@@ -257,6 +257,7 @@ def rebuildMain(
     gc.collect()
 
     saveSegment(idx, meta, "main", saveDir)
+    _buildSearchSidecar(idx, meta, "main", saveDir)
     clearCache()
     _clearDelta(saveDir)
     writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain")
@@ -336,6 +337,7 @@ def rebuildMainFromCatalog(
     idx = builder.finalize()
     meta = pl.DataFrame(metaRecs)
     saveSegment(idx, meta, "main", saveDir)
+    _buildSearchSidecar(idx, meta, "main", saveDir)
     _clearDelta(saveDir)
     writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain.catalog")
     clearCache()
@@ -877,6 +879,31 @@ def indexInfo() -> dict:
     return info
 
 
+_SEARCH_SIDECAR_SUFFIXES: tuple[str, ...] = (
+    ".postings.bin",
+    ".terms.bin",
+    ".docLengths.bin",
+    ".meta.bin",
+    ".metaOffsets.bin",
+    ".search_meta.json",
+)
+
+
+def _searchSidecarNames(segment: str) -> list[str]:
+    """range-fetch sidecar 파일명(segment 별 6종) — 존재 여부 무관 후보 목록."""
+    return [f"{segment}{suf}" for suf in _SEARCH_SIDECAR_SUFFIXES]
+
+
+def _buildSearchSidecar(idx: dict, meta: pl.DataFrame, name: str, saveDir: Path | None = None) -> None:
+    """saveSegment 직후 range-fetch sidecar 동거 생성 — 실패해도 본 인덱스(npz) 빌드는 보존(additive·fail-safe)."""
+    from dartlab.providers.dart.search.fieldIndex import saveShardedSegment
+
+    try:
+        saveShardedSegment(idx, meta, name, saveDir)
+    except Exception as exc:  # noqa: BLE001 — sidecar 실패가 npz 빌드를 깨면 안 됨(검색 range-fetch만 비활성)
+        _log.warning("[sidecar] %s 빌드 실패(검색 range-fetch 비활성): %s", name, exc)
+
+
 def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand: str = "") -> dict:
     """Write `manifest.json` for the current content index directory.
 
@@ -907,19 +934,20 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
     deltaDataAsOf = ""
     mainDocs = 0
     deltaDocs = 0
-    mainMeta: pl.DataFrame | None = None
+    canaryMetaParts: list[pl.DataFrame] = []
 
     for segment in ("main", "delta"):
         files = [f"{segment}.npz", f"{segment}_stems.json", f"{segment}_meta.parquet", f"{segment}_info.json"]
         if not all((base / name).exists() for name in files):
             continue
         requiredFiles.extend(files)
+        requiredFiles.extend(n for n in _searchSidecarNames(segment) if (base / n).exists())
         meta = pl.read_parquet(base / f"{segment}_meta.parquet")
+        canaryMetaParts.append(meta)
         info = json.loads((base / f"{segment}_info.json").read_text(encoding="utf-8"))
         nDocs = int(info.get("nDocs", meta.height) or 0)
         if segment == "main":
             mainDocs = nDocs
-            mainMeta = meta
         else:
             deltaDocs = nDocs
         segmentDataAsOf = _segmentDataAsOf(meta)
@@ -943,10 +971,11 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
     if entityGraphCatalog:
         requiredFiles.append(ENTITY_GRAPH_CATALOG_NAME)
     sourceCanaryPack = []
-    if mainMeta is not None and mainMeta.height:
+    if canaryMetaParts:
         from dartlab.providers.dart.search.artifactCanary import CANARY_PACK_VERSION, buildSourceCanaryPackFromMeta
 
-        sourceCanaryPack = buildSourceCanaryPackFromMeta(mainMeta)
+        canaryMeta = pl.concat(canaryMetaParts, how="diagonal_relaxed")
+        sourceCanaryPack = buildSourceCanaryPackFromMeta(canaryMeta)
         canaryPackVersion = CANARY_PACK_VERSION
     else:
         canaryPackVersion = ""
@@ -1090,6 +1119,9 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCur
         "source_manifest_set.json",
         ENTITY_GRAPH_CATALOG_NAME,
     ]
+    names.extend(
+        n for n in _searchSidecarNames("main") if (outDir / n).exists()
+    )  # range-fetch sidecar(있으면 동반 publish)
     if promoteCurrent is None:
         promoteCurrent = _envFlag("DARTLAB_SEARCH_PROMOTE_CURRENT", default=True)
     return publishContentIndexFiles(
@@ -1149,6 +1181,7 @@ def pullContentIndex(tier: str = "full") -> int:
         "delta_info.json",
         "router.json",
         ENTITY_GRAPH_CATALOG_NAME,
+        *_searchSidecarNames("main"),  # range-fetch sidecar(per-file tolerant pull — 미존재 무시)
     ]
     ok = 0
     from dartlab.core.hfRetry import retryHfCall
