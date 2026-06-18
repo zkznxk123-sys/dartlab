@@ -118,6 +118,13 @@ export class ChartCtl {
 	// 전략 도크(좌측 영구 패널) 열림 — 세션 한정. ChartMenus 로컬 btOpen 을 상향(차트 클릭에 안 닫히는 SSOT).
 	// 차트 워크스페이스 레이아웃(좌 도크 | 차트)이 이 값을 읽어 도크를 마운트한다. 닫아도 btStrategies 는 유지(재오픈 시 복원).
 	btDockOpen = $state(false);
+	// 백테스트 보고서 모드 — true 면 CenterStack 하단(재무그래프+판정+DuPont)을 BacktestReport 로 스왑(차트는 고정·비파괴).
+	// 다이얼로그 폐기의 SSOT: HonestyFooter '백테스팅 상세'·도크가 이 값을 토글, CenterStack 이 읽어 하단을 가른다.
+	btReportMode = $state(false);
+	// 백테스트 스코프 — 단일종목(기본) / 시장(index 타이밍) / 유니버스(횡단면 팩터). 제어·엔진경로·보고서 변형을 가른다.
+	btScope = $state<'single' | 'market' | 'universe'>('single');
+	// 차트↔보고서 양방향 포커스 — 차트 호버 봉 ts(YYYYMMDD). 보고서 거래행 co-highlight 용(단방향 상태, effect 소비 금지).
+	btHoverBar = $state<string | null>(null);
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀
