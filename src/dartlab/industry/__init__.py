@@ -98,9 +98,6 @@ _AXIS_REGISTRY: dict[str, IndustryAxisEntry] = {
     "theme": IndustryAxisEntry("테마", "횡단 투자 테마 — themeId→멤버 / stockCode→소속 테마.", "themeId|stockCode"),
 }
 
-# 옛 bool 플래그 → 축 (backward-compat 흡수).
-_FLAG_AXES = ("summary", "timeline", "lifecycle", "concentration", "dynamics", "polarization")
-
 
 class Industry:
     """산업 매퍼엔진 진입점.
