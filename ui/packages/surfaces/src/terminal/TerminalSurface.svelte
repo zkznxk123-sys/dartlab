@@ -11,6 +11,7 @@
 	import type { Lang } from './lib/types';
 	import { chgClass, fmtNum, sign, sparkPts } from './ui/helpers';
 	import LeftRail from './panels/LeftRail.svelte';
+	import StrategyDock from './charts/StrategyDock.svelte'; // 백테스트 모드 = 좌패널 전체를 조작 패널로 교체(좌중우 중 좌)
 	import CenterStack from './panels/CenterStack.svelte';
 	import RightStack from './panels/RightStack.svelte';
 	import SourcesModal from './panels/SourcesModal.svelte';
@@ -335,7 +336,14 @@
 		</div></div>
 
 		<main class="board">
-			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} /></div>
+			<div class="col colL">
+				{#if chartCtl.btReportMode}
+					<!-- 백테스트 모드 — 좌패널 전체가 조작 패널(스코프·프리셋버튼·커스텀·검증). LeftRail(매크로·스크리너) 교체. -->
+					<StrategyDock ctl={chartCtl} {lang} code={co.code} name={co.name.kr} fill onClose={() => { chartCtl.clearBtAll(); chartCtl.btReportMode = false; chartCtl.btDockOpen = false; }} />
+				{:else}
+					<LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} />
+				{/if}
+			</div>
 			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} onMacroLens={openMacroLens} onCoMovers={(rows) => (macroCoMovers = rows)} /></div>
 			<div class="col colR"><RightStack {co} {lang} {hosts} repoUrl={links.repo} onPick={pick} lookupListed={eng.lookupListed} percentileIn={eng.percentileIn} /></div>
 		</main>

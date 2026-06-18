@@ -28,7 +28,6 @@
 	import ChartMenus from './ChartMenus.svelte';
 	import ChartRibbon from './ChartRibbon.svelte';
 	import DrawToolbar from './DrawToolbar.svelte';
-	import StrategyDock from './StrategyDock.svelte';
 	import BtChip from './BtChip.svelte';
 
 	interface Props {
@@ -1176,13 +1175,7 @@
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
 		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} {onMacroLens} />
 	{/if}
-	<!-- 차트 워크스페이스 = [좌측 전략 도크 | 차트]. 도크는 static row(el.offsetParent 유지 → 레일 geometry 무변). -->
-	<div class="chartBody">
-		{#if ctl.btDockOpen && subject !== 'index'}
-			<StrategyDock {ctl} {lang} pf={btPf} {code} {name} onOpenReport={() => (ctl.btReportMode = true)} onClose={() => { ctl.clearBtAll(); ctl.btDockOpen = false; ctl.btReportMode = false; }} />
-		{/if}
-		<div class="chartHost" bind:this={el}></div>
-	</div>
+	<div class="chartHost" bind:this={el}></div>
 
 	{#if railBox && railDots.length}
 		<!-- 공시 위치 레일(02 §4) — x축 날짜라벨 아래 전용 띠. left/top/width=캔버스 geometry(전체화면 padding 자동 반영).

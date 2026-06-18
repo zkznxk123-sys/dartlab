@@ -13,13 +13,14 @@
 	interface Props {
 		ctl: ChartCtl;
 		lang: Lang;
-		pf: PortfolioBtResult | null; // 백테스트 결과(없으면 푸터 미표시) — PriceChart btPf
+		pf?: PortfolioBtResult | null; // 결과(있으면 하단 푸터) — fill(좌패널) 모드에선 미전달(결과는 중앙 하단 보고서)
 		code?: string;
 		name?: string;
-		onOpenReport: () => void;
-		onClose: () => void; // = clearBtAll + 도크 닫기 (PriceChart 배선)
+		fill?: boolean; // true = 좌측 패널 전체 차지(폭 100%·리사이즈·접기 없음). false = 차트 좌측 도크(레거시)
+		onOpenReport?: () => void;
+		onClose: () => void; // = clearBtAll + 백테스트 모드 종료
 	}
-	let { ctl, lang, pf, code, name, onOpenReport, onClose }: Props = $props();
+	let { ctl, lang, pf = null, code, name, fill = false, onOpenReport, onClose }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const OPS: Op[] = ['>', '<', '>=', '<=', 'crossUp', 'crossDown'];
 	const seriesDef = (key: SeriesKey) => SERIES_CATALOG.find((s) => s.key === key);
@@ -92,14 +93,14 @@
 	const sgn = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(1);
 </script>
 
-{#if collapsed}
-	<!-- 접힘 스파인(28px) — 결과 유지, 클릭=펼침. -->
+{#if collapsed && !fill}
+	<!-- 접힘 스파인(28px) — 차트 도크 모드에서만. 좌패널(fill) 모드는 접기 없음. -->
 	<button class="sdSpine" onclick={() => (collapsed = false)} title={T('전략 도크 펼치기', 'expand strategy dock')}>
 		<span class="sdSpineTtl">{T('전략 백테스트', 'STRATEGY LAB')}</span>
 		{#if headRet != null}<span class={'sdSpineRet mono ' + (headRet >= 0 ? 'tUp' : 'tDn')}>{sgn(headRet)}%</span>{/if}
 	</button>
 {:else}
-	<div class="stratDock" style={`width:${dockW}px`}>
+	<div class="stratDock" class:fill style={fill ? '' : `width:${dockW}px`}>
 		<!-- 헤더(sticky) -->
 		<div class="sdHeader">
 			<span class="sdMark" aria-hidden="true"></span>
@@ -107,8 +108,8 @@
 				<span class="sdTtl">{T('전략 백테스트', 'STRATEGY LAB')}</span>
 				<span class="sdSub">{T('규칙 조립 → 차트 위 즉시 검증', 'compose → verify on chart')}</span>
 			</div>
-			<button class="sdHbtn" onclick={() => (collapsed = true)} aria-label="collapse" title={T('접기(결과 유지)', 'collapse')}>—</button>
-			<button class="sdHbtn" onclick={onClose} aria-label="close" title={T('백테스트 종료(차트 정리)', 'close & clear')}>✕</button>
+			{#if !fill}<button class="sdHbtn" onclick={() => (collapsed = true)} aria-label="collapse" title={T('접기(결과 유지)', 'collapse')}>—</button>{/if}
+			<button class="sdHbtn" onclick={onClose} aria-label="close" title={T('백테스트 종료', 'close & exit')}>✕</button>
 		</div>
 
 		<div class="sdBody">
@@ -293,12 +294,14 @@
 
 		<!-- 결과 + 정직 푸터(sticky) — 그래프 금지(equity 는 차트). 결과 없으면 미표시. -->
 		{#if pf && ctl.btStrategies.length}
-			<HonestyFooter {pf} slots={ctl.btStrategies} focus={ctl.btFocus} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onFocus={(i) => ctl.setBtFocus(i)} {onOpenReport} />
+			<HonestyFooter {pf} slots={ctl.btStrategies} focus={ctl.btFocus} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onFocus={(i) => ctl.setBtFocus(i)} onOpenReport={onOpenReport ?? (() => {})} />
 		{/if}
 
-		<!-- 폭 리사이즈 핸들(우측 가장자리) -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="sdResize" onpointerdown={startResize} title={T('폭 조절', 'resize')}></div>
+		<!-- 폭 리사이즈 핸들 — 차트 도크 모드에서만(좌패널 fill 은 컬럼 폭). -->
+		{#if !fill}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div class="sdResize" onpointerdown={startResize} title={T('폭 조절', 'resize')}></div>
+		{/if}
 	</div>
 {/if}
 
@@ -314,6 +317,8 @@
 		border-right: 1px solid var(--dl-line-strong, #2a3142);
 		font-family: var(--sans, inherit);
 	}
+	/* 좌패널 전체 차지 모드 — 컬럼 폭 100%(글로벌 좌측 레일 대체). */
+	.stratDock.fill { width: 100%; flex: 1 1 auto; border-right: none; }
 	/* 헤더 sticky */
 	.sdHeader { flex: none; display: flex; align-items: center; gap: 7px; padding: 6px 8px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); background: rgba(251, 146, 60, 0.05); }
 	.sdMark { width: 4px; height: 22px; border-radius: 2px; background: var(--amber, #fb923c); flex: none; }
