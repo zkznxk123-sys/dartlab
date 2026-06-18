@@ -96,6 +96,9 @@
 	let trendError = $state<string | null>(null);
 	let DetailComponent = $state<any>(null);
 	let DataExplorerComponent = $state<any>(null);
+	// 유니버스 백테스터(간판① — 전종목 크로스섹셔널). lazy 모달.
+	let universeOpen = $state(false);
+	let UniverseBacktesterComponent = $state<any>(null);
 
 	// ── Runtime data + opt-in DuckDB lifecycle ────────
 	let dbState = $state<DbState>('idle');
@@ -649,6 +652,15 @@
 		DataExplorerComponent = (await import('@dartlab/ui-surfaces/scan')).DataExplorer;
 	}
 
+	function openUniverse() {
+		universeOpen = true;
+		void loadUniverseComponent();
+		void bootDuckDbForExplorer(); // 유니버스 패널도 DuckDB-wasm 으로 로드(ensureDuckDb)
+	}
+	async function loadUniverseComponent() {
+		UniverseBacktesterComponent = (await import('@dartlab/ui-surfaces/scan')).UniverseBacktester;
+	}
+
 	async function bootDuckDbForExplorer() {
 		if (dbBootStarted || dartDb) return;
 		dbBootStarted = true;
@@ -1094,6 +1106,9 @@
 				<SlidersHorizontal size={14} />
 				<span>데이터 탐색</span>
 			</button>
+			<button type="button" class="explore-btn" onclick={openUniverse} title="전종목 크로스섹셔널 백테스트 (17년 가격보존)">
+				<span>유니버스 백테스트 ▸</span>
+			</button>
 			<span class="db-badge db-{dbBadgeKind}" title={dbError ?? trendError ?? ''}>
 				<span class="db-dot"></span> {dbBadgeText}
 			</span>
@@ -1279,6 +1294,19 @@
 		{:else}
 			<div class="de-loading" role="status">데이터 탐색 로드 중…</div>
 		{/if}
+	{/if}
+
+	{#if universeOpen}
+		<div class="ub-modal" role="presentation" onclick={(e) => { if (e.target === e.currentTarget) universeOpen = false; }}>
+			{#if UniverseBacktesterComponent}
+				<UniverseBacktesterComponent
+					onClose={() => (universeOpen = false)}
+					onDrillDown={(code: string) => { window.location.href = `/lab/terminal?symbol=${code}`; }}
+				/>
+			{:else}
+				<div class="de-loading" role="status">유니버스 백테스터 로드 중… (패널 11.9MB)</div>
+			{/if}
+		</div>
 	{/if}
 
 	{#if cellHover}
@@ -1687,6 +1715,17 @@
 		background: rgba(0, 0, 0, 0.55);
 		color: #cbd5e1;
 		font-size: 12px;
+		z-index: 1000;
+	}
+	.ub-modal {
+		position: fixed;
+		inset: 0;
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		padding: 5vh 16px;
+		overflow-y: auto;
+		background: rgba(0, 0, 0, 0.55);
 		z-index: 1000;
 	}
 

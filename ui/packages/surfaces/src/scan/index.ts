@@ -13,6 +13,8 @@ export { default as InsightsFeed } from './InsightsFeed.svelte';
 export { default as SavedSets } from './SavedSets.svelte';
 export { default as Detail } from './Detail.svelte';
 export { default as DataExplorer } from './DataExplorer.svelte';
+// 유니버스 백테스터(terminal-strategy-lab 간판① — 전종목 크로스섹셔널, scan 의 자연 종착).
+export { default as UniverseBacktester } from './universe/UniverseBacktester.svelte';
 
 // ── duckdb 쿼리 엔진 + seam ──
 export {
