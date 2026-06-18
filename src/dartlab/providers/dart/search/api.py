@@ -20,6 +20,7 @@ _log = getLogger(__name__)
 
 
 SEARCH_SCOPES: tuple[str, ...] = ("auto", "title", "content", "both", "news")
+LOW_CONFIDENCE_SCORE_FLOOR = 0.02
 
 
 def search(
@@ -170,6 +171,7 @@ def search(
                 pl.col("source").map_elements(lambda source: sourceMatchesIntent(source, sourceIntent))
             )
         result = applyAnswerability(result, sourceIntent=sourceIntent, facets=facets)
+        result = _markLowConfidenceRows(result)
         result = attachEntityGraphCards(result)
         result = attachEvidenceCards(result, query=query)
         result = _rankAnswerableFirst(result, limit=limit)
@@ -257,6 +259,30 @@ def _rankAnswerableFirst(result: pl.DataFrame, *, limit: int) -> pl.DataFrame:
     return ranked.head(limit)
 
 
+def _markLowConfidenceRows(result: pl.DataFrame, *, minScore: float = LOW_CONFIDENCE_SCORE_FLOOR) -> pl.DataFrame:
+    """Mark the whole candidate set unanswerable when every score is below confidence floor."""
+    if result is None or result.height == 0 or "info" in result.columns:
+        return result
+    if "score" not in result.columns or "answerable" not in result.columns:
+        return result
+    scores: list[float] = []
+    for value in result["score"].to_list():
+        try:
+            scores.append(float(value))
+        except (TypeError, ValueError):
+            continue
+    if not scores or max(scores) >= float(minScore):
+        return result
+    rows = []
+    for row in result.iter_rows(named=True):
+        out = dict(row)
+        if out.get("answerable") is True:
+            out["answerable"] = False
+            out["notAnswerableReason"] = "lowConfidence"
+        rows.append(out)
+    return pl.DataFrame(rows)
+
+
 _TITLE_LANE_TERMS: tuple[str, ...] = (
     "공시",
     "결정",
@@ -300,6 +326,13 @@ def _prefersTitleLane(query: str) -> bool:
     text = " ".join(str(query or "").strip().lower().split())
     if not text:
         return False
+    try:
+        from dartlab.providers.dart.search.unified import _prefersBodySemanticRerank
+
+        if _prefersBodySemanticRerank(text):
+            return False
+    except ImportError:
+        pass
     if any(term in text for term in _CONTENT_LANE_TERMS) and "제출" not in text:
         return False
     return any(term in text for term in _TITLE_LANE_TERMS)

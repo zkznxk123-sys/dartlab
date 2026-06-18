@@ -1,6 +1,6 @@
 # 06. 진행 원장 — 결정 · 실측 · NEXT
 
-상태: v1.28 (2026-06-16)
+상태: v1.29 (2026-06-18)
 범위: 검색 제품화 준비 결정과 다음 작업.
 
 ---
@@ -124,6 +124,9 @@
 108. source-owner incremental catalog publish 의 구조적 실패 원인을 수정했다. 부분 runner tree 가 full source catalog 로 발행되면 `previousFileDrop/previousRowDrop` 으로 막히던 상태에서, 이제 `buildSearchCatalog.py --merge-previous-catalog` 가 HF 직전 full manifest/catalog 를 내려받아 현재 변경 parquet 를 source별 파티션/docKey 규칙으로 병합한 뒤 full snapshot 으로 검증한다.
 109. `originalSync.yml`, `newsArchiveSync.yml`, `edgarSync.yml` 의 source catalog build step 은 `--compare-remote-manifest --require-previous-manifest --merge-previous-catalog` 조합으로 바뀌었다. allFilings 는 docKey upsert, dartPanel 은 stockCode 파일 파티션 교체, edgarPanel 은 ticker 파티션 교체, newsPublic 은 date 파티션 교체로 stale row 를 제거한다.
 110. 실제 HF previous source catalog 를 내려받는 no-upload dry-run 을 4개 source 에 대해 실행했다. 결과는 allFilings 192,096 rows / DART panel 104,762 rows / EDGAR panel 84,294 rows / news 81,799 rows, 모두 `snapshotScope=full`, `valid=true`, `previousManifestId=true` 다. local `dartlab.search.indexInfo()` 는 full active 462,947 docs compatible, 실제 질의 `유상증자`, `반도체 HBM 투자`, `공시 말고 뉴스로 환율 기사` 는 answerable 결과를 반환했다. 새 workflow 가 원격 Actions 에서 성공하는지는 패치 push 후 별도 확인 대상이다.
+111. 본문 의미 rerank 는 꺼져 있던 `_rerankBodySemanticHits` 경로를 실제 `searchUnified()` auto path 에 연결했다. `공시 원문` 같은 단어가 들어가도 `언급/다룬/수혜/증설/설비투자/전력/인프라` 류 본문 의미 cue 가 있으면 title lane merge 를 타지 않는다.
+112. no-answer false accept 는 low-confidence answerability 로 막는다. 전체 후보군 score 가 floor 아래면 검색 row 는 유지하되 `answerable=false`, `notAnswerableReason=lowConfidence` 로 내려서 canary/gold/memory-card 가 답변 근거로 쓰지 못하게 한다.
+113. full query-log gold 회복 과정에서 body semantic rerank 를 정형 content 질의와 분리했다. `본문/주석/위험요인/사업보고서` 류 질의는 title lane 을 타지 않되 기존 content lane rank 를 보존하고, 주제형 cue 가 있는 자연어 의미 질의만 강한 body rerank 를 탄다.
 
 ---
 
@@ -168,6 +171,8 @@
 | graph catalog operationalization | `entityGraphCatalog.parquet` offline/copy prep + manifest required file + publish fileSources + active contentIndex discovery verified |
 | graph catalog evidence | remote evidence/status summary includes graph catalog presence, fileSource existence, nEntities, dataAsOf |
 | source-owner merge dry-run | HF previous catalog download + partial parquet merge: allFilings 192,096 / panel 104,762 / EDGAR 84,294 / news 81,799 rows, all valid |
+| live body-semantic/no-answer spot check | HBM 원문 질의 top-5 HBM 관련 panel/allFilings, no-answer trap top-5 `answerable=false(lowConfidence)` |
+| full query-log gold after body rerank guard | `releaseEligible=true`, blockers=[], overallReadyRate 0.9811, docHit10 0.9787, memoryCitationTop3Exact 0.9468, noAnswerFalseAcceptRate 0.0 |
 
 주의: random curatedDraft 는 제품 졸업 증거가 아니라 압박 실험이다.
 
@@ -183,6 +188,7 @@
 6. CLI `dartlab search`, public `/search`, viewer in-page search 의 명칭 충돌은 S4 surface naming review 에서는 통과했다. 이후 UI/CLI 문구 변경 시 같은 review 를 다시 해야 한다.
 7. query 본문 회사명 facet 은 본진 품질 bugfix 로 들어갔지만, real query-log gold 에서 유사 회사명/계열사/접미사 trap 을 더 넓게 검증해야 한다.
 8. lite 18개월 tier 는 326.3MB 로 기본 경량 배포 목표 300MB 를 넘었다. 운영 가능성은 확인됐지만, pip 기본 경험을 더 작게 만들려면 12개월/상위 universe/metadata 압축 정책을 별도 실험해야 한다.
+9. 본문 의미 rerank 는 규칙 기반 sparse path 로 회복했지만, 장기 품질은 real query-log gold 300 rows 와 miss ledger 에서 "토픽 정확도" 유형을 더 넓게 확인해야 한다.
 
 ---
 

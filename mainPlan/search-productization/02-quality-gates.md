@@ -1,6 +1,6 @@
 # 02. 품질 Gate — 제품 후보와 제품 졸업을 분리
 
-상태: v0.9 (2026-06-16)
+상태: v1.0 (2026-06-18)
 범위: 제품화 전후의 필수 품질 기준.
 
 ---
@@ -36,6 +36,10 @@ large corpus 기준:
   - CAPEX/AI 데이터센터 사업보고서 2개 후보는 sourceHint mismatch 로 reviewable set 에서 제외했다. 현재 품질 수치에 몰래 포함하지 않는다.
 
 제품화 전 proxy/curated miss 는 차단 결함이 아니었다. direct-review 이후의 신규 miss 는 miss ledger 에 기록하고 반복 유형이면 일반 정책으로만 승격한다.
+
+2026-06-18 live runtime spot check 에서 `HBM 설비투자와 TC bonder 증설을 언급한 공시 원문` 은 본문 의미 질의로 분류되어 panel/allFilings HBM 근거가 top-5 에 들어왔고, `화성 지하도시에 상장사가 얼음광산을 매입했다` 는 후보 score 가 전부 confidence floor 아래라 `answerable=false`, `notAnswerableReason=lowConfidence` 로 차단됐다. 이 기준은 query별 mapper 가 아니라 본문 의미 rerank + low-confidence no-answer 정책이다.
+
+2026-06-18 full query-log gold 는 `releaseEligible=true` 로 회복됐다. `overallReadyRate=0.9811`, `docHit10=0.9787`, `memoryCitationTop3Exact=0.9468`, `newsSourcePrecision10=1.0`, `noAnswerFalseAcceptRate=0.0` 이다. 본문/주석/위험요인 같은 정형 content 질의는 content lane 점수를 보존하고, `언급/다룬/수혜/증설/설비투자/전력/인프라` 같은 주제형 의미 질의만 body semantic rerank 를 탄다.
 
 ---
 
@@ -127,6 +131,8 @@ uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py `
 제품 후보에서 제품 졸업으로 바꿀 때는 strict primary citation 을 별도 warning track 으로 유지한다. 같은 날짜 형제공시 때문에 strict exact 가 낮아져도 sourceRef set 과 report intent preference 가 맞으면 운영 품질에는 치명적이지 않다.
 
 `docHit10` 과 `memoryCitationTop3Exact` 는 `answerable=True` 인 결과에서만 인정한다. sourceRef 가 맞아도 `missingDataAsOf`, `staleSource`, `facetMismatch:*` 같은 no-answer reason 이 붙은 row 는 release hit 가 아니다.
+
+search runtime 은 후보를 반환하더라도 전체 후보군 score 가 confidence floor 아래면 `answerable=false` 로 내려야 한다. noAnswer gate 와 memory-card 생성은 이 플래그를 기준으로 false accept 를 판정한다.
 
 ---
 

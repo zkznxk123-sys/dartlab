@@ -15,6 +15,8 @@ ARCHITECTURE §7.5) — 본 모듈은 실측 완료된 content lane 만 담는�
 
 from __future__ import annotations
 
+import re
+
 import numpy as np
 import polars as pl
 
@@ -63,6 +65,26 @@ _EVENT_TITLE_TERMS: tuple[str, ...] = (
     "영업정지",
     "배당",
 )
+_EVENT_TITLE_STRONG_TERMS: tuple[str, ...] = (
+    "결정",
+    "변경",
+    "제출",
+    "체결",
+    "발행",
+    "취득",
+    "처분",
+    "소집",
+    "결과",
+    "합병",
+    "분할",
+    "양수",
+    "양도",
+    "소송",
+    "횡령",
+    "배임",
+    "영업정지",
+    "배당",
+)
 _BODY_SEMANTIC_TERMS: tuple[str, ...] = (
     "본문",
     "주석",
@@ -78,6 +100,22 @@ _BODY_SEMANTIC_TERMS: tuple[str, ...] = (
     "비중",
     "만기",
 )
+_BODY_SEMANTIC_CUES: tuple[str, ...] = (
+    "언급",
+    "다룬",
+    "관련",
+    "수혜",
+    "부담",
+    "수요",
+    "증설",
+    "설비투자",
+    "전력",
+    "인프라",
+)
+_BODY_GENERIC_WEIGHT_TERMS: tuple[str, ...] = ("공시", "원문", "투자", "기업", "회사", "관련", "언급", "내용", "수혜")
+_NEWS_INTENT_TERMS: tuple[str, ...] = ("뉴스", "기사")
+_BODY_HANGUL_RE = re.compile(r"[가-힣]+")
+_BODY_ASCII_RE = re.compile(r"[A-Za-z]{2,20}")
 _REPORT_TERMS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("사업보고서", ("사업보고서", "annual report", "10-k", "10k")),
     ("반기보고서", ("반기보고서", "semiannual report")),
@@ -174,8 +212,8 @@ def searchUnified(
     routerModel = loadRouterModel(_activeIndexDir())  # 세그먼트와 동거 — 부재 시 None
     weights = _expansionWeights(query, routerModel)
     hasExpansion = len(weights) > len(set(tokens))
-    eventTitleRerank = _prefersEventTitleRerank(query)
-    bodySemanticRerank = False
+    bodySemanticRerank = sourceKind != "news" and _prefersBodySemanticRerank(query)
+    eventTitleRerank = not bodySemanticRerank and _prefersEventTitleRerank(query)
     reportLabels = _reportLabels(query) if eventTitleRerank else ()
     if eventTitleRerank:
         candidateLimit = _candidateLimit(query, limit)
@@ -266,9 +304,18 @@ def _prefersEventTitleRerank(query: str) -> bool:
 
 
 def _prefersBodySemanticRerank(query: str) -> bool:
-    """Whether the query asks for report body or footnote evidence."""
+    """Whether the query needs topic-focused body reranking.
+
+    Formal body/footnote queries already stay on the content lane through the
+    API router. Do not rerank them here; the stronger reranker is for natural
+    topic questions that ask whether a body text mentions or discusses a theme.
+    """
     text = " ".join(str(query or "").strip().lower().split())
-    return bool(text) and any(term in text for term in _BODY_SEMANTIC_TERMS)
+    if not text or any(term in text for term in _NEWS_INTENT_TERMS):
+        return False
+    if any(term in text for term in _EVENT_TITLE_STRONG_TERMS):
+        return False
+    return any(term in text for term in _BODY_SEMANTIC_CUES)
 
 
 def _rerankEventTitleHits(query: str, hits: list[dict], routerModel: dict | None) -> list[dict]:
@@ -311,7 +358,7 @@ def _rerankBodySemanticHits(query: str, hits: list[dict], routerModel: dict | No
     """Rerank body queries toward actual filing body/panel evidence, not news or boilerplate titles."""
     if not hits:
         return hits
-    weights = _eventTitleWeights(query, routerModel)
+    weights = _bodySemanticWeights(query, routerModel)
     reportLabels = _reportLabels(query)
     ranked: list[dict] = []
     total = max(1, len(hits))
@@ -321,16 +368,19 @@ def _rerankBodySemanticHits(query: str, hits: list[dict], routerModel: dict | No
         evidence = _bodyEvidenceText(row)
         sourceScore = _bodySourceScore(source)
         reportScore = _reportMatchScore(title, evidence, reportLabels)
-        overlap = _weightedTokenOverlap(" ".join((title, evidence)), weights)
+        surface = " ".join((title, evidence))
+        overlap = _weightedTokenOverlap(surface, weights)
+        exactTopicScore = _bodyExactTopicScore(query, surface)
         bodyMarker = 1.0 if any(term in evidence or term in title for term in _BODY_SEMANTIC_TERMS) else 0.0
         boilerplatePenalty = _bodyBoilerplatePenalty(query, title)
         originalRank = 1.0 - (index / total)
         finalScore = (
-            10.0 * sourceScore
-            + 9.0 * reportScore
-            + 2.5 * overlap
-            + 2.0 * bodyMarker
-            + 2.0 * originalRank
+            3.0 * sourceScore
+            + 6.0 * reportScore
+            + 5.0 * overlap
+            + 6.0 * exactTopicScore
+            + 1.5 * bodyMarker
+            + 1.0 * originalRank
             - boilerplatePenalty
             + 0.01 * float(row.get("score") or 0.0)
         )
@@ -349,6 +399,15 @@ def _eventTitleWeights(query: str, routerModel: dict | None) -> dict[str, float]
     return weights
 
 
+def _bodySemanticWeights(query: str, routerModel: dict | None) -> dict[str, float]:
+    """Return query weights for body evidence, downweighting broad UI/request words."""
+    weights = _expansionWeights(query, routerModel)
+    for token in tokenizeContent(" ".join(_BODY_GENERIC_WEIGHT_TERMS)):
+        if token in weights:
+            weights[token] = min(weights[token], 0.15)
+    return weights
+
+
 def _genericDecisionQuery(query: str) -> bool:
     text = str(query or "")
     return ("공시" in text or "원문" in text) and not any(term in text for term in _NON_DECISION_TERMS)
@@ -359,6 +418,25 @@ def _weightedTokenOverlap(text: str, weights: dict[str, float]) -> float:
     if not tokens:
         return 0.0
     return sum(float(weight) for token, weight in weights.items() if token in tokens)
+
+
+def _bodyExactTopicScore(query: str, text: str) -> float:
+    """Score exact topical surfaces for body semantic queries."""
+    q = str(query or "")
+    t = str(text or "").lower()
+    if not q or not t:
+        return 0.0
+    score = 0.0
+    for token in _BODY_ASCII_RE.findall(q):
+        term = token.lower()
+        if len(term) >= 2 and term in t:
+            score += 1.5 if len(term) <= 2 else 2.0
+    for run in _BODY_HANGUL_RE.findall(q):
+        if len(run) >= 4 and run in text:
+            score += 2.0
+        elif len(run) >= 3 and run in text:
+            score += 1.0
+    return score
 
 
 def _reportLabels(query: str) -> tuple[str, ...]:
@@ -514,11 +592,13 @@ def _bodyEvidenceText(row: dict) -> str:
 
 
 def _bodyBoilerplatePenalty(query: str, title: str) -> float:
-    text = str(query or "")
-    if not any(label in text for label, _aliases in _REPORT_TERMS):
-        return 0.0
     titleText = str(title or "")
-    return 8.0 if any(term in titleText for term in _NON_BODY_REPORT_TITLES) else 0.0
+    if not any(term in titleText for term in _NON_BODY_REPORT_TITLES):
+        return 0.0
+    text = str(query or "")
+    if any(term in text for term in _NON_BODY_REPORT_TITLES):
+        return 0.0
+    return 20.0
 
 
 def _decisionTitleScore(title: str, *, genericDecision: bool, query: str) -> float:

@@ -66,6 +66,49 @@ def test_body_semantic_rerank_prefers_panel_report_body_over_news_and_boilerplat
     assert ranked[0]["source"] == "panel"
 
 
+def test_body_semantic_intent_catches_topic_plus_original_filing_query() -> None:
+    from dartlab.providers.dart.search.unified import _prefersBodySemanticRerank
+
+    assert _prefersBodySemanticRerank("HBM 설비투자와 TC bonder 증설을 언급한 공시 원문")
+    assert not _prefersBodySemanticRerank("환율 리스크 사업보고서 본문")
+    assert not _prefersBodySemanticRerank("특수관계자 거래 주석")
+    assert not _prefersBodySemanticRerank("유상증자 결정 정정 공시")
+
+
+def test_body_semantic_rerank_prefers_topical_body_over_generic_filing_title() -> None:
+    from dartlab.providers.dart.search.unified import _rerankBodySemanticHits
+
+    ranked = _rerankBodySemanticHits(
+        "HBM 설비투자와 TC bonder 증설을 언급한 공시 원문",
+        [
+            {
+                "source": "panel",
+                "report_nm": "분기보고서",
+                "section_title": "회사 개요",
+                "text": "분기보고서 제출대상법인 유형 주권상장법인 투자 관련 일반 본문",
+                "score": 120.0,
+            },
+            {
+                "source": "allFilings",
+                "report_nm": "타법인 주식 및 출자증권 양수결정",
+                "section_title": "정정신고",
+                "text": "정정대상 공시서류 양도내역 매매대금 변경",
+                "score": 90.0,
+            },
+            {
+                "source": "allFilings",
+                "report_nm": "단일판매ㆍ공급계약체결",
+                "section_title": "단일판매ㆍ공급계약체결",
+                "text": "HBM4 제조용 TC BONDER 장비 수주 설비투자 증설",
+                "score": 2.0,
+            },
+        ],
+        None,
+    )
+
+    assert "HBM4" in ranked[0]["text"]
+
+
 def test_event_title_rerank_prefers_requested_report_label() -> None:
     from dartlab.providers.dart.search.unified import _rerankEventTitleHits
 
