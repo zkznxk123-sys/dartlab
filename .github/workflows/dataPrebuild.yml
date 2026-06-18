@@ -39,10 +39,17 @@ jobs:
   prebuild-scan:
     if: ${{ (github.event_name == 'workflow_run' && (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.full != 'true') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
 
     steps:
       - uses: actions/checkout@v6
+
+      # incremental 도 finance/report/scan 캐시 + 임시 parquet merge 가 동시에 생긴다.
+      # 기본 runner 디스크가 빌드 중 고갈되면 Python 예외 없이 runner 통신 상실로 끝난다.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL || true
+          df -h /
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -83,9 +90,40 @@ jobs:
       # KIND/dartList/corpProfile seed 는 prebuildData.py 가 retryHfCall SSOT 로 자체 수행
       # (offline 가드 아래 HF 다운로드 — buildScan 의 KIND OfflineViolation 회피).
       - name: Build DART scan prebuilds (incremental) + upload
-        run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
+        run: |
+          echo "[prebuild] start incremental"
+          df -h /
+          free -h || true
+          uv run python -u -X utf8 .github/scripts/prebuild/prebuildData.py &
+          pid=$!
+          (
+            elapsed=0
+            while kill -0 "$pid" 2>/dev/null; do
+              sleep 60
+              elapsed=$((elapsed + 60))
+              echo "[prebuild] heartbeat incremental elapsed=${elapsed}s"
+              df -h /
+              free -h || true
+            done
+          ) &
+          heartbeat=$!
+          set +e
+          wait "$pid"
+          status=$?
+          set -e
+          echo "[prebuild] child incremental exit=${status}"
+          df -h /
+          free -h || true
+          kill "$heartbeat" 2>/dev/null || true
+          exit "$status"
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          PYTHONUNBUFFERED: "1"
+          DARTLAB_SCAN_BATCH_SIZE: '50'
+          POLARS_MAX_THREADS: '2'
+          MALLOC_ARENA_MAX: '2'
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
 
       - name: Save DART scan cache
         if: always()
@@ -137,10 +175,41 @@ jobs:
 
       # KIND/dartList/corpProfile seed 는 prebuildData.py 가 retryHfCall SSOT 로 자체 수행.
       - name: Build DART scan prebuilds (full rebuild) + upload
-        run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
+        run: |
+          echo "[prebuild] start full"
+          df -h /
+          free -h || true
+          uv run python -u -X utf8 .github/scripts/prebuild/prebuildData.py &
+          pid=$!
+          (
+            elapsed=0
+            while kill -0 "$pid" 2>/dev/null; do
+              sleep 60
+              elapsed=$((elapsed + 60))
+              echo "[prebuild] heartbeat full elapsed=${elapsed}s"
+              df -h /
+              free -h || true
+            done
+          ) &
+          heartbeat=$!
+          set +e
+          wait "$pid"
+          status=$?
+          set -e
+          echo "[prebuild] child full exit=${status}"
+          df -h /
+          free -h || true
+          kill "$heartbeat" 2>/dev/null || true
+          exit "$status"
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           PREBUILD_FULL: "1"
+          PYTHONUNBUFFERED: "1"
+          DARTLAB_SCAN_BATCH_SIZE: '50'
+          POLARS_MAX_THREADS: '2'
+          MALLOC_ARENA_MAX: '2'
+          DARTLAB_HF_RETRY_ATTEMPTS: '3'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
 
       - name: Save DART scan cache
         if: always()

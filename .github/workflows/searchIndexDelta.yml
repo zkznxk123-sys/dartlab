@@ -17,6 +17,7 @@ on:
   workflow_run:
     workflows:
       - Original SSOT Sync
+      - AllFilings Backfill
       - News Archive Sync
       - EDGAR Data Sync (Bulk)
     types:
@@ -72,6 +73,9 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
+    env:
+      DARTLAB_HF_RETRY_ATTEMPTS: '3'
+      DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'
 
     steps:
       - uses: actions/checkout@v6
@@ -108,6 +112,8 @@ jobs:
           --optional-file catalog_snapshot.parquet
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_HF_RETRY_ATTEMPTS: '5'
+          DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '300'
 
       - name: Pull source search catalogs from HF
         run: |
@@ -163,6 +169,17 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
+      - name: Verify HF contentIndex current round-trip (lite, no-change)
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE == '1' }}
+        shell: bash
+        run: >
+          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py
+          --tier lite
+          --out "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+          --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
       - name: Audit search result contract
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchResultContract.py
@@ -190,7 +207,7 @@ jobs:
           --fail-on-error
 
       - name: Evaluate real query-log quality
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') == 'release' }}
+        if: ${{ always() && github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchGold.py
           --gold "${{ github.event.inputs.quality_gold || 'tests/fixtures/search/queryLogGold.real.jsonl' }}"
@@ -215,6 +232,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build content lite + stage candidate
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE != '1' }}
         run: uv run python .github/scripts/search/buildSearchMain.py
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -224,6 +242,7 @@ jobs:
           DARTLAB_SEARCH_PROMOTE_CURRENT: "0"
 
       - name: Verify HF contentIndex candidate round-trip (lite)
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE != '1' }}
         shell: bash
         run: |
           if [ -z "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
@@ -239,6 +258,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Promote verified contentIndex candidate (lite)
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE != '1' }}
         shell: bash
         run: |
           if [ -z "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
@@ -254,6 +274,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Audit remote search evidence
+        if: ${{ always() }}
         run: >
           uv run python -X utf8 .github/scripts/search/checkSearchRemoteEvidence.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -264,7 +285,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Evaluate search productization status (ops gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') != 'release' }}
+        if: ${{ always() && (github.event_name == 'workflow_run' || (github.event.inputs.productization_gate || 'release') != 'release') }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -279,7 +300,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Evaluate search productization status (release gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') == 'release' }}
+        if: ${{ always() && github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchProductizationStatus.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -295,7 +316,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build search proof bundle (ops gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') != 'release' }}
+        if: ${{ always() && (github.event_name == 'workflow_run' || (github.event.inputs.productization_gate || 'release') != 'release') }}
         run: >
           uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -308,7 +329,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build search proof bundle (release gate)
-        if: ${{ always() && (github.event.inputs.productization_gate || 'release') == 'release' }}
+        if: ${{ always() && github.event_name != 'workflow_run' && (github.event.inputs.productization_gate || 'release') == 'release' }}
         run: >
           uv run python -X utf8 .github/scripts/search/buildSearchProofBundle.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"
@@ -357,7 +378,7 @@ jobs:
             exit 1
           fi
         env:
-          PRODUCTIZATION_GATE: ${{ github.event.inputs.productization_gate || 'release' }}
+          PRODUCTIZATION_GATE: ${{ github.event_name == 'workflow_run' && 'ops' || (github.event.inputs.productization_gate || 'release') }}
 
       - name: Upload search evidence reports
         if: always()

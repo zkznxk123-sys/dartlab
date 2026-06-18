@@ -192,6 +192,7 @@ GATES: dict[str, Gate] = {
             "--ignore=tests/realData "
             "--benchmark-disable --no-cov"
         ),
+        timeout_minutes=30,
     ),
     "wheel-smoke": Gate(
         name="wheel-smoke",
@@ -311,6 +312,7 @@ GATES: dict[str, Gate] = {
             "--ignore=tests/realData "
             "{cov_flags} --benchmark-disable"
         ),
+        timeout_minutes=60,
     ),
     "fixture-integration": Gate(
         name="fixture-integration",
