@@ -1,10 +1,36 @@
 # 06. 진행 원장
 
-상태: v1.8
+상태: v1.9
 
 ---
 
 ## 2026-06-19
+
+### v1.9 — Dialog interaction shell / 키보드 UX 보강
+
+배경:
+
+- v1.8에서 첫 화면의 분석 구조는 강해졌지만, 탭은 시각 버튼에 가까웠고 다이얼로그 포커스가 명확히 갇히지 않았다.
+- 심층 분석 다이얼로그는 마우스 클릭만 되는 카드 묶음이 아니라, 빠르게 탭을 전환하고 닫고 다시 돌아올 수 있는 조작 콘솔이어야 한다.
+
+완료:
+
+- `MacroLensDialog` 탭 바를 `role="tablist"` / `role="tab"` / `aria-selected` / `aria-controls` / `role="tabpanel"` 계약으로 승격했다.
+- `ArrowLeft/ArrowRight/Home/End`로 탭을 전환하고 포커스를 활성 탭에 유지한다.
+- `Tab/Shift+Tab` 포커스 트랩을 추가해 포커스가 다이얼로그 밖으로 빠지지 않게 했다.
+- `Escape` 닫힘은 유지하고 이벤트 전파를 막아 터미널 뒤쪽 단축키와 충돌하지 않게 했다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning은 남아 있으나 error는 0.
+- Playwright keyboard smoke 통과: 초기 `판정` tab, `ArrowRight -> 지표`, `End -> 출처`, 40회 `Tab` 후 focus가 modal 내부 유지, `Escape` 후 modal count 0.
+- Playwright desktop/mobile overflow 확인: modal/page/body 수평 overflow 0.
+
+NEXT:
+
+1. 다음 UX 보강은 탭별 본문을 작은 컴포넌트로 분리해 코드 유지보수성을 올리는 쪽이다. 현재 기능 동작에는 영향이 없으므로 별도 리팩터 커밋으로만 진행한다.
+
+---
 
 ### v1.8 — Macro Verdict Engine / 판정-first 다이얼로그
 

@@ -27,6 +27,17 @@
 		{ k: 'scenario', kr: '시나리오', en: 'Scenario' },
 		{ k: 'sources', kr: '출처', en: 'Sources' }
 	];
+	const tabButtonId = (k: MacroLensTab) => `macro-lens-tab-${k}`;
+	const tabPanelId = (k: MacroLensTab) => `macro-lens-panel-${k}`;
+	const focusableSelector = [
+		'a[href]',
+		'button:not([disabled])',
+		'input:not([disabled])',
+		'select:not([disabled])',
+		'textarea:not([disabled])',
+		'summary',
+		'[tabindex]:not([tabindex="-1"])'
+	].join(',');
 	const channels: { k: MacroChannel; kr: string; en: string }[] = [
 		{ k: 'revenue', kr: '매출', en: 'Sales' },
 		{ k: 'margin', kr: '마진', en: 'Margin' },
@@ -157,10 +168,54 @@
 		localTab = tabName;
 		onTab(tabName);
 	}
+	function focusActiveTab() {
+		queueMicrotask(() => dialogEl?.querySelector<HTMLButtonElement>(`#${tabButtonId(localTab)}`)?.focus());
+	}
+	function selectRelativeTab(delta: number) {
+		const idx = tabs.findIndex((t) => t.k === localTab);
+		const next = tabs[(idx + delta + tabs.length) % tabs.length]?.k ?? tabs[0].k;
+		selectTab(next);
+		focusActiveTab();
+	}
+	function visibleFocusableElements(): HTMLElement[] {
+		if (!dialogEl) return [];
+		return Array.from(dialogEl.querySelectorAll<HTMLElement>(focusableSelector))
+			.filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true' && (el.offsetParent !== null || el === document.activeElement));
+	}
 	function onDialogKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			e.preventDefault();
 			onClose();
+			return;
+		}
+		const target = e.target instanceof HTMLElement ? e.target : null;
+		if (target?.closest('.mlTabs') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Home' || e.key === 'End')) {
+			e.preventDefault();
+			if (e.key === 'ArrowRight') selectRelativeTab(1);
+			else if (e.key === 'ArrowLeft') selectRelativeTab(-1);
+			else {
+				selectTab(e.key === 'Home' ? tabs[0].k : tabs[tabs.length - 1].k);
+				focusActiveTab();
+			}
+			e.stopPropagation();
+			return;
+		}
+		if (e.key === 'Tab') {
+			const focusable = visibleFocusableElements();
+			if (!focusable.length) {
+				e.preventDefault();
+				dialogEl?.focus();
+				return;
+			}
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
 		}
 		e.stopPropagation();
 	}
@@ -196,16 +251,24 @@
 			<button class="scrClose" onclick={onClose} aria-label="close"><X size={14} /></button>
 		</div>
 
-		<div class="mlTabs">
+		<div class="mlTabs" role="tablist" aria-label={T('매크로 렌즈 분석 탭', 'Macro Lens analysis tabs')}>
 			{#each tabs as t (t.k)}
-				<button class:active={localTab === t.k} onclick={() => selectTab(t.k)}>{T(t.kr, t.en)}</button>
+				<button
+					id={tabButtonId(t.k)}
+					role="tab"
+					class:active={localTab === t.k}
+					aria-selected={localTab === t.k}
+					aria-controls={tabPanelId(t.k)}
+					tabindex={localTab === t.k ? 0 : -1}
+					onclick={() => selectTab(t.k)}
+				>{T(t.kr, t.en)}</button>
 			{/each}
 		</div>
 		<div class="mlAlwaysNote">
 			{T('노출 점검표입니다. 정량 민감도·투자 결론·가격 산출은 표시하지 않습니다.', 'Exposure checklist only. No quantitative sensitivity, investment call, or price output.')}
 		</div>
 
-		<div class="mlBody">
+		<div class="mlBody" id={tabPanelId(localTab)} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
 			{#if localTab === 'regime'}
 				<section class={'mlVerdictHero ' + verdict.tone} aria-label="Macro verdict">
 					<div class="mlVerdictDial">

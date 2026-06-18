@@ -1,8 +1,28 @@
 # 06. Progress Ledger
 
-상태: 구현 v1.3
+상태: 구현 v1.4
 
 ## 2026-06-19
+
+### v1.4 — Dialog keyboard/focus shell
+
+배경:
+
+- v1.3의 판정-first UI는 분석 구조를 개선했지만, 탭과 포커스 조작은 아직 심층 콘솔 수준으로 고정되어 있지 않았다.
+
+완료:
+
+- `MacroLensDialog` 탭을 `tablist/tab/tabpanel` ARIA 계약으로 바꿨다.
+- `ArrowLeft/ArrowRight/Home/End` 탭 전환, `Tab/Shift+Tab` modal focus trap, `Escape` 닫힘을 고정했다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-surfaces` 통과.
+- Playwright keyboard smoke: 방향키 탭 전환, End 키, 40회 Tab 후 modal 내부 focus 유지, Escape 닫힘, desktop/mobile overflow 0 확인.
+
+NEXT:
+
+1. 탭별 본문 컴포넌트 분리는 유지보수성 리팩터로 별도 처리한다.
 
 ### v1.3 — Macro Verdict Engine / 판정-first 다이얼로그
 
