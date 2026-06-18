@@ -1,10 +1,40 @@
 # 06. 진행 원장
 
-상태: v1.1
+상태: v1.2
 
 ---
 
 ## 2026-06-18
+
+### v1.2 — Release/Source/Contribution 시각화 구현
+
+배경:
+
+- 운영자가 "구현할만하나" 이후 실제 구현을 요청했다.
+- 전문 UI 리뷰 결과, 새 탭을 늘리지 말고 기존 matrix와 drilldown에 `Release Rail`, `Source Packet`, `Contribution Mini Drilldown`, `Co-movement Gate`를 붙이는 방향이 맞았다.
+
+완료:
+
+- `MacroLensSnapshot`에 `releaseRail`, `sourcePackets`, `contributionStacks`, `coMoveGates`를 추가했다.
+- `releaseRail`은 driver별 마지막 관측일, freshness 상태, 다음 확인 시점, stale policy를 구조화한다. 실제 발표 캘린더를 꾸미지 않고 현재 관측 artifact 기준의 freshness policy로만 표시한다.
+- `sourcePackets`는 `seriesId/source/unit/frequency/asOf/latest/change/transform/artifactPath/lineage/status`를 구조화해 UI 문자열 파싱을 없앴다.
+- `contributionStacks`는 driver가 화면에 올라온 이유를 `최근 변화`, `전파 경로`, `동행 후보`, `신선도`, `회사 품질`로 분해한다. 방향성 점수나 투자 결론이 아니다.
+- `coMoveGates`는 원시 관측점 배열이 없으므로 가짜 산점도를 만들지 않고 corr 위치 gate로 표시한다.
+- 첫 화면 `Evidence Gate` 아래에 `Release Rail`을 붙였다.
+- `전파 지도` 상단 drilldown을 `전파 chain / 품질 gate / contribution / source packet` 4칸으로 재구성했다.
+- matrix cell, pulse, release rail, source packet 선택이 `localFocus` 하나로 같은 driver를 가리키게 했다.
+- [02-data-contract.md](02-data-contract.md)와 [README.md](README.md)를 새 구현 계약에 맞췄다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-contracts` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+
+NEXT:
+
+1. 원시 co-movement 관측점 배열이 공개 계약으로 올라오면 corr 위치 gate를 실제 산점도로 승격한다.
+2. 실제 발표 캘린더/빈티지 데이터가 들어오기 전까지 Release Rail은 freshness policy로만 표시한다.
+3. visual QA로 desktop/mobile에서 release rail과 drilldown 4칸이 겹치지 않는지 확인한다.
 
 ### v1.1 — 매크로 대시보드 시각화 방식 재조사 보강
 

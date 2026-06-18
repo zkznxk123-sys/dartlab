@@ -45,6 +45,10 @@
 	const focusEdge = $derived(localFocus ? snapshot.transmissionEdges.find((e) => e.driverId === localFocus || e.sectorKey === localFocus) : null);
 	const focusIndicator = $derived(localFocus ? snapshot.exposureIndicators.find((x) => x.seriesId === localFocus || x.sourceRef.includes(localFocus)) : null);
 	const focusFalsifiers = $derived(localFocus ? snapshot.falsifiers.filter((f) => !f.driverId || f.driverId === localFocus).slice(0, 3) : snapshot.falsifiers.slice(0, 3));
+	const focusRelease = $derived(localFocus ? snapshot.releaseRail.find((r) => r.driverId === localFocus) : snapshot.releaseRail[0]);
+	const focusSource = $derived(localFocus ? snapshot.sourcePackets.find((p) => p.driverId === localFocus || p.seriesId === localFocus) : snapshot.sourcePackets[0]);
+	const focusContribution = $derived(localFocus ? snapshot.contributionStacks.find((c) => c.driverId === localFocus) : snapshot.contributionStacks[0]);
+	const focusCoMove = $derived(localFocus ? snapshot.coMoveGates.find((c) => c.driverId === localFocus) : snapshot.coMoveGates[0]);
 	const exposureRows = $derived(buildExposureRows());
 	const gateRows = $derived(snapshot.evidenceGates);
 	const econBlocked = (id: string) => !activeEcon.includes(id) && activeEcon.length >= ECON_MAX;
@@ -74,6 +78,8 @@
 	const cellTitle = (edge: MacroTransmissionEdgeView | null, label: string) => edge ? `${label}: ${edge.financialLine} · ${edge.confidence} · ${edge.evidenceLevel}` : `${label}: 노출 경로 없음`;
 	const gateLabel = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.labelKr, g.labelEn);
 	const gateDetail = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.detailKr, g.detailEn);
+	const pct = (v: number) => `${Math.max(4, Math.min(100, Math.round(v * 100)))}%`;
+	const corrLeft = (corr: number | null) => `${Math.max(0, Math.min(100, ((corr ?? 0) + 1) * 50))}%`;
 	function motionLabel(value: string | null | undefined): string {
 		const raw = value ?? '—';
 		if (lang === 'en') return raw;
@@ -138,7 +144,7 @@
 				</section>
 				<section class="mlPulseStrip" aria-label="Macro pulse">
 					{#each exposureRows.slice(0, 6) as row (row.driver.id)}
-						<button class={'mlPulse ' + row.driver.pressureLevel} class:on={activeEcon.includes(row.driver.id)} disabled={econBlocked(row.driver.id)} onclick={() => onToggleEcon?.(row.driver.id)} title={econBlocked(row.driver.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle ECON overlay')}>
+						<button class={'mlPulse ' + row.driver.pressureLevel} class:on={activeEcon.includes(row.driver.id) || localFocus === row.driver.id} disabled={econBlocked(row.driver.id)} onclick={() => { localFocus = row.driver.id; onToggleEcon?.(row.driver.id); }} title={econBlocked(row.driver.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle ECON overlay')}>
 							<span>{row.driver.label}</span>
 							<b>{row.driver.value}</b>
 							<em>{row.driver.change}</em>
@@ -179,6 +185,19 @@
 							<em title={g.sourceRef}>{gateDetail(g)}</em>
 						</div>
 					{/each}
+				</section>
+				<section class="mlReleaseRail" aria-label="Release rail">
+					<div class="mlRailTitle"><span class="mlBlockK">Release Rail</span><b>{T('값을 다시 확인할 시점', 'When to re-check')}</b></div>
+					<div class="mlRailRows">
+						{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
+							<button class={'mlRailItem ' + r.status} class:focused={localFocus === r.driverId} onclick={() => goto('transmission', r.driverId)} title={r.sourceRef}>
+								<span>{r.label}</span>
+								<b>{r.lastObservation}</b>
+								<em>{r.frequency}</em>
+								<i>{r.status.toUpperCase()} · next {r.nextCheck}</i>
+							</button>
+						{/each}
+					</div>
 				</section>
 				<section class="mlLegend" aria-label="Legend">
 					<span class="medium">MED/HIGH = {T('업종 경로 존재', 'sector path')}</span>
@@ -236,6 +255,10 @@
 							<b>{(focusDriver?.label ?? focusEdge?.driverLabel ?? localFocus) || '—'}</b>
 							<p>{focusEdge ? `${focusEdge.sectorLabel} → ${focusEdge.financialLine} → ${focusEdge.valuationLever}` : T('선택 driver의 표준 전파 경로가 아직 없습니다.', 'No mapped transmission chain for the selected driver yet.')}</p>
 							<em>{focusEdge ? `${focusEdge.evidenceLevel} · ${focusEdge.confidence} · lag ${focusEdge.lagMonths ? `${focusEdge.lagMonths[0]}-${focusEdge.lagMonths[1]}M` : '—'}` : focusDriver?.sourceLineage ?? '—'}</em>
+							<div class="mlEvidence compact">
+								{#each (focusEdge?.requiredCompanyEvidence.length ? focusEdge.requiredCompanyEvidence : snapshot.exposureQuality.missingEvidence).slice(0, 3) as x (x)}<span>{x}</span>{/each}
+								{#if !(focusEdge?.requiredCompanyEvidence.length || snapshot.exposureQuality.missingEvidence.length)}<span>OK</span>{/if}
+							</div>
 						</div>
 						<div class="mlDrillCard">
 							<span class="mlBlockK">{T('품질 gate', 'Quality gate')}</span>
@@ -244,20 +267,49 @@
 							<em>{focusIndicator?.window ?? snapshot.exposureQuality.window ?? T('window 없음', 'window missing')}</em>
 						</div>
 						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('필요 증거', 'Required evidence')}</span>
-							<b>{focusEdge ? focusEdge.requiredCompanyEvidence.length : snapshot.exposureQuality.missingEvidence.length}</b>
-							<div class="mlEvidence compact">
-								{#each (focusEdge?.requiredCompanyEvidence.length ? focusEdge.requiredCompanyEvidence : snapshot.exposureQuality.missingEvidence).slice(0, 4) as x (x)}<span>{x}</span>{/each}
-								{#if !(focusEdge?.requiredCompanyEvidence.length || snapshot.exposureQuality.missingEvidence.length)}<span>OK</span>{/if}
+							<span class="mlBlockK">{T('contribution', 'contribution')}</span>
+							<b>{focusContribution?.summary ?? '—'}</b>
+							<div class="mlStackList">
+								{#each focusContribution?.components ?? [] as c (c.id)}
+									<div class="mlStackRow">
+										<span>{c.label}</span>
+										<div class="mlStackTrack"><i class={'mlStackFill ' + c.status} style={`width:${pct(c.value)}`}></i></div>
+										<em>{Math.round(c.value * 100)}</em>
+									</div>
+								{/each}
 							</div>
 						</div>
 						<div class="mlDrillCard">
 							<span class="mlBlockK">{T('source packet', 'source packet')}</span>
-							<b>{focusIndicator?.seriesId ?? focusDriver?.seriesId ?? focusEdge?.driverId ?? '—'}</b>
-							<p>{focusIndicator?.sourceRef ?? focusDriver?.sourceLineage ?? focusEdge?.sourceRefs[0] ?? snapshot.exposureQuality.sourceRef}</p>
+							<b>{focusSource?.seriesId ?? focusIndicator?.seriesId ?? focusDriver?.seriesId ?? focusEdge?.driverId ?? '—'}</b>
+							<div class="mlPacketGrid">
+								<span>source</span><b>{focusSource?.source ?? '—'}</b>
+								<span>unit</span><b>{focusSource?.unit ?? '—'}</b>
+								<span>freq</span><b>{focusSource?.frequency ?? '—'}</b>
+								<span>asOf</span><b>{focusSource?.asOf ?? '—'}</b>
+								<span>latest</span><b>{focusSource ? `${focusSource.value} / ${focusSource.change}` : '—'}</b>
+								<span>release</span><b>{focusRelease ? `${focusRelease.status} · ${focusRelease.nextCheck}` : '—'}</b>
+							</div>
+							<p>{focusSource?.lineage ?? focusIndicator?.sourceRef ?? focusEdge?.sourceRefs[0] ?? snapshot.exposureQuality.sourceRef}</p>
 							{#each focusFalsifiers.slice(0, 1) as f (f.id)}<em>{f.label}: {f.detail}</em>{/each}
 						</div>
 					</section>
+					{#if focusCoMove}
+						<section class={'mlCoMovePanel ' + focusCoMove.status}>
+							<div class="mlRailTitle"><span class="mlBlockK">Co-movement Gate</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
+							<div class="mlCorrPlot" aria-label="Co-movement correlation position">
+								<span>-1</span><span>0</span><span>+1</span>
+								<i style={`left:${corrLeft(focusCoMove.corr)}`}></i>
+							</div>
+							<div class="mlMiniList">
+								<span>corr {focusCoMove.corr ?? '—'}</span>
+								<span>n {focusCoMove.n ?? '—'}</span>
+								<span>{focusCoMove.window}</span>
+								<span>{focusCoMove.status.toUpperCase()}</span>
+							</div>
+							<p>{focusCoMove.detail}</p>
+						</section>
+					{/if}
 				{/if}
 				<section class="mlGrid edgeGrid">
 					{#each snapshot.transmissionEdges as e (e.id)}
@@ -325,10 +377,23 @@
 				<section class="mlGrid two">
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('출처', 'Sources')}</span><b>{T('source/date/value lineage', 'source/date/value lineage')}</b></div>
+						{#each snapshot.sourcePackets.slice(0, 8) as p (p.driverId)}
+							<button class={'mlSrcPacket ' + p.status} class:focused={localFocus === p.driverId} onclick={() => { localFocus = p.driverId; }} title={p.sourceRef}>
+								<b>{p.seriesId}</b>
+								<span>{p.source} · {p.unit} · {p.frequency}</span>
+								<em>{p.asOf} · {p.value} · {p.transform}</em>
+								<small>{p.artifactPath}</small>
+							</button>
+						{/each}
+						<div class="mlSrcSep"></div>
 						{#each snapshot.sourceRefs as s (s)}<div class="mlSrc">{s}</div>{/each}
 					</div>
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('한계', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
+						<div class="mlLimitSub">{T('Release freshness', 'Release freshness')}</div>
+						{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
+							<div class={'mlSrc warn ' + r.status}><b>{r.status}</b> {r.label}: last {r.lastObservation} · next {r.nextCheck}<em>{r.frequency} · stale after {r.staleAfterDays}d</em></div>
+						{/each}
 						{#each snapshot.missing as m (m.id)}<div class="mlSrc warn"><b>{m.status}</b> {m.reason}<em>{m.sourceRef}</em></div>{/each}
 						<div class={snapshot.exposureQuality.status === 'quantCandidate' ? 'mlSrc' : 'mlSrc warn'}><b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b> {snapshot.exposureQuality.reason}</div>
 						<div class="mlSrc warn">nObs/R²/window/frequency/lag: {snapshot.exposureQuality.nObs ?? '—'} / {snapshot.exposureQuality.rSquared ?? '—'} / {snapshot.exposureQuality.window ?? '—'} / {snapshot.exposureQuality.frequency ?? '—'} / {snapshot.exposureQuality.lagMonths ?? '—'}</div>
@@ -410,6 +475,42 @@
 	.mlGate.ok b { color: var(--good); }
 	.mlGate.watch b { color: var(--warn); }
 	.mlGate.blocked b { color: var(--dn); }
+	.mlReleaseRail { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
+	.mlRailTitle { display: flex; align-items: center; gap: 8px; min-width: 0; }
+	.mlRailTitle b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+	.mlRailTitle em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
+	.mlRailRows { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+	.mlRailItem { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.015); color: var(--dl-ink); text-align: left; padding: 7px; cursor: pointer; }
+	.mlRailItem:hover, .mlRailItem.focused { border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.04); }
+	.mlRailItem.fresh { border-color: rgba(52,211,153,.28); }
+	.mlRailItem.watch, .mlRailItem.unknown { border-color: rgba(251,146,60,.36); }
+	.mlRailItem.stale { border-color: rgba(248,113,113,.42); }
+	.mlRailItem span, .mlRailItem b, .mlRailItem em, .mlRailItem i { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlRailItem span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .04em; }
+	.mlRailItem b { margin-top: 4px; font-family: var(--dl-font-mono); font-size: 11px; }
+	.mlRailItem em, .mlRailItem i { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
+	.mlStackList { display: flex; flex-direction: column; gap: 5px; margin-top: 7px; }
+	.mlStackRow { display: grid; grid-template-columns: 58px 1fr 26px; gap: 6px; align-items: center; min-width: 0; font-size: 9.5px; color: var(--dl-ink-dim, #5b6473); }
+	.mlStackRow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlStackRow em { margin: 0; color: var(--dl-ink-muted, #7b8493); font-size: 9px; text-align: right; }
+	.mlStackTrack { height: 7px; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; overflow: hidden; background: rgba(255,255,255,.025); }
+	.mlStackFill { display: block; height: 100%; border-radius: 999px; background: var(--dl-ink-dim, #5b6473); }
+	.mlStackFill.ok { background: rgba(52,211,153,.72); }
+	.mlStackFill.watch { background: rgba(251,146,60,.72); }
+	.mlStackFill.blocked { background: rgba(248,113,113,.65); }
+	.mlPacketGrid { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 7px; margin-top: 7px; align-items: baseline; }
+	.mlPacketGrid span { color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
+	.mlPacketGrid b { display: block; margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+	.mlCoMovePanel { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.015); padding: 9px; }
+	.mlCoMovePanel.candidate { border-color: rgba(52,211,153,.38); }
+	.mlCoMovePanel.unstable { border-color: rgba(251,146,60,.36); }
+	.mlCoMovePanel.missing { border-color: rgba(248,113,113,.36); }
+	.mlCorrPlot { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); height: 28px; margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: linear-gradient(90deg, rgba(248,113,113,.06), rgba(255,255,255,.02), rgba(52,211,153,.06)); overflow: hidden; }
+	.mlCorrPlot span { display: flex; align-items: flex-end; padding: 0 5px 3px; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 9px; }
+	.mlCorrPlot span:nth-child(2) { justify-content: center; border-left: 1px solid rgba(255,255,255,.05); border-right: 1px solid rgba(255,255,255,.05); }
+	.mlCorrPlot span:nth-child(3) { justify-content: flex-end; }
+	.mlCorrPlot i { position: absolute; top: 5px; width: 8px; height: 18px; border: 1px solid var(--amber); border-radius: 999px; background: rgba(251,146,60,.35); transform: translateX(-50%); }
+	.mlCoMovePanel p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10px; line-height: 1.35; }
 	.mlLegend { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 	.mlLegend span { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; padding: 4px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlLegend .medium { border-color: rgba(251,146,60,.35); }
@@ -486,10 +587,22 @@
 	.mlSrc { padding: 6px 0; border-top: 1px solid rgba(255,255,255,.045); color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
 	.mlSrc b { color: var(--warn); font-family: var(--dl-font-mono); font-size: 10px; margin-right: 5px; text-transform: uppercase; }
 	.mlSrc em { display: block; margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; overflow-wrap: anywhere; }
+	.mlSrcPacket { width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,.045); background: transparent; color: inherit; text-align: left; padding: 7px 0; cursor: pointer; }
+	.mlSrcPacket:hover, .mlSrcPacket.focused { background: rgba(251,146,60,.035); }
+	.mlSrcPacket b, .mlSrcPacket span, .mlSrcPacket em, .mlSrcPacket small { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlSrcPacket b { color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
+	.mlSrcPacket span { margin-top: 2px; color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
+	.mlSrcPacket em, .mlSrcPacket small { margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
+	.mlSrcPacket.stale { border-left: 2px solid rgba(248,113,113,.52); padding-left: 6px; }
+	.mlSrcPacket.watch, .mlSrcPacket.unknown { border-left: 2px solid rgba(251,146,60,.52); padding-left: 6px; }
+	.mlSrcPacket.fresh { border-left: 2px solid rgba(52,211,153,.48); padding-left: 6px; }
+	.mlSrcPacket.missing { border-left: 2px solid rgba(248,113,113,.75); padding-left: 6px; }
+	.mlSrcSep { height: 8px; border-top: 1px dashed rgba(255,255,255,.08); }
+	.mlLimitSub { margin-top: 8px; color: var(--amber); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	.mlNote { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.45; border: 1px dashed var(--dl-line, #1b2130); border-radius: 5px; padding: 8px 10px; }
 	@media (max-width: 760px) {
 		.mlModal { height: min(780px, 94vh); }
-		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill { grid-template-columns: 1fr; }
+		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill, .mlRailRows { grid-template-columns: 1fr; }
 		.mlMatrix { overflow-x: auto; }
 		.mlMatrixHead, .mlMatrixRow { min-width: 640px; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }

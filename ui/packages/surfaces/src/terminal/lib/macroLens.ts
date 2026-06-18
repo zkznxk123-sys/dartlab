@@ -125,6 +125,65 @@ export interface MacroExposureIndicatorView {
 	impact: string;
 }
 
+export interface MacroReleaseView {
+	driverId: string;
+	label: string;
+	source: 'ECOS' | 'FRED';
+	frequency: string;
+	lastObservation: string;
+	nextCheck: string;
+	daysLag: number | null;
+	staleAfterDays: number;
+	status: 'fresh' | 'watch' | 'stale' | 'unknown';
+	sourceRef: string;
+}
+
+export interface MacroSourcePacketView {
+	driverId: string;
+	label: string;
+	seriesId: string;
+	source: 'ECOS' | 'FRED';
+	unit: string;
+	frequency: string;
+	asOf: string;
+	value: string;
+	change: string;
+	transform: string;
+	status: 'fresh' | 'watch' | 'stale' | 'unknown' | 'missing';
+	artifactPath: string;
+	sourceRef: string;
+	lineage: string;
+	qualityHint: string;
+}
+
+export interface MacroContributionComponentView {
+	id: string;
+	label: string;
+	value: number;
+	detail: string;
+	status: 'ok' | 'watch' | 'blocked';
+	sourceRef: string;
+}
+
+export interface MacroContributionView {
+	driverId: string;
+	label: string;
+	summary: string;
+	components: MacroContributionComponentView[];
+	sourceRef: string;
+}
+
+export interface MacroCoMoveGateView {
+	driverId: string;
+	label: string;
+	corr: number | null;
+	n: number | null;
+	window: string;
+	status: 'candidate' | 'unstable' | 'missing';
+	sourceRef: string;
+	detail: string;
+}
+
 export interface MacroEvidenceGateView {
 	id: 'macroData' | 'path' | 'comove' | 'company' | 'quant';
 	labelKr: string;
@@ -171,6 +230,10 @@ export interface MacroLensSnapshot {
 	};
 	exposureQuality: MacroExposureQualityView;
 	exposureIndicators: MacroExposureIndicatorView[];
+	releaseRail: MacroReleaseView[];
+	sourcePackets: MacroSourcePacketView[];
+	contributionStacks: MacroContributionView[];
+	coMoveGates: MacroCoMoveGateView[];
 	evidenceGates: MacroEvidenceGateView[];
 	falsifiers: MacroFalsifierView[];
 	scenarios: MacroScenarioView[];
@@ -454,10 +517,57 @@ function transformOf(def: MacroSeriesDef): string {
 function freshnessOf(def: MacroSeriesDef, d: string): MacroDriverView['freshness'] {
 	const lag = daysLag(d);
 	if (lag == null) return { status: 'unknown', daysLag: null, label: '기준일 확인 필요' };
-	const staleAfter = def.src === 'fred' ? 10 : def.id === 'BASE_RATE' ? 65 : 75;
+	const staleAfter = staleAfterDaysOf(def);
 	if (lag > staleAfter) return { status: 'stale', daysLag: lag, label: `stale ${lag}d` };
 	if (lag > staleAfter * 0.65) return { status: 'watch', daysLag: lag, label: `watch ${lag}d` };
 	return { status: 'fresh', daysLag: lag, label: `fresh ${lag}d` };
+}
+
+function staleAfterDaysOf(def: MacroSeriesDef): number {
+	if (def.src === 'fred') return 10;
+	if (def.id === 'BASE_RATE') return 65;
+	return 75;
+}
+
+function cadenceDaysOf(def: MacroSeriesDef): number {
+	if (def.src === 'fred') return 7;
+	if (def.id === 'BASE_RATE') return 60;
+	return 35;
+}
+
+function frequencyOf(def: MacroSeriesDef): string {
+	if (def.src === 'fred') return 'FRED rolling/daily check';
+	if (def.id === 'BASE_RATE') return 'ECOS policy event';
+	return def.yoy ? 'ECOS monthly YoY' : 'ECOS monthly';
+}
+
+function addDaysYmd(d: string, days: number): string {
+	const t = parseYmd(d);
+	if (t == null) return '—';
+	const next = new Date(t + days * MS_DAY);
+	const y = next.getUTCFullYear();
+	const m = `${next.getUTCMonth() + 1}`.padStart(2, '0');
+	const day = `${next.getUTCDate()}`.padStart(2, '0');
+	return `${y}-${m}-${day}`;
+}
+
+function componentStatus(value: number): MacroContributionComponentView['status'] {
+	return value >= 0.67 ? 'ok' : value >= 0.25 ? 'watch' : 'blocked';
+}
+
+function confidenceScore(edge: MacroTransmissionEdgeView | undefined): number {
+	if (!edge || edge.confidence === 'blocked') return 0;
+	const conf = edge.confidence === 'high' ? 1 : edge.confidence === 'medium' ? 0.72 : 0.42;
+	const evidence = edge.evidenceLevel === 'observed' ? 1 : edge.evidenceLevel === 'sectorPrior' ? 0.65 : 0.38;
+	return Math.min(1, conf * evidence);
+}
+
+function freshnessScore(status: MacroDriverView['freshness']['status']): number {
+	return status === 'fresh' ? 1 : status === 'watch' ? 0.55 : status === 'unknown' ? 0.25 : 0.05;
+}
+
+function exposureQualityScore(q: MacroExposureQualityView): number {
+	return q.status === 'quantCandidate' ? 0.86 : q.status === 'qualitativeOnly' ? 0.42 : 0.08;
 }
 
 function changeIntensity(m: MacroLatest): number {
@@ -975,6 +1085,141 @@ function buildEvidenceGates(args: {
 	];
 }
 
+function buildReleaseRail(drivers: MacroDriverView[]): MacroReleaseView[] {
+	return drivers.slice(0, 10).map((driver) => {
+		const def = macroDefOf(driver.id);
+		const staleAfterDays = def ? staleAfterDaysOf(def) : 75;
+		const cadenceDays = def ? cadenceDaysOf(def) : 35;
+		return {
+			driverId: driver.id,
+			label: driver.label,
+			source: driver.source,
+			frequency: def ? frequencyOf(def) : 'unknown frequency',
+			lastObservation: driver.asOf,
+			nextCheck: addDaysYmd(driver.asOf.replaceAll('-', ''), cadenceDays),
+			daysLag: driver.freshness.daysLag,
+			staleAfterDays,
+			status: driver.freshness.status,
+			sourceRef: `${driver.source}:${driver.seriesId}:freshness-policy`
+		};
+	});
+}
+
+function buildSourcePackets(drivers: MacroDriverView[], payload?: MacroTransmissionPayload | null): MacroSourcePacketView[] {
+	const payloadDrivers = new Map((payload?.drivers ?? []).map((d) => [d.id, d]));
+	return drivers.slice(0, 16).map((driver) => {
+		const def = macroDefOf(driver.id);
+		const row = payloadDrivers.get(driver.id);
+		const lineage = row?.sourceLineage;
+		const artifactPath = lineage?.artifactPath || `macro/${driver.source === 'ECOS' ? 'ecos' : 'fred'}/observations.parquet`;
+		const status = lineage?.status === 'missing' ? 'missing' : driver.freshness.status;
+		return {
+			driverId: driver.id,
+			label: driver.label,
+			seriesId: driver.seriesId,
+			source: driver.source,
+			unit: driver.unit,
+			frequency: def ? frequencyOf(def) : 'unknown frequency',
+			asOf: lineage?.date ? fmtDate(lineage.date) : driver.asOf,
+			value: driver.value,
+			change: driver.change,
+			transform: driver.transform,
+			status,
+			artifactPath,
+			sourceRef: `${artifactPath}#${driver.seriesId}`,
+			lineage: driver.sourceLineage,
+			qualityHint: driver.qualityHint
+		};
+	});
+}
+
+function buildContributionStacks(
+	drivers: MacroDriverView[],
+	edges: MacroTransmissionEdgeView[],
+	latest: MacroLatest[],
+	exposureQuality: MacroExposureQualityView
+): MacroContributionView[] {
+	const latestById = new Map(latest.map((m) => [m.def.id, m]));
+	return drivers.slice(0, 10).map((driver) => {
+		const macroLatest = latestById.get(driver.id);
+		const edge = edges.find((e) => e.driverId === driver.id);
+		const move = macroLatest ? Math.min(1, changeIntensity(macroLatest) / 24) : 0;
+		const path = confidenceScore(edge);
+		const co = driver.coMovement ? Math.min(1, Math.abs(driver.coMovement.corr)) : 0;
+		const fresh = freshnessScore(driver.freshness.status);
+		const company = exposureQualityScore(exposureQuality);
+		const components: MacroContributionComponentView[] = [
+			{
+				id: 'move',
+				label: '최근 변화',
+				value: move,
+				detail: macroLatest ? `${driver.change} · ${driver.asOf}` : 'latest observation missing',
+				status: componentStatus(move),
+				sourceRef: driver.sourceLineage
+			},
+			{
+				id: 'path',
+				label: '전파 경로',
+				value: path,
+				detail: edge ? `${edge.evidenceLevel} · ${edge.confidence} · ${edge.channel}` : 'mapped edge absent',
+				status: componentStatus(path),
+				sourceRef: edge?.sourceRefs[0] ?? 'macro.transmission edge missing'
+			},
+			{
+				id: 'comove',
+				label: '동행 후보',
+				value: co,
+				detail: driver.coMovement?.label ?? 'co-movement absent',
+				status: driver.coMovement?.status === 'candidate' ? 'ok' : driver.coMovement ? 'watch' : 'blocked',
+				sourceRef: 'terminal coMovement'
+			},
+			{
+				id: 'freshness',
+				label: '신선도',
+				value: fresh,
+				detail: driver.freshness.label,
+				status: componentStatus(fresh),
+				sourceRef: `${driver.source}:${driver.seriesId}:freshness-policy`
+			},
+			{
+				id: 'company',
+				label: '회사 품질',
+				value: company,
+				detail: `${exposureQuality.status} · nObs ${exposureQuality.nObs ?? '—'} · R² ${exposureQuality.rSquared ?? '—'}`,
+				status: componentStatus(company),
+				sourceRef: exposureQuality.sourceRef
+			}
+		];
+		const open = components.filter((c) => c.status === 'ok').length;
+		const watch = components.filter((c) => c.status === 'watch').length;
+		return {
+			driverId: driver.id,
+			label: driver.label,
+			summary: `${open} open · ${watch} watch · ${components.length - open - watch} locked`,
+			components,
+			sourceRef: `MacroLens:contributionStack:${driver.id}`
+		};
+	});
+}
+
+function buildCoMoveGates(drivers: MacroDriverView[]): MacroCoMoveGateView[] {
+	return drivers
+		.filter((driver) => driver.relevance !== 'context')
+		.slice(0, 10)
+		.map((driver) => ({
+			driverId: driver.id,
+			label: driver.label,
+			corr: driver.coMovement?.corr ?? null,
+			n: driver.coMovement?.n ?? null,
+			window: driver.coMovement?.window ?? 'overlap missing',
+			status: driver.coMovement?.status ?? 'missing',
+			sourceRef: 'terminal coMovement',
+			detail: driver.coMovement
+				? `${driver.coMovement.label}. 방향성 claim이나 beta가 아니라 동행 후보 gate다.`
+				: '가격과 macro observation의 겹친 표본이 부족하다.'
+		}));
+}
+
 export function buildMacroLensSnapshot(args: {
 	co: Company;
 	macro: MacroFile | null;
@@ -995,6 +1240,10 @@ export function buildMacroLensSnapshot(args: {
 	const scenarios = buildScenarios(drivers, edges);
 	const exposureQuality = buildExposureQuality(co);
 	const exposureIndicators = normalizeExposureIndicators(co.macroExposure?.selected);
+	const releaseRail = buildReleaseRail(drivers);
+	const sourcePackets = buildSourcePackets(drivers, transmission);
+	const contributionStacks = buildContributionStacks(drivers, edges, macroLatest, exposureQuality);
+	const coMoveGates = buildCoMoveGates(drivers);
 	const falsifiers = buildFalsifiers(coMovers, drivers, macro, exposureQuality);
 	const marketPhase = {
 		kr: phaseView('KR', macro?.kr),
@@ -1027,6 +1276,10 @@ export function buildMacroLensSnapshot(args: {
 		},
 		exposureQuality,
 		exposureIndicators,
+		releaseRail,
+		sourcePackets,
+		contributionStacks,
+		coMoveGates,
 		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef }),
 		falsifiers,
 		scenarios,

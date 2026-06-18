@@ -1,6 +1,6 @@
 # 매크로 렌즈 다이얼로그
 
-상태: 구현/기획 v1.1 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 v0.5 재조사 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷)
+상태: 구현 v1.2 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 v0.5 재조사 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷 · Release/Source/Contribution 시각화)
 범위: 퍼블릭 터미널의 `경제지표분석`을 Macro Lens 분석 코어로 승격한다. 화면은 다이얼로그지만, 핵심은 `dartlab.macro`의 시장·섹터 전파 산출물과 `analysis`의 회사 노출 품질을 하나의 검증 가능한 전파 사슬로 묶는 것이다.
 
 ---
@@ -34,6 +34,7 @@
 - 첫 화면 구현은 기존 산출물 재사용이다: `dashboards/macro.json`, `macro/{fred,ecos}/observations.parquet`, `MACRO_SERIES`, `co.tailwind`, `eng.sectorTailwinds()`, 차트 co-movement.
 - 첫 화면은 `대시보드`다. `Macro Phase Strip`, `Driver Pulse Strip`, `Exposure Matrix`, `Evidence Gate`, `Legend`로 구성하고 결론형 문단을 전면에 두지 않는다.
 - 시각화는 판정을 만들지 않는다. `OBS/PRIOR/TPL/LOCK/OPEN/QUAL/STALE/MISSING` 상태는 `macro.transmission`, `macroExposure.exposureQuality`, source lineage, freshness policy가 만든다.
+- `Release Rail`, 구조화된 `Source Packet`, `Contribution Stack`, `Co-movement Gate`는 matrix 선택 driver 하나(`localFocus`)에 동기화한다. 산점도 원시 점 배열이 없을 때는 가짜 scatter를 만들지 않고 corr 위치 gate만 표시한다.
 - 엔진 강화는 `tests/_attempts/macroLensEngine/` proof를 거쳐 `macro.transmission` 최소 축까지 `src/dartlab/macro`에 승격했다. 회사별 `analysis.macroExposure`는 `nObs/R²/window/lag/coverage/sourceRef` 품질 계약을 내며, Macro Lens는 이 값을 우선 소비하고 없을 때만 fallback 잠금 상태를 표시한다.
 - 매수/매도, 목표주가, 위기 임박, 수혜 확정 표현은 금지한다.
 - public/local 공통배선이 기본이다. 로컬 백엔드 없이 퍼블릭 데이터만으로 떠야 한다.

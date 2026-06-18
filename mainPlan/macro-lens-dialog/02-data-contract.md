@@ -1,6 +1,6 @@
 # 02. 데이터 계약
 
-상태: 구현 v0.6
+상태: 구현 v0.7
 범위: Macro Lens 다이얼로그가 읽는 데이터, 매크로 전파 엔진 산출물, 향후 확장 계약.
 
 ---
@@ -59,6 +59,10 @@ export interface MacroLensSnapshot {
   };
   exposureQuality: MacroExposureQuality;
   exposureIndicators: MacroExposureIndicator[];
+  releaseRail: MacroRelease[];
+  sourcePackets: MacroSourcePacket[];
+  contributionStacks: MacroContributionStack[];
+  coMoveGates: MacroCoMoveGate[];
   evidenceGates: MacroEvidenceGate[];
   falsifiers: MacroFalsifierView[];
   scenarios: MacroScenarioView[];
@@ -77,6 +81,10 @@ export interface MacroLensSnapshot {
 - `sectorBinding`: `co.tailwind`와 `eng.sectorTailwinds()` 기반 섹터 순풍/역풍.
 - `exposureQuality`: 회사별 민감도·회귀를 노출할 수 있는지 판단하는 품질 라벨.
 - `exposureIndicators`: analysis/prebuild가 선택한 회사별 매크로 지표 후보. UI가 회귀를 재계산하지 않고 source packet과 model card로만 표시한다.
+- `releaseRail`: driver별 마지막 관측일, 빈도, freshness 상태, 다음 확인 시점. 실제 발표 캘린더가 아니라 현재 관측 artifact의 freshness policy다.
+- `sourcePackets`: driver별 `seriesId/source/unit/frequency/asOf/latest/transform/artifactPath/lineage` 구조화 패킷. UI가 문자열을 파싱하지 않는다.
+- `contributionStacks`: 선택 driver가 화면에 올라온 이유를 `최근 변화/전파 경로/동행 후보/신선도/회사 품질`로 분해한 미니 stacked bar용 입력. 투자 방향 점수가 아니다.
+- `coMoveGates`: corr/n/window/status를 가진 동행 후보 gate. 원시 점 배열이 없으면 산점도가 아니라 corr 위치 플롯으로만 표시한다.
 - `evidenceGates`: 첫 화면의 시계열/경로/동행/회사노출/민감도 gate. UI가 재계산하지 않는다.
 - `falsifiers`: 상관, peer dispersion, 회귀 품질, stale data처럼 thesis를 약하게 만드는 조건.
 - `scenarios`: 시나리오 이름과 affected driver만. 손익 산출은 하지 않는다.
