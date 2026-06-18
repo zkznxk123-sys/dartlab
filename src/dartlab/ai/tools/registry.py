@@ -37,7 +37,6 @@ from .scenarioOverlay import scenarioOverlay
 from .searchPastSessions import searchPastSessions
 from .sensitivityAnalysis import sensitivityAnalysis
 from .storyTemplate import pickStoryTemplate
-from .themeTool import themeTool
 from .types import ToolResult, ToolSpec
 from .validateRecipe import validateRecipe
 from .webSearch import webSearch
@@ -369,30 +368,6 @@ _SPECS: dict[str, ToolSpec] = {
                 },
             },
             "required": ["stockCodes"],
-        },
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=False,
-    ),
-    "ThemeExposure": ToolSpec(
-        "ThemeExposure",
-        "근거있는 횡단 테마 노출 — stockCode 면 그 종목의 소속 테마+왜(주요제품 키워드)+매출노출%; "
-        "themeId 면 테마 멤버 종목(grade=노출%·discover=공급망 발견). 둘 다 없으면 테마 목록. "
-        "'삼성SDI 무슨 테마', '2차전지 종목', '이 종목 왜 이 테마·매출 몇%' 류에 1 회 호출. "
-        "노출%=None 은 부문 미공시(순도 미산출) — 100% 아님.",
-        {
-            "type": "object",
-            "properties": {
-                "themeId": {
-                    "type": "string",
-                    "description": "테마 ID (예: secondaryBattery). stockCode 와 함께면 stockCode 우선.",
-                },
-                "stockCode": {"type": "string", "description": "6 자리 종목코드 — 그 종목의 테마 도시에(왜·매출%)."},
-                "grade": {"type": "boolean", "description": "themeId 모드 멤버별 노출% 등급(느림). 기본 false."},
-                "discover": {"type": "boolean", "description": "themeId 모드 공급망 거래엣지 발견 추가. 기본 false."},
-            },
-            "required": [],
         },
         readOnlyHint=True,
         destructiveHint=False,
@@ -761,7 +736,6 @@ _TOOLS: dict[str, ToolFn] = {
     "EvidenceGate": evidenceGate,
     "PickStoryTemplate": pickStoryTemplate,
     "PeerCompareN": peerCompareN,
-    "ThemeExposure": themeTool,
     "CompileFinancialDashboard": compileFinancialDashboard,
     "CreditScorecard": creditScorecard,
     "RegressionForecast": regressionForecast,

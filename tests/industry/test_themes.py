@@ -67,3 +67,23 @@ def test_company_scope_facade():
     lg = Company("051910").themes()  # LG화학
     bat = lg.filter(lg["themeId"] == "secondaryBattery").to_dicts()[0]
     assert bat["근거"] and 40 < bat["노출%"] < 60 and bat["등급근거"] == "graded"
+
+
+def test_call_contract_is_apiref_not_separate_tool():
+    """호출계약 = apiRef 점 호출명 ``Company.themes`` (별도 도구 아님 — capability allowlist 자동등록)."""
+    from dartlab.reference.capability import loadCapabilities
+
+    assert "Company.themes" in loadCapabilities()
+    # 별도 ThemeExposure 도구는 제거됨 — EngineCall apiRef 가 유일 계약.
+    from dartlab.ai.tools import registry as rg
+
+    assert "ThemeExposure" not in rg._TOOLS
+
+
+@pytest.mark.requires_data
+def test_call_contract_engine_call_dispatch():
+    """EngineCall(apiRef='Company.themes', args={stockCode}) 점 호출명 실행."""
+    from dartlab.ai.tools.engineCall import engineCall
+
+    r = engineCall({"apiRef": "Company.themes", "args": {"stockCode": "051910"}})
+    assert r.ok and r.data["rowCount"] >= 1
