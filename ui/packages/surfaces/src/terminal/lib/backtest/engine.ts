@@ -80,13 +80,14 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 				deferredBars++; // 신호 변경을 원했으나 거래정지(v=0/o=0) — 다음 거래가능 봉까지 이연(감사)
 			}
 		}
-		// 손절/익절 인트라바(gated) — 신호청산 후 보유 중이면 당일 트리거(보수: 손절 우선). t+1 모델과 시점 충돌=라벨.
-		if (pos === 1 && stopPx != null && b.l <= stopPx) {
-			const exitPx = stopPx * (1 - k.slip) * (1 - k.comm - k.tax);
+		// 손절/익절 인트라바(gated) — 진입 봉 다음부터(i>entryIdx): 같은 봉 진입+청산은 인트라바 순서 미지 → look-ahead 낙관 차단.
+		// 갭 관통 시 stopPx/takePx 가 아닌 그 봉 시가로 체결(낙관 차단): 손절 min(stopPx,b.o)·익절 max(takePx,b.o). 보수: 손절 우선.
+		if (pos === 1 && i > entryIdx && stopPx != null && b.l <= stopPx) {
+			const exitPx = Math.min(stopPx, b.o) * (1 - k.slip) * (1 - k.comm - k.tax);
 			cash = shares * exitPx; shares = 0; pos = 0;
 			trades.push({ entryT: candles[entryIdx].t, exitT: b.t, entryPx, exitPx, retPct: (cash / entryCash - 1) * 100, holdDays: i - entryIdx, open: false, exitReason: 'stop', entryDeferredBars: 0, maePct, mfePct });
-		} else if (pos === 1 && takePx != null && b.h >= takePx) {
-			const exitPx = takePx * (1 - k.slip) * (1 - k.comm - k.tax);
+		} else if (pos === 1 && i > entryIdx && takePx != null && b.h >= takePx) {
+			const exitPx = Math.max(takePx, b.o) * (1 - k.slip) * (1 - k.comm - k.tax);
 			cash = shares * exitPx; shares = 0; pos = 0;
 			trades.push({ entryT: candles[entryIdx].t, exitT: b.t, entryPx, exitPx, retPct: (cash / entryCash - 1) * 100, holdDays: i - entryIdx, open: false, exitReason: 'take', entryDeferredBars: 0, maePct, mfePct });
 		}
@@ -326,8 +327,10 @@ function runBacktestCore(candles: Candle[], target: Int8Array, opts: BtOpts, spe
 
 	const retPct = endRet(strat.equity);
 	const closedAndOpen = strat.trades;
-	const wins = closedAndOpen.filter((t) => t.retPct > 0);
-	const losses = closedAndOpen.filter((t) => t.retPct < 0);
+	// 승률·손익비는 실현(청산) 거래만 — 미청산 finalMark 의 평가손익이 분자/분모를 오염하지 않게(거래표엔 미청산 행 유지).
+	const closed = closedAndOpen.filter((t) => !t.open);
+	const wins = closed.filter((t) => t.retPct > 0);
+	const losses = closed.filter((t) => t.retPct < 0);
 	const gainSum = wins.reduce((a, t) => a + t.retPct, 0);
 	const lossSum = Math.abs(losses.reduce((a, t) => a + t.retPct, 0));
 	const ddWin = mddWindowOf(strat.equity);
@@ -372,7 +375,7 @@ function runBacktestCore(candles: Candle[], target: Int8Array, opts: BtOpts, spe
 			mddDays: ddWin ? ddWin.days : null,
 			sharpe: ratios.sharpe,
 			sortino: ratios.sortino,
-			winRatePct: closedAndOpen.length ? (wins.length / closedAndOpen.length) * 100 : null,
+			winRatePct: closed.length ? (wins.length / closed.length) * 100 : null,
 			profitFactor: lossSum > 0 ? gainSum / lossSum : null,
 			tradeCount: closedAndOpen.length,
 			avgTradePct: closedAndOpen.length ? closedAndOpen.reduce((a, t) => a + t.retPct, 0) / closedAndOpen.length : null,

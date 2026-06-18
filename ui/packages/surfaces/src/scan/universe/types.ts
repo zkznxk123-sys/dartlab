@@ -2,7 +2,7 @@
 // 단일종목 엔진(terminal/lib/backtest)과 별도 객체 — candles-aligned 회계를 버리고 holdings 회계.
 // 공유 = 순수 equity 헬퍼 6종(mdd·riskRatios·benchmarkStats·endRet·cagr·mddWindowOf)뿐.
 
-export type RankSignalKey = 'mom12_1' | 'lowVol' | 'high52w' | 'liquidity' | 'reversal1m';
+export type RankSignalKey = 'mom12_1' | 'lowVol' | 'high52w' | 'liquidity';
 export type DelistReason = 'none' | 'merger' | 'unknown' | 'codeChange';
 
 /** gov/prices/universe-monthly.parquet 한 행(월말 1행/종목/월). 실측 스키마(buildUniversePanel.py). */
@@ -74,6 +74,6 @@ export const RANK_SIGNAL_LABEL: Record<RankSignalKey, { kr: string; en: string; 
 	mom12_1: { kr: '모멘텀 12-1', en: 'Momentum 12-1', lowerBetter: false },
 	lowVol: { kr: '저변동성', en: 'Low volatility', lowerBetter: true },
 	high52w: { kr: '52주 신고가 근접', en: '52w high proximity', lowerBetter: false },
-	liquidity: { kr: '유동성(거래대금)', en: 'Liquidity', lowerBetter: false },
-	reversal1m: { kr: '단기반전(1개월)', en: '1m reversal', lowerBetter: true }
+	liquidity: { kr: '유동성(거래대금)', en: 'Liquidity', lowerBetter: false }
+	// reversal1m 제거 — high52wProx 의 역을 '1개월 반전'으로 오라벨(진짜 trailing-1m 수익 시계열 부재). 데이터 생기면 재도입.
 };

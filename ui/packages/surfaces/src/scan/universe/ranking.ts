@@ -20,11 +20,6 @@ export function rankValue(row: UniverseRow, signal: RankSignalKey): number | nul
 		case 'liquidity':
 			v = row.turnover > 0 ? row.turnover : null;
 			break;
-		case 'reversal1m':
-			// 단기반전 = 직전 1개월 수익의 역. retFwd 는 미래라 못 씀 → momMonthly 부재 시 null.
-			// 1개월 모멘텀 대용: high52wProx 의 역(근접도 낮을수록 반등 여지) 가까운 근사. 정직: 약신호.
-			v = row.high52wProx;
-			break;
 		default:
 			v = null;
 	}

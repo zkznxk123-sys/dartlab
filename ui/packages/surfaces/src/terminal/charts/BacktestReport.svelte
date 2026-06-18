@@ -102,6 +102,14 @@
 		return { tier: T('서술적 · 단일구간', 'descriptive · single window'), tone: 'evMid' };
 	});
 
+	// 약한 증거(일화·1경로) = 헤드라인 수익률을 중립색으로 — 큰 초록이 "진짜 우위"로 오독되지 않게(NEVER-CLAIM).
+	const weakTier = $derived(evidence.tone === 'evDn');
+	const clsT = (v: number) => (weakTier ? 'tNeu' : cls(v));
+	// Calmar = CAGR / |MDD| — 이미 계산된 m 값 재사용(엔진 단일슬롯 metrics 엔 없어 여기서 도출).
+	const calmar = $derived(m.cagrPct != null && m.mddPct < 0 ? m.cagrPct / Math.abs(m.mddPct) : null);
+	// 청산(실현) 거래만 — 승률 분수 표기를 엔진 winRatePct(청산 기준)와 일치.
+	const closedTrades = $derived(result.trades.filter((t) => !t.open));
+
 	// 거래순서 몬테카를로(경로운) — 실현 거래만 재배열. 표본<15면 null(거짓 좁은 밴드 차단).
 	const mcCone = $derived.by(() => tradeShuffleCone(result.trades.map((t) => t.retPct)));
 
@@ -129,7 +137,7 @@
 		<span class="brTitle">{T('백테스트 보고서', 'BACKTEST REPORT')}</span>
 		<span class="brScope">{scopeLabel}</span>
 		<span class="brHeadline mono">
-			<b class={cls(m.retPct)}>{slots.find((s) => s.id === focusId)?.label ?? ''} {sgn(m.retPct)}%</b>
+			<b class={clsT(m.retPct)}>{slots.find((s) => s.id === focusId)?.label ?? ''} {sgn(m.retPct)}%</b>
 			<i>vs</i><b class={cls(result.bh.retPct)}>{T('보유', 'B&H')} {sgn(result.bh.retPct)}%</b>
 			<em class={'brExcess ' + cls(m.retPct - result.bh.retPct)}>{sgn(m.retPct - result.bh.retPct)}%p</em>
 		</span>
@@ -166,14 +174,14 @@
 
 	<!-- 히어로 5 카드 -->
 	<div class="brHero">
-		<div class="brCard"><span>{T('전략 순수익', 'net return')}</span><b class={'mono ' + cls(m.retPct)}>{sgn(m.retPct)}%</b></div>
+		<div class="brCard"><span>{T('전략 순수익', 'net return')}</span><b class={'mono ' + clsT(m.retPct)}>{sgn(m.retPct)}%</b>{#if weakTier}<em>{T('일화 — 색 보류', 'anecdote — muted')}</em>{/if}</div>
 		<div class="brCard"><span>CAGR</span><b class={'mono ' + (m.cagrPct != null ? cls(m.cagrPct) : 'tNeu')}>{m.cagrPct != null ? sgn(m.cagrPct) + '%' : '—'}</b></div>
 		<div class="brCard"><span>{T('최대 낙폭', 'max DD')}</span><b class="mono tDn">{m.mddPct.toFixed(1)}%</b></div>
 		<div class="brCard"><span>Sharpe</span><b class="mono">{m.sharpe != null ? m.sharpe.toFixed(2) : '—'}</b></div>
 		{#if scope === 'market'}
 			<div class="brCard"><span>{T('노출', 'exposure')}</span><b class="mono">{m.exposurePct.toFixed(0)}%</b></div>
 		{:else}
-			<div class="brCard"><span>{T('승률', 'win rate')}</span><b class="mono">{m.winRatePct != null ? m.winRatePct.toFixed(0) + '%' : '—'}</b><em>{result.trades.filter((t) => t.retPct > 0).length}/{m.tradeCount}</em></div>
+			<div class="brCard"><span>{T('승률', 'win rate')}</span><b class="mono">{m.winRatePct != null ? m.winRatePct.toFixed(0) + '%' : '—'}</b><em>{closedTrades.filter((t) => t.retPct > 0).length}/{closedTrades.length} {T('청산', 'closed')}</em></div>
 		{/if}
 	</div>
 
@@ -238,6 +246,8 @@
 			<div class="brRow"><span>{T('회복', 'recovered')}</span><b class={'mono ' + (recovered ? 'tUp' : 'tDn')}>{recovered ? T('회복함', 'yes') : T('미회복', 'no')}</b></div>
 			<div class="brRow"><span>{T('베타', 'beta')}</span><b class="mono">{m.beta != null ? m.beta.toFixed(2) : '—'}</b></div>
 			<div class="brRow"><span>{T('알파(연)', 'alpha p.a.')}</span><b class={'mono ' + (m.alphaPct != null ? cls(m.alphaPct) : 'tNeu')}>{m.alphaPct != null ? sgn(m.alphaPct) + '%' : '—'}</b></div>
+			<div class="brRow"><span>Calmar</span><b class="mono">{calmar != null ? calmar.toFixed(2) : '—'}</b></div>
+			<div class="brRow"><span>{T('정보비율', 'info ratio')}</span><b class="mono">{m.infoRatio != null ? m.infoRatio.toFixed(2) : '—'}</b></div>
 		</div>
 	</section>
 
