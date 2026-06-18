@@ -91,6 +91,27 @@ def build_table(rows: list[tuple[str, list[str]]], years: list[str], title: str)
     return "\n".join(lines)
 
 
+def recent_periods(columns: list[str], limit: int = 5) -> list[str]:
+    """Return newest fiscal labels, not raw dataframe column order."""
+    period_cols: list[str] = []
+    for col in columns:
+        label = str(col)
+        if label in ("항목", "snakeId"):
+            continue
+        if re.fullmatch(r"\d{4}(Q[1-4])?", label):
+            period_cols.append(label)
+
+    def sort_key(label: str) -> tuple[int, int]:
+        match = re.fullmatch(r"(\d{4})(?:Q([1-4]))?", label)
+        if not match:
+            return (0, 0)
+        year = int(match.group(1))
+        quarter = int(match.group(2) or 5)
+        return (year, quarter)
+
+    return sorted(period_cols, key=sort_key, reverse=True)[:limit]
+
+
 def extract_data(stockCode: str) -> dict | None:
     """dartlab으로 데이터 추출. Company 1개만 로드 후 해제.
 
@@ -112,7 +133,7 @@ def extract_data(stockCode: str) -> dict | None:
     # --- IS ---
     try:
         df = c.select("IS", IS_ITEMS, **freq_kw)
-        years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        years = recent_periods(df.columns)
         rows = []
         for item in IS_ITEMS:
             filtered = df.filter(df["항목"] == item)
@@ -132,7 +153,7 @@ def extract_data(stockCode: str) -> dict | None:
     # --- BS ---
     try:
         df = c.select("BS", BS_ITEMS, **freq_kw)
-        years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        years = recent_periods(df.columns)
         rows = []
         for item in BS_ITEMS:
             filtered = df.filter(df["항목"] == item)
@@ -152,7 +173,7 @@ def extract_data(stockCode: str) -> dict | None:
     # --- CF ---
     try:
         df = c.select("CF", CF_ITEMS, **freq_kw)
-        years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        years = recent_periods(df.columns)
         rows = []
         for item in CF_ITEMS:
             filtered = df.filter(df["항목"] == item)
@@ -173,7 +194,7 @@ def extract_data(stockCode: str) -> dict | None:
     try:
         df = c.show("SCE", **freq_kw) if not is_edgar else None
         if df is not None and len(df) > 0:
-            years = [col for col in df.columns if re.match(r"^\d{4}", col)][:5]
+            years = recent_periods(df.columns)
             item_col = "항목" if "항목" in df.columns else df.columns[0]
             rows = []
             for row in df.iter_rows(named=True):
@@ -319,7 +340,7 @@ def build_auto_section(data: dict) -> str:
 
     # --- Filings ---
     if data.get("filings"):
-        parts.append("## 공시 자료\n")
+        parts.append("## 공시 / Filings\n")
         parts.append("| 기간 | 보고서 | 링크 |")
         parts.append("|------|--------|------|")
         for f in data["filings"]:
