@@ -136,6 +136,37 @@ def test_event_title_rerank_prefers_requested_report_label() -> None:
     assert ranked[0]["report_nm"] == "사업보고서"
 
 
+def test_event_title_rerank_promotes_explicit_prospectus_title() -> None:
+    from dartlab.providers.dart.search.unified import _rerankEventTitleHits
+
+    ranked = _rerankEventTitleHits(
+        "공시 원문 투자설명서 6.0 주식회사 케이티스카이라이프 투 자 설 명",
+        [
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:20250721000015#section=0",
+                "report_nm": "주요사항보고서(자기주식처분결정)",
+                "section_title": "6.0 처분예정금액",
+                "text": "주식회사 케이티스카이라이프 자기주식 처분",
+                "rcept_dt": "20250721",
+                "score": 120.0,
+            },
+            {
+                "source": "allFilings",
+                "sourceRef": "dart:allFilings:20260617000006#section=0",
+                "report_nm": "투자설명서",
+                "section_title": "투 자 설 명 서",
+                "text": "6.0 주식회사 케이티스카이라이프",
+                "rcept_dt": "20260617",
+                "score": 20.0,
+            },
+        ],
+        None,
+    )
+
+    assert ranked[0]["sourceRef"] == "dart:allFilings:20260617000006#section=0"
+
+
 def test_report_label_candidate_lane_uses_body_when_title_metadata_missing() -> None:
     import polars as pl
 
@@ -166,6 +197,41 @@ def test_report_label_candidate_lane_uses_body_when_title_metadata_missing() -> 
 
     assert scores[0] == 0
     assert scores[1] > 0
+
+
+def test_report_label_candidate_lane_uses_literal_company_overlap() -> None:
+    import polars as pl
+
+    from dartlab.providers.dart.search.unified import _reportLabels, _scoreReportLabelEvidence
+
+    meta = pl.DataFrame(
+        [
+            {
+                "source": "allFilings",
+                "rcept_dt": "20260617",
+                "report_nm": "투자설명서",
+                "section_title": "투자설명서",
+                "text": "투자설명서 주식회사 다른회사",
+                "evidenceText": "투자설명서 주식회사 다른회사",
+            },
+            {
+                "source": "allFilings",
+                "rcept_dt": "20260617",
+                "report_nm": "투자설명서",
+                "section_title": "투자설명서",
+                "text": "투자설명서 6.0 주식회사 케이티스카이라이프 투 자 설 명 서",
+                "evidenceText": "투자설명서 6.0 주식회사 케이티스카이라이프 투 자 설 명 서",
+            },
+        ]
+    )
+
+    scores = _scoreReportLabelEvidence(
+        meta,
+        _reportLabels("공시 원문 투자설명서 6.0 주식회사 케이티스카이라이프 투 자 설 명"),
+        "공시 원문 투자설명서 6.0 주식회사 케이티스카이라이프 투 자 설 명",
+    )
+
+    assert scores[1] > scores[0]
 
 
 def test_event_title_weights_boost_supply_contract_for_order_query() -> None:

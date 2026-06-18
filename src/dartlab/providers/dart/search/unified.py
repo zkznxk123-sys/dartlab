@@ -121,6 +121,9 @@ _REPORT_TERMS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("반기보고서", ("반기보고서", "semiannual report")),
     ("분기보고서", ("분기보고서", "quarterly report", "10-q", "10q")),
     ("감사보고서", ("감사보고서", "audit report")),
+    ("투자설명서", ("투자설명서", "prospectus", "investment prospectus")),
+    ("증권신고서", ("증권신고서", "registration statement", "securities registration statement")),
+    ("일괄신고서", ("일괄신고서", "shelf registration")),
 )
 _NON_BODY_REPORT_TITLES: tuple[str, ...] = (
     "일괄신고서",
@@ -241,18 +244,21 @@ def searchUnified(
             fused = _rrfFuse(plain, boosted)
         else:
             fused = plain
-        candidateScores = [(int(i), float(fused[i])) for i in np.argsort(-fused)[:candidateLimit] if fused[i] > 0]
+        candidateScores: dict[int, float] = {
+            int(i): float(fused[i]) for i in np.argsort(-fused)[:candidateLimit] if fused[i] > 0
+        }
         if reportLabels:
             reportScores = _scoreReportLabelEvidence(meta, reportLabels, query)
             if mask is not None:
                 reportScores = np.where(mask, reportScores, 0.0)
-            candidateScores.extend(
-                (int(i), float(reportScores[i]))
-                for i in np.argsort(-reportScores)[:candidateLimit]
-                if reportScores[i] > 0
-            )
+            for i in np.argsort(-reportScores)[:candidateLimit]:
+                score = float(reportScores[i])
+                if score <= 0:
+                    continue
+                index = int(i)
+                candidateScores[index] = max(candidateScores.get(index, 0.0), score)
         seenSegmentKeys: set[tuple[str, str, str]] = set()
-        for i, score in candidateScores:
+        for i, score in sorted(candidateScores.items(), key=lambda item: item[1], reverse=True):
             row = meta.row(int(i), named=True)
             rowKey = _rowKey(row)
             if rowKey in seenSegmentKeys:
@@ -489,13 +495,15 @@ def _scoreReportLabelEvidence(meta: pl.DataFrame, reportLabels: tuple[str, ...],
     maxDate = max(dateValues or [0])
     minDate = min([value for value in dateValues if value] or [maxDate])
     dateSpan = max(1, maxDate - minDate)
-    for row in eligible.select("_i", "_source", "_date").iter_rows(named=True):
+    for row in eligible.select("_i", "_source", "_date", "_title", "_evidence").iter_rows(named=True):
         index = int(row["_i"])
         source = str(row.get("_source") or "")
         sourceScore = 1.0 if source in {"panel", "edgar-panel", "edgarPanel"} else 0.5
         dateValue = _dateOrdinal(row.get("_date"))
         freshness = (dateValue - minDate) / dateSpan if dateValue else 0.0
-        scores[index] = np.float32(80.0 + 3.0 * sourceScore + 2.0 * freshness)
+        surface = f"{row.get('_title') or ''} {row.get('_evidence') or ''}"[:1200]
+        literalScore = _bodyExactTopicScore(query, surface)
+        scores[index] = np.float32(80.0 + 3.0 * sourceScore + 2.0 * freshness + 8.0 * literalScore)
     return scores
 
 

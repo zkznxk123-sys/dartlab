@@ -123,8 +123,10 @@ def main() -> int:
         from dartlab.providers.dart.search.pipeline import _loadCatalog
 
         rows = exportDeltaRowsForContentIndex(_loadCatalog(previousCatalog), _loadCatalog(currentCatalog))
+        _writeDeltaEnv(changedDocs=rows.height)
         if rows.height == 0:
             print("[delta] catalog changed-set 없음 — 업로드 스킵")
+            _stageNoChangeManifest(hfToken)
             return 0
         from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
@@ -187,10 +189,12 @@ def main() -> int:
     print("[delta] Phase 3: content delta 세그먼트 빌드")
     t0 = time.perf_counter()
     nDocs = rebuildContentDelta(daysBack=lookback)
+    _writeDeltaEnv(changedDocs=nDocs)
     print(f"  delta {nDocs:,} 문서, {time.perf_counter() - t0:.0f}초")
 
     if nDocs == 0:
         print("[delta] 빌드된 문서 없음 — 업로드 스킵")
+        _stageNoChangeManifest(hfToken)
         return 0
 
     # Phase 4: HF 업로드
@@ -303,20 +307,56 @@ def _buildRouterArtifact() -> int:
     return len(model["events"])
 
 
+def _stageNoChangeManifest(hfToken: str) -> None:
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, clearCache
+    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+    from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
+
+    outDir = _contentIndexDir()
+    writeIndexManifest(outDir, tier="full", buildCommand="buildSearchDelta.noChangeManifest")
+    clearCache()
+    if not hfToken:
+        print("[delta] HF_TOKEN 없음 — no-change manifest 로컬 재작성만 수행")
+        return
+    summary = publishContentIndexFiles(
+        token=hfToken,
+        indexDir=outDir,
+        files=["manifest.json"],
+        tier="full",
+        previousManifestPath=outDir / "previous_manifest.json",
+        promoteCurrent=_promoteCurrent(),
+    )
+    _writeCandidateEnv(summary)
+    print(
+        f"  [no-change-manifest] {summary.get('candidateManifestPath', '')} "
+        f"-> {summary['currentPrefix']} {summary['publishMode']}"
+    )
+
+
 def _promoteCurrent() -> bool:
     raw = os.environ.get("DARTLAB_SEARCH_PROMOTE_CURRENT", "1")
     return raw.strip().lower() not in {"0", "false", "no", "n"}
 
 
 def _writeCandidateEnv(summary: dict) -> None:
-    envFile = os.environ.get("GITHUB_ENV", "").strip()
     candidate = str(summary.get("candidateManifestPath") or "").strip()
     tier = str(summary.get("tier") or "full").strip().upper()
-    if not envFile or not candidate:
+    if not candidate:
         return
-    key = f"DARTLAB_SEARCH_{tier}_CANDIDATE_MANIFEST"
+    _writeGithubEnv(f"DARTLAB_SEARCH_{tier}_CANDIDATE_MANIFEST", candidate)
+
+
+def _writeDeltaEnv(*, changedDocs: int) -> None:
+    _writeGithubEnv("DARTLAB_SEARCH_DELTA_CHANGED_DOCS", str(max(0, int(changedDocs))))
+    _writeGithubEnv("DARTLAB_SEARCH_DELTA_NO_CHANGE", "1" if int(changedDocs) <= 0 else "0")
+
+
+def _writeGithubEnv(key: str, value: str) -> None:
+    envFile = os.environ.get("GITHUB_ENV", "").strip()
+    if not envFile:
+        return
     with Path(envFile).open("a", encoding="utf-8") as f:
-        f.write(f"{key}={candidate}\n")
+        f.write(f"{key}={value}\n")
 
 
 if __name__ == "__main__":

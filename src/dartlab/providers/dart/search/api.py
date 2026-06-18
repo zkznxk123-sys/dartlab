@@ -2,11 +2,6 @@
 
 `dartlab.providers.dart.search` 패키지의 search/buildIndex/profile/pulse 등
 모든 함수 정의 위치. `__init__.py` 는 thin re-export 만 (룰 4).
-
-scope 분리 검색:
-- title: report_nm + panel section_title ngram (제목형 쿼리)
-- content: panel/allFilings word BM25 (본문형 쿼리)
-- auto (기본): 자동 판별
 """
 
 from __future__ import annotations
@@ -278,6 +273,9 @@ _TITLE_LANE_TERMS: tuple[str, ...] = (
     "배임",
     "영업정지",
     "배당",
+    "투자설명서",
+    "증권신고서",
+    "일괄신고서",
 )
 _CONTENT_LANE_TERMS: tuple[str, ...] = (
     "본문",
@@ -315,19 +313,39 @@ def _prefersTitleLane(query: str) -> bool:
 
 def _mergeAutoTitleContent(titleHits: pl.DataFrame, contentHits: pl.DataFrame, *, limit: int) -> pl.DataFrame:
     """Title-first merge for disclosure event/title queries."""
-    frames: list[pl.DataFrame] = []
-    if titleHits is not None and titleHits.height > 0 and "info" not in titleHits.columns:
-        frames.append(titleHits.with_columns(pl.lit("title").alias("scope")))
-    if contentHits is not None and contentHits.height > 0 and "info" not in contentHits.columns:
-        frames.append(contentHits.with_columns(pl.lit("content").alias("scope")))
-    if not frames:
+    titleFrame = (
+        titleHits.with_columns(pl.lit("title").alias("scope"))
+        if titleHits is not None and titleHits.height > 0 and "info" not in titleHits.columns
+        else None
+    )
+    contentFrame = (
+        contentHits.with_columns(pl.lit("content").alias("scope"))
+        if contentHits is not None and contentHits.height > 0 and "info" not in contentHits.columns
+        else None
+    )
+    if titleFrame is None and contentFrame is None:
         if contentHits is not None and contentHits.height > 0:
             return contentHits
         return titleHits
-    merged = pl.concat(frames, how="diagonal_relaxed")
     rows: list[dict] = []
     seen: set[tuple[str, str, str]] = set()
-    for row in merged.iter_rows(named=True):
+    titleQuota = max(1, min(limit, limit // 2)) if contentFrame is not None else limit
+    _appendUniqueRows(rows, seen, titleFrame, limit=titleQuota)
+    _appendUniqueRows(rows, seen, contentFrame, limit=limit)
+    _appendUniqueRows(rows, seen, titleFrame, limit=limit)
+    return pl.DataFrame(rows) if rows else pl.DataFrame()
+
+
+def _appendUniqueRows(
+    rows: list[dict],
+    seen: set[tuple[str, str, str]],
+    frame: pl.DataFrame | None,
+    *,
+    limit: int,
+) -> None:
+    if frame is None:
+        return
+    for row in frame.iter_rows(named=True):
         key = (
             str(row.get("sourceRef") or ""),
             str(row.get("rcept_no") or ""),
@@ -339,7 +357,6 @@ def _mergeAutoTitleContent(titleHits: pl.DataFrame, contentHits: pl.DataFrame, *
         rows.append(row)
         if len(rows) >= limit:
             break
-    return pl.DataFrame(rows) if rows else pl.DataFrame()
 
 
 def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:

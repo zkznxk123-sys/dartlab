@@ -169,6 +169,17 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
+      - name: Verify HF contentIndex current round-trip (lite, no-change)
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE == '1' }}
+        shell: bash
+        run: >
+          uv run python -X utf8 .github/scripts/search/verifySearchHfRoundTrip.py
+          --tier lite
+          --out "$RUNNER_TEMP/searchHfRoundTrip.delta.lite.json"
+          --fail-on-error
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
       - name: Audit search result contract
         run: >
           uv run python -X utf8 .github/scripts/search/evaluateSearchResultContract.py
@@ -221,6 +232,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build content lite + stage candidate
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE != '1' }}
         run: uv run python .github/scripts/search/buildSearchMain.py
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -230,6 +242,7 @@ jobs:
           DARTLAB_SEARCH_PROMOTE_CURRENT: "0"
 
       - name: Verify HF contentIndex candidate round-trip (lite)
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE != '1' }}
         shell: bash
         run: |
           if [ -z "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
@@ -245,6 +258,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Promote verified contentIndex candidate (lite)
+        if: ${{ env.DARTLAB_SEARCH_DELTA_NO_CHANGE != '1' }}
         shell: bash
         run: |
           if [ -z "${DARTLAB_SEARCH_LITE_CANDIDATE_MANIFEST:-}" ]; then
@@ -260,6 +274,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Audit remote search evidence
+        if: ${{ always() }}
         run: >
           uv run python -X utf8 .github/scripts/search/checkSearchRemoteEvidence.py
           --expected-sources "${{ github.event.inputs.expected_sources || 'allFilings,dartPanel,edgarPanel,newsPublic' }}"

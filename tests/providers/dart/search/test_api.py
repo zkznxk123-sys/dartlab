@@ -185,6 +185,42 @@ def test_auto_search_prefers_title_lane_for_disclosure_event(monkeypatch) -> Non
     assert result["scope"].to_list() == ["title", "content"]
 
 
+def test_auto_search_does_not_let_title_lane_starve_content(monkeypatch) -> None:
+    import polars as pl
+
+    import dartlab.providers.dart.search.unified as unified
+    from dartlab.providers.dart.search import api
+
+    def fakeTitle(query, *, corpCode, stockCode, limit):
+        return pl.DataFrame(
+            {
+                "rcept_no": [f"title-{index}" for index in range(limit)],
+                "section_order": [0] * limit,
+                "sourceRef": [f"dart:allFilings:title-{index}#section=0" for index in range(limit)],
+                "report_nm": ["투자설명서"] * limit,
+                "score": [1.0] * limit,
+            }
+        )
+
+    def fakeContent(query, *, corpCode, stockCode, sourceKind=None, limit):
+        return pl.DataFrame(
+            {
+                "rcept_no": ["exact-content"],
+                "section_order": [0],
+                "sourceRef": ["dart:allFilings:20260617000006#section=0"],
+                "report_nm": ["투자설명서"],
+                "score": [200.0],
+            }
+        )
+
+    monkeypatch.setattr(api, "_searchTitle", fakeTitle)
+    monkeypatch.setattr(unified, "searchUnified", fakeContent)
+
+    result = api._searchAuto("공시 원문 투자설명서", corpCode=None, stockCode=None, sourceKind="filing", limit=10)
+
+    assert "exact-content" in result["rcept_no"].to_list()
+
+
 def test_auto_search_keeps_content_lane_for_body_semantic_query(monkeypatch) -> None:
     import polars as pl
 

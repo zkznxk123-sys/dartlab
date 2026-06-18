@@ -256,6 +256,72 @@ def test_search_delta_script_catalog_build_subprocess(tmp_path) -> None:
     assert (outDir / "manifest.json").exists()
 
 
+def test_search_delta_script_no_change_restages_manifest_env(tmp_path) -> None:
+    import polars as pl
+
+    catalog = tmp_path / "catalog.parquet"
+    manifest = tmp_path / "source.json"
+    dataDir = tmp_path / "data"
+    envFile = tmp_path / "github.env"
+    row = {"source": "allFilings", "rcept_no": "A", "text": "투자설명서 케이티스카이라이프"}
+    pl.DataFrame([row]).write_parquet(catalog)
+    manifest.write_text(
+        json.dumps(
+            {
+                "source": "allFilings",
+                "sourceVersion": "v1",
+                "schemaVersion": "2026-06",
+                "snapshotScope": "full",
+                "dataAsOf": "20260617",
+                "builtAt": "2026-06-17T00:00:00",
+                "files": [{"path": "x.parquet", "rowCount": 1}],
+                "totalRows": 1,
+                "changedRows": 0,
+                "deletedRows": 0,
+                "producer": "test",
+            }
+        ),
+        encoding="utf-8",
+    )
+    env = {
+        **os.environ,
+        "HF_TOKEN": "",
+        "GITHUB_ENV": str(envFile),
+        "DARTLAB_DATA_DIR": str(dataDir),
+        "DARTLAB_SEARCH_DELTA_MODE": "catalog",
+        "DARTLAB_SEARCH_PREVIOUS_CATALOG": str(catalog),
+        "DARTLAB_SEARCH_CURRENT_CATALOG": str(catalog),
+        "DARTLAB_SEARCH_SOURCE_MANIFESTS": str(manifest),
+        "DARTLAB_SEARCH_EXPECTED_SOURCES": "allFilings",
+    }
+    subprocess.run(
+        [sys.executable, "-X", "utf8", ".github/scripts/search/buildSearchMain.py"],
+        cwd=Path.cwd(),
+        env={**env, "DARTLAB_SEARCH_MAIN_MODE": "catalog", "DARTLAB_SEARCH_MIN_DOCS": "1"},
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+        check=True,
+    )
+    proc = subprocess.run(
+        [sys.executable, "-X", "utf8", ".github/scripts/search/buildSearchDelta.py"],
+        cwd=Path.cwd(),
+        env=env,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        timeout=30,
+    )
+
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+    assert "DARTLAB_SEARCH_DELTA_NO_CHANGE=1" in envFile.read_text(encoding="utf-8")
+    manifestData = json.loads((dataDir / "dart/contentIndex/manifest.json").read_text(encoding="utf-8"))
+    assert manifestData["buildCommand"] == "buildSearchDelta.noChangeManifest"
+
+
 def test_search_main_script_catalog_build_subprocess(tmp_path) -> None:
     import polars as pl
 

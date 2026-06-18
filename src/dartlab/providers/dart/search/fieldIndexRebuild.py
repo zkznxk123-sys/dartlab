@@ -907,7 +907,7 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
     deltaDataAsOf = ""
     mainDocs = 0
     deltaDocs = 0
-    mainMeta: pl.DataFrame | None = None
+    canaryMetaParts: list[pl.DataFrame] = []
 
     for segment in ("main", "delta"):
         files = [f"{segment}.npz", f"{segment}_stems.json", f"{segment}_meta.parquet", f"{segment}_info.json"]
@@ -915,11 +915,11 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
             continue
         requiredFiles.extend(files)
         meta = pl.read_parquet(base / f"{segment}_meta.parquet")
+        canaryMetaParts.append(meta)
         info = json.loads((base / f"{segment}_info.json").read_text(encoding="utf-8"))
         nDocs = int(info.get("nDocs", meta.height) or 0)
         if segment == "main":
             mainDocs = nDocs
-            mainMeta = meta
         else:
             deltaDocs = nDocs
         segmentDataAsOf = _segmentDataAsOf(meta)
@@ -943,10 +943,11 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
     if entityGraphCatalog:
         requiredFiles.append(ENTITY_GRAPH_CATALOG_NAME)
     sourceCanaryPack = []
-    if mainMeta is not None and mainMeta.height:
+    if canaryMetaParts:
         from dartlab.providers.dart.search.artifactCanary import CANARY_PACK_VERSION, buildSourceCanaryPackFromMeta
 
-        sourceCanaryPack = buildSourceCanaryPackFromMeta(mainMeta)
+        canaryMeta = pl.concat(canaryMetaParts, how="diagonal_relaxed")
+        sourceCanaryPack = buildSourceCanaryPackFromMeta(canaryMeta)
         canaryPackVersion = CANARY_PACK_VERSION
     else:
         canaryPackVersion = ""
