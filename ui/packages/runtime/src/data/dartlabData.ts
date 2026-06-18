@@ -53,8 +53,12 @@ function shouldCacheJson(path: string): boolean {
 		path !== 'map/prices-snapshot.json' &&
 		// macro 도 캐시 제외 — HF-first 신선본이 6h 캐시에 가려지는 지연 차단 (소형 파일이라 비용 0)
 		path !== 'dashboards/macro.json' &&
+		// industryStats 도 제외 — 분포 지표가 점증(revCagr 등 신규 metric 추가)되므로 6h 캐시가 옛 스키마를
+		// 붙들면 신규 지표 의존 뷰(산업 지형도 y=매출 CAGR)가 통째 빈다. 소형(~250KB)이라 비용 0.
+		path !== 'map/industryStats.json' &&
 		path !== 'landing/map/ecosystem.json' &&
 		path !== 'landing/map/prices-snapshot.json' &&
+		path !== 'landing/map/industryStats.json' &&
 		path !== 'landing/dashboards/macro.json'
 	);
 }

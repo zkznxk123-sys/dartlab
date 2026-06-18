@@ -127,7 +127,7 @@
 		{/if}
 	</div>
 {:else}
-	<div class="smEmpty">{compact ? '' : '표본 부족 — 점 2개 미만'}</div>
+	<div class="smEmpty">{compact ? '데이터 없음' : '표본 부족 — 점 2개 미만'}</div>
 {/if}
 
 <style>
