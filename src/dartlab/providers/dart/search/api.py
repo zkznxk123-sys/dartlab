@@ -491,23 +491,24 @@ def rebuildContent(**kwargs) -> int:
 
 
 def rebuildContentDelta(**kwargs) -> int:
-    """content (BM25) 인덱스의 delta 세그먼트 일간 증분 빌드.
+    """[폐기] delta 세그먼트는 제거됨(compact-only) — 신규 공시는 catalog compaction 으로 main 에 반영.
 
     Args:
-        **kwargs: fieldIndex.rebuildDelta 로 forward.
+        **kwargs: 미사용(하위호환 시그니처).
 
     Returns:
-        int — 추가 인덱싱 row 수.
+        int — 반환 없음(항상 raise).
 
     Example:
-        >>> # rebuildContentDelta()
+        >>> # rebuildContentDelta()  # NotImplementedError
 
     Raises:
-        없음.
+        NotImplementedError: delta 세그먼트 폐기(PRD 기둥1·D). ``rebuildContent()``(=catalog 전체 리빌드) 사용.
     """
-    from dartlab.providers.dart.search.fieldIndex import rebuildDelta
-
-    return rebuildDelta(**kwargs)
+    raise NotImplementedError(
+        "delta 세그먼트는 폐기되었습니다(compact-only). 신규 공시는 매일 catalog compaction 으로 "
+        "main 에 반영됩니다 — rebuildContent()/rebuildMainFromCatalog 를 사용하세요."
+    )
 
 
 def prefetch(tier: str | None = None) -> dict:

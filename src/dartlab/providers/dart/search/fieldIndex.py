@@ -754,7 +754,7 @@ _segments: dict[str, tuple[dict, pl.DataFrame]] | None = None
 
 
 def _getSegments() -> dict[str, tuple[dict, pl.DataFrame]]:
-    """main + delta 세그먼트 로드 (캐시)."""
+    """main 세그먼트 로드 (캐시). compact-only — delta 세그먼트 폐기(PRD 기둥1·D)."""
     global _segments
     if _segments is not None:
         return _segments
@@ -773,10 +773,9 @@ def _getSegments() -> dict[str, tuple[dict, pl.DataFrame]]:
         )
     inDir = _activeIndexDir()  # flat(legacy/full) 우선, 없으면 tier(기본 lite)
     out = {}
-    for name in ("main", "delta"):
-        seg = loadSegment(name, inDir)
-        if seg is not None:
-            out[name] = seg
+    seg = loadSegment("main", inDir)
+    if seg is not None:
+        out["main"] = seg
     _segments = out
     return out
 
@@ -884,7 +883,7 @@ def searchContent(
     sourceKind: str | None = None,
     limit: int = 10,
 ) -> pl.DataFrame:
-    """content 전용 BM25 검색. main + delta 병합.
+    """content 전용 BM25 검색. 단일 main 세그먼트(compact-only).
 
     Parameters
     ----------
@@ -912,7 +911,7 @@ def searchContent(
         return pl.DataFrame()
 
     segments = _getSegments()
-    if not segments:
+    if "main" not in segments:
         return pl.DataFrame(
             {
                 "info": [
@@ -921,39 +920,18 @@ def searchContent(
             }
         )
 
+    # 단일 main 세그먼트(compact-only) — delta 병합·dedup 폐기(PRD 기둥1·D). 신규는 매일 catalog compaction 으로 반영.
+    mIdx, mMeta = segments["main"]
+    mScores = _scoreBM25(mIdx, tokens)
+    mMask = _scopeMask(mMeta, corpCode, stockCode, sourceKind)
+    if mMask is not None:
+        mScores = np.where(mMask, mScores, 0.0)
     allHits: list[dict] = []
-    deltaRcepts: set[tuple[str, int]] = set()
-
-    # delta 먼저 — 중복 감지용 rcept_no 수집
-    if "delta" in segments:
-        dIdx, dMeta = segments["delta"]
-        dScores = _scoreBM25(dIdx, tokens)
-        dMask = _scopeMask(dMeta, corpCode, stockCode, sourceKind)
-        if dMask is not None:
-            dScores = np.where(dMask, dScores, 0.0)
-        top = np.argsort(-dScores)[: limit * 3]
-        for i in top:
-            if dScores[i] <= 0:
-                break
-            row = dMeta.row(int(i), named=True)
-            deltaRcepts.add((row["rcept_no"], row["section_order"]))
-            allHits.append({**row, "score": float(dScores[i]), "segment": "delta"})
-
-    if "main" in segments:
-        mIdx, mMeta = segments["main"]
-        mScores = _scoreBM25(mIdx, tokens)
-        mMask = _scopeMask(mMeta, corpCode, stockCode, sourceKind)
-        if mMask is not None:
-            mScores = np.where(mMask, mScores, 0.0)
-        top = np.argsort(-mScores)[: limit * 3]
-        for i in top:
-            if mScores[i] <= 0:
-                break
-            row = mMeta.row(int(i), named=True)
-            key = (row["rcept_no"], row["section_order"])
-            if key in deltaRcepts:
-                continue
-            allHits.append({**row, "score": float(mScores[i]), "segment": "main"})
+    for i in np.argsort(-mScores)[:limit]:
+        if mScores[i] <= 0:
+            break
+        row = mMeta.row(int(i), named=True)
+        allHits.append({**row, "score": float(mScores[i]), "segment": "main"})
 
     if not allHits:
         return pl.DataFrame()
@@ -967,13 +945,12 @@ def searchContent(
 # ── 풀리빌드 + 증분 ──
 
 
-# ── rebuildMain / rebuildDelta / push/pull 등 빌드 helper 는 fieldIndexRebuild.py 로 분리 (룰 3 LoC).
+# ── rebuildMain / push/pull 등 빌드 helper 는 fieldIndexRebuild.py 로 분리 (룰 3 LoC).
 from dartlab.providers.dart.search.fieldIndexRebuild import (  # noqa: E402, F401
-    _clearDelta,
     contentStats,
     iterContent,
     pullContentIndex,
     pushContentIndex,
-    rebuildDelta,
     rebuildMain,
+    saveSegmentWithSidecar,
 )

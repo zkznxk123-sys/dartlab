@@ -61,11 +61,14 @@ def test_push_content_index_callable() -> None:
     assert callable(pushContentIndex)
 
 
-def test_rebuild_delta_callable() -> None:
-    """rebuildDelta() callable smoke."""
-    from dartlab.providers.dart.search.fieldIndex import rebuildDelta
+def test_rebuild_content_delta_retired() -> None:
+    """delta 세그먼트 폐기(compact-only) — rebuildContentDelta 는 NotImplementedError 로 repoint."""
+    import pytest
 
-    assert callable(rebuildDelta)
+    from dartlab.providers.dart.search.api import rebuildContentDelta
+
+    with pytest.raises(NotImplementedError):
+        rebuildContentDelta()
 
 
 def test_rebuild_main_callable() -> None:

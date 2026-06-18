@@ -131,8 +131,9 @@ def test_index_info_schema_version(synthRoot):
     assert (FI._contentIndexDir() / "manifest.json").exists()
 
 
-def test_rebuild_delta_updates_manifest(synthRoot):
-    """delta 빌드 후 manifest 에 delta required files 와 hasDelta 가 기록된다."""
+def test_main_manifest_sidecar_no_delta(synthRoot):
+    """compact-only — main rebuild manifest 의 requiredFiles 에 sidecar(postings.bin) 가 있고,
+    npz·delta 는 부재이며 hasDelta=False (PRD 기둥1·D: delta 세그먼트 폐기·sidecar SSOT)."""
     import json
 
     from dartlab.providers.dart.search import fieldIndex as FI
@@ -140,11 +141,12 @@ def test_rebuild_delta_updates_manifest(synthRoot):
 
     _mkAllFilings(synthRoot)
     FIR.rebuildMain(includePanel=False, tier="full", showProgress=False)
-    FIR.rebuildDelta(sinceDate="20241201", showProgress=False)
     manifest = json.loads((FI._contentIndexDir() / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["hasDelta"] is True
-    assert "delta.npz" in manifest["requiredFiles"]
-    assert manifest["nDocsBySource"]["allFilings"] >= 3
+    req = manifest["requiredFiles"]
+    assert manifest["hasDelta"] is False
+    assert "main.postings.bin" in req  # sidecar = SSOT
+    assert "main.npz" not in req  # npz 비게시(sidecar 우선)
+    assert not any(n.startswith("delta") for n in req)  # delta 세그먼트 폐기
 
 
 def _mkPanel(root):

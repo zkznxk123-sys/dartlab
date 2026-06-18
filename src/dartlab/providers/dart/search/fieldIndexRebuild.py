@@ -116,7 +116,6 @@ def rebuildMain(
         _contentIndexDir,
         _IncrementalBuilder,
         clearCache,
-        saveSegment,
     )
 
     if whitelist is not None and not isinstance(whitelist, set):
@@ -256,10 +255,8 @@ def rebuildMain(
     del metaRecs
     gc.collect()
 
-    saveSegment(idx, meta, "main", saveDir)
-    _buildSearchSidecar(idx, meta, "main", saveDir)
+    saveSegmentWithSidecar(idx, meta, "main", saveDir)
     clearCache()
-    _clearDelta(saveDir)
     writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain")
 
     if showProgress:
@@ -299,7 +296,6 @@ def rebuildMainFromCatalog(
         _contentIndexDir,
         _IncrementalBuilder,
         clearCache,
-        saveSegment,
     )
 
     saveDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
@@ -331,14 +327,11 @@ def rebuildMainFromCatalog(
             }
         )
     if not metaRecs:
-        _clearDelta(saveDir)
         writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain.catalog.empty")
         return 0
     idx = builder.finalize()
     meta = pl.DataFrame(metaRecs)
-    saveSegment(idx, meta, "main", saveDir)
-    _buildSearchSidecar(idx, meta, "main", saveDir)
-    _clearDelta(saveDir)
+    saveSegmentWithSidecar(idx, meta, "main", saveDir)
     writeIndexManifest(saveDir, tier=tier, buildCommand="rebuildMain.catalog")
     clearCache()
     del metaRecs, meta
@@ -652,93 +645,8 @@ def _feedNews(builder, metaRecs, newsLimit, showProgress, *, sinceDate=None) -> 
     return added
 
 
-def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress: bool = True) -> int:
-    """delta 세그먼트 빌드 — 최근 N일 allFilings.
-
-    main 이후 추가된 allFilings만 포함.
-
-    Parameters
-    ----------
-    sinceDate : YYYYMMDD. 이 날짜 이후만. None이면 daysBack 사용.
-    daysBack : sinceDate 미지정 시 N일 전부터.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> rebuildDelta(...)
-
-    Args:
-        sinceDate: 시작일 YYYYMMDD. None 이면 daysBack 사용.
-        daysBack: 과거 N 일 (sinceDate 없을 때).
-        showProgress: True 면 progress 로그.
-
-    Returns:
-        int — 인덱스 빌드 건수.
-    """
-    from datetime import datetime, timedelta
-
-    from dartlab.core.dartClient import allFilingsDir as _allFilingsDir
-    from dartlab.core.dartClient import allFilingsMetaSuffix
-
-    _META_SUFFIX = allFilingsMetaSuffix()
-    from dartlab.providers.dart.search.fieldIndex import (
-        CONTENT_LIMIT,
-        buildContentSegment,
-        clearCache,
-        saveSegment,
-    )
-
-    if sinceDate is None:
-        sinceDate = (datetime.now() - timedelta(days=daysBack)).strftime("%Y%m%d")
-
-    outDir = _allFilingsDir()
-    files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem and f.stem >= sinceDate)
-
-    if showProgress:
-        _log.info(f"[delta] {sinceDate} 이후: {len(files)}개 파일")
-
-    rows: list[dict] = []
-    for f in files:
-        try:
-            df = pl.read_parquet(f).filter(pl.col("fetch_status") == "ok")
-        except (pl.exceptions.PolarsError, OSError):
-            continue
-        for row in df.iter_rows(named=True):
-            raw = row.get("content_raw") or ""
-            # buildContentSegment 는 section_content 컬럼을 본문으로 읽으므로 평문 결과를 동일 키로 채운다.
-            row["section_content"] = _stripTags(raw, limit=CONTENT_LIMIT)
-            row.setdefault("section_order", 0)
-            row.setdefault("section_title", "")
-            row["source"] = "allFilings"
-            rows.append(row)
-
-    if showProgress:
-        _log.info(f"[delta] 총 {len(rows):,} 문서")
-
-    if not rows:
-        _clearDelta()
-        return 0
-
-    idx, meta = buildContentSegment(rows, showProgress=showProgress)
-    saveSegment(idx, meta, "delta")
-    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
-
-    _buildSearchSidecar(idx, meta, "delta", _contentIndexDir())  # 신규 공시 range-fetch — UI main+delta 병합
-    writeIndexManifest(_contentIndexDir(), tier="full", buildCommand="rebuildDelta")
-    clearCache()
-    return idx["nDocs"]
-
-
-def _clearDelta(outDir: Path | None = None) -> None:
-    """delta 세그먼트 파일 제거 (지정 디렉터리, 기본 flat base)."""
-    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
-
-    outDir = outDir or _contentIndexDir()
-    for name in ("delta.npz", "delta_stems.json", "delta_meta.parquet", "delta_info.json"):
-        p = outDir / name
-        if p.exists():
-            p.unlink()
+# delta 세그먼트는 폐기됨(PRD 기둥1·D) — 신규 공시는 매일 catalog compaction(rebuildMainFromCatalog)으로
+# main 에 반영된다. 옛 rebuildDelta/_clearDelta 와 별도 delta 빌드 경로는 제거(compact-only).
 
 
 # ── HF 동기화 ──
@@ -895,14 +803,103 @@ def _searchSidecarNames(segment: str) -> list[str]:
     return [f"{segment}{suf}" for suf in _SEARCH_SIDECAR_SUFFIXES]
 
 
+# 인덱스 동반 공용 산출물(세그먼트 무관) — manifest 는 publish 가 별도로 끝에 붙인다.
+_INDEX_COMMON_FILES: tuple[str, ...] = (
+    "router.json",
+    "catalog_snapshot.parquet",
+    "source_manifest_set.json",
+)
+
+
+def _segmentFiles(base: str | Path, segment: str = "main", *, requireExists: bool = True) -> list[str]:
+    """세그먼트 파일 SSOT — stems/info/parquet + STORED sidecar 6종. **npz 제외**(sidecar=SSOT).
+
+    파일명 열거의 단일 출처. manifest/push/pull 이 전부 이 helper 만 호출(흩어진 리터럴 제거).
+
+    Args:
+        base: 인덱스 디렉터리.
+        segment: 세그먼트 이름("main").
+        requireExists: True 면 로컬 존재분만(빌드/publish), False 면 후보 전체(pull tolerant).
+
+    Returns:
+        list[str] — 파일명 목록.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> _segmentFiles(".", "main", requireExists=False)[:3]
+        ['main_stems.json', 'main_info.json', 'main_meta.parquet']
+    """
+    names = [f"{segment}_stems.json", f"{segment}_info.json", f"{segment}_meta.parquet", *_searchSidecarNames(segment)]
+    if not requireExists:
+        return names
+    base = Path(base)
+    return [n for n in names if (base / n).exists()]
+
+
+def indexPublishNames(base: str | Path, *, requireExists: bool = True) -> list[str]:
+    """publish/pull 파일 SSOT — main 세그먼트(sidecar) + 공용 산출물 + manifest. compact-only(delta 없음).
+
+    Args:
+        base: 인덱스 디렉터리.
+        requireExists: True 면 로컬 존재분만, False 면 후보 전체(pull tolerant).
+
+    Returns:
+        list[str] — publish 대상 파일명(manifest.json 포함, 순서는 publish 가 정규화).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> "main.postings.bin" in indexPublishNames(".", requireExists=False)
+        True
+    """
+    from dartlab.providers.dart.search.entityGraph import ENTITY_GRAPH_CATALOG_NAME
+
+    base = Path(base)
+    names = _segmentFiles(base, "main", requireExists=requireExists)
+    extras = [*_INDEX_COMMON_FILES, ENTITY_GRAPH_CATALOG_NAME, "manifest.json"]
+    if requireExists:
+        extras = [n for n in extras if (base / n).exists()]
+    return names + extras
+
+
 def _buildSearchSidecar(idx: dict, meta: pl.DataFrame, name: str, saveDir: Path | None = None) -> None:
-    """saveSegment 직후 range-fetch sidecar 동거 생성 — 실패해도 본 인덱스(npz) 빌드는 보존(additive·fail-safe)."""
+    """range-fetch sidecar 동거 생성 — 실패해도 엔진 인덱스 빌드는 보존(additive·fail-safe)."""
     from dartlab.providers.dart.search.fieldIndex import saveShardedSegment
 
     try:
         saveShardedSegment(idx, meta, name, saveDir)
-    except Exception as exc:  # noqa: BLE001 — sidecar 실패가 npz 빌드를 깨면 안 됨(검색 range-fetch만 비활성)
+    except Exception as exc:  # noqa: BLE001 — sidecar 실패가 엔진 빌드를 깨면 안 됨(검색 range-fetch만 비활성)
         _log.warning("[sidecar] %s 빌드 실패(검색 range-fetch 비활성): %s", name, exc)
+
+
+def saveSegmentWithSidecar(idx: dict, meta: pl.DataFrame, name: str = "main", saveDir: Path | None = None) -> None:
+    """세그먼트 저장 **단일 choke point** — 엔진 동반물(stems/info/parquet[+npz, P2 제거]) + STORED sidecar 동거.
+
+    빌드 경로(rebuildMain/rebuildMainFromCatalog)는 이 함수만 호출 — sidecar 생성이 흩어지지 않게 한곳.
+
+    Args:
+        idx: 인덱스 dict.
+        meta: doc 순 meta DataFrame.
+        name: 세그먼트 이름("main").
+        saveDir: 출력 디렉터리.
+
+    Returns:
+        None.
+
+    Raises:
+        없음 (sidecar 실패는 fail-safe).
+
+    Example:
+        >>> callable(saveSegmentWithSidecar)
+        True
+    """
+    from dartlab.providers.dart.search.fieldIndex import saveSegment
+
+    saveSegment(idx, meta, name, saveDir)
+    _buildSearchSidecar(idx, meta, name, saveDir)
 
 
 def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand: str = "") -> dict:
@@ -937,12 +934,11 @@ def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand
     deltaDocs = 0
     canaryMetaParts: list[pl.DataFrame] = []
 
-    for segment in ("main", "delta"):
-        files = [f"{segment}.npz", f"{segment}_stems.json", f"{segment}_meta.parquet", f"{segment}_info.json"]
-        if not all((base / name).exists() for name in files):
+    for segment in ("main",):  # compact-only — delta 세그먼트 폐기(PRD 기둥1·D)
+        # meta.parquet = 세그먼트 앵커(항상 존재·canary 입력). requiredFiles 는 stems/info/parquet + sidecar(존재분, npz 제외=SSOT).
+        if not (base / f"{segment}_meta.parquet").exists():
             continue
-        requiredFiles.extend(files)
-        requiredFiles.extend(n for n in _searchSidecarNames(segment) if (base / n).exists())
+        requiredFiles.extend(_segmentFiles(base, segment))
         meta = pl.read_parquet(base / f"{segment}_meta.parquet")
         canaryMetaParts.append(meta)
         info = json.loads((base / f"{segment}_info.json").read_text(encoding="utf-8"))
@@ -1100,29 +1096,12 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCur
     Example:
         >>> pushContentIndex(tier="lite")  # doctest: +SKIP
     """
-    from dartlab.providers.dart.search.entityGraph import ENTITY_GRAPH_CATALOG_NAME
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
     from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
     outDir = _contentIndexDir() if tier == "full" else _contentIndexDir(tier)
-    names = [
-        "main.npz",
-        "main_stems.json",
-        "main_meta.parquet",
-        "main_info.json",
-        "manifest.json",
-        "delta.npz",
-        "delta_stems.json",
-        "delta_meta.parquet",
-        "delta_info.json",
-        "router.json",
-        "catalog_snapshot.parquet",
-        "source_manifest_set.json",
-        ENTITY_GRAPH_CATALOG_NAME,
-    ]
-    names.extend(
-        n for n in (*_searchSidecarNames("main"), *_searchSidecarNames("delta")) if (outDir / n).exists()
-    )  # range-fetch sidecar(main+delta, 있으면 동반 publish)
+    # publish 파일 SSOT — main 세그먼트(sidecar)+공용+manifest, 존재분. npz·delta 제외(compact-only·sidecar SSOT).
+    names = indexPublishNames(outDir)
     if promoteCurrent is None:
         promoteCurrent = _envFlag("DARTLAB_SEARCH_PROMOTE_CURRENT", default=True)
     return publishContentIndexFiles(
@@ -1170,20 +1149,13 @@ def pullContentIndex(tier: str = "full") -> int:
     repoPrefix = ciDir if tier == "full" else f"{ciDir}/{tier}"
     repo = repoFor("contentIndex")
 
+    # 런타임 필요분만 pull(per-file tolerant·404 무시) — segment sidecar + manifest/router/entityGraph.
+    # catalog_snapshot/source_manifest_set(빌드 provenance·대용량)은 제외. npz·delta 제외(compact-only).
     names = [
-        "main.npz",
-        "main_stems.json",
-        "main_meta.parquet",
-        "main_info.json",
+        *_segmentFiles(outDir, "main", requireExists=False),
         "manifest.json",
-        "delta.npz",
-        "delta_stems.json",
-        "delta_meta.parquet",
-        "delta_info.json",
         "router.json",
         ENTITY_GRAPH_CATALOG_NAME,
-        *_searchSidecarNames("main"),  # range-fetch sidecar(per-file tolerant pull — 미존재 무시)
-        *_searchSidecarNames("delta"),  # 신규 공시 sidecar(있으면 같이 pull)
     ]
     ok = 0
     from dartlab.core.hfRetry import retryHfCall
