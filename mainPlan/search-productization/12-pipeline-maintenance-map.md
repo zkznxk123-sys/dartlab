@@ -1,6 +1,6 @@
 # 12. 파이프라인·유지보수 맵 - 실제 운영 연결표
 
-상태: v1.24 (2026-06-17)
+상태: v1.25 (2026-06-18)
 범위: search productization 이 실제 GitHub workflow, HF artifact, local updater, 품질 gate 로 어떻게 이어지는지 정의한다.
 
 ---
@@ -38,6 +38,25 @@
 | Proof bundle next actions | `.github/scripts/search/buildSearchProofBundle.py`, `.github/scripts/search/planSearchBootstrap.py` | `searchProofBundle.json`, `searchProductizationStatus.json`, `searchBootstrapPlan.json`, `nextActions.bootstrapPlan` | `opsReady=false` proof 도 다음 실행계획을 포함한다. remote source/content blocker 가 있으면 bundle 안의 bootstrap plan 을 source-owner/Search Main/검증 실행 순서로 사용한다. |
 | Local lazy pull | `src/dartlab/providers/dart/search/localUpdate.py`, `fieldIndexRebuild.py`, `fieldIndex.py` | manifest 우선 staged activation, previous active rollback, legacy direct pull fallback | staged download, manifest compare, manifest/hash/load/canary/sourceCanary/schema compatibility smoke, optional `entityGraphCatalog.parquet` download, active pointer atomic swap, rollback target selfcheck. |
 | Quality gate | `tests/_attempts/searchProductCore/**`, `src/dartlab/providers/dart/search/artifactCanary.py`, `src/dartlab/providers/dart/search/canaryPack.py`, `src/dartlab/providers/dart/search/facetPlanner.py`, `src/dartlab/providers/dart/search/goldLog.py`, `src/dartlab/providers/dart/search/qualityGate.py`, `src/dartlab/providers/dart/search/resultContract.py`, `.github/scripts/search/evaluateSearchCanary.py`, `.github/scripts/search/prepareSearchGold.py`, `.github/scripts/search/evaluateSearchGold.py`, `.github/scripts/search/evaluateSearchResultContract.py`, `.github/scripts/search/evaluateSearchProductizationStatus.py`, `.github/scripts/search/runSearchQualityDrill.py` | replacement/random pressure report, artifact source/no-answer canary pack/report, query company facet regression, opt-in raw query-log candidate, canonical query-log gold JSONL, quality report, miss ledger, result contract report | quick/full/replacement/hfPipeline/localUpdater profiles. artifact positive canary 는 answerable result 를 요구한다. quality drill 은 `drillSynthetic`/`drillReviewed` 로 표식되고 release evidence 가 아니다. productization status 는 quality report 의 origin/review counts 와 realReviewedRows 를 다시 검사하므로 spoofed releaseEligible 로 졸업할 수 없다. reviewer-labeled real query-log gold 와 result contract report 전에는 release graduation 금지. |
+
+### 2.1 DART scan prebuild 실행 구조
+
+`Data Prebuild (DART)` 는 검색 source catalog 와 별개로 DART scan parquet 를 유지하지만, 같은 운영 원칙을 따른다. 전량 다운로드를 기본으로 되살리지 않고, manifest/ledger/planner 가 먼저 변경량을 결정한 뒤 builder/publish 가 그 계획만 실행한다.
+
+| 책임 | 파일 | 계약 |
+|---|---|---|
+| manifest | `.github/scripts/prebuild/planning/prebuildManifest.py` | scan 산출물 known path 와 로컬 category count 를 결정한다. scan seed 는 HF tree listing 없이 fixed artifact path 를 직접 resolve 한다. |
+| planner | `.github/scripts/prebuild/planning/prebuildPlan.py` | `BaseSeedPlan`, `PanelDeltaPlan` 순수 로직. Actions cache 가 있는 finance/report 는 HF listing 을 열지 않고, panel bootstrap 은 전량 다운로드 없이 ledger 만 기록한다. cap 에 걸린 panel 변경분은 next ledger 에 반영하지 않아 다음 cycle 에 다시 drain 된다. |
+| orchestrator | `.github/scripts/prebuild/prebuildData.py` | offline-only CI entry. HF download/listing, scan build, docsIndex, prune, quality check, HF upload 만 실행한다. full panel seed 는 `PREBUILD_FULL=1` 주간/수동 safety path 전용이다. |
+| guard | `tests/pipeline/test_prebuild_plan.py`, `tests/pipeline/test_pipeline_hf_metadata.py` | cache-first seed, HF 429 no-change degrade, bootstrap no-download, capped delta ledger 보존, workflow heartbeat/memory env 를 회귀 차단한다. |
+
+강행 invariant:
+
+1. daily incremental 은 finance/report cache + scan known artifact + panel listing 1회만 연다.
+2. daily incremental 은 전 종목 panel seed 를 하지 않는다.
+3. HF panel listing 429 는 기존 ledger 가 있을 때 no-change 로 degrade 한다.
+4. 부분 scan 산출물이 HF current 로 publish 되지 않도록 finance coverage 를 build 후 검증한다.
+5. full rebuild 는 빌더 변경/backfill drift 교정 safety path 이며 daily freshness 수단이 아니다.
 
 ---
 
@@ -458,6 +477,7 @@ search delta 는 이 source catalog 들을 직접 원천 데이터로 보지 않
 |---|---|---|---|---|---:|---|---|
 | pending | pending | catalog | pending | pending | pending | pending | 실제 scheduled/dispatch run 대기 |
 | 2026-06-16 | local prepareSearchDeltaInputs | catalog | none | 361,136-doc current catalog | 361,136 new / 0 changed / 0 deleted | local only | pass. current catalog 174.5MB, unique docKey 100%, dry-run 약 2.1초 |
+| 2026-06-18 KST | Search Index Delta scheduled run 27719942258 | catalog | HF current full/lite | lite current 292,568 docs | current publish | `dart/contentIndex/lite/manifest.json` staging `lite-27719942258` | completed/success. full source set allFilings/dartPanel/edgarPanel/newsPublic preserved, source manifest set producerRun complete, remote evidence valid. |
 
 ### GitHub Actions Snapshot
 
@@ -468,6 +488,11 @@ search delta 는 이 source catalog 들을 직접 원천 데이터로 보지 않
 | 2026-06-16 KST | Original SSOT Sync | 27529940941, scheduled 2026-06-15T07:09Z | completed/cancelled | source owner catalog proof not available from latest run. |
 | 2026-06-16 KST | News Archive Sync | 27551386208, scheduled 2026-06-15T13:57Z | completed/success | source workflow green, but searchCatalog/newsPublic remote artifact still missing in HF evidence audit. |
 | 2026-06-16 KST | EDGAR Data Sync (Bulk) | 27540813725, scheduled 2026-06-15T10:42Z | completed/success | source workflow green, but searchCatalog/edgarPanel remote artifact still missing in HF evidence audit. |
+| 2026-06-18 KST | Data Prebuild (DART) | 27701989863, push `ba805190` | completed/success | incremental panel listing 2,931 remote / 2,930 ledger, changed panel 584 downloaded, docsIndex merged to 15,258,204 rows, finance prebuild coverage 100%, 23 scan parquet + ledger uploaded to HF. |
+| 2026-06-18 KST | Data Prebuild (DART) | 27717621114, workflow_run `ba805190` | completed/success | post-fix automated run green on same head SHA. Confirms Data Prebuild automation path, not only manual dispatch. |
+| 2026-06-18 KST | Search Index Delta | 27719942258, scheduled `ba805190` | completed/success | scheduled catalog delta green. Current lite manifest built at 2026-06-17T21:13:20 with 292,568 docs; full manifest remains valid with delta. |
+| 2026-06-18 KST | CI Fast | 27701980261, push `ba805190` | completed/success | typecheck, lint, quality, fast tests, architecture-l0-l15, product smoke quick, wheel smoke passed. |
+| 2026-06-18 KST | CI Full | 27701980277, push `ba805190` | completed/success | cross-os smoke, fixture integration, product-smoke-wheel, realdata suites, Python 3.12/3.13 full tests passed. |
 
 ### Publish / Local Activation
 
@@ -480,6 +505,7 @@ search delta 는 이 source catalog 들을 직접 원천 데이터로 보지 않
 | 2026-06-16 | local pipeline drill | local fake HF | `dart/contentIndex/` | synthetic active manifest | synthetic previous manifest | pass in focused subprocess test, sourceManifestSet 4 sources | 실제 HF 증거는 아니며 preflight smoke 로 인정 |
 | 2026-06-16 | full contentIndex candidate promote | `dart/contentIndex/_staging/full-20260616094524/` | `dart/contentIndex/manifest.json` | HF current full | previous current manifest pointer | `verifySearchHfRoundTrip.py --tier full` valid=true, activation/rollback true | 462,947 docs; source counts allFilings 192,095 / panel 104,761 / edgar-panel 84,293 / news 81,798 |
 | 2026-06-16 | lite contentIndex candidate promote | `dart/contentIndex/lite/_staging/lite-20260616101609/` | `dart/contentIndex/lite/manifest.json` | HF current lite | previous current lite manifest pointer | `verifySearchHfRoundTrip.py --tier lite` valid=true, activation/rollback true | 280,747 docs, 326.3MB. 18개월 default lite 경량성은 후속 개선 필요 |
+| 2026-06-18 KST | scheduled lite contentIndex promote | `dart/contentIndex/lite/_staging/lite-27719942258/` | `dart/contentIndex/lite/manifest.json` | HF current lite | previous current lite manifest pointer | remote evidence valid + empty-local lazy pull smoke | 292,568 docs; source counts allFilings 169,144 / panel 18,037 / edgar-panel 13,347 / news 92,040; source freshness allFilings/news/panel 20260617, edgar-panel 20260630. |
 
 ### Quality / Gold
 
@@ -506,6 +532,8 @@ search delta 는 이 source catalog 들을 직접 원천 데이터로 보지 않
 | 2026-06-16 | direct-review productization status | HF current repo + full/lite round-trip + quality report | proof bundle | `opsReady=true`, `releaseReady=true` | `data/dart/searchCatalog/searchProofBundle.directReview/searchProductizationStatus.json`: remote evidence valid, result contract valid, canary valid, full/lite activation+rollback valid, blockers=[] |
 | 2026-06-16 | direct-review replacement evidence | proof bundle + remote evidence + workflow YAML | replacement evidence | `valid=true` | `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json`: catalog default/scheduled, legacy operator-only, fail-closed publish, active/previous manifest id, rollback command/verified, run evidence and surface naming recorded |
 | 2026-06-16 | direct-review cutover state | proof bundle + replacement evidence | cutover | `S4_DEFAULT_REPLACEMENT` | `data/dart/searchCatalog/searchProofBundle.directReview/searchCutover.json`: `releaseReady=true`, `defaultReplacement=true`, blockers=[] |
+| 2026-06-18 KST | live remote evidence audit | HF current repo | source/content manifest inventory | `valid=true`, blockers=[] | sourceCatalog allFilings/dartPanel/edgarPanel/newsPublic present with producerRun lineage; full/lite contentIndex manifests present; source_manifest_set producerRun complete. |
+| 2026-06-18 KST | empty local dataDir lazy pull smoke | HF current lite | runtime `dartlab.search(...)` | `indexInfo.available=true`, `nDocs=292568` | content query "반도체 HBM 투자" returned allFilings body hits, news query "환율 기사" returned news hits, title/auto query "유상증자" returned allFilings hits. All sampled rows had sourceRef and dataAsOf. |
 
 ---
 

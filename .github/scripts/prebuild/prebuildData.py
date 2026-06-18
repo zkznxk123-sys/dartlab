@@ -27,8 +27,12 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR.parent))
 from _hfRetry import retryHfCall  # noqa: E402
+from planning.prebuildManifest import categoryFileCount, scanArtifactRelPaths  # noqa: E402
+from planning.prebuildPlan import DEFAULT_INCREMENTAL_DOWNLOAD_CAP, planBaseSeed, planPanelDelta  # noqa: E402
 
 # scan 프리빌드가 읽는 입력 카테고리 SSOT — buildScan 하위 빌더의 원천.
 #   finance/report → 재무·보고서 빌더, panel → changes/sharesOutstanding/docsIndex 빌더.
@@ -45,7 +49,7 @@ SCAN_OUTPUT_KEYS = (
 
 # 일일 증분 변경분 다운로드 상한 — 초과분은 다음 사이클로 drain (대량 변경 시 디스크/시간 폭주
 # 방지, OOM 근본원인 재발 차단). 정상 일일 변경은 수십~수백이라 거의 닿지 않는다.
-INCREMENTAL_DOWNLOAD_CAP = 8000
+INCREMENTAL_DOWNLOAD_CAP = DEFAULT_INCREMENTAL_DOWNLOAD_CAP
 
 
 def _isFullMode() -> bool:
@@ -56,8 +60,7 @@ def _categoryFileCount(dataDir: str, category: str) -> int:
     """Return local file count for a data category."""
     from dartlab.core.dataConfig import DATA_RELEASES
 
-    catDir = Path(dataDir) / DATA_RELEASES[category]["dir"]
-    return sum(1 for p in catDir.rglob("*") if p.is_file()) if catDir.exists() else 0
+    return categoryFileCount(dataDir, category, DATA_RELEASES)
 
 
 def _knownScanRelPaths() -> list[str]:
@@ -65,19 +68,7 @@ def _knownScanRelPaths() -> list[str]:
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.scan.builders.kr.report.build import SCAN_API_TYPES
 
-    scanDir = DATA_RELEASES["scan"]["dir"]
-    base = [
-        "changes.parquet",
-        "finance.parquet",
-        "finance-lite.parquet",
-        "sharesOutstanding.parquet",
-        "docsIndex.parquet",
-        "corpProfile.parquet",
-        "_scanBuildState.json",
-    ]
-    rels = [f"{scanDir}/{name}" for name in base]
-    rels.extend(f"{scanDir}/report/{apiType}.parquet" for apiType in SCAN_API_TYPES)
-    return rels
+    return scanArtifactRelPaths(DATA_RELEASES["scan"]["dir"], SCAN_API_TYPES)
 
 
 def _seedKnownScanArtifacts(dataDir: str) -> tuple[int, int, float]:
@@ -104,14 +95,12 @@ def _seedBaseInputs(dataDir: str) -> None:
     """finance/report full inputs cache-first + scan known artifacts direct seed."""
     from dartlab.pipeline.seed import seedCategoriesFromHf
 
-    categories: list[str] = []
-    for cat in ("finance", "report"):
-        localCount = _categoryFileCount(dataDir, cat)
-        if localCount:
-            print(f"[prebuild] base seed {cat}: 로컬 {localCount}개 (Actions cache 사용, HF listing skip)")
-        else:
-            categories.append(cat)
+    localCounts = {cat: _categoryFileCount(dataDir, cat) for cat in ("finance", "report")}
+    seedPlan = planBaseSeed(localCounts)
+    for cat in seedPlan.cachedCategories:
+        print(f"[prebuild] base seed {cat}: 로컬 {localCounts[cat]}개 (Actions cache 사용, HF listing skip)")
 
+    categories = list(seedPlan.missingCategories)
     summary = seedCategoriesFromHf(categories, dataDir=dataDir) if categories else {}
     for cat, (total, new, mb) in summary.items():
         print(f"[prebuild] base seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
@@ -179,33 +168,21 @@ def _prepareIncrementalPanel(dataDir: str) -> tuple[list[str], list[str], dict[s
         raise
     print(f"[prebuild] panel listing: 원격 {len(remote)}개, 직전 ledger {len(prior)}개")
 
-    if not prior:
+    panelPlan = planPanelDelta(prior, remote, cap=INCREMENTAL_DOWNLOAD_CAP)
+    if panelPlan.bootstrap:
         # 부트스트랩: 전량 다운로드 금지. ledger 만 기록 → 다음 사이클부터 진짜 변경분만.
         print(
             "[prebuild] ⚠ ledger 부재(부트스트랩) — panel 다운로드 skip, ledger 만 기록. baseline 은 full cron 이 생성"
         )
-        return [], [], dict(remote)
+        return [], [], dict(panelPlan.newState)
 
-    changedRel = sorted(rel for rel, size in remote.items() if prior.get(rel) != size)
-    removedRel = [rel for rel in prior if rel not in remote]
-
-    capped = len(changedRel) > INCREMENTAL_DOWNLOAD_CAP
-    processRel = changedRel[:INCREMENTAL_DOWNLOAD_CAP] if capped else changedRel
-    if capped:
+    processRel = list(panelPlan.processRel)
+    if panelPlan.capped:
+        totalChanged = len(panelPlan.processRel) + len(panelPlan.deferredRel)
         print(
-            f"[prebuild] ⚠ 변경 {len(changedRel)}개 > 상한 {INCREMENTAL_DOWNLOAD_CAP} — "
+            f"[prebuild] ⚠ 변경 {totalChanged}개 > 상한 {INCREMENTAL_DOWNLOAD_CAP} — "
             f"{len(processRel)}개만 처리, 나머지는 다음 사이클 drain"
         )
-
-    # ledger 는 '처리한 것'만 반영(미처리 changed 는 다음 사이클 재감지). 삭제는 즉시 반영.
-    newState = dict(prior)
-    for rel in removedRel:
-        newState.pop(rel, None)
-    for rel in processRel:
-        newState[rel] = remote[rel]
-
-    changedCodes = sorted(Path(r).stem for r in processRel)
-    removedCodes = sorted(Path(r).stem for r in removedRel)
 
     if processRel:
         print(f"[prebuild] 변경 종목 {len(processRel)}개 panel 다운로드")
@@ -215,7 +192,7 @@ def _prepareIncrementalPanel(dataDir: str) -> tuple[list[str], list[str], dict[s
     else:
         print("[prebuild] 변경 종목 없음 — panel 다운로드 skip")
 
-    return changedCodes, removedCodes, newState
+    return list(panelPlan.changedCodes), list(panelPlan.removedCodes), dict(panelPlan.newState)
 
 
 def _checkDataReady(dataDir: str) -> dict[str, int]:
