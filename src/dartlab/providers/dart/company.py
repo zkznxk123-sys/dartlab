@@ -5349,7 +5349,7 @@ class Company:
         SeeAlso:
             - ``industry`` — 가치사슬 산업 위치 (테마와 다른 차원).
             - ``dartlab.industry.Industry.theme`` — 테마 → 멤버 종목 (테마 스코프).
-            - ``dartlab.industry.themes.companyThemes`` — 본 함수 backend.
+            - ``dartlab.industry.themes._companyThemes`` — 본 함수 backend (private).
 
         Requires:
             - dartlab
@@ -5366,9 +5366,9 @@ class Company:
         AIContext:
             테마 답변 시 근거(키워드)·노출%(등급근거)를 cite. 노출% None 은 "부문 미공시" 정직 표기.
         """
-        from dartlab.industry.themes import companyThemes
+        from dartlab.industry.themes import _companyThemes
 
-        return companyThemes(self.stockCode)
+        return _companyThemes(self)
 
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 엽니다.

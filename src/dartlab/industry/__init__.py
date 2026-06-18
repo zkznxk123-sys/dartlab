@@ -583,21 +583,30 @@ class Industry:
             - ``industry/themes.json`` + KIND 상장목록. grade=True: panel 주석 데이터.
 
         See Also:
-            - ``dartlab.industry.themes.themeRevenueExposure`` : 등급 위임.
+            - ``Company(code).themes()`` : 회사 스코프(종목 → 소속 테마).
             - ``dartlab.industry.Industry.edges`` : 공급망 관계 원천.
 
         AIContext:
-            테마 단일 진입점. 멤버십(근거)·노출%(등급근거)를 cite. None 노출은 "미산출"로 정직 표기.
+            테마 스코프 진입(회사 스코프는 Company.themes). 멤버십(근거)·노출%(등급근거)를 cite.
         """
-        from dartlab.industry.themes import listThemes, loadThemes, matchThemeText, themeRevenueExposure
+        from dartlab.industry.themes import _loadThemes, _matchTheme, _themeExposure
 
+        themes = _loadThemes()
         if themeId is None:
             return pl.DataFrame(
-                listThemes(),
+                [
+                    {
+                        "themeId": t.themeId,
+                        "name": t.name,
+                        "keywords": len(t.keywords),
+                        "gradeable": bool(t.segmentKeywords),
+                    }
+                    for t in themes.values()
+                ],
                 schema={"themeId": pl.Utf8, "name": pl.Utf8, "keywords": pl.Int64, "gradeable": pl.Boolean},
             )
 
-        theme = loadThemes().get(themeId)
+        theme = themes.get(themeId)
         emptySchema = {
             "종목코드": pl.Utf8,
             "회사명": pl.Utf8,
@@ -614,7 +623,7 @@ class Industry:
         members: list[dict] = []
         memberCodes: set[str] = set()
         for r in kind.iter_rows(named=True):
-            hits = matchThemeText(theme, r.get("주요제품") or "")
+            hits = _matchTheme(theme, r.get("주요제품") or "")
             if hits:
                 code = r["종목코드"]
                 memberCodes.add(code)
@@ -635,7 +644,7 @@ class Industry:
             import gc
 
             for m in members:
-                g = themeRevenueExposure(themeId, m["종목코드"]) or {}
+                g = _themeExposure(themeId, m["종목코드"]) or {}
                 m["노출%"] = g.get("exposurePct")
                 m["등급근거"] = g.get("basis")
                 gc.collect()
