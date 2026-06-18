@@ -32,6 +32,8 @@ export interface BtLayerExtend {
 	mdd: { peak: number; recover: number | null } | null; // combo(없으면 포커스) 기준 — 에쿼티 음영
 	oosSplitTs: number | null;
 	focus: number; // BT_TRADES 마커 포커스 슬롯
+	// ★펀더게이트 moat 시각화(W2) — 포커스 전략의 재무 게이트 활성 구간(초록 배경 틴트, 공시일 이후 PIT 계단).
+	gate: { active: (0 | 1)[]; label: string } | null; // candles-aligned(ext.ts 정렬). 가격 백테스터가 못 그리는 panel 레이어.
 }
 
 type EqRow = { e: (number | null)[]; c: number | null; b: number | null } | null;
@@ -79,6 +81,21 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 			// N≥2 = 포커스 1전략만(클러터 차단). N=1 = 그 전략.
 			const s = ext.strategies[ext.focus] ?? ext.strategies[0];
 			if (!s) return true;
+			// 펀더게이트 배경 틴트(W2 moat) — 재무 게이트 활성 구간 초록(공시일 이후 PIT 계단). 마커보다 먼저(배경).
+			if (ext.gate?.active?.length && bounding) {
+				const gmap = new Map<number, 0 | 1>();
+				ext.ts.forEach((t, k) => gmap.set(t, ext.gate!.active[k] ?? 0));
+				const gf = Math.max(0, visibleRange.from);
+				const gt = Math.min(kLineDataList.length, visibleRange.to);
+				ctx.fillStyle = 'rgba(52,211,153,0.10)';
+				let runX0: number | null = null;
+				for (let gi = gf; gi <= gt; gi++) {
+					const on = gi < gt && gmap.get(kLineDataList[gi]?.timestamp) === 1;
+					if (on && runX0 == null) runX0 = xAxis.convertToPixel(gi);
+					else if (!on && runX0 != null) { const gx1 = xAxis.convertToPixel(gi); ctx.fillRect(runX0, 0, Math.max(1, gx1 - runX0), bounding.height); runX0 = null; }
+				}
+				if (ext.gate.label) { ctx.save(); ctx.font = '9px monospace'; ctx.fillStyle = 'rgba(52,211,153,0.8)'; ctx.textAlign = 'left'; ctx.fillText(String.fromCharCode(9636) + ' ' + ext.gate.label, 6, bounding.height - 6); ctx.restore(); }
+			}
 			const tmap = new Map(s.trades.map((tr) => [tr.ts, tr]));
 			const label = barSpace.bar >= 12 && ext.strategies.length === 1; // LOD-2: 라벨은 단일전략·충분 줌만
 			const from = Math.max(0, visibleRange.from);
@@ -210,7 +227,8 @@ export function buildBtExtend(
 	pf: PortfolioBtResult | null,
 	candles: Candle[],
 	slots: StrategySlot[],
-	focus: number
+	focus: number,
+	gate: { active: (0 | 1)[]; label: string } | null = null
 ): BtLayerExtend | null {
 	if (!pf || !pf.slots.length || !candles.length) return null;
 	const metaById = new Map(slots.map((s) => [s.id, s]));
@@ -237,7 +255,8 @@ export function buildBtExtend(
 		bh: pf.bhEquity,
 		mdd,
 		oosSplitTs: oos ? toMs(oos.splitT) : null,
-		focus: Math.min(Math.max(0, focus), Math.max(0, pf.slots.length - 1))
+		focus: Math.min(Math.max(0, focus), Math.max(0, pf.slots.length - 1)),
+		gate
 	};
 }
 

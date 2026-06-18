@@ -826,7 +826,22 @@
 		// extendData 신참조가 재계산 트리거(CMP 식). 슬롯별 spec.code 공통(단일종목).
 		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, gate, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btPf = pf;
-		const ext = buildBtExtend(pf, all, slots, focus);
+		// 펀더게이트 배경 틴트 — 포커스 전략의 fundGate 조건(임계값)으로 활성 구간 산출(공시일 이후 PIT 계단).
+		let gateVis: { active: (0 | 1)[]; label: string } | null = null;
+		if (gate && usesGate) {
+			const frule = slots[Math.min(focus, slots.length - 1)]?.rule;
+			const fc = frule ? [...frule.entry, ...frule.exit].find((cc) => cc.left === 'fundGate' && cc.right.kind === 'const') : null;
+			if (fc && fc.right.kind === 'const') {
+				const thr = fc.right.value;
+				const active = gate.map((v): 0 | 1 => {
+					if (v == null) return 0;
+					const ok = fc.op === '>=' ? v >= thr : fc.op === '>' ? v > thr : fc.op === '<=' ? v <= thr : fc.op === '<' ? v < thr : false;
+					return ok ? 1 : 0;
+				});
+				gateVis = { active, label: `Piotroski ${fc.op} ${thr}` };
+			}
+		}
+		const ext = buildBtExtend(pf, all, slots, focus, gateVis);
 		if (ext) applyBt(c, ext);
 		else clearBt(c);
 	});
