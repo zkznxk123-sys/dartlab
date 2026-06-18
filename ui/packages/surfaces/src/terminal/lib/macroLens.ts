@@ -231,6 +231,62 @@ export interface MacroMissingView {
 	sourceRef: string;
 }
 
+export type MacroVerdictDirection = 'supportive' | 'pressure' | 'mixed' | 'watch' | 'locked';
+export type MacroVerdictClaimLevel = 'marketMap' | 'sectorPrior' | 'companyCandidate' | 'locked';
+
+export interface MacroVerdictComponentView {
+	id: 'move' | 'path' | 'freshness' | 'sector' | 'company' | 'comove';
+	labelKr: string;
+	labelEn: string;
+	score: number;
+	status: 'ok' | 'watch' | 'blocked';
+	detail: string;
+}
+
+export interface MacroVerdictDriverView {
+	driverId: string;
+	label: string;
+	value: string;
+	change: string;
+	score: number;
+	direction: 'supportive' | 'pressure' | 'mixed' | 'unknown';
+	directionLabelKr: string;
+	directionLabelEn: string;
+	channelLabelKr: string;
+	channelLabelEn: string;
+	financialLine: string;
+	lagLabel: string;
+	evidenceLabel: string;
+	confidenceLabel: string;
+	sourceRef: string;
+	components: MacroVerdictComponentView[];
+}
+
+export interface MacroVerdictView {
+	score: number;
+	direction: MacroVerdictDirection;
+	claimLevel: MacroVerdictClaimLevel;
+	tone: Tone;
+	titleKr: string;
+	titleEn: string;
+	stanceKr: string;
+	stanceEn: string;
+	summaryKr: string;
+	summaryEn: string;
+	primaryChainKr: string;
+	primaryChainEn: string;
+	nextActionKr: string;
+	nextActionEn: string;
+	falsifierKr: string;
+	falsifierEn: string;
+	qualityLabelKr: string;
+	qualityLabelEn: string;
+	drivers: MacroVerdictDriverView[];
+	gates: MacroEvidenceGateView[];
+	blockers: string[];
+	sourceRefs: string[];
+}
+
 export interface MacroLensSnapshot {
 	asOf: {
 		macro: string | null;
@@ -267,6 +323,7 @@ export interface MacroLensSnapshot {
 	scenarios: MacroScenarioView[];
 	sourceRefs: string[];
 	missing: MacroMissingView[];
+	verdict: MacroVerdictView;
 	glance?: MacroGlanceView;
 	macroPath?: MacroPathView;
 	marketOnly?: boolean;
@@ -734,6 +791,239 @@ function changeIntensity(m: MacroLatest): number {
 	return Math.min(24, abs);
 }
 
+function clamp01(v: number): number {
+	return Math.max(0, Math.min(1, v));
+}
+
+function roundScore(v: number): number {
+	return Math.round(clamp01(v) * 100);
+}
+
+function sectorEvidenceScore(tailwind: Tailwind | null, sectorTailwinds: { blended: number }[]): number {
+	const rows = tailwind ? [tailwind] : sectorTailwinds;
+	if (!rows.length) return 0.12;
+	const avg = rows.reduce((sum, row) => sum + row.blended, 0) / rows.length;
+	const hasNegative = rows.some((row) => row.blended < 0);
+	const positiveScore = clamp01(0.42 + avg * 1.25);
+	return hasNegative ? Math.max(0.22, positiveScore - 0.18) : positiveScore;
+}
+
+function signWeight(sign: MacroTransmissionEdgeView['sign'] | undefined): number {
+	if (sign === 'positive') return 1;
+	if (sign === 'negative') return -1;
+	return 0;
+}
+
+function verdictDirectionLabel(edge: MacroTransmissionEdgeView | undefined): {
+	direction: MacroVerdictDriverView['direction'];
+	kr: string;
+	en: string;
+} {
+	if (!edge) return { direction: 'unknown', kr: '경로 없음', en: 'unmapped' };
+	if (edge.sign === 'positive') return { direction: 'supportive', kr: '우호', en: 'supportive' };
+	if (edge.sign === 'negative') return { direction: 'pressure', kr: '부담', en: 'pressure' };
+	if (edge.sign === 'mixed') return { direction: 'mixed', kr: '양방향', en: 'mixed' };
+	return { direction: 'unknown', kr: '미확정', en: 'unknown' };
+}
+
+function impactDirectionLabel(edge: MacroTransmissionEdgeView | undefined, signedImpact: number): {
+	direction: MacroVerdictDriverView['direction'];
+	kr: string;
+	en: string;
+} {
+	if (edge?.sign === 'mixed') return { direction: 'mixed', kr: '양방향', en: 'mixed' };
+	if (Math.abs(signedImpact) < 0.03) return verdictDirectionLabel(edge);
+	return signedImpact > 0
+		? { direction: 'supportive', kr: '순풍', en: 'supportive' }
+		: { direction: 'pressure', kr: '역풍', en: 'pressure' };
+}
+
+function verdictComponent(
+	id: MacroVerdictComponentView['id'],
+	labelKr: string,
+	labelEn: string,
+	score: number,
+	detail: string
+): MacroVerdictComponentView {
+	return {
+		id,
+		labelKr,
+		labelEn,
+		score: roundScore(score),
+		status: componentStatus(score),
+		detail
+	};
+}
+
+function buildMacroVerdict(args: {
+	marketOnly: boolean;
+	macro: MacroFile | null;
+	drivers: MacroDriverView[];
+	topPressures: MacroDriverView[];
+	edges: MacroTransmissionEdgeView[];
+	macroLatest: MacroLatest[];
+	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[];
+	exposureQuality: MacroExposureQualityView;
+	evidenceGates: MacroEvidenceGateView[];
+	falsifiers: MacroFalsifierView[];
+	tailwind: Tailwind | null;
+}): MacroVerdictView {
+	const latestById = new Map(args.macroLatest.map((m) => [m.def.id, m]));
+	const candidates = (args.topPressures.length ? args.topPressures : args.drivers)
+		.filter((driver) => driver.relevance !== 'context')
+		.slice(0, 8);
+	const sectorScore = sectorEvidenceScore(args.tailwind, args.sectorTailwinds);
+	const companyScore = args.marketOnly ? 0.1 : exposureQualityScore(args.exposureQuality);
+	const rows = candidates.map((driver) => {
+		const edge = args.edges.find((e) => e.driverId === driver.id);
+		const latest = latestById.get(driver.id);
+		const moveScore = latest ? Math.min(1, changeIntensity(latest) / 24) : 0;
+		const pathScore = confidenceScore(edge);
+		const freshScore = freshnessScore(driver.freshness.status);
+		const coScore = driver.coMovement?.status === 'candidate' ? 0.72 : driver.coMovement ? 0.35 : 0.05;
+		const relevanceBoost = driver.relevance === 'primary' ? 1 : driver.relevance === 'secondary' ? 0.82 : 0.42;
+		const evidenceScore = clamp01(
+			moveScore * 0.22
+			+ pathScore * 0.28
+			+ freshScore * 0.18
+			+ sectorScore * 0.12
+			+ companyScore * 0.12
+			+ coScore * 0.08
+		) * relevanceBoost;
+		const moveDirection = latest?.chg == null || !Number.isFinite(latest.chg) ? 0 : latest.chg > 0 ? 1 : latest.chg < 0 ? -1 : 0;
+		const signedImpact = edge?.sign === 'mixed' ? 0 : evidenceScore * signWeight(edge?.sign) * moveDirection;
+		const dir = impactDirectionLabel(edge, signedImpact);
+		const channel = edge ? CHANNEL_LABELS[edge.channel] : null;
+		const components: MacroVerdictComponentView[] = [
+			verdictComponent('move', '변화', 'Move', moveScore, latest ? `${driver.change} · ${driver.asOf}` : 'latest observation missing'),
+			verdictComponent('path', '경로', 'Path', pathScore, edge ? `${edge.evidenceLevel} · ${edge.confidence}` : 'mapped edge absent'),
+			verdictComponent('freshness', '신선도', 'Fresh', freshScore, driver.freshness.label),
+			verdictComponent('sector', '섹터', 'Sector', sectorScore, args.tailwind ? `${args.tailwind.label} ${args.tailwind.blended.toFixed(2)}` : 'market sector map'),
+			verdictComponent('company', '회사', 'Company', companyScore, args.exposureQuality.reason),
+			verdictComponent('comove', '동행', 'Co-move', coScore, driver.coMovement?.label ?? 'co-movement absent')
+		];
+		return {
+			driverId: driver.id,
+			label: driver.label,
+			value: driver.value,
+			change: driver.change,
+			score: roundScore(evidenceScore),
+			rawScore: evidenceScore,
+			signedScore: signedImpact,
+			direction: dir.direction,
+			directionLabelKr: dir.kr,
+			directionLabelEn: dir.en,
+			channelLabelKr: channel?.kr ?? '경로',
+			channelLabelEn: channel?.en ?? 'Path',
+			financialLine: edge?.financialLine ?? '표준 전파 경로 없음',
+			lagLabel: edge?.lagMonths ? `${edge.lagMonths[0]}-${edge.lagMonths[1]}M` : '—',
+			evidenceLabel: edge ? (edge.evidenceLevel === 'observed' ? 'OBS' : edge.evidenceLevel === 'sectorPrior' ? 'PRIOR' : 'TPL') : 'LOCK',
+			confidenceLabel: edge?.confidence.toUpperCase() ?? 'LOCK',
+			sourceRef: edge?.sourceRefs[0] ?? driver.sourceLineage,
+			components
+		};
+	}).sort((a, b) => b.rawScore - a.rawScore);
+	const top = rows.slice(0, 3);
+	const blendedScore = top.reduce((sum, row, index) => sum + row.rawScore * ([0.55, 0.3, 0.15][index] ?? 0), 0);
+	const net = top.reduce((sum, row) => sum + row.signedScore, 0) * 100;
+	const sectorTilt = clamp01(sectorScore) - 0.5;
+	const directionalScore = clamp01(0.5 + (net / 100) * 0.45 + sectorTilt * 0.16);
+	const hardBlocks = args.evidenceGates.filter((gate) => gate.status === 'blocked' && (gate.id === 'macroData' || gate.id === 'path'));
+	const score = hardBlocks.length ? roundScore(blendedScore) : roundScore(directionalScore);
+	const companyLocked = args.evidenceGates.some((gate) => gate.id === 'company' && gate.status === 'blocked');
+	const quantLocked = args.evidenceGates.some((gate) => gate.id === 'quant' && gate.status === 'blocked');
+	const claimLevel: MacroVerdictClaimLevel = hardBlocks.length
+		? 'locked'
+		: args.marketOnly
+			? 'marketMap'
+			: args.exposureQuality.status === 'quantCandidate'
+				? 'companyCandidate'
+				: args.exposureQuality.coverage === 'sectorOnly'
+					? 'sectorPrior'
+					: 'locked';
+	const direction: MacroVerdictDirection = hardBlocks.length
+		? 'locked'
+		: blendedScore < 0.25
+			? 'watch'
+			: score >= 56 && !top.some((row) => row.direction === 'mixed')
+				? 'supportive'
+				: score <= 44 && !top.some((row) => row.direction === 'mixed')
+					? 'pressure'
+					: Math.abs(net) < 12 || top.some((row) => row.direction === 'mixed')
+				? 'mixed'
+				: net > 0
+					? 'supportive'
+					: 'pressure';
+	const tone: Tone = direction === 'supportive' ? 'good' : direction === 'pressure' ? 'warn' : direction === 'locked' ? 'down' : direction === 'mixed' ? 'neutral' : 'warn';
+	const title = direction === 'supportive'
+		? { kr: '우호 경로 우세', en: 'Supportive Path' }
+		: direction === 'pressure'
+			? { kr: '부담 경로 우세', en: 'Pressure Path' }
+			: direction === 'mixed'
+				? { kr: '양방향 압력', en: 'Mixed Pressure' }
+				: direction === 'locked'
+					? { kr: '판정 잠김', en: 'Locked' }
+					: { kr: '관찰 우선', en: 'Watch First' };
+	const quality = claimLevel === 'companyCandidate'
+		? { kr: '회사 후보', en: 'company candidate' }
+		: claimLevel === 'sectorPrior'
+			? { kr: '섹터 prior', en: 'sector prior' }
+			: claimLevel === 'marketMap'
+				? { kr: '시장 지도', en: 'market map' }
+				: { kr: '잠김', en: 'locked' };
+	const primary = rows[0];
+	const primaryChainKr = primary ? `${primary.label} → ${primary.channelLabelKr} → ${primary.financialLine}` : '전파 경로 없음';
+	const primaryChainEn = primary ? `${primary.label} → ${primary.channelLabelEn} → ${primary.financialLine}` : 'No transmission path';
+	const blockers = [
+		...hardBlocks.flatMap((gate) => gate.blocks.length ? gate.blocks : [`${gate.labelKr}: ${gate.value}`]),
+		...(companyLocked ? ['company exposure locked'] : []),
+		...(quantLocked ? ['quant sensitivity locked'] : [])
+	];
+	const falsifier = args.falsifiers.find((f) => f.severity === 'blocker') ?? args.falsifiers.find((f) => f.severity === 'warning') ?? args.falsifiers[0];
+	const nextActionKr = hardBlocks.length
+		? '시계열·전파 경로 결손부터 복구'
+		: args.marketOnly
+			? '섹터 칩 또는 종목 선택으로 회사 노출 확인'
+			: args.exposureQuality.status === 'quantCandidate'
+				? '민감도 탭에서 nObs/R²/window 검산'
+				: '회사 증거가 열릴 때까지 정량 claim 금지';
+	const nextActionEn = hardBlocks.length
+		? 'Repair missing series/path first'
+		: args.marketOnly
+			? 'Select a sector chip or company for exposure'
+			: args.exposureQuality.status === 'quantCandidate'
+				? 'Inspect nObs/R²/window in sensitivity'
+				: 'No quantitative claim until company evidence opens';
+	return {
+		score,
+		direction,
+		claimLevel,
+		tone,
+		titleKr: title.kr,
+		titleEn: title.en,
+		stanceKr: `${quality.kr} · ${score}/100`,
+		stanceEn: `${quality.en} · ${score}/100`,
+		summaryKr: primary ? `${primary.label}가 1순위 경로다. ${claimLevel === 'companyCandidate' ? '회사 표본 후보까지 열려 있다.' : '회사별 beta는 아직 잠겨 있으므로 방향 claim만 허용한다.'}` : '표시 가능한 driver 경로가 부족하다.',
+		summaryEn: primary ? `${primary.label} is the first path. ${claimLevel === 'companyCandidate' ? 'Company sample candidate is open.' : 'Company beta remains locked, so only directional claims are allowed.'}` : 'Driver path evidence is insufficient.',
+		primaryChainKr,
+		primaryChainEn,
+		nextActionKr,
+		nextActionEn,
+		falsifierKr: falsifier?.detail ?? '상관은 인과가 아니며 회사 증거 전까지 결론을 잠근다.',
+		falsifierEn: falsifier?.detail ?? 'Correlation is not causation; keep conclusions locked until company evidence is available.',
+		qualityLabelKr: quality.kr,
+		qualityLabelEn: quality.en,
+		drivers: rows.map(({ rawScore: _rawScore, signedScore: _signedScore, ...row }) => row),
+		gates: args.evidenceGates,
+		blockers,
+		sourceRefs: [
+			args.macro?.asOf ? `dashboards/macro.json:${args.macro.asOf}` : 'dashboards/macro.json',
+			...top.map((row) => row.sourceRef),
+			args.exposureQuality.sourceRef
+		]
+	};
+}
+
 function signedValue(v: number, maximumFractionDigits = 2): string {
 	const abs = Math.abs(v).toLocaleString('en-US', { maximumFractionDigits });
 	return `${v > 0 ? '+' : v < 0 ? '-' : ''}${abs}`;
@@ -1032,12 +1322,12 @@ export function buildMacroPath(
 export function buildMacroGlanceView(
 	macro: MacroFile | null,
 	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[],
-	opts: { activeIndustryId?: string; mode?: 'compact' | 'full' } = {}
+	opts: { activeIndustryId?: string; mode?: 'compact' | 'full'; transmission?: MacroTransmissionPayload | null } = {}
 ): MacroGlanceView {
 	return {
 		asOf: macro?.asOf ?? null,
 		regime: buildRegimeQuadrant(macro),
-		path: buildMacroPath(macro?.transmission ?? null, sectorTailwinds, opts),
+		path: buildMacroPath(opts.transmission ?? macro?.transmission ?? null, sectorTailwinds, opts),
 		sectorTailwinds
 	};
 }
@@ -1713,6 +2003,20 @@ export function buildMacroLensSnapshot(args: {
 	};
 	const missing = buildMissing({ macro, macroLatest, edges, coMovers, transmission });
 	const edgeSourceRef = transmission ? 'dartlab://macro/transmission' : 'macro transmission edge template';
+	const evidenceGates = buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef });
+	const verdict = buildMacroVerdict({
+		marketOnly: false,
+		macro,
+		drivers,
+		topPressures: topPressures.length ? topPressures : drivers.slice(0, 3),
+		edges,
+		macroLatest,
+		sectorTailwinds,
+		exposureQuality,
+		evidenceGates,
+		falsifiers,
+		tailwind: co.tailwind
+	});
 	const financePeriod = co.trendQuarter?.periods.at(-1) ?? co.trendAnnual?.periods.at(-1) ?? null;
 	return {
 		asOf: {
@@ -1742,7 +2046,7 @@ export function buildMacroLensSnapshot(args: {
 		sourcePackets,
 		contributionStacks,
 		coMoveGates,
-		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef }),
+		evidenceGates,
 		falsifiers,
 		scenarios,
 		sourceRefs: [
@@ -1757,8 +2061,9 @@ export function buildMacroLensSnapshot(args: {
 			...drivers.slice(0, 8).map((d) => `${d.id}: ${d.sourceLineage}`)
 		],
 		missing,
-		glance: buildMacroGlanceView(macro, sectorTailwinds, { activeIndustryId: co.industry, mode: 'compact' }),
-		macroPath: buildMacroPath(macro?.transmission ?? transmission, sectorTailwinds, { activeIndustryId: co.industry, mode: 'full' }),
+		verdict,
+		glance: buildMacroGlanceView(macro, sectorTailwinds, { activeIndustryId: co.industry, mode: 'compact', transmission: transmission ?? macro?.transmission ?? null }),
+		macroPath: buildMacroPath(transmission ?? macro?.transmission, sectorTailwinds, { activeIndustryId: co.industry, mode: 'full' }),
 		marketOnly: false
 	};
 }
@@ -1817,6 +2122,21 @@ export function buildMarketMacroLensSnapshot(args: {
 	};
 	const missing = buildMissing({ macro, macroLatest, edges, coMovers: [], transmission });
 	const edgeSourceRef = transmission ? 'dartlab://macro/transmission' : 'macro transmission missing';
+	const evidenceGates = buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef });
+	const falsifiers = buildFalsifiers([], drivers, macro, exposureQuality);
+	const verdict = buildMacroVerdict({
+		marketOnly: true,
+		macro,
+		drivers,
+		topPressures: topPressures.length ? topPressures : drivers.slice(0, 3),
+		edges,
+		macroLatest,
+		sectorTailwinds,
+		exposureQuality,
+		evidenceGates,
+		falsifiers,
+		tailwind: null
+	});
 	return {
 		asOf: {
 			macro: macro?.asOf ?? null,
@@ -1845,8 +2165,8 @@ export function buildMarketMacroLensSnapshot(args: {
 		sourcePackets,
 		contributionStacks,
 		coMoveGates,
-		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef }),
-		falsifiers: buildFalsifiers([], drivers, macro, exposureQuality),
+		evidenceGates,
+		falsifiers,
 		scenarios: buildScenarios(drivers, edges),
 		sourceRefs: [
 			MACRO_ATTRIBUTION,
@@ -1857,6 +2177,7 @@ export function buildMarketMacroLensSnapshot(args: {
 			...drivers.slice(0, 8).map((d) => `${d.id}: ${d.sourceLineage}`)
 		],
 		missing,
+		verdict,
 		glance: buildMacroGlanceView(macro, sectorTailwinds, { mode: 'compact' }),
 		macroPath: buildMacroPath(transmission, sectorTailwinds, { mode: 'full' }),
 		marketOnly: true

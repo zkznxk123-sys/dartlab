@@ -1,6 +1,39 @@
 # 06. 진행 원장
 
-상태: v1.7
+상태: v1.8
+
+---
+
+## 2026-06-19
+
+### v1.8 — Macro Verdict Engine / 판정-first 다이얼로그
+
+배경:
+
+- v1.7까지의 다이얼로그는 `Phase Strip`, `Pulse`, `Matrix`, `Quality Gate`가 각각은 유용했지만, 사용자가 창을 열자마자 "그래서 지금 무엇을 봐야 하는가"를 잡기 어려웠다.
+- 텍스트 설명을 늘리면 더 약해진다. 첫 화면은 판정, 핵심 경로, 다음 행동, 반증 조건, 잠금 사유를 한 번에 보여주는 분석 콘솔이어야 한다.
+- 매크로 verdict는 사람이 임의 판정하지 않는다. `macro.transmission`, `macroExposure.exposureQuality`, freshness, sector tailwind, co-movement gate에서 계산 가능한 증거만 사용한다.
+
+완료:
+
+- `MacroLensSnapshot.verdict` 계약을 추가했다. 점수, 방향, claim level, headline, primary chain, next action, falsifier, blockers, sourceRefs, top driver breakdown을 구조화한다.
+- `buildMacroVerdict()`는 driver별 `move/path/freshness/sector/company/co-move` component를 0~100 gate로 계산한다. mixed edge는 방향성을 0으로 두고, 회사 증거가 없으면 company claim을 잠근다.
+- 시장-only snapshot은 `marketMap` claim level로 제한한다. 회사 선택 전에는 종목별 수혜/피해나 정량 민감도 claim을 만들지 않는다.
+- 다이얼로그 첫 탭을 `판정`으로 바꾸고, 첫 화면을 `Macro Verdict Hero -> Verdict Engine Rail -> 반증/잠금/근거 수준 -> Top 3 drivers` 순서로 재구성했다.
+- 기존 matrix/release rail/legend는 접힌 `증거 매트릭스와 릴리즈 레일` 상세로 내렸다. 첫 화면은 판단 구조를 먼저 보여주고, 원하면 raw evidence로 내려가는 방식이다.
+- 모바일 탭은 짧은 라벨과 고정 높이 세그먼트 컨트롤로 바꿨다. 핵심 경로 텍스트는 모바일에서 잘리지 않게 줄바꿈을 허용하고, 판정 엔진 component는 내부 가로 스크롤로 처리한다.
+- 브라우저 QA 캡처: `output/playwright/macro-verdict-v2-desktop-modal.png`, `output/playwright/macro-verdict-v4-mobile-modal.png`.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning은 남아 있으나 error는 0.
+- Playwright desktop/mobile smoke: `.mlVerdictHero`, `.mlMechanismPanel`, top driver 3개, mechanism step 6개, evidence fold 기본 닫힘, 페이지/모달 수평 overflow 0 확인.
+
+NEXT:
+
+1. 실제 발표 캘린더/빈티지 데이터가 생기면 verdict component에 release reaction gate를 추가한다.
+2. 회사별 macroExposure 표본이 충분히 열리기 전까지 `company` component가 낮은 경우 정량 claim은 계속 잠근다.
 
 ---
 

@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { MACRO_SERIES, type MacroLatest } from '@dartlab/ui-contracts';
 import { CURRENT_MACRO_EDGE_SECTOR_KEYS, EDGE_SECTOR_TO_TAILWIND } from './macroMappings';
-import { buildMacroGlanceView, buildMacroPath, buildRegimeQuadrant } from './macroLens';
+import { buildMacroGlanceView, buildMacroPath, buildMarketMacroLensSnapshot, buildRegimeQuadrant } from './macroLens';
 import type { MacroFile } from './types';
 
 const macro = JSON.parse(
@@ -20,6 +21,21 @@ const sectorTailwinds = () =>
 			en: map.en,
 			tailwindKey,
 			blended: tw.blended
+		}];
+	});
+
+const macroLatest = (): MacroLatest[] =>
+	(macro.transmission?.drivers ?? []).flatMap((driver) => {
+		const def = MACRO_SERIES.find((series) => series.id === driver.id);
+		if (!def) return [];
+		const date = driver.sourceLineage?.date?.replaceAll('-', '') || '20260618';
+		const value = driver.sourceLineage?.value ?? 1;
+		return [{
+			def,
+			v: value,
+			d: date,
+			chg: 1,
+			spark: [value - 2, value - 1, value]
 		}];
 	});
 
@@ -72,5 +88,28 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		expect(view.path.links.length).toBeGreaterThan(0);
 		expect(view.path.allSectorLinks.length).toBeGreaterThan(0);
 		expect(view.sectorTailwinds.length).toBeGreaterThan(0);
+	});
+
+	it('builds a market-only macro verdict without company claims', () => {
+		const snapshot = buildMarketMacroLensSnapshot({
+			macro,
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds()
+		});
+		expect(snapshot.marketOnly).toBe(true);
+		expect(snapshot.verdict.score).toBeGreaterThanOrEqual(0);
+		expect(snapshot.verdict.score).toBeLessThanOrEqual(100);
+		expect(snapshot.verdict.claimLevel).toBe('marketMap');
+		expect(snapshot.verdict.nextActionKr).toContain('종목 선택');
+		expect(snapshot.verdict.drivers.length).toBeGreaterThan(0);
+		expect(snapshot.verdict.sourceRefs.length).toBeGreaterThan(0);
+
+		const forbidden = [
+			snapshot.verdict.titleKr,
+			snapshot.verdict.summaryKr,
+			snapshot.verdict.nextActionKr,
+			snapshot.verdict.primaryChainKr
+		].join(' ');
+		expect(forbidden).not.toMatch(/매수|매도|목표가|보장|추천/);
 	});
 });

@@ -1,8 +1,36 @@
 # 06. Progress Ledger
 
-상태: PRD v1.1
+상태: 구현 v1.3
 
 ## 2026-06-19
+
+### v1.3 — Macro Verdict Engine / 판정-first 다이얼로그
+
+배경:
+
+- v1.2 구현은 macro path와 transmission rail을 터미널에 연결했지만, 다이얼로그 첫 화면은 여전히 matrix와 pulse 중심이라 사용자가 즉시 볼 핵심 판단 구조가 약했다.
+- 판정은 사람이 임의로 내리는 값이 아니라, 공개 산출물의 증거 gate를 통해 산출되어야 한다.
+
+완료:
+
+- `MacroLensSnapshot.verdict`를 추가했다. `score/direction/claimLevel/title/summary/primaryChain/nextAction/falsifier/blockers/sourceRefs/drivers`를 구조화한다.
+- `buildMacroVerdict()`는 driver별 변화, 전파 경로, 신선도, 섹터 tailwind, 회사 macroExposure 품질, co-movement를 component score로 만든다.
+- mixed edge는 방향 기여를 0으로 두고, 회사 evidence가 잠긴 경우 정량 claim을 잠근다. market-only snapshot은 `marketMap` claim level로 제한한다.
+- `MacroLensDialog` 첫 탭을 `판정`으로 바꾸고 `Macro Verdict Hero -> Verdict Engine Rail -> 반증/잠금/근거 수준 -> Top 3 drivers` 순서로 재구성했다.
+- 기존 matrix/release rail/legend는 접힌 상세 증거 영역으로 내렸다.
+- 모바일 탭 줄바꿈과 핵심 경로 truncation을 수정했다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning은 남아 있으나 error는 0.
+- Playwright desktop/mobile smoke: verdict hero, engine rail, top driver 3개, component step 6개, evidence fold 기본 닫힘, 수평 overflow 0 확인.
+- QA screenshots: `output/playwright/macro-verdict-v2-desktop-modal.png`, `output/playwright/macro-verdict-v4-mobile-modal.png`.
+
+NEXT:
+
+1. 실제 발표 캘린더/빈티지 데이터가 열리면 release reaction gate를 verdict component에 추가한다.
+2. public/local UI 변경이므로 push 전에는 운영자 눈검수 스크린샷 확인을 유지한다.
 
 ### v1.0 — Current-code grounded PRD 승격
 

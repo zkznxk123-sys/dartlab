@@ -1,6 +1,6 @@
 # Macro Lens
 
-상태: PRD v1.1 (2026-06-19, expert-reviewed implementation-ready)
+상태: 구현 v1.3 (2026-06-19, expert-reviewed · Macro Verdict UI/Engine 반영)
 출처: `C:\Users\MSI\.claude\plans\graceful-yawning-valley.md`
 거처: `ui/packages/surfaces/src/terminal/` + `landing/src/routes/terminal`
 목표: 퍼블릭 터미널 좌상단 `마켓 펄스 · 매크로`를 텍스트 카드에서 `경제 위치 -> 전파 경로 -> 섹터/스크리너 행동`으로 이어지는 분석 렌즈로 승격한다.
@@ -24,6 +24,7 @@
 - 새 라우트, 새 상주 패널, 새 fetch surface는 만들지 않는다.
 - 좌상단 기존 `마켓 펄스 · 매크로` 카드와 기존 Macro Lens 다이얼로그 transmission 탭을 제자리 승격한다.
 - 강한 기능의 본체는 `macro.json#kr/us/quadrant`, `macro.json#sectorTailwind`, `macro.json#transmission`의 정직한 시각화다.
+- 다이얼로그 첫 화면은 `판정`이다. 점수/claim level/핵심 경로/다음 행동/반증 조건을 먼저 보여주고, 판정 엔진 레일에서 변화·경로·신선도·섹터·회사·동행 gate가 어디서 열리고 막혔는지 공개한다.
 - 회사 미선택 상태에서도 `MacroGlanceView`는 열린다. 회사 의존 `CompanyMacroLensSnapshot`은 선택 이후 하이라이트/체크리스트에만 붙는다.
 - `growthSignal`/`inflationSignal`은 픽셀 좌표로 쓰지 않는다. 비정규 원시값이므로 tooltip/debug 보조값까지만 허용한다.
 - `sectorTailwind.blended`가 전부 양수인 현재 v19에서는 하위 섹터를 `역풍`으로 부르지 않는다. 상대 약순풍으로만 표시한다.
