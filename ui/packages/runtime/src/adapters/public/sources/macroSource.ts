@@ -2,7 +2,8 @@
 // (seriesId, date, value) 가 seriesId+date 정렬이라 seriesId 필터로 row-group pruning.
 // 차트 오버레이(ECON)·KPI 티커가 공유하는 단일 로더. 전체 파일 1.5MB 이하 — 시리즈당 첫 로드 수백 ms.
 // 화이트리스트·출처표시 정본은 contracts (MACRO_SERIES·MACRO_ATTRIBUTION).
-import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort } from '@dartlab/ui-contracts';
+import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort, type MacroTransmissionEdge, type MacroTransmissionQuery, type MacroTransmissionResult } from '@dartlab/ui-contracts';
+import { loadJson } from '../../../data/dartlabData';
 import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
@@ -13,6 +14,10 @@ interface ObsRow extends Record<string, unknown> {
 	seriesId?: string | null;
 	date?: Date | string | null;
 	value?: number | null;
+}
+
+interface MacroDashboardFile {
+	transmission?: MacroTransmissionResult | null;
 }
 
 // createHfMacroPort 는 ui/web 레거시(@dartlab/ui-runtime export 소비)가 core 없이 호출하므로(시그니처 불변
@@ -136,6 +141,40 @@ export async function loadMacroLatest(core?: DataCore): Promise<MacroLatest[]> {
 	return all.filter((x): x is MacroLatest => x != null);
 }
 
+function marketSet(market: 'KR' | 'US', includeCrossMarket: boolean): Set<string> {
+	if (market === 'US') return new Set(includeCrossMarket ? ['US', 'GLOBAL'] : ['US']);
+	return new Set(includeCrossMarket ? ['KR', 'US', 'GLOBAL'] : ['KR']);
+}
+
+function edgeMatches(edge: MacroTransmissionEdge, sectorKey: string | null, markets: Set<string>): boolean {
+	if (!markets.has(edge.market)) return false;
+	if (!sectorKey) return true;
+	return edge.sectorKeys.includes('all') || edge.sectorKeys.includes(sectorKey);
+}
+
+function filterTransmission(payload: MacroTransmissionResult, query: MacroTransmissionQuery = {}): MacroTransmissionResult {
+	const market = query.market ?? payload.market ?? 'KR';
+	const sectorKey = query.sectorKey ?? payload.sectorKey ?? null;
+	const markets = marketSet(market, query.includeCrossMarket ?? true);
+	const edges = payload.edges.filter((edge) => edgeMatches(edge, sectorKey, markets));
+	const driverIds = new Set(edges.map((edge) => edge.driverId));
+	return {
+		...payload,
+		market,
+		sectorKey,
+		edges,
+		drivers: payload.drivers.filter((driver) => driverIds.has(driver.id)),
+		sourceRefs: [...new Set(['dashboards/macro.json#transmission', ...(payload.sourceRefs ?? [])])]
+	};
+}
+
+async function loadMacroTransmission(query: MacroTransmissionQuery = {}): Promise<MacroTransmissionResult | null> {
+	if (!browser) return null;
+	const dashboard = await loadJson<MacroDashboardFile>('dashboards/macro.json', { fetchFn: fetch, required: false });
+	const payload = dashboard?.transmission;
+	return payload ? filterTransmission(payload, query) : null;
+}
+
 /** HF 공개 데이터 기반 MacroPort — 거시 시계열은 회사·앱 무관이라 local 셸도 본 포트를 명시적으로 재사용한다.
  *  core 는 어댑터(createXRuntime)가 주입(전역 싱글턴 금지). 미주입(ui/web 레거시 직접 호출)은 모듈 폴백 코어. */
 export function createHfMacroPort(core?: DataCore): MacroPort {
@@ -145,6 +184,7 @@ export function createHfMacroPort(core?: DataCore): MacroPort {
 			return MACRO_SERIES;
 		},
 		getSeries: (id) => loadMacroSeries(id, c),
-		getLatest: () => loadMacroLatest(c)
+		getLatest: () => loadMacroLatest(c),
+		getTransmission: (query) => loadMacroTransmission(query)
 	};
 }

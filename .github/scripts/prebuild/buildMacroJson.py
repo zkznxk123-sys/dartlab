@@ -10,6 +10,7 @@
       "asOf": "2026-04-22",
       "kr": { phase, phaseLabel, confidence, indicators: {...}, signals: [...], sectorStrategy: "..." },
       "us": { 동일 },
+      "transmission": { drivers, edges, sourceRefs, missing },
       "sectorTailwind": {
         "semiconductor": { "kr": +0.4, "us": +0.2 },
         ...
@@ -144,6 +145,42 @@ def _analyze_market(market: str) -> dict:
         return _fallback(market)
 
 
+def _build_transmission() -> dict:
+    """Macro Lens용 시장·섹터 전파 payload 를 macro.json 에 싣는다.
+
+    ``analyzeTransmission`` 은 회사 객체를 읽지 않고, macro observation 이 없으면 missing
+    lineage 로 닫힌다. prebuild offline 환경에서는 외부 API 호출 없이 HF/local cache 또는
+    missing payload 만 만든다.
+    """
+    try:
+        from dartlab.macro.transmission import analyzeTransmission
+
+        payload = analyzeTransmission("KR", includeCrossMarket=True)
+        payload["version"] = "v1"
+        return payload
+    except Exception as e:
+        print(f"  ⚠ macro transmission 미가용 ({type(e).__name__}): missing payload", flush=True)
+        return {
+            "version": "v1",
+            "market": "KR",
+            "sectorKey": None,
+            "asOf": None,
+            "drivers": [],
+            "edges": [],
+            "regimeEvidence": [],
+            "aliases": {},
+            "sourceRefs": ["dartlab://macro/transmission"],
+            "missing": [
+                {
+                    "id": "macro.transmission",
+                    "status": "missing",
+                    "reason": f"macro transmission unavailable: {type(e).__name__}",
+                    "sourceRef": "dartlab://macro/transmission",
+                }
+            ],
+        }
+
+
 def main() -> int:
     # prebuild = offline only. analyzeCycle (외부 API) 호출은 sync 단계로 이전,
     # 여기서는 HF dataset 의 macro/cycle/{kr,us}.json 만 다운로드해서 사용.
@@ -177,12 +214,14 @@ def main() -> int:
         }
         for s in sorted(sectors)
     }
+    transmission = _build_transmission()
 
     output = {
         "version": "v19",
         "asOf": date.today().isoformat(),
         "kr": kr,
         "us": us,
+        "transmission": transmission,
         "sectorTailwind": sector_tailwind,
     }
 

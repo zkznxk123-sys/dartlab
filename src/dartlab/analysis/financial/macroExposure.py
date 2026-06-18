@@ -79,6 +79,49 @@ def _getYoYChange(df, col: str = "value"):
     return None
 
 
+def _qualityFromSelected(selected: list[dict], *, stockCode: str) -> dict:
+    """Macro Lens가 소비하는 회사 단위 매크로 노출 품질 블록."""
+    if not selected:
+        return {
+            "status": "blocked",
+            "reason": "회사 매출과 매크로 지표의 겹친 표본이 부족합니다.",
+            "blockedReason": "selected macro regression absent",
+            "missingEvidence": ["selected indicator", "nObs", "R²", "window", "sourceRef"],
+            "sourceRef": f"analysis.macroExposure:{stockCode}",
+            "nObs": None,
+            "rSquared": None,
+            "window": None,
+            "frequency": "annual",
+            "lagMonths": None,
+            "coverage": "missing",
+        }
+
+    best = max(selected, key=lambda row: row.get("rSquared", 0) or 0)
+    nObs = best.get("nObs")
+    rSquared = best.get("rSquared")
+    missingEvidence = []
+    if not isinstance(nObs, int) or nObs < 5:
+        missingEvidence.append("nObs>=5")
+    if not isinstance(rSquared, int | float) or rSquared < 0.2:
+        missingEvidence.append("R²>=0.20")
+    if not best.get("sourceRef"):
+        missingEvidence.append("sourceRef")
+
+    return {
+        "status": "qualitativeOnly" if missingEvidence else "quantCandidate",
+        "reason": "연간 매출 성장률과 매크로 지표 변화율의 공개 품질 계약입니다.",
+        "blockedReason": " · ".join(missingEvidence) if missingEvidence else "",
+        "missingEvidence": missingEvidence,
+        "sourceRef": best.get("sourceRef") or f"analysis.macroExposure:{stockCode}",
+        "nObs": nObs,
+        "rSquared": rSquared,
+        "window": best.get("window"),
+        "frequency": "annual",
+        "lagMonths": best.get("lagMonths"),
+        "coverage": "company",
+    }
+
+
 # ══════════════════════════════════════
 # 매크로민감도 — 기업 매출 vs 외생변수
 # ══════════════════════════════════════
@@ -132,6 +175,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
         genericBestR2 : float — 범용 최고 R-squared
         netDirection : str — 종합 매출 방향 ("positive" | "negative" | "neutral")
         netDirectionLabel : str — 종합 방향 한글 라벨
+        exposureQuality : dict — nObs/R²/window/lag/coverage/sourceRef 품질 계약
     """
     import polars as pl
 
@@ -244,6 +288,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 
             g_vals = [p[1] for p in valid_pairs]
             i_vals = [p[2] for p in valid_pairs]
+            valid_years = [years[p[0]] for p in valid_pairs]
 
             # 지표 변화율
             i_changes = []
@@ -256,6 +301,8 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
             g_subset = g_vals[1:]
             if len(g_subset) < 2 or len(i_changes) < 2:
                 continue
+            nObs = len(g_subset)
+            window = f"{valid_years[1]}-{valid_years[-1]} annual" if len(valid_years) >= 2 else "annual"
 
             # R-squared
             g_mean = sum(g_subset) / len(g_subset)
@@ -277,6 +324,16 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
                     "seriesId": ind.seriesId,
                     "axis": ind.axis,
                     "rSquared": round(r2, 3),
+                    "nObs": nObs,
+                    "window": window,
+                    "frequency": "annual",
+                    "lagMonths": 0,
+                    "coverage": "company",
+                    "sourceRef": f"analysis.macroExposure:{stockCode}:{ind.seriesId}",
+                    "sourceRefs": [
+                        "Company.select:IS:매출액",
+                        f"macro/{ind.source}/observations.parquet#{ind.seriesId}",
+                    ],
                     "latestChange": round(latest_i_change * 100, 1),
                     "impact": impact,
                 }
@@ -312,6 +369,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
         "selectedSource": selectedLabel,
         "optimalBestR2": opt_best,
         "genericBestR2": gen_best,
+        "exposureQuality": _qualityFromSelected(selected, stockCode=stockCode),
         "netDirection": net_direction,
         "netDirectionLabel": {"positive": "매출 상승 방향", "negative": "매출 하락 방향", "neutral": "중립"}.get(
             net_direction, "중립"

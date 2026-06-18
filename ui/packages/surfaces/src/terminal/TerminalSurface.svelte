@@ -4,7 +4,7 @@
 	// 중앙 스택            = 시각화 중심 (차트·그래프·전체화면 분석)
 	// 우측 스택            = 테이블·텍스트·수치·정성 — 그래프 배치 금지 (그래프는 중앙으로)
 	import './terminal.css';
-	import type { Candle, DartLabRuntime, MacroLatest } from '@dartlab/ui-contracts';
+	import type { Candle, DartLabRuntime, MacroLatest, MacroTransmissionResult } from '@dartlab/ui-contracts';
 	import { setDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine } from './lib/engine';
 	import type { TerminalHosts, TerminalBrandLinks } from './lib/hosts';
@@ -62,6 +62,7 @@
 	let industryOpen = $state(false); // 산업 분석 다이얼로그 (좌측 산업 sweep 행 클릭)
 	let industryId = $state('');
 	let macroCoMovers = $state<CoMover[]>([]);
+	let macroTransmission = $state<MacroTransmissionResult | null>(null);
 	const chartCtl = new ChartCtl();
 	// GitHub 스타 수 — SNS 버튼 옆 라이브 배지(사회적 증명). null = 미조회/실패(배지 숨김).
 	let ghStars = $state<number | null>(null);
@@ -118,9 +119,34 @@
 	});
 
 	const co = $derived(eng.buildCompany(sym));
+	$effect(() => {
+		const c = co;
+		if (!c) {
+			macroTransmission = null;
+			return;
+		}
+		const code = c.code;
+		const sectorKey = c.industry;
+		let alive = true;
+		macroTransmission = null;
+		void runtime.macro
+			.getTransmission({ market: 'KR', sectorKey, includeCrossMarket: true })
+			.then((payload) => {
+				if (!alive || co?.code !== code || co?.industry !== sectorKey) return;
+				macroTransmission = payload;
+			})
+			.catch(() => {
+				if (!alive || co?.code !== code || co?.industry !== sectorKey) return;
+				macroTransmission = null;
+			});
+		return () => {
+			alive = false;
+		};
+	});
 	const macroLensSnapshot = $derived.by(() => co ? buildMacroLensSnapshot({
 		co,
 		macro: eng.raw.macro,
+		transmission: macroTransmission,
 		macroLatest,
 		sectorTailwinds: eng.sectorTailwinds(),
 		coMovers: macroCoMovers

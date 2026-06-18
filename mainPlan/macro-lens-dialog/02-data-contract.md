@@ -20,7 +20,7 @@
 | co-movement | `ui/packages/surfaces/src/terminal/lib/coMovement.ts` | 종목 월수익률과 거시 1차차분 상관 |
 | price/finance snapshot | terminal `Company` shape | 회사 checkpoint 표시 |
 | sector priors | `src/dartlab/providers/mappers/.../sectorPriors.json` | 전파 edge 초기 prior 후보 |
-| macro sensitivity | `src/dartlab/analysis/financial/_signalsMacroSensitivity.py` | 회사 노출·회귀 품질 후보 |
+| macro sensitivity | `src/dartlab/analysis/financial/macroExposure.py` | 회사 노출·회귀 품질 계약 |
 
 주의: `MACRO_SERIES.id`를 canonical macro id로 둔다. `KRW_USD`, `PMI`처럼 기존 prior나 분석 코드에 남은 레거시/외부 id는 registry에서 명시적으로 매핑하거나 사용하지 않는다.
 
@@ -171,7 +171,7 @@ export interface MacroFalsifierView {
 원칙:
 
 - `macro.transmission`은 `MacroDriverView`와 `MacroTransmissionEdgeView`를 낸다. 현재 공개 호출은 `dartlab.macro("transmission", market="KR", sectorKey="semiconductor")`다.
-- 기존 analysis macro 표면은 `MacroExposureQuality`와 회사별 checkpoint를 낸다.
+- 기존 analysis macro 표면은 `MacroExposureQuality`와 회사별 checkpoint를 낸다. `macroExposure.calcMacroSensitivity`의 지표별 결과는 `nObs`, `window`, `frequency`, `lagMonths`, `coverage`, `sourceRef`, `sourceRefs`를 포함해야 한다.
 - UI는 두 산출물을 합쳐 보여주되 숨은 수학을 만들지 않는다.
 - `blocked` edge는 숨기지 않고 이유를 표시한다.
 

@@ -253,6 +253,63 @@ function fakeMacro(): MacroPort {
 		},
 		async getLatest() {
 			return [{ def, v: 1355, d: '20260602', chg: 5, spark: [1350, 1355] }];
+		},
+		async getTransmission(query = {}) {
+			const sectorKey = query.sectorKey ?? 'semiconductor';
+			return {
+				version: 'test',
+				market: query.market ?? 'KR',
+				sectorKey,
+				asOf: '2026-06-02',
+				drivers: [
+					{
+						id: 'USDKRW',
+						labelKr: '원/달러 환율',
+						source: 'ECOS',
+						sourceSeriesId: 'USDKRW',
+						market: 'KR',
+						unit: '원',
+						group: 'FX',
+						transform: 'level_and_mom_1m',
+						directionSemantics: '상승은 원화 약세다.',
+						defaultLagMonths: [0, 3],
+						sourceLineage: {
+							source: 'ECOS',
+							sourceSeriesId: 'USDKRW',
+							date: '2026-06-02',
+							value: 1355,
+							unit: '원',
+							artifactPath: 'macro/ecos/observations.parquet',
+							asOfPolicy: 'observation_date <= price_as_of',
+							status: 'observed'
+						}
+					}
+				],
+				edges: [
+					{
+						id: 'fx-export-revenue',
+						driverId: 'USDKRW',
+						market: 'KR',
+						sectorKeys: [sectorKey],
+						channel: 'revenue',
+						financialLine: '매출 성장률 / 환산손익',
+						valuationLever: 'growth',
+						sign: 'mixed',
+						lagMonths: [0, 3],
+						evidenceLevel: 'sectorPrior',
+						confidence: 'low',
+						requiredCompanyEvidence: ['해외 매출 비중', 'FX 손익 주석'],
+						falsifiers: ['달러 원가 비중이 상쇄'],
+						sourceRefs: ['driver:USDKRW', 'macro.transmission:test'],
+						sourceRef: 'macro.transmission:edge:fx-export-revenue',
+						evidenceLabel: 'PRIOR'
+					}
+				],
+				regimeEvidence: [],
+				aliases: {},
+				sourceRefs: ['dartlab://macro/transmission'],
+				missing: []
+			};
 		}
 	};
 }

@@ -1,3 +1,9 @@
+import type {
+	MacroTransmissionDriver as ContractMacroTransmissionDriver,
+	MacroTransmissionEdge as ContractMacroTransmissionEdge,
+	MacroTransmissionResult as ContractMacroTransmissionResult
+} from '@dartlab/ui-contracts';
+
 // DartLab Terminal — raw data file shapes + built Company shape.
 // 스키마는 landing/static 의 실데이터에서 검증 (finance/macro/meta/prices/search-index/ecosystem/quarters/industryStats).
 // 가짜 필드 없음 — cf.opening/closing 는 실데이터에서 null 이라 표면에 노출하지 않는다.
@@ -56,6 +62,9 @@ export interface MacroSide {
 	phaseLabel: string;
 	quadrant?: MacroQuadrant; // 빌더 입력 부족(cycle 결측) 시 부재 가능 — 소비처 옵셔널 접근 강제
 }
+export type MacroTransmissionDriver = ContractMacroTransmissionDriver;
+export type MacroTransmissionEdge = ContractMacroTransmissionEdge;
+export type MacroTransmissionPayload = ContractMacroTransmissionResult;
 export interface TailwindEntry {
 	kr: number;
 	us: number;
@@ -67,6 +76,7 @@ export interface MacroFile {
 	kr: MacroSide;
 	us: MacroSide;
 	sectorTailwind: Record<string, TailwindEntry>;
+	transmission?: MacroTransmissionPayload | null;
 }
 
 export interface BlogEntry {

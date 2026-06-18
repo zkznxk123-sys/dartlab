@@ -24,6 +24,80 @@ export interface MacroLatest {
 	spark: number[]; // 최근 ~1년 추세 (≤40점 다운샘플)
 }
 
+export type MacroTransmissionMarket = 'KR' | 'US' | 'GLOBAL';
+export type MacroTransmissionChannel = 'revenue' | 'margin' | 'balanceSheet' | 'cashFlow' | 'valuation';
+export type MacroTransmissionEvidence = 'observed' | 'sectorPrior' | 'template';
+export type MacroTransmissionLabel = 'OBS' | 'PRIOR' | 'TPL' | 'LOCK';
+
+export interface MacroTransmissionDriver {
+	id: string;
+	labelKr?: string;
+	source: 'ECOS' | 'FRED';
+	sourceSeriesId: string;
+	market: MacroTransmissionMarket;
+	unit: string;
+	group: string;
+	transform: string;
+	directionSemantics: string;
+	defaultLagMonths: [number, number] | number[] | null;
+	sourceLineage?: {
+		source: 'ECOS' | 'FRED';
+		sourceSeriesId: string;
+		date: string | null;
+		value: number | null;
+		unit: string | null;
+		artifactPath: string;
+		asOfPolicy: string;
+		status: 'observed' | 'missing';
+	};
+}
+
+export interface MacroTransmissionEdge {
+	id: string;
+	driverId: string;
+	market: MacroTransmissionMarket;
+	sectorKeys: string[];
+	channel: MacroTransmissionChannel;
+	financialLine: string;
+	valuationLever: 'discountRate' | 'growth' | 'margin' | 'multiple' | 'riskPremium';
+	sign: 'positive' | 'negative' | 'mixed' | 'unknown';
+	lagMonths: [number, number] | number[] | null;
+	evidenceLevel: MacroTransmissionEvidence;
+	confidence: 'high' | 'medium' | 'low' | 'blocked';
+	requiredCompanyEvidence: string[];
+	falsifiers?: string[];
+	sourceRefs: string[];
+	sourceRef?: string;
+	evidenceLabel?: MacroTransmissionLabel;
+}
+
+export interface MacroTransmissionMissing {
+	id: string;
+	status: 'missing' | 'partial' | 'notWiredYet' | 'staleRisk';
+	reason: string;
+	sourceRef: string;
+}
+
+export interface MacroTransmissionResult {
+	version?: string;
+	market: 'KR' | 'US';
+	sectorKey?: string | null;
+	asOf?: string | null;
+	drivers: MacroTransmissionDriver[];
+	edges: MacroTransmissionEdge[];
+	regimeEvidence?: unknown[];
+	aliases?: Record<string, string>;
+	sourceRefs: string[];
+	missing?: MacroTransmissionMissing[];
+}
+
+export interface MacroTransmissionQuery {
+	market?: 'KR' | 'US';
+	sectorKey?: string | null;
+	asOf?: string | null;
+	includeCrossMarket?: boolean;
+}
+
 /** 카탈로그 — 주가와 비교 가치가 큰 거시 지표 (HF observations 에 데이터가 실재하는 것만 노출).
  *  MacroPort.listSeries() 정본. 한국(ECOS) → 미국(FRED) 순. ECON_MAX(3) 가 동시표시를 막아 카탈로그가 커도 차트는 깨끗. */
 export const MACRO_SERIES: MacroSeriesDef[] = [
@@ -83,4 +157,5 @@ export interface MacroPort {
 	listSeries(): Promise<MacroSeriesDef[]>;
 	getSeries(id: string): Promise<MacroPoint[] | null>;
 	getLatest(): Promise<MacroLatest[]>;
+	getTransmission(query?: MacroTransmissionQuery): Promise<MacroTransmissionResult | null>;
 }

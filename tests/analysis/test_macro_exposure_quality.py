@@ -1,0 +1,86 @@
+from __future__ import annotations
+
+from datetime import date
+from types import SimpleNamespace
+
+import polars as pl
+
+from dartlab.analysis.financial import macroExposure
+
+
+class _FakeCompany:
+    stockCode = "FAKE"
+    currency = "USD"
+
+    def select(self, topic: str, items: list[str]):
+        assert topic == "IS"
+        assert items == ["매출액"]
+        return SimpleNamespace(
+            topic="IS",
+            df=pl.DataFrame(
+                {
+                    "snakeId": ["sales"],
+                    "항목": ["매출액"],
+                    "2018": [100.0],
+                    "2019": [105.0],
+                    "2020": [114.0],
+                    "2021": [130.0],
+                    "2022": [150.0],
+                    "2023": [180.0],
+                    "2024": [220.0],
+                }
+            ),
+        )
+
+
+def _macro_frame(values: list[float]) -> pl.DataFrame:
+    return pl.DataFrame(
+        {
+            "date": [date(year, 12, 31) for year in range(2019, 2025)],
+            "value": values,
+        }
+    )
+
+
+def test_macro_sensitivity_exposes_quality_gate(monkeypatch):
+    monkeypatch.setattr(macroExposure, "_getGather", lambda: object())
+    monkeypatch.setattr(
+        macroExposure,
+        "_loadMacroIndicator",
+        lambda _g, _series_id, _source: _macro_frame([105.0, 114.0, 130.0, 150.0, 180.0, 220.0]),
+    )
+
+    result = macroExposure.calcMacroSensitivity(_FakeCompany())
+
+    assert result is not None
+    assert result["selectedSource"] == "범용"
+    assert result["selected"]
+
+    row = result["selected"][0]
+    assert row["nObs"] == 5
+    assert row["window"] == "2020-2024 annual"
+    assert row["frequency"] == "annual"
+    assert row["lagMonths"] == 0
+    assert row["coverage"] == "company"
+    assert row["sourceRef"] == "analysis.macroExposure:FAKE:FEDFUNDS"
+    assert "Company.select:IS:매출액" in row["sourceRefs"]
+
+    quality = result["exposureQuality"]
+    assert quality["status"] == "quantCandidate"
+    assert quality["missingEvidence"] == []
+    assert quality["nObs"] == 5
+    assert quality["window"] == "2020-2024 annual"
+    assert quality["sourceRef"].startswith("analysis.macroExposure:FAKE:")
+
+
+def test_macro_sensitivity_blocks_quality_without_macro_observations(monkeypatch):
+    monkeypatch.setattr(macroExposure, "_getGather", lambda: object())
+    monkeypatch.setattr(macroExposure, "_loadMacroIndicator", lambda _g, _series_id, _source: None)
+
+    result = macroExposure.calcMacroSensitivity(_FakeCompany())
+
+    assert result is not None
+    assert result["selected"] == []
+    assert result["exposureQuality"]["status"] == "blocked"
+    assert result["exposureQuality"]["coverage"] == "missing"
+    assert "sourceRef" in result["exposureQuality"]["missingEvidence"]

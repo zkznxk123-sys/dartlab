@@ -1,13 +1,13 @@
 {
 "version": "v19",
-"asOf": "2026-04-22",
+"asOf": "2026-06-18",
 "kr": {
 "market": "KR",
 "phase": "recovery",
 "phaseLabel": "회복",
 "confidence": "high",
 "signals": [
-"CLI 급등 (+1.00)"
+"CLI 급등 (+1.10)"
 ],
 "sectorStrategy": {
 "high": "overweight",
@@ -20,9 +20,9 @@
 "quadrant": "stagflation",
 "quadrantLabel": "스태그플레이션",
 "growth": "falling",
-"growthSignal": -6.9,
+"growthSignal": -20.0,
 "inflation": "rising",
-"inflationSignal": 0.65,
+"inflationSignal": 0.94,
 "assetImplication": {
 "equity": "underweight",
 "bond": "underweight",
@@ -33,33 +33,45 @@
 },
 "confidence": "high",
 "description": "성장 둔화 + 물가 상승 — 금·TIPS·현금 방어, 주식·채권 불리"
-}
+},
+"computedAt": "2026-06-12T15:39:37.996264+00:00"
 },
 "us": {
 "market": "US",
-"phase": "expansion",
-"phaseLabel": "확장",
+"phase": "slowdown",
+"phaseLabel": "둔화",
 "confidence": "medium",
 "signals": [
-"HY 스프레드 안정 (287bp)",
-"수익률곡선 정상 (+0.52%)",
-"금 급등 (YoY +62.1%)",
-"CPI 3.3% — 인플레 동반 확장"
+"HY 스프레드 안정 (280bp)",
+"수익률곡선 평탄화 (+0.40%)",
+"금 급등 (YoY +39.5%)",
+"CPI 4.3% — 물가 과열, 둔화 전조"
 ],
 "sectorStrategy": {
-"high": "overweight",
-"moderate": "overweight",
-"defensive": "neutral",
+"defensive": "overweight",
+"moderate": "neutral",
+"high": "underweight",
 "low": "neutral"
 },
-"transition": null,
+"transition": {
+"from": "slowdown",
+"to": "contraction",
+"progress": 33,
+"triggered": [
+"gold_surging"
+],
+"pending": [
+"vix_spiking",
+"term_spread_inverted"
+]
+},
 "quadrant": {
 "quadrant": "reflation",
 "quadrantLabel": "리플레이션",
 "growth": "rising",
-"growthSignal": 619557.0,
+"growthSignal": 662678.0,
 "inflation": "rising",
-"inflationSignal": 26.04,
+"inflationSignal": 26.71,
 "assetImplication": {
 "equity": "overweight",
 "bond": "underweight",
@@ -70,68 +82,570 @@
 },
 "confidence": "high",
 "description": "성장 가속 + 물가 상승 — 원자재·EM 주식·TIPS 유리, 명목채 불리"
+},
+"computedAt": "2026-06-12T15:39:38.196754+00:00"
+},
+"transmission": {
+"market": "KR",
+"sectorKey": null,
+"asOf": "2026-06-17",
+"drivers": [
+{
+"id": "BAMLH0A0HYM2",
+"labelKr": "미국 HY 스프레드",
+"source": "FRED",
+"sourceSeriesId": "BAMLH0A0HYM2",
+"market": "US",
+"unit": "%p",
+"group": "credit",
+"transform": "level_and_delta_1m",
+"directionSemantics": "상승은 신용위험과 자금조달 압력 확대 신호다.",
+"defaultLagMonths": [
+0,
+3
+],
+"releaseLagDays": 1,
+"staleAfterDays": 7,
+"requiredAsOfPolicy": "observation_date <= price_as_of",
+"sourceLineage": {
+"source": "FRED",
+"sourceSeriesId": "BAMLH0A0HYM2",
+"date": "2026-06-16",
+"value": 2.71,
+"unit": "%p",
+"artifactPath": "macro/fred/observations.parquet",
+"asOfPolicy": "observation_date <= price_as_of",
+"status": "observed"
 }
+},
+{
+"id": "BASE_RATE",
+"labelKr": "한국 기준금리",
+"source": "ECOS",
+"sourceSeriesId": "BASE_RATE",
+"market": "KR",
+"unit": "%",
+"group": "rates",
+"transform": "level_and_delta_3m",
+"directionSemantics": "상승은 이자비용, 차입 재조달, 할인율 압력을 키운다.",
+"defaultLagMonths": [
+3,
+12
+],
+"releaseLagDays": 1,
+"staleAfterDays": 45,
+"requiredAsOfPolicy": "observation_date <= price_as_of",
+"sourceLineage": {
+"source": "ECOS",
+"sourceSeriesId": "BASE_RATE",
+"date": "2026-06-15",
+"value": 2.5,
+"unit": "%",
+"artifactPath": "macro/ecos/observations.parquet",
+"asOfPolicy": "observation_date <= price_as_of",
+"status": "observed"
+}
+},
+{
+"id": "CPI",
+"labelKr": "소비자물가 YoY",
+"source": "ECOS",
+"sourceSeriesId": "CPI",
+"market": "KR",
+"unit": "%",
+"group": "inflation",
+"transform": "yoy_and_mom_1m",
+"directionSemantics": "상승은 가격 전가 여지와 실질수요 둔화 압력을 동시에 만든다.",
+"defaultLagMonths": [
+1,
+6
+],
+"releaseLagDays": 20,
+"staleAfterDays": 75,
+"requiredAsOfPolicy": "observation_date <= price_as_of",
+"sourceLineage": {
+"source": "ECOS",
+"sourceSeriesId": "CPI",
+"date": "2026-05-01",
+"value": 119.92,
+"unit": "%",
+"artifactPath": "macro/ecos/observations.parquet",
+"asOfPolicy": "observation_date <= price_as_of",
+"status": "observed"
+}
+},
+{
+"id": "DCOILWTICO",
+"labelKr": "WTI",
+"source": "FRED",
+"sourceSeriesId": "DCOILWTICO",
+"market": "GLOBAL",
+"unit": "$",
+"group": "commodity",
+"transform": "level_and_pct_1m",
+"directionSemantics": "상승은 에너지 매출에는 증가 요인, 제조·물류 원가에는 압력 요인일 수 있다.",
+"defaultLagMonths": [
+0,
+3
+],
+"releaseLagDays": 1,
+"staleAfterDays": 7,
+"requiredAsOfPolicy": "observation_date <= price_as_of",
+"sourceLineage": {
+"source": "FRED",
+"sourceSeriesId": "DCOILWTICO",
+"date": "2026-06-08",
+"value": 95.0,
+"unit": "$",
+"artifactPath": "macro/fred/observations.parquet",
+"asOfPolicy": "observation_date <= price_as_of",
+"status": "observed"
+}
+},
+{
+"id": "EXPORT",
+"labelKr": "수출 YoY",
+"source": "ECOS",
+"sourceSeriesId": "EXPORT",
+"market": "KR",
+"unit": "%",
+"group": "trade",
+"transform": "yoy_and_mom_1m",
+"directionSemantics": "상승은 외부수요와 제조업 매출 환경 개선 신호다.",
+"defaultLagMonths": [
+1,
+6
+],
+"releaseLagDays": 10,
+"staleAfterDays": 45,
+"requiredAsOfPolicy": "observation_date <= price_as_of",
+"sourceLineage": {
+"source": "ECOS",
+"sourceSeriesId": "EXPORT",
+"date": "2026-04-01",
+"value": 90586.8,
+"unit": "%",
+"artifactPath": "macro/ecos/observations.parquet",
+"asOfPolicy": "observation_date <= price_as_of",
+"status": "observed"
+}
+},
+{
+"id": "USDKRW",
+"labelKr": "원/달러",
+"source": "ECOS",
+"sourceSeriesId": "USDKRW",
+"market": "KR",
+"unit": "원",
+"group": "FX",
+"transform": "level_and_mom_1m",
+"directionSemantics": "상승은 원화 약세다. 수출 환산매출과 수입원가를 동시에 흔든다.",
+"defaultLagMonths": [
+0,
+3
+],
+"releaseLagDays": 1,
+"staleAfterDays": 10,
+"requiredAsOfPolicy": "observation_date <= price_as_of",
+"sourceLineage": {
+"source": "ECOS",
+"sourceSeriesId": "USDKRW",
+"date": "2026-06-17",
+"value": 1513.4,
+"unit": "원",
+"artifactPath": "macro/ecos/observations.parquet",
+"asOfPolicy": "observation_date <= price_as_of",
+"status": "observed"
+}
+}
+],
+"edges": [
+{
+"id": "fx-export-revenue",
+"driverId": "USDKRW",
+"market": "KR",
+"sectorKeys": [
+"semiconductor",
+"auto",
+"shipbuilding",
+"chemical",
+"battery"
+],
+"channel": "revenue",
+"financialLine": "매출 성장률 / 환산손익",
+"valuationLever": "growth",
+"sign": "mixed",
+"lagMonths": [
+0,
+3
+],
+"evidenceLevel": "sectorPrior",
+"confidence": "low",
+"requiredCompanyEvidence": [
+"해외 매출 비중",
+"외화 매출·매입 통화",
+"FX 손익 주석"
+],
+"falsifiers": [
+"달러 원가 비중이 해외 매출 효과를 상쇄",
+"헤지 정책으로 환산 민감도 약화"
+],
+"sourceRefs": [
+"driver:USDKRW",
+"macro.transmission:sectorPrior:fx-export"
+],
+"evidenceLabel": "PRIOR",
+"sourceRef": "macro.transmission:edge:fx-export-revenue"
+},
+{
+"id": "export-demand-revenue",
+"driverId": "EXPORT",
+"market": "KR",
+"sectorKeys": [
+"semiconductor",
+"auto",
+"shipbuilding",
+"chemical",
+"battery",
+"logistics"
+],
+"channel": "revenue",
+"financialLine": "매출 성장률 / 가동률",
+"valuationLever": "growth",
+"sign": "positive",
+"lagMonths": [
+1,
+6
+],
+"evidenceLevel": "observed",
+"confidence": "medium",
+"requiredCompanyEvidence": [
+"수출 매출",
+"주요 제품 수요",
+"재고와 수주"
+],
+"falsifiers": [
+"내수 매출 중심",
+"재고 과잉으로 출하 증가가 매출로 이어지지 않음"
+],
+"sourceRefs": [
+"driver:EXPORT",
+"macro.transmission:observed:export-demand"
+],
+"evidenceLabel": "OBS",
+"sourceRef": "macro.transmission:edge:export-demand-revenue"
+},
+{
+"id": "rate-debt-interest",
+"driverId": "BASE_RATE",
+"market": "KR",
+"sectorKeys": [
+"all"
+],
+"channel": "balanceSheet",
+"financialLine": "이자비용 / 차입 재조달",
+"valuationLever": "discountRate",
+"sign": "negative",
+"lagMonths": [
+3,
+12
+],
+"evidenceLevel": "template",
+"confidence": "low",
+"requiredCompanyEvidence": [
+"부채비율",
+"단기차입금",
+"이자보상배율",
+"차입금 만기"
+],
+"falsifiers": [
+"순현금 기업",
+"고정금리 장기차입 중심",
+"이자수익이 비용을 상쇄"
+],
+"sourceRefs": [
+"driver:BASE_RATE",
+"macro.transmission:template:rate-debt"
+],
+"evidenceLabel": "TPL",
+"sourceRef": "macro.transmission:edge:rate-debt-interest"
+},
+{
+"id": "rate-bank-margin",
+"driverId": "BASE_RATE",
+"market": "KR",
+"sectorKeys": [
+"finance",
+"bank"
+],
+"channel": "margin",
+"financialLine": "순이자마진 / 조달비용",
+"valuationLever": "margin",
+"sign": "mixed",
+"lagMonths": [
+1,
+6
+],
+"evidenceLevel": "sectorPrior",
+"confidence": "low",
+"requiredCompanyEvidence": [
+"예대금리차",
+"조달 구조",
+"대손비용",
+"금리민감자산"
+],
+"falsifiers": [
+"조달비용이 대출금리보다 빠르게 상승",
+"대손비용 증가가 NIM 개선을 상쇄"
+],
+"sourceRefs": [
+"driver:BASE_RATE",
+"macro.transmission:sectorPrior:bank-rate"
+],
+"evidenceLabel": "PRIOR",
+"sourceRef": "macro.transmission:edge:rate-bank-margin"
+},
+{
+"id": "hy-risk-premium",
+"driverId": "BAMLH0A0HYM2",
+"market": "US",
+"sectorKeys": [
+"all"
+],
+"channel": "valuation",
+"financialLine": "신용스프레드 / 위험프리미엄",
+"valuationLever": "riskPremium",
+"sign": "negative",
+"lagMonths": [
+0,
+3
+],
+"evidenceLevel": "observed",
+"confidence": "medium",
+"requiredCompanyEvidence": [
+"신용등급",
+"차입 의존도",
+"만기 구조",
+"현금 보유"
+],
+"falsifiers": [
+"무차입 또는 충분한 현금",
+"방어적 현금흐름",
+"정부/모회사 지원 가능성"
+],
+"sourceRefs": [
+"driver:BAMLH0A0HYM2",
+"macro.transmission:observed:credit-spread"
+],
+"evidenceLabel": "OBS",
+"sourceRef": "macro.transmission:edge:hy-risk-premium"
+},
+{
+"id": "oil-margin-cost",
+"driverId": "DCOILWTICO",
+"market": "GLOBAL",
+"sectorKeys": [
+"chemical",
+"auto",
+"logistics",
+"food",
+"energy",
+"utility"
+],
+"channel": "margin",
+"financialLine": "매출총이익률 / 원가율",
+"valuationLever": "margin",
+"sign": "mixed",
+"lagMonths": [
+0,
+3
+],
+"evidenceLevel": "sectorPrior",
+"confidence": "low",
+"requiredCompanyEvidence": [
+"원재료 비중",
+"가격 전가력",
+"재고 회전",
+"연료비 비중"
+],
+"falsifiers": [
+"원가 전가 계약",
+"재고평가 이익",
+"에너지 매출 비중 우세"
+],
+"sourceRefs": [
+"driver:DCOILWTICO",
+"macro.transmission:sectorPrior:oil-margin"
+],
+"evidenceLabel": "PRIOR",
+"sourceRef": "macro.transmission:edge:oil-margin-cost"
+},
+{
+"id": "cpi-utility-tariff",
+"driverId": "CPI",
+"market": "KR",
+"sectorKeys": [
+"utility",
+"food",
+"retail"
+],
+"channel": "margin",
+"financialLine": "판가 / 비용 전가",
+"valuationLever": "margin",
+"sign": "mixed",
+"lagMonths": [
+1,
+6
+],
+"evidenceLevel": "template",
+"confidence": "low",
+"requiredCompanyEvidence": [
+"가격 전가력",
+"규제 요금",
+"수요 탄력성"
+],
+"falsifiers": [
+"가격 규제로 판가 전가 불가",
+"실질소득 둔화로 물량 감소"
+],
+"sourceRefs": [
+"driver:CPI",
+"macro.transmission:template:cpi-margin"
+],
+"evidenceLabel": "TPL",
+"sourceRef": "macro.transmission:edge:cpi-utility-tariff"
+}
+],
+"regimeEvidence": [
+{
+"id": "driver:BAMLH0A0HYM2",
+"driverId": "BAMLH0A0HYM2",
+"status": "observed",
+"date": "2026-06-16",
+"value": 2.71,
+"unit": "%p",
+"sourceRef": "macro/fred/observations.parquet#BAMLH0A0HYM2"
+},
+{
+"id": "driver:BASE_RATE",
+"driverId": "BASE_RATE",
+"status": "observed",
+"date": "2026-06-15",
+"value": 2.5,
+"unit": "%",
+"sourceRef": "macro/ecos/observations.parquet#BASE_RATE"
+},
+{
+"id": "driver:CPI",
+"driverId": "CPI",
+"status": "observed",
+"date": "2026-05-01",
+"value": 119.92,
+"unit": "%",
+"sourceRef": "macro/ecos/observations.parquet#CPI"
+},
+{
+"id": "driver:DCOILWTICO",
+"driverId": "DCOILWTICO",
+"status": "observed",
+"date": "2026-06-08",
+"value": 95.0,
+"unit": "$",
+"sourceRef": "macro/fred/observations.parquet#DCOILWTICO"
+},
+{
+"id": "driver:EXPORT",
+"driverId": "EXPORT",
+"status": "observed",
+"date": "2026-04-01",
+"value": 90586.8,
+"unit": "%",
+"sourceRef": "macro/ecos/observations.parquet#EXPORT"
+},
+{
+"id": "driver:USDKRW",
+"driverId": "USDKRW",
+"status": "observed",
+"date": "2026-06-17",
+"value": 1513.4,
+"unit": "원",
+"sourceRef": "macro/ecos/observations.parquet#USDKRW"
+}
+],
+"aliases": {
+"KRW_USD": "USDKRW",
+"BASE_RATE_KR": "BASE_RATE",
+"WTI": "DCOILWTICO",
+"HY_SPREAD": "BAMLH0A0HYM2"
+},
+"sourceRefs": [
+"dartlab://macro/transmission",
+"ui/packages/contracts/src/macro.ts::MACRO_SERIES",
+"macro/{ecos,fred}/observations.parquet"
+],
+"missing": [],
+"version": "v1"
 },
 "sectorTailwind": {
 "automotive": {
 "kr": 0.4,
-"us": 0.5,
-"blended": 0.44
+"us": -0.3,
+"blended": 0.12
 },
 "biotech": {
 "kr": 0.0,
-"us": 0.1,
-"blended": 0.04
+"us": 0.2,
+"blended": 0.08
 },
 "chemicals": {
 "kr": 0.3,
-"us": 0.2,
-"blended": 0.26
+"us": -0.2,
+"blended": 0.1
 },
 "construction": {
 "kr": 0.5,
-"us": 0.3,
-"blended": 0.42
+"us": -0.4,
+"blended": 0.14
 },
 "display": {
 "kr": 0.3,
-"us": 0.4,
-"blended": 0.34
+"us": -0.2,
+"blended": 0.1
 },
 "energy": {
 "kr": 0.3,
-"us": 0.0,
-"blended": 0.18
+"us": 0.1,
+"blended": 0.22
 },
 "finance": {
 "kr": 0.4,
-"us": 0.3,
-"blended": 0.36
+"us": -0.1,
+"blended": 0.2
 },
 "it_software": {
 "kr": 0.4,
-"us": 0.5,
-"blended": 0.44
+"us": 0.1,
+"blended": 0.28
 },
 "retail": {
 "kr": 0.3,
-"us": 0.4,
-"blended": 0.34
+"us": -0.2,
+"blended": 0.1
 },
 "semiconductor": {
 "kr": 0.5,
-"us": 0.6,
-"blended": 0.54
+"us": -0.2,
+"blended": 0.22
 },
 "shipbuilding": {
 "kr": 0.3,
-"us": 0.4,
-"blended": 0.34
+"us": -0.1,
+"blended": 0.14
 },
 "steel": {
 "kr": 0.4,
-"us": 0.2,
-"blended": 0.32
+"us": -0.3,
+"blended": 0.12
 }
 }
 }

@@ -1,10 +1,43 @@
 # 06. 진행 원장
 
-상태: v0.6
+상태: v0.7
 
 ---
 
 ## 2026-06-18
+
+### v0.7 — `macro.transmission` 터미널 배선 + macroExposure 품질 계약
+
+배경:
+
+- `macro.transmission`은 src에 승격됐지만 터미널 Macro Lens는 아직 UI 템플릿 edge를 우선 사용했다.
+- 운영자가 "판정형? 누가 판정하는데?"를 지적했으므로 UI는 결론자가 아니라 엔진 산출물·근거 gate 소비자가 되어야 한다.
+
+완료:
+
+- `dashboards/macro.json` prebuild 산출물에 `transmission` payload를 싣는 경로를 추가했다.
+- `MacroPort.getTransmission()` 계약을 추가하고 public runtime이 `dashboards/macro.json#transmission`을 market/sector 기준으로 필터링한다.
+- fake runtime도 동일한 `drivers/edges/sourceRefs/missing` shape를 반환해 터미널 테스트 셸이 같은 계약을 쓴다.
+- `TerminalSurface.svelte`가 선택 종목 업종 기준으로 `runtime.macro.getTransmission({ market: "KR", sectorKey, includeCrossMarket: true })`를 호출한다.
+- `MacroLensSnapshot` edge 생성은 `macro.transmission` 산출물을 우선 소비하고, 없을 때만 UI fallback template을 쓴다.
+- driver lineage는 `sourceLineage(date/value/unit/artifactPath/status)`가 있으면 pulse/edge에 반영한다.
+- `analysis.financial.macroExposure.calcMacroSensitivity`는 지표별 `nObs`, `window`, `frequency`, `lagMonths`, `coverage`, `sourceRef`, `sourceRefs`와 top-level `exposureQuality`를 낸다.
+- `tests/analysis/test_macro_exposure_quality.py`로 정량 후보와 macro observation 결손 시 blocked 품질 상태를 고정했다.
+
+검증:
+
+- `python -X utf8 -m pytest tests\analysis\test_macro_exposure_quality.py -q` 통과.
+- `python -X utf8 -m pytest tests\macro\test_transmission.py tests\analysis\test_macro_exposure_quality.py -q` 통과.
+- `python -X utf8 -m pytest tests\architecture\test_prebuild_offline.py -q` 통과.
+- `npm run check -w @dartlab/ui-contracts` 통과.
+- `npm run check -w @dartlab/ui-runtime` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning만 남음).
+
+NEXT:
+
+1. `MacroLensSnapshot.exposureQuality`가 하드코딩된 잠금 상태가 아니라 `Company.analysis("macro", "매크로민감도")` 또는 public-safe 분석 산출물을 직접 소비하게 바꾼다.
+2. 셀 클릭 상세 탭에 `contribution -> co-movement -> falsifier -> source packet` 순서를 실제 interaction으로 연결한다.
+3. public macro artifact 갱신 후 `dashboards/macro.json#transmission`이 실제 배포 파일에도 들어갔는지 visual/runtime QA로 확인한다.
 
 ### v0.6 — `macro.transmission` src 최소 승격
 

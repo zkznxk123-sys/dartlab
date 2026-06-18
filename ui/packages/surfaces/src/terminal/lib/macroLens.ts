@@ -1,6 +1,6 @@
 import { MACRO_ATTRIBUTION, MACRO_SERIES, type MacroLatest, type MacroSeriesDef } from '@dartlab/ui-contracts';
 import type { CoMover } from './coMovement';
-import type { Company, MacroFile, MacroSide, Tailwind, Tone } from './types';
+import type { Company, MacroFile, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
 
 export type MacroLensTab = 'regime' | 'drivers' | 'transmission' | 'scenario' | 'sources';
 export type MacroMarket = 'KR' | 'US' | 'GLOBAL';
@@ -607,7 +607,95 @@ function buildDrivers(latest: MacroLatest[], industry: string, coMovers: CoMover
 	});
 }
 
-function buildEdges(co: Company, drivers: MacroDriverView[]): MacroTransmissionEdgeView[] {
+function normalizeLag(lag: number[] | [number, number] | null | undefined): [number, number] | null {
+	if (!lag || lag.length < 2) return null;
+	const start = Number(lag[0]);
+	const end = Number(lag[1]);
+	return Number.isFinite(start) && Number.isFinite(end) ? [start, end] : null;
+}
+
+function transmissionLineageOf(driver: MacroTransmissionPayload['drivers'][number]): string {
+	const lineage = driver.sourceLineage;
+	if (!lineage) return `${driver.source} · ${driver.sourceSeriesId} · ${driver.transform}`;
+	const date = lineage.date ? fmtDate(lineage.date) : '—';
+	return `${lineage.source} · ${lineage.sourceSeriesId} · obs ${date} · ${driver.transform} · ${lineage.status}`;
+}
+
+function applyTransmissionDriverLineage(drivers: MacroDriverView[], payload?: MacroTransmissionPayload | null): MacroDriverView[] {
+	if (!payload?.drivers?.length) return drivers;
+	const byId = new Map(payload.drivers.map((d) => [d.id, d]));
+	return drivers.map((driver) => {
+		const row = byId.get(driver.id);
+		if (!row) return driver;
+		const lineage = row.sourceLineage;
+		return {
+			...driver,
+			source: row.source,
+			seriesId: row.sourceSeriesId || driver.seriesId,
+			unit: row.unit || driver.unit,
+			group: row.group || driver.group,
+			transform: row.transform || driver.transform,
+			directionSemantics: row.directionSemantics || driver.directionSemantics,
+			defaultLagMonths: normalizeLag(row.defaultLagMonths)?.[1] ?? driver.defaultLagMonths,
+			asOf: lineage?.date ? fmtDate(lineage.date) : driver.asOf,
+			sourceLineage: transmissionLineageOf(row),
+			qualityHint: lineage?.status === 'missing' ? 'blocked: macro transmission lineage missing' : driver.qualityHint
+		};
+	});
+}
+
+function transmissionEdgeMatches(edge: MacroTransmissionEdge, sectorKey: string): boolean {
+	const sectors = Array.isArray(edge.sectorKeys) ? edge.sectorKeys : [];
+	return sectors.includes('all') || sectors.includes(sectorKey);
+}
+
+function noteFromTransmission(edge: MacroTransmissionEdge): string {
+	const required = edge.requiredCompanyEvidence?.length ? `회사 증거: ${edge.requiredCompanyEvidence.slice(0, 3).join(' · ')}` : '회사 증거 필요';
+	const falsifier = edge.falsifiers?.length ? `반증: ${edge.falsifiers[0]}` : '반증 조건은 source packet에서 확인';
+	return `${required}. ${falsifier}.`;
+}
+
+function buildEdgesFromTransmission(co: Company, drivers: MacroDriverView[], payload?: MacroTransmissionPayload | null): MacroTransmissionEdgeView[] {
+	if (!payload?.edges?.length) return [];
+	const driverById = new Map(drivers.map((d) => [d.id, d]));
+	const payloadDrivers = new Map(payload.drivers.map((d) => [d.id, d]));
+	const sectorLabel = co.sector.kr || co.industry;
+	return payload.edges
+		.filter((e) => transmissionEdgeMatches(e, co.industry))
+		.slice(0, 12)
+		.map((e) => {
+			const driver = driverById.get(e.driverId);
+			const payloadDriver = payloadDrivers.get(e.driverId);
+			const blocked = !driver || payloadDriver?.sourceLineage?.status === 'missing';
+			const sourceRefs = [
+				e.sourceRef ?? `macro.transmission:edge:${e.id}`,
+				...(e.sourceRefs ?? []),
+				payloadDriver ? transmissionLineageOf(payloadDriver) : `driver:${e.driverId}:missing`
+			];
+			return {
+				id: e.id,
+				driverId: e.driverId,
+				driverLabel: driver?.label ?? payloadDriver?.labelKr ?? e.driverId,
+				market: e.market,
+				sectorKey: co.industry,
+				sectorLabel,
+				channel: e.channel,
+				financialLine: e.financialLine,
+				valuationLever: e.valuationLever,
+				sign: e.sign,
+				lagMonths: normalizeLag(e.lagMonths),
+				confidence: blocked ? 'blocked' : e.confidence,
+				evidenceLevel: e.evidenceLevel,
+				requiredCompanyEvidence: e.requiredCompanyEvidence ?? [],
+				sourceRefs,
+				note: blocked ? `${noteFromTransmission(e)} 최신 driver 관측 lineage가 닫혀 있어 정량 claim은 잠근다.` : noteFromTransmission(e)
+			};
+		});
+}
+
+function buildEdges(co: Company, drivers: MacroDriverView[], payload?: MacroTransmissionPayload | null): MacroTransmissionEdgeView[] {
+	const transmissionEdges = buildEdgesFromTransmission(co, drivers, payload);
+	if (transmissionEdges.length) return transmissionEdges;
 	const driverById = new Map(drivers.map((d) => [d.id, d]));
 	const sectorLabel = co.sector.kr || co.industry;
 	const selected = EDGE_TEMPLATES
@@ -730,12 +818,14 @@ function buildExposureQuality(): MacroExposureQualityView {
 	};
 }
 
-function buildMissing(args: { macro: MacroFile | null; macroLatest: MacroLatest[]; edges: MacroTransmissionEdgeView[]; coMovers: CoMover[] }): MacroMissingView[] {
+function buildMissing(args: { macro: MacroFile | null; macroLatest: MacroLatest[]; edges: MacroTransmissionEdgeView[]; coMovers: CoMover[]; transmission?: MacroTransmissionPayload | null }): MacroMissingView[] {
 	const out: MacroMissingView[] = [];
 	if (!args.macro) out.push({ id: 'macro-json', status: 'missing', reason: 'macro regime artifact unavailable', sourceRef: 'dashboards/macro.json' });
 	if (!args.macroLatest.length) out.push({ id: 'macro-latest', status: 'missing', reason: 'macro latest observations unavailable', sourceRef: 'macro/{fred,ecos}/observations.parquet' });
-	if (!args.edges.length) out.push({ id: 'transmission-edge', status: 'notWiredYet', reason: 'sector transmission edge unavailable for this company', sourceRef: 'Macro Lens EDGE_TEMPLATES' });
+	if (!args.transmission) out.push({ id: 'macro-transmission', status: 'notWiredYet', reason: 'macro.transmission payload not present in macro artifact; using UI fallback templates', sourceRef: 'dashboards/macro.json#transmission' });
+	if (!args.edges.length) out.push({ id: 'transmission-edge', status: 'notWiredYet', reason: 'sector transmission edge unavailable for this company', sourceRef: args.transmission ? 'dartlab://macro/transmission' : 'Macro Lens EDGE_TEMPLATES' });
 	if (!args.coMovers.length) out.push({ id: 'co-movement', status: 'partial', reason: 'overlap sample insufficient or chart co-movement not calculated', sourceRef: 'terminal coMovement' });
+	for (const m of args.transmission?.missing ?? []) out.push(m);
 	return out;
 }
 
@@ -745,6 +835,7 @@ function buildEvidenceGates(args: {
 	topPressures: MacroDriverView[];
 	edges: MacroTransmissionEdgeView[];
 	exposureQuality: MacroExposureQualityView;
+	edgeSourceRef: string;
 }): MacroEvidenceGateView[] {
 	const top = args.topPressures.length ? args.topPressures : args.drivers.slice(0, 3);
 	const stale = top.filter((d) => d.freshness.status === 'stale');
@@ -772,7 +863,7 @@ function buildEvidenceGates(args: {
 			detailKr: '관측 edge',
 			detailEn: 'observed edges',
 			status: observed.length ? 'ok' : 'watch',
-			sourceRef: 'macro transmission edge template',
+			sourceRef: args.edgeSourceRef,
 			blocks: args.edges.filter((e) => e.confidence === 'blocked').map((e) => `${e.driverId}: ${e.sourceRefs.join(' · ')}`)
 		},
 		{
@@ -814,18 +905,19 @@ function buildEvidenceGates(args: {
 export function buildMacroLensSnapshot(args: {
 	co: Company;
 	macro: MacroFile | null;
+	transmission?: MacroTransmissionPayload | null;
 	macroLatest: MacroLatest[];
 	sectorTailwinds: { id: string; kr: string; en: string; blended: number }[];
 	coMovers: CoMover[];
 }): MacroLensSnapshot {
-	const { co, macro, macroLatest, sectorTailwinds, coMovers } = args;
-	const drivers = buildDrivers(macroLatest, co.industry, coMovers);
+	const { co, macro, transmission = macro?.transmission ?? null, macroLatest, sectorTailwinds, coMovers } = args;
+	const drivers = applyTransmissionDriverLineage(buildDrivers(macroLatest, co.industry, coMovers), transmission);
 	const priorityRank = { high: 0, medium: 1, low: 2, blocked: 3 };
 	const topPressures = [...drivers]
 		.filter((d) => d.relevance !== 'context' && d.pressureLevel !== 'blocked')
 		.sort((a, b) => priorityRank[a.pressureLevel] - priorityRank[b.pressureLevel])
 		.slice(0, 3);
-	const edges = buildEdges(co, drivers);
+	const edges = buildEdges(co, drivers, transmission);
 	const checkpoints = buildCheckpoints(co);
 	const scenarios = buildScenarios(drivers, edges);
 	const falsifiers = buildFalsifiers(coMovers, drivers, macro);
@@ -834,7 +926,8 @@ export function buildMacroLensSnapshot(args: {
 		kr: phaseView('KR', macro?.kr),
 		us: phaseView('US', macro?.us)
 	};
-	const missing = buildMissing({ macro, macroLatest, edges, coMovers });
+	const missing = buildMissing({ macro, macroLatest, edges, coMovers, transmission });
+	const edgeSourceRef = transmission ? 'dartlab://macro/transmission' : 'macro transmission edge template';
 	const financePeriod = co.trendQuarter?.periods.at(-1) ?? co.trendAnnual?.periods.at(-1) ?? null;
 	return {
 		asOf: {
@@ -859,12 +952,13 @@ export function buildMacroLensSnapshot(args: {
 			bottom: sectorTailwinds.length > 4 ? sectorTailwinds.slice(-4).reverse() : []
 		},
 		exposureQuality,
-		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality }),
+		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef }),
 		falsifiers,
 		scenarios,
 		sourceRefs: [
 			MACRO_ATTRIBUTION,
 			'dashboards/macro.json',
+			...(transmission?.sourceRefs ?? []),
 			'macro/{fred,ecos}/observations.parquet',
 			'terminal Company snapshot',
 			'coMovement: monthly stock return vs macro diff',
