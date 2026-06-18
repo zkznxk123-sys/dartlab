@@ -42,6 +42,8 @@ export interface BtTrade {
 	open: boolean;
 	// 03 §0.5.4 — 청산 사유 명시(현 open:true 암묵 → 명시). signal=신호청산 / finalMark=미청산 종가 가상평가.
 	exitReason: 'signal' | 'finalMark';
+	maePct?: number; // 최대역행(보유 중 worst 미실현 %, MAE) — 거래 분석(S2)
+	mfePct?: number; // 최대순행(보유 중 best 미실현 %, MFE)
 	entryDeferredBars: number; // v=0/거래정지로 진입이 이연된 봉 수(0=신호 다음 봉 즉시 체결, 감사용)
 }
 export interface BtWarning {

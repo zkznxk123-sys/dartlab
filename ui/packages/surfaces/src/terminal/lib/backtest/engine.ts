@@ -34,6 +34,8 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 	let entryPx = 0;
 	let heldBars = 0;
 	let deferredBars = 0;
+	let maePct = 0;
+	let mfePct = 0;
 	equity[startIdx] = 100;
 	for (let i = startIdx + 1; i < n; i++) {
 		const b = candles[i];
@@ -48,6 +50,8 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 					cash = 0;
 					pos = 1;
 					entryIdx = i;
+					maePct = 0;
+					mfePct = 0;
 				} else {
 					const px = b.o * (1 - k.slip);
 					const exitPx = px * (1 - k.comm - k.tax);
@@ -63,14 +67,22 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 						holdDays: i - entryIdx,
 						open: false,
 						exitReason: 'signal',
-						entryDeferredBars: 0
+						entryDeferredBars: 0,
+						maePct,
+						mfePct
 					});
 				}
 			} else {
 				deferredBars++; // 신호 변경을 원했으나 거래정지(v=0/o=0) — 다음 거래가능 봉까지 이연(감사)
 			}
 		}
-		if (pos === 1) heldBars++;
+		if (pos === 1) {
+			heldBars++;
+			const lowRet = (b.l / entryPx - 1) * 100;
+			const highRet = (b.h / entryPx - 1) * 100;
+			if (lowRet < maePct) maePct = lowRet;
+			if (highRet > mfePct) mfePct = highRet;
+		}
 		equity[i] = cash + shares * b.c;
 	}
 	if (pos === 1) {
@@ -86,7 +98,9 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 			holdDays: n - 1 - entryIdx,
 			open: true,
 			exitReason: 'finalMark',
-			entryDeferredBars: 0
+			entryDeferredBars: 0,
+			maePct,
+			mfePct
 		});
 	}
 	// entryDeferredBars 는 진입-청산 분리 모델상 청산 시 역산이 어려워 0 (전체 deferredBars 로 감사 — 03 §0.5.4).

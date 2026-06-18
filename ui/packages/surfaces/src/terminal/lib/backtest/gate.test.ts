@@ -51,6 +51,25 @@ describe('fundGate 조건 — 재무 게이트 진입 차단', () => {
 		expect(ruleUsesGate(rule)).toBe(true);
 	});
 
+	it('MAE/MFE: 보유 중 최대역행·최대순행 추적(S2 거래분석)', () => {
+		// 8봉, 비용 0. 항상-진입 룰(price>0) → 봉1 진입 후 보유. 봉4 저가 80(역행), 봉5 고가 130(순행).
+		const cs: Candle[] = Array.from({ length: 8 }, (_, i) => ({ t: `2021${String(i + 1).padStart(4, '0')}`, o: 100, h: 100, l: 100, c: 100, v: 1000 }));
+		cs[4] = { ...cs[4], l: 80 }; // 역행 -20%
+		cs[5] = { ...cs[5], h: 130 }; // 순행 +30%
+		const rule: StrategyRule = {
+			entry: [{ left: 'price', leftParams: {}, op: '>', right: { kind: 'const', value: 0 } }],
+			entryCombine: 'AND',
+			exit: [],
+			exitCombine: 'OR'
+		};
+		const res = runBacktestRule(cs, rule, { windowBars: 8, withCosts: false, costsBp: { commissionBp: 0, sellTaxBp: 0, slippageBp: 0 } });
+		expect(res).not.toBeNull();
+		const tr = res!.trades[0];
+		expect(tr).toBeTruthy();
+		expect(tr.maePct).toBeCloseTo(-20, 5); // 저가 80 / 진입 100 − 1
+		expect(tr.mfePct).toBeCloseTo(30, 5); // 고가 130 / 진입 100 − 1
+	});
+
 	it('runBacktestRule: gate 없으면 fundGate 조건=항상 0(진입 0, 회귀 안전)', () => {
 		const cs = mkCandles(40);
 		const rule: StrategyRule = {
