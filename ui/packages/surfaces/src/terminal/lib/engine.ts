@@ -252,7 +252,8 @@ export interface IndustryMember {
 	margin: number; // opMargin % (가로)
 	growth: number; // revCagr % (세로)
 	cap: number; // gov 시총(크기) — 0 가능
-	grade: string; // profGrade (색=gradeTone)
+	grade: string; // profGrade (수익성 등급)
+	debtGrade: string; // debtGrade (재무 건전성) — 색=gradeTone('debt'). x축(수익성)과 직교.
 }
 export interface IndustryMacro {
 	id: string;
@@ -1089,7 +1090,8 @@ export function createEngine(raw: RawData): Engine {
 				margin: +n.opMargin.toFixed(2),
 				growth: +n.revCagr.toFixed(2),
 				cap: raw.prices.data[n.id]?.marketCap ?? 0,
-				grade: n.profGrade || ''
+				grade: n.profGrade || '',
+				debtGrade: n.debtGrade || ''
 			});
 		}
 		return out;

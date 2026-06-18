@@ -31,18 +31,19 @@
 	const fmt1 = (v: number | null | undefined, u = ''): string => (v == null ? '—' : (Math.abs(v) >= 10 ? Math.round(v).toString() : v.toFixed(1)) + u);
 	const twLabel = (t: number | null): string => (t == null ? '' : t >= 0.55 ? (lang === 'en' ? 'tailwind' : '순풍') : t <= 0.35 ? (lang === 'en' ? 'headwind' : '역풍') : (lang === 'en' ? 'neutral' : '중립'));
 
-	// ── 지형도: 산업 = (영업이익률 중앙값 × 마진 격차 IQR). y(격차)는 좋고나쁨 아님 → 위치 절반 verdict-free.
+	// ── 지형도: 산업 = (영업이익률 중앙값 × 매출 CAGR 중앙값). 드릴(회사맵)과 동일한 (수익성×성장) 좌표 → 깔때기 연속.
+	//   마진 격차(IQR)는 버려지지 않음 — 순위 토글 'polar(마진분산)' 렌즈에 잔존(정보 손실 0).
 	const industryPts = $derived.by((): ScatterPt[] =>
 		all
-			.filter((x) => x.dist.opMargin?.median != null && x.marginIqr != null)
+			.filter((x) => x.dist.opMargin?.median != null && x.dist.revCagr?.median != null)
 			.map((x) => ({
 				id: x.id,
 				x: x.dist.opMargin!.median,
-				y: x.marginIqr as number,
+				y: x.dist.revCagr!.median,
 				size: x.count,
 				label: lang === 'en' ? x.en : x.kr,
 				faint: x.count < 15,
-				meta: `n=${x.count} · ${lang === 'en' ? 'margin' : '마진'} ${fmt1(x.dist.opMargin!.median)}% · ${lang === 'en' ? 'spread' : '격차'} ${fmt1(x.marginIqr)}%p${x.tailwind != null ? ' · ' + twLabel(x.tailwind) : ''}`
+				meta: `n=${x.count} · ${lang === 'en' ? 'margin' : '마진'} ${fmt1(x.dist.opMargin!.median)}% · ${lang === 'en' ? 'growth' : '성장'} ${fmt1(x.dist.revCagr!.median)}%${x.tailwind != null ? ' · ' + twLabel(x.tailwind) : ''}`
 			}))
 	);
 
@@ -54,9 +55,9 @@
 			x: c.margin,
 			y: c.growth,
 			size: c.cap,
-			tone: gradeTone('prof', c.grade),
+			tone: gradeTone('debt', c.debtGrade),
 			label: c.name,
-			meta: `${lang === 'en' ? 'margin' : '마진'} ${fmt1(c.margin)}% · ${lang === 'en' ? 'growth' : '성장'} ${fmt1(c.growth)}%${c.grade ? ' · ' + c.grade : ''}`
+			meta: `${lang === 'en' ? 'margin' : '마진'} ${fmt1(c.margin)}% · ${lang === 'en' ? 'growth' : '성장'} ${fmt1(c.growth)}%${c.debtGrade ? (lang === 'en' ? ' · debt ' : ' · 부채 ') + c.debtGrade : ''}`
 		}))
 	);
 	const plotted = $derived(memberPts.length);
@@ -77,13 +78,15 @@
 	const dirLabel = $derived.by(() => {
 		if (dirSigns.length < 2) return { txt: '', cls: 'tNeu' };
 		const up = dirSigns.filter((x) => x > 0).length, dn = dirSigns.filter((x) => x < 0).length;
-		return up > dn ? { txt: lang === 'en' ? 'improving' : '개선', cls: 'tUp' } : dn > up ? { txt: lang === 'en' ? 'deteriorating' : '악화', cls: 'tDn' } : { txt: lang === 'en' ? 'mixed' : '혼조', cls: 'tNeu' };
+		// 색 중립(tNeu) — 부호 다수결을 초록/빨강으로 칠하면 매출 −를 묻고 verdict 누출. 라벨 텍스트만.
+		return up > dn ? { txt: lang === 'en' ? 'improving' : '개선', cls: 'tNeu' } : dn > up ? { txt: lang === 'en' ? 'deteriorating' : '악화', cls: 'tNeu' } : { txt: lang === 'en' ? 'mixed' : '혼조', cls: 'tNeu' };
 	});
 	const sgn = (v: number | null | undefined, u: string): string => (v == null ? '—' : (v > 0 ? '+' : '') + v.toFixed(1) + u);
 	const polarLabel = $derived(m?.marginIqr == null ? '' : m.marginIqr > 15 ? (lang === 'en' ? 'wide' : '넓음') : m.marginIqr < 8 ? (lang === 'en' ? 'narrow' : '좁음') : (lang === 'en' ? 'mid' : '보통'));
 
+	// 색 범례 = 재무 건전성(debtGrade 4단). x축 수익성과 직교 — "고수익인데 빨강=현금 압박" 즉시 보임.
 	const GRADE_LEG: { t: string; k: string; e: string }[] = [
-		{ t: 'up', k: '우수', e: 'top' }, { t: 'good', k: '양호', e: 'good' }, { t: 'neutral', k: '보통', e: 'mid' }, { t: 'warn', k: '저수익', e: 'thin' }, { t: 'down', k: '적자', e: 'loss' }
+		{ t: 'up', k: '안전', e: 'safe' }, { t: 'good', k: '관찰', e: 'watch' }, { t: 'warn', k: '주의', e: 'caution' }, { t: 'down', k: '고위험', e: 'high-risk' }
 	];
 
 	$effect(() => {
@@ -117,14 +120,14 @@
 					</span>
 				</div>
 				<ScatterMap pts={memberPts} xLabel={lang === 'en' ? 'op-margin %' : '수익성(영업이익률 %)'} yLabel={lang === 'en' ? 'rev CAGR %' : '성장(매출 CAGR %)'} showLabels zeroX onPick={onPick}
-					hint={lang === 'en' ? `※ dot = company · size = gov market-cap · color = profit grade · position = actual values (${plotted} plotted, extremes pinned to edge) · click → company` : `※ 점=회사 · 크기=gov 시총 · 색=수익성 등급 · 위치=실측값 (${plotted}사 · 극단값 가장자리·hover=실제) · 클릭 → 종목`} />
+					hint={lang === 'en' ? `※ dot = company · size = gov market-cap · color = financial health (debt grade) · position = actual values (${plotted} plotted, extremes pinned to edge) · click → company` : `※ 점=회사 · 크기=gov 시총 · 색=재무 건전성(부채등급) · 위치=실측값 (${plotted}사 · 극단값 가장자리·hover=실제) · 클릭 → 종목`} />
 				<!-- 비공간 사실 — 얇은 칩 한 줄(표 아님) -->
 				<div class="indFactStrip">
 					<span>{lang === 'en' ? 'spread(IQR)' : '마진 격차'} <b>{fmt1(m.marginIqr)}%p</b> {polarLabel}</span>
 					<span>{lang === 'en' ? 'loss' : '적자'} <b>{m.bucket.lossRisk}%</b></span>
 					<span>{lang === 'en' ? 'thin' : '저수익'} <b>{m.bucket.profRisk}%</b></span>
 					<span>{lang === 'en' ? 'distress' : '부실'} <b>{m.bucket.cfDistress}%</b></span>
-					{#if dir && dirSigns.length >= 2}<span>{lang === 'en' ? 'YoY' : '방향'} {lang === 'en' ? 'm' : '마진'}{sgn(dir.opMarginDelta, '')} ROE{sgn(dir.roeDelta, '')} {lang === 'en' ? 'rev' : '매출'}{sgn(dir.revenueYoyPct, '')} <em class={dirLabel.cls}>{dirLabel.txt}</em></span>{/if}
+					{#if dir && dirSigns.length >= 2}<span title={`${lang === 'en' ? 'margin' : '마진'}${sgn(dir.opMarginDelta, '')} ROE${sgn(dir.roeDelta, '')} ${lang === 'en' ? 'rev' : '매출'}${sgn(dir.revenueYoyPct, '')}`}>{lang === 'en' ? 'YoY' : '방향'} <em class={dirLabel.cls}>{dirLabel.txt}</em></span>{/if}
 					{#if m.cfSignature}<span>{lang === 'en' ? 'CF' : '현금'} <b>{m.cfSignature.pattern}</b></span>{/if}
 					{#if m.tailwind != null}<span class={m.tailwind >= 0.55 ? 'tUp' : m.tailwind <= 0.35 ? 'tDn' : 'tNeu'}>{twLabel(m.tailwind)} {m.tailwind.toFixed(2)}</span>{/if}
 				</div>
@@ -143,8 +146,8 @@
 					{/if}
 				</div>
 				{#if landView === 'map'}
-					<ScatterMap pts={industryPts} xLabel={lang === 'en' ? 'op-margin median' : '영업이익률 중앙값(수익 수준)'} yLabel={lang === 'en' ? 'margin spread IQR' : '마진 격차(IQR)'} showLabels zeroX yFloor0 onPick={(id) => (view = id)}
-						hint={lang === 'en' ? '※ dot = industry · x = margin level · y = within-industry spread · size = members · position = observation, not a verdict · click → companies' : '※ 점=산업 · 가로=수익 수준 · 세로=산업 내 격차 · 크기=멤버수 · 위치=관측이지 판정 아님 · 클릭 → 회사 산포'} />
+					<ScatterMap pts={industryPts} xLabel={lang === 'en' ? 'op-margin median' : '영업이익률 중앙값(수익 수준)'} yLabel={lang === 'en' ? 'rev CAGR median' : '성장(매출 CAGR %)'} showLabels zeroX onPick={(id) => (view = id)}
+						hint={lang === 'en' ? '※ dot = industry · x = margin level · y = revenue growth · size = members · position = observation, not a verdict · click → companies' : '※ 점=산업 · 가로=수익 수준 · 세로=매출 성장 · 크기=멤버수 · 위치=관측이지 판정 아님 · 클릭 → 회사 산포'} />
 				{:else}
 					<div class="indLand">
 						{#each landRows as r, i (r.x.id)}
@@ -167,14 +170,14 @@
 					? 'Distribution: industryStats · KSIC · equal-weight · listed primary (≠ KRX cap-weighted index). Market-cap/PBR use gov, not KRX.'
 					: '분포: industryStats · KSIC · 동일가중 · 상장 primary (≠ KRX 시총가중 업종지수). 시총/PBR은 gov(KRX 아님).'}</div>
 				<div>※ {lang === 'en'
-					? 'Company dots = actual reported values; grade color = scan profit grade (an assessment, labeled). n<15 (⚠) ranks less stable.'
-					: '회사 점 = 실측 보고값 · 색 = scan 수익성 등급(평가값, 라벨). n<15(⚠) 순위 불안정.'}</div>
+					? 'Company dots = actual reported values; color = scan debt grade (financial health, an assessment, labeled). n<15 (⚠) ranks less stable.'
+					: '회사 점 = 실측 보고값 · 색 = scan 부채(건전성) 등급(평가값, 라벨). n<15(⚠) 순위 불안정.'}</div>
 				<div>※ {lang === 'en'
 					? 'Snapshot of current listed members (survivorship: delisted/unlisted excluded) — not a trend; positions shift year to year.'
 					: '현재 상장 멤버 스냅샷(생존편향: 상폐·비상장 제외) — 추세 아님, 위치는 연도별로 바뀜.'}</div>
 				<div>※ {lang === 'en'
-					? 'Position facts only — no buy/sell, no causal/forecast (spread is observed dispersion, not a verdict).'
-					: '위치 사실만 — 매수/매도·인과/예측 금지(격차는 관측된 분산이지 판정 아님).'}</div>
+					? 'Position facts only — no buy/sell, no causal/forecast (axes are observed metrics, not a verdict).'
+					: '위치 사실만 — 매수/매도·인과/예측 금지(축은 관측된 지표이지 판정 아님).'}</div>
 			</div>
 		</div>
 	</div>

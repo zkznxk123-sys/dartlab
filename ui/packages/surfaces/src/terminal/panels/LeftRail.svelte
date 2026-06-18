@@ -92,8 +92,8 @@
 	// 미니 지형도 — 산업 = (영업이익률 중앙값 × 마진 격차 IQR). 위치=구조 관측. 현재 종목 산업 강조·클릭=스크리너 필터+상세.
 	const industryPts = $derived.by((): ScatterPt[] =>
 		sweepAll
-			.filter((s) => s.count >= 10 && s.dist.opMargin?.median != null && s.marginIqr != null)
-			.map((s) => ({ id: s.id, x: s.dist.opMargin!.median, y: s.marginIqr as number, size: s.count, label: lang === 'en' ? s.en : s.kr, faint: s.count < 15 }))
+			.filter((s) => s.count >= 10 && s.dist.opMargin?.median != null && s.dist.revCagr?.median != null)
+			.map((s) => ({ id: s.id, x: s.dist.opMargin!.median, y: s.dist.revCagr!.median, size: s.count, label: lang === 'en' ? s.en : s.kr, faint: s.count < 15 }))
 	);
 	const curIndustry = $derived(sectorFilter || (eng.raw.eco?.nodes || []).find((n) => n.id === active)?.industry || '');
 	const activeSectorName = $derived(sectorFilter ? (sweepAll.find((s) => s.id === sectorFilter)?.kr || sectorFilter) : '');
@@ -151,10 +151,10 @@
 		<button class="scrOpenBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'detail · all industries' : '상세보기 · 전체 산업'}>{lang === 'en' ? 'Detail ↗' : '상세보기 ↗'}</button>
 	{/snippet}
 	<div class="swMap">
-		<ScatterMap pts={industryPts} compact highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX yFloor0 />
+		<ScatterMap pts={industryPts} compact highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
 	</div>
 	<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `detail · ${industryPts.length} industries · companies →` : `상세보기 · ${industryPts.length}산업 · 회사 산포 →`}</button>
-	<div class="swNote">ⓘ {lang === 'en' ? 'x = margin · y = spread · ring = current · equal-weight · not KRX' : '가로=수익 · 세로=마진격차 · ◯=현재 산업 · 상장 동일가중 · KRX 아님'}</div>
+	<div class="swNote">ⓘ {lang === 'en' ? 'x = margin · y = growth · ring = current · equal-weight · not KRX' : '가로=수익 · 세로=성장 · ◯=현재 산업 · 상장 동일가중 · KRX 아님'}</div>
 </Panel>
 
 <!-- 하단 통합 — 스크리너 ⇄ 공시 워치 탭. 워치가 무한 증가해 스크리너를 가리던 문제 해소

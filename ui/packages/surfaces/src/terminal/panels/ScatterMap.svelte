@@ -48,8 +48,9 @@
 		// 로버스트 축 — 극단 아웃라이어가 축을 늘려 본질 클러스터를 뭉개는 것 방지(분포 2.5~97.5% 범위).
 		// 범위 밖 점은 가장자리에 클램프(드롭 아님·hover=실제값). 산업맵(중앙값·소수)엔 영향 미미.
 		const q = (arr: number[], pp: number) => { const s = [...arr].sort((a, b) => a - b); const idx = (s.length - 1) * pp; const lo = Math.floor(idx), hi = Math.ceil(idx); return s[lo] + (s[hi] - s[lo]) * (idx - lo); };
-		let xmin = q(xs, 0.025), xmax = q(xs, 0.975);
-		let ymin = yFloor0 ? 0 : q(ys, 0.025), ymax = q(ys, 0.975);
+		const qlo = ps.length > 40 ? 0.1 : 0.025, qhi = 1 - qlo; // 점 많으면(회사맵 100+사) 10~90%로 타이트 — 정상기업 중앙압축 방지. 소수(산업맵 29)는 극단 보존.
+		let xmin = q(xs, qlo), xmax = q(xs, qhi);
+		let ymin = yFloor0 ? 0 : q(ys, qlo), ymax = q(ys, qhi);
 		if (xmax <= xmin) { xmin = Math.min(...xs); xmax = Math.max(...xs); }
 		if (ymax <= ymin) { ymin = yFloor0 ? 0 : Math.min(...ys); ymax = Math.max(...ys); }
 		const xpad = (xmax - xmin || 1) * 0.09; xmin -= xpad; xmax += xpad;
