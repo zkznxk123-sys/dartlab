@@ -181,7 +181,7 @@
 </div>
 
 <style>
-	.indModal { width: min(760px, 95vw); }
+	.indModal { width: min(660px, 92vw); max-height: 86vh; }
 	.indBack { background: none; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; color: #c2cad6; font-size: 10px; padding: 1px 7px; cursor: pointer; }
 	.indBack:hover { color: var(--dl-ink, #c8cfdb); border-color: var(--amber, #fb923c); }
 	.indWho { font-size: 12px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }

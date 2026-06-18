@@ -41,7 +41,7 @@
 	const geo = $derived.by(() => {
 		const ps = pts.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
 		if (ps.length < 2) return null;
-		const W = compact ? 220 : 700, H = compact ? 134 : 360;
+		const W = compact ? 220 : 700, H = compact ? 134 : 300;
 		const ml = compact ? 16 : 52, mr = compact ? 12 : 70, mt = compact ? 10 : 14, mb = compact ? 16 : 28;
 		const x0 = ml, x1 = W - mr, y0 = mt, y1 = H - mb;
 		const xs = ps.map((p) => p.x), ys = ps.map((p) => p.y);
