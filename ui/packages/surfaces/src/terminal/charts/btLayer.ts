@@ -13,7 +13,8 @@ import type { StrategySlot } from '../lib/backtest';
 export const BT_TRADES = 'BT_TRADES';
 export const BT_EQUITY = 'BT_EQUITY';
 // 전략 슬롯 ≤3 색 (캔들 상승/하락·combo·B&H 와 구분). combo=마젠타, B&H=회색.
-export const STRAT_COLORS = ['#fb923c', '#38bdf8', '#a3e635'];
+// 3번째는 보라(#a78bfa) — 라임(#a3e635)은 손익 초록(--up #34d399)과 혼동돼 제거.
+export const STRAT_COLORS = ['#fb923c', '#38bdf8', '#a78bfa'];
 export const COMBO_COLOR = '#e879f9';
 export const BH_COLOR = '#8b919e';
 
@@ -71,9 +72,9 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 					ctx.save();
 					ctx.strokeStyle = 'rgba(96,165,250,0.55)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
 					ctx.beginPath(); ctx.moveTo(splitX, 0); ctx.lineTo(splitX, bounding.height); ctx.stroke(); ctx.setLineDash([]);
-					ctx.font = '9px monospace';
-					ctx.fillStyle = '#8b919e'; ctx.textAlign = 'right'; ctx.fillText('학습', splitX - 4, 11);
-					ctx.fillStyle = '#60a5fa'; ctx.textAlign = 'left'; ctx.fillText('검증', splitX + 4, 11);
+					ctx.font = '11px monospace';
+					ctx.fillStyle = '#8b919e'; ctx.textAlign = 'right'; ctx.fillText('학습', splitX - 4, 13);
+					ctx.fillStyle = '#60a5fa'; ctx.textAlign = 'left'; ctx.fillText('검증', splitX + 4, 13);
 					ctx.restore();
 				}
 			}
@@ -87,37 +88,45 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 				ext.ts.forEach((t, k) => gmap.set(t, ext.gate!.active[k] ?? 0));
 				const gf = Math.max(0, visibleRange.from);
 				const gt = Math.min(kLineDataList.length, visibleRange.to);
-				ctx.fillStyle = 'rgba(52,211,153,0.10)';
+				ctx.fillStyle = 'rgba(120,140,170,0.12)'; // 중립 청회 — 손익 초록과 인지 분리(게이트=재무건강 구간, 수익 아님)
 				let runX0: number | null = null;
 				for (let gi = gf; gi <= gt; gi++) {
 					const on = gi < gt && gmap.get(kLineDataList[gi]?.timestamp) === 1;
 					if (on && runX0 == null) runX0 = xAxis.convertToPixel(gi);
 					else if (!on && runX0 != null) { const gx1 = xAxis.convertToPixel(gi); ctx.fillRect(runX0, 0, Math.max(1, gx1 - runX0), bounding.height); runX0 = null; }
 				}
-				if (ext.gate.label) { ctx.save(); ctx.font = '9px monospace'; ctx.fillStyle = 'rgba(52,211,153,0.8)'; ctx.textAlign = 'left'; ctx.fillText(String.fromCharCode(9636) + ' ' + ext.gate.label, 6, bounding.height - 6); ctx.restore(); }
+				if (ext.gate.label) { ctx.save(); ctx.font = '11px monospace'; ctx.fillStyle = 'rgba(120,140,170,0.85)'; ctx.textAlign = 'left'; ctx.fillText(String.fromCharCode(9636) + ' ' + ext.gate.label, 6, bounding.height - 6); ctx.restore(); }
 			}
 			const tmap = new Map(s.trades.map((tr) => [tr.ts, tr]));
 			const label = barSpace.bar >= 12 && ext.strategies.length === 1; // LOD-2: 라벨은 단일전략·충분 줌만
 			const from = Math.max(0, visibleRange.from);
 			const to = Math.min(kLineDataList.length, visibleRange.to);
-			ctx.font = '10px monospace';
+			ctx.font = '10px monospace'; ctx.textAlign = 'center';
+				// 마커 가격 라벨 — 반투명 배경칩으로 캔들 위 대비 확보(가독).
+				const labelChip = (txt: string, cx: number, cy: number) => {
+					const w = ctx.measureText(txt).width;
+					ctx.fillStyle = 'rgba(10,14,21,0.72)';
+					ctx.fillRect(cx - w / 2 - 3, cy - 9, w + 6, 12);
+					ctx.fillStyle = '#aeb6c2';
+					ctx.fillText(txt, cx, cy);
+				};
 			for (let i = from; i < to; i++) {
 				const d = kLineDataList[i];
 				const m = tmap.get(d.timestamp);
 				if (!m) continue;
 				const x = xAxis.convertToPixel(i);
-				const sz = 4.5;
+				const sz = 5.5;
 				ctx.beginPath();
 				if (m.side === 'B') {
 					const y = yAxis.convertToPixel(d.low) + 12;
 					ctx.fillStyle = s.color;
 					ctx.moveTo(x, y - sz); ctx.lineTo(x - sz, y + sz); ctx.lineTo(x + sz, y + sz); ctx.closePath(); ctx.fill();
-					if (label) { ctx.fillStyle = '#8b919e'; ctx.textAlign = 'center'; ctx.fillText(m.px.toLocaleString('en-US', { maximumFractionDigits: 0 }), x, y + sz + 11); }
+					if (label) labelChip(m.px.toLocaleString('en-US', { maximumFractionDigits: 0 }), x, y + sz + 12);
 				} else {
 					const y = yAxis.convertToPixel(d.high) - 12;
 					ctx.fillStyle = m.stop ? '#f0616f' : s.color; // 손절 청산은 빨강 구분(P2)
 					ctx.moveTo(x, y + sz); ctx.lineTo(x - sz, y - sz); ctx.lineTo(x + sz, y - sz); ctx.closePath(); ctx.fill();
-					if (label) { ctx.fillStyle = '#8b919e'; ctx.textAlign = 'center'; ctx.fillText(m.px.toLocaleString('en-US', { maximumFractionDigits: 0 }), x, y - sz - 4); }
+					if (label) labelChip(m.px.toLocaleString('en-US', { maximumFractionDigits: 0 }), x, y - sz - 5);
 				}
 			}
 			return true;
@@ -203,8 +212,8 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 			if (ext.combo) polyline((r) => r.c, ext.combo.color, 2.3, false);
 
 			// 7. 범례 (좌상단) — 전략 라벨 + 마지막 값
-			ctx.font = '9px monospace'; ctx.textAlign = 'left';
-			let ly = 11;
+			ctx.font = '11px monospace'; ctx.textAlign = 'left';
+			let ly = 13;
 			const lastOf = (pick: (r: NonNullable<EqRow>) => number | null): number | null => {
 				for (let i = to - 1; i >= from; i--) { const r = result[i]; if (r) { const v = pick(r); if (v != null) return v; } }
 				return null;
@@ -212,7 +221,7 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 			const legend = (color: string, text: string, v: number | null) => {
 				ctx.fillStyle = color;
 				ctx.fillText(`${text}${v != null ? ' ' + (v - 100 >= 0 ? '+' : '') + (v - 100).toFixed(1) + '%' : ''}`, 6, ly);
-				ly += 11;
+				ly += 13;
 			};
 			if (ext.combo) legend(ext.combo.color, '조합', lastOf((r) => r.c));
 			ext.strategies.forEach((s, si) => legend(s.color, s.label, lastOf((r) => r.e[si] ?? null)));

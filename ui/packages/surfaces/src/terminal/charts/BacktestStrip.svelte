@@ -66,23 +66,19 @@
 			</button>
 		{/each}
 		<span class="btSpacer"></span>
-		<button class="btMore" onclick={onOpenReport} title={T('전문 화면 — 자산곡선·거래·낙폭·가정', 'professional view')}>{T('백테스팅 상세', 'details')} ▸</button>
+		<button class="btMore" onclick={onOpenReport} title={T('자산곡선·거래·낙폭·가정 보기', 'detailed view')}>{T('백테스팅 상세', 'details')} ▸</button>
 		<button class="btClose" onclick={onClear} title={T('백테스트 해제', 'clear backtest')}>✕</button>
 	</div>
 
-	<!-- ★정직 3단 위계 (02 §4·04 §2): active(amber·트리거 시만) / caution(slate·N≥2) / spec(중립·항상). 닫기 불가, 11px floor. -->
-	{#if (focusRes?.warnings ?? []).length}
-		<div class="btTier btTierActive">
+	<!-- ★정직 플래그 (닫기 불가): active 경고(amber·트리거 시) + 사후선택/분산(multi). 산문→칩으로 면적 회수, 전문은 ⓘ 방법론에 보존. -->
+	{#if (focusRes?.warnings ?? []).length || multi}
+		<div class="btTier btTierFlags">
 			{#each focusRes?.warnings ?? [] as w (w.kind)}
 				<span class="btWarnChip" title={w.date ?? ''}>⚠ {T(WARN_LABEL[w.kind].kr, WARN_LABEL[w.kind].en)}{w.date ? ' ' + fmtDate(w.date) : ''}</span>
 			{/each}
-		</div>
-	{/if}
-	{#if multi}
-		<div class="btTier btTierCaution">
-			{T('여러 전략 같은 데이터 비교 = 사후선택 편향(위 곡선이 미래 최고 아님)', 'comparing strategies on the same data = selection bias (top curve ≠ best future)')}
-			· {T('단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'single-stock combo = timing, not asset diversification')}
-			{#if pf.combo}· {T('조합 = 동일가중 보유합성(리밸런싱 없음)', 'combo = equal-weight, no rebalancing')}{#if comboMddBetter && comboMddNums} · <b class="btDiv">{T('분산효과: 조합 MDD', 'diversification: combo MDD')} {comboMddNums.combo.toFixed(0)}% &lt; {comboMddNums.worst.toFixed(0)}%</b>{/if}{/if}
+			{#if multi}
+				<button class="btFlagChip" onclick={() => (methodOpen = !methodOpen)} title={T('여러 전략을 같은 데이터로 비교 = 사후선택 편향(위 곡선이 미래 최고 아님) · 단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'comparing strategies on the same data = selection bias · single-stock combo = timing, not asset diversification')}>{T('사후선택·타이밍분산', 'selection · timing')}{#if comboMddBetter && comboMddNums} · <b class="btDiv">{T('분산효과 낙폭', 'divers. DD')} {Math.abs(comboMddNums.combo).toFixed(0)}%&lt;{Math.abs(comboMddNums.worst).toFixed(0)}%</b>{/if} ⓘ</button>
+			{/if}
 		</div>
 	{/if}
 	<div class="btTier btTierSpec">
@@ -96,6 +92,7 @@
 	</div>
 	{#if methodOpen}
 		<div class="btLedger">
+			{#if multi}<div>{T('· 여러 전략 같은 데이터 비교 = 사후선택 편향 · 단일종목 조합 = 타이밍 분산이지 자산 분산 아님 · 조합 = 동일가중 보유합성(리밸런싱 없음)', '· comparing strategies on same data = selection bias · single-stock combo = timing not asset diversification · combo = equal-weight, no rebalancing')}</div>{/if}
 			<div>{T('· 신호 t일 종가 → t+1일 시가 체결 — 미래참조 구조적 차단', '· signal close(t) → fill open(t+1) — look-ahead structurally blocked')}</div>
 			<div>{T('· 거래정지·갭 봉(v=0/o=0) = 체결 이연 (감사 카운터로 노출)', '· halted/gap bars (v=0/o=0) = fill deferred (audit counter)')}</div>
 			<div>{T('· 배당 미반영 + 무수정주가 기본 → B&H를 보수적으로 깎음(전략이 상대적 유리) — 상존 편향', '· dividends excluded + unadjusted price haircut B&H — persistent bias favoring strategy')}</div>
@@ -105,35 +102,37 @@
 </div>
 
 <style>
-	.btStrip { background: var(--dl-bg-raised, #0e141f); border-top: 1px solid var(--dl-line, #1b2130); padding: 5px 12px 4px; font-size: 11.5px; }
+	/* 하단 도킹 오버레이 — positioning SSOT 여기로 통일(terminal.css 글로벌 .btStrip 블록 제거). */
+	.btStrip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: rgba(10, 14, 21, 0.95); border-top: 1px solid var(--dl-line-strong, #2a3142); padding: 5px 12px 4px; font-size: 11.5px; backdrop-filter: blur(2px); }
 	.btStrip.btLag { opacity: 0.92; }
 	.btHead { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-	.btRet { font-size: 12.5px; font-weight: 700; }
+	.btRet { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
 	.btVs { color: var(--dimmer); font-size: 10px; }
-	.btExcess { font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--dl-line, #1b2130); }
+	.btExcess { font-size: 13px; font-weight: 700; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--dl-line, #1b2130); font-variant-numeric: tabular-nums; }
 	.btDot { color: #3a4456; }
-	.btChip { display: inline-flex; align-items: center; gap: 5px; background: none; border: 1px solid var(--dl-line, #1b2130); border-radius: 12px; padding: 1px 8px 1px 5px; cursor: pointer; font-family: inherit; font-size: 10.5px; color: #aeb6c2; }
+	.btChip { display: inline-flex; align-items: center; gap: 5px; background: none; border: 1px solid var(--dl-line, #1b2130); border-radius: 12px; padding: 1px 8px 1px 5px; cursor: pointer; font-family: inherit; font-size: 11px; color: #aeb6c2; }
 	.btChip:hover { border-color: #3a4456; }
 	.btChip.on { border-color: #3a4456; background: rgba(255, 255, 255, 0.04); }
 	.btSw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
 	.btChipLbl { color: var(--dl-ink, #c8cfdb); }
-	.btChip b { font-size: 10.5px; }
+	.btChip b { font-size: 11px; font-variant-numeric: tabular-nums; }
 	.btSpacer { flex: 1 1 auto; }
-	.btMore { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 10.5px; padding: 2px 9px; border-radius: 3px; cursor: pointer; font-family: inherit; }
-	.btMore:hover { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
+	.btMore { background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.45); color: var(--amber, #fb923c); font-size: 11px; font-weight: 600; padding: 2px 11px; border-radius: 3px; cursor: pointer; font-family: inherit; }
+	.btMore:hover { background: rgba(251, 146, 60, 0.2); }
 	.btClose { background: none; border: none; color: var(--dimmer); cursor: pointer; font-size: 13px; padding: 0 2px; }
 	.btClose:hover { color: var(--dl-ink, #c8cfdb); }
-	/* ★정직 3단 위계 — 11px floor(권위로 읽히게, 9.5px 위반 교정) */
+	/* ★정직 — 권위는 활자크기 아니라 상존+닫기불가. 산문→칩으로 면적 회수, 전문은 ⓘ 보존. 11px floor 유지. */
 	.btTier { margin-top: 3px; line-height: 1.5; font-size: 11px; }
-	.btTierActive { display: flex; flex-wrap: wrap; gap: 5px; }
+	.btTierFlags { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 	.btWarnChip { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 6px; }
-	.btTierCaution { color: #8b94a3; font-style: italic; }
+	.btFlagChip { font-size: 11px; color: #8b94a3; background: none; border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 1px 7px; cursor: pointer; font-family: inherit; }
+	.btFlagChip:hover { color: #aeb6c2; border-color: #3a4456; }
 	.btDiv { font-weight: 600; font-style: normal; color: #aeb6c2; } /* 분산효과 증거 — 중립 강조(승자 축포 금지) */
 	.btTierSpec { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--dimmer); }
 	.btStamp { color: #8b94a3; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 0 6px; letter-spacing: 0.01em; }
 	.btMethod { font-size: 11px; background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; border-radius: 3px; padding: 0 7px; cursor: pointer; font-family: inherit; }
 	.btMethod:hover, .btMethod.on { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
-	.btAttr { margin-left: auto; color: #5b6573; font-size: 10.5px; }
+	.btAttr { margin-left: auto; color: #5b6573; font-size: 10px; }
 	.btLedger { margin-top: 4px; padding: 6px 8px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; font-size: 11px; color: #8b94a3; line-height: 1.6; }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }

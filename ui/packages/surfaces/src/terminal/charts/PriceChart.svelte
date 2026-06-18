@@ -63,6 +63,7 @@
 	let el: HTMLDivElement | null = $state(null);
 	let chart = $state<any>(null);
 	let btPf = $state<PortfolioBtResult | null>(null); // 다전략 결과(N≤3 + 조합)
+	let btCandleTs = $state<string[]>([]); // 백테스트 캔들 t(YYYYMMDD) — equity 정렬(BacktestDialog 슬라이스)
 	let btReportOpen = $state(false); // [백테스팅 상세] → BacktestDialog(전문 화면) 오픈
 	// 종목↔거시 동행(상관) — "어떤 거시가 이 종목과 같이 움직였나"(04 §5, 인과 아님). 회사전환 시 캔들 기준 재계산.
 	let coMovers = $state<CoMover[]>([]);
@@ -811,6 +812,7 @@
 		if (subject === 'index' || !slots.length) {
 			clearBt(c);
 			btPf = null;
+			btCandleTs = [];
 			return;
 		}
 		void ctl.adj;
@@ -827,6 +829,7 @@
 		const stop = ctl.btStop.lossPct || ctl.btStop.gainPct ? { ...ctl.btStop } : null; // 손절/익절(S2) — 빈값=미적용
 		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, gate, stop, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btPf = pf;
+		btCandleTs = all.map((cd) => cd.t); // equity 인덱스 정렬 — BacktestDialog 가 startIdx 오프셋으로 슬라이스
 		// 펀더게이트 배경 틴트 — 포커스 전략의 fundGate 조건(임계값)으로 활성 구간 산출(공시일 이후 PIT 계단).
 		let gateVis: { active: (0 | 1)[]; label: string } | null = null;
 		if (gate && usesGate) {
@@ -1304,7 +1307,7 @@
 		<BacktestStrip pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClear={() => ctl.clearBtAll()} onOpenReport={() => (btReportOpen = true)} />
 	{/if}
 	{#if btPf && ctl.btStrategies.length && btReportOpen}
-		<BacktestDialog pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClose={() => (btReportOpen = false)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />
+		<BacktestDialog pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClose={() => (btReportOpen = false)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />
 	{/if}
 </div>
 

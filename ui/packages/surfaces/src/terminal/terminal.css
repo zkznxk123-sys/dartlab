@@ -442,21 +442,8 @@
 .dlTerm .btParamLbl { font-size: 11px; color: var(--dim); min-width: 42px; }
 .dlTerm .btParamVal { font-size: 13px; color: var(--txt); min-width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
 
-/* 백테스트 결과 바 — 차트 하단 슬림 1줄(읽히는 헤드라인만). 상세 전부는 [백테스팅 상세]→BacktestDialog. */
-.dlTerm .btStrip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: rgba(10, 14, 21, 0.95); border-top: 1px solid var(--bdHi, #2a3142); padding: 5px 12px 4px; backdrop-filter: blur(2px); }
-.dlTerm .btStrip.btLag .btHead { opacity: 0.8; }
-.dlTerm .btHead { display: flex; align-items: baseline; gap: 9px; }
-.dlTerm .btPreset { font-family: var(--cond); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
-.dlTerm .btRet { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.dlTerm .btVs { font-size: 10px; color: var(--dimmer); }
-.dlTerm .btExcess { font-size: 13px; font-weight: 700; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--bd); font-variant-numeric: tabular-nums; }
-.dlTerm .btSpacer { flex: 1; }
-.dlTerm .btWarn { font-family: var(--mono); font-size: 11px; color: var(--amber); border: 1px solid rgba(251, 146, 60, 0.45); border-radius: 2px; padding: 0 4px; line-height: 1.6; }
-.dlTerm .btMore { background: rgba(251, 146, 60, 0.12); border: 1px solid rgba(251, 146, 60, 0.5); color: var(--amber); font-family: var(--sans); font-size: 11px; font-weight: 600; cursor: pointer; padding: 2px 11px; border-radius: 3px; }
-.dlTerm .btMore:hover { background: rgba(251, 146, 60, 0.22); }
-.dlTerm .btClose { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 12px; padding: 0 2px; }
-.dlTerm .btClose:hover { color: var(--amber); }
-.dlTerm .btFoot { font-size: 10px; color: var(--dimmer); margin-top: 3px; line-height: 1.5; }
+/* 백테스트 결과 strip(.btStrip)·헤드라인 스타일 SSOT = BacktestStrip.svelte scoped <style>.
+   (구 글로벌 .dlTerm .bt* strip 블록은 이중정의·specificity 충돌로 제거 — positioning 포함 전부 scoped 로 이관) */
 
 /* 백테스트 스트립(.btStrip, 하단 도킹)이 뜨면 공시 레일 숨김 — 같은 하단 띠 점유 겹침 방지. (출처는 패널 헤더 sub 로 이동) */
 .dlTerm .chartWrap:has(.btStrip) .discRail { display: none; }
