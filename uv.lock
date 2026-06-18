@@ -533,7 +533,7 @@ requires-dist = [
     { name = "pyarrow", marker = "sys_platform == 'emscripten'" },
     { name = "pyyaml", marker = "sys_platform != 'emscripten'", specifier = ">=6.0.0,<7" },
     { name = "qrcode", marker = "sys_platform != 'emscripten'", specifier = ">=7.0,<9" },
-    { name = "rich", marker = "sys_platform != 'emscripten'", specifier = ">=14.3.3,<15" },
+    { name = "rich", marker = "sys_platform != 'emscripten'", specifier = ">=14.3.3,<16" },
     { name = "rich", marker = "sys_platform == 'emscripten'" },
     { name = "sse-starlette", marker = "sys_platform != 'emscripten'", specifier = ">=2.0.0,<4" },
     { name = "uvicorn", extras = ["standard"], marker = "sys_platform != 'emscripten'", specifier = ">=0.30.0,<1" },
