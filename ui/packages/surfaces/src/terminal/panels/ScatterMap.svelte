@@ -107,7 +107,8 @@
 			{/if}
 			{#if !compact}
 				<text x={(g.x0 + g.x1) / 2} y={g.H - 2} class="smAxLbl" text-anchor="middle">{xLabel} →</text>
-				<text x={13} y={(g.y0 + g.y1) / 2} class="smAxLbl" text-anchor="middle" transform={`rotate(-90 13 ${(g.y0 + g.y1) / 2})`}>{yLabel} ↑</text>
+				<!-- y축 라벨은 rotate(-90)로 세움 → 화살표 "→"가 회전 후 "↑"(위=값 큼)로 보임. "↑"를 쓰면 회전돼 "←"가 됨. -->
+				<text x={13} y={(g.y0 + g.y1) / 2} class="smAxLbl" text-anchor="middle" transform={`rotate(-90 13 ${(g.y0 + g.y1) / 2})`}>{yLabel} →</text>
 				<text x={g.x0} y={g.y1 + 11} class="smTick" text-anchor="start">{Math.round(g.xmin)}</text>
 				<text x={g.x1} y={g.y1 + 11} class="smTick" text-anchor="end">{Math.round(g.xmax)}</text>
 				<text x={g.x0 - 5} y={g.y1} class="smTick" text-anchor="end">{Math.round(g.ymin)}</text>
@@ -145,9 +146,9 @@
 	.smLbl { fill: #c2cad6; font-size: 11px; pointer-events: none; }
 	.sm-mini .smLbl { font-size: 10px; }
 	.smDot.on .smLbl, .smDot.hi .smLbl, .smLtop { fill: #f0f3f7; font-weight: 700; }
-	.smAxLbl { fill: #d2d8e2; font-size: 12.5px; }
-	.smTick { fill: #aab2bf; font-size: 11px; }
-	.smInfo { font-size: 12.5px; color: #c2cad6; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 28px; }
+	.smAxLbl { fill: #d2d8e2; font-size: 10px; }
+	.smTick { fill: #aab2bf; font-size: 9px; }
+	.smInfo { font-size: 10.5px; color: #c2cad6; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 26px; }
 	.smInfo b { color: #f0f3f7; }
 	.smInfo em { font-style: normal; color: var(--amber, #fb923c); }
 	.smEmpty { font-size: 10px; color: #aab2bf; padding: 12px; text-align: center; }

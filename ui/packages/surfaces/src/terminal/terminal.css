@@ -321,9 +321,9 @@
 
 /* INDUSTRY SWEEP — 거시 깔때기 산업층(섹터 히트맵 대체). 렌즈 picker + 산업 행(분포막대·값·n·tailwind). */
 .dlTerm .swMap { padding: 4px 4px 2px; }
-.dlTerm .swMore { width: 100%; background: none; border: 0; border-top: 1px solid var(--bd); margin-top: 2px; padding: 5px 5px; font-family: var(--cond); font-size: 10.5px; color: var(--amberDim, #b9863b); cursor: pointer; text-align: left; letter-spacing: 0.2px; }
+.dlTerm .swMore { width: 100%; background: none; border: 0; border-top: 1px solid var(--bd); margin-top: 2px; padding: 4px 5px; font-family: var(--cond); font-size: 9px; color: var(--amberDim, #b9863b); cursor: pointer; text-align: left; letter-spacing: 0.2px; }
 .dlTerm .swMore:hover { color: var(--amber); }
-.dlTerm .swNote { font-family: var(--cond); font-size: 9.5px; color: #aab2bf; padding: 3px 5px 2px; line-height: 1.35; }
+.dlTerm .swNote { font-family: var(--cond); font-size: 8px; color: var(--dimmer); padding: 3px 5px 2px; line-height: 1.3; }
 
 /* MOVERS */
 .dlTerm .moversWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bd); }
