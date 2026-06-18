@@ -844,6 +844,7 @@ export function createEngine(raw: RawData): Engine {
 			trendAnnual: trendFromFinance(fin),
 			trendQuarter: trendFromQuarters(code),
 			income, balance, cashflow, ratios, credit, analysis,
+			macroExposure: fin.macroExposure ?? null,
 			peers: derivePeers(code, industry),
 			story: blog ? { title: blog.title, date: blog.date, readTime: blog.readTime, slug: normalizeBlogSlug(blog.slug) } : null,
 			percentile: null, valuation: null, risks: [], riskCatalog: [], tailwind: null,

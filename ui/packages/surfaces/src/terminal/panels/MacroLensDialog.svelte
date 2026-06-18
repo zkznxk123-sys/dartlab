@@ -36,6 +36,7 @@
 	const severityCls: Record<string, string> = { info: 'info', warning: 'warn', blocker: 'block' };
 	const pressureText: Record<string, string> = { high: '검토우선', medium: '보조', low: '맥락', blocked: '차단' };
 	const readinessText: Record<string, string> = { ready: 'READY', needsEvidence: 'EVIDENCE', blocked: 'BLOCK' };
+	const exposureQualityText: Record<string, string> = { quantCandidate: 'OPEN', qualitativeOnly: 'QUAL', blocked: 'LOCK' };
 	const relevantDrivers = $derived(snapshot.drivers.filter((d) => d.relevance !== 'context').slice(0, 16));
 	const contextDrivers = $derived(snapshot.drivers.filter((d) => d.relevance === 'context').slice(0, 18));
 	const visibleDrivers = $derived([...relevantDrivers, ...contextDrivers]);
@@ -289,10 +290,12 @@
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('한계', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
 						{#each snapshot.missing as m (m.id)}<div class="mlSrc warn"><b>{m.status}</b> {m.reason}<em>{m.sourceRef}</em></div>{/each}
-						<div class="mlSrc warn">{snapshot.exposureQuality.reason}</div>
+						<div class={snapshot.exposureQuality.status === 'quantCandidate' ? 'mlSrc' : 'mlSrc warn'}><b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b> {snapshot.exposureQuality.reason}</div>
 						<div class="mlSrc warn">nObs/R²/window/frequency/lag: {snapshot.exposureQuality.nObs ?? '—'} / {snapshot.exposureQuality.rSquared ?? '—'} / {snapshot.exposureQuality.window ?? '—'} / {snapshot.exposureQuality.frequency ?? '—'} / {snapshot.exposureQuality.lagMonths ?? '—'}</div>
-						<div class="mlSrc warn">{snapshot.exposureQuality.blockedReason} · {snapshot.exposureQuality.sourceRef}</div>
-						<div class="mlSrc warn">{T('필요 증거', 'Required evidence')}: {snapshot.exposureQuality.missingEvidence.join(' · ')}</div>
+						<div class="mlSrc warn">{snapshot.exposureQuality.blockedReason || T('정량 후보 조건 충족', 'Quant candidate gate open')} · {snapshot.exposureQuality.sourceRef}</div>
+						{#if snapshot.exposureQuality.missingEvidence.length}
+							<div class="mlSrc warn">{T('필요 증거', 'Required evidence')}: {snapshot.exposureQuality.missingEvidence.join(' · ')}</div>
+						{/if}
 						<div class="mlSrc">{T('상관은 인과가 아니며, 지표 변화가 회사 실적 변화를 보장하지 않는다.', 'Correlation is not causation; indicator moves do not guarantee company results.')}</div>
 					</div>
 				</section>

@@ -13,7 +13,8 @@ Company 객체 안 만듬 → Polars lazy 로 직접 변환 → OOM 없음.
           "is":  { "sales": [...5], "op": [...5], "net": [...5], "opMargin": [...5] },
           "bs":  { "assets": {...6×5}, "liab": {...6×5}, "equity": {...5×5} },
           "cf":  { "opening", "op", "inv", "fin", "fx", "closing" },
-          "ratios": { "roe": [...5], "debtRatio": [...5] }
+          "ratios": { "roe": [...5], "debtRatio": [...5] },
+          "macroExposure": { "selected", "selectedSource", "exposureQuality", ... }
         },
         ...
       }
@@ -37,6 +38,12 @@ import polars as pl
 ROOT = Path(__file__).resolve().parents[3]
 SRC = ROOT / "data" / "dart" / "scan" / "finance.parquet"
 OUT = ROOT / "landing" / "static" / "dashboards" / "finance.json"
+MACRO_OBS = {
+    "ecos": ROOT / "data" / "macro" / "ecos" / "observations.parquet",
+    "fred": ROOT / "data" / "macro" / "fred" / "observations.parquet",
+}
+KIND_LIST = ROOT / "data" / "kindList" / "corpList.parquet"
+PRODUCT_INDEX = ROOT / "data" / "dart" / "scan" / "productIndex.parquet"
 
 # 5년 범위
 YEARS = ["2021", "2022", "2023", "2024", "2025"]
@@ -108,6 +115,55 @@ def _to_billion(v: str | None) -> float | None:
         return round(x / 1_000_000_000, 1)
     except (ValueError, AttributeError):
         return None
+
+
+def _load_macro_annual() -> dict[tuple[str, str], dict[int, float]]:
+    """로컬 macro observation parquet → (source, seriesId)별 연평균 맵."""
+    annual: dict[tuple[str, str], dict[int, float]] = {}
+    for source, path in MACRO_OBS.items():
+        if not path.exists():
+            print(f"  ⚠ macro observations missing: {path}", flush=True)
+            continue
+        df = pl.read_parquet(path)
+        if df.is_empty() or not {"seriesId", "date", "value"}.issubset(set(df.columns)):
+            continue
+        grouped = (
+            df.with_columns(pl.col("date").cast(pl.Date).dt.year().alias("year"))
+            .group_by(["seriesId", "year"])
+            .agg(pl.col("value").mean().alias("value"))
+        )
+        for row in grouped.iter_rows(named=True):
+            series_id = str(row["seriesId"])
+            year = int(row["year"])
+            value = row["value"]
+            if value is None:
+                continue
+            annual.setdefault((source, series_id), {})[year] = float(value)
+    return annual
+
+
+def _load_company_meta() -> dict[str, dict[str, str | None]]:
+    """로컬 캐시만 사용해 종목별 업종/제품 텍스트를 로드한다."""
+    meta: dict[str, dict[str, str | None]] = {}
+    if KIND_LIST.exists():
+        kind = pl.read_parquet(KIND_LIST)
+        needed = {"종목코드", "업종", "주요제품"}
+        if needed.issubset(set(kind.columns)):
+            for row in kind.select(["종목코드", "업종", "주요제품"]).iter_rows(named=True):
+                code = str(row["종목코드"]).zfill(6)
+                meta[code] = {
+                    "industry": row["업종"],
+                    "product": row["주요제품"],
+                }
+    if PRODUCT_INDEX.exists():
+        products = pl.read_parquet(PRODUCT_INDEX)
+        if {"stockCode", "product"}.issubset(set(products.columns)):
+            for row in products.select(["stockCode", "product"]).iter_rows(named=True):
+                code = str(row["stockCode"]).zfill(6)
+                current = meta.setdefault(code, {"industry": None, "product": None})
+                if row["product"]:
+                    current["product"] = row["product"]
+    return meta
 
 
 def _extract_annual(df: pl.DataFrame, stockCode: str) -> dict:
@@ -253,12 +309,26 @@ def main() -> int:
 
     stockCodes = sorted(df["stockCode"].unique().to_list())
     print(f"  unique stockCodes: {len(stockCodes)}", flush=True)
+    macroAnnual = _load_macro_annual()
+    companyMeta = _load_company_meta()
+    print(f"  macro annual series: {len(macroAnnual)}, company meta: {len(companyMeta)}", flush=True)
+
+    from dartlab.analysis.financial.macroExposure import calcMacroExposureFromAnnualRevenue
 
     companies = {}
     t1 = time.time()
     for i, code in enumerate(stockCodes, 1):
         data = _extract_annual(df, code)
         if data:
+            meta = companyMeta.get(code, {})
+            data["macroExposure"] = calcMacroExposureFromAnnualRevenue(
+                stockCode=code,
+                years=YEARS,
+                revenue=data["is"]["sales"],
+                macroAnnual=macroAnnual,
+                industry=meta.get("industry"),
+                product=meta.get("product"),
+            )
             companies[code] = data
         if i % 500 == 0:
             rate = i / (time.time() - t1)

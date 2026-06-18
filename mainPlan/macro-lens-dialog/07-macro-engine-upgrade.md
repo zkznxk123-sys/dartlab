@@ -190,7 +190,7 @@ company.analysis("macro", "매크로민감도")
 }
 ```
 
-UI는 위 산출물을 직접 계산하지 않고 `MacroLensSnapshot`으로만 변환한다. 현재 UI는 아직 자체 view-model edge를 쓰므로, 다음 단계에서 `macro.transmission` 산출물을 우선 입력으로 받게 바꾼다.
+UI는 위 산출물을 직접 계산하지 않고 `MacroLensSnapshot`으로만 변환한다. 현재 Macro Lens는 `macro.transmission` 산출물을 edge의 우선 입력으로 받고, 회사별 품질은 `finance.json#companies[*].macroExposure.exposureQuality`를 우선 소비한다.
 
 ---
 

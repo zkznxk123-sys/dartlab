@@ -15,6 +15,46 @@ export type Lang = 'kr' | 'en';
 export type Tone = 'up' | 'down' | 'good' | 'warn' | 'neutral';
 export type Prov = 'real' | 'derived' | 'wire';
 
+export type MacroExposureQualityStatus = 'quantCandidate' | 'qualitativeOnly' | 'blocked';
+export interface MacroExposureQualityPayload {
+	status: MacroExposureQualityStatus;
+	reason: string;
+	blockedReason: string;
+	missingEvidence: string[];
+	sourceRef: string;
+	nObs: number | null;
+	rSquared: number | null;
+	window: string | null;
+	frequency: 'monthly' | 'quarterly' | 'annual' | null;
+	lagMonths: number | null;
+	coverage: 'company' | 'sectorOnly' | 'missing';
+}
+export interface MacroExposureIndicatorPayload {
+	label?: string;
+	seriesId: string;
+	axis?: string;
+	rSquared: number | null;
+	nObs: number | null;
+	window: string | null;
+	frequency?: 'monthly' | 'quarterly' | 'annual' | null;
+	lagMonths?: number | null;
+	coverage?: 'company' | 'sectorOnly' | 'missing';
+	sourceRef: string;
+	sourceRefs?: string[];
+	latestChange?: number | null;
+	impact?: string;
+}
+export interface MacroExposurePayload {
+	stockCode?: string;
+	selected?: MacroExposureIndicatorPayload[];
+	selectedSource?: string;
+	optimalBestR2?: number | null;
+	genericBestR2?: number | null;
+	exposureQuality: MacroExposureQualityPayload;
+	netDirection?: 'positive' | 'negative' | 'neutral' | string;
+	netDirectionLabel?: string;
+}
+
 // ───────────────────────── raw files ─────────────────────────
 export interface FinanceCompany {
 	is: { sales: Num[]; op: Num[]; net: Num[]; opMargin: Num[] };
@@ -32,6 +72,7 @@ export interface FinanceCompany {
 	};
 	cf: { op: Num; inv: Num; fin: Num; opening: Num; closing: Num; fx: Num };
 	ratios: { roe: Num[]; debtRatio: Num[] };
+	macroExposure?: MacroExposurePayload | null;
 }
 export interface FinanceFile {
 	version?: string;
@@ -443,6 +484,7 @@ export interface Company {
 	ratios: RatioRow[];
 	credit: Credit;
 	analysis: { summary: Bilingual; tracks: AnalysisTrack[] };
+	macroExposure: MacroExposurePayload | null;
 	peers: Peer[];
 	story: { title: string; date: string; readTime?: number | string; slug: string } | null;
 	percentile: { industry: string; n: number; metrics: PercentileMetric[] } | null;

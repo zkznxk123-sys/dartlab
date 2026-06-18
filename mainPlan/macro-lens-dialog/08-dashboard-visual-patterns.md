@@ -1,221 +1,271 @@
 # 08. 매크로 대시보드 시각화 조사
 
-상태: 조사 반영 v0.3
-범위: Macro Lens 첫 화면을 텍스트 리포트가 아니라 전문가형 증거 상태판으로 만들기 위한 공식 매크로 대시보드 시각화 패턴.
+상태: 조사 반영 v0.4
+범위: 퍼블릭 터미널 `경제지표분석`을 텍스트 리포트가 아니라 매크로 전파 계기판으로 만들기 위한 시각화 방식 조사.
 
 ---
 
 ## 1. 결론
 
-공식 매크로 대시보드의 공통점은 결론문이 아니라 **시계열, 분해, 비교, 기준일, 출처, 품질 상태**를 전면에 둔다는 점이다. 따라서 Macro Lens 첫 화면은 "판단을 내려주는 화면"이 아니라 `driver -> channel -> evidence gate`를 한눈에 보는 노출 상태판이어야 한다.
+강한 매크로 화면은 "판정"하지 않는다. 데이터와 모델 조건을 열어 보이고, 사용자가 결론을 내릴 수 있게 한다.
 
-Macro Lens가 강해지려면 사용자가 다섯 질문을 10초 안에 읽어야 한다.
+따라서 Macro Lens 첫 화면은 다음 질문에 바로 답해야 한다.
 
-| 질문 | 화면 답 |
+| 질문 | 화면 방식 |
 |---|---|
-| 지금 무엇이 움직였나? | driver pulse strip, latest/asOf/source |
-| 그 움직임이 회사 어디에 닿나? | exposure matrix, channel rail |
-| 증거가 실제 데이터인가, 템플릿인가? | evidence gate, OBS/PRIOR/TPL/LOCK |
-| 정량으로 말해도 되나? | quality lock, nObs/R2/window/coverage |
-| 무엇이 나오면 해석을 철회하나? | falsifier/release calendar/source drawer |
+| 지금 무엇이 움직였나 | driver pulse strip, 최신값, 변화율, 기준일 |
+| 이 움직임이 어느 경로로 회사에 닿나 | driver x channel exposure matrix |
+| 실제 관측인가, 업종 prior인가, 템플릿인가 | OBS/PRIOR/TPL/LOCK evidence label |
+| 정량 숫자를 보여줘도 되는가 | nObs/R2/window/lag/sourceRef quality gate |
+| 언제 다시 확인해야 하나 | release rail, vintage/update path |
+| 무엇이 나오면 해석을 접어야 하나 | falsifier rail |
+| 원천을 재현할 수 있나 | source/data packet drawer |
 
-현재 제품에 채택할 핵심 패턴은 여덟 가지다.
+핵심은 `좋다/나쁘다`가 아니라 `열림/잠김/관측/결손`이다. 누가 판정하느냐의 답은 "AI가 판정하지 않는다"다. `macro.transmission`, `analysis.macroExposure`, 공개 데이터의 `asOf/source/frequency/coverage`가 게이트 상태를 만든다. 사용자는 그 게이트를 보고 투자 해석을 한다.
 
-| 패턴 | 참고 사례 | Macro Lens 적용 |
+---
+
+## 2. 조사한 실제 패턴
+
+| 레퍼런스 | 확인한 방식 | Macro Lens 적용 |
 |---|---|---|
-| 지표 펄스 스트립 | FRED dashboard, OECD STI dashboard | 핵심 driver 5~7개를 최신값, 변화, sparkline으로 압축 |
-| 매트릭스/히트맵 | OECD dashboard, IMF/ECB 비교 UI | driver x 재무 channel 노출 여부를 셀로 표시 |
-| 기준일·출처 고정 | FRED, World Bank DataBank, BIS Data Portal | 모든 값에 asOf/source lineage 노출 |
-| 구성요소 분해 | Atlanta Fed GDPNow | driver가 어느 line을 흔드는지 chain으로 분해 |
-| pressure index | NY Fed GSCPI | 복합 압력을 단일 방향성 대신 상태 변화로 표시 |
-| release/vintage rail | FRED, GDPNow, OECD release dates | 발표일, 업데이트일, 데이터 빈도를 해석 옆에 고정 |
-| comparator view | OECD, IMF DataMapper, ECB regional chart | 국가/업종/peer 비교를 별도 탭에서 제공 |
-| evidence packet | World Bank DataBank, BIS dashboard | 차트 아래 표, 메타데이터, 다운로드, sourceRef를 묶음 제공 |
+| FRED Dashboard | graph, table, single value, data list, notes, saved map widget을 조합. 관측 범위를 고정하거나 최신값 기준으로 움직일 수 있음. | 큰 문단 대신 driver tile + sparkline + latest stamp. |
+| FRED recession shading | NBER 경기 전환점을 그래프 음영으로 표시. 진행 중인 recession은 다르게 표시. | 시계열에는 regime band와 기준 주체를 붙인다. |
+| OECD Short-Term Indicators Dashboard | G20/지역 aggregate를 interactive chart/table로 추적. 월 2회 업데이트, codebook에 source/frequency/unit/coverage 제공. | driver마다 source, frequency, coverage를 고정 표시. |
+| ECB Data Portal | interactive charts, dashboards, customisation, comparison. regional chart hover 후 국가 상세로 이동. | 비교는 첫 화면이 아니라 drill-down으로 둔다. |
+| IMF DataMapper / PortWatch | 국가·지표 visualise/compare/download, 무역 흐름 disruption monitor/simulate. | map은 후순위. 충격 시뮬레이션은 상세 탭에서만 사용. |
+| Atlanta Fed GDPNow | running estimate, judgement adjustment 없음, subcomponent contribution과 update date 제공. | 숫자 하나가 아니라 구성요소 변화와 업데이트 경로를 보여준다. |
+| Chicago Fed NFCI | 105개 지표를 risk/credit/leverage contribution으로 분해, 주간 업데이트. | 복합 지수는 component contribution 없이 단일 점수로 내지 않는다. |
+| NY Fed GSCPI | 공급망 압력을 composite index로 만들고 inflation 설명력은 별도 검증. | pressure index는 방향성 추천이 아니라 상태 변화로만 표시. |
+| OFR Vulnerabilities Monitor | 58개 취약성 indicator heatmap. 결론이 아니라 조사 신호라고 명시. | heatmap은 "취약성 탐지"로 쓰고 매수/매도 판정으로 쓰지 않는다. |
+| BIS Credit-to-GDP gaps | credit gap dashboard로 국가/글로벌 전개와 data story 제공. 지표를 기계적으로 쓰지 말라고 명시. | macro gate도 기계적 결론이 아니라 조기경보·확인 대상으로 표시. |
+| World Bank DataBank | query에서 table/chart/map을 만들고 저장·공유 가능. | 원천 패킷은 chart/table/source metadata를 함께 제공한다. |
+
+참고 링크:
+
+- FRED dashboard: <https://fredhelp.stlouisfed.org/fred/account/dashboard-features/add-widget/>
+- FRED recession shading: <https://fredhelp.stlouisfed.org/fred/data/understanding-the-data/recession-bars/>
+- OECD Short-Term Indicators Dashboard: <https://www.oecd.org/en/data/dashboards/oecd-short-term-indicators-dashboard.html>
+- ECB Data Portal overview: <https://data.ecb.europa.eu/help/data/overview>
+- ECB regional chart help: <https://data.ecb.europa.eu/help/selecting-indicators-visualise-dashboard>
+- IMF data tools: <https://www.imf.org/en/data>
+- Atlanta Fed GDPNow: <https://www.atlantafed.org/research-and-data/data/gdpnow>
+- Chicago Fed NFCI: <https://www.chicagofed.org/research/data/nfci/current-data>
+- NY Fed GSCPI paper: <https://www.newyorkfed.org/research/staff_reports/sr1017>
+- OFR Vulnerabilities Monitor: <https://www.financialresearch.gov/financial-vulnerabilities/>
+- BIS Credit-to-GDP gaps: <https://data.bis.org/topics/CREDIT_GAPS/tables-and-dashboards>
+- World Bank DataBank: <https://databank.worldbank.org/>
 
 ---
 
-## 2. 참고한 외부 패턴
+## 3. 방식 카탈로그
 
-### FRED Dashboard
+### 3.1 상태 압축형
 
-- graph, data table, single value, data list, notes, saved map 같은 widget을 조합한다.
-- observation range를 고정하거나 최신 관측치 기준으로 움직이게 설정할 수 있다.
-- 제품 적용: Macro Lens는 큰 설명문보다 작은 driver tile과 sparkline을 우선한다.
-- 출처:
-  - <https://fredhelp.stlouisfed.org/fred/account/dashboard-features/new-dashboard/>
-  - <https://fredhelp.stlouisfed.org/fred/account/dashboard-features/add-widget/>
+| 방식 | 쓰임 | 데이터 계약 | 주의 |
+|---|---|---|---|
+| KPI tile | 최신값, 기준일, 단위 표시 | `value/unit/asOf/frequency/sourceSeriesId` | 단독 숫자만 두면 해석이 과해진다. |
+| Sparkline tile | 최근 방향과 변동성 압축 | `history/window/transform` | 축과 기간이 없으면 장식이다. |
+| Pulse strip | 금리, FX, CPI, 유가, PMI 등 핵심 driver 5~7개 정렬 | `driverId/latest/delta/freshness` | 너무 많이 넣으면 다시 지표 목록이 된다. |
+| Regime band | recession, tightening, inflation pressure 같은 배경 국면 | `regimeId/start/end/source` | 출처 없는 음영은 금지. |
 
-### OECD Short-Term Indicators Dashboard
+첫 화면 채택: 필수.
 
-- G20 및 지역 aggregate를 대상으로 단기 macro development를 interactive chart/table로 추적한다.
-- 월 2회 업데이트 일정, codebook, source, original dataset link, frequency, unit, coverage를 함께 제공한다.
-- 제품 적용: driver를 카드 나열로 흩뜨리지 않고 exposure matrix 행으로 고정한다.
-- 출처: <https://www.oecd.org/en/data/dashboards/oecd-short-term-indicators-dashboard.html>
+### 3.2 전파 경로형
 
-### Atlanta Fed GDPNow
+| 방식 | 쓰임 | 데이터 계약 | 주의 |
+|---|---|---|---|
+| Exposure matrix | driver가 매출, 마진, 차입, 현금, 밸류 어디에 닿는지 표시 | `driverId/channel/evidenceLabel/sourceRef` | 색은 투자 방향이 아니라 증거 상태다. |
+| Channel rail | 선택 driver의 전파 사슬 표시 | `driver -> sector -> financialLine -> valuationLever` | 긴 설명문보다 4~5개 노드로 끝낸다. |
+| Sankey/flow | 무역·공급망 충격처럼 실제 흐름 데이터가 있을 때 | `origin/destination/weight/asOf` | 일반 매크로에는 과하다. P2. |
+| Network map | 금융기관·국가 간 전염 경로 | `node/edge/exposure/weight` | 데이터 없으면 장식. P2. |
 
-- running estimate를 표시하되 official forecast가 아니며 판단 조정이 없다는 한계를 명시한다.
-- subcomponent contribution과 update history로 숫자 변화를 분해한다.
-- 제품 적용: headline thesis 대신 driver별 전파 component와 update 기준일을 둔다. 정량 claim은 model basis와 lock 조건이 없으면 차단한다.
-- 출처: <https://www.atlantafed.org/research-and-data/data/gdpnow>
+첫 화면 채택: exposure matrix만 필수. channel rail은 셀 클릭 상세.
 
-### NY Fed Global Supply Chain Pressure Index
+### 3.3 분해·기여도형
 
-- global supply chain pressure를 포착하는 composite index를 만들고, inflation 설명력은 별도 방법론으로 검증한다.
-- 제품 적용: `pressure`를 투자 방향으로 쓰지 않고 증거 gate와 결손 사유로 번역한다.
-- 출처:
-  - <https://www.newyorkfed.org/research/policy/gscpi>
-  - <https://www.newyorkfed.org/research/staff_reports/sr1017>
+| 방식 | 쓰임 | 데이터 계약 | 주의 |
+|---|---|---|---|
+| Contribution bar | 복합 지수의 구성요소별 기여 | `component/contribution/sign/updateDate` | 단일 pressure score의 오해를 줄인다. |
+| Waterfall | GDPNow처럼 headline 변화 원인 분해 | `prev/current/delta/component` | 모델 산식이 없으면 쓰지 않는다. |
+| Bridge chart | macro driver가 재무 line으로 이어지는 중간 계산 | `macroDelta/channelBeta/financialDelta/quality` | beta 품질 gate가 열려야 한다. |
 
-### World Bank DataBank
+첫 화면 채택: 요약만. 상세 탭에서 강하게 쓴다.
 
-- time series collection에서 query를 만들고 table, chart, map을 생성·저장·공유한다.
-- 제품 적용: 모든 숫자는 `value + unit + asOf + source` 없이 단독 노출하지 않는다.
-- 출처: <https://databank.worldbank.org/>
+### 3.4 업데이트·빈티지형
 
-### BIS Data Portal
+| 방식 | 쓰임 | 데이터 계약 | 주의 |
+|---|---|---|---|
+| Release rail | 다음 발표일, 마지막 업데이트일, 빈도 | `lastRelease/nextRelease/frequency/source` | stale 데이터를 바로 드러낸다. |
+| Vintage path | 발표가 누적되며 판단이 어떻게 바뀌었는지 | `vintageDate/value/modelVersion` | public 산출물이 없으면 보류. |
+| Revision marker | 지표 수정/확정치 반영 | `initial/revised/revisionDate` | macro 해석 실패 원인 추적에 필요. |
 
-- 국제 은행, credit, liquidity, exchange rate, CPI 등 금융안정 분석용 통계를 topic별 dashboard로 제공한다.
-- credit dashboard는 국가/글로벌 전개를 빠르게 보고 data story를 만들 수 있게 한다.
-- 제품 적용: macro driver를 "경제 전반"이 아니라 `credit`, `liquidity`, `FX`, `prices` 같은 전파 모듈로 분리한다.
-- 출처:
-  - <https://data.bis.org/>
-  - <https://data.bis.org/topics/TOTAL_CREDIT/tables-and-dashboards>
+첫 화면 채택: release rail은 필수. vintage path는 P1.
 
-### IMF DataMapper / ECB Data Portal
+### 3.5 품질·반증형
 
-- IMF DataMapper는 map/list/chart를 통해 country/indicator 비교를 제공한다.
-- ECB dashboard help는 regional chart로 국가 간 indicator 비교와 hover data point를 제공한다.
-- 제품 적용: 첫 화면에는 map을 넣지 않는다. 다만 macro driver가 국가·통화권 비교를 요구할 때 drill-down 탭으로 제공한다.
-- 출처:
-  - <https://www.imf.org/external/datamapper/index.php>
-  - <https://data.ecb.europa.eu/help/selecting-indicators-visualise-dashboard>
+| 방식 | 쓰임 | 데이터 계약 | 주의 |
+|---|---|---|---|
+| Evidence gate rail | 데이터, 경로, 동행, 회사노출, 정량 gate 표시 | `gateId/status/blockReason/sourceRef` | "판정"이 아니라 잠금 사유다. |
+| Co-movement scatter | driver와 회사/업종 지표의 동행 후보 | `nObs/rSquared/lag/window` | causality 라벨 금지. |
+| Falsifier rail | 해석을 버릴 조건 | `condition/requiredData/nextCheckDate` | 이게 없으면 그냥 서사다. |
+| Model card drawer | 모델 한계, 표본, 결손, 버전 | `method/modelVersion/sample/limit` | 숫자가 강해 보일수록 더 필요하다. |
+
+첫 화면 채택: evidence gate + falsifier 필수. scatter는 상세.
+
+### 3.6 비교·분포형
+
+| 방식 | 쓰임 | 데이터 계약 | 주의 |
+|---|---|---|---|
+| Country comparator | 같은 지표의 국가/지역 차이 | `country/value/rank/asOf` | 종목 다이얼로그 첫 화면에는 느리다. |
+| Peer comparator | 같은 업종 내 exposure 차이 | `peerCode/driver/channel/quality` | 회사별 exposure 품질이 있어야 한다. |
+| Fan chart / probability band | forecast uncertainty | `pointEstimate/band/modelBasis/calibration` | 모델 분포 계약 없으면 금지. |
+| Scenario table | 금리/환율/유가 path별 민감도 | `scenario/inputAssumption/outputDelta/quality` | 목표가 시뮬레이터로 오해되지 않게 한다. |
+
+첫 화면 채택: 없음. P1~P2.
+
+### 3.7 원천 패킷형
+
+| 방식 | 쓰임 | 데이터 계약 | 주의 |
+|---|---|---|---|
+| Source drawer | 값의 출처, 단위, 빈도, 기준일 | `sourceName/sourceSeriesId/unit/frequency/asOf` | 모든 숫자에 붙인다. |
+| Data table | chart 뒤의 원시 관측치 확인 | `date/value/vintage/source` | 다운로드보다 화면 내 검증이 먼저다. |
+| Download/export | 분석 재현 | `artifactPath/schemaVersion` | public artifact만 노출. |
+
+첫 화면 채택: drawer로 필수.
 
 ---
 
-## 3. 시각화 방식 카탈로그
+## 4. Macro Lens 화면 구조
 
-조사한 방식은 차트 종류가 아니라 **질문 처리 방식**으로 나눠야 한다. Macro Lens에 필요한 것은 예쁜 chart set이 아니라 `무엇이 움직였고`, `어디로 전파되고`, `근거가 충분한지`, `언제 다시 확인할지`를 빠르게 고정하는 구조다.
+첫 화면은 아래 순서로 고정한다.
 
-| 방식 계열 | 대표 시각화 | 답하는 질문 | 필요한 입력 계약 | 첫 화면 |
-|---|---|---|---|---|
-| 상태 위젯형 | single value, sparkline, latest delta, note | 지금 driver가 움직였나 | `value/unit/asOf/frequency/sourceSeriesId` | 채택 |
-| 시계열형 | line, recession band, release marker | 움직임이 추세인가 일시 잡음인가 | `history/window/transform/vintage` | 채택 |
-| 매트릭스형 | driver x channel heatmap | 이 지표가 회사 어디에 닿나 | `driverId/channel/evidenceLabel/blockedReason` | 채택 |
-| 기여도 분해형 | contribution bar, waterfall | 숫자 변화의 원인은 무엇인가 | `component/contribution/updateDate/sourceRef` | 상세 탭 |
-| 업데이트 경로형 | vintage path, update log | 새 발표 후 해석이 어떻게 바뀌었나 | `releaseDate/prev/current/delta/source` | 상세 탭 |
-| 압력 지수형 | normalized index, z-score band | 복수 지표 압력이 평균 대비 어디인가 | `zScore/components/methodology/limit` | 일부 채택 |
-| 비교형 | country/region/peer comparator | 이 시장만 다른가, 전 세계 현상인가 | `market/region/peer/value/rank/coverage` | 상세 탭 |
-| 불확실성형 | probability band, fan chart | 모델 숫자의 오차 범위는 어디까지인가 | `pointEstimate/bands/modelBasis/sample` | 후순위 |
-| 반증형 | falsifier rail, release calendar | 무엇이 나오면 이 해석을 버리나 | `condition/requiredData/nextReleaseDate` | 채택 |
-| 원천 패킷형 | table, metadata drawer, download link | 이 숫자는 어디서 왔고 재현 가능한가 | `sourceRef/artifactPath/rawRows/codebook` | 채택 |
+```text
+Header
+  종목명 / sector / macro asOf / data freshness
 
-제품 언어로 번역하면 첫 화면에는 `상태 위젯형 + 시계열형 + 매트릭스형 + 반증형 + 원천 패킷형`만 둔다. `기여도 분해`, `업데이트 경로`, `비교`, `불확실성`은 셀 클릭 후 들어가는 상세 탭이 맞다. 첫 화면에 모든 것을 올리면 강해지는 것이 아니라 읽는 순서가 깨진다.
+Row 1: Macro Phase Strip
+  KR / US / Sector 상태 3개
 
-### 3.0 방식별 채택·기각 기준
+Row 2: Driver Pulse Strip
+  USDKRW / BASE_RATE / CPI / EXPORT / OIL / PMI 등 최대 6개
 
-| 채택 | 이유 |
-|---|---|
-| sparkline + latest stamp | FRED/OECD류의 작은 위젯 구조를 따라 driver 상태를 압축한다. |
-| exposure matrix | macro driver를 회사 손익·현금흐름·밸류 channel로 연결하는 가장 빠른 표면이다. |
-| evidence gate rail | 누가 결론을 내려주는 문제가 아니라 데이터 상태가 열렸는지/잠겼는지를 보여준다. |
-| update path | GDPNow처럼 새 데이터가 들어올 때 숫자가 왜 움직였는지 추적한다. |
-| source drawer | World Bank/BIS처럼 표·메타데이터·다운로드 가능한 원천을 붙인다. |
+Main: Exposure Matrix
+  rows = drivers
+  columns = revenue / margin / debt / cash / valuation
+  cells = OBS / PRIOR / TPL / LOCK / -
 
-| 기각 또는 후순위 | 이유 |
-|---|---|
-| donut/gauge | 원인, 기준일, 결손을 숨기고 단일 점수처럼 읽힌다. |
-| 지도 첫 화면 | 국가 비교에는 좋지만 종목 다이얼로그의 전파 경로를 느리게 만든다. |
-| 뉴스 카드 wall | 데이터 lineage 없이 서사를 늘린다. |
-| fan chart 첫 화면 | 모델 분포 계약이 없으면 신뢰도 높은 그림처럼 오해된다. |
-| macro score | 방향과 확신을 섞어버려 반증 가능성이 낮다. |
+Bottom: Evidence Gate + Release Rail
+  macro data / path / co-move / company exposure / quant gate
+  last release / next release / stale reason
 
-### 3.1 P0: 첫 화면에 들어갈 방식
+Drawer: Source Packet
+  sourceSeriesId / unit / frequency / latest observation / method / missing reason
+```
 
-| 방식 | 용도 | 왜 필요한가 | 구현 규칙 |
-|---|---|---|---|
-| Phase strip | KR/US/sector macro state 요약 | 전체 국면을 한 줄로 고정 | 3개 타일, 각 타일은 value/asOf/source 포함 |
-| Driver pulse strip | 금리, FX, 유가, CPI, PMI 등 핵심 driver 최신 상태 | macro 움직임을 긴 문장 없이 읽게 함 | 최대 6개, sparkline + delta + frequency |
-| Exposure matrix | driver가 revenue/margin/debt/cash/valuation 어디에 닿는지 표시 | 회사 영향 경로를 카드보다 빠르게 비교 | 행=driver, 열=channel, 셀=OBS/PRIOR/TPL/LOCK |
-| Evidence gate rail | 데이터 신뢰도와 차단 사유 | "누가 판단하나" 문제를 엔진 출력과 결손으로 바꿈 | macroData/path/comove/company/quant 5개 gate |
-| Source stamp | 기준일, 출처, 빈도, coverage | macro 숫자의 시차와 빈 데이터 문제 노출 | 모든 tile/matrix/detail에 sourceRef 유지 |
+이 구조의 목적은 텍스트를 줄이는 것이 아니라 읽는 순서를 고정하는 것이다. 첫 화면에 결론문을 크게 두지 않는다. 결론문이 필요하면 matrix와 gate 아래에서 2줄 이하로만 둔다.
 
-### 3.2 P1: 다이얼로그 상세 탭에 들어갈 방식
+---
 
-| 방식 | 용도 | 참고 패턴 | 구현 규칙 |
-|---|---|---|---|
-| Contribution waterfall | driver 변화가 재무 line에 주는 chain 분해 | GDPNow contribution | 매출/마진/차입/밸류 중 한 channel 선택 후 기여 항목 분해 |
-| Update path chart | 최근 발표로 snapshot이 어떻게 바뀌었는지 추적 | GDPNow update history | release date별 이전값/현재값/delta 표시 |
-| Co-movement scatter | macro driver와 회사/업종 지표의 동행 후보 확인 | 경제 dashboard의 correlation diagnostic | nObs, R2, window, lag 없으면 LOCK |
-| Falsifier rail | 해석을 철회할 조건 | nowcast 한계 공시, release calendar | `조건 -> 필요한 데이터 -> 다음 발표일`로 표시 |
-| Data packet drawer | 원시값, 단위, 빈도, source, missing reason | DataBank/BIS metadata | 각 chart 하단에서 열리는 source drawer |
+## 5. 상태 라벨
 
-### 3.3 P2: 후순위 방식
+셀과 gate 라벨은 아래만 허용한다.
 
-| 방식 | 쓰는 경우 | 후순위 이유 |
+| 라벨 | 의미 | 누가 만든 상태인가 |
 |---|---|---|
-| Country/region map | 국가별 macro divergence가 핵심일 때 | 개별 회사 dialog 첫 화면에는 정보 밀도가 낮음 |
-| Peer comparator | 같은 업종/국가/수출비중 peer 비교 | peer exposure 데이터가 준비된 뒤 효과가 큼 |
-| Scenario fan chart | inflation/rate/FX path 범위 비교 | 모델 분포와 가정 관리가 먼저 필요 |
-| Data story canvas | 리서치 리포트용 narrative export | terminal first-use보다 저장/공유 workflow에 가까움 |
+| OBS | 관측값 또는 공개 edge로 확인됨 | `macro.transmission` source lineage |
+| PRIOR | 업종 prior 경로만 있음 | sector/industry prior registry |
+| TPL | 템플릿 경로, 회사 증거 없음 | macroLens fallback view-model |
+| LOCK | 정량/강한 해석 금지 | quality gate |
+| STALE | 기준일 초과 | source freshness check |
+| MISSING | 원천 또는 series 미배선 | data contract |
+| - | 표준 경로 없음 | driver registry |
+
+사용하지 않을 말:
+
+- 판정
+- 수혜 확정
+- 피해 확정
+- 매수/매도
+- 좋음/나쁨
+- 위기 임박
+
+화면은 "판정"을 내리지 않는다. 화면은 `왜 열렸고 왜 잠겼는지`를 보여준다.
 
 ---
 
-## 4. Macro Lens 채택 규칙
+## 6. 가장 강한 조합
 
-첫 화면은 아래 순서를 따른다.
+Macro Lens에 바로 쓸 강한 조합은 다섯 개다.
 
-1. `Macro Phase Strip`: KR, US, 업종 상태를 3개 타일로 고정한다.
-2. `Driver Pulse Strip`: 선택 종목에 닿을 수 있는 상위 driver를 6개 이하로 제한한다.
-3. `Exposure Matrix`: 행은 driver, 열은 `매출·마진·차입·현금·밸류`다.
-4. `Evidence Gate`: 시계열, 경로, 동행, 회사노출, 민감도 잠금 상태를 노출한다.
-5. `Legend`: 색과 약어가 투자 방향이 아니라 증거 상태임을 명시한다.
+| 조합 | 구성 | 효과 |
+|---|---|---|
+| Driver Pulse + Source Stamp | latest, delta, sparkline, asOf, source | 지금 움직임을 짧게 확인한다. |
+| Exposure Matrix + Evidence Label | driver x channel, OBS/PRIOR/TPL/LOCK | 회사 영향 경로를 한 번에 본다. |
+| Contribution Drilldown | component bar, waterfall, update marker | 숫자가 왜 바뀌었는지 본다. |
+| Quality Gate + Model Card | nObs, R2, lag, window, coverage, blockedReason | 정량 claim 가능 여부를 기계적으로 잠근다. |
+| Falsifier + Release Rail | 반증 조건, 필요 데이터, 다음 발표일 | 다음에 무엇을 보면 되는지 남긴다. |
 
-셀 라벨은 다음만 허용한다.
+이 다섯 개가 없으면 화면은 예쁜 매크로 뉴스판이 된다. 이 다섯 개가 있으면 분석 도구가 된다.
 
-| 라벨 | 의미 |
+---
+
+## 7. 금지할 시각화
+
+| 금지 | 이유 |
 |---|---|
-| `OBS` | 관측 edge 또는 실제 데이터로 확인 가능한 경로 |
-| `PRIOR` | 업종 prior 경로 |
-| `TPL` | 템플릿 경로, 회사 증거 필요 |
-| `LOCK` | 정량 claim 금지 |
-| `·` | 표준 경로 없음 |
+| Gauge | 기준과 원천을 숨기고 점수처럼 보인다. |
+| Donut | 매크로 전파 경로를 설명하지 못한다. |
+| 단일 macro score | 방향, 확신, 품질을 섞는다. |
+| 뉴스 카드 wall | source lineage와 반증 조건이 없다. |
+| 첫 화면 지도 | 종목 영향 경로보다 국가 비교를 먼저 보게 만든다. |
+| 출처 없는 heatmap | 색이 결론처럼 읽힌다. |
+| 모델 분포 없는 fan chart | 정밀한 예측처럼 오해된다. |
 
 ---
 
-## 5. 금지 규칙
+## 8. 구현 우선순위
 
-- 첫 화면에서 긴 thesis 문단을 만들지 않는다.
-- `우호`, `부담`, `수혜`, `피해`, `확정`, `판정`을 셀·카드 라벨로 쓰지 않는다.
-- 초록색은 투자 긍정이 아니다. `관측 가능/증거 충분`에만 쓴다.
-- 빨간색은 투자 부정이 아니다. `차단/stale/사용 금지`에만 쓴다.
-- co-movement는 `동행 후보`까지만 표현하고, causal label은 금지한다.
-- beta/민감도는 `nObs`, `R²`, `window`, `lag`, `coverage`, `sourceRef`가 없으면 노출하지 않는다.
-- gauge, donut, 단일 macro score, 뉴스 카드 wall은 첫 화면에서 쓰지 않는다. 강해 보이지만 원인·경로·결손을 숨긴다.
-- 색상은 방향성이 아니라 증거 상태다. 상승/하락 색을 바로 투자 해석으로 연결하지 않는다.
+### P0
+
+- Driver Pulse Strip
+- Exposure Matrix
+- Evidence Gate Rail
+- Source Stamp
+- Release Rail
+- Falsifier Rail
+
+### P1
+
+- Contribution Waterfall
+- Update/Vintage Path
+- Co-movement Scatter
+- Model Card Drawer
+- Peer/sector comparator
+
+### P2
+
+- Country map
+- Sankey/flow
+- Fan chart
+- Scenario table
+- Data story export
 
 ---
 
-## 6. 현재 구현 반영
+## 9. 제품 결론
 
-2026-06-18 현재 `MacroLensDialog.svelte`는 위 규칙 중 첫 화면 핵심을 반영한다.
+`경제지표분석`은 "경제지표를 보여주는 화면"이 아니라 "매크로가 이 종목의 어느 재무 채널에 닿을 수 있는지 검증하는 화면"이어야 한다.
 
-- 탭 1 이름: `대시보드`
-- phase strip: KR/US/업종
-- pulse strip: 상위 driver 6개
-- exposure matrix: driver × `매출·마진·차입·현금·밸류`
-- evidence gate: `MacroLensSnapshot.evidenceGates`가 제공하는 시계열, 경로, 동행, 회사노출, 민감도
-- legend: `MED/HIGH`, `LOW`, `BLOCK`, `·` 설명
+따라서 첫 화면의 정답은 긴 텍스트가 아니다.
 
-남은 강화는 UI 입력 전환과 회사 노출 품질 승격이다. `macro.transmission`은 `OBS/PRIOR/TPL` edge와 source/date/value lineage를 내기 시작했다. 다음 단계에서는 UI `MacroLensSnapshot`이 이 산출물을 우선 입력으로 받고, `analysis.macroExposure`가 `nObs/R²/window/lag/coverage/sourceRef`를 제공해야 한다.
+```text
+무엇이 움직였나
+어느 채널에 닿나
+증거가 관측인가 prior인가
+정량 숫자는 열렸나 잠겼나
+무엇을 보면 해석을 바꿀까
+원천은 어디인가
+```
 
----
-
-## 7. 설계 결론
-
-Macro Lens는 "경제를 설명하는 글"이 아니라 **매크로 노출 계기판**이어야 한다. 채택 순서는 다음이다.
-
-1. 첫 화면은 `phase -> pulse -> matrix -> gate`만 둔다.
-2. 사용자가 셀을 누르면 `contribution -> co-movement -> falsifier -> source packet`으로 들어간다.
-3. 정량 claim은 gate가 열릴 때만 나온다.
-4. gate가 닫히면 결론문을 만들지 않고 `왜 잠겼는지`, `어떤 데이터가 필요할지`, `다음 확인일이 언제인지`를 보여준다.
+이 여섯 줄에 답하지 못하는 시각화는 제거한다.

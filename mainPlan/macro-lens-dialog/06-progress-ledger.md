@@ -1,10 +1,67 @@
 # 06. 진행 원장
 
-상태: v0.7
+상태: v0.9
 
 ---
 
 ## 2026-06-18
+
+### v0.9 — 회사 macroExposure 품질의 public terminal 소비
+
+배경:
+
+- `analysis.macroExposure`는 `nObs/R²/window/lag/coverage/sourceRef` 품질 계약을 냈지만, Macro Lens UI는 아직 `analysis.macroExposure pending` 하드코딩 상태를 표시했다.
+- 새 per-company artifact는 금지되어 있으므로 기존 public terminal data path 안에서 해결해야 했다.
+
+완료:
+
+- `macroExposure.calcMacroExposureFromAnnualRevenue()`를 추가해 회사 객체 없이 연매출 배열과 macro observation 연평균으로 `exposureQuality`를 계산하게 했다.
+- `buildFinanceJson.py`가 `data/macro/{ecos,fred}/observations.parquet`, `data/kindList/corpList.parquet`, `data/dart/scan/productIndex.parquet`를 로컬/offline으로 읽고 기존 `dashboards/finance.json#companies[*].macroExposure`에 품질 패킷을 포함한다.
+- `FinanceCompany`와 terminal `Company` 타입에 `macroExposure`를 추가했다.
+- `buildCompany()`가 raw finance의 `macroExposure`를 `Company`로 전달한다.
+- `MacroLensSnapshot.exposureQuality`가 `co.macroExposure.exposureQuality`를 우선 소비하고, 없을 때만 fallback pending lock을 만든다.
+- Evidence Gate의 `회사노출`과 `민감도`는 `quantCandidate/qualitativeOnly/blocked` 상태에 따라 `OBS/PRIOR/LOCK`, `OPEN/LOCK`으로 표시된다.
+- 출처·한계 탭은 실제 `nObs/R²/window/frequency/lag/sourceRef`를 표시하고, 결손 증거가 있을 때만 `필요 증거` 줄을 노출한다.
+- `landing/static/dashboards/finance.json`을 재생성했다. 예: `005930`은 `analysis.macroExposure:005930:USDKRW`, `nObs=3`, `R²=0.991`, `window=2023-2025 annual`, `qualitativeOnly`로 잠긴다.
+
+검증:
+
+- `python -X utf8 -m pytest tests\analysis\test_macro_exposure_quality.py -q` 통과.
+- `uv run ruff check src\dartlab\analysis\financial\macroExposure.py .github\scripts\prebuild\buildFinanceJson.py tests\analysis\test_macro_exposure_quality.py` 통과.
+- `python -X utf8 .github\scripts\prebuild\buildFinanceJson.py` 통과, `finance.json` 2802사 생성.
+- `python -X utf8 -m pytest tests\macro\test_transmission.py tests\analysis\test_macro_exposure_quality.py tests\architecture\test_prebuild_offline.py tests\architecture\test_l2_no_cross_import.py -q` 통과.
+- `npm run check -w @dartlab/ui-contracts` 통과.
+- `npm run check -w @dartlab/ui-runtime` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+- `python -X utf8 tests\audit\dartlabGuard.py quick` 통과.
+
+NEXT:
+
+1. `finance.parquet`가 현재 2021~2025만 포함해 대부분 종목은 `nObs<5`로 `qualitativeOnly`가 된다. 정량 gate를 더 자주 열려면 prebuild 입력에 더 긴 연간 매출 이력을 공급해야 한다.
+2. 셀 클릭 상세 탭에 `Contribution Waterfall`, `Co-movement Scatter`, `Model Card Drawer`, `Source Packet` 상호작용을 붙인다.
+3. visual/runtime QA로 `회사노출` gate가 실제 품질 상태를 표시하는지 확인한다.
+
+### v0.8 — 매크로 대시보드 시각화 방식 재조사
+
+배경:
+
+- 운영자가 "매크로 분석에 쓰이는 대시보드 시각화를 조사해라. 방식들"이라고 요청했다.
+- 이전 조사 문서는 방향은 맞았지만, `판정형`으로 오해될 여지가 남아 있었다.
+
+완료:
+
+- [08-dashboard-visual-patterns.md](08-dashboard-visual-patterns.md)를 v0.4로 다시 정리했다.
+- FRED, OECD, ECB, IMF, Atlanta Fed GDPNow, Chicago Fed NFCI, NY Fed GSCPI, OFR Vulnerabilities Monitor, BIS Credit-to-GDP gaps, World Bank DataBank 사례를 시각화 방식 기준으로 재분류했다.
+- `상태 압축형`, `전파 경로형`, `분해·기여도형`, `업데이트·빈티지형`, `품질·반증형`, `비교·분포형`, `원천 패킷형`으로 카탈로그를 나눴다.
+- "누가 판정하나"에 대한 제품 답을 명확히 했다. AI나 UI가 판정하지 않고, `macro.transmission`, `analysis.macroExposure`, 공개 데이터의 `asOf/source/frequency/coverage`가 gate 상태를 만든다.
+- 첫 화면 구조를 `Phase Strip -> Driver Pulse -> Exposure Matrix -> Evidence Gate/Release Rail -> Source Drawer`로 고정했다.
+- 금지 시각화를 `gauge`, `donut`, 단일 macro score, 뉴스 카드 wall, 첫 화면 지도, 출처 없는 heatmap, 모델 분포 없는 fan chart로 명확히 했다.
+
+NEXT:
+
+1. P0 화면은 `Driver Pulse Strip`, `Exposure Matrix`, `Evidence Gate Rail`, `Source Stamp`, `Release Rail`, `Falsifier Rail`만 남긴다.
+2. P1 상세는 `Contribution Waterfall`, `Update/Vintage Path`, `Co-movement Scatter`, `Model Card Drawer` 순서로 설계한다.
+3. UI 문구에서 `판정`, `수혜 확정`, `피해 확정`, `좋음/나쁨`을 계속 금지하고 `OBS/PRIOR/TPL/LOCK/STALE/MISSING` 상태만 사용한다.
 
 ### v0.7 — `macro.transmission` 터미널 배선 + macroExposure 품질 계약
 

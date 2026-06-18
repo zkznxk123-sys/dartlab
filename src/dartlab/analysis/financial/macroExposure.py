@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping, Sequence
 
 from dartlab.core.memory import memoizedCalc
 
@@ -119,6 +120,179 @@ def _qualityFromSelected(selected: list[dict], *, stockCode: str) -> dict:
         "frequency": "annual",
         "lagMonths": best.get("lagMonths"),
         "coverage": "company",
+    }
+
+
+def _revenueGrowthRows(years: Sequence[str | int], revenue: Sequence[float | int | None]) -> list[dict]:
+    """연매출 배열을 회귀 입력용 성장률 row로 변환한다."""
+    rows = []
+    for year, value in zip(years, revenue):
+        if value is None:
+            continue
+        try:
+            y = int(str(year)[:4])
+            v = float(value)
+        except (TypeError, ValueError):
+            continue
+        rows.append({"year": y, "revenue": v})
+    rows.sort(key=lambda row: row["year"])
+
+    growthRows = []
+    for prev, cur in zip(rows, rows[1:]):
+        prevRev = prev["revenue"]
+        if prevRev == 0:
+            continue
+        growthRows.append({"year": cur["year"], "growth": cur["revenue"] / abs(prevRev) - 1})
+    return growthRows
+
+
+def _regressAnnualIndicators(
+    *,
+    stockCode: str,
+    growthRows: list[dict],
+    indicators: Sequence,
+    macroAnnual: Mapping[tuple[str, str], Mapping[int, float]],
+) -> list[dict]:
+    """연매출 성장률과 연평균 매크로 지표 변화율의 품질 row를 계산한다."""
+    results = []
+    years = [int(row["year"]) for row in growthRows]
+    growth = [float(row["growth"]) for row in growthRows]
+    if len(years) < 3:
+        return results
+
+    for ind in indicators:
+        source = str(getattr(ind, "source", "")).lower()
+        seriesId = str(getattr(ind, "seriesId", ""))
+        annual = macroAnnual.get((source, seriesId))
+        if not annual:
+            continue
+
+        values = [annual.get(y) for y in years]
+        validPairs = [(i, gVal, v) for i, (gVal, v) in enumerate(zip(growth, values)) if v is not None]
+        if len(validPairs) < 3:
+            continue
+
+        gVals = [float(p[1]) for p in validPairs]
+        iVals = [float(p[2]) for p in validPairs]
+        validYears = [years[p[0]] for p in validPairs]
+
+        indicatorChanges = []
+        for j in range(1, len(iVals)):
+            prevVal = iVals[j - 1]
+            if prevVal != 0:
+                indicatorChanges.append((iVals[j] - prevVal) / abs(prevVal))
+            else:
+                indicatorChanges.append(0.0)
+
+        gSubset = gVals[1:]
+        if len(gSubset) < 2 or len(indicatorChanges) < 2:
+            continue
+
+        nObs = len(gSubset)
+        gMean = sum(gSubset) / len(gSubset)
+        iMean = sum(indicatorChanges) / len(indicatorChanges)
+        sst = sum((v - gMean) ** 2 for v in gSubset)
+        cov = sum((gSubset[k] - gMean) * (indicatorChanges[k] - iMean) for k in range(len(gSubset)))
+        iVar = sum((v - iMean) ** 2 for v in indicatorChanges)
+        r2 = (cov**2) / (sst * iVar) if sst > 0 and iVar > 0 else 0.0
+        latestChange = indicatorChanges[-1] if indicatorChanges else 0.0
+        betaSign = 1 if cov > 0 else -1
+        impact = "상승" if latestChange * betaSign > 0 else "하락"
+
+        results.append(
+            {
+                "label": getattr(ind, "label", seriesId),
+                "seriesId": seriesId,
+                "axis": getattr(ind, "axis", ""),
+                "rSquared": round(r2, 3),
+                "nObs": nObs,
+                "window": f"{validYears[1]}-{validYears[-1]} annual",
+                "frequency": "annual",
+                "lagMonths": 0,
+                "coverage": "company",
+                "sourceRef": f"analysis.macroExposure:{stockCode}:{seriesId}",
+                "sourceRefs": [
+                    "finance.parquet:annualRevenue",
+                    f"macro/{source}/observations.parquet#{seriesId}",
+                ],
+                "latestChange": round(latestChange * 100, 1),
+                "impact": impact,
+            }
+        )
+
+    return results
+
+
+def calcMacroExposureFromAnnualRevenue(
+    *,
+    stockCode: str,
+    years: Sequence[str | int],
+    revenue: Sequence[float | int | None],
+    macroAnnual: Mapping[tuple[str, str], Mapping[int, float]],
+    currency: str = "KRW",
+    industry: str | None = None,
+    product: str | None = None,
+) -> dict:
+    """회사 객체 없이 public prebuild가 소비하는 매크로 노출 품질 패킷.
+
+    UI가 회귀를 다시 만들지 않도록, 기존 ``finance.json`` 생성 단계에서 회사별
+    연매출과 macro observation 연평균만으로 최소 품질 상태를 계산한다.
+    """
+    from dartlab.gather.mapping.exogenousAxes import ExogenousIndicator, getExogenousIndicators
+
+    growthRows = _revenueGrowthRows(years, revenue)
+    if currency == "USD":
+        optimal = []
+        generic = [
+            ExogenousIndicator("FEDFUNDS", "fred", "Federal Funds Rate", "financial"),
+            ExogenousIndicator("DTWEXBGS", "fred", "USD Index", "fx"),
+            ExogenousIndicator("INDPRO", "fred", "Industrial Production", "domestic"),
+        ]
+    else:
+        optimal = getExogenousIndicators(industry=industry, product=product)
+        generic = [
+            ExogenousIndicator("BASE_RATE", "ecos", "기준금리", "financial"),
+            ExogenousIndicator("USDKRW", "ecos", "원/달러", "fx"),
+            ExogenousIndicator("IPI", "ecos", "산업생산", "domestic"),
+        ]
+
+    optimalResults = _regressAnnualIndicators(
+        stockCode=stockCode,
+        growthRows=growthRows,
+        indicators=optimal,
+        macroAnnual=macroAnnual,
+    )
+    genericResults = _regressAnnualIndicators(
+        stockCode=stockCode,
+        growthRows=growthRows,
+        indicators=generic,
+        macroAnnual=macroAnnual,
+    )
+
+    optBest = max((r["rSquared"] for r in optimalResults), default=0)
+    genBest = max((r["rSquared"] for r in genericResults), default=0)
+    if optBest >= genBest:
+        selected = optimalResults
+        selectedLabel = "업종최적"
+    else:
+        selected = genericResults
+        selectedLabel = "범용"
+
+    upCount = sum(1 for r in selected if r["impact"] == "상승")
+    downCount = sum(1 for r in selected if r["impact"] == "하락")
+    netDirection = "positive" if upCount > downCount else "negative" if downCount > upCount else "neutral"
+
+    return {
+        "stockCode": stockCode,
+        "selected": selected[:3],
+        "selectedSource": selectedLabel,
+        "optimalBestR2": optBest,
+        "genericBestR2": genBest,
+        "exposureQuality": _qualityFromSelected(selected, stockCode=stockCode),
+        "netDirection": netDirection,
+        "netDirectionLabel": {"positive": "매출 상승 방향", "negative": "매출 하락 방향", "neutral": "중립"}.get(
+            netDirection, "중립"
+        ),
     }
 
 

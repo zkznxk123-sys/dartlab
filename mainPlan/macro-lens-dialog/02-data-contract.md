@@ -1,6 +1,6 @@
 # 02. 데이터 계약
 
-상태: 구현 v0.4
+상태: 구현 v0.5
 범위: Macro Lens 다이얼로그가 읽는 데이터, 매크로 전파 엔진 산출물, 향후 확장 계약.
 
 ---
@@ -19,6 +19,7 @@
 | sector tailwinds | `eng.sectorTailwinds()` | 좌측 순풍/역풍 섹터 목록 |
 | co-movement | `ui/packages/surfaces/src/terminal/lib/coMovement.ts` | 종목 월수익률과 거시 1차차분 상관 |
 | price/finance snapshot | terminal `Company` shape | 회사 checkpoint 표시 |
+| company macroExposure | `dashboards/finance.json#companies[*].macroExposure` | public-safe 회사별 매크로 노출 품질 |
 | sector priors | `src/dartlab/providers/mappers/.../sectorPriors.json` | 전파 edge 초기 prior 후보 |
 | macro sensitivity | `src/dartlab/analysis/financial/macroExposure.py` | 회사 노출·회귀 품질 계약 |
 
@@ -126,7 +127,7 @@ export interface MacroTransmissionEdgeView {
 }
 
 export interface MacroExposureQuality {
-  status: 'qualitativeOnly' | 'blocked';
+  status: 'quantCandidate' | 'qualitativeOnly' | 'blocked';
   reason: string;
   blockedReason: string;
   missingEvidence: string[];
@@ -172,7 +173,8 @@ export interface MacroFalsifierView {
 
 - `macro.transmission`은 `MacroDriverView`와 `MacroTransmissionEdgeView`를 낸다. 현재 공개 호출은 `dartlab.macro("transmission", market="KR", sectorKey="semiconductor")`다.
 - 기존 analysis macro 표면은 `MacroExposureQuality`와 회사별 checkpoint를 낸다. `macroExposure.calcMacroSensitivity`의 지표별 결과는 `nObs`, `window`, `frequency`, `lagMonths`, `coverage`, `sourceRef`, `sourceRefs`를 포함해야 한다.
-- UI는 두 산출물을 합쳐 보여주되 숨은 수학을 만들지 않는다.
+- public prebuild는 회사 객체를 호출하지 않고 `finance.parquet`의 연매출과 `macro/{fred,ecos}/observations.parquet`의 연평균으로 `macroExposure.exposureQuality`를 만든 뒤 기존 `finance.json` 회사 엔트리에 포함한다.
+- UI는 `finance.json`의 `macroExposure.exposureQuality`와 `macro.transmission` 산출물을 합쳐 보여주되 숨은 수학을 만들지 않는다.
 - `blocked` edge는 숨기지 않고 이유를 표시한다.
 
 ---
@@ -224,6 +226,8 @@ export interface MacroFalsifierView {
 ## 6. 향후 새 산출물
 
 새 산출물이 필요해도 per-company artifact는 만들지 않는다. 시장 단위 artifact만 허용한다.
+
+회사별 품질은 새 산출물이 아니라 기존 all-company finance bundle의 회사 엔트리 안에 넣는다. 이는 새 fetch surface를 만들지 않고 이미 로드된 public terminal snapshot을 확장하는 경로다.
 
 후보:
 

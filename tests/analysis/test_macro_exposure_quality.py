@@ -84,3 +84,50 @@ def test_macro_sensitivity_blocks_quality_without_macro_observations(monkeypatch
     assert result["exposureQuality"]["status"] == "blocked"
     assert result["exposureQuality"]["coverage"] == "missing"
     assert "sourceRef" in result["exposureQuality"]["missingEvidence"]
+
+
+def test_public_annual_revenue_helper_opens_quant_candidate():
+    years = ["2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"]
+    revenue = [100.0, 105.0, 114.0, 130.0, 150.0, 180.0, 220.0, 270.0]
+    macro_annual = {
+        ("ecos", "BASE_RATE"): {year: value for year, value in zip(range(2018, 2026), revenue)},
+        ("ecos", "IPI"): {year: value for year, value in zip(range(2018, 2026), revenue)},
+        ("ecos", "USDKRW"): {year: value for year, value in zip(range(2018, 2026), revenue)},
+    }
+
+    result = macroExposure.calcMacroExposureFromAnnualRevenue(
+        stockCode="FAKE",
+        years=years,
+        revenue=revenue,
+        macroAnnual=macro_annual,
+    )
+
+    quality = result["exposureQuality"]
+    assert quality["status"] == "quantCandidate"
+    assert quality["nObs"] == 6
+    assert quality["rSquared"] == 1.0
+    assert quality["window"] == "2020-2025 annual"
+    assert quality["sourceRef"].startswith("analysis.macroExposure:FAKE:")
+    assert result["selected"]
+
+
+def test_public_annual_revenue_helper_locks_low_sample():
+    years = ["2021", "2022", "2023", "2024", "2025"]
+    revenue = [100.0, 105.0, 114.0, 130.0, 150.0]
+    macro_annual = {
+        ("ecos", "BASE_RATE"): {year: value for year, value in zip(range(2021, 2026), revenue)},
+        ("ecos", "IPI"): {year: value for year, value in zip(range(2021, 2026), revenue)},
+        ("ecos", "USDKRW"): {year: value for year, value in zip(range(2021, 2026), revenue)},
+    }
+
+    result = macroExposure.calcMacroExposureFromAnnualRevenue(
+        stockCode="FAKE",
+        years=years,
+        revenue=revenue,
+        macroAnnual=macro_annual,
+    )
+
+    quality = result["exposureQuality"]
+    assert quality["status"] == "qualitativeOnly"
+    assert quality["nObs"] == 3
+    assert "nObs>=5" in quality["missingEvidence"]

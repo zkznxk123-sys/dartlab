@@ -1,6 +1,6 @@
 import { MACRO_ATTRIBUTION, MACRO_SERIES, type MacroLatest, type MacroSeriesDef } from '@dartlab/ui-contracts';
 import type { CoMover } from './coMovement';
-import type { Company, MacroFile, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
+import type { Company, MacroExposureQualityPayload, MacroFile, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
 
 export type MacroLensTab = 'regime' | 'drivers' | 'transmission' | 'scenario' | 'sources';
 export type MacroMarket = 'KR' | 'US' | 'GLOBAL';
@@ -96,7 +96,7 @@ export interface MacroScenarioView {
 }
 
 export interface MacroExposureQualityView {
-	status: 'qualitativeOnly' | 'blocked';
+	status: 'quantCandidate' | 'qualitativeOnly' | 'blocked';
 	reason: string;
 	blockedReason: string;
 	missingEvidence: string[];
@@ -725,7 +725,7 @@ function buildEdges(co: Company, drivers: MacroDriverView[], payload?: MacroTran
 	});
 }
 
-function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro: MacroFile | null): MacroFalsifierView[] {
+function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro: MacroFile | null, exposureQuality: MacroExposureQualityView): MacroFalsifierView[] {
 	const byId = new Map(drivers.map((d) => [d.id, d]));
 	const out: MacroFalsifierView[] = [];
 	for (const cm of coMovers.slice(0, 5)) {
@@ -769,14 +769,25 @@ function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro:
 		detail: 'macro.asOf가 없으면 최신 국면 해석으로 단정하지 않는다.',
 		sourceRef: 'dashboards/macro.json'
 	});
-	out.push({
-		id: 'company-evidence',
-		type: 'missingCompanyEvidence',
-		label: '회사 고유 노출은 정성 단계',
-		severity: 'warning',
-		detail: '해외매출·FX손익·차입 만기·원재료 비중이 공개 surface로 표준화되기 전까지 beta 숫자는 표시하지 않는다.',
-		sourceRef: 'analysis.macroExposure pending'
-	});
+	if (exposureQuality.status === 'quantCandidate') {
+		out.push({
+			id: 'company-exposure-quality',
+			type: 'quality',
+			label: '회사 노출 품질 후보',
+			severity: 'info',
+			detail: `nObs ${exposureQuality.nObs ?? '—'}, R² ${exposureQuality.rSquared ?? '—'}, ${exposureQuality.window ?? 'window 없음'}. 정량 후보지만 추천·목표가로 번역하지 않는다.`,
+			sourceRef: exposureQuality.sourceRef
+		});
+	} else {
+		out.push({
+			id: 'company-evidence',
+			type: 'missingCompanyEvidence',
+			label: exposureQuality.status === 'blocked' ? '회사 고유 노출 잠김' : '회사 고유 노출은 정성 단계',
+			severity: exposureQuality.status === 'blocked' ? 'blocker' : 'warning',
+			detail: exposureQuality.blockedReason || exposureQuality.reason,
+			sourceRef: exposureQuality.sourceRef
+		});
+	}
 	return out;
 }
 
@@ -802,7 +813,30 @@ function buildScenarios(drivers: MacroDriverView[], edges: MacroTransmissionEdge
 	}).slice(0, 5);
 }
 
-function buildExposureQuality(): MacroExposureQualityView {
+function normalizeExposureQuality(q: MacroExposureQualityPayload | undefined | null, code: string): MacroExposureQualityView | null {
+	if (!q) return null;
+	const status: MacroExposureQualityView['status'] =
+		q.status === 'quantCandidate' || q.status === 'qualitativeOnly' || q.status === 'blocked'
+			? q.status
+			: 'blocked';
+	return {
+		status,
+		reason: q.reason || '회사 매출과 매크로 지표의 공개 품질 계약입니다.',
+		blockedReason: q.blockedReason || (status === 'quantCandidate' ? '' : 'quality gate closed'),
+		missingEvidence: Array.isArray(q.missingEvidence) ? q.missingEvidence : [],
+		sourceRef: q.sourceRef || `analysis.macroExposure:${code}`,
+		nObs: typeof q.nObs === 'number' ? q.nObs : null,
+		rSquared: typeof q.rSquared === 'number' ? q.rSquared : null,
+		window: q.window ?? null,
+		frequency: q.frequency ?? null,
+		lagMonths: typeof q.lagMonths === 'number' ? q.lagMonths : null,
+		coverage: q.coverage ?? 'missing'
+	};
+}
+
+function buildExposureQuality(co: Company): MacroExposureQualityView {
+	const actual = normalizeExposureQuality(co.macroExposure?.exposureQuality, co.code);
+	if (actual) return actual;
 	return {
 		status: 'qualitativeOnly',
 		reason: '회사별 회귀/민감도는 nObs/R²/window/lag/coverage 공개 계약 전까지 정성 경로만 표시',
@@ -843,6 +877,9 @@ function buildEvidenceGates(args: {
 	const observed = args.edges.filter((e) => e.evidenceLevel === 'observed' && e.confidence !== 'blocked');
 	const candidates = args.drivers.filter((d) => d.coMovement?.status === 'candidate');
 	const coWindows = candidates.map((d) => `${d.id}:${d.coMovement?.window ?? 'window?'}`);
+	const companyHasEvidence = args.exposureQuality.coverage === 'company' && args.exposureQuality.nObs != null;
+	const quantOpen = args.exposureQuality.status === 'quantCandidate';
+	const qualityDetail = `nObs ${args.exposureQuality.nObs ?? '—'} · R² ${args.exposureQuality.rSquared ?? '—'} · ${args.exposureQuality.window ?? 'window 없음'}`;
 	return [
 		{
 			id: 'macroData',
@@ -881,23 +918,23 @@ function buildEvidenceGates(args: {
 			id: 'company',
 			labelKr: '회사노출',
 			labelEn: 'Company',
-			value: '정성',
-			detailKr: '회귀 잠금',
-			detailEn: 'regression locked',
-			status: 'blocked',
+			value: companyHasEvidence ? 'OBS' : args.exposureQuality.coverage === 'sectorOnly' ? 'PRIOR' : 'LOCK',
+			detailKr: companyHasEvidence ? qualityDetail : '회사 표본 없음',
+			detailEn: companyHasEvidence ? qualityDetail : 'company sample absent',
+			status: companyHasEvidence ? (quantOpen ? 'ok' : 'watch') : 'blocked',
 			sourceRef: args.exposureQuality.sourceRef,
-			blocks: args.exposureQuality.missingEvidence
+			blocks: args.exposureQuality.missingEvidence.length ? args.exposureQuality.missingEvidence : []
 		},
 		{
 			id: 'quant',
 			labelKr: '민감도',
 			labelEn: 'Beta',
-			value: 'LOCK',
-			detailKr: 'nObs/R² 없음',
-			detailEn: 'no nObs/R²',
-			status: 'blocked',
+			value: quantOpen ? 'OPEN' : 'LOCK',
+			detailKr: quantOpen ? qualityDetail : (args.exposureQuality.blockedReason || 'quality gate closed'),
+			detailEn: quantOpen ? qualityDetail : (args.exposureQuality.blockedReason || 'quality gate closed'),
+			status: quantOpen ? 'ok' : 'blocked',
 			sourceRef: args.exposureQuality.sourceRef,
-			blocks: [args.exposureQuality.blockedReason]
+			blocks: quantOpen ? [] : [args.exposureQuality.blockedReason || 'quality gate closed']
 		}
 	];
 }
@@ -920,8 +957,8 @@ export function buildMacroLensSnapshot(args: {
 	const edges = buildEdges(co, drivers, transmission);
 	const checkpoints = buildCheckpoints(co);
 	const scenarios = buildScenarios(drivers, edges);
-	const falsifiers = buildFalsifiers(coMovers, drivers, macro);
-	const exposureQuality = buildExposureQuality();
+	const exposureQuality = buildExposureQuality(co);
+	const falsifiers = buildFalsifiers(coMovers, drivers, macro, exposureQuality);
 	const marketPhase = {
 		kr: phaseView('KR', macro?.kr),
 		us: phaseView('US', macro?.us)
@@ -960,6 +997,7 @@ export function buildMacroLensSnapshot(args: {
 			'dashboards/macro.json',
 			...(transmission?.sourceRefs ?? []),
 			'macro/{fred,ecos}/observations.parquet',
+			exposureQuality.sourceRef,
 			'terminal Company snapshot',
 			'coMovement: monthly stock return vs macro diff',
 			...drivers.slice(0, 8).map((d) => `${d.id}: ${d.sourceLineage}`)
