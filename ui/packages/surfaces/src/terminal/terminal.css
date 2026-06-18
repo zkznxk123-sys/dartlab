@@ -950,14 +950,7 @@
 .dlTerm .sbItem b { font-family: var(--mono); font-size: 9px; }
 .dlTerm .sbSpacer { flex: 1; }
 
-/* ENGINE TITLE TINTS */
-.dlTerm .panel.eAnalysis .panelTitle { color: var(--amber); }
-.dlTerm .panel.eCredit .panelTitle { color: var(--credit); }
-.dlTerm .panel.eMacro .panelTitle { color: var(--warn); }
-.dlTerm .panel.eQuant .panelTitle { color: var(--good); }
-.dlTerm .panel.eIndustry .panelTitle { color: var(--industry); }
-.dlTerm .panel.eValuation .panelTitle { color: var(--valuation); }
-.dlTerm .panel.eChanges .panelTitle { color: var(--amber); }
+/* 섹션 헤더 통일 — 모든 패널 제목은 amber 단색(엔진별 색상 분기 폐지). 높이 16px·10px 는 .panelHead/.panelTitle 단일 정의가 강제. */
 
 /* 공시뷰어 인터미널 오버레이 — ViewerStudio(embedded) 호스트. 스튜디오 스타일은 component-scoped 라 충돌 없음 */
 .dlViewerFs { position: fixed; inset: 0; z-index: 120; background: #050811; display: flex; flex-direction: column; }
@@ -1061,7 +1054,7 @@
 /* ── FinFullscreen 격상 (append-only) — 감사 이력 스트립 + 개별 임원 보수 표 ── */
 .dlTerm .audStrip { border: 1px solid var(--bd); border-radius: 2px; background: var(--dl-bg-base); padding: 8px 10px; margin-bottom: 10px; }
 .dlTerm .audStripHead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-.dlTerm .audStripTitle { font-family: var(--cond); font-size: 11px; letter-spacing: 0.6px; color: var(--dim); text-transform: uppercase; }
+.dlTerm .audStripTitle { font-family: var(--cond); font-size: 10px; letter-spacing: 0.6px; color: var(--dim); text-transform: uppercase; }
 .dlTerm .audStripMeta { font-size: 9.5px; color: var(--dimmer); }
 .dlTerm .audStripMeta i { font-style: normal; }
 .dlTerm .audStripMeta .audWarn { color: #f0616f; font-weight: 600; }
