@@ -175,7 +175,7 @@ The mapper must cover every distinct `macro.json#transmission.edges[].sectorKeys
 | `shipbuilding` | `shipbuilding` | `shipbuilding` |
 | `chemical` | `chemical` | `chemicals` |
 | `battery` | `battery` | `chemicals` |
-| `logistics` | none | none; render `tailwind 미산출` |
+| `logistics` | `logistics` | none; render `tailwind 미산출` |
 | `finance` | `finance` | `finance` |
 | `bank` | `finance` | `finance` |
 | `food` | `food` | `retail` |
@@ -188,7 +188,7 @@ Future key handling:
 
 - Unknown key must render as blocked/unknown, not crash.
 - Test must fail if current `macro.json` introduces a new key without mapper coverage, except `all`.
-- Do not invent weak semantic joins. `logistics` and `utility` stay unmapped until data or product explicitly adds sector-tailwind coverage.
+- Do not invent weak semantic joins. `logistics` keeps its terminal industry filter id but no sector-tailwind join; `utility` stays unmapped until data or product explicitly adds sector-tailwind coverage.
 
 ## 8. P0 Bug: Positive Blended Must Not Become Headwind
 

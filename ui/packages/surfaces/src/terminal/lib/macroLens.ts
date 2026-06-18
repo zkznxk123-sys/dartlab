@@ -1,6 +1,7 @@
 import { MACRO_ATTRIBUTION, MACRO_SERIES, type MacroLatest, type MacroSeriesDef } from '@dartlab/ui-contracts';
 import type { CoMover } from './coMovement';
 import type { Company, MacroExposureIndicatorPayload, MacroExposureQualityPayload, MacroFile, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
+import { EDGE_SECTOR_TO_TAILWIND, CURRENT_MACRO_EDGE_SECTOR_KEYS, classifyTailwind, hasNegativeTailwind } from './macroMappings';
 
 export type MacroLensTab = 'regime' | 'drivers' | 'transmission' | 'scenario' | 'sources';
 export type MacroMarket = 'KR' | 'US' | 'GLOBAL';
@@ -266,6 +267,9 @@ export interface MacroLensSnapshot {
 	scenarios: MacroScenarioView[];
 	sourceRefs: string[];
 	missing: MacroMissingView[];
+	glance?: MacroGlanceView;
+	macroPath?: MacroPathView;
+	marketOnly?: boolean;
 }
 
 export interface MacroPhaseView {
@@ -276,6 +280,106 @@ export interface MacroPhaseView {
 	growth: string;
 	inflation: string;
 	description: string;
+}
+
+export interface RegimeQuadrantCellView {
+	key: 'stagflation' | 'reflation' | 'deflation' | 'goldilocks';
+	labelKr: string;
+	labelEn: string;
+	growth: 'rising' | 'falling';
+	inflation: 'rising' | 'falling';
+}
+
+export interface RegimeMarketView {
+	market: 'KR' | 'US';
+	cellKey: RegimeQuadrantCellView['key'] | null;
+	phase: string;
+	phaseLabel: string;
+	quadrantLabel: string;
+	growth: string;
+	inflation: string;
+	confidence: string | null;
+	hasQuadrant: boolean;
+	lensConflict: boolean;
+	transitionLabel: string;
+	hasTransitionProgress: boolean;
+	assets: { key: string; labelKr: string; labelEn: string; weight: string; tone: 'ow' | 'uw' | 'nu' }[];
+	description: string;
+}
+
+export interface RegimeQuadrantView {
+	asOf: string | null;
+	cells: RegimeQuadrantCellView[];
+	markets: RegimeMarketView[];
+	freshness: {
+		status: 'fresh' | 'watch' | 'stale' | 'unknown';
+		label: string;
+		daysLag: number | null;
+	};
+	lensConflict: boolean;
+}
+
+export interface MacroPathSectorNode {
+	key: string;
+	labelKr: string;
+	labelEn: string;
+	industryId: string | null;
+	tailwindKey: string | null;
+	blended: number | null;
+	tailwindLabelKr: string;
+	tailwindLabelEn: string;
+	tone: Tone;
+	missingTailwind: boolean;
+	active: boolean;
+}
+
+export interface MacroPathLinkView {
+	id: string;
+	driverId: string;
+	driverLabel: string;
+	channel: MacroChannel;
+	channelLabelKr: string;
+	channelLabelEn: string;
+	sectorKeys: string[];
+	sectorNodes: MacroPathSectorNode[];
+	market: MacroMarket;
+	sign: 'positive' | 'negative' | 'mixed' | 'unknown';
+	signLabel: string;
+	evidenceLevel: 'observed' | 'sectorPrior' | 'template';
+	evidenceLabel: 'OBS' | 'PRIOR' | 'TPL';
+	confidence: 'high' | 'medium' | 'low' | 'blocked';
+	styleClass: string;
+	signClass: string;
+	opacity: number;
+	financialLine: string;
+	valuationLever: string;
+	lagLabel: string;
+	note: string;
+	sourceRefs: string[];
+	active: boolean;
+	allSector: boolean;
+}
+
+export interface MacroPathView {
+	asOf: string | null;
+	mode: 'compact' | 'full';
+	driverNodes: { id: string; label: string; market: MacroMarket; freshnessStatus: string }[];
+	channelNodes: { id: MacroChannel; labelKr: string; labelEn: string }[];
+	sectorNodes: MacroPathSectorNode[];
+	links: MacroPathLinkView[];
+	allSectorLinks: MacroPathLinkView[];
+	missing: MacroMissingView[];
+	coverageKeys: string[];
+	hasNegativeTailwind: boolean;
+	captionKr: string;
+	captionEn: string;
+}
+
+export interface MacroGlanceView {
+	asOf: string | null;
+	regime: RegimeQuadrantView;
+	path: MacroPathView;
+	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[];
 }
 
 interface EdgeTemplate {
@@ -505,6 +609,27 @@ const SCENARIOS: Omit<MacroScenarioView, 'readiness'>[] = [
 
 const CORE_DRIVER_IDS = ['USDKRW', 'BASE_RATE', 'CPI', 'EXPORT', 'DGS10', 'BAMLH0A0HYM2', 'DCOILWTICO'];
 const MS_DAY = 24 * 60 * 60 * 1000;
+const REGIME_CELLS: RegimeQuadrantCellView[] = [
+	{ key: 'stagflation', labelKr: '스태그플레이션', labelEn: 'Stagflation', growth: 'falling', inflation: 'rising' },
+	{ key: 'reflation', labelKr: '리플레이션', labelEn: 'Reflation', growth: 'rising', inflation: 'rising' },
+	{ key: 'deflation', labelKr: '디플레이션', labelEn: 'Deflation', growth: 'falling', inflation: 'falling' },
+	{ key: 'goldilocks', labelKr: '골디락스', labelEn: 'Goldilocks', growth: 'rising', inflation: 'falling' }
+];
+const ASSET_ROWS = [
+	{ key: 'equity', labelKr: '주식', labelEn: 'Equity' },
+	{ key: 'bond', labelKr: '채권', labelEn: 'Bond' },
+	{ key: 'commodity', labelKr: '원자재', labelEn: 'Comdty' },
+	{ key: 'gold', labelKr: '금', labelEn: 'Gold' },
+	{ key: 'tips', labelKr: '물가채', labelEn: 'TIPS' },
+	{ key: 'cash', labelKr: '현금', labelEn: 'Cash' }
+];
+const CHANNEL_LABELS: Record<MacroChannel, { kr: string; en: string }> = {
+	revenue: { kr: '매출', en: 'Sales' },
+	margin: { kr: '마진', en: 'Margin' },
+	balanceSheet: { kr: '차입', en: 'Debt' },
+	cashFlow: { kr: '현금', en: 'Cash' },
+	valuation: { kr: '밸류', en: 'Value' }
+};
 
 const fmtDate = (d?: string | null) => d ? (d.length === 8 ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : d) : '—';
 
@@ -711,6 +836,212 @@ function phaseView(market: 'KR' | 'US', side?: MacroSide): MacroPhaseView | null
 	};
 }
 
+function assetTone(weight?: string): 'ow' | 'uw' | 'nu' {
+	return weight === 'overweight' ? 'ow' : weight === 'underweight' ? 'uw' : 'nu';
+}
+
+function cellFromSide(side?: MacroSide): RegimeQuadrantCellView['key'] | null {
+	const q = side?.quadrant;
+	const key = q?.quadrant;
+	if (key === 'stagflation' || key === 'reflation' || key === 'deflation' || key === 'goldilocks') return key;
+	const growth = q?.growth;
+	const inflation = q?.inflation;
+	if (growth === 'falling' && inflation === 'rising') return 'stagflation';
+	if (growth === 'rising' && inflation === 'rising') return 'reflation';
+	if (growth === 'falling' && inflation === 'falling') return 'deflation';
+	if (growth === 'rising' && inflation === 'falling') return 'goldilocks';
+	return null;
+}
+
+function transitionLabel(side?: MacroSide): { label: string; hasProgress: boolean } {
+	const tr = side?.transition;
+	if (!tr) return { label: '전이신호 미산출', hasProgress: false };
+	const progress = typeof tr.progress === 'number' ? `${tr.progress}%` : '미확정';
+	const from = tr.from || '?';
+	const to = tr.to || '?';
+	const triggered = tr.triggered?.length ?? 0;
+	const pending = tr.pending?.length ?? 0;
+	return { label: `${from}→${to} · ${progress} · ${triggered}/${triggered + pending} 신호`, hasProgress: typeof tr.progress === 'number' };
+}
+
+function freshnessFromAsOf(asOf?: string | null): RegimeQuadrantView['freshness'] {
+	const lag = daysLag((asOf || '').replaceAll('-', ''));
+	if (lag == null) return { status: 'unknown', label: 'asOf 없음', daysLag: null };
+	if (lag > 10) return { status: 'stale', label: `${lag}일 경과`, daysLag: lag };
+	if (lag > 5) return { status: 'watch', label: `${lag}일 경과`, daysLag: lag };
+	return { status: 'fresh', label: `${lag}일`, daysLag: lag };
+}
+
+function buildRegimeMarket(market: 'KR' | 'US', side?: MacroSide): RegimeMarketView {
+	const q = side?.quadrant;
+	const cellKey = cellFromSide(side);
+	const phase = side?.phase ?? 'unknown';
+	const phaseLabel = side?.phaseLabel || phase;
+	const quadrantLabel = q?.quadrantLabel || q?.quadrant || '국면 상세 데이터 없음';
+	const tr = transitionLabel(side);
+	return {
+		market,
+		cellKey,
+		phase,
+		phaseLabel,
+		quadrantLabel,
+		growth: q?.growth || '—',
+		inflation: q?.inflation || '—',
+		confidence: q?.confidence || side?.confidence || null,
+		hasQuadrant: !!q,
+		lensConflict: !!q && phase !== q.quadrant,
+		transitionLabel: tr.label,
+		hasTransitionProgress: tr.hasProgress,
+		assets: ASSET_ROWS.map((asset) => ({
+			...asset,
+			weight: q?.assetImplication?.[asset.key] ?? 'neutral',
+			tone: assetTone(q?.assetImplication?.[asset.key])
+		})),
+		description: q?.description || '국면 상세 데이터 없음'
+	};
+}
+
+export function buildRegimeQuadrant(macro: MacroFile | null): RegimeQuadrantView {
+	const markets = [buildRegimeMarket('KR', macro?.kr), buildRegimeMarket('US', macro?.us)];
+	return {
+		asOf: macro?.asOf ?? null,
+		cells: REGIME_CELLS,
+		markets,
+		freshness: freshnessFromAsOf(macro?.asOf ?? null),
+		lensConflict: markets.some((m) => m.lensConflict)
+	};
+}
+
+function evidenceStyle(edge: MacroTransmissionEdge): { styleClass: string; opacity: number; label: 'OBS' | 'PRIOR' | 'TPL' } {
+	if (edge.evidenceLevel === 'observed') return { styleClass: 'observed', opacity: 1, label: 'OBS' };
+	if (edge.evidenceLevel === 'sectorPrior') return { styleClass: 'prior', opacity: 0.65, label: 'PRIOR' };
+	return { styleClass: 'template', opacity: 0.45, label: 'TPL' };
+}
+
+function signClass(sign: MacroTransmissionEdge['sign']): string {
+	return sign === 'positive' ? 'pos' : sign === 'negative' ? 'neg' : sign === 'mixed' ? 'mix' : 'unk';
+}
+
+function pathSectorNode(
+	key: string,
+	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[],
+	activeIndustryId?: string
+): MacroPathSectorNode {
+	const map = EDGE_SECTOR_TO_TAILWIND[key] ?? { industryId: null, tailwindKey: null, kr: key, en: key };
+	const tw = map.tailwindKey ? sectorTailwinds.find((row) => row.tailwindKey === map.tailwindKey || row.id === map.industryId) : null;
+	const cls = tw ? classifyTailwind(tw.blended) : null;
+	return {
+		key,
+		labelKr: map.kr,
+		labelEn: map.en,
+		industryId: map.industryId,
+		tailwindKey: map.tailwindKey,
+		blended: tw?.blended ?? null,
+		tailwindLabelKr: cls?.labelKr ?? 'tailwind 미산출',
+		tailwindLabelEn: cls?.labelEn ?? 'tailwind missing',
+		tone: cls?.tone ?? 'neutral',
+		missingTailwind: !tw,
+		active: !!activeIndustryId && map.industryId === activeIndustryId
+	};
+}
+
+export function buildMacroPath(
+	transmission: MacroTransmissionPayload | null | undefined,
+	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[],
+	opts: { activeIndustryId?: string; mode?: 'compact' | 'full' } = {}
+): MacroPathView {
+	const mode = opts.mode ?? 'compact';
+	const missing: MacroMissingView[] = [];
+	if (!transmission?.edges?.length) {
+		missing.push({ id: 'macro-path', status: 'missing', reason: 'macro.transmission edges unavailable', sourceRef: 'dashboards/macro.json#transmission' });
+	}
+	const driverById = new Map((transmission?.drivers ?? []).map((driver) => [driver.id, driver]));
+	const sectorByKey = new Map<string, MacroPathSectorNode>();
+	const links: MacroPathLinkView[] = [];
+	const allSectorLinks: MacroPathLinkView[] = [];
+	for (const edge of transmission?.edges ?? []) {
+		const style = evidenceStyle(edge);
+		const blocked = edge.confidence === 'blocked';
+		const sectors = (edge.sectorKeys?.length ? edge.sectorKeys : ['unknown']);
+		const allSector = sectors.length === 1 && sectors[0] === 'all';
+		const sectorNodes = allSector
+			? [pathSectorNode('all', sectorTailwinds, opts.activeIndustryId)]
+			: sectors.map((key) => pathSectorNode(key, sectorTailwinds, opts.activeIndustryId));
+		for (const node of sectorNodes) sectorByKey.set(node.key, node);
+		const driver = driverById.get(edge.driverId);
+		const channelLabel = CHANNEL_LABELS[edge.channel];
+		const view: MacroPathLinkView = {
+			id: edge.id,
+			driverId: edge.driverId,
+			driverLabel: driver?.labelKr ?? edge.driverId,
+			channel: edge.channel,
+			channelLabelKr: channelLabel?.kr ?? edge.channel,
+			channelLabelEn: channelLabel?.en ?? edge.channel,
+			sectorKeys: sectors,
+			sectorNodes,
+			market: edge.market,
+			sign: edge.sign,
+			signLabel: edge.sign === 'positive' ? '+' : edge.sign === 'negative' ? '-' : edge.sign === 'mixed' ? '±' : '?',
+			evidenceLevel: edge.evidenceLevel,
+			evidenceLabel: style.label,
+			confidence: edge.confidence,
+			styleClass: blocked ? 'blocked' : style.styleClass,
+			signClass: blocked ? 'blocked' : signClass(edge.sign),
+			opacity: blocked ? 0.3 : style.opacity,
+			financialLine: edge.financialLine,
+			valuationLever: edge.valuationLever,
+			lagLabel: normalizeLag(edge.lagMonths) ? `${normalizeLag(edge.lagMonths)![0]}-${normalizeLag(edge.lagMonths)![1]}M` : '—',
+			note: noteFromTransmission(edge),
+			sourceRefs: edge.sourceRefs?.length ? edge.sourceRefs : [edge.sourceRef ?? `macro.transmission:edge:${edge.id}`],
+			active: sectorNodes.some((node) => node.active),
+			allSector
+		};
+		if (allSector) allSectorLinks.push(view);
+		else links.push(view);
+	}
+	const sortedSectors = [...sectorByKey.values()].sort((a, b) => {
+		if (a.key === 'all') return 1;
+		if (b.key === 'all') return -1;
+		if (a.blended == null && b.blended == null) return a.labelKr.localeCompare(b.labelKr);
+		if (a.blended == null) return 1;
+		if (b.blended == null) return -1;
+		return b.blended - a.blended;
+	});
+	const negative = hasNegativeTailwind(sectorTailwinds);
+	return {
+		asOf: transmission?.asOf ?? null,
+		mode,
+		driverNodes: (transmission?.drivers ?? []).map((d) => ({
+			id: d.id,
+			label: d.labelKr ?? d.id,
+			market: d.market,
+			freshnessStatus: d.sourceLineage?.status ?? 'unknown'
+		})),
+		channelNodes: Object.entries(CHANNEL_LABELS).map(([id, label]) => ({ id: id as MacroChannel, labelKr: label.kr, labelEn: label.en })),
+		sectorNodes: sortedSectors,
+		links,
+		allSectorLinks,
+		missing: [...missing, ...((transmission?.missing ?? []) as MacroMissingView[])],
+		coverageKeys: [...CURRENT_MACRO_EDGE_SECTOR_KEYS],
+		hasNegativeTailwind: negative,
+		captionKr: negative ? '음수 blended 섹터만 역풍으로 표시' : '전 섹터 약순풍 - 절대 역풍 없음',
+		captionEn: negative ? 'Only negative blended sectors are headwind' : 'All sectors weak-positive - no absolute headwind'
+	};
+}
+
+export function buildMacroGlanceView(
+	macro: MacroFile | null,
+	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[],
+	opts: { activeIndustryId?: string; mode?: 'compact' | 'full' } = {}
+): MacroGlanceView {
+	return {
+		asOf: macro?.asOf ?? null,
+		regime: buildRegimeQuadrant(macro),
+		path: buildMacroPath(macro?.transmission ?? null, sectorTailwinds, opts),
+		sectorTailwinds
+	};
+}
+
 function toneFromValue(v: number | null, goodHigh = true): Tone {
 	if (v == null) return 'neutral';
 	if (goodHigh) return v >= 10 ? 'up' : v >= 3 ? 'good' : v >= 0 ? 'neutral' : 'warn';
@@ -895,6 +1226,42 @@ function buildEdgesFromTransmission(co: Company, drivers: MacroDriverView[], pay
 				note: blocked ? `${noteFromTransmission(e)} 최신 driver 관측 lineage가 닫혀 있어 정량 claim은 잠근다.` : noteFromTransmission(e)
 			};
 		});
+}
+
+function buildMarketEdgesFromTransmission(drivers: MacroDriverView[], payload?: MacroTransmissionPayload | null): MacroTransmissionEdgeView[] {
+	if (!payload?.edges?.length) return [];
+	const driverById = new Map(drivers.map((d) => [d.id, d]));
+	const payloadDrivers = new Map(payload.drivers.map((d) => [d.id, d]));
+	return payload.edges.slice(0, 16).map((e) => {
+		const driver = driverById.get(e.driverId);
+		const payloadDriver = payloadDrivers.get(e.driverId);
+		const blocked = !driver || payloadDriver?.sourceLineage?.status === 'missing';
+		const sectorKeys = e.sectorKeys?.length ? e.sectorKeys : ['unknown'];
+		const sectorLabels = sectorKeys.map((key) => EDGE_SECTOR_TO_TAILWIND[key]?.kr ?? key);
+		const sourceRefs = [
+			e.sourceRef ?? `macro.transmission:edge:${e.id}`,
+			...(e.sourceRefs ?? []),
+			payloadDriver ? transmissionLineageOf(payloadDriver) : `driver:${e.driverId}:missing`
+		];
+		return {
+			id: e.id,
+			driverId: e.driverId,
+			driverLabel: driver?.label ?? payloadDriver?.labelKr ?? e.driverId,
+			market: e.market,
+			sectorKey: sectorKeys[0] ?? 'unknown',
+			sectorLabel: sectorLabels.join(' · '),
+			channel: e.channel,
+			financialLine: e.financialLine,
+			valuationLever: e.valuationLever,
+			sign: e.sign,
+			lagMonths: normalizeLag(e.lagMonths),
+			confidence: blocked ? 'blocked' : e.confidence,
+			evidenceLevel: e.evidenceLevel,
+			requiredCompanyEvidence: e.requiredCompanyEvidence ?? [],
+			sourceRefs,
+			note: blocked ? `${noteFromTransmission(e)} 최신 driver 관측 lineage가 닫혀 있어 정량 claim은 잠근다.` : noteFromTransmission(e)
+		};
+	});
 }
 
 function buildEdges(co: Company, drivers: MacroDriverView[], payload?: MacroTransmissionPayload | null): MacroTransmissionEdgeView[] {
@@ -1320,7 +1687,7 @@ export function buildMacroLensSnapshot(args: {
 	macro: MacroFile | null;
 	transmission?: MacroTransmissionPayload | null;
 	macroLatest: MacroLatest[];
-	sectorTailwinds: { id: string; kr: string; en: string; blended: number }[];
+	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[];
 	coMovers: CoMover[];
 }): MacroLensSnapshot {
 	const { co, macro, transmission = macro?.transmission ?? null, macroLatest, sectorTailwinds, coMovers } = args;
@@ -1389,7 +1756,110 @@ export function buildMacroLensSnapshot(args: {
 			...exposureIndicators.flatMap((x) => [x.sourceRef, ...x.sourceRefs]).filter(Boolean),
 			...drivers.slice(0, 8).map((d) => `${d.id}: ${d.sourceLineage}`)
 		],
-		missing
+		missing,
+		glance: buildMacroGlanceView(macro, sectorTailwinds, { activeIndustryId: co.industry, mode: 'compact' }),
+		macroPath: buildMacroPath(macro?.transmission ?? transmission, sectorTailwinds, { activeIndustryId: co.industry, mode: 'full' }),
+		marketOnly: false
+	};
+}
+
+function marketOnlyExposureQuality(): MacroExposureQualityView {
+	return {
+		method: null,
+		modelVersion: null,
+		targetMetric: null,
+		minObs: null,
+		status: 'blocked',
+		reason: '종목을 선택하면 회사 노출 checkpoint를 계산한다.',
+		blockedReason: 'company not selected',
+		missingEvidence: ['company selection'],
+		sourceRef: 'terminal macro market-only',
+		nObs: null,
+		rSquared: null,
+		window: null,
+		frequency: null,
+		lagMonths: null,
+		coverage: 'missing'
+	};
+}
+
+function marketOnlyCheckpoints(): MacroCheckpointView[] {
+	return [
+		{ id: 'sector', label: '섹터 전파', value: '종목 선택 후', tone: 'neutral', reason: '회사 업종이 선택되면 해당 경로를 하이라이트한다.', source: 'company selection' },
+		{ id: 'margin', label: '마진 흡수력', value: 'LOCK', tone: 'neutral', reason: '회사 재무제표 선택 전에는 계산하지 않는다.', source: 'company.fundamentals' },
+		{ id: 'debt', label: '금리 민감도', value: 'LOCK', tone: 'neutral', reason: '차입·이자보상배율은 종목 선택 후 확인한다.', source: 'company.fundamentals' },
+		{ id: 'cashFlow', label: '현금흐름 흡수', value: 'LOCK', tone: 'neutral', reason: '현금흐름 checkpoint는 종목 선택 후 확인한다.', source: 'company.financials' }
+	];
+}
+
+export function buildMarketMacroLensSnapshot(args: {
+	macro: MacroFile | null;
+	macroLatest: MacroLatest[];
+	sectorTailwinds: { id: string; kr: string; en: string; blended: number; tailwindKey?: string }[];
+}): MacroLensSnapshot {
+	const { macro, macroLatest, sectorTailwinds } = args;
+	const transmission = macro?.transmission ?? null;
+	const drivers = applyTransmissionDriverLineage(buildDrivers(macroLatest, '', []), transmission);
+	const priorityRank = { high: 0, medium: 1, low: 2, blocked: 3 };
+	const topPressures = [...drivers]
+		.filter((d) => d.relevance !== 'context' && d.pressureLevel !== 'blocked')
+		.sort((a, b) => priorityRank[a.pressureLevel] - priorityRank[b.pressureLevel])
+		.slice(0, 3);
+	const edges = buildMarketEdgesFromTransmission(drivers, transmission);
+	const exposureQuality = marketOnlyExposureQuality();
+	const releaseRail = buildReleaseRail(drivers);
+	const sourcePackets = buildSourcePackets(drivers, transmission);
+	const contributionStacks = buildContributionStacks(drivers, edges, macroLatest, exposureQuality);
+	const coMoveGates = buildCoMoveGates(drivers, []);
+	const marketPhase = {
+		kr: phaseView('KR', macro?.kr),
+		us: phaseView('US', macro?.us)
+	};
+	const missing = buildMissing({ macro, macroLatest, edges, coMovers: [], transmission });
+	const edgeSourceRef = transmission ? 'dartlab://macro/transmission' : 'macro transmission missing';
+	return {
+		asOf: {
+			macro: macro?.asOf ?? null,
+			price: null,
+			finance: null
+		},
+		company: {
+			code: 'MARKET',
+			name: 'Market Macro',
+			sector: '종목 선택 전',
+			industry: ''
+		},
+		marketPhase,
+		drivers,
+		topPressures: topPressures.length ? topPressures : drivers.slice(0, 3),
+		transmissionEdges: edges,
+		companyCheckpoints: marketOnlyCheckpoints(),
+		sectorBinding: {
+			tailwind: null,
+			top: sectorTailwinds.slice(0, 4),
+			bottom: sectorTailwinds.length > 4 ? sectorTailwinds.slice(-4).reverse() : []
+		},
+		exposureQuality,
+		exposureIndicators: [],
+		releaseRail,
+		sourcePackets,
+		contributionStacks,
+		coMoveGates,
+		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef }),
+		falsifiers: buildFalsifiers([], drivers, macro, exposureQuality),
+		scenarios: buildScenarios(drivers, edges),
+		sourceRefs: [
+			MACRO_ATTRIBUTION,
+			'dashboards/macro.json',
+			...(transmission?.sourceRefs ?? []),
+			'macro/{fred,ecos}/observations.parquet',
+			'terminal macro market-only',
+			...drivers.slice(0, 8).map((d) => `${d.id}: ${d.sourceLineage}`)
+		],
+		missing,
+		glance: buildMacroGlanceView(macro, sectorTailwinds, { mode: 'compact' }),
+		macroPath: buildMacroPath(transmission, sectorTailwinds, { mode: 'full' }),
+		marketOnly: true
 	};
 }
 

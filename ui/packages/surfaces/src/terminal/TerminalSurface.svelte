@@ -20,12 +20,14 @@
 	import MacroLensDialog from './panels/MacroLensDialog.svelte';
 	import IndustryDialog from './panels/IndustryDialog.svelte';
 	import { ChartCtl } from './charts/chartState.svelte';
-	import { buildMacroLensSnapshot, type MacroLensTab } from './lib/macroLens';
+	import { buildMacroLensSnapshot, buildMarketMacroLensSnapshot, type MacroLensTab } from './lib/macroLens';
+	import { classifyTailwind, hasNegativeTailwind } from './lib/macroMappings';
 	import type { CoMover } from './lib/coMovement';
 	import { Heart } from 'lucide-svelte';
 	import { LAST_SYM_KEY } from './lib/lastSymbol';
 	import { warmCompany } from './lib/warmup';
 	import { fetchGithubStars, fmtStars } from './lib/githubStars';
+	import { readStore, writeStore } from './lib/termStore';
 
 	interface Props {
 		eng: Engine;
@@ -64,6 +66,8 @@
 	let industryId = $state('');
 	let macroCoMovers = $state<CoMover[]>([]);
 	let macroTransmission = $state<MacroTransmissionResult | null>(null);
+	let sectorFilter = $state('');
+	let bottomTab = $state<'screener' | 'watch'>(readStore<string>('dlTerm.bottomTab', 'screener') === 'watch' ? 'watch' : 'screener');
 	const chartCtl = new ChartCtl();
 	// GitHub 스타 수 — SNS 버튼 옆 라이브 배지(사회적 증명). null = 미조회/실패(배지 숨김).
 	let ghStars = $state<number | null>(null);
@@ -82,6 +86,7 @@
 	let cmd = $state('');
 	let flash = $state<string | null>(null);
 	let flashTimer: ReturnType<typeof setTimeout> | null = null;
+	$effect(() => { writeStore('dlTerm.bottomTab', bottomTab === 'watch' ? 'watch' : null); });
 
 	// viewer 식 자동완성 검색
 	let cmdInput = $state<HTMLInputElement | null>(null);
@@ -144,14 +149,21 @@
 			alive = false;
 		};
 	});
-	const macroLensSnapshot = $derived.by(() => co ? buildMacroLensSnapshot({
-		co,
-		macro: eng.raw.macro,
-		transmission: macroTransmission,
-		macroLatest,
-		sectorTailwinds: eng.sectorTailwinds(),
-		coMovers: macroCoMovers
-	}) : null);
+	const macroLensSnapshot = $derived.by(() => {
+		const sectorTailwinds = eng.sectorTailwinds();
+		return co ? buildMacroLensSnapshot({
+			co,
+			macro: eng.raw.macro,
+			transmission: macroTransmission,
+			macroLatest,
+			sectorTailwinds,
+			coMovers: macroCoMovers
+		}) : buildMarketMacroLensSnapshot({
+			macro: eng.raw.macro,
+			macroLatest,
+			sectorTailwinds
+		});
+	});
 	$effect(() => {
 		const code = co?.code;
 		if (!code) return;
@@ -193,7 +205,14 @@
 			out.push({ l: 'US', v: lang === 'en' ? m.us.phase : m.us.phaseLabel, t: dir(m.us.quadrant?.growth) });
 		}
 		if (tw[0]) out.push({ l: lang === 'en' ? 'tailwind' : '순풍', v: (lang === 'en' ? tw[0].en : tw[0].kr) + ' +' + tw[0].blended.toFixed(2), t: 'tUp' });
-		if (tw.length > 1) { const lo = tw[tw.length - 1]; out.push({ l: lang === 'en' ? 'headwind' : '역풍', v: (lang === 'en' ? lo.en : lo.kr) + ' ' + lo.blended.toFixed(2), t: 'tDn' }); }
+		if (tw.length > 1) {
+			const lo = tw[tw.length - 1];
+			const cls = classifyTailwind(lo.blended);
+			const negative = hasNegativeTailwind(tw) && lo.blended < 0;
+			const kpiTone = negative ? 'tDn' : cls.tone === 'up' ? 'tUp' : cls.tone === 'good' ? 'tGood' : 'tNeu';
+			const value = (lang === 'en' ? lo.en : lo.kr) + ' ' + (lo.blended > 0 ? '+' : '') + lo.blended.toFixed(2);
+			out.push({ l: negative ? (lang === 'en' ? 'headwind' : '역풍') : (lang === 'en' ? 'weak tw' : '약순풍'), v: value, t: kpiTone });
+		}
 		if (up != null) out.push({ l: lang === 'en' ? 'breadth' : '시장폭', v: up.toFixed(0) + '%↑', t: up >= 50 ? 'tUp' : 'tDn' });
 		if (avg != null) out.push({ l: lang === 'en' ? 'avg 1M' : '평균1M', v: sign(avg, 1) + '%', t: avg >= 0 ? 'tUp' : 'tDn' });
 		return out;
@@ -219,6 +238,10 @@
 		macroLensTab = tab;
 		macroLensFocus = focusId;
 		macroLensOpen = true;
+	}
+	function handleSectorFilter(id: string) {
+		sectorFilter = sectorFilter === id ? '' : id;
+		bottomTab = 'screener';
 	}
 	function openIndustry(id: string) {
 		industryId = id;
@@ -250,6 +273,7 @@
 			<div class="bootMark">DartLab <span>terminal</span></div>
 			<div class="bootBar"><div class="bootFill"></div></div>
 			<div class="bootMsg">{lang === 'en' ? 'company not found' : '회사 데이터를 찾을 수 없습니다'}</div>
+			<button class="finFullBtn" onclick={() => openMacroLens('regime', '')}>{lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}</button>
 		</div>
 	{:else}
 		<header class="topBar">
@@ -341,7 +365,7 @@
 					<!-- 백테스트 모드 — 좌패널 전체가 조작 패널(스코프·프리셋버튼·커스텀·검증). LeftRail(매크로·스크리너) 교체. -->
 					<StrategyDock ctl={chartCtl} {lang} code={co.code} name={co.name.kr} fill onClose={() => { chartCtl.clearBtAll(); chartCtl.btReportMode = false; chartCtl.btDockOpen = false; }} />
 				{:else}
-					<LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} />
+					<LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} {sectorFilter} {bottomTab} onSectorFilter={handleSectorFilter} onBottomTab={(tab) => (bottomTab = tab)} />
 				{/if}
 			</div>
 			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} onMacroLens={openMacroLens} onCoMovers={(rows) => (macroCoMovers = rows)} /></div>
@@ -366,20 +390,21 @@
 		<SourcesModal {lang} open={sourcesOpen} onClose={() => (sourcesOpen = false)} pricesAsOf={co.price.asOf} macroAsOf={eng.raw.macro?.asOf ?? ''} financeLatest={finLatest || (co.trendQuarter?.periods.at(-1) ?? '')} />
 		<GiscusPanel code={co.code} name={co.name.kr} {lang} open={discussOpen} onClose={() => (discussOpen = false)} />
 		<SupportDialog {lang} {links} {base} open={supportOpen} onClose={() => (supportOpen = false)} />
-		{#if macroLensOpen && macroLensSnapshot}
-			<MacroLensDialog
-				snapshot={macroLensSnapshot}
-				{lang}
-				tab={macroLensTab}
-				focusId={macroLensFocus}
-				activeEcon={chartCtl.econ}
-				onTab={(t) => (macroLensTab = t)}
-				onClose={() => (macroLensOpen = false)}
-				onToggleEcon={(id) => chartCtl.toggleEcon(id)}
-			/>
-		{/if}
 		{#if industryOpen}
 			<IndustryDialog {eng} {industryId} {lang} onClose={() => (industryOpen = false)} onPick={(c) => { pick(c); industryOpen = false; }} />
 		{/if}
+	{/if}
+	{#if macroLensOpen && macroLensSnapshot}
+		<MacroLensDialog
+			snapshot={macroLensSnapshot}
+			{lang}
+			tab={macroLensTab}
+			focusId={macroLensFocus}
+			activeEcon={chartCtl.econ}
+			onTab={(t) => (macroLensTab = t)}
+			onClose={() => (macroLensOpen = false)}
+			onToggleEcon={(id) => chartCtl.toggleEcon(id)}
+			onSector={handleSectorFilter}
+		/>
 	{/if}
 </div>

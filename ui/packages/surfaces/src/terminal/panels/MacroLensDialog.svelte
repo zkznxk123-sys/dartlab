@@ -3,6 +3,7 @@
 	import type { Lang } from '../lib/types';
 	import type { MacroChannel, MacroDriverView, MacroLensSnapshot, MacroLensTab, MacroTransmissionEdgeView } from '../lib/macroLens';
 	import { ECON_MAX } from '../charts/chartState.svelte';
+	import MacroPathRail from './MacroPathRail.svelte';
 
 	interface Props {
 		snapshot: MacroLensSnapshot;
@@ -13,11 +14,11 @@
 		onTab: (tab: MacroLensTab) => void;
 		onClose: () => void;
 		onToggleEcon?: (id: string) => void;
+		onSector?: (industryId: string) => void;
 	}
-	let { snapshot, lang, tab, focusId = '', activeEcon = [], onTab, onClose, onToggleEcon }: Props = $props();
+	let { snapshot, lang, tab, focusId = '', activeEcon = [], onTab, onClose, onToggleEcon, onSector }: Props = $props();
 	let localFocus = $state('');
 	let localTab = $state<MacroLensTab>('regime');
-	let seededTab = $state(false);
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const tabs: { k: MacroLensTab; kr: string; en: string }[] = [
 		{ k: 'regime', kr: '대시보드', en: 'Dashboard' },
@@ -164,9 +165,7 @@
 		localFocus = focusId;
 	});
 	$effect(() => {
-		if (seededTab) return;
-		localTab = tab;
-		seededTab = true;
+		if (localTab !== tab) localTab = tab;
 	});
 	$effect(() => {
 		if (typeof document === 'undefined') return;
@@ -319,6 +318,9 @@
 				</div>
 				<div class="mlNote">{T('Driver는 최신값만 보지 않고 방향성 의미·lag·섹터 전파 가능성을 같이 본다.', 'Drivers are read with direction semantics, lag and sector transmission, not just latest values.')}</div>
 			{:else if localTab === 'transmission'}
+				{#if snapshot.macroPath}
+					<MacroPathRail view={snapshot.macroPath} {lang} mode="full" onSector={onSector} />
+				{/if}
 				{#if focusEdge}
 					<section class="mlFocus">
 						<GitBranch class="mlFocusIcon" size={15} />
@@ -433,27 +435,30 @@
 						</section>
 					{/if}
 				{/if}
-				<section class="mlGrid edgeGrid">
-					{#each snapshot.transmissionEdges as e (e.id)}
-						<div class="mlEdge" class:focused={activeFocusId === e.driverId || activeFocusId === e.sectorKey}>
-							<div class="mlEdgeTop">
-								<span class="mlSign">{signText[e.sign]}</span>
-								<b>{e.driverLabel}</b>
-								<em>{e.market}</em>
-								<span class={'mlConf ' + e.confidence}>{confidenceText[e.confidence]}</span>
+				<details class="mlEdgeDetails">
+					<summary>{T('상세 edge 카드', 'Detailed edge cards')} · {snapshot.transmissionEdges.length}</summary>
+					<section class="mlGrid edgeGrid">
+						{#each snapshot.transmissionEdges as e (e.id)}
+							<div class="mlEdge" class:focused={activeFocusId === e.driverId || activeFocusId === e.sectorKey}>
+								<div class="mlEdgeTop">
+									<span class="mlSign">{signText[e.sign]}</span>
+									<b>{e.driverLabel}</b>
+									<em>{e.market}</em>
+									<span class={'mlConf ' + e.confidence}>{confidenceText[e.confidence]}</span>
+								</div>
+								<div class="mlEdgePath">{e.sectorLabel} → {e.financialLine} → {e.valuationLever}</div>
+								<p>{e.note}</p>
+								<div class="mlMiniList">
+									<span>{T('lag', 'lag')}: {e.lagMonths ? `${e.lagMonths[0]}-${e.lagMonths[1]}M` : '—'}</span>
+									<span>{e.evidenceLevel}</span>
+								</div>
+								<div class="mlEvidence">
+									{#each e.requiredCompanyEvidence.slice(0, 3) as x (x)}<span>{x}</span>{/each}
+								</div>
 							</div>
-							<div class="mlEdgePath">{e.sectorLabel} → {e.financialLine} → {e.valuationLever}</div>
-							<p>{e.note}</p>
-							<div class="mlMiniList">
-								<span>{T('lag', 'lag')}: {e.lagMonths ? `${e.lagMonths[0]}-${e.lagMonths[1]}M` : '—'}</span>
-								<span>{e.evidenceLevel}</span>
-							</div>
-							<div class="mlEvidence">
-								{#each e.requiredCompanyEvidence.slice(0, 3) as x (x)}<span>{x}</span>{/each}
-							</div>
-						</div>
-					{/each}
-				</section>
+						{/each}
+					</section>
+				</details>
 				<section class="mlGrid two">
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('회사 checkpoint', 'Company checkpoints')}</span><b>{T('정량화 전 확인할 재무 위치', 'Financial checkpoints before quant claim')}</b></div>
@@ -786,6 +791,12 @@
 	.mlIconBtn { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 72px; border: 1px solid var(--dl-line, #1b2130); background: var(--dl-bg-base, #080d16); color: var(--dl-ink-dim, #5b6473); border-radius: 3px; padding: 3px 4px; cursor: pointer; font-size: 9px; font-weight: 700; }
 	.mlIconBtn:hover, .mlIconBtn.on { color: var(--amber); border-color: var(--amber); }
 	.mlIconBtn:disabled { cursor: not-allowed; opacity: .48; color: var(--dl-ink-dim, #5b6473); border-color: var(--dl-line, #1b2130); }
+	.mlEdgeDetails { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.012); padding: 0; overflow: hidden; }
+	.mlEdgeDetails summary { cursor: pointer; list-style: none; padding: 8px 10px; color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+	.mlEdgeDetails summary::-webkit-details-marker { display: none; }
+	.mlEdgeDetails summary:hover { color: var(--amber); }
+	.mlEdgeDetails[open] { padding-bottom: 10px; }
+	.mlEdgeDetails[open] .edgeGrid { padding: 0 10px; }
 	.mlEdgeTop b { flex: 1 1 auto; min-width: 0; }
 	.mlSign { width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--dl-line, #1b2130); display: inline-flex; align-items: center; justify-content: center; color: var(--amber); font-weight: 800; }
 	.mlEdgeTop em { font-style: normal; color: var(--dl-ink-dim, #5b6473); font-size: 10px; }

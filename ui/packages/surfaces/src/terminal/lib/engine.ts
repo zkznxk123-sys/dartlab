@@ -29,6 +29,7 @@ import type {
 	RiskCatalogItem,
 } from './types';
 import { RISK_RULES, evalRiskCatalog, type RiskRuleCtx } from './riskRules';
+import { INDUSTRY_TAILWIND_MAP, classifyTailwind } from './macroMappings';
 
 const SECTOR_EN: Record<string, string> = {
 	semiconductor: 'Semiconductors', auto: 'Automobile', energy: 'Energy', electronics: 'Electronics',
@@ -101,14 +102,6 @@ const MARKET_LABEL: Record<string, string> = { 유가증권: 'KOSPI', 코스닥:
 // 슬러그로 실었다. 공개 슬러그는 6자리 종목코드로 시작하므로, 코드 앞 1~3자리 접두일 때만 벗긴다
 // (새 슬러그 "005930-…" 는 \d{1,3}- 패턴에 안 걸려 무변 — 멱등).
 const normalizeBlogSlug = (s: string): string => s.replace(/^\d{1,3}-(?=[0-9A-Z]{6}-)/, '');
-// industry → macro.sectorTailwind 키 (실 macro.json 키와 검증 일치)
-const TAILWIND_MAP: Record<string, string> = {
-	auto: 'automotive', pharma: 'biotech', chemical: 'chemicals', construction: 'construction',
-	electronics: 'display', energy: 'energy', finance: 'finance', software: 'it_software',
-	retail: 'retail', semiconductor: 'semiconductor', shipbuilding: 'shipbuilding', steel: 'steel',
-	battery: 'chemicals', telecom: 'it_software'
-};
-
 const rev = <T>(a: T[] | undefined): T[] => (a || []).slice().reverse();
 
 // 법인명 정규화 — ㈜·(주)·주식회사·공백 제거 + 소문자. 출자 다이얼로그의 피출자사명→상장코드 exact 해소용.
@@ -219,7 +212,7 @@ export interface Engine {
 	suggest(q: string, n?: number): { code: string; name: string; industry: string }[];
 	featured(n?: number): string[];
 	sectorPerf(): { id: string; kr: string; en: string; chg: number; n: number }[];
-	sectorTailwinds(): { id: string; kr: string; en: string; blended: number }[];
+	sectorTailwinds(): { id: string; kr: string; en: string; blended: number; tailwindKey: string }[];
 	priceOf(code: string): RawData['prices']['data'][string] | undefined;
 	nameOf(code: string): string;
 	// 피출자사명 → 상장 종목 해소(시총·최근 순익). 정규화 exact + 시총·재무 존재 게이트 — 미해소 = null(비상장 취급).
@@ -412,14 +405,15 @@ export function createEngine(raw: RawData): Engine {
 	}
 
 	function tailwindOf(industry: string): Company['tailwind'] {
-		const k = TAILWIND_MAP[industry];
+		const k = INDUSTRY_TAILWIND_MAP[industry];
 		const tw = k && raw.macro?.sectorTailwind ? raw.macro.sectorTailwind[k] : null;
 		if (!tw) return null;
 		const b = tw.blended;
+		const cls = classifyTailwind(b);
 		return {
 			key: k, kr: SECTOR_KR[industry] || industry, blended: b, krScore: tw.kr, usScore: tw.us,
-			label: b >= 0.4 ? '순풍' : b >= 0.2 ? '중립' : '역풍',
-			tone: b >= 0.4 ? 'up' : b >= 0.2 ? 'neutral' : 'down'
+			label: cls.labelKr,
+			tone: cls.tone
 		};
 	}
 
@@ -949,17 +943,17 @@ export function createEngine(raw: RawData): Engine {
 			.sort((a, b) => b.chg - a.chg);
 	}
 
-	// 매크로 국면 → 섹터 순풍/역풍(blended) — TAILWIND_MAP·SECTOR_KR SSOT 재사용, blended 내림차순.
+	// 매크로 국면 → 섹터 순풍/역풍(blended) — INDUSTRY_TAILWIND_MAP·SECTOR_KR SSOT 재사용, blended 내림차순.
 	function sectorTailwinds() {
 		const tw = raw.macro?.sectorTailwind;
 		if (!tw) return [];
 		const seen = new Set<string>();
-		const out: { id: string; kr: string; en: string; blended: number }[] = [];
-		for (const [id, key] of Object.entries(TAILWIND_MAP)) {
+		const out: { id: string; kr: string; en: string; blended: number; tailwindKey: string }[] = [];
+		for (const [id, key] of Object.entries(INDUSTRY_TAILWIND_MAP)) {
 			const e = tw[key];
 			if (!e || e.blended == null || seen.has(key)) continue;
 			seen.add(key);
-			out.push({ id, kr: SECTOR_KR[id] || id, en: SECTOR_EN[id] || id, blended: e.blended });
+			out.push({ id, kr: SECTOR_KR[id] || id, en: SECTOR_EN[id] || id, blended: e.blended, tailwindKey: key });
 		}
 		return out.sort((a, b) => b.blended - a.blended);
 	}
@@ -1065,7 +1059,7 @@ export function createEngine(raw: RawData): Engine {
 				.slice(0, 5)
 				.map((n) => ({ code: n.id, name: byCode[n.id]?.corpName || n.id, value: n[field] as number }));
 
-		const twKey = TAILWIND_MAP[id];
+		const twKey = INDUSTRY_TAILWIND_MAP[id];
 		const tw = twKey && raw.macro?.sectorTailwind ? raw.macro.sectorTailwind[twKey] : null;
 		return {
 			id,

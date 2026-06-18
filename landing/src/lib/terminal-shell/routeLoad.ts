@@ -26,6 +26,16 @@ import {
 // 한 번 박으면 터미널 load 가 항상 deploy 된 정적 씨데이터를 먼저 맞힌다.
 setStaticBase(base);
 
+async function loadMacroWithTransmission(fetchFn: typeof fetch): Promise<MacroFile | null> {
+	const macro = await loadJson<MacroFile>('dashboards/macro.json', { fetchFn });
+	if (macro?.transmission?.edges?.length) return macro;
+	const localMacro = await loadJson<MacroFile>('dashboards/macro.json', { fetchFn, preferLocal: true });
+	if (macro && localMacro?.transmission?.edges?.length) {
+		return { ...macro, transmission: localMacro.transmission };
+	}
+	return macro ?? localMacro ?? null;
+}
+
 export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: RawData }> {
 	// 일별시세 조기 워밍 — 마지막 본 종목(없으면 기본 005930)의 주가·재무를 씨데이터 JSON 로드와
 	// 병렬로 시작 (in-flight dedup 이라 패널 호출과 중복 fetch 0). 차트 첫 페인트 ~2s 단축.
@@ -36,8 +46,8 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 	const opt = { fetchFn, preferLocal: true };
 	const [finance, macro, meta, prices, index, eco, quarters, industryStats] = await Promise.all([
 		loadJson<FinanceFile>('dashboards/finance.json', opt),
-		// macro 도 HF-first — mapBuild 가 매일 publish 하는 소형 파일 (git 정적 사본 동결 사고 재발 방지)
-		loadJson<MacroFile>('dashboards/macro.json', { fetchFn }),
+		// macro 는 HF-first freshness 유지. 단, HF 산출물이 transmission 없는 구버전이면 local v19 전파 경로만 보강.
+		loadMacroWithTransmission(fetchFn),
 		loadJson<MetaFile>('dashboards/meta.json', opt),
 		// 시세 스냅샷만 HF-first — 일배치(buildPricesSnapshot.py)가 매 영업일 HF 를 갱신하는데
 		// preferLocal 이면 배포 시점 정적 사본이 영원히 이겨 asOf 가 동결된다 (4/24 사고).

@@ -103,12 +103,25 @@ export interface MacroQuadrant {
 	quadrantLabel: string;
 	growth: string;
 	inflation?: string;
+	growthSignal?: number;
+	inflationSignal?: number;
 	assetImplication: Record<string, string>;
+	confidence?: string;
 	description: string;
+}
+export interface MacroTransition {
+	from?: string;
+	to?: string;
+	progress?: number;
+	triggered?: string[];
+	pending?: string[];
 }
 export interface MacroSide {
 	phase: string;
 	phaseLabel: string;
+	confidence?: string;
+	signals?: string | string[] | Record<string, unknown> | null;
+	transition?: MacroTransition | null;
 	quadrant?: MacroQuadrant; // 빌더 입력 부족(cycle 결측) 시 부재 가능 — 소비처 옵셔널 접근 강제
 }
 export type MacroTransmissionDriver = ContractMacroTransmissionDriver;

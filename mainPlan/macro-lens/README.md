@@ -27,7 +27,7 @@
 - 회사 미선택 상태에서도 `MacroGlanceView`는 열린다. 회사 의존 `CompanyMacroLensSnapshot`은 선택 이후 하이라이트/체크리스트에만 붙는다.
 - `growthSignal`/`inflationSignal`은 픽셀 좌표로 쓰지 않는다. 비정규 원시값이므로 tooltip/debug 보조값까지만 허용한다.
 - `sectorTailwind.blended`가 전부 양수인 현재 v19에서는 하위 섹터를 `역풍`으로 부르지 않는다. 상대 약순풍으로만 표시한다.
-- `EDGE_TO_TAILWIND`는 공유 mapper 한 곳만 둔다. `logistics`, `utility`처럼 의미 매핑이 약한 키는 강제로 다른 섹터에 붙이지 않고 `tailwind 미산출`로 렌더한다.
+- `EDGE_SECTOR_TO_TAILWIND`는 공유 mapper 한 곳만 둔다. `logistics`, `utility`처럼 의미 매핑이 약한 키는 강제로 다른 섹터에 붙이지 않고 `tailwind 미산출`로 렌더한다.
 - `['all']` transmission edge는 전 섹터 fan-out으로 펼치지 않고 `전 섹터` pill 1개로 표시한다.
 - 전파 경로는 magnitude chart가 아니다. 선 굵기는 고정이고, 증거강도는 opacity/line style로만 표시한다.
 - 회사 단위 elasticity, beta, 목표가, 추천, 매수/매도, 위기임박 표현은 금지한다.

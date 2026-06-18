@@ -30,7 +30,7 @@
 
 Recommended files:
 
-- `ui/packages/surfaces/src/terminal/lib/engine.test.ts`
+- `ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts`
 - `ui/packages/surfaces/src/terminal/lib/macroLens.test.ts`
 
 Test cases:

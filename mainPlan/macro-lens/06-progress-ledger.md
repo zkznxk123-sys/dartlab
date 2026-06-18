@@ -58,3 +58,38 @@ NEXT:
 
 1. 외부 원문 PRD `C:\Users\MSI\.claude\plans\graceful-yawning-valley.md`에 SSOT 승격 상태를 표시한다.
 2. 문서 링크/미해결 토큰 검사를 통과시킨 뒤 explicit-path commit을 만든다.
+
+### v1.2 — Terminal implementation
+
+배경:
+
+- 사용자는 기획에서 멈추지 말고 실제 public terminal의 경제지표분석 핵심 기능으로 구현하라고 지시했다.
+- 구현 중 전문가 리뷰는 `HEADWIND` 정직 버그, 회사 미선택 macro drill 차단, `sectorFilter`/`bottomTab` 소유권 분산, 현행 v19 sector key 계약을 우선순위로 지적했다.
+
+완료:
+
+- `macroMappings.ts`를 추가해 `INDUSTRY_TAILWIND_MAP`, `EDGE_SECTOR_TO_TAILWIND`, `classifyTailwind()`를 공유 SSOT로 만들었다.
+- `engine.ts`의 `tailwindOf()`와 `sectorTailwinds()`가 공유 분류 함수를 사용하도록 바꿔 양수 `blended`가 `역풍`이 되는 경로를 제거했다.
+- `TerminalSurface.svelte`의 상단 macro KPI도 음수 `blended`가 있을 때만 `역풍/headwind`를 표시하도록 고쳤다.
+- `buildRegimeQuadrant()`, `buildMacroPath()`, `buildMacroGlanceView()`, `buildMarketMacroLensSnapshot()`을 추가해 회사 선택 전에도 macro drill을 열 수 있게 했다.
+- `RegimeQuadrant.svelte`와 `MacroPathRail.svelte`를 추가하고, `LeftRail.svelte`의 기존 macro floor를 2x2 국면 + 전이 경로 rail로 교체했다.
+- `MacroLensDialog.svelte`의 기존 5개 탭을 유지하면서 transmission 탭 상단에 full `MacroPathRail`을 배치했다.
+- `sectorFilter`와 `bottomTab` 소유권을 `TerminalSurface`로 이동해 macro path sector chip 클릭이 screener 필터와 같은 상태를 쓰도록 만들었다.
+- `logistics`는 terminal filter id를 유지하되 sector-tailwind는 `tailwind 미산출`로 표시하고, `utility`는 industry/tailwind 모두 unmapped로 유지했다.
+- public loader가 HF-first macro 신선도를 유지하되 HF 산출물에 `transmission`이 없는 경우 local v19 `transmission`만 보강하도록 `loadMacroWithTransmission()`을 추가했다.
+- `macroMappings.test.ts`와 `macroLens.test.ts`를 추가해 current v19 sector key coverage, all-sector fanout 금지, 2x2 국면, 회사 미선택 glance, positive blended no-headwind 회귀를 고정했다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 a11y/state warning은 남아 있으나 error는 0.
+- `npm run check --prefix landing` 통과. 기존 warning은 남아 있으나 error는 0.
+- `node tests/audit/checkUiDataWiring.mjs` 통과. 신규 위반 0.
+- `uv run python -X utf8 tests/audit/dartlabGuard.py quick` 통과.
+- `python -X utf8 tests/audit/lint_camelcase_ast.py --changed --strict` 통과.
+- Playwright smoke 통과: desktop `1440x1000`, mobile `390x844`. macro floor, positive no-headwind, sector filter, 5 modal tabs, full transmission rail, horizontal overflow를 확인했다.
+- QA screenshots: `output/playwright/macro-lens-desktop.png`, `output/playwright/macro-lens-mobile.png`.
+
+NEXT:
+
+1. dev server와 브라우저 세션을 정리하고 explicit-path commit을 만든다.
