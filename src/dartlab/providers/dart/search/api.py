@@ -20,7 +20,6 @@ _log = getLogger(__name__)
 
 
 SEARCH_SCOPES: tuple[str, ...] = ("auto", "title", "content", "both", "news")
-LOW_CONFIDENCE_SCORE_FLOOR = 0.02
 
 
 def search(
@@ -159,7 +158,7 @@ def search(
             result = result.filter(pl.col("rcept_dt") <= end)
 
     if result.height > 0 and "info" not in result.columns:
-        from dartlab.providers.dart.search.answerability import applyAnswerability
+        from dartlab.providers.dart.search.answerability import applyAnswerability, markLowConfidenceRows
         from dartlab.providers.dart.search.entityGraph import attachEntityGraphCards
         from dartlab.providers.dart.search.evidencePack import attachEvidenceCards
         from dartlab.providers.dart.search.resultSchema import normalizeSearchResult
@@ -171,7 +170,7 @@ def search(
                 pl.col("source").map_elements(lambda source: sourceMatchesIntent(source, sourceIntent))
             )
         result = applyAnswerability(result, sourceIntent=sourceIntent, facets=facets)
-        result = _markLowConfidenceRows(result)
+        result = markLowConfidenceRows(result)
         result = attachEntityGraphCards(result)
         result = attachEvidenceCards(result, query=query)
         result = _rankAnswerableFirst(result, limit=limit)
@@ -257,30 +256,6 @@ def _rankAnswerableFirst(result: pl.DataFrame, *, limit: int) -> pl.DataFrame:
         result.with_row_index(orderColumn).sort(["answerable", orderColumn], descending=[True, False]).drop(orderColumn)
     )
     return ranked.head(limit)
-
-
-def _markLowConfidenceRows(result: pl.DataFrame, *, minScore: float = LOW_CONFIDENCE_SCORE_FLOOR) -> pl.DataFrame:
-    """Mark the whole candidate set unanswerable when every score is below confidence floor."""
-    if result is None or result.height == 0 or "info" in result.columns:
-        return result
-    if "score" not in result.columns or "answerable" not in result.columns:
-        return result
-    scores: list[float] = []
-    for value in result["score"].to_list():
-        try:
-            scores.append(float(value))
-        except (TypeError, ValueError):
-            continue
-    if not scores or max(scores) >= float(minScore):
-        return result
-    rows = []
-    for row in result.iter_rows(named=True):
-        out = dict(row)
-        if out.get("answerable") is True:
-            out["answerable"] = False
-            out["notAnswerableReason"] = "lowConfidence"
-        rows.append(out)
-    return pl.DataFrame(rows)
 
 
 _TITLE_LANE_TERMS: tuple[str, ...] = (

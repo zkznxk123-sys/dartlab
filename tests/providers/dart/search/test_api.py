@@ -256,9 +256,9 @@ def test_rank_answerable_first_preserves_answerable_order() -> None:
 def test_mark_low_confidence_rows_marks_answerable_false() -> None:
     import polars as pl
 
-    from dartlab.providers.dart.search import api
+    from dartlab.providers.dart.search.answerability import markLowConfidenceRows
 
-    result = api._markLowConfidenceRows(
+    result = markLowConfidenceRows(
         pl.DataFrame(
             {
                 "id": [1, 2],
@@ -276,9 +276,9 @@ def test_mark_low_confidence_rows_marks_answerable_false() -> None:
 def test_mark_low_confidence_rows_keeps_high_confidence_pool() -> None:
     import polars as pl
 
-    from dartlab.providers.dart.search import api
+    from dartlab.providers.dart.search.answerability import markLowConfidenceRows
 
-    result = api._markLowConfidenceRows(
+    result = markLowConfidenceRows(
         pl.DataFrame(
             {
                 "id": [1, 2],
