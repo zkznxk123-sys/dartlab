@@ -1,6 +1,6 @@
 // 로컬 터미널 RawData 조립(createEngine 씨드) — 셸 글루.
-// 랜딩(공표) 터미널과 동일한 전체 시장 데이터셋 7종(전 종목 finance·prices·eco·macro·quarters·search-index·
-// meta)을 HF 에서 로드한다 — loadJson 이 hasHfLandingJson 으로 HF_RESOLVE/landing/* 를 해석하므로 로컬도
+// 랜딩(공표) 터미널과 동일한 전체 시장 데이터셋 8종(전 종목 finance·prices·eco·macro·quarters·search-index·
+// meta·industryStats)을 HF 에서 로드한다 — loadJson 이 hasHfLandingJson 으로 HF_RESOLVE/landing/* 를 해석하므로 로컬도
 // 같은 공유 자산을 받는다. 그 결과 스크리너·생태계맵·매크로 오버레이·동종비교·전종목 검색이 랜딩과 동일하게
 // 동작한다(옛 단일회사 빈 씨드는 이 시장 기능을 전부 죽였다 — 로컬 터미널이 랜딩과 "달라" 보이던 근본 원인).
 // 회사 단위 실시간 상세(차트 캔들·패널 격자·AI)는 /api 포트가, 시장 씨드는 HF 가 공급 — 각자 단일 경로
@@ -16,6 +16,7 @@ import {
 	type IndexRow,
 	type EcosystemFile,
 	type QuartersFile,
+	type IndustryStatsFile,
 	type RawData
 } from '@dartlab/ui-surfaces/terminal';
 
@@ -26,14 +27,15 @@ export async function loadTerminalRaw(
 	// 현재 종목 주가·재무 조기 워밍 — /api price 포트 + HF finance 포트 (씨드 로드와 병렬, in-flight dedup).
 	warmCompany(getLocalRuntime(), code);
 
-	const [finance, macro, meta, prices, index, eco, quarters] = await Promise.all([
+	const [finance, macro, meta, prices, index, eco, quarters, industryStats] = await Promise.all([
 		loadJson<FinanceFile>('dashboards/finance.json', { fetchFn }),
 		loadJson<MacroFile>('dashboards/macro.json', { fetchFn }),
 		loadJson<MetaFile>('dashboards/meta.json', { fetchFn }),
 		loadJson<PricesFile>('map/prices-snapshot.json', { fetchFn }),
 		loadJson<IndexRow[]>('map/search-index.json', { fetchFn }),
 		loadJson<EcosystemFile>('map/ecosystem.json', { fetchFn }),
-		loadJson<QuartersFile>('dashboards/quarters.json', { fetchFn })
+		loadJson<QuartersFile>('dashboards/quarters.json', { fetchFn }),
+		loadJson<IndustryStatsFile>('map/industryStats.json', { fetchFn })
 	]);
 
 	return {
@@ -45,7 +47,8 @@ export async function loadTerminalRaw(
 			prices: prices ?? { data: {} },
 			index: index ?? [],
 			eco: eco ?? null,
-			quarters: quarters ?? null
+			quarters: quarters ?? null,
+			industryStats: industryStats ?? null
 		} as RawData
 	};
 }
