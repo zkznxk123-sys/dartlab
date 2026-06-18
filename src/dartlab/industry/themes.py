@@ -204,3 +204,70 @@ def themeRevenueExposure(themeId: str, code: str) -> dict | None:
     pct = sum(p for seg, p in exp.items() if any(k in seg.lower() for k in segKws))
     top = max(exp.items(), key=lambda x: x[1])
     return {"exposurePct": round(pct, 1), "basis": "graded", "topSegment": {"name": top[0], "pct": top[1]}}
+
+
+def companyThemes(code: str) -> pl.DataFrame:
+    """한 종목의 소속 테마 도시에 — 근거(주요제품 키워드) + 매출노출%. (``Company(code).themes()`` backend)
+
+    Capabilities:
+        회사 스코프 질문 "이 종목 무슨 테마, 왜, 매출 몇%" 의 엔진 SSOT. 주요제품 substring 으로
+        소속 테마를 찾고 테마별 노출%(테마-인지)를 등급. 인포스탁 black-box 리스트와 달리 근거
+        투명. 테마 스코프(``Industry().theme(themeId)`` = 테마→멤버) 와 쌍을 이루는 회사 스코프 진입.
+
+    Parameters
+    ----------
+    code : str
+        6자리 종목코드.
+
+    Returns
+    -------
+    pl.DataFrame
+        ``themeId, 테마, 근거, 노출%, 등급근거``. 매칭 테마 없으면 빈 DataFrame. ``노출%``=None 은
+        미산출(추출실패/단일사업/segmentKeywords 부재) — 100% 등치 금지.
+
+    Raises:
+        없음 — 데이터 부재는 빈 결과 + 등급근거 표기.
+
+    Example:
+        >>> from dartlab.industry.themes import companyThemes
+        >>> companyThemes("051910")["테마"].to_list()  # LG화학
+        ['2차전지/배터리']
+
+    Guide:
+        ``Company(code).themes()`` 가 본 함수 위임. 답변에 근거(키워드)·등급근거(basis) cite.
+
+    When:
+        "이 종목 무슨 테마", "왜 이 테마·매출 몇%" 회사 스코프 답변.
+
+    How:
+        KIND 주요제품 → ``matchThemeText`` 소속 판정 → ``themeRevenueExposure`` 등급.
+
+    See Also:
+        ``dartlab.industry.Industry.theme`` : 테마 스코프(테마 → 멤버).
+        ``dartlab.industry.themes.themeRevenueExposure`` : 등급 위임.
+    """
+    import gc
+
+    from dartlab.gather.krx.listing.registry import getKindList
+
+    kind = getKindList()
+    row = kind.filter(kind["종목코드"] == code)
+    product = row["주요제품"][0] if row.height else ""
+    schema = {"themeId": pl.Utf8, "테마": pl.Utf8, "근거": pl.Utf8, "노출%": pl.Float64, "등급근거": pl.Utf8}
+    rows: list[dict] = []
+    for tid, theme in loadThemes().items():
+        hits = matchThemeText(theme, product or "")
+        if not hits:
+            continue
+        g = themeRevenueExposure(tid, code) or {}
+        rows.append(
+            {
+                "themeId": tid,
+                "테마": theme.name,
+                "근거": ", ".join(hits),
+                "노출%": g.get("exposurePct"),
+                "등급근거": g.get("basis"),
+            }
+        )
+        gc.collect()
+    return pl.DataFrame(rows, schema=schema)

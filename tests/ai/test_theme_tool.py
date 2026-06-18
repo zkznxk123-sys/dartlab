@@ -33,9 +33,9 @@ def test_theme_tool_stock_dossier():
     sdi = next(t for t in themeTool(stockCode="006400").data["themes"] if t["themeId"] == "secondaryBattery")
     assert sdi["노출%"] is None and sdi["등급근거"] == "pure_play_candidate"
 
-    # 매칭 테마 없는 코드 → 빈 themes(에러 아님).
-    none = themeTool(stockCode="000000")
-    assert none.ok and none.data["themes"] == []
+    # 미존재 코드 → graceful 에러(raise 아님, ToolResult ok=False).
+    bogus = themeTool(stockCode="000000")
+    assert not bogus.ok and bogus.error == "company_not_found"
 
 
 @pytest.mark.requires_data

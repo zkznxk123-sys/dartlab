@@ -62,40 +62,49 @@ def themeTool(
         "삼성SDI 2차전지 노출?", "이 테마 종목·순도", "왜 이 테마" 류 LLM 자율 호출.
 
     How:
-        ``industry.themes`` (loadThemes/matchThemeText/themeRevenueExposure) + ``Industry.theme`` verb.
+        스코프 디스패치 — stockCode → ``Company(code).themes()`` (회사 스코프),
+        themeId → ``Industry().theme(themeId)`` (테마 스코프). 도구는 호출만.
 
     Requires:
         - ``industry/themes.json`` + KIND 상장목록. grade/stockCode: panel 주석.
 
     See Also:
-        - ``dartlab.industry.Industry.theme`` : 테마 멤버 verb.
-        - ``dartlab.industry.themes.themeRevenueExposure`` : 등급 위임.
+        - ``dartlab.providers.dart.company`` ``Company(code).themes()`` : 회사 스코프 진입.
+        - ``dartlab.industry.Industry.theme`` : 테마 스코프 verb.
 
     AIContext:
         근거투명 테마층 — 인포스탁/네이버가 못 주는 "왜·매출%·동종"을 cite. None 노출 정직 표기.
     """
-    from dartlab.industry import Industry
-
-    # 엔진 verb 와 동일 시그니처 — 본 도구는 thin wrapper (로직 재구현 0).
-    rows = Industry().theme(themeId, stockCode, grade=grade, discover=discover).to_dicts()
+    # 스코프별 정준 진입 디스패치 — 회사 스코프=Company(code).themes(), 테마 스코프=Industry().theme().
+    # 도구는 엔진 verb 를 호출만 (로직 재구현 0).
     confidence = baseScore("ratio")
-
     if stockCode:
+        from .companyResolve import resolveCompanyOrNone
+
+        company = resolveCompanyOrNone(stockCode)
+        if company is None:
+            return ToolResult(False, f"'{stockCode}' 회사 미해결", error="company_not_found")
+        themesFn = getattr(company, "themes", None)  # 테마는 KR 한정 — US/EDGAR 은 빈 결과
+        rows = themesFn().to_dicts() if themesFn else []
         idKey, title, summary, key = (
             f"theme:{stockCode}",
             f"{stockCode} 테마 노출",
             f"{stockCode} 소속 테마 {len(rows)}개 (근거+매출노출%)",
             "themes",
         )
-    elif themeId:
-        idKey, title, summary, key = (
-            f"theme:{themeId}",
-            f"테마 {themeId} 멤버",
-            f"테마 '{themeId}' 멤버 {len(rows)}종목",
-            "members",
-        )
     else:
-        idKey, title, summary, key = "theme:list", "테마 목록", f"등록 테마 {len(rows)}개", "themes"
+        from dartlab.industry import Industry
+
+        rows = Industry().theme(themeId, grade=grade, discover=discover).to_dicts()
+        if themeId:
+            idKey, title, summary, key = (
+                f"theme:{themeId}",
+                f"테마 {themeId} 멤버",
+                f"테마 '{themeId}' 멤버 {len(rows)}종목",
+                "members",
+            )
+        else:
+            idKey, title, summary, key = "theme:list", "테마 목록", f"등록 테마 {len(rows)}개", "themes"
 
     payload = {key: rows, "count": len(rows), "confidence": confidence}
     ref = Ref(id=idKey, kind="tableRef", title=title, source="themeTool", payload=payload)

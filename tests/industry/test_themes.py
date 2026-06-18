@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from dartlab.industry.themes import (
+    companyThemes,
     listThemes,
     loadThemes,
     matchThemeText,
@@ -69,8 +70,8 @@ def test_theme_exposure_branches():
 
 
 @pytest.mark.requires_data
-def test_theme_verb_members_and_grade():
-    """Industry.theme verb — 목록·멤버 태깅·테마-인지 등급 컬럼."""
+def test_theme_verb_members_theme_scope():
+    """테마 스코프 — Industry().theme(themeId) = 테마 → 멤버 (edges/map 동형 verb)."""
     from dartlab.industry import Industry
 
     ind = Industry()
@@ -79,3 +80,18 @@ def test_theme_verb_members_and_grade():
     assert members.height > 50
     assert "051910" in members["종목코드"].to_list()  # LG화학
     assert set(members.columns) >= {"종목코드", "회사명", "근거", "발견"}
+
+
+@pytest.mark.requires_data
+def test_company_themes_scope():
+    """회사 스코프 — Company(code).themes() = 종목 → 소속 테마 (c.industry() 동형).
+
+    회사 질문은 Company 파사드, 테마 질문은 Industry verb — dartlab 스코프 분리 준수.
+    """
+    from dartlab.company import Company
+
+    lg = companyThemes("051910")  # LG화학
+    bat = lg.filter(lg["themeId"] == "secondaryBattery").to_dicts()[0]
+    assert bat["근거"] and 40 < bat["노출%"] < 60 and bat["등급근거"] == "graded"
+    # Company 파사드가 동일 결과 (c.industry() 와 같은 위임 패턴).
+    assert Company("051910").themes().to_dicts() == lg.to_dicts()
