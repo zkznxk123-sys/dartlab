@@ -6,13 +6,15 @@
 	import type { Company, Lang, Tone, Num } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import PriceChart from '../charts/PriceChart.svelte';
-	import { ChartCtl, ECON_MAX } from '../charts/chartState.svelte'; // 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유)
+	import { ChartCtl, ECON_MAX, PERIOD_N } from '../charts/chartState.svelte'; // 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유)
 	import type { CoMover } from '../lib/coMovement';
 	import type { MacroLensTab } from '../lib/macroLens';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import BacktestReport from '../charts/BacktestReport.svelte';
+	import BacktestPreflight from '../charts/BacktestPreflight.svelte'; // 대기 상태 — void 대신 실행 전 프리플라이트(B&H 기준선·데이터품질·비용·체결모델)
 	import { UniverseBacktester } from '../../scan'; // 유니버스 횡단면 백테스터(자급형) — 보고서 모드 universe 스코프 재호스팅
-	import type { PortfolioBtResult } from '../lib/backtest';
+	import { backtestPreflight } from '../lib/backtest';
+	import type { PortfolioBtResult, BtPreflight } from '../lib/backtest';
 	import FinFullscreen from './FinFullscreen.svelte';
 	import GradeExplainDialog from './GradeExplainDialog.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
@@ -125,6 +127,12 @@
 	// 백테스트 결과 — PriceChart 가 onBtResult 로 올려줌(엔진은 PriceChart 소유). 보고서 모드에서 하단 BacktestReport 에 전달.
 	let btPf = $state<PortfolioBtResult | null>(null);
 	let btCandleTs = $state<string[]>([]);
+	// 대기 프리플라이트 — 백테스트 모드(단일) + 결과 없음 + 캔들 일치일 때만. 백테스트와 같은 창(PERIOD_N[period]) 실현 B&H·데이터품질.
+	const btPreflight = $derived.by<BtPreflight | null>(() => {
+		if (!ctl.btReportMode || ctl.btScope !== 'single' || btPf || !candles || candles.length < 2 || chartCode !== co.code) return null;
+		const win = Math.min(PERIOD_N[ctl.period] ?? candles.length, candles.length);
+		return backtestPreflight(candles, win, ctl.btCostsBp);
+	});
 	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
 	let finBundle = $state<TerminalFinanceBundle | null>(null);
 	let finMode = $state<FinMode>('ttm'); // 그래프 기본 = TTM (추세) — 표는 분기 원값 (우측 패널·다이얼로그)
@@ -470,7 +478,8 @@
 			valBand={subject === 'index' ? null : priceValBand}
 			peers={subject === 'index' ? [] : chartPeers}
 			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onMacroLens} {onCoMovers}
-				onBtResult={(pf, ts) => { btPf = pf; btCandleTs = ts; }} />
+				onBtResult={(pf, ts) => { btPf = pf; btCandleTs = ts; }}
+				compact={ctl.btReportMode && ctl.btScope !== 'universe'} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? (subject === 'index' ? 'loading index series …' : 'loading daily prices …') : (subject === 'index' ? '지수 시계열 불러오는 중 …' : '일별 시세 불러오는 중 …')}</div>
 	{:else if subject === 'index'}
@@ -489,9 +498,23 @@
 	{:else if btPf}
 		<BacktestReport pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} scope={ctl.btScope} {lang} onFocus={(i) => ctl.setBtFocus(i)} onFocusBar={(t) => (ctl.btHoverBar = t)} onBack={() => { ctl.btReportMode = false; ctl.btDockOpen = false; ctl.clearBtAll(); }} />
 	{:else}
-		<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '백테스트 보고서', en: 'BACKTEST REPORT' }} sub={{ kr: '결과 대기', en: 'awaiting result' }} flush>
-			<div class="storyEmpty">{lang === 'en' ? 'Pick a preset on the left to run a backtest — the report appears here.' : '왼쪽에서 프리셋(또는 커스텀 규칙)을 고르면 — 백테스트 결과 보고서가 여기 나옵니다.'}</div>
+		<!-- 대기 = void 금지. 실행 전 프리플라이트(이겨야 할 선·데이터품질·비용·체결모델) + 재무 small-multiples 유지(파괴적 교체 차단). -->
+		<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '백테스트 준비', en: 'PREFLIGHT' }} sub={{ kr: '이 종목·이 창의 진실 — 실행 전', en: 'this symbol · this window' }} flush>
+			{#if btPreflight}
+				<BacktestPreflight pf={btPreflight} period={ctl.period} {lang} />
+			{:else}
+				<div class="storyEmpty">{lang === 'en' ? 'Loading price data …' : '시세 불러오는 중 …'}</div>
+			{/if}
 		</Panel>
+		{#if finState === 'ready' && finData}
+			<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표 (참고)', en: 'FINANCIALS (context)' }} sub={{ kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기', en: finMode + ' · ' + finData.periods.length + 'p' }} flush>
+				<div class="finGrid">
+					{#each finData.cards as card (card.key)}
+						<div class="finMini"><MiniFinChart {card} periods={finData.periods} /></div>
+					{/each}
+				</div>
+			</Panel>
+		{/if}
 	{/if}
 {:else}
 <!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.

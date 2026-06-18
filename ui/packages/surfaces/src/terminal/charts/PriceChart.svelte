@@ -57,8 +57,10 @@
 		indexCtl?: IndexControl;
 		// 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유, 04 §5). PriceChart 가 new 하지 않고 받는다.
 		ctl: ChartCtl;
+		// 보고서 모드 압축 — 백테스트 결과 시 차트 높이 축소(하단 보고서 verdict·히어로가 fold 위로). 전체화면이면 무시.
+		compact?: boolean;
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, onMacroLens, onCoMovers, onBtResult, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, onMacroLens, onCoMovers, onBtResult, subject = 'price', indexLine = false, indexCtl, ctl, compact = false }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 	let el: HTMLDivElement | null = $state(null);
@@ -1170,7 +1172,7 @@
 	export function pushTick(c: Candle) { if (ctl.tf !== 'D') return; try { chart?.updateData(toK(c)); } catch { /* */ } }
 </script>
 
-<div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
+<div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : compact ? 'height:392px;min-height:340px;' : 'height:480px;min-height:360px;'}>
 	{#if !ctl.full}
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
 		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} {onMacroLens} />

@@ -19,6 +19,9 @@ export { runBacktest, runBacktestRule } from './engine';
 export { mdd, mddWindowOf, riskRatios, benchmarkStats, endRet, cagr } from './engine';
 export { runPortfolioBacktest } from './portfolio';
 export type { StrategySlot, ComboMetrics, ComboResult, PortfolioBtResult } from './portfolio';
+// 대기 프리플라이트 — 전략 0개일 때 실행 전 B&H 기준선·데이터품질·비용 계산(중앙 하단 BacktestPreflight).
+export { backtestPreflight } from './preflight';
+export type { BtPreflight } from './preflight';
 // 조건 빌더(전문가급 커스텀 패널) — 지표 카탈로그·룰 프리셋·평가.
 export { SERIES_CATALOG, RULE_PRESETS, OP_LABEL, evalRule, evalCondition, ruleWarmup } from './conditions';
 export type { SeriesKey, SeriesDef, Op, Condition, StrategyRule, RulePreset, RuleEval } from './conditions';

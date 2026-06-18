@@ -162,7 +162,7 @@
 		<span class="brStamp">{T('체결 t+1 시가', 'fill t+1 open')}</span>
 		<span class="brStamp">{withCosts ? T('비용 반영', 'costs on') : T('⚠ 비용 미포함', '⚠ costs off')}</span>
 		<span class="brStamp">{adjusted ? T('배당미반영·수정주가', 'div excl·adj') : T('배당미반영·무수정주가', 'div excl·unadj')}</span>
-		<span class="brStamp">{T('단일구간', 'single window')}</span>
+		{#if oos}<span class="brStamp">{T('학습/검증 분할', 'train/test split')}</span>{:else if rs}<span class="brStamp">{T('구간', 'window')} {fmtD(rs.range.from)}~{fmtD(rs.range.to)} · {rs.range.bars}{T('봉', 'b')}</span>{:else}<span class="brStamp">{T('단일구간', 'single window')}</span>{/if}
 		{#if rs}<span class="brStamp">{T('기준일', 'as of')} {fmtD(rs.dataAsOf)}</span>{/if}
 		{#each result.warnings as w (w.kind)}<span class="brWarn">⚠ {w.kind}</span>{/each}
 	</div>
@@ -174,7 +174,7 @@
 
 	<!-- 히어로 5 카드 -->
 	<div class="brHero">
-		<div class="brCard"><span>{T('전략 순수익', 'net return')}</span><b class={'mono ' + clsT(m.retPct)}>{sgn(m.retPct)}%</b>{#if weakTier}<em>{T('일화 — 색 보류', 'anecdote — muted')}</em>{/if}</div>
+		<div class="brCard hero"><span>{T('보유(B&H) 대비', 'vs buy & hold')}</span><b class={'mono ' + clsT(m.retPct - result.bh.retPct)}>{sgn(m.retPct - result.bh.retPct)}%p</b>{#if weakTier}<em>{T('일화 — 색 보류', 'anecdote — muted')}</em>{:else}<em>{T('전략 ' + sgn(m.retPct) + '% · 보유 ' + sgn(result.bh.retPct) + '%', 'strat ' + sgn(m.retPct) + '% · B&H ' + sgn(result.bh.retPct) + '%')}</em>{/if}</div>
 		<div class="brCard"><span>CAGR</span><b class={'mono ' + (m.cagrPct != null ? cls(m.cagrPct) : 'tNeu')}>{m.cagrPct != null ? sgn(m.cagrPct) + '%' : '—'}</b></div>
 		<div class="brCard"><span>{T('최대 낙폭', 'max DD')}</span><b class="mono tDn">{m.mddPct.toFixed(1)}%</b></div>
 		<div class="brCard"><span>Sharpe</span><b class="mono">{m.sharpe != null ? m.sharpe.toFixed(2) : '—'}</b></div>
@@ -204,19 +204,21 @@
 				<i class="brMcNote">{T('실현 거래 순서만 재배열 — 예측 아님. 헤드라인은 한 경로(운)일 뿐 · 자본은 최악낙폭 기준.', 'reshuffle of realized trades only — not a forecast; the headline is one lucky path.')}</i>
 			</div>
 		</section>
-	{:else if result.trades.length}
-		<div class="brMcSkip">{T('거래 표본 부족(<15) — 경로운 추정 정직하게 생략', 'too few trades (<15) — path-luck estimate honestly skipped')}</div>
 	{/if}
 
-	<!-- 소형 다중 — 월별·연간·분포 -->
-	<section class="brSec">
-		<div class="brSecHd">{T('월별 수익률', 'monthly returns')}</div>
-		<MonthlyReturnsHeatmap {eq} ts={tsWin} {lang} />
-	</section>
-	<section class="brSec">
-		<div class="brSecHd">{T('연간 수익률 — 전략 vs 보유', 'yearly returns')}</div>
-		<YearlyReturnsBars {eq} {bhq} ts={tsWin} {lang} />
-	</section>
+	<!-- 소형 다중 — 월별·연간·분포. 표본 짧으면(일화) 1~2칸 히트맵=과잉분석 신호라 한 줄로 생략. -->
+	{#if weakTier}
+		<div class="brShortNote">{T('표본이 짧아 월별·연간 분해 생략 — 한 경로의 일화', 'sample too short for monthly/yearly breakdown — one anecdotal path')}</div>
+	{:else}
+		<section class="brSec">
+			<div class="brSecHd">{T('월별 수익률', 'monthly returns')}</div>
+			<MonthlyReturnsHeatmap {eq} ts={tsWin} {lang} />
+		</section>
+		<section class="brSec">
+			<div class="brSecHd">{T('연간 수익률 — 전략 vs 보유', 'yearly returns')}</div>
+			<YearlyReturnsBars {eq} {bhq} ts={tsWin} {lang} />
+		</section>
+	{/if}
 	{#if result.trades.length >= 2}
 		<section class="brSec">
 			<div class="brSecHd">{T('거래 수익률 분포', 'trade return distribution')}</div>
@@ -237,7 +239,7 @@
 		<div class="brSecHd">{T('보조 지표', 'secondary metrics')}</div>
 		<div class="brGrid">
 			<div class="brRow"><span>{T('보유(B&H)', 'buy & hold')}</span><b class={'mono ' + cls(result.bh.retPct)}>{sgn(result.bh.retPct)}%</b></div>
-			<div class="brRow"><span>{T('초과 수익', 'excess')}</span><b class={'mono ' + cls(m.retPct - result.bh.retPct)}>{sgn(m.retPct - result.bh.retPct)}%p</b></div>
+			<div class="brRow"><span>{T('전략 순수익', 'net return')}</span><b class={'mono ' + clsT(m.retPct)}>{sgn(m.retPct)}%</b></div>
 			<div class="brRow"><span>Sortino</span><b class="mono">{m.sortino != null ? m.sortino.toFixed(2) : '—'}</b></div>
 			<div class="brRow"><span>{T('손익비', 'profit factor')}</span><b class="mono">{m.profitFactor != null ? m.profitFactor.toFixed(2) : '—'}</b></div>
 			{#if tradeStats}<div class="brRow"><span>{T('기대값/거래', 'expectancy')}</span><b class={'mono ' + (tradeStats.exp >= 0 ? 'tUp' : 'tDn')}>{tradeStats.exp >= 0 ? '+' : ''}{tradeStats.exp.toFixed(2)}%</b></div>{/if}
@@ -323,9 +325,11 @@
 	.brBanner.lag { color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); }
 	.brHero { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 	.brCard { display: flex; flex-direction: column; gap: 2px; padding: 9px 11px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; }
+	/* 히어로 카드 #1 = 보유 대비 초과수익 — 백테스트의 진짜 답. 앰버 좌측 액센트로 강조. */
+	.brCard.hero { border-left: 3px solid var(--amber, #fb923c); background: rgba(251, 146, 60, 0.04); }
 	.brCard > span { font-size: 11px; color: var(--dim, #8b94a3); }
 	.brCard > b { font-size: 21px; font-weight: 700; line-height: 1.1; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
-	.brCard > em { font-style: normal; font-size: 10px; color: var(--dimmer, #5b6573); font-family: var(--dl-font-mono, monospace); }
+	.brCard > em { font-style: normal; font-size: 11px; color: var(--dimmer, #5b6573); font-family: var(--dl-font-mono, monospace); }
 	.brSec { display: flex; flex-direction: column; gap: 7px; }
 	.brSecHd { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: #aeb6c2; text-transform: uppercase; display: flex; align-items: center; gap: 9px; }
 	.brN { font-family: var(--dl-font-mono, monospace); font-size: 11px; color: var(--dimmer, #5b6573); font-weight: 400; }
@@ -335,9 +339,9 @@
 	.brMc b { font-weight: 700; }
 	.brMc i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 10.5px; }
 	.brMcNote { flex-basis: 100%; line-height: 1.5; }
-	.brMcSkip { font-size: 10.5px; color: var(--dimmer, #5b6573); padding: 2px 2px; }
+	.brShortNote { font-size: 11px; color: var(--dim, #8b94a3); padding: 4px 2px; line-height: 1.5; }
 	.brOosLine { font-size: 11.5px; color: #aeb6c2; font-variant-numeric: tabular-nums; }
-	.brOosLine i { font-style: normal; font-size: 10px; color: var(--dimmer, #5b6573); margin-left: 4px; }
+	.brOosLine i { font-style: normal; font-size: 11px; color: var(--dimmer, #5b6573); margin-left: 4px; }
 	.brOosLine b { font-weight: 700; }
 	.brDecay { font-family: var(--dl-font-mono, monospace); }
 	.brGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 4px 14px; }
