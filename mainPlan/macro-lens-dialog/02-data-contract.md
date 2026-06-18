@@ -1,6 +1,6 @@
 # 02. 데이터 계약
 
-상태: 구현 v0.5
+상태: 구현 v0.6
 범위: Macro Lens 다이얼로그가 읽는 데이터, 매크로 전파 엔진 산출물, 향후 확장 계약.
 
 ---
@@ -58,6 +58,7 @@ export interface MacroLensSnapshot {
     bottom: MacroSectorBinding[];
   };
   exposureQuality: MacroExposureQuality;
+  exposureIndicators: MacroExposureIndicator[];
   evidenceGates: MacroEvidenceGate[];
   falsifiers: MacroFalsifierView[];
   scenarios: MacroScenarioView[];
@@ -75,6 +76,7 @@ export interface MacroLensSnapshot {
 - `companyCheckpoints`: 회사 재무 checkpoint. 예: 부채비율, 영업이익률, CFO/NI 등 이미 terminal `Company`가 가진 값만 사용한다.
 - `sectorBinding`: `co.tailwind`와 `eng.sectorTailwinds()` 기반 섹터 순풍/역풍.
 - `exposureQuality`: 회사별 민감도·회귀를 노출할 수 있는지 판단하는 품질 라벨.
+- `exposureIndicators`: analysis/prebuild가 선택한 회사별 매크로 지표 후보. UI가 회귀를 재계산하지 않고 source packet과 model card로만 표시한다.
 - `evidenceGates`: 첫 화면의 시계열/경로/동행/회사노출/민감도 gate. UI가 재계산하지 않는다.
 - `falsifiers`: 상관, peer dispersion, 회귀 품질, stale data처럼 thesis를 약하게 만드는 조건.
 - `scenarios`: 시나리오 이름과 affected driver만. 손익 산출은 하지 않는다.
@@ -138,6 +140,22 @@ export interface MacroExposureQuality {
   frequency: 'monthly' | 'quarterly' | 'annual' | null;
   lagMonths: number | null;
   coverage: 'company' | 'sectorOnly' | 'missing';
+}
+
+export interface MacroExposureIndicator {
+  label: string;
+  seriesId: string;
+  axis: string;
+  rSquared: number | null;
+  nObs: number | null;
+  window: string | null;
+  frequency: 'monthly' | 'quarterly' | 'annual' | null;
+  lagMonths: number | null;
+  coverage: 'company' | 'sectorOnly' | 'missing';
+  sourceRef: string;
+  sourceRefs: string[];
+  latestChange: number | null;
+  impact: string;
 }
 
 export interface MacroEvidenceGate {

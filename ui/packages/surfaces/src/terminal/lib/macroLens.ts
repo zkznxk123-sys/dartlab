@@ -1,6 +1,6 @@
 import { MACRO_ATTRIBUTION, MACRO_SERIES, type MacroLatest, type MacroSeriesDef } from '@dartlab/ui-contracts';
 import type { CoMover } from './coMovement';
-import type { Company, MacroExposureQualityPayload, MacroFile, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
+import type { Company, MacroExposureIndicatorPayload, MacroExposureQualityPayload, MacroFile, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
 
 export type MacroLensTab = 'regime' | 'drivers' | 'transmission' | 'scenario' | 'sources';
 export type MacroMarket = 'KR' | 'US' | 'GLOBAL';
@@ -109,6 +109,22 @@ export interface MacroExposureQualityView {
 	coverage: 'company' | 'sectorOnly' | 'missing';
 }
 
+export interface MacroExposureIndicatorView {
+	label: string;
+	seriesId: string;
+	axis: string;
+	rSquared: number | null;
+	nObs: number | null;
+	window: string | null;
+	frequency: 'monthly' | 'quarterly' | 'annual' | null;
+	lagMonths: number | null;
+	coverage: 'company' | 'sectorOnly' | 'missing';
+	sourceRef: string;
+	sourceRefs: string[];
+	latestChange: number | null;
+	impact: string;
+}
+
 export interface MacroEvidenceGateView {
 	id: 'macroData' | 'path' | 'comove' | 'company' | 'quant';
 	labelKr: string;
@@ -154,6 +170,7 @@ export interface MacroLensSnapshot {
 		bottom: { id: string; kr: string; en: string; blended: number }[];
 	};
 	exposureQuality: MacroExposureQualityView;
+	exposureIndicators: MacroExposureIndicatorView[];
 	evidenceGates: MacroEvidenceGateView[];
 	falsifiers: MacroFalsifierView[];
 	scenarios: MacroScenarioView[];
@@ -834,6 +851,25 @@ function normalizeExposureQuality(q: MacroExposureQualityPayload | undefined | n
 	};
 }
 
+function normalizeExposureIndicators(rows: MacroExposureIndicatorPayload[] | undefined | null): MacroExposureIndicatorView[] {
+	if (!Array.isArray(rows)) return [];
+	return rows.slice(0, 6).map((row) => ({
+		label: row.label || row.seriesId,
+		seriesId: row.seriesId,
+		axis: row.axis || 'macro',
+		rSquared: typeof row.rSquared === 'number' ? row.rSquared : null,
+		nObs: typeof row.nObs === 'number' ? row.nObs : null,
+		window: row.window ?? null,
+		frequency: row.frequency ?? null,
+		lagMonths: typeof row.lagMonths === 'number' ? row.lagMonths : null,
+		coverage: row.coverage ?? 'missing',
+		sourceRef: row.sourceRef,
+		sourceRefs: Array.isArray(row.sourceRefs) ? row.sourceRefs : [],
+		latestChange: typeof row.latestChange === 'number' ? row.latestChange : null,
+		impact: row.impact || '—'
+	}));
+}
+
 function buildExposureQuality(co: Company): MacroExposureQualityView {
 	const actual = normalizeExposureQuality(co.macroExposure?.exposureQuality, co.code);
 	if (actual) return actual;
@@ -958,6 +994,7 @@ export function buildMacroLensSnapshot(args: {
 	const checkpoints = buildCheckpoints(co);
 	const scenarios = buildScenarios(drivers, edges);
 	const exposureQuality = buildExposureQuality(co);
+	const exposureIndicators = normalizeExposureIndicators(co.macroExposure?.selected);
 	const falsifiers = buildFalsifiers(coMovers, drivers, macro, exposureQuality);
 	const marketPhase = {
 		kr: phaseView('KR', macro?.kr),
@@ -989,6 +1026,7 @@ export function buildMacroLensSnapshot(args: {
 			bottom: sectorTailwinds.length > 4 ? sectorTailwinds.slice(-4).reverse() : []
 		},
 		exposureQuality,
+		exposureIndicators,
 		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef }),
 		falsifiers,
 		scenarios,
@@ -1000,6 +1038,7 @@ export function buildMacroLensSnapshot(args: {
 			exposureQuality.sourceRef,
 			'terminal Company snapshot',
 			'coMovement: monthly stock return vs macro diff',
+			...exposureIndicators.flatMap((x) => [x.sourceRef, ...x.sourceRefs]).filter(Boolean),
 			...drivers.slice(0, 8).map((d) => `${d.id}: ${d.sourceLineage}`)
 		],
 		missing

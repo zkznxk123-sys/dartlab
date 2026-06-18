@@ -15,6 +15,7 @@
 		onToggleEcon?: (id: string) => void;
 	}
 	let { snapshot, lang, tab, focusId = '', activeEcon = [], onTab, onClose, onToggleEcon }: Props = $props();
+	let localFocus = $state('');
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const tabs: { k: MacroLensTab; kr: string; en: string }[] = [
 		{ k: 'regime', kr: '대시보드', en: 'Dashboard' },
@@ -40,8 +41,10 @@
 	const relevantDrivers = $derived(snapshot.drivers.filter((d) => d.relevance !== 'context').slice(0, 16));
 	const contextDrivers = $derived(snapshot.drivers.filter((d) => d.relevance === 'context').slice(0, 18));
 	const visibleDrivers = $derived([...relevantDrivers, ...contextDrivers]);
-	const focusDriver = $derived(focusId ? snapshot.drivers.find((d) => d.id === focusId) : null);
-	const focusEdge = $derived(focusId ? snapshot.transmissionEdges.find((e) => e.driverId === focusId || e.sectorKey === focusId) : null);
+	const focusDriver = $derived(localFocus ? snapshot.drivers.find((d) => d.id === localFocus) : null);
+	const focusEdge = $derived(localFocus ? snapshot.transmissionEdges.find((e) => e.driverId === localFocus || e.sectorKey === localFocus) : null);
+	const focusIndicator = $derived(localFocus ? snapshot.exposureIndicators.find((x) => x.seriesId === localFocus || x.sourceRef.includes(localFocus)) : null);
+	const focusFalsifiers = $derived(localFocus ? snapshot.falsifiers.filter((f) => !f.driverId || f.driverId === localFocus).slice(0, 3) : snapshot.falsifiers.slice(0, 3));
 	const exposureRows = $derived(buildExposureRows());
 	const gateRows = $derived(snapshot.evidenceGates);
 	const econBlocked = (id: string) => !activeEcon.includes(id) && activeEcon.length >= ECON_MAX;
@@ -77,6 +80,10 @@
 		const key = raw.toLowerCase();
 		return key === 'rising' ? '상승' : key === 'falling' ? '하락' : key === 'stable' ? '횡보' : raw;
 	}
+	function goto(tabName: MacroLensTab, id = '') {
+		localFocus = id || localFocus;
+		onTab(tabName);
+	}
 	function onDialogKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			e.preventDefault();
@@ -84,6 +91,9 @@
 		}
 		e.stopPropagation();
 	}
+	$effect(() => {
+		localFocus = focusId;
+	});
 	$effect(() => {
 		if (typeof document === 'undefined') return;
 		const prev = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -145,12 +155,12 @@
 					</div>
 					{#each exposureRows as row (row.driver.id)}
 						<div class="mlMatrixRow">
-							<button class="mlMatrixDriver" onclick={() => onTab('drivers')} title={row.driver.sourceLineage}>
+							<button class="mlMatrixDriver" onclick={() => goto('drivers', row.driver.id)} title={row.driver.sourceLineage}>
 								<b>{row.driver.label}</b>
 								<em>{row.driver.value} · {row.driver.asOf}</em>
 							</button>
 							{#each row.cells as edge, i (`${row.driver.id}-${channels[i].k}`)}
-								<button class={'mlXCell ' + cellClass(edge)} onclick={() => edge && onTab('transmission')} title={cellTitle(edge, T(channels[i].kr, channels[i].en))}>
+								<button class={'mlXCell ' + cellClass(edge)} onclick={() => edge && goto('transmission', edge.driverId)} title={cellTitle(edge, T(channels[i].kr, channels[i].en))}>
 									{#if edge}
 										<b>{signText[edge.sign]}</b><em>{cellLabel(edge)}</em>
 									{:else}
@@ -197,7 +207,7 @@
 						<span>{T('Driver', 'Driver')}</span><span>{T('품질', 'Quality')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
 					</div>
 					{#each visibleDrivers as d (d.id)}
-						<div class={'mlDriverRow ' + d.relevance} class:focused={focusId === d.id}>
+						<div class={'mlDriverRow ' + d.relevance} class:focused={localFocus === d.id}>
 							<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
 							<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText[d.pressureLevel]}</b><em>{d.qualityHint}</em></span>
 							<span class="mono">{d.value}</span>
@@ -219,9 +229,39 @@
 						<div><b>{focusEdge.driverLabel} → {focusEdge.financialLine}</b><span>{focusEdge.note}</span></div>
 					</section>
 				{/if}
+				{#if focusDriver || focusEdge || focusIndicator}
+					<section class="mlDrill">
+						<div class="mlDrillCard">
+							<span class="mlBlockK">{T('전파 chain', 'Transmission chain')}</span>
+							<b>{(focusDriver?.label ?? focusEdge?.driverLabel ?? localFocus) || '—'}</b>
+							<p>{focusEdge ? `${focusEdge.sectorLabel} → ${focusEdge.financialLine} → ${focusEdge.valuationLever}` : T('선택 driver의 표준 전파 경로가 아직 없습니다.', 'No mapped transmission chain for the selected driver yet.')}</p>
+							<em>{focusEdge ? `${focusEdge.evidenceLevel} · ${focusEdge.confidence} · lag ${focusEdge.lagMonths ? `${focusEdge.lagMonths[0]}-${focusEdge.lagMonths[1]}M` : '—'}` : focusDriver?.sourceLineage ?? '—'}</em>
+						</div>
+						<div class="mlDrillCard">
+							<span class="mlBlockK">{T('품질 gate', 'Quality gate')}</span>
+							<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
+							<p>{focusIndicator ? `${focusIndicator.label} · R² ${focusIndicator.rSquared ?? '—'} · nObs ${focusIndicator.nObs ?? '—'}` : snapshot.exposureQuality.reason}</p>
+							<em>{focusIndicator?.window ?? snapshot.exposureQuality.window ?? T('window 없음', 'window missing')}</em>
+						</div>
+						<div class="mlDrillCard">
+							<span class="mlBlockK">{T('필요 증거', 'Required evidence')}</span>
+							<b>{focusEdge ? focusEdge.requiredCompanyEvidence.length : snapshot.exposureQuality.missingEvidence.length}</b>
+							<div class="mlEvidence compact">
+								{#each (focusEdge?.requiredCompanyEvidence.length ? focusEdge.requiredCompanyEvidence : snapshot.exposureQuality.missingEvidence).slice(0, 4) as x (x)}<span>{x}</span>{/each}
+								{#if !(focusEdge?.requiredCompanyEvidence.length || snapshot.exposureQuality.missingEvidence.length)}<span>OK</span>{/if}
+							</div>
+						</div>
+						<div class="mlDrillCard">
+							<span class="mlBlockK">{T('source packet', 'source packet')}</span>
+							<b>{focusIndicator?.seriesId ?? focusDriver?.seriesId ?? focusEdge?.driverId ?? '—'}</b>
+							<p>{focusIndicator?.sourceRef ?? focusDriver?.sourceLineage ?? focusEdge?.sourceRefs[0] ?? snapshot.exposureQuality.sourceRef}</p>
+							{#each focusFalsifiers.slice(0, 1) as f (f.id)}<em>{f.label}: {f.detail}</em>{/each}
+						</div>
+					</section>
+				{/if}
 				<section class="mlGrid edgeGrid">
 					{#each snapshot.transmissionEdges as e (e.id)}
-						<div class="mlEdge" class:focused={focusId === e.driverId || focusId === e.sectorKey}>
+						<div class="mlEdge" class:focused={localFocus === e.driverId || localFocus === e.sectorKey}>
 							<div class="mlEdgeTop">
 								<span class="mlSign">{signText[e.sign]}</span>
 								<b>{e.driverLabel}</b>
@@ -326,6 +366,11 @@
 	.scenarioGrid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 	.pressureGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.mlBlock, .mlEdge, .mlScenario, .mlFocus { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 10px; min-width: 0; }
+	.mlDrill { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.25fr; gap: 8px; }
+	.mlDrillCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(251,146,60,.035); padding: 9px; }
+	.mlDrillCard b { display: block; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+	.mlDrillCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
+	.mlDrillCard em { display: block; margin-top: 5px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9.5px; line-height: 1.3; overflow-wrap: anywhere; }
 	.mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend { display: grid; gap: 8px; }
 	.mlPhaseStrip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.mlPhaseStrip div, .mlGate, .mlPulse { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
@@ -384,6 +429,7 @@
 	.mlKV, .mlMiniList { display: flex; flex-wrap: wrap; gap: 8px; font-size: 10px; color: var(--dl-ink-dim, #5b6473); margin-top: 6px; }
 	.mlBlock p, .mlEdge p, .mlScenario p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 11px; line-height: 1.45; }
 	.mlEvidence { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+	.mlEvidence.compact { margin-top: 6px; }
 	.mlEvidence span { border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; padding: 2px 7px; font-size: 10px; color: var(--dl-ink-dim, #5b6473); }
 	.up { color: var(--up); }
 	.down { color: var(--dn); }
@@ -443,7 +489,7 @@
 	.mlNote { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.45; border: 1px dashed var(--dl-line, #1b2130); border-radius: 5px; padding: 8px 10px; }
 	@media (max-width: 760px) {
 		.mlModal { height: min(780px, 94vh); }
-		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend { grid-template-columns: 1fr; }
+		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill { grid-template-columns: 1fr; }
 		.mlMatrix { overflow-x: auto; }
 		.mlMatrixHead, .mlMatrixRow { min-width: 640px; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }

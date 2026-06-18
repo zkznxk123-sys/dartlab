@@ -6,6 +6,34 @@
 
 ## 2026-06-18
 
+### v1.0 — Matrix drilldown evidence packet
+
+배경:
+
+- 첫 화면 matrix는 강해졌지만 셀 클릭 후 `contribution -> co-movement -> falsifier -> source packet` 흐름이 아직 약했다.
+- 사용자에게 더 많은 문단을 주는 대신, 선택 driver의 전파 chain과 품질 gate를 한 화면에서 묶어야 했다.
+
+완료:
+
+- `MacroLensSnapshot.exposureIndicators`를 추가해 `finance.json#macroExposure.selected`의 지표별 `seriesId/R²/nObs/window/sourceRef/sourceRefs`를 UI 패킷으로 전달한다.
+- Macro Lens 다이얼로그 내부 focus state를 추가했다. matrix driver/cell 클릭 시 선택 driver를 유지한 채 `drivers` 또는 `transmission` 탭으로 이동한다.
+- `전파 지도` 탭 상단에 drilldown 패킷을 추가했다.
+  - `전파 chain`: driver → sector → financial line → valuation lever.
+  - `품질 gate`: `OPEN/QUAL/LOCK`, `R²`, `nObs`, `window`.
+  - `필요 증거`: edge의 company evidence 또는 quality missing evidence.
+  - `source packet`: selected macro exposure sourceRef, driver lineage, falsifier.
+- UI가 새 계산을 만들지 않고 snapshot에 들어온 공개 산출물만 표시하게 유지했다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-contracts` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+
+NEXT:
+
+1. 실제 브라우저 visual QA로 matrix 셀 클릭 → drilldown 패킷 전환이 모바일/데스크톱에서 읽히는지 확인한다.
+2. P1 상세 탭에 waterfall/scatter 차트가 필요하면 이 drilldown 패킷 아래에만 붙인다. 첫 화면에는 추가하지 않는다.
+
 ### v0.9 — 회사 macroExposure 품질의 public terminal 소비
 
 배경:

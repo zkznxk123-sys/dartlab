@@ -1,6 +1,6 @@
 # 매크로 렌즈 다이얼로그
 
-상태: 구현 v0.9 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 재조사 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비)
+상태: 구현 v1.0 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 재조사 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷)
 범위: 퍼블릭 터미널의 `경제지표분석`을 Macro Lens 분석 코어로 승격한다. 화면은 다이얼로그지만, 핵심은 `dartlab.macro`의 시장·섹터 전파 산출물과 `analysis`의 회사 노출 품질을 하나의 검증 가능한 전파 사슬로 묶는 것이다.
 
 ---
