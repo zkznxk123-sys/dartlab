@@ -23,6 +23,8 @@ _SKIP_KEYWORDS = {"합계", "조정", "내부", "소계", "총계", "부문계",
 # 부문 주석 단위 추론 실패 시 fallback 배율 (백만원 = build.cell._UNIT_SCALE 기본). axisPath 멤버 토큰.
 _NOTE_UNIT_SCALE = 1_000_000
 _SEG_TOKEN_RE = re.compile(r"entity\d+_([A-Za-z0-9]+?)Member", re.I)
+# 평탄화(flattened) axisPath — ``...entity..._<SEG>MemberOfOperatingSegmentsMemberOf...`` (LG화학류).
+_SEG_FLAT_RE = re.compile(r"entity\d+_([A-Za-z0-9]+?)MemberOfOperatingSegmentsMember", re.I)
 
 
 def _getRatios(company):
@@ -42,17 +44,23 @@ def _getRatios(company):
 def _segNameFromAxis(axisPath: str | None) -> str | None:
     """NT_D871100 axisPath → 영업부문 멤버 토큰. ``OperatingSegmentsMember`` 하위 멤버만.
 
-    ``...|OperatingSegmentsMember|entity00126380_DxDivisionMemberOf...`` → ``"DxDivision"``.
-    조정행(MaterialReconcilingItemsMember)·총계(ConsolidatedMember)·부문축 없는 단일축 = None.
+    두 XBRL 인코딩 형식 지원:
+    - 파이프 접미사: ``...|OperatingSegmentsMember|entity00126380_DxDivisionMemberOf...`` →
+      ``"DxDivision"`` (삼성전자류).
+    - 평탄화(flattened): ``...|entity00356361_LgEnergySolutionLtdMemberOfOperatingSegmentsMemberOf...``
+      → ``"LgEnergySolutionLtd"`` (LG화학류 — 옛 코드가 파이프 접미사만 인식해 0부문으로 떨군 회귀).
+    조정행(``ReconcilingItems``)·총계(단독 ``ConsolidatedMember``)·부문축 없는 단일축 = None.
     """
-    if not axisPath or "OperatingSegmentsMember|" not in axisPath:
+    if not axisPath or "OperatingSegmentsMember" not in axisPath:
+        return None
+    if "ReconcilingItems" in axisPath:
         return None
     last = axisPath.split("|")[-1]
-    m = _SEG_TOKEN_RE.search(last)
-    if m:
-        return m.group(1)
-    name = re.sub(r"Member.*$", "", last)
-    return name or None
+    # 부문 멤버는 반드시 entity 접두 토큰. 롤업 총계행(``...|OperatingSegmentsMember``)
+    # 처럼 entity 접두가 없으면 None (옛 ``re.sub`` 폴백이 "OperatingSegments" 를
+    # 허위 부문으로 잡던 회귀 차단).
+    m = _SEG_FLAT_RE.search(last) or _SEG_TOKEN_RE.search(last)
+    return m.group(1) if m else None
 
 
 def _isRevenueLabel(label: str) -> bool:
