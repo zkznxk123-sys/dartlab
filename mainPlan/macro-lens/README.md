@@ -1,6 +1,6 @@
 # Macro Lens
 
-상태: 구현 v1.6 (2026-06-19, expert-reviewed · Macro Verdict UI/Engine · keyboard/focus shell · Command Bar/Evidence Cockpit · hard-lock guards · Direction Contest/A-B Matrix/Action Queue 반영)
+상태: 구현 v1.7 (2026-06-19, expert-reviewed · Macro Verdict UI/Engine · keyboard/focus shell · Command Bar/Evidence Cockpit · hard-lock guards · Direction Contest/A-B Matrix/Action Queue · direction/evidence score split · driver-local kill-chain · flip test 반영)
 출처: `C:\Users\MSI\.claude\plans\graceful-yawning-valley.md`
 거처: `ui/packages/surfaces/src/terminal/` + `landing/src/routes/terminal`
 목표: 퍼블릭 터미널 좌상단 `마켓 펄스 · 매크로`를 텍스트 카드에서 `경제 위치 -> 전파 경로 -> 섹터/스크리너 행동`으로 이어지는 분석 렌즈로 승격한다.
@@ -24,10 +24,10 @@
 - 새 라우트, 새 상주 패널, 새 fetch surface는 만들지 않는다.
 - 좌상단 기존 `마켓 펄스 · 매크로` 카드와 기존 Macro Lens 다이얼로그 transmission 탭을 제자리 승격한다.
 - 강한 기능의 본체는 `macro.json#kr/us/quadrant`, `macro.json#sectorTailwind`, `macro.json#transmission`의 정직한 시각화다.
-- 다이얼로그 첫 화면은 `판정 보드`다. 점수/claim level/핵심 경로/반증 kill switch/방향 대결/다음 행동 queue를 한 시야 안에 묶고, `Command Bar`로 핵심 지표 차트 오버레이·전파 경로 검증·출처/반증 확인을 바로 실행한다.
-- 상위 driver는 `A/B Matrix`로 비교한다. 변화량, lag, path evidence/confidence, 변화/경로/회사/동행 component score를 같은 축에 놓아 1순위 경로가 왜 앞서는지 검산한다.
+- 다이얼로그 첫 화면은 `판정 보드`를 더 압축한 `검증 보드`다. 호환용 score 하나가 아니라 signed `directionScore`와 `evidenceScore`를 분리해 방향 우세와 근거 신뢰를 다르게 읽게 한다.
+- 첫 화면의 핵심은 `핵심 경로`, `driver-local kill-chain`, `flip test`, 다음 행동이다. kill-chain은 `관측값 -> 전파 edge -> 회사 증거 -> 반증 조건 -> 재확인` 5단계이며, `macro.transmission.edges[*].falsifiers`를 보존한다.
+- 상위 driver의 `A/B Matrix`, `Direction Contest`, `Evidence Cockpit`, phase/pulse는 닫힌 `상세 검산`으로 이동했다. 첫 화면은 결론을 공격하는 조건을 먼저 보여주고, 검산 표는 필요할 때 연다.
 - verdict ranking은 evidence-first다. relevance driver에 evidence를 붙인 뒤 정렬하며, missing/blocked/template/sectorPrior path는 rank cap을 받아 관측 path를 과장된 변화량만으로 이기지 못한다.
-- `Evidence Cockpit`은 시계열/경로/동행/회사노출/민감도 5개 gate와 핵심 driver release freshness를 첫 화면에 고정한다. raw matrix와 전체 release rail은 접힌 상세로 둔다.
 - 판정 엔진은 stale 핵심 driver, `macro.transmission` 결손/fallback template, 불완전한 `quantCandidate`, 변화 0 polarity 오독을 hard-lock 또는 unknown으로 처리한다. `locked` verdict는 score도 잠금 영역으로 제한한다.
 - 다이얼로그 탭은 ARIA tablist와 키보드 조작 계약을 갖는다. 방향키/Home/End로 탭을 바꾸고, Tab focus는 modal 내부에 갇힌다.
 - 회사 미선택 상태에서도 `MacroGlanceView`는 열린다. 회사 의존 `CompanyMacroLensSnapshot`은 선택 이후 하이라이트/체크리스트에만 붙는다.

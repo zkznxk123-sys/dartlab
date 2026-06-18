@@ -55,6 +55,7 @@ export interface MacroTransmissionEdgeView {
 	confidence: 'high' | 'medium' | 'low' | 'blocked';
 	evidenceLevel: 'observed' | 'sectorPrior' | 'template';
 	requiredCompanyEvidence: string[];
+	falsifiers: string[];
 	sourceRefs: string[];
 	note: string;
 }
@@ -243,12 +244,37 @@ export interface MacroVerdictComponentView {
 	detail: string;
 }
 
+export interface MacroVerdictDriverGateView {
+	id: 'series' | 'path' | 'company' | 'quant' | 'comove';
+	labelKr: string;
+	labelEn: string;
+	status: 'open' | 'watch' | 'locked';
+	value: string;
+	detailKr: string;
+	detailEn: string;
+	sourceRef: string;
+}
+
+export interface MacroVerdictKillStepView {
+	id: string;
+	labelKr: string;
+	labelEn: string;
+	status: 'open' | 'watch' | 'locked';
+	detailKr: string;
+	detailEn: string;
+	tab: MacroLensTab;
+	driverId?: string;
+	sourceRef: string;
+}
+
 export interface MacroVerdictDriverView {
 	driverId: string;
 	label: string;
 	value: string;
 	change: string;
 	score: number;
+	directionScore: number;
+	evidenceScore: number;
 	direction: 'supportive' | 'pressure' | 'mixed' | 'unknown';
 	directionLabelKr: string;
 	directionLabelEn: string;
@@ -260,6 +286,8 @@ export interface MacroVerdictDriverView {
 	confidenceLabel: string;
 	sourceRef: string;
 	components: MacroVerdictComponentView[];
+	gates: MacroVerdictDriverGateView[];
+	killChain: MacroVerdictKillStepView[];
 }
 
 export interface MacroVerdictContestRowView {
@@ -292,6 +320,19 @@ export interface MacroVerdictContestView {
 	rows: MacroVerdictContestRowView[];
 }
 
+export interface MacroVerdictFlipView {
+	status: 'active' | 'watch' | 'locked';
+	labelKr: string;
+	labelEn: string;
+	neededKr: string;
+	neededEn: string;
+	detailKr: string;
+	detailEn: string;
+	leaderDriverId?: string;
+	challengerDriverId?: string;
+	sourceRef: string;
+}
+
 export interface MacroVerdictActionView {
 	id: string;
 	labelKr: string;
@@ -307,6 +348,8 @@ export interface MacroVerdictActionView {
 
 export interface MacroVerdictView {
 	score: number;
+	directionScore: number;
+	evidenceScore: number;
 	direction: MacroVerdictDirection;
 	claimLevel: MacroVerdictClaimLevel;
 	tone: Tone;
@@ -322,13 +365,17 @@ export interface MacroVerdictView {
 	nextActionEn: string;
 	falsifierKr: string;
 	falsifierEn: string;
+	evidenceLabelKr: string;
+	evidenceLabelEn: string;
 	qualityLabelKr: string;
 	qualityLabelEn: string;
 	drivers: MacroVerdictDriverView[];
 	gates: MacroEvidenceGateView[];
 	blockers: string[];
 	sourceRefs: string[];
+	killChain: MacroVerdictKillStepView[];
 	contest: MacroVerdictContestView;
+	flip: MacroVerdictFlipView;
 	actions: MacroVerdictActionView[];
 }
 
@@ -934,6 +981,201 @@ function contestSideLabel(side: MacroVerdictContestRowView['side']): { kr: strin
 	return { kr: '미약', en: 'weak' };
 }
 
+function verdictGateStatus(status: MacroVerdictDriverGateView['status']): string {
+	return status === 'open' ? 'OPEN' : status === 'watch' ? 'WATCH' : 'LOCK';
+}
+
+function buildDriverGates(args: {
+	marketOnly: boolean;
+	driver: MacroDriverView;
+	latest?: MacroLatest;
+	edge?: MacroTransmissionEdgeView;
+	components: MacroVerdictComponentView[];
+	exposureQuality: MacroExposureQualityView;
+}): MacroVerdictDriverGateView[] {
+	const componentById = new Map(args.components.map((c) => [c.id, c]));
+	const move = componentById.get('move');
+	const path = componentById.get('path');
+	const company = componentById.get('company');
+	const comove = componentById.get('comove');
+	const quantOpen = quantEvidenceOpen(args.exposureQuality);
+	const quantBlocks = quantEvidenceBlocks(args.exposureQuality);
+	const seriesStatus: MacroVerdictDriverGateView['status'] =
+		!args.latest || args.driver.freshness.status === 'stale'
+			? 'locked'
+			: args.driver.freshness.status === 'fresh'
+				? 'open'
+				: 'watch';
+	const pathStatus: MacroVerdictDriverGateView['status'] =
+		!args.edge || args.edge.confidence === 'blocked' || args.edge.evidenceLevel === 'template'
+			? 'locked'
+			: args.edge.evidenceLevel === 'observed' && args.edge.confidence !== 'low'
+				? 'open'
+				: 'watch';
+	const companyStatus: MacroVerdictDriverGateView['status'] =
+		args.marketOnly || args.exposureQuality.coverage === 'missing'
+			? 'locked'
+			: quantOpen || args.exposureQuality.coverage === 'company'
+				? 'open'
+				: 'watch';
+	const quantStatus: MacroVerdictDriverGateView['status'] =
+		quantOpen
+			? 'open'
+			: args.exposureQuality.status === 'blocked'
+				? 'locked'
+				: 'watch';
+	const comoveStatus: MacroVerdictDriverGateView['status'] =
+		args.driver.coMovement?.status === 'candidate'
+			? 'watch'
+			: args.driver.coMovement
+				? 'watch'
+				: 'locked';
+	return [
+		{
+			id: 'series',
+			labelKr: '관측값',
+			labelEn: 'Series',
+			status: seriesStatus,
+			value: verdictGateStatus(seriesStatus),
+			detailKr: args.latest ? `${args.driver.change} · ${args.driver.freshness.label}` : 'latest observation missing',
+			detailEn: args.latest ? `${args.driver.change} · ${args.driver.freshness.label}` : 'latest observation missing',
+			sourceRef: args.driver.sourceLineage
+		},
+		{
+			id: 'path',
+			labelKr: '전파',
+			labelEn: 'Path',
+			status: pathStatus,
+			value: args.edge ? `${args.edge.evidenceLevel === 'observed' ? 'OBS' : args.edge.evidenceLevel === 'sectorPrior' ? 'PRIOR' : 'TPL'}/${args.edge.confidence.toUpperCase()}` : 'LOCK',
+			detailKr: args.edge ? `${args.edge.channel} · ${args.edge.financialLine}` : path?.detail ?? 'mapped edge absent',
+			detailEn: args.edge ? `${args.edge.channel} · ${args.edge.financialLine}` : path?.detail ?? 'mapped edge absent',
+			sourceRef: args.edge?.sourceRefs[0] ?? args.driver.sourceLineage
+		},
+		{
+			id: 'company',
+			labelKr: '회사',
+			labelEn: 'Company',
+			status: companyStatus,
+			value: verdictGateStatus(companyStatus),
+			detailKr: args.marketOnly ? '종목 선택 전 회사 claim 잠김' : company?.detail ?? args.exposureQuality.reason,
+			detailEn: args.marketOnly ? 'company claim locked before company selection' : company?.detail ?? args.exposureQuality.reason,
+			sourceRef: args.exposureQuality.sourceRef
+		},
+		{
+			id: 'quant',
+			labelKr: '정량',
+			labelEn: 'Quant',
+			status: quantStatus,
+			value: quantOpen ? `n ${args.exposureQuality.nObs}` : 'LOCK',
+			detailKr: quantOpen ? `R² ${args.exposureQuality.rSquared ?? '—'} · ${args.exposureQuality.window ?? 'window'}` : quantBlocks[0] ?? args.exposureQuality.blockedReason,
+			detailEn: quantOpen ? `R² ${args.exposureQuality.rSquared ?? '—'} · ${args.exposureQuality.window ?? 'window'}` : quantBlocks[0] ?? args.exposureQuality.blockedReason,
+			sourceRef: args.exposureQuality.sourceRef
+		},
+		{
+			id: 'comove',
+			labelKr: '동행',
+			labelEn: 'Co-move',
+			status: comoveStatus,
+			value: args.driver.coMovement ? `n ${args.driver.coMovement.n}` : 'LOCK',
+			detailKr: comove?.detail ?? 'co-movement absent',
+			detailEn: comove?.detail ?? 'co-movement absent',
+			sourceRef: args.driver.sourceLineage
+		}
+	];
+}
+
+function buildDriverKillChain(args: {
+	marketOnly: boolean;
+	driver: MacroDriverView;
+	latest?: MacroLatest;
+	edge?: MacroTransmissionEdgeView;
+	gates: MacroVerdictDriverGateView[];
+	exposureQuality: MacroExposureQualityView;
+	falsifiers: MacroFalsifierView[];
+}): MacroVerdictKillStepView[] {
+	const gateById = new Map(args.gates.map((g) => [g.id, g]));
+	const series = gateById.get('series');
+	const path = gateById.get('path');
+	const company = gateById.get('company');
+	const quant = gateById.get('quant');
+	const edgeFalsifier = args.edge?.falsifiers[0];
+	const driverFalsifier = args.falsifiers.find((f) => f.driverId === args.driver.id) ?? args.falsifiers.find((f) => !f.driverId);
+	const requiredEvidence = args.edge?.requiredCompanyEvidence?.length
+		? args.edge.requiredCompanyEvidence.slice(0, 3).join(' · ')
+		: args.exposureQuality.missingEvidence.slice(0, 3).join(' · ');
+	const companyDetail = args.marketOnly
+		? '종목 선택 전에는 회사 매출·원가·차입 노출을 열 수 없다.'
+		: requiredEvidence
+			? `확인 필요: ${requiredEvidence}`
+			: args.exposureQuality.blockedReason || args.exposureQuality.reason;
+	const falsifierDetail = edgeFalsifier
+		?? driverFalsifier?.detail
+		?? '회사 증거와 동행상관이 열리기 전에는 인과 claim을 만들지 않는다.';
+	const falsifierStatus: MacroVerdictKillStepView['status'] =
+		args.edge?.confidence === 'blocked'
+			? 'locked'
+			: edgeFalsifier || driverFalsifier
+				? 'watch'
+				: 'locked';
+	return [
+		{
+			id: `series-${args.driver.id}`,
+			labelKr: '관측값',
+			labelEn: 'Observation',
+			status: series?.status ?? 'locked',
+			detailKr: args.latest ? `${args.driver.label} ${args.driver.change} · ${args.driver.asOf}` : 'latest observation missing',
+			detailEn: args.latest ? `${args.driver.label} ${args.driver.change} · ${args.driver.asOf}` : 'latest observation missing',
+			tab: 'drivers',
+			driverId: args.driver.id,
+			sourceRef: series?.sourceRef ?? args.driver.sourceLineage
+		},
+		{
+			id: `path-${args.driver.id}`,
+			labelKr: '전파 edge',
+			labelEn: 'Transmission edge',
+			status: path?.status ?? 'locked',
+			detailKr: args.edge ? `${args.edge.driverLabel} → ${args.edge.sectorLabel} → ${args.edge.financialLine}` : 'macro.transmission edge 없음',
+			detailEn: args.edge ? `${args.edge.driverLabel} → ${args.edge.sectorLabel} → ${args.edge.financialLine}` : 'macro.transmission edge missing',
+			tab: 'transmission',
+			driverId: args.driver.id,
+			sourceRef: path?.sourceRef ?? args.driver.sourceLineage
+		},
+		{
+			id: `company-${args.driver.id}`,
+			labelKr: '회사 증거',
+			labelEn: 'Company evidence',
+			status: company?.status ?? 'locked',
+			detailKr: companyDetail,
+			detailEn: companyDetail,
+			tab: 'sources',
+			driverId: args.driver.id,
+			sourceRef: company?.sourceRef ?? args.exposureQuality.sourceRef
+		},
+		{
+			id: `falsifier-${args.driver.id}`,
+			labelKr: '반증 조건',
+			labelEn: 'Falsifier',
+			status: falsifierStatus,
+			detailKr: falsifierDetail,
+			detailEn: falsifierDetail,
+			tab: 'sources',
+			driverId: args.driver.id,
+			sourceRef: args.edge?.sourceRefs[0] ?? driverFalsifier?.sourceRef ?? args.driver.sourceLineage
+		},
+		{
+			id: `recheck-${args.driver.id}`,
+			labelKr: '재확인',
+			labelEn: 'Recheck',
+			status: quant?.status === 'locked' || series?.status === 'locked' ? 'locked' : 'watch',
+			detailKr: `${args.driver.freshness.label} · ${args.driver.sourceLineage}`,
+			detailEn: `${args.driver.freshness.label} · ${args.driver.sourceLineage}`,
+			tab: 'sources',
+			driverId: args.driver.id,
+			sourceRef: args.driver.sourceLineage
+		}
+	];
+}
+
 function buildMacroVerdict(args: {
 	marketOnly: boolean;
 	macro: MacroFile | null;
@@ -961,14 +1203,6 @@ function buildMacroVerdict(args: {
 		const freshScore = freshnessScore(driver.freshness.status);
 		const coScore = driver.coMovement?.status === 'candidate' ? 0.72 : driver.coMovement ? 0.35 : 0.05;
 		const relevanceBoost = driver.relevance === 'primary' ? 1 : driver.relevance === 'secondary' ? 0.82 : 0.42;
-		const evidenceScore = clamp01(
-			moveScore * 0.22
-			+ pathScore * 0.28
-			+ freshScore * 0.18
-			+ sectorScore * 0.12
-			+ companyScore * 0.12
-			+ coScore * 0.08
-		) * relevanceBoost;
 		const pathRankCap = !edge || edge.confidence === 'blocked'
 			? 0.22
 			: edge.evidenceLevel === 'template'
@@ -976,9 +1210,17 @@ function buildMacroVerdict(args: {
 				: edge.evidenceLevel === 'sectorPrior'
 					? 0.68
 					: 1;
-		const rankScore = Math.min(evidenceScore, pathRankCap);
+		const evidenceConfidence = Math.min(clamp01(
+			pathScore * 0.34
+			+ freshScore * 0.2
+			+ sectorScore * 0.12
+			+ companyScore * 0.22
+			+ coScore * 0.12
+		) * relevanceBoost, pathRankCap);
+		const rankScore = Math.min(clamp01(moveScore * 0.24 + evidenceConfidence * 0.76), pathRankCap);
 		const moveDirection = latest?.chg == null || !Number.isFinite(latest.chg) ? 0 : latest.chg > 0 ? 1 : latest.chg < 0 ? -1 : 0;
-		const signedImpact = edge?.sign === 'mixed' ? 0 : rankScore * signWeight(edge?.sign) * moveDirection;
+		const directionMagnitude = edge?.sign === 'mixed' ? 0 : clamp01(moveScore * pathScore * relevanceBoost);
+		const signedImpact = directionMagnitude * signWeight(edge?.sign) * moveDirection;
 		const dir = impactDirectionLabel(edge, signedImpact);
 		const channel = edge ? CHANNEL_LABELS[edge.channel] : null;
 		const components: MacroVerdictComponentView[] = [
@@ -989,14 +1231,35 @@ function buildMacroVerdict(args: {
 			verdictComponent('company', '회사', 'Company', companyScore, args.exposureQuality.reason),
 			verdictComponent('comove', '동행', 'Co-move', coScore, driver.coMovement?.label ?? 'co-movement absent')
 		];
+		const gates = buildDriverGates({
+			marketOnly: args.marketOnly,
+			driver,
+			latest,
+			edge,
+			components,
+			exposureQuality: args.exposureQuality
+		});
+		const killChain = buildDriverKillChain({
+			marketOnly: args.marketOnly,
+			driver,
+			latest,
+			edge,
+			gates,
+			exposureQuality: args.exposureQuality,
+			falsifiers: args.falsifiers
+		});
 		return {
 			driverId: driver.id,
 			label: driver.label,
 			value: driver.value,
 			change: driver.change,
 			score: roundScore(rankScore),
+			directionScore: Math.round(signedImpact * 100),
+			evidenceScore: roundScore(evidenceConfidence),
 			rawScore: rankScore,
 			signedScore: signedImpact,
+			evidenceRaw: evidenceConfidence,
+			directionRaw: Math.abs(signedImpact),
 			direction: dir.direction,
 			directionLabelKr: dir.kr,
 			directionLabelEn: dir.en,
@@ -1007,16 +1270,22 @@ function buildMacroVerdict(args: {
 			evidenceLabel: edge ? (edge.evidenceLevel === 'observed' ? 'OBS' : edge.evidenceLevel === 'sectorPrior' ? 'PRIOR' : 'TPL') : 'LOCK',
 			confidenceLabel: edge?.confidence.toUpperCase() ?? 'LOCK',
 			sourceRef: edge?.sourceRefs[0] ?? driver.sourceLineage,
-			components
+			components,
+			gates,
+			killChain
 		};
 	}).sort((a, b) => b.rawScore - a.rawScore);
 	const top = rows.slice(0, 3);
 	const blendedScore = top.reduce((sum, row, index) => sum + row.rawScore * ([0.55, 0.3, 0.15][index] ?? 0), 0);
+	const evidenceBlend = top.reduce((sum, row, index) => sum + row.evidenceRaw * ([0.55, 0.3, 0.15][index] ?? 0), 0);
 	const net = top.reduce((sum, row) => sum + row.signedScore, 0) * 100;
 	const sectorTilt = clamp01(sectorScore) - 0.5;
-	const directionalScore = clamp01(0.5 + (net / 100) * 0.45 + sectorTilt * 0.16);
 	const hardBlocks = args.evidenceGates.filter((gate) => gate.status === 'blocked' && (gate.id === 'macroData' || gate.id === 'path'));
-	const score = hardBlocks.length ? Math.min(44, roundScore(blendedScore)) : roundScore(directionalScore);
+	const directionScore = hardBlocks.length ? 0 : Math.max(-100, Math.min(100, Math.round(net + sectorTilt * 16)));
+	const evidenceScore = hardBlocks.length ? Math.min(44, roundScore(evidenceBlend)) : roundScore(evidenceBlend);
+	const score = hardBlocks.length
+		? Math.min(44, evidenceScore)
+		: roundScore(clamp01(Math.abs(directionScore) / 100 * 0.46 + evidenceScore / 100 * 0.54));
 	const companyLocked = args.evidenceGates.some((gate) => gate.id === 'company' && gate.status === 'blocked');
 	const quantLocked = args.evidenceGates.some((gate) => gate.id === 'quant' && gate.status === 'blocked');
 	const quantOpen = quantEvidenceOpen(args.exposureQuality);
@@ -1031,15 +1300,15 @@ function buildMacroVerdict(args: {
 					: 'locked';
 	const direction: MacroVerdictDirection = hardBlocks.length
 		? 'locked'
-		: blendedScore < 0.25
+		: evidenceScore < 25 || blendedScore < 0.25
 			? 'watch'
-			: score >= 56 && !top.some((row) => row.direction === 'mixed')
+			: directionScore >= 14 && !top.some((row) => row.direction === 'mixed')
 				? 'supportive'
-				: score <= 44 && !top.some((row) => row.direction === 'mixed')
+				: directionScore <= -14 && !top.some((row) => row.direction === 'mixed')
 					? 'pressure'
-					: Math.abs(net) < 12 || top.some((row) => row.direction === 'mixed')
+					: Math.abs(directionScore) < 14 || top.some((row) => row.direction === 'mixed')
 				? 'mixed'
-				: net > 0
+				: directionScore > 0
 					? 'supportive'
 					: 'pressure';
 	const tone: Tone = direction === 'supportive' ? 'good' : direction === 'pressure' ? 'warn' : direction === 'locked' ? 'down' : direction === 'mixed' ? 'neutral' : 'warn';
@@ -1059,7 +1328,16 @@ function buildMacroVerdict(args: {
 			: claimLevel === 'marketMap'
 				? { kr: '시장 지도', en: 'market map' }
 				: { kr: '잠김', en: 'locked' };
+	const evidenceLabel = hardBlocks.length
+		? { kr: '근거 LOCK', en: 'evidence locked' }
+		: evidenceScore >= 68
+			? { kr: '근거 개방', en: 'evidence open' }
+			: evidenceScore >= 42
+				? { kr: '부분 근거', en: 'partial evidence' }
+				: { kr: '근거 부족', en: 'thin evidence' };
 	const primary = rows[0];
+	const primaryKillChain = primary?.killChain ?? [];
+	const firstKillStep = primaryKillChain.find((step) => step.status === 'locked') ?? primaryKillChain.find((step) => step.status === 'watch');
 	const primaryChainKr = primary ? `${primary.label} → ${primary.channelLabelKr} → ${primary.financialLine}` : '전파 경로 없음';
 	const primaryChainEn = primary ? `${primary.label} → ${primary.channelLabelEn} → ${primary.financialLine}` : 'No transmission path';
 	const blockers = [
@@ -1068,14 +1346,18 @@ function buildMacroVerdict(args: {
 		...(quantLocked ? ['quant sensitivity locked'] : [])
 	];
 	const falsifier = args.falsifiers.find((f) => f.severity === 'blocker') ?? args.falsifiers.find((f) => f.severity === 'warning') ?? args.falsifiers[0];
-	const nextActionKr = hardBlocks.length
+	const nextActionKr = firstKillStep
+		? firstKillStep.detailKr
+		: hardBlocks.length
 		? '시계열·전파 경로 결손부터 복구'
 		: args.marketOnly
 			? '섹터 칩 또는 종목 선택으로 회사 노출 확인'
 			: quantOpen
 				? '민감도 탭에서 nObs/R²/window 검산'
 				: '회사 증거가 열릴 때까지 정량 claim 금지';
-	const nextActionEn = hardBlocks.length
+	const nextActionEn = firstKillStep
+		? firstKillStep.detailEn
+		: hardBlocks.length
 		? 'Repair missing series/path first'
 		: args.marketOnly
 			? 'Select a sector chip or company for exposure'
@@ -1169,7 +1451,67 @@ function buildMacroVerdict(args: {
 			};
 		})
 	};
+	const challengerRow = leaderSide === 'supportive'
+		? contestSample.filter((row) => row.direction === 'pressure').sort((a, b) => b.rawScore - a.rawScore)[0]
+		: leaderSide === 'pressure'
+			? contestSample.filter((row) => row.direction === 'supportive').sort((a, b) => b.rawScore - a.rawScore)[0]
+			: undefined;
+	const leaderRow = leaderSide === 'supportive' || leaderSide === 'pressure'
+		? contestSample.filter((row) => row.direction === leaderSide).sort((a, b) => b.rawScore - a.rawScore)[0]
+		: primary;
+	const flipNeed = spread + 1;
+	const flip: MacroVerdictFlipView = hardBlocks.length
+		? {
+			status: 'locked',
+			labelKr: '뒤집힘 계산 잠김',
+			labelEn: 'Flip locked',
+			neededKr: 'LOCK 해소 전 숫자 금지',
+			neededEn: 'no threshold before LOCK clears',
+			detailKr: blockers[0] ?? hardBlocks[0]?.detailKr ?? 'hard lock',
+			detailEn: blockers[0] ?? hardBlocks[0]?.detailEn ?? 'hard lock',
+			leaderDriverId: leaderRow?.driverId,
+			challengerDriverId: challengerRow?.driverId,
+			sourceRef: hardBlocks[0]?.sourceRef ?? primary?.sourceRef ?? 'macro verdict'
+		}
+		: leaderSide === 'supportive' || leaderSide === 'pressure'
+			? {
+				status: 'active',
+				labelKr: leaderSide === 'supportive' ? '역풍이 뒤집는 조건' : '순풍이 뒤집는 조건',
+				labelEn: leaderSide === 'supportive' ? 'pressure flip test' : 'support flip test',
+				neededKr: `${challengerRow?.label ?? contest.challengerKr} +${flipNeed}p`,
+				neededEn: `${challengerRow?.label ?? contest.challengerEn} +${flipNeed}p`,
+				detailKr: firstKillStep ? `${firstKillStep.labelKr}: ${firstKillStep.detailKr}` : '상대 방향 driver의 관측·전파·회사증거 점수가 leader를 넘어야 한다.',
+				detailEn: firstKillStep ? `${firstKillStep.labelEn}: ${firstKillStep.detailEn}` : 'The opposite-side driver must overtake the leader on observation, path, and company evidence.',
+				leaderDriverId: leaderRow?.driverId,
+				challengerDriverId: challengerRow?.driverId,
+				sourceRef: firstKillStep?.sourceRef ?? challengerRow?.sourceRef ?? primary?.sourceRef ?? 'macro verdict'
+			}
+			: {
+				status: 'watch',
+				labelKr: '이미 경합',
+				labelEn: 'Already contested',
+				neededKr: '경합 driver gate 확인',
+				neededEn: 'inspect contested driver gates',
+				detailKr: firstKillStep ? `${firstKillStep.labelKr}: ${firstKillStep.detailKr}` : '순풍·역풍·혼합 score가 좁아 방향 단정 금지',
+				detailEn: firstKillStep ? `${firstKillStep.labelEn}: ${firstKillStep.detailEn}` : 'Support, pressure, and mixed scores are too close for a directional claim.',
+				leaderDriverId: leaderRow?.driverId,
+				challengerDriverId: challengerRow?.driverId,
+				sourceRef: firstKillStep?.sourceRef ?? primary?.sourceRef ?? 'macro verdict'
+			};
 	const actions: MacroVerdictActionView[] = [];
+	for (const step of primaryKillChain.filter((x) => x.status !== 'open').slice(0, 2)) {
+		actions.push({
+			id: `kill-${step.id}`,
+			labelKr: step.labelKr,
+			labelEn: step.labelEn,
+			detailKr: step.detailKr,
+			detailEn: step.detailEn,
+			tab: step.tab,
+			driverId: step.driverId,
+			severity: step.status === 'locked' ? 'blocker' : 'watch',
+			sourceRef: step.sourceRef
+		});
+	}
 	for (const gate of hardBlocks.slice(0, 2)) {
 		actions.push({
 			id: `repair-${gate.id}`,
@@ -1254,24 +1596,28 @@ function buildMacroVerdict(args: {
 	const actionQueue = actions.filter((action, index, arr) => arr.findIndex((x) => x.id === action.id) === index).slice(0, 4);
 	return {
 		score,
+		directionScore,
+		evidenceScore,
 		direction,
 		claimLevel,
 		tone,
 		titleKr: title.kr,
 		titleEn: title.en,
-		stanceKr: `${quality.kr} · ${score}/100`,
-		stanceEn: `${quality.en} · ${score}/100`,
+		stanceKr: `${quality.kr} · 방향 ${directionScore > 0 ? '+' : ''}${directionScore} · 근거 ${evidenceScore}`,
+		stanceEn: `${quality.en} · direction ${directionScore > 0 ? '+' : ''}${directionScore} · evidence ${evidenceScore}`,
 		summaryKr: primary ? `${primary.label}가 1순위 경로다. ${summaryTailKr}` : '표시 가능한 driver 경로가 부족하다.',
 		summaryEn: primary ? `${primary.label} is the first path. ${summaryTailEn}` : 'Driver path evidence is insufficient.',
 		primaryChainKr,
 		primaryChainEn,
 		nextActionKr,
 		nextActionEn,
-		falsifierKr: falsifier?.detail ?? '상관은 인과가 아니며 회사 증거 전까지 결론을 잠근다.',
-		falsifierEn: falsifier?.detail ?? 'Correlation is not causation; keep conclusions locked until company evidence is available.',
+		falsifierKr: firstKillStep?.detailKr ?? falsifier?.detail ?? '상관은 인과가 아니며 회사 증거 전까지 결론을 잠근다.',
+		falsifierEn: firstKillStep?.detailEn ?? falsifier?.detail ?? 'Correlation is not causation; keep conclusions locked until company evidence is available.',
+		evidenceLabelKr: evidenceLabel.kr,
+		evidenceLabelEn: evidenceLabel.en,
 		qualityLabelKr: quality.kr,
 		qualityLabelEn: quality.en,
-		drivers: rows.map(({ rawScore: _rawScore, signedScore: _signedScore, ...row }) => row),
+		drivers: rows.map(({ rawScore: _rawScore, signedScore: _signedScore, evidenceRaw: _evidenceRaw, directionRaw: _directionRaw, ...row }) => row),
 		gates: args.evidenceGates,
 		blockers,
 		sourceRefs: [
@@ -1279,7 +1625,9 @@ function buildMacroVerdict(args: {
 			...top.map((row) => row.sourceRef),
 			args.exposureQuality.sourceRef
 		],
+		killChain: primaryKillChain,
 		contest,
+		flip,
 		actions: actionQueue
 	};
 }
@@ -1772,6 +2120,7 @@ function buildEdgesFromTransmission(co: Company, drivers: MacroDriverView[], pay
 				confidence: blocked ? 'blocked' : e.confidence,
 				evidenceLevel: e.evidenceLevel,
 				requiredCompanyEvidence: e.requiredCompanyEvidence ?? [],
+				falsifiers: e.falsifiers ?? [],
 				sourceRefs,
 				note: blocked ? `${noteFromTransmission(e)} 최신 driver 관측 lineage가 닫혀 있어 정량 claim은 잠근다.` : noteFromTransmission(e)
 			};
@@ -1808,6 +2157,7 @@ function buildMarketEdgesFromTransmission(drivers: MacroDriverView[], payload?: 
 			confidence: blocked ? 'blocked' : e.confidence,
 			evidenceLevel: e.evidenceLevel,
 			requiredCompanyEvidence: e.requiredCompanyEvidence ?? [],
+			falsifiers: e.falsifiers ?? [],
 			sourceRefs,
 			note: blocked ? `${noteFromTransmission(e)} 최신 driver 관측 lineage가 닫혀 있어 정량 claim은 잠근다.` : noteFromTransmission(e)
 		};
@@ -1840,6 +2190,7 @@ function buildEdges(co: Company, drivers: MacroDriverView[], payload?: MacroTran
 			confidence: blocked ? 'blocked' : e.confidence,
 			evidenceLevel: e.evidenceLevel,
 			requiredCompanyEvidence: e.requiredCompanyEvidence,
+			falsifiers: [],
 			sourceRefs: [driver?.seriesId ?? e.driverId, blocked ? 'notWiredYet' : 'sector prior', 'company checkpoints'],
 			note: blocked ? `${e.note} 최신 시계열이 MacroPort에 없어서 전파 edge는 차단 상태로만 표시한다.` : e.note
 		};

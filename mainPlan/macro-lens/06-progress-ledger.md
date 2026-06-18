@@ -1,8 +1,38 @@
 # 06. Progress Ledger
 
-상태: 구현 v1.6
+상태: 구현 v1.7
 
 ## 2026-06-19
+
+### v1.7 — driver-local kill-chain / score split / flip test
+
+배경:
+
+- v1.6은 판정 보드를 강화했지만, 점수·근거·방향·반증 조건이 한 화면에서 여전히 섞여 보였다.
+- 전문 UI/엔진 재검토 결과, 첫 화면은 `판정`, `이 판정을 죽이는 조건`, `뒤집히는 조건`만 남기는 쪽이 더 강하다는 결론을 냈다.
+
+완료:
+
+- `MacroTransmissionEdgeView`가 `falsifiers`를 보존한다. 원천 `macro.transmission` edge의 반증 조건이 `note` 문장에 묻히지 않고 driver-local kill-chain으로 올라온다.
+- `MacroVerdictView`에 `directionScore`, `evidenceScore`, `evidenceLabel`, `killChain`, `flip`을 추가했다. 각 top driver에도 `gates`와 `killChain`을 붙였다.
+- `MacroLensDialog` 첫 화면은 score split, 핵심 경로, kill-chain 5단계, flip test, next action 중심으로 압축했다.
+- `Direction Contest`, `A/B Matrix`, `Verdict Engine`, `Evidence Cockpit`, phase/pulse는 닫힌 `상세 검산` 아래로 이동했다.
+- hard lock 상태에서는 `directionScore=0`, `evidenceScore<=44`, `flip.status='locked'`로 고정해 숫자 임계값을 만들지 않는다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과. 14개 테스트.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning 45개, error 0.
+- `node tests/audit/checkUiDataWiring.mjs` 통과. 신규 위반 0건.
+- Playwright smoke: desktop/mobile score split, kill-chain 5단계, flip, 상세 검산 접힘/열림, overflow 0 확인.
+- QA screenshots: `output/playwright/macro-killchain-desktop.png`, `output/playwright/macro-killchain-mobile.png`.
+
+NEXT:
+
+1. release calendar/vintage 산출물이 생기면 kill-chain의 `재확인` 단계를 날짜 기반 gate로 바꾼다.
+2. `macro.transmission`이 edge별 freshness policy를 구조화하면 `sourceLineage` 문자열 의존을 줄인다.
+
+---
 
 ### v1.6 — Direction Contest / A-B Matrix / evidence-first ranking
 

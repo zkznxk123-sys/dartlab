@@ -203,6 +203,12 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		expect(snapshot.verdict.nextActionKr).toContain('종목 선택');
 		expect(snapshot.verdict.drivers.length).toBeGreaterThan(0);
 		expect(snapshot.verdict.sourceRefs.length).toBeGreaterThan(0);
+		expect(snapshot.verdict.directionScore).toBeGreaterThanOrEqual(-100);
+		expect(snapshot.verdict.directionScore).toBeLessThanOrEqual(100);
+		expect(snapshot.verdict.evidenceScore).toBeGreaterThanOrEqual(0);
+		expect(snapshot.verdict.evidenceScore).toBeLessThanOrEqual(100);
+		expect(snapshot.verdict.killChain.length).toBeGreaterThan(0);
+		expect(snapshot.verdict.flip.status).not.toBeUndefined();
 		expect(snapshot.verdict.contest.rows.length).toBeGreaterThan(0);
 		expect(snapshot.verdict.actions.some((action) => action.id === 'select-company')).toBe(true);
 		expect(snapshot.verdict.contest.supportiveScore + snapshot.verdict.contest.pressureScore + snapshot.verdict.contest.mixedScore + snapshot.verdict.contest.unknownScore).toBeGreaterThan(0);
@@ -229,7 +235,25 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		expect(gate?.status).toBe('blocked');
 		expect(gate?.blocks.join(' ')).toContain('USDKRW');
 		expect(snapshot.verdict.direction).toBe('locked');
+		expect(snapshot.verdict.directionScore).toBe(0);
+		expect(snapshot.verdict.evidenceScore).toBeLessThanOrEqual(44);
+		expect(snapshot.verdict.flip.status).toBe('locked');
 		expect(snapshot.verdict.score).toBeLessThanOrEqual(44);
+	});
+
+	it('preserves transmission edge falsifiers in driver-local kill chains', () => {
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture(),
+			macro,
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		const fxEdge = snapshot.transmissionEdges.find((edge) => edge.driverId === 'USDKRW');
+		expect(fxEdge?.falsifiers[0]).toContain('달러 원가');
+		const fxDriver = snapshot.verdict.drivers.find((driver) => driver.driverId === 'USDKRW');
+		expect(fxDriver?.killChain.some((step) => step.detailKr.includes('달러 원가'))).toBe(true);
+		expect(fxDriver?.gates.map((gate) => gate.id)).toEqual(['series', 'path', 'company', 'quant', 'comove']);
 	});
 
 	it('does not open companyCandidate when quantCandidate lacks required evidence fields', () => {
@@ -338,6 +362,8 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		const templateDriver = snapshot.verdict.drivers.find((d) => d.driverId === 'BASE_RATE');
 		expect(templateDriver?.evidenceLabel).toBe('TPL');
 		expect(templateDriver?.score).toBeLessThanOrEqual(42);
+		expect(templateDriver?.evidenceScore).toBeLessThanOrEqual(42);
+		expect(templateDriver?.gates.find((gate) => gate.id === 'path')?.status).toBe('locked');
 		expect(snapshot.verdict.contest.rows[0]?.driverId).toBe('EXPORT');
 	});
 });

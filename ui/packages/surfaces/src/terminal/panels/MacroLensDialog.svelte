@@ -59,8 +59,9 @@
 	const visibleDrivers = $derived([...relevantDrivers, ...contextDrivers]);
 	const verdict = $derived(snapshot.verdict);
 	const verdictDrivers = $derived(snapshot.verdict.drivers.slice(0, 3));
-	const verdictActions = $derived(snapshot.verdict.actions.slice(0, 4));
+	const verdictActions = $derived(snapshot.verdict.actions.slice(0, 2));
 	const topVerdictDriver = $derived(verdictDrivers[0]);
+	const topKillStep = $derived(verdict.killChain.find((step) => step.status === 'locked') ?? verdict.killChain.find((step) => step.status === 'watch') ?? verdict.killChain[0]);
 	const focusableIds = $derived(new Set([
 		...snapshot.drivers.map((d) => d.id),
 		...snapshot.transmissionEdges.map((e) => e.driverId),
@@ -156,6 +157,8 @@
 	const gateLabel = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.labelKr, g.labelEn);
 	const gateDetail = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.detailKr, g.detailEn);
 	const pct = (v: number) => `${Math.max(4, Math.min(100, Math.round(v * 100)))}%`;
+	const signedScore = (v: number) => `${v > 0 ? '+' : ''}${v}`;
+	const killStatus = (status: string) => status === 'open' ? 'OPEN' : status === 'watch' ? 'WATCH' : 'LOCK';
 	const corrLeft = (corr: number | null) => `${Math.max(0, Math.min(100, ((corr ?? 0) + 1) * 50))}%`;
 	function motionLabel(value: string | null | undefined): string {
 		const raw = value ?? '—';
@@ -294,10 +297,14 @@
 			{#if localTab === 'regime'}
 				<section class={'mlVerdictHero ' + verdict.tone} aria-label="Macro verdict">
 					<div class="mlVerdictDial">
-						<span>{T('판정', 'Verdict')}</span>
+						<span>{T('판정 강도', 'Verdict')}</span>
 						<b>{verdict.score}</b>
 						<em>/100</em>
-						<i>{verdict.claimLevel}</i>
+						<i>{T(verdict.evidenceLabelKr, verdict.evidenceLabelEn)}</i>
+						<div class="mlScoreSplit" aria-label="Direction and evidence score">
+							<span><i>DIR</i><b>{signedScore(verdict.directionScore)}</b></span>
+							<span><i>EVD</i><b>{verdict.evidenceScore}</b></span>
+						</div>
 					</div>
 					<div class="mlVerdictMain">
 						<span class="mlBlockK">{T(verdict.qualityLabelKr, verdict.qualityLabelEn)} · {verdict.claimLevel}</span>
@@ -307,9 +314,9 @@
 							<span>{T('핵심 경로', 'Main path')}</span>
 							<b>{T(verdict.primaryChainKr, verdict.primaryChainEn)}</b>
 						</div>
-						<button class="mlFalsifierSwitch" onclick={inspectVerdictSources} title={T(verdict.falsifierKr, verdict.falsifierEn)}>
-							<span>{T('반증', 'Kill switch')}</span>
-							<b>{T(verdict.falsifierKr, verdict.falsifierEn)}</b>
+						<button class={'mlFalsifierSwitch ' + (topKillStep?.status ?? 'watch')} onclick={inspectVerdictSources} title={T(topKillStep?.detailKr ?? verdict.falsifierKr, topKillStep?.detailEn ?? verdict.falsifierEn)}>
+							<span>{topKillStep ? T(topKillStep.labelKr, topKillStep.labelEn) : T('반증', 'Kill switch')}</span>
+							<b>{T(topKillStep?.detailKr ?? verdict.falsifierKr, topKillStep?.detailEn ?? verdict.falsifierEn)}</b>
 						</button>
 					</div>
 					<div class="mlBattleBoard" aria-label="Macro direction meter">
@@ -329,8 +336,9 @@
 							<span>{T('혼합', 'Mixed')} <b>{verdict.contest.mixedScore + verdict.contest.unknownScore}</b></span>
 						</div>
 						<div class="mlBattlePivot">
-							<span>{T('전환 조건', 'Flip test')}</span>
-							<b>{verdict.blockers.length ? T('LOCK 해소 전까지 방향 판정 금지', 'No directional claim until LOCK clears') : `${T(verdict.contest.challengerKr, verdict.contest.challengerEn)} · spread ${verdict.contest.spread}`}</b>
+							<span>{T(verdict.flip.labelKr, verdict.flip.labelEn)}</span>
+							<b>{T(verdict.flip.neededKr, verdict.flip.neededEn)}</b>
+							<em>{T(verdict.flip.detailKr, verdict.flip.detailEn)}</em>
 						</div>
 					</div>
 					<div class="mlVerdictAction">
@@ -362,6 +370,27 @@
 					</div>
 				</section>
 
+				<section class="mlKillChainPanel" aria-label="Driver-local falsifier kill chain">
+					<div class="mlKillChainHead">
+						<div>
+							<span class="mlBlockK">{T('반증 체인', 'Kill-chain')}</span>
+							<b>{topVerdictDriver ? topVerdictDriver.label : T('경로 없음', 'No path')}</b>
+						</div>
+						<em>{T('관측값 → 전파 → 회사증거 → 반증 → 재확인', 'Observation → path → company → falsifier → recheck')}</em>
+					</div>
+					<div class="mlKillChainSteps">
+						{#each verdict.killChain as step (step.id)}
+							<button class={'mlKillStep ' + step.status} onclick={() => goto(step.tab, step.driverId ?? verdictFocusId)} title={`${T(step.detailKr, step.detailEn)} · ${step.sourceRef}`}>
+								<span>{killStatus(step.status)}</span>
+								<b>{T(step.labelKr, step.labelEn)}</b>
+								<em>{T(step.detailKr, step.detailEn)}</em>
+							</button>
+						{/each}
+					</div>
+				</section>
+
+				<details class="mlVerdictAuditFold">
+					<summary>{T('상세 검산 열기', 'Open detailed audit')}</summary>
 				<section class={'mlContestPanel ' + verdict.contest.leaderSide} aria-label="Macro direction contest">
 					<div class="mlContestHead">
 						<div>
@@ -506,6 +535,7 @@
 						</button>
 					{/each}
 				</section>
+				</details>
 				<details class="mlEvidenceFold">
 					<summary>{T('증거 매트릭스와 릴리즈 레일', 'Evidence matrix and release rail')}</summary>
 					<section class="mlMatrix" aria-label="Macro exposure matrix">
@@ -926,6 +956,11 @@
 	.mlVerdictDial b { margin-top: 4px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 32px; line-height: 1; }
 	.mlVerdictDial em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; }
 	.mlVerdictDial i { margin-top: 7px; max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(255,255,255,.07); border-radius: 999px; color: var(--amber); background: rgba(251,146,60,.045); padding: 2px 7px; font-style: normal; font-family: var(--dl-font-mono); font-size: 8px; }
+	.mlScoreSplit { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; width: calc(100% - 14px); margin-top: 7px; }
+	.mlScoreSplit span { min-width: 0; border: 1px solid rgba(255,255,255,.055); border-radius: 4px; background: rgba(255,255,255,.012); padding: 4px 3px; text-align: center; }
+	.mlScoreSplit i, .mlScoreSplit b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlScoreSplit i { margin: 0; max-width: none; border: 0; border-radius: 0; background: transparent; color: var(--dl-ink-muted, #7b8493); padding: 0; font-size: 7.5px; }
+	.mlScoreSplit b { margin-top: 2px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; line-height: 1; }
 	.mlVerdictMain, .mlVerdictAction, .mlBattleBoard { min-width: 0; }
 	.mlVerdictMain h3 { margin: 4px 0 0; color: var(--dl-ink); font-size: 20px; line-height: 1.05; letter-spacing: 0; }
 	.mlVerdictMain p, .mlVerdictAction b, .mlVerdictAction em { min-width: 0; overflow-wrap: anywhere; }
@@ -934,11 +969,13 @@
 	.mlVerdictChain span, .mlVerdictAction span { color: var(--amber); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	.mlVerdictChain b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11px; }
 	.mlFalsifierSwitch { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 7px; align-items: center; width: 100%; min-width: 0; margin-top: 7px; border: 1px solid rgba(251,146,60,.32); border-radius: 5px; background: rgba(251,146,60,.035); color: var(--dl-ink); padding: 6px 7px; text-align: left; cursor: pointer; }
+	.mlFalsifierSwitch.open { border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.025); }
+	.mlFalsifierSwitch.locked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.026); }
 	.mlFalsifierSwitch:hover { border-color: rgba(251,146,60,.62); background: rgba(251,146,60,.06); }
 	.mlFalsifierSwitch span { color: var(--amber); font-size: 8.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	.mlFalsifierSwitch b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
 	.mlBattleBoard { display: flex; flex-direction: column; justify-content: center; gap: 7px; border: 1px solid rgba(255,255,255,.06); border-radius: 6px; background: rgba(0,0,0,.13); padding: 8px; }
-	.mlBattleHead span, .mlBattleHead b, .mlBattleHead em, .mlBattlePivot span, .mlBattlePivot b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlBattleHead span, .mlBattleHead b, .mlBattleHead em, .mlBattlePivot span, .mlBattlePivot b, .mlBattlePivot em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlBattleHead span, .mlBattlePivot span { color: var(--amber); font-size: 8.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	.mlBattleHead b { margin-top: 4px; color: var(--dl-ink); font-size: 13px; }
 	.mlBattleHead em { margin-top: 2px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
@@ -952,6 +989,7 @@
 	.mlBattleScores b { float: right; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
 	.mlBattlePivot { border-top: 1px solid rgba(255,255,255,.06); padding-top: 6px; }
 	.mlBattlePivot b { margin-top: 3px; color: var(--dl-ink); font-size: 10px; }
+	.mlBattlePivot em { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
 	.mlVerdictAction { display: flex; flex-direction: column; justify-content: center; gap: 6px; border-left: 1px solid rgba(255,255,255,.06); padding-left: 8px; }
 	.mlVerdictAction b { color: var(--dl-ink); font-size: 12px; line-height: 1.25; }
 	.mlVerdictAction em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; }
@@ -998,6 +1036,28 @@
 	.mlActionItem span, .mlActionItem b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlActionItem span { color: var(--dl-ink-dim, #5b6473); font-family: var(--dl-font-mono); font-size: 8px; font-weight: 800; }
 	.mlActionItem b { margin-top: 4px; font-size: 10px; }
+	.mlKillChainPanel { display: grid; grid-template-columns: minmax(190px, .42fr) minmax(0, 1.58fr); gap: 8px; border: 1px solid rgba(251,146,60,.28); border-radius: 6px; background: rgba(251,146,60,.018); padding: 8px; }
+	.mlKillChainHead, .mlKillStep { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.13); padding: 8px; }
+	.mlKillChainHead { display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+	.mlKillChainHead b, .mlKillChainHead em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlKillChainHead b { color: var(--dl-ink); font-size: 12px; }
+	.mlKillChainHead em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
+	.mlKillChainSteps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; min-width: 0; }
+	.mlKillStep { color: var(--dl-ink); text-align: left; cursor: pointer; }
+	.mlKillStep.open { border-color: rgba(52,211,153,.3); }
+	.mlKillStep.watch { border-color: rgba(251,146,60,.38); }
+	.mlKillStep.locked { border-color: rgba(248,113,113,.42); }
+	.mlKillStep:hover { border-color: rgba(251,146,60,.62); background: rgba(251,146,60,.04); }
+	.mlKillStep span, .mlKillStep b, .mlKillStep em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlKillStep span { color: var(--amber); font-family: var(--dl-font-mono); font-size: 8px; font-weight: 800; }
+	.mlKillStep b { margin-top: 5px; color: var(--dl-ink); font-size: 10.5px; }
+	.mlKillStep em { margin-top: 4px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
+	.mlVerdictAuditFold { border: 1px solid rgba(148,163,184,.16); border-radius: 6px; background: rgba(255,255,255,.01); }
+	.mlVerdictAuditFold summary { min-height: 32px; cursor: pointer; color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 9px 10px; }
+	.mlVerdictAuditFold:not([open]) > :not(summary) { display: none !important; }
+	.mlVerdictAuditFold[open] { padding: 0 8px 8px; }
+	.mlVerdictAuditFold[open] summary { margin: 0 -8px 8px; border-bottom: 1px solid rgba(255,255,255,.055); color: var(--amber); }
+	.mlVerdictAuditFold > section { margin-top: 8px; }
 	.mlCompareTray { border: 1px solid rgba(148,163,184,.18); border-radius: 6px; background: rgba(255,255,255,.012); padding: 8px; }
 	.mlCompareTitle { display: flex; align-items: center; gap: 8px; min-width: 0; margin-bottom: 7px; }
 	.mlCompareTitle b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11.5px; }
@@ -1365,12 +1425,13 @@
 	.mlNote { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.45; border: 1px dashed var(--dl-line, #1b2130); border-radius: 5px; padding: 8px 10px; }
 	@media (max-width: 760px) {
 		.mlModal { height: min(780px, 94vh); }
-		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill, .mlRailRows, .mlVerdictHero, .mlContestPanel, .mlDecisionGrid, .mlVerdictDrivers, .mlEvidenceCockpit { grid-template-columns: 1fr; }
+		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill, .mlRailRows, .mlVerdictHero, .mlKillChainPanel, .mlContestPanel, .mlDecisionGrid, .mlVerdictDrivers, .mlEvidenceCockpit { grid-template-columns: 1fr; }
 		.mlTabs { min-height: 38px; padding-left: 8px; padding-right: 8px; }
 		.mlTabs button { min-width: 50px; min-height: 30px; padding: 8px 9px; text-align: center; }
 		.mlVerdictHero { grid-template-columns: 92px minmax(0, 1fr); gap: 8px; }
 		.mlVerdictDial { min-height: 0; }
 		.mlVerdictDial b { font-size: 28px; }
+		.mlScoreSplit b { font-size: 10px; }
 		.mlBattleBoard, .mlVerdictAction, .mlContestPanel, .mlCompareTray, .mlMechanismPanel, .mlDecisionGrid { grid-column: 1 / -1; }
 		.mlVerdictMain h3 { font-size: 18px; }
 		.mlVerdictChain { grid-template-columns: 58px minmax(0, 1fr); }
@@ -1379,6 +1440,8 @@
 		.mlCommandBar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 		.mlContestRows, .mlActionQueue { grid-template-columns: 1fr; }
 		.mlVerdictAction .mlActionQueue { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.mlKillChainSteps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.mlKillStep:last-child { grid-column: 1 / -1; }
 		.mlCompareCards { grid-template-columns: 1fr; }
 		.mlCompareCard { grid-template-columns: 1fr; }
 		.mlCompareTop { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.055); padding-right: 0; padding-bottom: 5px; }

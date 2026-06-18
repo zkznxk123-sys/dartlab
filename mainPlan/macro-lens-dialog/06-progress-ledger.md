@@ -1,10 +1,44 @@
 # 06. 진행 원장
 
-상태: v1.11
+상태: v1.12
 
 ---
 
 ## 2026-06-19
+
+### v1.12 — Direction/Evidence split · driver-local kill-chain · flip test
+
+배경:
+
+- 사용자가 "판정형? 누가 판정하는데?"라고 지적했다. 답은 사람이 아니라 공개 산출물 gate와 반증 조건이어야 한다.
+- UX/엔진 red-team은 첫 화면이 여전히 많이 말하고 있으며, `판정 -> 이 판정을 죽이는 조건 -> 어느 조건이면 뒤집히는가`로 압축해야 한다고 결론냈다.
+- 엔진 red-team은 `macro.transmission.edges[*].falsifiers`가 원천 계약에는 있지만 `MacroTransmissionEdgeView`에서 버려지고 있어 driver별 반증 체인으로 올라오지 못한다고 지적했다.
+
+완료:
+
+- `MacroTransmissionEdgeView.falsifiers`를 추가해 `macro.transmission` edge의 반증 조건을 UI view-model에서 보존한다. fallback template edge는 빈 배열로 유지해 template가 실제 반증 근거처럼 보이지 않게 했다.
+- `MacroVerdictView`에 signed `directionScore`(-100~100)와 `evidenceScore`(0~100), `evidenceLabel`, `killChain`, `flip`을 추가했다. 호환용 `score`는 남기되 첫 화면 의미는 방향/근거 split으로 읽힌다.
+- 각 verdict driver에 `gates`와 `killChain`을 붙였다. 체인은 `관측값 -> 전파 edge -> 회사 증거 -> 반증 조건 -> 재확인` 순서로, 각 단계가 `OPEN/WATCH/LOCK`, target tab, sourceRef를 가진다.
+- `buildMacroVerdict()`의 방향 판정은 `directionScore`를 사용하고, claim 가능 강도는 hard lock/evidence/coverage gate로 제한한다. hard lock이면 `directionScore=0`, `evidenceScore<=44`, `flip.status='locked'`로 고정한다.
+- `Flip Test`를 추가했다. hard lock 상태에서는 임계값 숫자를 만들지 않고 lock 사유를 보여준다. 열린 상태에서는 challenger가 leader를 뒤집는 데 필요한 점수차와 첫 kill switch를 함께 보여준다.
+- `MacroLensDialog` 첫 화면을 `판정/근거 split`, `driver-local kill-chain`, `flip/next action` 중심으로 압축했다. `Direction Contest`, `A/B Matrix`, `Verdict Engine`, `Evidence Cockpit`, phase/pulse는 닫힌 `상세 검산`으로 내렸다.
+- 모바일에서 score split 숫자가 큰 판정 숫자 스타일에 먹혀 잘리던 문제를 별도 media override로 수정했다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과. 14개 테스트.
+- 추가 회귀: market-only verdict의 direction/evidence/killChain/flip 계약, stale hard lock의 score split 잠금, transmission edge falsifier 보존과 driver-local kill-chain 노출, template path gate lock.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning 45개, error 0.
+- `node tests/audit/checkUiDataWiring.mjs` 통과. 신규 위반 0건.
+- Playwright smoke 통과: desktop/mobile에서 score split 1개, kill-chain panel 1개, kill step 5개, flip 1개, 상세 검산 기본 닫힘(contest/A-B/engine visible 0), 상세 검산 열기 후 contest row 3개/A-B card 3개, overflow 0.
+- QA screenshots: `output/playwright/macro-killchain-desktop.png`, `output/playwright/macro-killchain-mobile.png`.
+
+NEXT:
+
+1. 실제 release calendar/vintage 데이터가 열리면 kill-chain의 `재확인` 단계를 발표 캘린더 gate로 승격한다.
+2. `macro.transmission` 엔진이 edge별 `asOfPolicy/releaseLagDays/staleAfterDays`를 더 구조화하면 UI의 recheck 문구를 sourceLineage 문자열이 아니라 계산된 날짜로 교체한다.
+
+---
 
 ### v1.11 — Direction Contest / A-B Matrix / Action Queue
 
