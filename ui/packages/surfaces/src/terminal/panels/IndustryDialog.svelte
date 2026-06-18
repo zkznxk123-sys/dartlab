@@ -76,10 +76,10 @@
 	<div class="scrModal indModal" role="dialog" aria-modal="true" aria-label={lang === 'en' ? 'Industry analysis' : '산업 분석'} onclick={(e) => e.stopPropagation()}>
 		<div class="scrHead">
 			{#if view && m}
-				<button class="indBack" onclick={() => (view = '')} title={lang === 'en' ? 'all industries' : '전체 산업'}>◄ {lang === 'en' ? 'all' : '전체'}</button>
+				<button class="indBack" onclick={() => (view = '')} title={lang === 'en' ? 'back to list' : '목록으로'}>◄ {lang === 'en' ? 'list' : '목록'}</button>
 				<span class="indWho">{lang === 'en' ? m.en : m.kr}<i>n={m.count}{#if m.tailwind != null} · {twLabel(m.tailwind)} {m.tailwind.toFixed(2)}{/if}{#if m.macroPhase} · {lang === 'en' ? 'macro' : '국면'} {m.macroPhase}{/if}</i></span>
 			{:else}
-				<span class="scrTitle">{lang === 'en' ? 'INDUSTRY ANALYSIS' : '산업 분석'}</span>
+				<span class="scrTitle">{lang === 'en' ? 'INDUSTRY DETAIL' : '산업 상세보기'}</span>
 				<span class="indWho">{lang === 'en' ? `${landRows.length} industries` : `${landRows.length}개 산업`}<i>{lang === 'en' ? 'click → drill' : '클릭 → 산업 상세'}</i></span>
 			{/if}
 			<span class="indLens">{lang === 'en' ? 'cross-industry distribution facts (not a verdict)' : '34산업 cross-section 분포 사실 (판정 아님)'}</span>
@@ -99,13 +99,14 @@
 								<span class="indMName">{lang === 'en' ? d.en : d.kr}</span>
 								<span class="indMCurve">{#if band}<DistCurve {band} value={band.median} p={r ? r.pct : 50} unit={d.unit} {lang} h={26} neutral={d.lower} />{:else}<span class="indDash">n&lt;10</span>{/if}</span>
 								<span class="indMVal mono">{fmt(band?.median, d.unit)}</span>
-								<span class={'indMRank ' + (r ? rankTone(r.pct) : 'tNeu')}>{#if r}{lang === 'en' ? r.pos + '/' + r.tot : '산업 ' + r.pos + '/' + r.tot + '위'}{:else}—{/if}</span>
+								<span class={'indMRank ' + (r ? rankTone(r.pct) : 'tNeu')} title={r ? (lang === 'en' ? `${r.pos} of ${r.tot} industries` : `${r.tot}개 산업 중 ${r.pos}위`) : ''}>{#if r}{lang === 'en' ? 'top ' + Math.max(1, Math.round((r.pos / r.tot) * 100)) + '%' : '상위 ' + Math.max(1, Math.round((r.pos / r.tot) * 100)) + '%'}{:else}—{/if}</span>
 							</div>
 						{/each}
 					</div>
 					<div class="indFacts">
-						<span>{lang === 'en' ? 'Margin spread (IQR)' : '마진 양극화(IQR)'} <b>{m.marginIqr ?? '—'}%p</b> {polarLabel}</span>
-						<span>{lang === 'en' ? 'Loss/low-margin share' : '적자·저수익 비중'} <b>{m.bucket.profRisk}%</b></span>
+						<span>{lang === 'en' ? 'Margin spread (IQR)' : '마진 분산(IQR)'} <b>{m.marginIqr ?? '—'}%p</b> {polarLabel}</span>
+						<span>{lang === 'en' ? 'Loss share' : '적자 비중'} <b>{m.bucket.lossRisk}%</b></span>
+						<span>{lang === 'en' ? 'Thin-margin share' : '저수익↓ 비중'} <b>{m.bucket.profRisk}%</b></span>
 						<span>{lang === 'en' ? 'Liquidity-risk share' : '유동성위험 비중'} <b>{m.bucket.liqRisk}%</b></span>
 					</div>
 				</section>
@@ -120,7 +121,7 @@
 								<span class="indMName">{lang === 'en' ? d.en : d.kr}</span>
 								<span class="indMCurve">{#if band}<DistCurve {band} value={band.median} p={r ? r.pct : 50} unit={d.unit} {lang} h={26} />{:else}<span class="indDash">n&lt;10</span>{/if}</span>
 								<span class="indMVal mono">{fmt(band?.median, d.unit)}</span>
-								<span class={'indMRank ' + (r ? rankTone(r.pct) : 'tNeu')}>{#if r}{lang === 'en' ? r.pos + '/' + r.tot : '산업 ' + r.pos + '/' + r.tot + '위'}{:else}—{/if}</span>
+								<span class={'indMRank ' + (r ? rankTone(r.pct) : 'tNeu')} title={r ? (lang === 'en' ? `${r.pos} of ${r.tot} industries` : `${r.tot}개 산업 중 ${r.pos}위`) : ''}>{#if r}{lang === 'en' ? 'top ' + Math.max(1, Math.round((r.pos / r.tot) * 100)) + '%' : '상위 ' + Math.max(1, Math.round((r.pos / r.tot) * 100)) + '%'}{:else}—{/if}</span>
 							</div>
 						{/each}
 					</div>
@@ -163,7 +164,7 @@
 							<span class="indLName">{lang === 'en' ? r.x.en : r.x.kr}{#if r.x.tailwind != null}<i class={'swTw ' + (r.x.tailwind >= 0.55 ? 'tw-up' : r.x.tailwind <= 0.35 ? 'tw-dn' : 'tw-nu')}>{r.x.tailwind >= 0.55 ? '↑' : r.x.tailwind <= 0.35 ? '↓' : '·'}</i>{/if}</span>
 							<span class="indLCurve">{#if band}<DistCurve {band} value={r.v} p={rank} unit={lens.unit} {lang} h={20} neutral={lens.lower} />{/if}</span>
 							<span class={'indLVal mono ' + rankTone(rank)}>{fmt(r.v, lens.unit)}</span>
-							<span class="indLN mono">{r.x.count}</span>
+							<span class="indLN mono" class:warn={r.x.count < 15} title={r.x.count < 15 ? (lang === 'en' ? 'small sample — rank less stable' : '표본 작아 순위 불안정') : ''}>{r.x.count}{#if r.x.count < 15}⚠{/if}</span>
 						</button>
 					{/each}
 				</div>
@@ -174,8 +175,11 @@
 					? 'Distribution: industryStats · KSIC · equal-weight · listed primary (≠ KRX cap-weighted index). PBR uses gov market-cap, not KRX.'
 					: '분포: industryStats · KSIC · 동일가중 · 상장 primary (≠ KRX 시총가중 업종지수). PBR은 gov 시총(KRX 아님).'}</div>
 				<div>※ {lang === 'en'
-					? 'Bucket % = scan-grade buckets (no ordinal-mean). Median ROE/ROA compressed in KR → spread is the signal. Snapshot, not a trend.'
-					: '버킷 % = scan grade 버킷(ordinal 평균 아님). KR median ROE/ROA 압축 → 분산이 신호. 스냅샷(추세 아님).'}</div>
+					? 'Bucket % = scan-grade buckets (no ordinal-mean). Median ROE/ROA compressed in KR → spread is the signal. n<15 (⚠) ranks less stable.'
+					: '버킷 % = scan grade 버킷(ordinal 평균 아님). KR median ROE/ROA 압축 → 분산이 신호. n<15(⚠) 순위 불안정.'}</div>
+				<div>※ {lang === 'en'
+					? 'Snapshot of current listed members (survivorship: delisted/unlisted excluded) — not a trend; rank may shift year to year.'
+					: '현재 상장 멤버 스냅샷(생존편향: 상폐·비상장 제외) — 추세 아님, 순위는 연도별로 바뀔 수 있음.'}</div>
 				<div>※ {lang === 'en'
 					? 'Distribution facts only — no buy/sell, no causal/forecast (polarization is observed spread, not a verdict).'
 					: '분포 사실만 — 매수/매도·인과/예측 금지(양극화는 관측된 격차이지 판정 아님).'}</div>
@@ -216,7 +220,7 @@
 	.indLensBtn { font-size: 10px; padding: 2px 9px; border-radius: 3px; border: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.02); color: #aeb6c2; cursor: pointer; }
 	.indLensBtn:hover { color: var(--dl-ink, #c8cfdb); }
 	.indLensBtn.on { color: var(--amber, #fb923c); border-color: color-mix(in srgb, var(--amber, #fb923c) 55%, transparent); background: color-mix(in srgb, var(--amber, #fb923c) 12%, transparent); }
-	.indLand { display: flex; flex-direction: column; margin-bottom: 10px; }
+	.indLand { display: flex; flex-direction: column; margin-bottom: 10px; max-height: 56vh; overflow-y: auto; }
 	.indLandRow { display: grid; grid-template-columns: 18px 96px 1fr 56px 26px; align-items: center; gap: 9px; padding: 2px 4px; background: none; border: 0; border-bottom: 1px solid var(--dl-line, #1b2130); cursor: pointer; text-align: left; }
 	.indLandRow:hover { background: var(--dl-bg-overlay, rgba(255, 255, 255, 0.04)); }
 	.indLR { font-size: 9px; color: #aeb6c2; text-align: center; }
@@ -224,6 +228,7 @@
 	.indLCurve { min-width: 0; line-height: 0; }
 	.indLVal { font-size: 11px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
 	.indLN { font-size: 9px; color: #aeb6c2; text-align: right; font-variant-numeric: tabular-nums; }
+	.indLN.warn { color: var(--warn, #d29922); }
 	.swTw { font-style: normal; font-size: 9px; font-weight: 700; }
 	.swTw.tw-up { color: var(--up, #3fb950); }
 	.swTw.tw-dn { color: var(--dn, #f85149); }

@@ -337,8 +337,10 @@
 .dlTerm .swVal { font-size: 10.5px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
 .dlTerm .swVal i { font-style: normal; font-size: 8px; color: var(--dimmer); margin-left: 1px; }
 .dlTerm .swN { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-align: right; font-variant-numeric: tabular-nums; }
+.dlTerm .swN.warn { color: var(--warn); }
 .dlTerm .swMore { width: 100%; background: none; border: 0; border-top: 1px solid var(--bd); margin-top: 2px; padding: 4px 5px; font-family: var(--cond); font-size: 9px; color: var(--amberDim, #b9863b); cursor: pointer; text-align: left; letter-spacing: 0.2px; }
 .dlTerm .swMore:hover { color: var(--amber); }
+.dlTerm .swNote { font-family: var(--cond); font-size: 8px; color: var(--dimmer); padding: 3px 5px 2px; line-height: 1.3; }
 
 /* MOVERS */
 .dlTerm .moversWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bd); }

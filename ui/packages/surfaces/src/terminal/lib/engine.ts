@@ -253,7 +253,7 @@ export interface IndustryMacro {
 	dist: Record<string, IndustryDist | null>; // industryStats 분포(n<10 → null). opMargin·netMargin·roe·debtRatio·currentRatio·revCagr·netIncomeCagr·ccc·assetTurnover·icr
 	marginIqr: number | null; // opMargin p75-p25 = 마진 양극화(polarization 마진렌즈)
 	pbr: IndustryDist | null; // gov 시총/자본 분포(KRX 아님 — raw.prices=gov/prices). 밸류 양극화
-	bucket: { profRisk: number; growthRisk: number; debtRisk: number; liqRisk: number; cfDistress: number }; // scan grade 악성 버킷 %(ordinal 평균 아님)
+	bucket: { profRisk: number; lossRisk: number; growthRisk: number; debtRisk: number; liqRisk: number; cfDistress: number }; // scan grade 악성 버킷 %(ordinal 평균 아님). profRisk=적자+저수익, lossRisk=적자만(혼합 방지)
 	cfSignature: { pattern: string; share: number } | null; // cfPattern 최빈 = 산업 현금흐름 시그니처
 	tailwind: number | null; // macro blended 순풍/역풍
 	macroPhase: string;
@@ -949,6 +949,7 @@ export function createEngine(raw: RawData): Engine {
 	// 거시 산업 sweep — scan grade 악성 버킷(04 §3 Rule 5: 버킷% 만, ordinal 평균 금지) · cf distress.
 	const _RISK_BUCKET = {
 		prof: new Set(['저수익', '적자']),
+		loss: new Set(['적자']),
 		growth: new Set(['역성장', '급감']),
 		debt: new Set(['주의', '고위험']),
 		liq: new Set(['주의', '위험'])
@@ -1006,6 +1007,7 @@ export function createEngine(raw: RawData): Engine {
 		};
 		const bucket = {
 			profRisk: pct('profGrade', _RISK_BUCKET.prof),
+			lossRisk: pct('profGrade', _RISK_BUCKET.loss),
 			growthRisk: pct('growthGrade', _RISK_BUCKET.growth),
 			debtRisk: pct('debtGrade', _RISK_BUCKET.debt),
 			liqRisk: pct('liqGrade', _RISK_BUCKET.liq),

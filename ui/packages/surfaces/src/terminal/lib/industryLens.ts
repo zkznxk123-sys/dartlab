@@ -40,10 +40,10 @@ export const INDUSTRY_LENSES: IndustryLens[] = [
 		note: 'PBR 중앙값 = gov 시총 / 자본 (KRX 시총가중 업종지수 아님)'
 	},
 	{
-		key: 'polar', kr: '양극화', en: 'Spread', unit: '%p', lower: false,
+		key: 'polar', kr: '마진분산', en: 'Spread', unit: '%p', lower: false,
 		valueOf: (m) => m.marginIqr,
 		bandOf: (m) => m.dist.opMargin,
-		note: '영업이익률 IQR(p75−p25) = 산업 내 격차 (넓을수록 양극 · 판정 아님)'
+		note: '영업이익률 IQR(p75−p25) = 산업 내 회사 간 격차. 넓다=격차 큼이지 좋고나쁨 아님(중립 관측)'
 	},
 	{
 		key: 'risk', kr: '부실', en: 'Distress', unit: '%', lower: true,

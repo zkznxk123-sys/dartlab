@@ -153,7 +153,7 @@
      전체 랭킹·분포·산업 4질문 *상세는 다이얼로그*(공간 절약). 시세 아닌 *구조*로 산업을 가른다. -->
 <Panel {lang} className="eIndustry" prov="real" title={{ kr: '산업 스윕', en: 'INDUSTRY SWEEP' }} sub={{ kr: '구조 · 클릭=상세', en: 'structure · click=detail' }}>
 	{#snippet right()}
-		<button class="scrOpenBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'all industries · detail' : '전체 산업 상세'}>{lang === 'en' ? 'ALL ↗' : '전체 ↗'}</button>
+		<button class="scrOpenBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'detail · all industries' : '상세보기 · 전체 산업'}>{lang === 'en' ? 'Detail ↗' : '상세보기 ↗'}</button>
 	{/snippet}
 	<div class="swLensRow">
 		{#each INDUSTRY_LENSES as l (l.key)}
@@ -168,11 +168,12 @@
 				<span class="swRk mono">{i + 1}</span>
 				<span class="swName">{lang === 'en' ? r.m.en : r.m.kr}{#if r.m.tailwind != null}<i class={'swTw ' + twTone(r.m.tailwind)}>{r.m.tailwind >= 0.55 ? '↑' : r.m.tailwind <= 0.35 ? '↓' : '·'}</i>{/if}</span>
 				<span class={'swVal mono ' + (lens.lower ? 'tNeu' : 'tUp')}>{fmtLensVal(r.v)}<i>{lens.unit}</i></span>
-				<span class="swN mono">{r.m.count}</span>
+				<span class="swN mono" class:warn={r.m.count < 15} title={r.m.count < 15 ? (lang === 'en' ? 'small sample — rank less stable' : '표본 작아 순위 불안정') : ''}>{r.m.count}{#if r.m.count < 15}⚠{/if}</span>
 			</div>
 		{/each}
 	</div>
-	<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `all ${sweep.length} industries · distribution · drill →` : `전체 ${sweep.length}산업 · 분포 · 4질문 →`}</button>
+	<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `detail · ${sweep.length} industries · distribution · drill →` : `상세보기 · ${sweep.length}산업 · 분포 · 4질문 →`}</button>
+	<div class="swNote">ⓘ {lang === 'en' ? 'listed equal-weight · snapshot · n<15 (⚠) unstable · not KRX index' : '상장 동일가중 · 스냅샷 · n<15(⚠) 불안정 · KRX 지수 아님'}</div>
 </Panel>
 
 <!-- 하단 통합 — 스크리너 ⇄ 공시 워치 탭. 워치가 무한 증가해 스크리너를 가리던 문제 해소
