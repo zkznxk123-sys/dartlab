@@ -1,6 +1,6 @@
 # 02. 데이터 계약
 
-상태: 설계 v0.2
+상태: 설계 v0.3
 범위: Macro Lens 다이얼로그가 읽는 데이터, 매크로 전파 엔진 산출물, 향후 확장 계약.
 
 ---
@@ -46,35 +46,37 @@ export interface MacroLensSnapshot {
     kr: MacroPhaseView | null;
     us: MacroPhaseView | null;
   };
-  observables: MacroObservableView[];
   drivers: MacroDriverView[];
+  topPressures: MacroDriverView[];
   transmissionEdges: MacroTransmissionEdgeView[];
-  sectorBinding: MacroSectorBinding | null;
-  companyBinding: MacroCompanyBinding;
-  exposureQuality: MacroExposureQuality | null;
-  coMovement: MacroCoMovementView[];
+  companyCheckpoints: MacroCheckpointView[];
+  sectorBinding: {
+    tailwind: Tailwind | null;
+    top: MacroSectorBinding[];
+    bottom: MacroSectorBinding[];
+  };
+  exposureQuality: MacroExposureQuality;
+  evidenceGates: MacroEvidenceGate[];
   falsifiers: MacroFalsifierView[];
-  scenarioEntrypoints: MacroScenarioEntrypoint[];
-  sourceRefs: MacroSourceRef[];
+  scenarios: MacroScenarioView[];
+  sourceRefs: string[];
   missing: MacroMissing[];
-  engineLineage: MacroEngineLineage[];
 }
 ```
 
 필드 의미:
 
 - `marketPhase`: `macro.json`의 KR/US phase와 quadrant.
-- `observables`: `MACRO_SERIES` + `MacroPort.getLatest()`에서 온 최신 지표.
-- `drivers`: canonical driver id, series binding, 방향성 의미, 단위, 기본 lag.
+- `drivers`: canonical driver id, series binding, 방향성 의미, 단위, 기본 lag, freshness, co-movement 후보.
+- `topPressures`: 첫 화면 pulse/matrix에 우선 노출할 driver. UI 라벨은 투자 압박이 아니라 검토 우선순위로 번역한다.
 - `transmissionEdges`: driver가 sector/financial line/valuation lever로 전파되는 후보 경로.
+- `companyCheckpoints`: 회사 재무 checkpoint. 예: 부채비율, 영업이익률, CFO/NI 등 이미 terminal `Company`가 가진 값만 사용한다.
 - `sectorBinding`: `co.tailwind`와 `eng.sectorTailwinds()` 기반 섹터 순풍/역풍.
-- `companyBinding`: 회사 재무 checkpoint. 예: 부채비율, 영업이익률, CFO/NI 등 이미 terminal `Company`가 가진 값만 사용한다.
 - `exposureQuality`: 회사별 민감도·회귀를 노출할 수 있는지 판단하는 품질 라벨.
-- `coMovement`: 차트에서 계산한 종목-거시 동행상관.
+- `evidenceGates`: 첫 화면의 시계열/경로/동행/회사노출/민감도 gate. UI가 재계산하지 않는다.
 - `falsifiers`: 상관, peer dispersion, 회귀 품질, stale data처럼 thesis를 약하게 만드는 조건.
-- `scenarioEntrypoints`: 시나리오 이름과 affected driver만. 손익 산출은 하지 않는다.
+- `scenarios`: 시나리오 이름과 affected driver만. 손익 산출은 하지 않는다.
 - `missing`: 결손·미배선·표본 부족·stale 가능성.
-- `engineLineage`: 어떤 엔진/산출물/기준일이 이 row를 만들었는지.
 
 ---
 
@@ -105,20 +107,42 @@ export interface MacroTransmissionEdgeView {
   sign: 'positive' | 'negative' | 'mixed' | 'unknown';
   lagMonths: [number, number] | null;
   confidence: 'high' | 'medium' | 'low' | 'blocked';
-  evidenceLevel: 'observed' | 'regression' | 'sectorPrior' | 'template';
+  evidenceLevel: 'observed' | 'sectorPrior' | 'template';
   requiredCompanyEvidence: string[];
   sourceRefs: string[];
 }
 
 export interface MacroExposureQuality {
-  status: 'open' | 'qualitativeOnly' | 'blocked';
-  reason?: string;
-  nObs?: number;
-  rSquared?: number;
-  window?: string;
-  frequency?: 'monthly' | 'quarterly' | 'annual';
-  lagMonths?: number | null;
+  status: 'qualitativeOnly' | 'blocked';
+  reason: string;
+  blockedReason: string;
+  missingEvidence: string[];
+  sourceRef: string;
+  nObs: number | null;
+  rSquared: number | null;
+  window: string | null;
+  frequency: 'monthly' | 'quarterly' | 'annual' | null;
+  lagMonths: number | null;
   coverage: 'company' | 'sectorOnly' | 'missing';
+}
+
+export interface MacroEvidenceGate {
+  id: 'macroData' | 'path' | 'comove' | 'company' | 'quant';
+  labelKr: string;
+  labelEn: string;
+  value: string;
+  detailKr: string;
+  detailEn: string;
+  status: 'ok' | 'watch' | 'blocked';
+  sourceRef: string;
+  blocks: string[];
+}
+
+export interface MacroMissing {
+  id: string;
+  status: 'missing' | 'partial' | 'notWiredYet' | 'staleRisk';
+  reason: string;
+  sourceRef: string;
 }
 
 export interface MacroFalsifierView {

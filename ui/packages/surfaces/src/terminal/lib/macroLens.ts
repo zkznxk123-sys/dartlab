@@ -25,6 +25,7 @@ export interface MacroDriverView {
 	coMovement: {
 		corr: number;
 		n: number;
+		window: string;
 		label: string;
 		status: 'candidate' | 'unstable' | 'missing';
 	} | null;
@@ -94,6 +95,39 @@ export interface MacroScenarioView {
 	};
 }
 
+export interface MacroExposureQualityView {
+	status: 'qualitativeOnly' | 'blocked';
+	reason: string;
+	blockedReason: string;
+	missingEvidence: string[];
+	sourceRef: string;
+	nObs: number | null;
+	rSquared: number | null;
+	window: string | null;
+	frequency: 'monthly' | 'quarterly' | 'annual' | null;
+	lagMonths: number | null;
+	coverage: 'company' | 'sectorOnly' | 'missing';
+}
+
+export interface MacroEvidenceGateView {
+	id: 'macroData' | 'path' | 'comove' | 'company' | 'quant';
+	labelKr: string;
+	labelEn: string;
+	value: string;
+	detailKr: string;
+	detailEn: string;
+	status: 'ok' | 'watch' | 'blocked';
+	sourceRef: string;
+	blocks: string[];
+}
+
+export interface MacroMissingView {
+	id: string;
+	status: 'missing' | 'partial' | 'notWiredYet' | 'staleRisk';
+	reason: string;
+	sourceRef: string;
+}
+
 export interface MacroLensSnapshot {
 	asOf: {
 		macro: string | null;
@@ -119,19 +153,12 @@ export interface MacroLensSnapshot {
 		top: { id: string; kr: string; en: string; blended: number }[];
 		bottom: { id: string; kr: string; en: string; blended: number }[];
 	};
-	exposureQuality: {
-		status: 'qualitativeOnly' | 'blocked';
-		reason: string;
-		nObs: number | null;
-		rSquared: number | null;
-		window: string | null;
-		lagMonths: number | null;
-		coverage: 'sectorOnly' | 'missing';
-	};
+	exposureQuality: MacroExposureQualityView;
+	evidenceGates: MacroEvidenceGateView[];
 	falsifiers: MacroFalsifierView[];
 	scenarios: MacroScenarioView[];
 	sourceRefs: string[];
-	missing: string[];
+	missing: MacroMissingView[];
 }
 
 export interface MacroPhaseView {
@@ -161,18 +188,18 @@ interface EdgeTemplate {
 
 const DRIVER_SEMANTICS: Record<string, { direction: string; lag: number | null }> = {
 	USDKRW: { direction: '상승은 원화 약세. 수출 환산매출과 수입원가가 동시에 움직인다.', lag: 1 },
-	BASE_RATE: { direction: '상승은 차입비용과 할인율 부담을 키운다.', lag: 6 },
-	FEDFUNDS: { direction: '상승은 글로벌 할인율·달러 유동성 부담을 키운다.', lag: 6 },
+	BASE_RATE: { direction: '상승은 차입비용과 할인율 상승 압력으로 전파될 수 있다.', lag: 6 },
+	FEDFUNDS: { direction: '상승은 글로벌 할인율·달러 유동성 압력으로 전파될 수 있다.', lag: 6 },
 	DGS10: { direction: '상승은 장기 할인율과 multiple 압박으로 전파될 수 있다.', lag: 3 },
 	CPI: { direction: '상승은 가격전가와 비용압박을 동시에 확인해야 한다.', lag: 3 },
 	CPIAUCSL: { direction: '상승은 미국 긴축·수요 둔화 압력으로 전파될 수 있다.', lag: 3 },
 	EXPORT: { direction: '상승은 외부수요와 국내 제조업 매출 환경을 보여준다.', lag: 1 },
 	IPI: { direction: '상승은 생산·가동률 환경 개선 신호다.', lag: 1 },
 	CLI: { direction: '상승은 경기 선행 모멘텀 개선 신호다.', lag: 3 },
-	BAMLH0A0HYM2: { direction: '상승은 신용위험과 자금조달 부담 확대 신호다.', lag: 3 },
+	BAMLH0A0HYM2: { direction: '상승은 신용위험과 자금조달 압력 확대 신호다.', lag: 3 },
 	NFCI: { direction: '상승은 금융여건 긴축 신호다.', lag: 3 },
 	VIXCLS: { direction: '상승은 위험회피와 equity risk premium 확대 신호다.', lag: 0 },
-	DCOILWTICO: { direction: '상승은 에너지 매출에는 순풍, 제조 원가에는 부담일 수 있다.', lag: 1 },
+	DCOILWTICO: { direction: '상승은 에너지 매출 증가 요인, 제조 원가 상승 요인일 수 있다.', lag: 1 },
 	PCOPPUSDM: { direction: '상승은 글로벌 제조·전기화 수요와 원가 압력을 동시에 시사한다.', lag: 1 },
 	PPI_SEMI: { direction: '상승은 반도체 제품가격 환경 개선 또는 원가 전가 신호다.', lag: 1 },
 	PPI_CHEM: { direction: '상승은 화학 제품가격과 원가 전가력을 동시에 확인해야 한다.', lag: 1 },
@@ -180,7 +207,7 @@ const DRIVER_SEMANTICS: Record<string, { direction: string; lag: number | null }
 	PPI_AUTO: { direction: '상승은 자동차 판가·원가 전가력을 함께 본다.', lag: 1 },
 	PPI_DISPLAY: { direction: '상승은 디스플레이 가격 환경 개선 신호다.', lag: 1 },
 	PPI_ELEC: { direction: '상승은 전기전자 판가와 부품 원가를 함께 본다.', lag: 1 },
-	PPI_OIL: { direction: '상승은 정유·석화 판가와 원재료 부담을 동시에 만든다.', lag: 1 }
+	PPI_OIL: { direction: '상승은 정유·석화 판가와 원재료 원가를 동시에 확인하게 만든다.', lag: 1 }
 };
 
 const SECTOR_DRIVER: Record<string, string[]> = {
@@ -363,10 +390,10 @@ const EDGE_TEMPLATES: EdgeTemplate[] = [
 
 const SCENARIOS: Omit<MacroScenarioView, 'readiness'>[] = [
 	{ id: 'fx10', label: '원/달러 +10%', driverId: 'USDKRW', shock: 'USDKRW +10%', firstBreak: '수출 환산매출 또는 수입원가', expectedDirection: '수출 환산매출과 달러 원가가 동시에 움직임', impactedFinancialLine: '매출 성장률 / 매출총이익률', valuationLever: 'growth / margin', falsifier: '달러 원가·부채·헤지 정책 확인 전 방향 단정 금지', requiredEvidence: ['해외 매출 비중', '외화 원가', 'FX 손익'], nextSurface: '재무제표 분석 · 매출/원가/주석' },
-	{ id: 'rate100', label: '기준금리 +100bp', driverId: 'BASE_RATE', shock: 'BASE_RATE +1.0%p', firstBreak: '이자비용과 할인율', expectedDirection: '차입 의존 기업에는 비용·할인율 부담', impactedFinancialLine: '이자비용 / 순이익 / multiple', valuationLever: 'discountRate', falsifier: '순현금·고정금리 장기차입이면 약화', requiredEvidence: ['부채비율', '단기차입', '이자보상배율'], nextSurface: '재무제표 분석 · 안정성/현금흐름' },
-	{ id: 'oil30', label: 'WTI +30%', driverId: 'DCOILWTICO', shock: 'WTI +30%', firstBreak: '원재료·연료비 또는 에너지 매출', expectedDirection: '에너지는 매출 순풍, 제조·물류는 원가 부담 가능', impactedFinancialLine: '매출총이익률 / 원가율', valuationLever: 'margin', falsifier: '가격 전가·재고평가·원가 계약 확인 전 단정 금지', requiredEvidence: ['원재료 비중', '가격 전가력', '재고'], nextSurface: '재무제표 분석 · 마진/재고' },
+	{ id: 'rate100', label: '기준금리 +100bp', driverId: 'BASE_RATE', shock: 'BASE_RATE +1.0%p', firstBreak: '이자비용과 할인율', expectedDirection: '차입 의존 기업에는 비용·할인율 상승 압력', impactedFinancialLine: '이자비용 / 순이익 / multiple', valuationLever: 'discountRate', falsifier: '순현금·고정금리 장기차입이면 약화', requiredEvidence: ['부채비율', '단기차입', '이자보상배율'], nextSurface: '재무제표 분석 · 안정성/현금흐름' },
+	{ id: 'oil30', label: 'WTI +30%', driverId: 'DCOILWTICO', shock: 'WTI +30%', firstBreak: '원재료·연료비 또는 에너지 매출', expectedDirection: '에너지는 매출 증가 요인, 제조·물류는 원가 상승 요인 확인', impactedFinancialLine: '매출총이익률 / 원가율', valuationLever: 'margin', falsifier: '가격 전가·재고평가·원가 계약 확인 전 단정 금지', requiredEvidence: ['원재료 비중', '가격 전가력', '재고'], nextSurface: '재무제표 분석 · 마진/재고' },
 	{ id: 'exportDown', label: '수출 YoY -10%', driverId: 'EXPORT', shock: 'EXPORT YoY -10%', firstBreak: '외부수요와 가동률', expectedDirection: '수출 제조업 매출·가동률 압박 가능', impactedFinancialLine: '매출 성장률 / 재고 / 가동률', valuationLever: 'growth', falsifier: '시장점유율·제품 믹스·단가가 반대 방향이면 약화', requiredEvidence: ['수출 매출', '수주', '재고'], nextSurface: '산업/동종업종 비교' },
-	{ id: 'hy200', label: 'HY spread +200bp', driverId: 'BAMLH0A0HYM2', shock: 'HY spread +2.0%p', firstBreak: '위험프리미엄과 차입 접근성', expectedDirection: '레버리지 기업의 요구수익률·차입 접근성 부담', impactedFinancialLine: '신용스프레드 / 금융비용 / multiple', valuationLever: 'riskPremium', falsifier: '현금 보유·모회사 지원·만기 여유 확인 전 단정 금지', requiredEvidence: ['신용등급', '만기', '현금 보유'], nextSurface: '신용/리스크 경고등' }
+	{ id: 'hy200', label: 'HY spread +200bp', driverId: 'BAMLH0A0HYM2', shock: 'HY spread +2.0%p', firstBreak: '위험프리미엄과 차입 접근성', expectedDirection: '레버리지 기업의 요구수익률·차입 접근성 압력', impactedFinancialLine: '신용스프레드 / 금융비용 / multiple', valuationLever: 'riskPremium', falsifier: '현금 보유·모회사 지원·만기 여유 확인 전 단정 금지', requiredEvidence: ['신용등급', '만기', '현금 보유'], nextSurface: '신용/리스크 경고등' }
 ];
 
 const CORE_DRIVER_IDS = ['USDKRW', 'BASE_RATE', 'CPI', 'EXPORT', 'DGS10', 'BAMLH0A0HYM2', 'DCOILWTICO'];
@@ -436,6 +463,7 @@ function coMovementOf(cm?: CoMover): MacroDriverView['coMovement'] | null {
 	return {
 		corr: cm.corr,
 		n: cm.n,
+		window: `${cm.n}M overlap`,
 		status,
 		label: `${status === 'candidate' ? '탐색 후보' : '불안정'} corr ${sign}${cm.corr.toFixed(2)} · n=${cm.n}`
 	};
@@ -622,7 +650,7 @@ function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro:
 			driverId: cm.id,
 			label: `${d.label} ${signal?.label ?? `corr ${cm.corr > 0 ? '+' : ''}${cm.corr.toFixed(2)}`}`,
 			severity: signal?.status === 'candidate' ? 'info' : 'warning',
-			detail: `최근 겹친 ${cm.n}개월 월수익률과 거시 1차차분의 Pearson 상관. lag 안정성·회사 증거 전에는 인과나 beta로 승격하지 않는다.`,
+			detail: `최근 겹친 ${cm.n}개월(${signal?.window ?? `${cm.n}M overlap`}) 월수익률과 거시 1차차분의 Pearson 상관. lag 안정성·회사 증거 전에는 인과나 beta로 승격하지 않는다.`,
 			sourceRef: 'terminal coMovement'
 		});
 	}
@@ -633,7 +661,7 @@ function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro:
 			driverId: d.id,
 			label: `${d.label} 기준일 stale`,
 			severity: 'warning',
-			detail: `${d.sourceLineage}. 최신 국면 판단과 전파 경로 우선순위는 낮춰서 읽는다.`,
+			detail: `${d.sourceLineage}. 최신 국면 해석과 전파 경로 우선순위는 낮춰서 읽는다.`,
 			sourceRef: d.sourceLineage
 		});
 	}
@@ -650,7 +678,7 @@ function buildFalsifiers(coMovers: CoMover[], drivers: MacroDriverView[], macro:
 		type: 'staleData',
 		label: 'macro 기준일 없음',
 		severity: 'warning',
-		detail: 'macro.asOf가 없으면 최신 국면 판단으로 단정하지 않는다.',
+		detail: 'macro.asOf가 없으면 최신 국면 해석으로 단정하지 않는다.',
 		sourceRef: 'dashboards/macro.json'
 	});
 	out.push({
@@ -686,6 +714,103 @@ function buildScenarios(drivers: MacroDriverView[], edges: MacroTransmissionEdge
 	}).slice(0, 5);
 }
 
+function buildExposureQuality(): MacroExposureQualityView {
+	return {
+		status: 'qualitativeOnly',
+		reason: '회사별 회귀/민감도는 nObs/R²/window/lag/coverage 공개 계약 전까지 정성 경로만 표시',
+		blockedReason: 'nObs/R²/window/lag/coverage/sourceRef 공개 계약 전',
+		missingEvidence: ['nObs', 'R²', 'window', 'lag', 'company exposure sourceRef'],
+		sourceRef: 'analysis.macroExposure pending',
+		nObs: null,
+		rSquared: null,
+		window: null,
+		frequency: null,
+		lagMonths: null,
+		coverage: 'sectorOnly'
+	};
+}
+
+function buildMissing(args: { macro: MacroFile | null; macroLatest: MacroLatest[]; edges: MacroTransmissionEdgeView[]; coMovers: CoMover[] }): MacroMissingView[] {
+	const out: MacroMissingView[] = [];
+	if (!args.macro) out.push({ id: 'macro-json', status: 'missing', reason: 'macro regime artifact unavailable', sourceRef: 'dashboards/macro.json' });
+	if (!args.macroLatest.length) out.push({ id: 'macro-latest', status: 'missing', reason: 'macro latest observations unavailable', sourceRef: 'macro/{fred,ecos}/observations.parquet' });
+	if (!args.edges.length) out.push({ id: 'transmission-edge', status: 'notWiredYet', reason: 'sector transmission edge unavailable for this company', sourceRef: 'Macro Lens EDGE_TEMPLATES' });
+	if (!args.coMovers.length) out.push({ id: 'co-movement', status: 'partial', reason: 'overlap sample insufficient or chart co-movement not calculated', sourceRef: 'terminal coMovement' });
+	return out;
+}
+
+function buildEvidenceGates(args: {
+	asOf: string | null;
+	drivers: MacroDriverView[];
+	topPressures: MacroDriverView[];
+	edges: MacroTransmissionEdgeView[];
+	exposureQuality: MacroExposureQualityView;
+}): MacroEvidenceGateView[] {
+	const top = args.topPressures.length ? args.topPressures : args.drivers.slice(0, 3);
+	const stale = top.filter((d) => d.freshness.status === 'stale');
+	const watch = top.filter((d) => d.freshness.status === 'watch');
+	const observed = args.edges.filter((e) => e.evidenceLevel === 'observed' && e.confidence !== 'blocked');
+	const candidates = args.drivers.filter((d) => d.coMovement?.status === 'candidate');
+	const coWindows = candidates.map((d) => `${d.id}:${d.coMovement?.window ?? 'window?'}`);
+	return [
+		{
+			id: 'macroData',
+			labelKr: '시계열',
+			labelEn: 'Series',
+			value: stale.length ? 'STALE' : watch.length ? 'WATCH' : 'OK',
+			detailKr: args.asOf ?? 'macro 기준일 없음',
+			detailEn: args.asOf ?? 'macro asOf missing',
+			status: stale.length ? 'blocked' : watch.length ? 'watch' : 'ok',
+			sourceRef: 'dashboards/macro.json + macro observations',
+			blocks: stale.map((d) => `${d.id}: ${d.freshness.label}`)
+		},
+		{
+			id: 'path',
+			labelKr: '경로',
+			labelEn: 'Path',
+			value: `${observed.length}/${args.edges.length}`,
+			detailKr: '관측 edge',
+			detailEn: 'observed edges',
+			status: observed.length ? 'ok' : 'watch',
+			sourceRef: 'macro transmission edge template',
+			blocks: args.edges.filter((e) => e.confidence === 'blocked').map((e) => `${e.driverId}: ${e.sourceRefs.join(' · ')}`)
+		},
+		{
+			id: 'comove',
+			labelKr: '동행',
+			labelEn: 'Co-move',
+			value: candidates.length ? `${candidates.length}` : 'LOW',
+			detailKr: candidates.length ? coWindows.join(', ') : '인과 아님',
+			detailEn: candidates.length ? coWindows.join(', ') : 'not causal',
+			status: candidates.length ? 'watch' : 'blocked',
+			sourceRef: 'terminal coMovement',
+			blocks: candidates.length ? [] : ['corr/n/window candidate absent']
+		},
+		{
+			id: 'company',
+			labelKr: '회사노출',
+			labelEn: 'Company',
+			value: '정성',
+			detailKr: '회귀 잠금',
+			detailEn: 'regression locked',
+			status: 'blocked',
+			sourceRef: args.exposureQuality.sourceRef,
+			blocks: args.exposureQuality.missingEvidence
+		},
+		{
+			id: 'quant',
+			labelKr: '민감도',
+			labelEn: 'Beta',
+			value: 'LOCK',
+			detailKr: 'nObs/R² 없음',
+			detailEn: 'no nObs/R²',
+			status: 'blocked',
+			sourceRef: args.exposureQuality.sourceRef,
+			blocks: [args.exposureQuality.blockedReason]
+		}
+	];
+}
+
 export function buildMacroLensSnapshot(args: {
 	co: Company;
 	macro: MacroFile | null;
@@ -704,15 +829,12 @@ export function buildMacroLensSnapshot(args: {
 	const checkpoints = buildCheckpoints(co);
 	const scenarios = buildScenarios(drivers, edges);
 	const falsifiers = buildFalsifiers(coMovers, drivers, macro);
+	const exposureQuality = buildExposureQuality();
 	const marketPhase = {
 		kr: phaseView('KR', macro?.kr),
 		us: phaseView('US', macro?.us)
 	};
-	const missing: string[] = [];
-	if (!macro) missing.push('macro.json');
-	if (!macroLatest.length) missing.push('macro latest');
-	if (!edges.length) missing.push('sector transmission edge');
-	if (!coMovers.length) missing.push('co-movement sample');
+	const missing = buildMissing({ macro, macroLatest, edges, coMovers });
 	const financePeriod = co.trendQuarter?.periods.at(-1) ?? co.trendAnnual?.periods.at(-1) ?? null;
 	return {
 		asOf: {
@@ -736,15 +858,8 @@ export function buildMacroLensSnapshot(args: {
 			top: sectorTailwinds.slice(0, 4),
 			bottom: sectorTailwinds.length > 4 ? sectorTailwinds.slice(-4).reverse() : []
 		},
-		exposureQuality: {
-			status: 'qualitativeOnly',
-			reason: '회사별 회귀/민감도는 nObs/R²/window/lag/coverage 공개 계약 전까지 정성 경로만 표시',
-			nObs: null,
-			rSquared: null,
-			window: null,
-			lagMonths: null,
-			coverage: 'sectorOnly'
-		},
+		exposureQuality,
+		evidenceGates: buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality }),
 		falsifiers,
 		scenarios,
 		sourceRefs: [

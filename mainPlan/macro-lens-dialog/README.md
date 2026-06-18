@@ -1,6 +1,6 @@
 # 매크로 렌즈 다이얼로그
 
-상태: 구현 v0.3 (2026-06-18, Phase 1~4 완료 · src 승격 대기)
+상태: 구현 v0.5 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 조사 반영 · src 승격 대기)
 범위: 퍼블릭 터미널의 `경제지표분석`을 Macro Lens 분석 코어로 승격한다. 화면은 다이얼로그지만, 핵심은 `dartlab.macro`의 시장·섹터 전파 산출물과 `analysis`의 회사 노출 품질을 하나의 검증 가능한 전파 사슬로 묶는 것이다.
 
 ---
@@ -21,6 +21,7 @@
 6. [05-validation-and-risk.md](05-validation-and-risk.md) — 검증, 테스트, 롤백, 리스크.
 7. [06-progress-ledger.md](06-progress-ledger.md) — 결정 기록과 NEXT.
 8. [07-macro-engine-upgrade.md](07-macro-engine-upgrade.md) — 매크로 엔진 강화 트랙, 산출물, graduation gate.
+9. [08-dashboard-visual-patterns.md](08-dashboard-visual-patterns.md) — 공식 매크로 대시보드 조사, 시각화 방식 카탈로그, 첫 화면 채택 규칙.
 
 ---
 
@@ -31,6 +32,7 @@
 - `macro` 개선은 허용한다. 단, `macro.transmission`은 시장·섹터 레벨 산출물만 만들고 회사/analysis 내부를 import하지 않는다.
 - 회사별 민감도는 기존 `Company.analysis("macro", "매크로민감도")` 계열을 확장해 연결한다. 내부 산출명은 `analysis.macroExposure` 후보로 둘 수 있지만, `nObs`, `rSquared`, `lag`, `window`, `coverage`, `sourceRef`가 없으면 deep block을 닫는다.
 - 첫 화면 구현은 기존 산출물 재사용이다: `dashboards/macro.json`, `macro/{fred,ecos}/observations.parquet`, `MACRO_SERIES`, `co.tailwind`, `eng.sectorTailwinds()`, 차트 co-movement.
+- 첫 화면은 `대시보드`다. `Macro Phase Strip`, `Driver Pulse Strip`, `Exposure Matrix`, `Evidence Gate`, `Legend`로 구성하고 결론형 문단을 전면에 두지 않는다.
 - 엔진 강화는 `tests/_attempts/macroLensEngine/` proof까지 완료했다. `src/dartlab` 승격은 별도 단계로 진행한다.
 - 매수/매도, 목표주가, 위기 임박, 수혜 확정 표현은 금지한다.
 - public/local 공통배선이 기본이다. 로컬 백엔드 없이 퍼블릭 데이터만으로 떠야 한다.

@@ -1,10 +1,73 @@
 # 06. 진행 원장
 
-상태: v0.3
+상태: v0.5
 
 ---
 
 ## 2026-06-18
+
+### v0.5 — 매크로 대시보드 시각화 방식 조사
+
+배경:
+
+- 운영자가 "매크로 분석에 쓰이는 대시보드 시각화를 조사해라"라고 요청했다.
+- 결론: Macro Lens는 화려한 chart gallery가 아니라 `지표 상태`, `전파 경로`, `증거 잠금`, `source/date/value lineage`를 한 화면에서 읽는 계기판이어야 한다.
+
+조사 대상:
+
+- FRED Dashboard: graph, table, single value, data list, note, map widget 조합.
+- OECD Short-Term Indicators Dashboard: G20/지역 aggregate의 short-term macro chart/table, 월 2회 업데이트, codebook/frequency/unit/coverage 제공.
+- Atlanta Fed GDPNow: running estimate, official forecast 아님, subcomponent contribution과 update history.
+- NY Fed GSCPI: supply chain pressure composite index와 방법론/한계.
+- World Bank DataBank/BIS Data Portal: query, chart/table/map, metadata, topic dashboard, data story.
+- IMF DataMapper/ECB Data Portal: 국가·지역 비교 chart/map와 hover data point.
+
+제품 결정:
+
+- P0 첫 화면: phase strip, driver pulse strip, exposure matrix, evidence gate rail, source stamp.
+- P1 상세 탭: contribution waterfall, update path chart, co-movement scatter, falsifier rail, data packet drawer.
+- P2 후순위: country map, peer comparator, scenario fan chart, data story canvas.
+- 첫 화면 금지: gauge, donut, 단일 macro score, 뉴스 카드 wall. 원인·경로·결손을 숨기기 때문이다.
+
+문서 반영:
+
+- [08-dashboard-visual-patterns.md](08-dashboard-visual-patterns.md)를 v0.2로 확장했다.
+
+NEXT:
+
+1. P1 상세 탭을 만들 때 `contribution -> co-movement -> falsifier -> source packet` 순서를 유지한다.
+2. 첫 화면에는 map/fan/story canvas를 넣지 않는다. 회사별 매크로 노출을 읽는 속도가 떨어진다.
+3. 엔진 승격 시 `evidenceGates`와 `exposureQuality`가 P0/P1 시각화의 직접 입력이 되게 한다.
+
+### v0.4 — 대시보드형 증거 상태판 전환
+
+배경:
+
+- 운영자가 "판정형? 누가 판정하는데?"라고 지적했다.
+- 결론: 제품은 투자판단자가 아니다. Macro Lens는 `노출 후보`, `전파 경로`, `커버리지`, `신선도`, `동행상관 상태`, `정량 claim 잠금 사유`를 보여주는 증거 상태판이어야 한다.
+
+완료:
+
+- 첫 탭을 `국면`에서 `대시보드`로 전환했다.
+- 첫 화면을 `Macro Phase Strip`, `Driver Pulse Strip`, `Exposure Matrix`, `Evidence Gate`, `Legend`로 재구성했다.
+- `판정`, `목표주가`, `매수/매도`, `수혜 확정/피해 확정`처럼 추천 또는 단정으로 읽힐 수 있는 UI 문구를 제거했다.
+- matrix 셀은 `OBS/PRIOR/TPL/LOCK/·`처럼 증거 단계만 표시한다.
+- `MacroLensSnapshot.evidenceGates`를 추가해 첫 화면 gate를 UI 추론이 아니라 view-model 계약으로 고정했다.
+- `exposureQuality`에 `blockedReason`, `missingEvidence`, `frequency`, `sourceRef`를 추가했고, co-movement에는 `window`를 붙였다.
+- `missing`은 문자열 배열에서 `{status, reason, sourceRef}` 구조로 전환했다.
+- 공식 매크로 대시보드 조사 결과를 [08-dashboard-visual-patterns.md](08-dashboard-visual-patterns.md)에 추가했다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning만 남음).
+- `python -X utf8 tests\audit\dartlabGuard.py quick` 통과.
+- Playwright 브라우저 확인: `대시보드` 탭에서 phase 3개, pulse 6개, matrix 6행/30셀, gate 5개, legend 4개 렌더링 확인.
+
+NEXT:
+
+1. `macro.transmission` src 승격 시 `OBS/PRIOR/TPL/LOCK` 라벨을 UI 임시 번역이 아니라 엔진 lineage 산출물로 제공한다.
+2. `analysis.macroExposure`가 `nObs/R²/window/lag/coverage/sourceRef`를 내기 전까지 민감도/beta는 계속 잠근다.
+3. co-movement 숫자 노출은 `corr + n + window`가 모두 있을 때만 허용한다.
 
 ### v0.3 — Phase 1~4 구현 완료
 

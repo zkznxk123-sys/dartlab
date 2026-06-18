@@ -42,7 +42,7 @@
 	const focusDriver = $derived(focusId ? snapshot.drivers.find((d) => d.id === focusId) : null);
 	const focusEdge = $derived(focusId ? snapshot.transmissionEdges.find((e) => e.driverId === focusId || e.sectorKey === focusId) : null);
 	const exposureRows = $derived(buildExposureRows());
-	const gateRows = $derived(buildGateRows());
+	const gateRows = $derived(snapshot.evidenceGates);
 	const econBlocked = (id: string) => !activeEcon.includes(id) && activeEcon.length >= ECON_MAX;
 	let dialogEl = $state<HTMLDivElement | null>(null);
 	function buildExposureRows(): { driver: MacroDriverView; cells: (MacroTransmissionEdgeView | null)[] }[] {
@@ -58,20 +58,6 @@
 			cells: channels.map((ch) => snapshot.transmissionEdges.find((e) => e.driverId === driver.id && e.channel === ch.k) ?? null)
 		}));
 	}
-	function buildGateRows(): { id: string; label: string; value: string; detail: string; status: 'ok' | 'watch' | 'blocked' }[] {
-		const top = snapshot.topPressures;
-		const stale = top.filter((d) => d.freshness.status === 'stale').length;
-		const watch = top.filter((d) => d.freshness.status === 'watch').length;
-		const observed = snapshot.transmissionEdges.filter((e) => e.evidenceLevel === 'observed' && e.confidence !== 'blocked').length;
-		const candidate = snapshot.drivers.filter((d) => d.coMovement?.status === 'candidate').length;
-		return [
-			{ id: 'macroData', label: '시계열', value: stale ? 'STALE' : watch ? 'WATCH' : 'OK', detail: snapshot.asOf.macro ?? '—', status: stale ? 'blocked' : watch ? 'watch' : 'ok' },
-			{ id: 'path', label: '경로', value: `${observed}/${snapshot.transmissionEdges.length}`, detail: 'observed edges', status: observed ? 'ok' : 'watch' },
-			{ id: 'comove', label: '동행', value: candidate ? `${candidate}` : 'LOW', detail: 'not causal', status: candidate ? 'watch' : 'blocked' },
-			{ id: 'company', label: '회사노출', value: '정성', detail: '회귀 미승격', status: 'blocked' },
-			{ id: 'quant', label: '민감도', value: 'LOCK', detail: 'nObs/R² 없음', status: 'blocked' }
-		];
-	}
 	function sparkPoints(vals: number[]): string {
 		if (!vals.length) return '';
 		const min = Math.min(...vals);
@@ -82,6 +68,14 @@
 	const cellClass = (edge: MacroTransmissionEdgeView | null) => edge ? edge.confidence : 'none';
 	const cellLabel = (edge: MacroTransmissionEdgeView) => edge.confidence === 'blocked' ? 'LOCK' : evidenceText[edge.evidenceLevel];
 	const cellTitle = (edge: MacroTransmissionEdgeView | null, label: string) => edge ? `${label}: ${edge.financialLine} · ${edge.confidence} · ${edge.evidenceLevel}` : `${label}: 노출 경로 없음`;
+	const gateLabel = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.labelKr, g.labelEn);
+	const gateDetail = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.detailKr, g.detailEn);
+	function motionLabel(value: string | null | undefined): string {
+		const raw = value ?? '—';
+		if (lang === 'en') return raw;
+		const key = raw.toLowerCase();
+		return key === 'rising' ? '상승' : key === 'falling' ? '하락' : key === 'stable' ? '횡보' : raw;
+	}
 	function onDialogKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			e.preventDefault();
@@ -121,14 +115,14 @@
 			{/each}
 		</div>
 		<div class="mlAlwaysNote">
-			{T('노출 점검표입니다. 정량 민감도·투자판단·가격 산출은 표시하지 않습니다.', 'Exposure checklist only. No quantitative sensitivity, investment call, or price output.')}
+			{T('노출 점검표입니다. 정량 민감도·투자 결론·가격 산출은 표시하지 않습니다.', 'Exposure checklist only. No quantitative sensitivity, investment call, or price output.')}
 		</div>
 
 		<div class="mlBody">
 			{#if tab === 'regime'}
 				<section class="mlPhaseStrip" aria-label="Macro phases">
-					<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{snapshot.marketPhase.kr?.growth ?? '—'} · {snapshot.marketPhase.kr?.inflation ?? '—'}</em></div>
-					<div><span>US</span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{snapshot.marketPhase.us?.growth ?? '—'} · {snapshot.marketPhase.us?.inflation ?? '—'}</em></div>
+					<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
+					<div><span>US</span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}</em></div>
 					<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : '—'}</em></div>
 				</section>
 				<section class="mlPulseStrip" aria-label="Macro pulse">
@@ -169,9 +163,9 @@
 				<section class="mlGateStrip" aria-label="Evidence gates">
 					{#each gateRows as g (g.id)}
 						<div class={'mlGate ' + g.status}>
-							<span>{g.label}</span>
+							<span>{gateLabel(g)}</span>
 							<b>{g.value}</b>
-							<em>{g.detail}</em>
+							<em title={g.sourceRef}>{gateDetail(g)}</em>
 						</div>
 					{/each}
 				</section>
@@ -247,7 +241,7 @@
 				</section>
 				<section class="mlGrid two">
 					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('회사 checkpoint', 'Company checkpoints')}</span><b>{T('정량 확정 전 확인할 재무 위치', 'Financial checkpoints before quant claim')}</b></div>
+						<div class="mlBlockTop"><span class="mlBlockK">{T('회사 checkpoint', 'Company checkpoints')}</span><b>{T('정량화 전 확인할 재무 위치', 'Financial checkpoints before quant claim')}</b></div>
 						{#each snapshot.companyCheckpoints as c (c.id)}
 							<div class="mlCheck">
 								<span>{c.label}</span><b class={c.tone}>{c.value}</b><em>{c.reason}</em>
@@ -294,9 +288,11 @@
 					</div>
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('한계', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
-						{#each snapshot.missing as m (m)}<div class="mlSrc warn">{m}</div>{/each}
+						{#each snapshot.missing as m (m.id)}<div class="mlSrc warn"><b>{m.status}</b> {m.reason}<em>{m.sourceRef}</em></div>{/each}
 						<div class="mlSrc warn">{snapshot.exposureQuality.reason}</div>
-						<div class="mlSrc warn">nObs/R²/window/lag: {snapshot.exposureQuality.nObs ?? '—'} / {snapshot.exposureQuality.rSquared ?? '—'} / {snapshot.exposureQuality.window ?? '—'} / {snapshot.exposureQuality.lagMonths ?? '—'}</div>
+						<div class="mlSrc warn">nObs/R²/window/frequency/lag: {snapshot.exposureQuality.nObs ?? '—'} / {snapshot.exposureQuality.rSquared ?? '—'} / {snapshot.exposureQuality.window ?? '—'} / {snapshot.exposureQuality.frequency ?? '—'} / {snapshot.exposureQuality.lagMonths ?? '—'}</div>
+						<div class="mlSrc warn">{snapshot.exposureQuality.blockedReason} · {snapshot.exposureQuality.sourceRef}</div>
+						<div class="mlSrc warn">{T('필요 증거', 'Required evidence')}: {snapshot.exposureQuality.missingEvidence.join(' · ')}</div>
 						<div class="mlSrc">{T('상관은 인과가 아니며, 지표 변화가 회사 실적 변화를 보장하지 않는다.', 'Correlation is not causation; indicator moves do not guarantee company results.')}</div>
 					</div>
 				</section>
@@ -439,6 +435,8 @@
 	.mlScenario.blocked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.035); }
 	.mlScenario em { display: block; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; margin-top: 8px; }
 	.mlSrc { padding: 6px 0; border-top: 1px solid rgba(255,255,255,.045); color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
+	.mlSrc b { color: var(--warn); font-family: var(--dl-font-mono); font-size: 10px; margin-right: 5px; text-transform: uppercase; }
+	.mlSrc em { display: block; margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; overflow-wrap: anywhere; }
 	.mlNote { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.45; border: 1px dashed var(--dl-line, #1b2130); border-radius: 5px; padding: 8px 10px; }
 	@media (max-width: 760px) {
 		.mlModal { height: min(780px, 94vh); }
