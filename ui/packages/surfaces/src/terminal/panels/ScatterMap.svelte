@@ -11,6 +11,11 @@
 		faint?: boolean; // 소표본/저신뢰 → 흐림·라벨 생략
 		meta?: string; // hover 정보바 보조 텍스트
 	}
+	export interface TrailPath {
+		id: string;
+		points: { x: number; y: number }[]; // 오래된→최신(끝점=현재). 끝점은 보통 pts 의 같은 id 점과 일치
+		tone?: string;
+	}
 </script>
 
 <script lang="ts">
@@ -24,9 +29,10 @@
 		yFloor0?: boolean; // y축 0 시작(격차 등); 아니면 min 패딩
 		highlightId?: string; // 상시 강조(현재 산업/종목)
 		hint?: string; // 정보바 기본 텍스트
+		trails?: TrailPath[]; // 연도별 이동 꼬리(지형도 시간축). 끝점=현재 점·꼬리=과거. 축 범위에 꼬리점 포함.
 		onPick?: (id: string) => void;
 	}
-	let { pts, xLabel, yLabel, compact = false, showLabels = false, zeroX = false, yFloor0 = false, highlightId = '', hint = '', onPick }: Props = $props();
+	let { pts, xLabel, yLabel, compact = false, showLabels = false, zeroX = false, yFloor0 = false, highlightId = '', hint = '', trails = [], onPick }: Props = $props();
 	let hoverId = $state('');
 
 	const TONE: Record<string, { f: string; s: string }> = {
@@ -45,14 +51,17 @@
 		const ml = compact ? 4 : 52, mr = compact ? 8 : 70, mt = compact ? 4 : 14, mb = compact ? 6 : 28;
 		const x0 = ml, x1 = W - mr, y0 = mt, y1 = H - mb;
 		const xs = ps.map((p) => p.x), ys = ps.map((p) => p.y);
+		// 축 범위는 현재점 + 꼬리점 합집합으로 잡는다(꼬리가 잘리지 않게). 중앙값 십자·크기는 현재점(ps)만.
+		const tps = trails.flatMap((t) => t.points).filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+		const bx = tps.length ? xs.concat(tps.map((p) => p.x)) : xs, by = tps.length ? ys.concat(tps.map((p) => p.y)) : ys;
 		// 로버스트 축 — 극단 아웃라이어가 축을 늘려 본질 클러스터를 뭉개는 것 방지(분포 2.5~97.5% 범위).
 		// 범위 밖 점은 가장자리에 클램프(드롭 아님·hover=실제값). 산업맵(중앙값·소수)엔 영향 미미.
 		const q = (arr: number[], pp: number) => { const s = [...arr].sort((a, b) => a - b); const idx = (s.length - 1) * pp; const lo = Math.floor(idx), hi = Math.ceil(idx); return s[lo] + (s[hi] - s[lo]) * (idx - lo); };
 		const qlo = ps.length > 40 ? 0.1 : 0.025, qhi = 1 - qlo; // 점 많으면(회사맵 100+사) 10~90%로 타이트 — 정상기업 중앙압축 방지. 소수(산업맵 29)는 극단 보존.
-		let xmin = q(xs, qlo), xmax = q(xs, qhi);
-		let ymin = yFloor0 ? 0 : q(ys, qlo), ymax = q(ys, qhi);
-		if (xmax <= xmin) { xmin = Math.min(...xs); xmax = Math.max(...xs); }
-		if (ymax <= ymin) { ymin = yFloor0 ? 0 : Math.min(...ys); ymax = Math.max(...ys); }
+		let xmin = q(bx, qlo), xmax = q(bx, qhi);
+		let ymin = yFloor0 ? 0 : q(by, qlo), ymax = q(by, qhi);
+		if (xmax <= xmin) { xmin = Math.min(...bx); xmax = Math.max(...bx); }
+		if (ymax <= ymin) { ymin = yFloor0 ? 0 : Math.min(...by); ymax = Math.max(...by); }
 		const pf = compact ? 0 : 0.09; // compact 미니맵 = 그래프영역 패딩 0(점이 박스 가장자리까지·위치 불변)
 		const xpad = (xmax - xmin || 1) * pf; xmin -= xpad; xmax += xpad;
 		const ypad = (ymax - ymin || 1) * pf; ymax += ypad; if (!yFloor0) ymin -= ypad;
@@ -76,7 +85,12 @@
 				if (!hit) { d.lbl = true; placed.push(box); }
 			});
 		}
-		return { W, H, x0, x1, y0, y1, cx: sx(med(xs)), cy: sy(med(ys)), zx: zeroX && xmin < 0 && xmax > 0 ? sx(0) : null, dots, xmin, xmax, ymin, ymax };
+		const trailPaths = trails.map((t) => ({
+			id: t.id,
+			tone: TONE[t.tone || 'base'] || TONE.base,
+			pts: t.points.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y)).map((p) => ({ x: sx(p.x), y: sy(p.y) }))
+		})).filter((t) => t.pts.length >= 2);
+		return { W, H, x0, x1, y0, y1, cx: sx(med(xs)), cy: sy(med(ys)), zx: zeroX && xmin < 0 && xmax > 0 ? sx(0) : null, dots, trailPaths, xmin, xmax, ymin, ymax };
 	});
 	const hover = $derived(geo ? geo.dots.find((d) => d.p.id === hoverId) ?? null : null);
 	const pick = (id: string) => onPick?.(id);
@@ -91,6 +105,10 @@
 			{#if g.zx != null}<line x1={g.zx} y1={g.y0} x2={g.zx} y2={g.y1} class="smZero" />{/if}
 			<line x1={g.cx} y1={g.y0} x2={g.cx} y2={g.y1} class="smCross" />
 			<line x1={g.x0} y1={g.cy} x2={g.x1} y2={g.cy} class="smCross" />
+			{#each g.trailPaths as t (t.id)}
+				<polyline points={t.pts.map((p) => `${p.x},${p.y}`).join(' ')} fill="none" stroke={t.tone.s} class="smTrail" />
+				{#each t.pts.slice(0, -1) as p}<circle cx={p.x} cy={p.y} r={compact ? 1.1 : 1.9} fill={t.tone.s} class="smTrailDot" />{/each}
+			{/each}
 			{#each g.dots as d (d.p.id)}
 				<g class={'smDot' + (hoverId === d.p.id ? ' on' : '') + (highlightId === d.p.id ? ' hi' : '')} role="button" tabindex="0" aria-label={d.p.label}
 					onclick={() => pick(d.p.id)}
@@ -156,4 +174,6 @@
 	.smInfo b { color: #f0f3f7; }
 	.smInfo em { font-style: normal; color: var(--amber, #fb923c); }
 	.smEmpty { font-size: 10px; color: #aab2bf; padding: 12px; text-align: center; }
+	.smTrail { stroke-width: 1.3; stroke-opacity: 0.42; stroke-linejoin: round; stroke-linecap: round; }
+	.smTrailDot { opacity: 0.5; }
 </style>

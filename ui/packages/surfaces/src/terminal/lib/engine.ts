@@ -229,6 +229,7 @@ export interface Engine {
 	// 거시 산업 sweep — 한 산업의 cross-industry 비교 스냅샷(분포·scan grade 버킷%·gov 밸류·tailwind·멤버). 좌측 sweep·산업 다이얼로그 전용.
 	industryMacro(id: string): IndustryMacro | null;
 	industryMembers(id: string): IndustryMember[];
+	industryTrails(): IndustryTrail[]; // 산업 연도별 이동 — (수익성 × 전년比 성장) 궤적. 지형도 시간축.
 }
 
 // ── 거시 산업 sweep 모델 (좌측 LeftRail 산업층 · IndustryDialog) ──
@@ -254,6 +255,11 @@ export interface IndustryMember {
 	cap: number; // gov 시총(크기) — 0 가능
 	grade: string; // profGrade (수익성 등급)
 	debtGrade: string; // debtGrade (재무 건전성) — 색=gradeTone('debt'). x축(수익성)과 직교.
+}
+export interface IndustryTrail {
+	id: string;
+	count: number; // 산업 멤버(상장 primary) 수
+	pts: { year: string; x: number; y: number }[]; // 연도별 (영업이익률 median, 전년比 매출성장 median %). 오래된→최신, 끝점=최신연도
 }
 export interface IndustryMacro {
 	id: string;
@@ -1097,9 +1103,39 @@ export function createEngine(raw: RawData): Engine {
 		return out;
 	}
 
+	// 산업 연도별 이동 — finance 회사별 연도배열을 산업별 median 집계 → (수익성 × 전년比 성장) 궤적.
+	// x=opMargin median(해당 연도) · y=전년比 매출성장 median(YoY, sales[y]/sales[y-1]-1). 끝점=최신연도.
+	// 새 fetch 0(이미 로드된 finance+eco). 생존편향: 오늘 상장 멤버를 과거로 집계(상폐·비상장 제외).
+	function industryTrails(): IndustryTrail[] {
+		const fy = raw.finance.years || [];
+		const med = (a: number[]): number => { const s = [...a].sort((p, q) => p - q); const k = Math.floor(s.length / 2); return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
+		const out: IndustryTrail[] = [];
+		for (const id of [...new Set((raw.eco?.nodes || []).map((n) => n.industry))]) {
+			const nodes = industryNodes(id);
+			if (nodes.length < 10) continue;
+			const pts: { year: string; x: number; y: number }[] = [];
+			for (let yi = 1; yi < fy.length; yi++) { // yi=1 부터 — YoY 는 직전연도 필요
+				const margins: number[] = [], grows: number[] = [];
+				for (const n of nodes) {
+					const f = raw.finance.companies[n.id];
+					if (!f) continue;
+					const mg = f.is?.opMargin?.[yi];
+					if (typeof mg === 'number') margins.push(mg);
+					const s0 = f.is?.sales?.[yi - 1], s1 = f.is?.sales?.[yi];
+					if (typeof s0 === 'number' && typeof s1 === 'number' && s0 > 0) grows.push((s1 / s0 - 1) * 100);
+				}
+				if (margins.length < 5 || grows.length < 5) continue; // 표본부족 연도 skip(04 §3 Rule 5)
+				pts.push({ year: fy[yi], x: +med(margins).toFixed(2), y: +med(grows).toFixed(2) });
+			}
+			if (pts.length < 2) continue; // 궤적은 2점 이상
+			out.push({ id, count: nodes.length, pts });
+		}
+		return out;
+	}
+
 	return {
 		raw, years, source: 'HuggingFace · dartlab-data',
-		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed, percentileIn, industryMacro, industryMembers,
+		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed, percentileIn, industryMacro, industryMembers, industryTrails,
 		priceOf: (code: string) => raw.prices.data[code],
 		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
 	};
