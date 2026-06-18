@@ -42,7 +42,7 @@
 		const ps = pts.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
 		if (ps.length < 2) return null;
 		const W = compact ? 220 : 700, H = compact ? 134 : 300;
-		const ml = compact ? 16 : 52, mr = compact ? 12 : 70, mt = compact ? 10 : 14, mb = compact ? 16 : 28;
+		const ml = compact ? 4 : 52, mr = compact ? 8 : 70, mt = compact ? 4 : 14, mb = compact ? 6 : 28;
 		const x0 = ml, x1 = W - mr, y0 = mt, y1 = H - mb;
 		const xs = ps.map((p) => p.x), ys = ps.map((p) => p.y);
 		// 로버스트 축 — 극단 아웃라이어가 축을 늘려 본질 클러스터를 뭉개는 것 방지(분포 2.5~97.5% 범위).
@@ -53,8 +53,9 @@
 		let ymin = yFloor0 ? 0 : q(ys, qlo), ymax = q(ys, qhi);
 		if (xmax <= xmin) { xmin = Math.min(...xs); xmax = Math.max(...xs); }
 		if (ymax <= ymin) { ymin = yFloor0 ? 0 : Math.min(...ys); ymax = Math.max(...ys); }
-		const xpad = (xmax - xmin || 1) * 0.09; xmin -= xpad; xmax += xpad;
-		const ypad = (ymax - ymin || 1) * 0.09; ymax += ypad; if (!yFloor0) ymin -= ypad;
+		const pf = compact ? 0 : 0.09; // compact 미니맵 = 그래프영역 패딩 0(점이 박스 가장자리까지·위치 불변)
+		const xpad = (xmax - xmin || 1) * pf; xmin -= xpad; xmax += xpad;
+		const ypad = (ymax - ymin || 1) * pf; ymax += ypad; if (!yFloor0) ymin -= ypad;
 		const clamp = (v: number, a: number, c: number) => Math.max(a, Math.min(c, v));
 		const maxSz = Math.max(...ps.map((p) => p.size), 1);
 		const rMax = compact ? 5.5 : 13.5, rMin = compact ? 2 : 3.5;
@@ -133,7 +134,9 @@
 <style>
 	.smWrap { width: 100%; }
 	.smSvg { width: 100%; height: auto; display: block; }
-	.sm-mini .smSvg { max-height: 134px; }
+	/* max-height 캡 제거 — 캡이 있으면 레일이 viewBox(220px)보다 넓을 때 letterbox(좌우 여백)가 생긴다.
+	   width:100%·height:auto 로 레일 폭을 꽉 채우고(원형 유지), 박스 높이는 SVG 비율을 따른다. */
+	.sm-mini .smSvg { max-height: none; }
 	.smAx { stroke: var(--dl-line, #2a3142); stroke-width: 1; }
 	.smZero { stroke: color-mix(in srgb, var(--dl-ink, #c8cfdb) 20%, transparent); stroke-width: 1; stroke-dasharray: 1 3; }
 	.smCross { stroke: color-mix(in srgb, var(--amber, #fb923c) 24%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
