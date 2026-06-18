@@ -226,6 +226,38 @@ export interface Engine {
 	lookupListed(name: string): { code: string; marketCap: number; net: number | null } | null;
 	// 유니버스 교차 백분위 — co.percentile(업종 고정)과 달리 모집단(업종/시장/전체) 선택. 다이얼로그 전용(콜드 비용 0).
 	percentileIn(code: string, universe: Universe): UniversePercentile | null;
+	// 거시 산업 sweep — 한 산업의 cross-industry 비교 스냅샷(분포·scan grade 버킷%·gov 밸류·tailwind·멤버). 좌측 sweep·산업 다이얼로그 전용.
+	industryMacro(id: string): IndustryMacro | null;
+}
+
+// ── 거시 산업 sweep 모델 (좌측 LeftRail 산업층 · IndustryDialog) ──
+// 산업이 *주체* — 회사 주체 percentileIn 과 직교. 모두 baked(industryStats·ecosystem·gov prices) 합성, 새 fetch 0.
+export interface IndustryDist {
+	p10: number;
+	p25: number;
+	median: number;
+	p75: number;
+	p90: number;
+	n: number;
+}
+export interface IndustryMacroMember {
+	code: string;
+	name: string;
+	value: number;
+}
+export interface IndustryMacro {
+	id: string;
+	kr: string;
+	en: string;
+	count: number; // 산업 멤버(상장 primary) 수
+	dist: Record<string, IndustryDist | null>; // industryStats 분포(n<10 → null). opMargin·netMargin·roe·debtRatio·currentRatio·revCagr·netIncomeCagr·ccc·assetTurnover·icr
+	marginIqr: number | null; // opMargin p75-p25 = 마진 양극화(polarization 마진렌즈)
+	pbr: IndustryDist | null; // gov 시총/자본 분포(KRX 아님 — raw.prices=gov/prices). 밸류 양극화
+	bucket: { profRisk: number; growthRisk: number; debtRisk: number; liqRisk: number; cfDistress: number }; // scan grade 악성 버킷 %(ordinal 평균 아님)
+	cfSignature: { pattern: string; share: number } | null; // cfPattern 최빈 = 산업 현금흐름 시그니처
+	tailwind: number | null; // macro blended 순풍/역풍
+	macroPhase: string;
+	top: { roe: IndustryMacroMember[]; growth: IndustryMacroMember[]; risk: IndustryMacroMember[] }; // Q4 멤버 지형 → 종목 드릴인
 }
 
 export function createEngine(raw: RawData): Engine {
@@ -914,9 +946,107 @@ export function createEngine(raw: RawData): Engine {
 		return out.sort((a, b) => b.blended - a.blended);
 	}
 
+	// 거시 산업 sweep — scan grade 악성 버킷(04 §3 Rule 5: 버킷% 만, ordinal 평균 금지) · cf distress.
+	const _RISK_BUCKET = {
+		prof: new Set(['저수익', '적자']),
+		growth: new Set(['역성장', '급감']),
+		debt: new Set(['주의', '고위험']),
+		liq: new Set(['주의', '위험'])
+	};
+	const _CF_DISTRESS = new Set(['현금위기형', '쇠퇴형', '외부의존형']);
+
+	function _band(arr: number[]): IndustryDist | null {
+		const s = arr.filter((v) => v != null && !Number.isNaN(v)).sort((a, b) => a - b);
+		if (s.length < 5) return null; // 표본부족 → null(0대체 금지)
+		const q = (f: number): number => {
+			const i = f * (s.length - 1);
+			const lo = Math.floor(i);
+			const hi = Math.ceil(i);
+			return s[lo] + (s[hi] - s[lo]) * (i - lo);
+		};
+		return { p10: q(0.1), p25: q(0.25), median: q(0.5), p75: q(0.75), p90: q(0.9), n: s.length };
+	}
+
+	function industryMacro(id: string): IndustryMacro | null {
+		const nodes = industryNodes(id);
+		if (!nodes.length) return null;
+
+		// (1) 재무 분포 — industryStats baked(n<10 → null, 04 §3 Rule 5)
+		const sd = (raw.industryStats as Record<string, IndustryStat> | null)?.[id]?.distribution || {};
+		const pick = (m: string): IndustryDist | null => {
+			const d = sd[m];
+			return d && d.median != null && d.p10 != null && d.p90 != null && (d.n ?? 0) >= 10
+				? { p10: d.p10, p25: d.p25 ?? d.p10, median: d.median, p75: d.p75 ?? d.p90, p90: d.p90, n: d.n as number }
+				: null;
+		};
+		const dist: Record<string, IndustryDist | null> = {};
+		for (const m of ['opMargin', 'netMargin', 'roe', 'debtRatio', 'currentRatio', 'revCagr', 'netIncomeCagr', 'ccc', 'assetTurnover', 'icr']) dist[m] = pick(m);
+		const om = dist.opMargin;
+		const marginIqr = om ? +(om.p75 - om.p25).toFixed(2) : null;
+
+		// (2) gov 시총/자본 → 산업 PBR 분포 (KRX 아님 — raw.prices = gov/prices/date/*.parquet)
+		const pbrArr: number[] = [];
+		for (const node of nodes) {
+			const f = raw.finance.companies[node.id];
+			const p = raw.prices.data[node.id];
+			if (!f || !p || !p.marketCap) continue;
+			const ee = lastNonNull(f.bs.totals.totalEquity);
+			if (ee && ee.v > 0) {
+				const x = p.marketCap / (ee.v * 1e12);
+				if (x > 0 && x < 60) pbrArr.push(x); // 음수자본 제외 · 극단 클립
+			}
+		}
+		const pbr = _band(pbrArr);
+
+		// (3) scan grade 악성 버킷 % (ecosystem baked) — 버킷% 만(ordinal 평균 금지)
+		const pct = (field: keyof EcoNode, bad: Set<string>): number => {
+			const has = nodes.filter((n) => n[field]);
+			if (!has.length) return 0;
+			return +((has.filter((n) => bad.has(n[field] as string)).length / has.length) * 100).toFixed(1);
+		};
+		const bucket = {
+			profRisk: pct('profGrade', _RISK_BUCKET.prof),
+			growthRisk: pct('growthGrade', _RISK_BUCKET.growth),
+			debtRisk: pct('debtGrade', _RISK_BUCKET.debt),
+			liqRisk: pct('liqGrade', _RISK_BUCKET.liq),
+			cfDistress: pct('cfPattern', _CF_DISTRESS)
+		};
+		// cfPattern 최빈 = 산업 현금흐름 시그니처
+		const cfCount: Record<string, number> = {};
+		let cfTot = 0;
+		for (const n of nodes) if (n.cfPattern) { cfCount[n.cfPattern] = (cfCount[n.cfPattern] || 0) + 1; cfTot++; }
+		const cfTop = Object.entries(cfCount).sort((a, b) => b[1] - a[1])[0];
+		const cfSignature = cfTop && cfTot ? { pattern: cfTop[0], share: Math.round((cfTop[1] / cfTot) * 100) } : null;
+
+		// (4) 멤버 지형 — 지표 top5 → 종목 드릴인
+		const topBy = (field: keyof EcoNode, desc: boolean): IndustryMacroMember[] =>
+			nodes
+				.filter((n) => n[field] != null)
+				.sort((a, b) => (desc ? (b[field] as number) - (a[field] as number) : (a[field] as number) - (b[field] as number)))
+				.slice(0, 5)
+				.map((n) => ({ code: n.id, name: byCode[n.id]?.corpName || n.id, value: n[field] as number }));
+
+		const twKey = TAILWIND_MAP[id];
+		const tw = twKey && raw.macro?.sectorTailwind ? raw.macro.sectorTailwind[twKey] : null;
+		return {
+			id,
+			kr: SECTOR_KR[id] || id,
+			en: SECTOR_EN[id] || id,
+			count: nodes.length,
+			dist,
+			marginIqr,
+			pbr,
+			bucket,
+			cfSignature,
+			tailwind: tw && tw.blended != null ? tw.blended : null,
+			macroPhase: raw.macro?.kr?.phaseLabel || raw.macro?.kr?.phase || '',
+			top: { roe: topBy('roe', true), growth: topBy('revCagr', true), risk: topBy('debtRatio', true) }
+		};
+	}
+
 	return {
 		raw, years, source: 'HuggingFace · dartlab-data',
-		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed, percentileIn,
+		buildCompany, search, suggest, featured, sectorPerf, sectorTailwinds, lookupListed, percentileIn, industryMacro,
 		priceOf: (code: string) => raw.prices.data[code],
 		nameOf: (code: string) => (byCode[code] ? byCode[code].corpName : code)
 	};

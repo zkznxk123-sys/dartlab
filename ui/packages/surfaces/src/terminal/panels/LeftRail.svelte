@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
-	import type { Engine } from '../lib/engine';
+	import type { Engine, IndustryMacro } from '../lib/engine';
+	import { INDUSTRY_LENSES, lensByKey } from '../lib/industryLens';
 	import type { MacroLensTab } from '../lib/macroLens';
 	import type { EcoNode, Lang } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
@@ -11,7 +12,7 @@
 	import { watchlist } from '../lib/watchlist.svelte'; // 워치 카운트 — 하단 탭 라벨 배지
 	import { readStore, writeStore } from '../lib/termStore'; // 하단 탭 선택 영속 (워치리스트와 동형 · 기기로컬)
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
-	import { txc, chgClass, sign, heat, sparkPts } from '../ui/helpers';
+	import { txc, chgClass, sign, sparkPts } from '../ui/helpers';
 
 	interface Props {
 		eng: Engine;
@@ -19,8 +20,9 @@
 		active: string;
 		onPick: (code: string) => void;
 		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
+		onIndustry?: (id: string) => void; // 산업 sweep 행 클릭 → IndustryDialog
 	}
-	let { eng, lang, active, onPick, onMacroLens }: Props = $props();
+	let { eng, lang, active, onPick, onMacroLens, onIndustry }: Props = $props();
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
@@ -79,12 +81,31 @@
 
 	// ── 경제 (최상단 고정) ──
 	const macro = $derived(eng.raw.macro);
-	const sectors = $derived(eng.sectorPerf().slice(0, 12));
-	const sectorMax = $derived(Math.max(...sectors.map((x) => Math.abs(x.chg)), 1));
 	const assetChips: [string, string][] = [['주식', 'equity'], ['채권', 'bond'], ['원자재', 'commodity'], ['금', 'gold'], ['물가채', 'tips'], ['현금', 'cash']];
 	const wcls = (w?: string) => (w === 'overweight' ? 'ow' : w === 'underweight' ? 'uw' : 'nu');
 	const toggleSector = (id: string) => (sectorFilter = sectorFilter === id ? '' : id);
-	const activeSectorName = $derived(sectorFilter ? (sectors.find((s) => s.id === sectorFilter)?.kr || sectorFilter) : '');
+
+	// ── 산업 sweep — 거시 깔때기 산업층. 34산업을 선택 렌즈로 cross-section 비교(섹터 시세 히트맵 대체). ──
+	// 전부 baked 합성(industryStats·ecosystem·gov 시총), 새 fetch 0. 측정근거=_attempts/macroIndustrySweep.
+	let sweepLens = $state('prof');
+	const lens = $derived(lensByKey(sweepLens));
+	const industryIds = $derived([...new Set((eng.raw.eco?.nodes || []).map((n) => n.industry))]);
+	const sweepAll = $derived(industryIds.map((id) => eng.industryMacro(id)).filter((m): m is IndustryMacro => m != null));
+	// 선택 렌즈 값 보유 산업만, lower 반영 정렬(좋은 순 위로). 멤버 n<10 산업 제외(04 §3 표본 가드).
+	const sweep = $derived.by(() => {
+		const rows = sweepAll
+			.filter((m) => m.count >= 10 && lens.valueOf(m) != null)
+			.map((m) => ({ m, v: lens.valueOf(m) as number }));
+		rows.sort((a, b) => (lens.lower ? a.v - b.v : b.v - a.v));
+		return rows;
+	});
+	const fmtLensVal = (v: number): string => (lens.unit === '배' ? v.toFixed(1) : Math.round(v).toString());
+	const twTone = (t: number | null): string => (t == null ? '' : t >= 0.55 ? 'tw-up' : t <= 0.35 ? 'tw-dn' : 'tw-nu');
+	const activeSectorName = $derived(sectorFilter ? (sweepAll.find((s) => s.id === sectorFilter)?.kr || sectorFilter) : '');
+	function pickIndustry(id: string) {
+		toggleSector(id); // 스크리너 필터(기존 깔때기) — 한 번 더 누르면 해제
+		onIndustry?.(id); // IndustryDialog 열기(신규)
+	}
 	// 매크로 국면 → 순풍/역풍 섹터(blended). 칩 클릭 = 아래 스크리너 섹터 필터.
 	const tailwinds = $derived(eng.sectorTailwinds());
 	const twTop = $derived(tailwinds.slice(0, 3));
@@ -128,18 +149,30 @@
 	</Panel>
 {/if}
 
-<!-- 섹터 히트맵 — 스크리너 섹터 필터원이라 스크리너 바로 위로. (공시 워치는 하단 통합 탭으로 이동) -->
-<Panel {lang} className="eIndustry" prov="real" title={{ kr: '섹터 히트맵', en: 'SECTOR HEATMAP' }} sub={{ kr: '평균 1M · 클릭=필터', en: 'avg 1M · click to filter' }}>
-	<div class="sectorGrid">
-		{#each sectors as x (x.id)}
-			<div class={'sectorCell' + (sectorFilter === x.id ? ' on' : '')} role="button" tabindex="0"
-				onclick={() => toggleSector(x.id)} onkeydown={(e) => e.key === 'Enter' && toggleSector(x.id)}
-				style={`background:${heat(x.chg, sectorMax)}`}>
-				<span class="sName">{txc(x, lang)}</span>
-				<span class={'sChg ' + chgClass(x.chg)}>{sign(x.chg, 1)}</span>
+<!-- 산업 sweep — 거시 깔때기 산업층(매크로→★산업→종목). 패널 = 핵심(렌즈별 상위 7산업)만 compact.
+     전체 랭킹·분포·산업 4질문 *상세는 다이얼로그*(공간 절약). 시세 아닌 *구조*로 산업을 가른다. -->
+<Panel {lang} className="eIndustry" prov="real" title={{ kr: '산업 스윕', en: 'INDUSTRY SWEEP' }} sub={{ kr: '구조 · 클릭=상세', en: 'structure · click=detail' }}>
+	{#snippet right()}
+		<button class="scrOpenBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'all industries · detail' : '전체 산업 상세'}>{lang === 'en' ? 'ALL ↗' : '전체 ↗'}</button>
+	{/snippet}
+	<div class="swLensRow">
+		{#each INDUSTRY_LENSES as l (l.key)}
+			<button class={'swLens' + (sweepLens === l.key ? ' on' : '')} onclick={() => (sweepLens = l.key)} title={l.note}>{lang === 'en' ? l.en : l.kr}</button>
+		{/each}
+	</div>
+	<div class="swList">
+		{#each sweep.slice(0, 7) as r, i (r.m.id)}
+			<div class={'swRow' + (sectorFilter === r.m.id ? ' on' : '')} role="button" tabindex="0"
+				onclick={() => pickIndustry(r.m.id)} onkeydown={(e) => e.key === 'Enter' && pickIndustry(r.m.id)}
+				title={`${r.m.kr} · n=${r.m.count}${r.m.tailwind != null ? ' · tailwind ' + r.m.tailwind.toFixed(2) : ''} · 클릭=산업 분석`}>
+				<span class="swRk mono">{i + 1}</span>
+				<span class="swName">{lang === 'en' ? r.m.en : r.m.kr}{#if r.m.tailwind != null}<i class={'swTw ' + twTone(r.m.tailwind)}>{r.m.tailwind >= 0.55 ? '↑' : r.m.tailwind <= 0.35 ? '↓' : '·'}</i>{/if}</span>
+				<span class={'swVal mono ' + (lens.lower ? 'tNeu' : 'tUp')}>{fmtLensVal(r.v)}<i>{lens.unit}</i></span>
+				<span class="swN mono">{r.m.count}</span>
 			</div>
 		{/each}
 	</div>
+	<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `all ${sweep.length} industries · distribution · drill →` : `전체 ${sweep.length}산업 · 분포 · 4질문 →`}</button>
 </Panel>
 
 <!-- 하단 통합 — 스크리너 ⇄ 공시 워치 탭. 워치가 무한 증가해 스크리너를 가리던 문제 해소

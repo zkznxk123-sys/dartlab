@@ -319,6 +319,27 @@
 .dlTerm .sName { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--txt); letter-spacing: 0.2px; }
 .dlTerm .sChg { font-family: var(--mono); font-size: 10px; font-weight: 600; }
 
+/* INDUSTRY SWEEP — 거시 깔때기 산업층(섹터 히트맵 대체). 렌즈 picker + 산업 행(분포막대·값·n·tailwind). */
+.dlTerm .swLensRow { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px 3px 5px; }
+.dlTerm .swLens { font-family: var(--cond); font-size: 9px; padding: 1px 6px; border-radius: 2px; border: 1px solid var(--bd); background: var(--dl-bg-deep); color: var(--dimmer); cursor: pointer; transition: color 0.12s, border-color 0.12s; }
+.dlTerm .swLens:hover { color: var(--txt); }
+.dlTerm .swLens.on { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 55%, transparent); background: color-mix(in srgb, var(--amber) 12%, transparent); }
+.dlTerm .swList { display: flex; flex-direction: column; }
+.dlTerm .swRow { display: grid; grid-template-columns: 14px 1fr 50px 24px; align-items: center; gap: 6px; padding: 1.5px 5px; border-bottom: 1px solid var(--dl-line); cursor: pointer; }
+.dlTerm .swRow:hover { background: var(--dl-bg-overlay); }
+.dlTerm .swRow.on { box-shadow: inset 2px 0 0 var(--amber); background: var(--dl-bg-overlay); }
+.dlTerm .swRk { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-align: center; }
+.dlTerm .swName { font-family: var(--cond); font-size: 10.5px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px; }
+.dlTerm .swTw { font-style: normal; font-size: 9px; font-weight: 700; flex: 0 0 auto; }
+.dlTerm .swTw.tw-up { color: var(--up); }
+.dlTerm .swTw.tw-dn { color: var(--dn); }
+.dlTerm .swTw.tw-nu { color: var(--dimmer); }
+.dlTerm .swVal { font-size: 10.5px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.dlTerm .swVal i { font-style: normal; font-size: 8px; color: var(--dimmer); margin-left: 1px; }
+.dlTerm .swN { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-align: right; font-variant-numeric: tabular-nums; }
+.dlTerm .swMore { width: 100%; background: none; border: 0; border-top: 1px solid var(--bd); margin-top: 2px; padding: 4px 5px; font-family: var(--cond); font-size: 9px; color: var(--amberDim, #b9863b); cursor: pointer; text-align: left; letter-spacing: 0.2px; }
+.dlTerm .swMore:hover { color: var(--amber); }
+
 /* MOVERS */
 .dlTerm .moversWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bd); }
 .dlTerm .moverCol { background: var(--panel); padding: 5px 7px; }

@@ -17,6 +17,7 @@
 	import GiscusPanel from './panels/GiscusPanel.svelte';
 	import SupportDialog from './panels/SupportDialog.svelte';
 	import MacroLensDialog from './panels/MacroLensDialog.svelte';
+	import IndustryDialog from './panels/IndustryDialog.svelte';
 	import { ChartCtl } from './charts/chartState.svelte';
 	import { buildMacroLensSnapshot, type MacroLensTab } from './lib/macroLens';
 	import type { CoMover } from './lib/coMovement';
@@ -58,6 +59,8 @@
 	let macroLensOpen = $state(false);
 	let macroLensTab = $state<MacroLensTab>('regime');
 	let macroLensFocus = $state('');
+	let industryOpen = $state(false); // 산업 분석 다이얼로그 (좌측 산업 sweep 행 클릭)
+	let industryId = $state('');
 	let macroCoMovers = $state<CoMover[]>([]);
 	const chartCtl = new ChartCtl();
 	// GitHub 스타 수 — SNS 버튼 옆 라이브 배지(사회적 증명). null = 미조회/실패(배지 숨김).
@@ -190,6 +193,10 @@
 		macroLensFocus = focusId;
 		macroLensOpen = true;
 	}
+	function openIndustry(id: string) {
+		industryId = id;
+		industryOpen = true;
+	}
 	function go(e: Event) {
 		e.preventDefault();
 		const r = eng.search(cmd);
@@ -302,7 +309,7 @@
 		</div></div>
 
 		<main class="board">
-			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} /></div>
+			<div class="col colL"><LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} /></div>
 			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} onMacroLens={openMacroLens} onCoMovers={(rows) => (macroCoMovers = rows)} /></div>
 			<div class="col colR"><RightStack {co} {lang} {hosts} repoUrl={links.repo} onPick={pick} lookupListed={eng.lookupListed} percentileIn={eng.percentileIn} /></div>
 		</main>
@@ -336,6 +343,9 @@
 				onClose={() => (macroLensOpen = false)}
 				onToggleEcon={(id) => chartCtl.toggleEcon(id)}
 			/>
+		{/if}
+		{#if industryOpen}
+			<IndustryDialog {eng} {industryId} {lang} onClose={() => (industryOpen = false)} onPick={(c) => { pick(c); industryOpen = false; }} />
 		{/if}
 	{/if}
 </div>
