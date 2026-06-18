@@ -64,6 +64,15 @@
 	const rankTone = (pct: number): string => (pct >= 66 ? 'tUp' : pct <= 33 ? 'tDn' : 'tNeu');
 	const twLabel = (t: number | null): string => (t == null ? '' : t >= 0.55 ? '순풍' : t <= 0.35 ? '역풍' : '중립');
 	const polarLabel = $derived(m?.marginIqr == null ? '' : m.marginIqr > 15 ? '넓음(양극)' : m.marginIqr < 8 ? '좁음(동질)' : '보통');
+	// 최근 방향(YoY) 합의 — 마진·ROE·매출 델타 부호 다수결(단일 델타 노이즈 방어). 다년 CAGR과 직교.
+	const dir = $derived(m?.direction ?? null);
+	const dirSigns = $derived(dir ? [dir.opMarginDelta, dir.roeDelta, dir.revenueYoyPct].filter((x): x is number => x != null) : []);
+	const dirLabel = $derived.by(() => {
+		if (dirSigns.length < 2) return { txt: '', cls: 'tNeu' };
+		const up = dirSigns.filter((x) => x > 0).length, dn = dirSigns.filter((x) => x < 0).length;
+		return up > dn ? { txt: '개선', cls: 'tUp' } : dn > up ? { txt: '악화', cls: 'tDn' } : { txt: '혼조', cls: 'tNeu' };
+	});
+	const sgn = (v: number | null | undefined, u: string): string => (v == null ? '—' : (v > 0 ? '+' : '') + v.toFixed(1) + u);
 
 	$effect(() => {
 		const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { if (view) { view = ''; } else { onClose(); } } };
@@ -126,10 +135,16 @@
 						{/each}
 					</div>
 					<div class="indFacts">
+						{#if dir && dirSigns.length >= 2}
+							<span class="indDir">{lang === 'en' ? 'Recent direction (YoY)' : '최근 방향(YoY)'} <b>{lang === 'en' ? 'margin' : '마진'} {sgn(dir.opMarginDelta, '%p')} · ROE {sgn(dir.roeDelta, '%p')} · {lang === 'en' ? 'rev' : '매출'} {sgn(dir.revenueYoyPct, '%')}</b> <em class={dirLabel.cls}>{lang === 'en' ? (dirLabel.txt === '개선' ? 'improving' : dirLabel.txt === '악화' ? 'deteriorating' : 'mixed') : dirLabel.txt}</em></span>
+						{/if}
 						{#if m.cfSignature}<span>{lang === 'en' ? 'Cashflow signature' : '현금흐름 시그니처'} <b>{m.cfSignature.pattern}</b> {m.cfSignature.share}%</span>{/if}
 						<span>{lang === 'en' ? 'Cash-distress share' : '현금위기 비중'} <b>{m.bucket.cfDistress}%</b></span>
 						{#if m.tailwind != null}<span>{lang === 'en' ? 'Macro tailwind' : '거시 순풍/역풍'} <b class={m.tailwind >= 0.55 ? 'tUp' : m.tailwind <= 0.35 ? 'tDn' : 'tNeu'}>{twLabel(m.tailwind)} {m.tailwind.toFixed(2)}</b></span>{/if}
 					</div>
+					{#if dir && dirSigns.length >= 2 && (m.dist.netIncomeCagr || m.dist.revCagr)}
+						<div class="indHint">※ {lang === 'en' ? 'CAGR = multi-year average; YoY direction = recent change. Divergence (e.g. +CAGR but −YoY) = possible cyclical peak (observation, not forecast).' : 'CAGR=다년 평균 · YoY 방향=최근 변화. 둘이 갈리면(예: CAGR+ 인데 YoY−) 순환 고점 가능성(관측이지 예측 아님).'}</div>
+					{/if}
 				</section>
 
 				<section class="indSec">
@@ -208,6 +223,8 @@
 	.indDash { font-size: 9.5px; color: #aeb6c2; font-style: italic; }
 	.indFacts { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; font-size: 10px; color: #aeb6c2; }
 	.indFacts b { color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
+	.indDir em { font-style: normal; font-weight: 700; margin-left: 2px; }
+	.indHint { font-size: 9px; color: #aeb6c2; line-height: 1.4; margin-top: 5px; font-style: italic; }
 	.indMembers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 	.indMemCol { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 	.indMemHd { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #aeb6c2; margin-bottom: 2px; }

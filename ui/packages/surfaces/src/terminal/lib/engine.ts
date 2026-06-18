@@ -255,6 +255,7 @@ export interface IndustryMacro {
 	pbr: IndustryDist | null; // gov 시총/자본 분포(KRX 아님 — raw.prices=gov/prices). 밸류 양극화
 	bucket: { profRisk: number; lossRisk: number; growthRisk: number; debtRisk: number; liqRisk: number; cfDistress: number }; // scan grade 악성 버킷 %(ordinal 평균 아님). profRisk=적자+저수익, lossRisk=적자만(혼합 방지)
 	cfSignature: { pattern: string; share: number } | null; // cfPattern 최빈 = 산업 현금흐름 시그니처
+	direction: { opMarginDelta: number | null; roeDelta: number | null; revenueYoyPct: number | null }; // YoY 방향(개선/악화) — 다년 CAGR과 직교(최근 변화), 구조 vs 순환 단서
 	tailwind: number | null; // macro blended 순풍/역풍
 	macroPhase: string;
 	top: { roe: IndustryMacroMember[]; growth: IndustryMacroMember[]; risk: IndustryMacroMember[] }; // Q4 멤버 지형 → 종목 드릴인
@@ -1014,6 +1015,19 @@ export function createEngine(raw: RawData): Engine {
 			liqRisk: pct('liqGrade', _RISK_BUCKET.liq),
 			cfDistress: pct('cfPattern', _CF_DISTRESS)
 		};
+		// YoY 방향(개선/악화) — baked 델타 산업 median. 다년 CAGR(평균)과 직교: 최근 변화 = 구조 vs 순환 단서.
+		const nodeMed = (field: keyof EcoNode): number | null => {
+			const vals = nodes.map((n) => n[field]).filter((v): v is number => typeof v === 'number');
+			if (vals.length < 5) return null;
+			const s = [...vals].sort((a, b) => a - b);
+			return +s[Math.floor(s.length / 2)].toFixed(2);
+		};
+		const direction = {
+			opMarginDelta: nodeMed('opMarginDelta'),
+			roeDelta: nodeMed('roeDelta'),
+			revenueYoyPct: nodeMed('revenueYoyPct')
+		};
+
 		// cfPattern 최빈 = 산업 현금흐름 시그니처
 		const cfCount: Record<string, number> = {};
 		let cfTot = 0;
@@ -1041,6 +1055,7 @@ export function createEngine(raw: RawData): Engine {
 			pbr,
 			bucket,
 			cfSignature,
+			direction,
 			tailwind: tw && tw.blended != null ? tw.blended : null,
 			macroPhase: raw.macro?.kr?.phaseLabel || raw.macro?.kr?.phase || '',
 			top: { roe: topBy('roe', true), growth: topBy('revCagr', true), risk: topBy('debtRatio', true) }
