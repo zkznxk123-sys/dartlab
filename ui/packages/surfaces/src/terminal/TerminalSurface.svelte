@@ -19,6 +19,7 @@
 	import SupportDialog from './panels/SupportDialog.svelte';
 	import MacroLensDialog from './panels/MacroLensDialog.svelte';
 	import IndustryDialog from './panels/IndustryDialog.svelte';
+	import FilingSearchDialog from './panels/FilingSearchDialog.svelte';
 	import { ChartCtl } from './charts/chartState.svelte';
 	import { buildMacroLensSnapshot, buildMarketMacroLensSnapshot, type MacroLensTab } from './lib/macroLens';
 	import { classifyTailwind, hasNegativeTailwind } from './lib/macroMappings';
@@ -64,6 +65,7 @@
 	let macroLensFocus = $state('');
 	let industryOpen = $state(false); // 산업 분석 다이얼로그 (좌측 산업 sweep 행 클릭)
 	let industryId = $state('');
+	let filingSearchOpen = $state(false); // 전역 공시 본문 검색 팔레트 (⌘⇧F · statusBar)
 	let macroCoMovers = $state<CoMover[]>([]);
 	let macroTransmission = $state<MacroTransmissionResult | null>(null);
 	let sectorFilter = $state('');
@@ -117,7 +119,9 @@
 			if (document.querySelector('.dlTerm .chartWrap.full')) return;
 			const tag = (e.target as HTMLElement | null)?.tagName;
 			const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
-			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); cmdInput?.focus(); }
+			// ⌘⇧F = 전역 공시 본문 검색 팔레트(cmdBar ⌘K=종목 점프와 분리). 차트 전체화면 가드 위에서 이미 양보.
+			if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); filingSearchOpen = true; }
+			else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); cmdInput?.focus(); }
 			else if (e.key === '/' && !inInput) { e.preventDefault(); cmdInput?.focus(); }
 		};
 		window.addEventListener('keydown', onDocKey);
@@ -373,7 +377,10 @@
 		</main>
 
 		<footer class="statusBar">
-			<span class="sbItem"><b class="tAmber">⌘K</b> {lang === 'en' ? 'SEARCH' : '검색'}</span>
+			<span class="sbItem"><b class="tAmber">⌘K</b> {lang === 'en' ? 'JUMP' : '종목점프'}</span>
+			<button class="sbItem sbSrcBtn" onclick={() => (filingSearchOpen = true)} title={lang === 'en' ? 'global filing full-text search' : '전역 공시 본문 검색'}>
+				<b class="tAmber">⌘⇧F</b> {lang === 'en' ? 'FILINGS' : '공시검색'}
+			</button>
 			<span class="sbItem"><b class="tAmber">/</b> {lang === 'en' ? 'FOCUS' : '검색창'}</span>
 			<button class="sbItem sbSrcBtn" onclick={() => (sourcesOpen = true)} title={lang === 'en' ? 'data sources & licenses' : '데이터 출처·라이선스'}>
 				<b class="tAmber">ⓘ</b> {lang === 'en' ? 'SOURCES' : '데이터 출처'}
@@ -390,6 +397,9 @@
 		<SourcesModal {lang} open={sourcesOpen} onClose={() => (sourcesOpen = false)} pricesAsOf={co.price.asOf} macroAsOf={eng.raw.macro?.asOf ?? ''} financeLatest={finLatest || (co.trendQuarter?.periods.at(-1) ?? '')} />
 		<GiscusPanel code={co.code} name={co.name.kr} {lang} open={discussOpen} onClose={() => (discussOpen = false)} />
 		<SupportDialog {lang} {links} {base} open={supportOpen} onClose={() => (supportOpen = false)} />
+		{#if filingSearchOpen}
+			<FilingSearchDialog {lang} onPick={pick} onClose={() => (filingSearchOpen = false)} />
+		{/if}
 		{#if industryOpen}
 			<IndustryDialog {eng} {industryId} {lang} onClose={() => (industryOpen = false)} onPick={(c) => { pick(c); industryOpen = false; }} />
 		{/if}
