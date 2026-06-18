@@ -16,6 +16,8 @@
 	}
 	let { snapshot, lang, tab, focusId = '', activeEcon = [], onTab, onClose, onToggleEcon }: Props = $props();
 	let localFocus = $state('');
+	let localTab = $state<MacroLensTab>('regime');
+	let seededTab = $state(false);
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const tabs: { k: MacroLensTab; kr: string; en: string }[] = [
 		{ k: 'regime', kr: '대시보드', en: 'Dashboard' },
@@ -68,8 +70,41 @@
 	const focusCoMove = $derived(activeFocusId ? snapshot.coMoveGates.find((c) => c.driverId === activeFocusId) : snapshot.coMoveGates[0]);
 	const exposureRows = $derived(buildExposureRows());
 	const gateRows = $derived(snapshot.evidenceGates);
+	const exposureQualityClass = $derived(snapshot.exposureQuality.status === 'quantCandidate' ? 'ok' : snapshot.exposureQuality.status === 'qualitativeOnly' ? 'watch' : 'blocked');
+	const modelMetricRows = $derived([
+		{ label: 'nObs', value: snapshot.exposureQuality.nObs != null ? String(snapshot.exposureQuality.nObs) : '—', status: snapshot.exposureQuality.nObs != null ? 'ok' : 'blocked' },
+		{ label: 'R²', value: fmtR2(snapshot.exposureQuality.rSquared), status: snapshot.exposureQuality.rSquared != null ? 'ok' : 'blocked' },
+		{ label: 'window', value: snapshot.exposureQuality.window ?? '—', status: snapshot.exposureQuality.window ? 'ok' : 'blocked' },
+		{ label: 'freq', value: snapshot.exposureQuality.frequency ?? '—', status: snapshot.exposureQuality.frequency ? 'ok' : 'blocked' },
+		{ label: 'lag', value: snapshot.exposureQuality.lagMonths != null ? `${snapshot.exposureQuality.lagMonths}M` : '—', status: snapshot.exposureQuality.lagMonths != null ? 'ok' : 'blocked' },
+		{ label: 'coverage', value: snapshot.exposureQuality.coverage, status: snapshot.exposureQuality.coverage === 'company' ? 'ok' : snapshot.exposureQuality.coverage === 'sectorOnly' ? 'watch' : 'blocked' }
+	]);
+	const modelClaimRows = $derived([
+		{
+			label: T('경로 설명', 'Path narrative'),
+			status: snapshot.transmissionEdges.some((e) => e.confidence !== 'blocked') ? 'ok' : 'blocked',
+			value: snapshot.transmissionEdges.some((e) => e.confidence !== 'blocked') ? 'EDGE' : 'LOCK',
+			detail: snapshot.transmissionEdges.find((e) => e.confidence !== 'blocked')?.sourceRefs[0] ?? 'macro.transmission'
+		},
+		{
+			label: T('동행 후보', 'Co-move candidate'),
+			status: snapshot.coMoveGates.some((c) => c.status === 'candidate') ? 'watch' : 'blocked',
+			value: snapshot.coMoveGates.find((c) => c.status === 'candidate')?.n != null ? `n ${snapshot.coMoveGates.find((c) => c.status === 'candidate')?.n}` : 'LOCK',
+			detail: T('인과 아님', 'not causal')
+		},
+		{
+			label: T('정량 민감도', 'Quant sensitivity'),
+			status: exposureQualityClass,
+			value: exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status,
+			detail: snapshot.exposureQuality.blockedReason || snapshot.exposureQuality.reason
+		}
+	]);
 	const econBlocked = (id: string) => !activeEcon.includes(id) && activeEcon.length >= ECON_MAX;
 	let dialogEl = $state<HTMLDivElement | null>(null);
+	function fmtR2(value: number | null | undefined): string {
+		if (value == null) return '—';
+		return value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+	}
 	function buildExposureRows(): { driver: MacroDriverView; cells: (MacroTransmissionEdgeView | null)[] }[] {
 		const seen = new Set<string>();
 		const drivers: MacroDriverView[] = [];
@@ -105,6 +140,11 @@
 	}
 	function goto(tabName: MacroLensTab, id = '') {
 		localFocus = id || activeFocusId;
+		localTab = tabName;
+		onTab(tabName);
+	}
+	function selectTab(tabName: MacroLensTab) {
+		localTab = tabName;
 		onTab(tabName);
 	}
 	function onDialogKeydown(e: KeyboardEvent) {
@@ -116,6 +156,11 @@
 	}
 	$effect(() => {
 		localFocus = focusId;
+	});
+	$effect(() => {
+		if (seededTab) return;
+		localTab = tab;
+		seededTab = true;
 	});
 	$effect(() => {
 		if (typeof document === 'undefined') return;
@@ -145,7 +190,7 @@
 
 		<div class="mlTabs">
 			{#each tabs as t (t.k)}
-				<button class:active={tab === t.k} onclick={() => onTab(t.k)}>{T(t.kr, t.en)}</button>
+				<button class:active={localTab === t.k} onclick={() => selectTab(t.k)}>{T(t.kr, t.en)}</button>
 			{/each}
 		</div>
 		<div class="mlAlwaysNote">
@@ -153,7 +198,7 @@
 		</div>
 
 		<div class="mlBody">
-			{#if tab === 'regime'}
+			{#if localTab === 'regime'}
 				<section class="mlPhaseStrip" aria-label="Macro phases">
 					<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
 					<div><span>US</span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}</em></div>
@@ -231,7 +276,7 @@
 					<span class="blocked">BLOCK = {T('시계열 또는 회사 증거 부족', 'missing series/evidence')}</span>
 					<span class="none">· = {T('표준 경로 없음', 'no mapped path')}</span>
 				</section>
-			{:else if tab === 'drivers'}
+			{:else if localTab === 'drivers'}
 				{#if focusDriver}
 					<section class="mlFocus">
 						<LineChart class="mlFocusIcon" size={15} />
@@ -267,7 +312,7 @@
 					{/each}
 				</div>
 				<div class="mlNote">{T('Driver는 최신값만 보지 않고 방향성 의미·lag·섹터 전파 가능성을 같이 본다.', 'Drivers are read with direction semantics, lag and sector transmission, not just latest values.')}</div>
-			{:else if tab === 'transmission'}
+			{:else if localTab === 'transmission'}
 				{#if focusEdge}
 					<section class="mlFocus">
 						<GitBranch class="mlFocusIcon" size={15} />
@@ -422,7 +467,7 @@
 						{/each}
 					</div>
 				</section>
-			{:else if tab === 'scenario'}
+			{:else if localTab === 'scenario'}
 				<section class="mlGrid scenarioGrid">
 					{#each snapshot.scenarios as s (s.id)}
 						<div class={'mlScenario ' + s.readiness.status}>
@@ -457,21 +502,83 @@
 							</button>
 						{/each}
 						<div class="mlSrcSep"></div>
-						{#each snapshot.sourceRefs as s (s)}<div class="mlSrc">{s}</div>{/each}
+						{#each snapshot.sourceRefs as s, i (`${s}-${i}`)}<div class="mlSrc">{s}</div>{/each}
 					</div>
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('한계', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
+						<div class={'mlQualityCard ' + exposureQualityClass} aria-label="Quality gate model card">
+							<div class="mlQualityTop">
+								<span class="mlBlockK">Quality Gate</span>
+								<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
+								<em>{T('정량 claim gate · 추천/목표가 아님', 'quant claim gate · no recommendation')}</em>
+							</div>
+							<p>{snapshot.exposureQuality.reason}</p>
+							<div class="mlModelMetrics">
+								{#each modelMetricRows as r (r.label)}
+									<div class={'mlModelMetric ' + r.status}>
+										<span>{r.label}</span>
+										<b>{r.value}</b>
+									</div>
+								{/each}
+							</div>
+							<div class="mlClaimRail" aria-label="Allowed macro claims">
+								{#each modelClaimRows as r (r.label)}
+									<div class={'mlClaimChip ' + r.status}>
+										<span>{r.label}</span>
+										<b>{r.value}</b>
+										<em>{r.detail}</em>
+									</div>
+								{/each}
+							</div>
+							<div class="mlModelSource"><span>sourceRef</span><b>{snapshot.exposureQuality.sourceRef}</b></div>
+						</div>
+						<div class="mlLimitSub">Model Card</div>
+						<div class="mlIndicatorGrid" aria-label="Selected company macro indicators">
+							{#each snapshot.exposureIndicators.slice(0, 4) as x, i (`${x.seriesId}-${x.axis}-${i}`)}
+								<div class={'mlIndicatorCard ' + (x.coverage === 'company' ? 'ok' : x.coverage === 'sectorOnly' ? 'watch' : 'blocked')}>
+									<div><span>{x.axis}</span><b>{x.seriesId}</b></div>
+									<em>{x.label} · {x.frequency ?? '—'} · lag {x.lagMonths ?? '—'}M</em>
+									<div class="mlIndicatorStats">
+										<span>n {x.nObs ?? '—'}</span>
+										<span>R² {fmtR2(x.rSquared)}</span>
+										<span>{x.window ?? '—'}</span>
+									</div>
+									<small title={x.sourceRefs.join(' · ')}>{x.sourceRef}</small>
+								</div>
+							{:else}
+								<div class="mlIndicatorCard blocked">
+									<div><span>indicator</span><b>LOCK</b></div>
+									<em>{T('선택된 회사별 macroExposure 지표 없음', 'No selected company macroExposure indicator')}</em>
+									<small>{snapshot.exposureQuality.sourceRef}</small>
+								</div>
+							{/each}
+						</div>
+						<div class="mlLimitSub">Missing Ledger</div>
+						<div class="mlMissingLedger" aria-label="Missing evidence ledger">
+							{#each snapshot.exposureQuality.missingEvidence as x (x)}
+								<div class="mlMissingItem blocked"><b>required</b><span>{x}</span><em>{snapshot.exposureQuality.sourceRef}</em></div>
+							{/each}
+							{#each snapshot.missing as m (m.id)}
+								<div class={'mlMissingItem ' + (m.status === 'partial' || m.status === 'staleRisk' ? 'watch' : 'blocked')}><b>{m.status}</b><span>{m.reason}</span><em>{m.sourceRef}</em></div>
+							{/each}
+							{#if !snapshot.exposureQuality.missingEvidence.length && !snapshot.missing.length}
+								<div class="mlMissingItem ok"><b>OK</b><span>{T('표시 가능한 결손 없음', 'No visible missing item')}</span><em>{snapshot.exposureQuality.sourceRef}</em></div>
+							{/if}
+						</div>
+						<div class="mlLimitSub">Falsifier Strip</div>
+						<div class="mlFalsifierStrip" aria-label="Macro falsifiers">
+							{#each snapshot.falsifiers.slice(0, 4) as f (f.label)}
+								<div class={'mlFalsifierToken ' + severityCls[f.severity]}>
+									<b>{f.label}</b>
+									<span>{f.detail}</span>
+									<em>{f.sourceRef ?? 'macroLens'}</em>
+								</div>
+							{/each}
+						</div>
 						<div class="mlLimitSub">{T('Release freshness', 'Release freshness')}</div>
 						{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
 							<div class={'mlSrc warn ' + r.status}><b>{r.status}</b> {r.label}: last {r.lastObservation} · next {r.nextCheck}<em>{r.frequency} · stale after {r.staleAfterDays}d</em></div>
 						{/each}
-						{#each snapshot.missing as m (m.id)}<div class="mlSrc warn"><b>{m.status}</b> {m.reason}<em>{m.sourceRef}</em></div>{/each}
-						<div class={snapshot.exposureQuality.status === 'quantCandidate' ? 'mlSrc' : 'mlSrc warn'}><b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b> {snapshot.exposureQuality.reason}</div>
-						<div class="mlSrc warn">nObs/R²/window/frequency/lag: {snapshot.exposureQuality.nObs ?? '—'} / {snapshot.exposureQuality.rSquared ?? '—'} / {snapshot.exposureQuality.window ?? '—'} / {snapshot.exposureQuality.frequency ?? '—'} / {snapshot.exposureQuality.lagMonths ?? '—'}</div>
-						<div class="mlSrc warn">{snapshot.exposureQuality.blockedReason || T('정량 후보 조건 충족', 'Quant candidate gate open')} · {snapshot.exposureQuality.sourceRef}</div>
-						{#if snapshot.exposureQuality.missingEvidence.length}
-							<div class="mlSrc warn">{T('필요 증거', 'Required evidence')}: {snapshot.exposureQuality.missingEvidence.join(' · ')}</div>
-						{/if}
 						<div class="mlSrc">{T('상관은 인과가 아니며, 지표 변화가 회사 실적 변화를 보장하지 않는다.', 'Correlation is not causation; indicator moves do not guarantee company results.')}</div>
 					</div>
 				</section>
@@ -689,6 +796,67 @@
 	.mlSrc { padding: 6px 0; border-top: 1px solid rgba(255,255,255,.045); color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
 	.mlSrc b { color: var(--warn); font-family: var(--dl-font-mono); font-size: 10px; margin-right: 5px; text-transform: uppercase; }
 	.mlSrc em { display: block; margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; overflow-wrap: anywhere; }
+	.mlQualityCard { margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.016); padding: 9px; }
+	.mlQualityCard.ok { border-color: rgba(52,211,153,.42); background: rgba(52,211,153,.035); }
+	.mlQualityCard.watch { border-color: rgba(251,146,60,.42); background: rgba(251,146,60,.035); }
+	.mlQualityCard.blocked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.032); }
+	.mlQualityTop { display: grid; grid-template-columns: 82px 60px minmax(0, 1fr); gap: 7px; align-items: center; min-width: 0; }
+	.mlQualityTop b { color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 13px; }
+	.mlQualityTop em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9.5px; text-align: right; }
+	.mlQualityCard.ok .mlQualityTop b { color: var(--good); }
+	.mlQualityCard.watch .mlQualityTop b { color: var(--warn); }
+	.mlQualityCard.blocked .mlQualityTop b { color: var(--dn); }
+	.mlQualityCard p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
+	.mlModelMetrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
+	.mlModelMetric { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 6px; }
+	.mlModelMetric.ok { border-color: rgba(52,211,153,.28); }
+	.mlModelMetric.watch { border-color: rgba(251,146,60,.34); }
+	.mlModelMetric.blocked { border-color: rgba(248,113,113,.36); }
+	.mlModelMetric span, .mlModelMetric b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlModelMetric span { color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+	.mlModelMetric b { margin-top: 3px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10.5px; }
+	.mlClaimRail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 7px; }
+	.mlClaimChip { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.012); padding: 6px; }
+	.mlClaimChip.ok { border-color: rgba(52,211,153,.3); }
+	.mlClaimChip.watch { border-color: rgba(251,146,60,.34); }
+	.mlClaimChip.blocked { border-color: rgba(248,113,113,.36); }
+	.mlClaimChip span, .mlClaimChip b, .mlClaimChip em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlClaimChip span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; }
+	.mlClaimChip b { margin-top: 3px; font-family: var(--dl-font-mono); font-size: 10px; color: var(--amber); }
+	.mlClaimChip em { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 8.5px; }
+	.mlModelSource { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 7px; align-items: center; margin-top: 7px; color: var(--dl-ink-muted, #7b8493); font-size: 9px; }
+	.mlModelSource span { font-family: var(--dl-font-mono); text-transform: uppercase; }
+	.mlModelSource b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink-dim, #5b6473); font-family: var(--dl-font-mono); font-size: 9px; }
+	.mlIndicatorGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+	.mlIndicatorCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.014); padding: 7px; }
+	.mlIndicatorCard.ok { border-color: rgba(52,211,153,.28); }
+	.mlIndicatorCard.watch { border-color: rgba(251,146,60,.34); }
+	.mlIndicatorCard.blocked { border-color: rgba(248,113,113,.38); }
+	.mlIndicatorCard div:first-child { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 6px; align-items: center; min-width: 0; }
+	.mlIndicatorCard span, .mlIndicatorCard b, .mlIndicatorCard em, .mlIndicatorCard small { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlIndicatorCard span { color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
+	.mlIndicatorCard b { color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
+	.mlIndicatorCard em { display: block; margin-top: 4px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
+	.mlIndicatorCard small { display: block; margin-top: 4px; color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; }
+	.mlIndicatorStats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 5px; }
+	.mlIndicatorStats span { border: 1px solid rgba(255,255,255,.055); border-radius: 3px; padding: 2px 4px; color: var(--dl-ink-dim, #5b6473); font-size: 8.5px; text-transform: none; }
+	.mlMissingLedger, .mlFalsifierStrip { display: grid; gap: 5px; margin-top: 6px; }
+	.mlMissingItem, .mlFalsifierToken { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.012); padding: 6px; }
+	.mlMissingItem { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 5px 7px; align-items: baseline; }
+	.mlMissingItem.ok { border-color: rgba(52,211,153,.28); }
+	.mlMissingItem.watch { border-color: rgba(251,146,60,.34); }
+	.mlMissingItem.blocked { border-color: rgba(248,113,113,.36); }
+	.mlMissingItem b, .mlMissingItem span, .mlMissingItem em, .mlFalsifierToken b, .mlFalsifierToken span, .mlFalsifierToken em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlMissingItem b { color: var(--warn); font-family: var(--dl-font-mono); font-size: 9px; text-transform: uppercase; }
+	.mlMissingItem span { color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
+	.mlMissingItem em { grid-column: 2; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 8.5px; }
+	.mlFalsifierStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.mlFalsifierToken.info { border-color: rgba(52,211,153,.26); }
+	.mlFalsifierToken.warn { border-color: rgba(251,146,60,.34); }
+	.mlFalsifierToken.block { border-color: rgba(248,113,113,.38); }
+	.mlFalsifierToken b { display: block; color: var(--dl-ink); font-size: 10px; }
+	.mlFalsifierToken span { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
+	.mlFalsifierToken em { display: block; margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 8.5px; }
 	.mlSrcPacket { width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,.045); background: transparent; color: inherit; text-align: left; padding: 7px 0; cursor: pointer; }
 	.mlSrcPacket:hover, .mlSrcPacket.focused { background: rgba(251,146,60,.035); }
 	.mlSrcPacket b, .mlSrcPacket span, .mlSrcPacket em, .mlSrcPacket small { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -716,5 +884,8 @@
 		.mlMobileDrillRail em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; text-align: right; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
 		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
+		.mlQualityTop, .mlClaimRail, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
+		.mlQualityTop em { text-align: left; }
+		.mlModelMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	}
 </style>

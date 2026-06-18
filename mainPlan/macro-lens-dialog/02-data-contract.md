@@ -1,6 +1,6 @@
 # 02. 데이터 계약
 
-상태: 구현 v1.3
+상태: 구현 v1.4 (v1.6 Sources 품질 패널 소비 반영)
 범위: Macro Lens 다이얼로그가 읽는 데이터, 매크로 전파 엔진 산출물, 향후 확장 계약.
 
 ---
@@ -79,8 +79,8 @@ export interface MacroLensSnapshot {
 - `transmissionEdges`: driver가 sector/financial line/valuation lever로 전파되는 후보 경로.
 - `companyCheckpoints`: 회사 재무 checkpoint. 예: 부채비율, 영업이익률, CFO/NI 등 이미 terminal `Company`가 가진 값만 사용한다.
 - `sectorBinding`: `co.tailwind`와 `eng.sectorTailwinds()` 기반 섹터 순풍/역풍.
-- `exposureQuality`: 회사별 민감도·회귀를 노출할 수 있는지 판단하는 품질 라벨.
-- `exposureIndicators`: analysis/prebuild가 선택한 회사별 매크로 지표 후보. UI가 회귀를 재계산하지 않고 source packet과 model card로만 표시한다.
+- `exposureQuality`: 회사별 민감도·회귀를 노출할 수 있는지 판단하는 품질 라벨. `출처·한계` 탭의 `Quality Gate`는 이 필드의 `status/reason/blockedReason/missingEvidence/sourceRef/nObs/rSquared/window/frequency/lagMonths/coverage`를 그대로 표시한다.
+- `exposureIndicators`: analysis/prebuild가 선택한 회사별 매크로 지표 후보. UI가 회귀를 재계산하지 않고 source packet과 model card로만 표시한다. `Model Card`는 `seriesId/axis/nObs/R²/window/frequency/lag/coverage/sourceRef/sourceRefs`를 노출하되 예측 모델, beta 산출, 목표가, 추천 상태로 번역하지 않는다.
 - `releaseRail`: driver별 마지막 관측일, 빈도, freshness 상태, 다음 확인 시점. 실제 발표 캘린더가 아니라 현재 관측 artifact의 freshness policy다.
 - `sourcePackets`: driver별 `seriesId/source/unit/frequency/asOf/latest/transform/artifactPath/lineage` 구조화 패킷. UI가 문자열을 파싱하지 않는다.
 - `contributionStacks`: 선택 driver가 화면에 올라온 이유를 `최근 변화/전파 경로/동행 후보/신선도/회사 품질`로 분해한 Evidence Contribution 입력. 각 값은 축이 다른 근거 개방도이며 재무 기여도, 원인분해 waterfall, 투자 방향 점수가 아니다.
@@ -88,7 +88,7 @@ export interface MacroLensSnapshot {
 - `evidenceGates`: 첫 화면의 시계열/경로/동행/회사노출/민감도 gate. UI가 재계산하지 않는다.
 - `falsifiers`: 상관, peer dispersion, 회귀 품질, stale data처럼 thesis를 약하게 만드는 조건.
 - `scenarios`: 시나리오 이름과 affected driver만. 손익 산출은 하지 않는다.
-- `missing`: 결손·미배선·표본 부족·stale 가능성.
+- `missing`: 결손·미배선·표본 부족·stale 가능성. `Missing Ledger`는 `missing`과 `exposureQuality.missingEvidence`를 같은 레벨에 표시해 왜 정량 claim이 잠겼는지 숨기지 않는다.
 
 ---
 

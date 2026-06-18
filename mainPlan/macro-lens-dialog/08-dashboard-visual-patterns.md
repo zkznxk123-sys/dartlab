@@ -1,6 +1,6 @@
 # 08. 매크로 대시보드 시각화 조사
 
-상태: 조사 반영 v0.5
+상태: 조사 반영 v0.6 (Sources Quality Gate/Model Card 구현 반영)
 범위: 퍼블릭 터미널 `경제지표분석`을 텍스트 리포트가 아니라 매크로 전파 계기판으로 만들기 위한 시각화 방식 조사.
 
 ---
@@ -16,7 +16,7 @@
 | 지금 무엇이 움직였나 | driver pulse strip, 최신값, 변화율, 기준일 |
 | 이 움직임이 어느 경로로 회사에 닿나 | driver x channel exposure matrix |
 | 실제 관측인가, 업종 prior인가, 템플릿인가 | OBS/PRIOR/TPL/LOCK evidence label |
-| 정량 숫자를 보여줘도 되는가 | nObs/R2/window/lag/sourceRef quality gate |
+| 정량 숫자를 보여줘도 되는가 | nObs/R2/window/lag/coverage/sourceRef quality gate + model card |
 | 언제 다시 확인해야 하나 | release rail, vintage/update path |
 | 무엇이 나오면 해석을 접어야 하나 | falsifier rail |
 | 원천을 재현할 수 있나 | source/data packet drawer |
@@ -236,7 +236,7 @@ Macro Lens에 바로 쓸 강한 조합은 다섯 개다.
 | Driver Pulse + Source Stamp | latest, delta, sparkline, asOf, source | 지금 움직임을 짧게 확인한다. |
 | Exposure Matrix + Evidence Label | driver x channel, OBS/PRIOR/TPL/LOCK | 회사 영향 경로를 한 번에 본다. |
 | Contribution Drilldown | component bar, waterfall, update marker | 숫자가 왜 바뀌었는지 본다. |
-| Quality Gate + Model Card | nObs, R2, lag, window, coverage, blockedReason | 정량 claim 가능 여부를 기계적으로 잠근다. |
+| Quality Gate + Model Card | nObs, R2, lag, window, frequency, coverage, blockedReason, missingEvidence, sourceRef | 정량 claim 가능 여부를 기계적으로 잠그고 UI가 계산하지 않은 값을 과장하지 못하게 한다. |
 | Falsifier + Release Rail | 반증 조건, 필요 데이터, 다음 발표일 | 다음에 무엇을 보면 되는지 남긴다. |
 
 이 다섯 개가 없으면 화면은 예쁜 매크로 뉴스판이 된다. 이 다섯 개가 있으면 분석 도구가 된다.
@@ -252,6 +252,7 @@ Macro Lens에 바로 쓸 강한 조합은 다섯 개다.
 | 하단 | Release Rail | 다음에 무엇을 보면 해석을 바꿀지 | 발표일이 없고 과거값만 있다 |
 | 셀 클릭 | Drilldown Packet | chain, quality, required evidence, source packet | 장문 설명이 먼저 나온다 |
 | 상세 | Contribution/Scatter | 왜 headline이 바뀌었고 동행 후보가 있는지 | causal claim처럼 보인다 |
+| 출처·한계 | Quality Gate / Model Card / Missing Ledger / Falsifier Strip | 정량 claim이 열린 이유와 잠긴 이유 | 출처 목록만 있고 gate 사유가 흩어진다 |
 
 첫 화면은 7초 안에 읽혀야 한다. 클릭 후 상세는 30초 안에 "왜 열렸고 왜 잠겼는지"를 확인해야 한다.
 

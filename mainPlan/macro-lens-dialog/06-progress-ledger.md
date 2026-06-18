@@ -1,10 +1,40 @@
 # 06. 진행 원장
 
-상태: v1.5
+상태: v1.6
 
 ---
 
 ## 2026-06-18
+
+### v1.6 — Sources Quality Gate / Model Card 구현
+
+배경:
+
+- 전문 UI/UX 검토 결과, 다음 P1 구현은 새 계산 엔진이 아니라 `출처·한계` 탭을 `정량 해석 허가증/거부 사유 패널`로 바꾸는 것이었다.
+- 기존 Sources 탭은 `sourceRefs`, `missing`, `exposureQuality`를 줄 단위 텍스트로 늘어놓아 `누가 정량 claim을 열고 잠그는지`가 한눈에 보이지 않았다.
+
+완료:
+
+- `출처·한계` 탭 우측에 `Quality Gate` 패널을 추가했다.
+- `Quality Gate`는 `OPEN/QUAL/LOCK`, `nObs`, `R²`, `window`, `frequency`, `lag`, `coverage`, `sourceRef`를 한 화면에서 표시한다.
+- `경로 설명`, `동행 후보`, `정량 민감도` claim chip을 추가해 어느 수준의 해석이 열렸는지 분리했다.
+- `Model Card`는 `exposureIndicators`를 회사별 macroExposure 지표 후보로만 보여준다. UI가 회귀를 재계산하거나 beta/예측/추천으로 승격하지 않는다.
+- `Missing Ledger`는 `exposureQuality.missingEvidence`와 `snapshot.missing`을 같은 레벨에 표시한다.
+- `Falsifier Strip`은 기존 `falsifiers`를 Sources 탭에도 붙여 반증 조건을 출처/한계와 같은 화면에서 보게 했다.
+- `MacroLensDialog` 탭 전환이 active class만 바뀌고 본문이 바뀌지 않을 수 있는 경로를 로컬 탭 상태로 고쳤다.
+- Sources 탭의 기존 `sourceRefs`와 새 `exposureIndicators` 렌더에서 중복 key가 발생하지 않게 순번 포함 키로 바꿨다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+- Playwright desktop: `출처·한계` 탭에서 `Quality Gate` 1개, metric 6개, claim chip 3개, `Model Card`, `Missing Ledger`, `Falsifier Strip`, `정량 claim gate · 추천/목표가 아님` 표시 확인. 페이지/모달 수평 overflow 없음, page error 없음.
+- Playwright mobile: 동일 항목 표시 확인. 페이지/모달 수평 overflow 없음, page error 없음.
+- QA 과정에서 기존 Sources 탭도 중복 `sourceRef` key 때문에 열릴 수 없던 런타임 오류를 확인했고 함께 수정했다.
+
+NEXT:
+
+1. `Model Card`는 현재 `exposureIndicators` 후보 표시다. 예측 모델이나 beta 카드로 승격하려면 `method/modelVersion/targetMetric/minObs` 계약을 별도 추가해야 한다.
+2. 실제 발표 캘린더/빈티지 데이터가 생기면 `Release freshness`를 release reaction view로 확장한다. 현재 화면은 관측 artifact freshness policy다.
 
 ### v1.5 — Evidence Contribution Lens 구현
 

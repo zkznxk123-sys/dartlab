@@ -1,6 +1,6 @@
 # 매크로 렌즈 다이얼로그
 
-상태: 구현 v1.5 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 v0.5 재조사 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷 · Release/Source/Evidence Contribution 시각화 · 관측점 기반 co-movement scatter · 모바일 드릴다운 포커스 보강)
+상태: 구현 v1.6 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 v0.6 반영 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷 · Release/Source/Evidence Contribution 시각화 · 관측점 기반 co-movement scatter · 모바일 드릴다운 포커스 보강 · Sources 탭 Quality Gate/Model Card 구현)
 범위: 퍼블릭 터미널의 `경제지표분석`을 Macro Lens 분석 코어로 승격한다. 화면은 다이얼로그지만, 핵심은 `dartlab.macro`의 시장·섹터 전파 산출물과 `analysis`의 회사 노출 품질을 하나의 검증 가능한 전파 사슬로 묶는 것이다.
 
 ---
@@ -35,6 +35,7 @@
 - 첫 화면은 `대시보드`다. `Macro Phase Strip`, `Driver Pulse Strip`, `Exposure Matrix`, `Evidence Gate`, `Legend`로 구성하고 결론형 문단을 전면에 두지 않는다.
 - 시각화는 판정을 만들지 않는다. `OBS/PRIOR/TPL/LOCK/OPEN/QUAL/STALE/MISSING` 상태는 `macro.transmission`, `macroExposure.exposureQuality`, source lineage, freshness policy가 만든다.
 - `Release Rail`, 구조화된 `Source Packet`, `Evidence Contribution`, `Co-movement Gate`는 유효한 driver focus 하나에 동기화한다. 외부에서 `KR` 같은 market-level focus가 들어오면 driver로 간주하지 않고 기본 driver로 회수한다. `Evidence Contribution`은 `최근 변화/전파 경로/동행 후보/신선도/회사 품질`의 근거 개방도를 보여주는 분해 렌즈이며 재무 기여도나 합산 점수가 아니다. `Co-movement Gate`는 원시 월별 관측점이 있으면 `macro 월말 1차차분 × 종목 월수익률` 산점도를 그리고, 없을 때만 corr 위치 gate로 fallback한다. 산점도는 beta·회귀선·인과 증명이 아니라 동행 후보의 표본 모양을 보는 반증 도구다.
+- `출처·한계` 탭은 출처 문자열 목록이 아니라 `Quality Gate`, `Model Card`, `Missing Ledger`, `Falsifier Strip`, `Release freshness` 순서의 품질 패널이다. `Quality Gate`는 `OPEN/QUAL/LOCK` 상태와 `nObs/R²/window/frequency/lag/coverage/sourceRef`를 한 화면에 묶고, `Model Card`는 `exposureIndicators`를 회사별 macroExposure 지표 후보로만 표시한다. UI는 회귀를 재계산하지 않으며 예측 모델·목표가·추천으로 읽히는 문구를 쓰지 않는다.
 - 모바일에서는 matrix의 작은 셀을 주 터치 경로로 쓰지 않는다. `대시보드` 아래 `Mobile Drill Rail` 6개 버튼이 `전파 지도` drilldown과 같은 focus 계약을 사용하며, matrix는 세부 표로 유지한다.
 - 엔진 강화는 `tests/_attempts/macroLensEngine/` proof를 거쳐 `macro.transmission` 최소 축까지 `src/dartlab/macro`에 승격했다. 회사별 `analysis.macroExposure`는 `nObs/R²/window/lag/coverage/sourceRef` 품질 계약을 내며, Macro Lens는 이 값을 우선 소비하고 없을 때만 fallback 잠금 상태를 표시한다.
 - 매수/매도, 목표주가, 위기 임박, 수혜 확정 표현은 금지한다.
