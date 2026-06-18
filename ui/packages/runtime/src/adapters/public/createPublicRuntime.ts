@@ -1,7 +1,8 @@
 // public adapter — static/HF 데이터 포트 실구현 조립 (책임 경계 02 §9.1).
 // silent fallback 금지: 모든 포트 메서드는 단일 경로다. 공유 엔진(duckdb-wasm 계열) 의존 메서드는
 // 셸(landing)이 `shared` 로 주입한다 — 어댑터가 landing 을 역방향 import 하지 않기 위한 필수 계약.
-// 아직 surface 가 소비하지 않는 포트(navigation·storage·map·search·ai)는 명시적 throw 게이트 유지.
+// 아직 surface 가 소비하지 않는 포트(navigation·storage·map·ai)는 명시적 throw 게이트 유지.
+// search(공시 본문 검색)는 단계-8 에서 createSearchPort 로 배선 — 무서버 HF sidecar byte-range fetch.
 import type {
 	CompanyChange,
 	CompanyPort,
@@ -28,6 +29,7 @@ import { loadHfProductIndexMap } from './sources/productIndexSource';
 import { loadCompanyRegularFilings } from './sources/regularFilingsSource';
 import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from './sources/nonRegularFilingsSource';
 import { createDataCore, type DataCore } from '../../data/fetch/request';
+import { createSearchPort } from '../../data/search/filingSearch';
 import { loadCompanyNews } from './sources/newsSource';
 import { createReportSource } from './sources/reportSource';
 import { publicExportPort, type PublicExportShared } from './sources/exportSource';
@@ -154,9 +156,8 @@ export function createPublicRuntime(options: PublicRuntimeOptions): DartLabRunti
 		get map() {
 			return notWiredYet('map', '단계-8(map 추출)');
 		},
-		get search() {
-			return notWiredYet('search', '단계-8(search 추출)');
-		},
+		// 공시 본문 검색 — HF sidecar(postings/meta.bin) byte-range fetch, 무서버(:8400 불요, 로컬과 동일 코어·경로).
+		search: createSearchPort(dataCore),
 		get ai() {
 			return notWiredYet('ai', '단계-7(ask 추출)');
 		},

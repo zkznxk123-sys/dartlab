@@ -406,6 +406,23 @@ function fakeSearch(): SearchPort {
 		async query(input) {
 			const hits = universe.filter((r) => r.corpName.includes(input.text) || r.stockCode === input.text);
 			return { hits, total: hits.length };
+		},
+		async queryFilings(input) {
+			const t = (input.text ?? '').trim();
+			if (!t) return [];
+			return [
+				{
+					rceptNo: '20260612900600',
+					corpName: '픽스처전자',
+					stockCode: FIXTURE_CODE,
+					reportNm: '주요사항보고서',
+					rceptDt: '20260612',
+					snippet: `${t} 관련 픽스처 공시 본문`,
+					source: 'allFilings',
+					sourceRef: 'dart:allFilings:20260612900600#section=0',
+					score: 1
+				}
+			];
 		}
 	};
 }

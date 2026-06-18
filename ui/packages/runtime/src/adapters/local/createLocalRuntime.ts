@@ -2,7 +2,7 @@
 // silent fallback 금지: 모든 포트 메서드는 단일 경로다 — 부재는 null/[] 정직 표기, 다른 소스 우회 없음.
 // 데이터 포트(company·price·filing·finance·viewer·macro·report·scan.changes)=단계-5-2a, AiPort(SSE)=단계-5-2b.
 // services(빈 레지스트리)·storage(localStorage)=자족 실구현, navigation=셸 주입(LocalRuntimeOptions)=단계-5-3a.
-// map·search 만 단계-8 throw 게이트(호출 시 배선순서 위반 즉시 노출 — 공개 어댑터와 동일 패턴).
+// map 만 단계-8 throw 게이트(search 는 단계-8 createSearchPort 배선 완료 — 공개 어댑터와 동일 코어·경로).
 import type {
 	DartLabRuntime,
 	FinancePort,
@@ -25,6 +25,7 @@ import { localStoragePort } from './sources/storageSource';
 import { localCompanyPort } from './sources/companySource';
 import { localFilingPort } from './sources/filingSource';
 import { createDataCore, type DataCore } from '../../data/fetch/request';
+import { createSearchPort } from '../../data/search/filingSearch';
 import { localScanPort } from './sources/scanSource';
 import { localViewerPort } from './sources/viewerSource';
 
@@ -76,9 +77,8 @@ export function createLocalRuntime(options: LocalRuntimeOptions): DartLabRuntime
 		get map() {
 			return notWiredYet('map', '단계-8(map 추출)');
 		},
-		get search() {
-			return notWiredYet('search', '단계-8(search 추출)');
-		},
+		// 공시 본문 검색 — HF sidecar(postings/meta.bin) byte-range fetch, 백엔드 0(퍼블릭과 동일 코어·경로).
+		search: createSearchPort(dataCore),
 		ai: localAiPort(api),
 		// 로컬 명령 레지스트리 — export.tablesToExcel 등록(엔진 완전판 .xlsx). 다운로드 트리거는 surface 가 toast.payload 로.
 		services: createServiceRegistry([exportServiceRegistration(exportPort)]),

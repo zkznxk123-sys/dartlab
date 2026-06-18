@@ -410,7 +410,7 @@ def _encodeVarintArray(vals: np.ndarray) -> tuple[bytes, np.ndarray]:
 
 
 # meta.bin doc-카드에 담는 필드 (top-k snippet/회사점프용 — main_meta 의 부분집합, bounded).
-_SHARD_META_FIELDS = ("corp_name", "stock_code", "report_nm", "rcept_dt", "source", "sourceRef", "url")
+_SHARD_META_FIELDS = ("rcept_no", "corp_name", "stock_code", "report_nm", "rcept_dt", "source", "sourceRef", "url")
 _SHARD_SNIPPET_LIMIT = 400
 
 

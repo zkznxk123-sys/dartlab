@@ -45,11 +45,26 @@ export interface ParquetWholeFileSpec<T> {
 	dedup?: boolean;
 }
 
+export interface RequestBytesSpec {
+	/** byte-range 는 직결만(hfRange) — 프록시는 206 엣지캐시 불가(hfRange.ts 참조). */
+	origin?: Extract<OriginId, 'hfRange'>;
+	path: string;
+	start: number;
+	len: number;
+	/** 미지정 시 `${path}#${start}:${len}` — 같은 .bin 의 다른 range 를 분리(path 단위 충돌 금지). */
+	cacheKey?: string;
+	cache?: CachePolicy;
+	dedup?: boolean;
+}
+
 export interface DataCore {
 	request<T>(spec: RequestSpec<T>): Promise<T>;
 	requestParquetRows<T extends Record<string, unknown>>(spec: ParquetRowsSpec<T>): Promise<T[]>;
 	/** 소형 단일 parquet 통파일 직독(HEAD probe 생략, GET 1회). 미존재(404)는 null — read 레벨 캐시·dedup 공유. */
 	requestParquetWholeFile<T extends Record<string, unknown>>(spec: ParquetWholeFileSpec<T>): Promise<T[] | null>;
+	/** byte-range 직독(HF 직결, Range GET) → ArrayBuffer. 검색 sidecar(postings/meta.bin) 질의어·top-k 조각 fetch 전용.
+	 *  전용 캐시(maxEntries 64, range당 분리 키) — postings 조각(worst ~0.6MB)이 entry 수로만 bound 되어 힙 안전. */
+	requestBytes(spec: RequestBytesSpec): Promise<ArrayBuffer>;
 	clear(): void;
 }
 
@@ -64,6 +79,8 @@ export function createDataCore(opts: DataCoreOptions = {}): DataCore {
 	const fetchFn = opts.fetchFn ?? (fetch as FetchLike);
 	const now = opts.now ?? Date.now;
 	const dedup = new RequestDedup();
+	// byte-range 전용 캐시 — postings/meta 조각(worst ~0.6MB)을 entry 수(64)로만 bound(힙 안전). TTL 버킷과 분리.
+	const bytesCache = new RuntimeCache<ArrayBuffer>({ maxEntries: 64, ttlMs: 60 * MIN });
 	// TTL 별 캐시 버킷 — RuntimeCache 가 인스턴스당 단일 TTL 이라, 정책 TTL 별로 버킷을 분리(maxEntries 는 최초 정책 기준).
 	const buckets = new Map<number, RuntimeCache<unknown>>();
 	function bucket(p: CachePolicy): RuntimeCache<unknown> {
@@ -123,11 +140,31 @@ export function createDataCore(opts: DataCoreOptions = {}): DataCore {
 		return spec.dedup === false ? exec() : (dedup.run(key, exec) as Promise<T[] | null>);
 	}
 
-	function clear(): void {
-		for (const b of buckets.values()) b.clear();
+	async function requestBytes(spec: RequestBytesSpec): Promise<ArrayBuffer> {
+		const origin = spec.origin ?? 'hfRange';
+		const policy = spec.cache ?? { scope: 'memory', ttlMs: 60 * MIN };
+		const key = spec.cacheKey ?? `${spec.path}#${spec.start}:${spec.len}`;
+		if (policy.scope === 'memory') {
+			const hit = bytesCache.get(key, now());
+			if (hit !== undefined) return hit;
+		}
+		const exec = async (): Promise<ArrayBuffer> => {
+			const end = spec.start + spec.len - 1;
+			const res = await fetchResilient(fetchFn, originUrl(origin, spec.path), { headers: { Range: `bytes=${spec.start}-${end}` } });
+			if (!res.ok && res.status !== 206) throw new Error(`requestBytes ${spec.path} [${spec.start}-${end}] 실패: ${res.status}`);
+			const buf = await res.arrayBuffer();
+			if (policy.scope === 'memory') bytesCache.set(key, buf, now());
+			return buf;
+		};
+		return spec.dedup === false ? exec() : (dedup.run(key, exec) as Promise<ArrayBuffer>);
 	}
 
-	return { request, requestParquetRows, requestParquetWholeFile, clear };
+	function clear(): void {
+		for (const b of buckets.values()) b.clear();
+		bytesCache.clear();
+	}
+
+	return { request, requestParquetRows, requestParquetWholeFile, requestBytes, clear };
 }
 
 /**

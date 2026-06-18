@@ -21,8 +21,29 @@ export interface SearchResultPage {
 	total: number;
 }
 
+/** 공시 본문 검색 결과 1행 — 전역 코퍼스(DART+EDGAR+뉴스) BM25 hit. 행 클릭 = 관련 회사로 점프. */
+export interface FilingHit {
+	rceptNo: string;
+	corpName: string;
+	/** 점프 키 — 종목 active 전환·viewer 딥링크. 없으면(뉴스 등) 회사 점프 불가. */
+	stockCode: string;
+	reportNm: string;
+	rceptDt: string;
+	snippet: string;
+	source: string;
+	sourceRef: string;
+	score: number;
+}
+
+export interface FilingSearchQuery {
+	text: string;
+	limit?: number;
+}
+
 export interface SearchPort {
 	/** 전 종목 인덱스 — 회사 검색·유니버스 공용. */
 	universe(): Promise<IndexRow[]>;
 	query(input: SearchQuery): Promise<SearchResultPage>;
+	/** 전역 공시 본문 검색 — 질의어 postings + top-k meta 만 HTTP range fetch(서버리스·exact BM25). */
+	queryFilings(input: FilingSearchQuery): Promise<FilingHit[]>;
 }
