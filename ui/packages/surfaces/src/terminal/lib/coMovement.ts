@@ -35,10 +35,17 @@ function pearson(xs: number[], ys: number[]): number {
 	return den === 0 ? 0 : cov / den;
 }
 
+export interface CoMovePoint {
+	ym: string;
+	stockReturn: number;
+	macroDiff: number;
+}
+
 export interface CoMover {
 	id: string;
 	corr: number; // [-1,1] 부호 = 정/역 동행
 	n: number; // 겹친 월 수
+	points: CoMovePoint[]; // x=macroDiff, y=stockReturn. UI 산점도용 최근 표본.
 }
 
 /**
@@ -69,17 +76,20 @@ export function rankCoMovers(
 		const valByMonth = monthEndVal(s.points);
 		const xs: number[] = [];
 		const ys: number[] = [];
+		const points: CoMovePoint[] = [];
 		for (let i = 1; i < win.length; i++) {
 			const r = stockRet.get(win[i]);
 			const cur = valByMonth.get(win[i]);
 			const prev = valByMonth.get(win[i - 1]);
 			if (r == null || cur == null || prev == null) continue;
+			const macroDiff = cur - prev;
 			xs.push(r);
-			ys.push(cur - prev); // 거시 1차차분
+			ys.push(macroDiff); // 거시 1차차분
+			points.push({ ym: win[i], stockReturn: +r.toFixed(4), macroDiff: +macroDiff.toFixed(4) });
 		}
 		if (xs.length < minN) continue;
 		const c = pearson(xs, ys);
-		if (Number.isFinite(c)) out.push({ id: s.id, corr: +c.toFixed(2), n: xs.length });
+		if (Number.isFinite(c)) out.push({ id: s.id, corr: +c.toFixed(2), n: xs.length, points: points.slice(-96) });
 	}
 	out.sort((a, b) => Math.abs(b.corr) - Math.abs(a.corr));
 	return out;

@@ -1,6 +1,6 @@
 # 02. 데이터 계약
 
-상태: 구현 v0.7
+상태: 구현 v1.3
 범위: Macro Lens 다이얼로그가 읽는 데이터, 매크로 전파 엔진 산출물, 향후 확장 계약.
 
 ---
@@ -17,7 +17,7 @@
 | macro transmission | `src/dartlab/macro/transmission/transmission.py` | driver → sector → financial line → valuation lever edge |
 | company tailwind | `ui/packages/surfaces/src/terminal/lib/engine.ts::tailwindOf` | 선택 종목 업종의 blended tailwind |
 | sector tailwinds | `eng.sectorTailwinds()` | 좌측 순풍/역풍 섹터 목록 |
-| co-movement | `ui/packages/surfaces/src/terminal/lib/coMovement.ts` | 종목 월수익률과 거시 1차차분 상관 |
+| co-movement | `ui/packages/surfaces/src/terminal/lib/coMovement.ts` | 종목 월수익률과 거시 월말값 1차차분 상관, 최근 관측점 산점도 |
 | price/finance snapshot | terminal `Company` shape | 회사 checkpoint 표시 |
 | company macroExposure | `dashboards/finance.json#companies[*].macroExposure` | public-safe 회사별 매크로 노출 품질 |
 | sector priors | `src/dartlab/providers/mappers/.../sectorPriors.json` | 전파 edge 초기 prior 후보 |
@@ -84,7 +84,7 @@ export interface MacroLensSnapshot {
 - `releaseRail`: driver별 마지막 관측일, 빈도, freshness 상태, 다음 확인 시점. 실제 발표 캘린더가 아니라 현재 관측 artifact의 freshness policy다.
 - `sourcePackets`: driver별 `seriesId/source/unit/frequency/asOf/latest/transform/artifactPath/lineage` 구조화 패킷. UI가 문자열을 파싱하지 않는다.
 - `contributionStacks`: 선택 driver가 화면에 올라온 이유를 `최근 변화/전파 경로/동행 후보/신선도/회사 품질`로 분해한 미니 stacked bar용 입력. 투자 방향 점수가 아니다.
-- `coMoveGates`: corr/n/window/status를 가진 동행 후보 gate. 원시 점 배열이 없으면 산점도가 아니라 corr 위치 플롯으로만 표시한다.
+- `coMoveGates`: corr/n/window/status와 최근 관측점 배열을 가진 동행 후보 gate. 점 배열이 있으면 `x=거시 월말값 1차차분`, `y=종목 월수익률` 산점도로 표시하고, 점 배열이 없으면 corr 위치 플롯으로만 표시한다. corr 계산 표본(`n`)과 화면 표시점 수가 다를 수 있으므로 UI는 `shown`을 별도 표기한다.
 - `evidenceGates`: 첫 화면의 시계열/경로/동행/회사노출/민감도 gate. UI가 재계산하지 않는다.
 - `falsifiers`: 상관, peer dispersion, 회귀 품질, stale data처럼 thesis를 약하게 만드는 조건.
 - `scenarios`: 시나리오 이름과 affected driver만. 손익 산출은 하지 않는다.

@@ -297,15 +297,35 @@
 					{#if focusCoMove}
 						<section class={'mlCoMovePanel ' + focusCoMove.status}>
 							<div class="mlRailTitle"><span class="mlBlockK">Co-movement Gate</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
-							<div class="mlCorrPlot" aria-label="Co-movement correlation position">
-								<span>-1</span><span>0</span><span>+1</span>
-								<i style={`left:${corrLeft(focusCoMove.corr)}`}></i>
-							</div>
+							{#if focusCoMove.points.length}
+								<div class="mlScatterPlot" aria-label="Monthly co-movement scatter">
+									<i class="mlZeroX" style={`left:${focusCoMove.xZero}%`}></i>
+									<i class="mlZeroY" style={`top:${focusCoMove.yZero}%`}></i>
+									<span class="mlAxisLabel x">{T('macro 월말 Δ', 'macro month-end Δ')}</span>
+									<span class="mlAxisLabel y">{T('종목 월수익률', 'stock MoM return')}</span>
+									{#each focusCoMove.points as p (p.ym)}
+										<b class:latest={p.latest} style={`left:${p.px}%;top:${p.py}%`} title={p.label}></b>
+									{/each}
+								</div>
+							{:else}
+								<div class="mlCorrPlot" aria-label="Co-movement correlation position">
+									<span>-1</span><span>0</span><span>+1</span>
+									<i style={`left:${corrLeft(focusCoMove.corr)}`}></i>
+								</div>
+							{/if}
 							<div class="mlMiniList">
 								<span>corr {focusCoMove.corr ?? '—'}</span>
 								<span>n {focusCoMove.n ?? '—'}</span>
+								<span>shown {focusCoMove.displayedPoints}</span>
+								<span>{focusCoMove.lagLabel}</span>
 								<span>{focusCoMove.window}</span>
+								<span>x {focusCoMove.xRange}</span>
+								<span>y {focusCoMove.yRange}</span>
 								<span>{focusCoMove.status.toUpperCase()}</span>
+							</div>
+							<div class="mlCoLimits">
+								<span>{focusCoMove.formula}</span>
+								{#each focusCoMove.limitations as x (x)}<span>{x}</span>{/each}
 							</div>
 							<p>{focusCoMove.detail}</p>
 						</section>
@@ -510,6 +530,18 @@
 	.mlCorrPlot span:nth-child(2) { justify-content: center; border-left: 1px solid rgba(255,255,255,.05); border-right: 1px solid rgba(255,255,255,.05); }
 	.mlCorrPlot span:nth-child(3) { justify-content: flex-end; }
 	.mlCorrPlot i { position: absolute; top: 5px; width: 8px; height: 18px; border: 1px solid var(--amber); border-radius: 999px; background: rgba(251,146,60,.35); transform: translateX(-50%); }
+	.mlScatterPlot { position: relative; height: 126px; margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: linear-gradient(180deg, rgba(52,211,153,.035), rgba(255,255,255,.012) 48%, rgba(248,113,113,.035)); overflow: hidden; }
+	.mlScatterPlot::before { content: ""; position: absolute; inset: 10px 12px 18px 24px; border-left: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); pointer-events: none; }
+	.mlScatterPlot .mlZeroX, .mlScatterPlot .mlZeroY { position: absolute; display: block; pointer-events: none; background: rgba(255,255,255,.12); }
+	.mlScatterPlot .mlZeroX { top: 8px; bottom: 15px; width: 1px; }
+	.mlScatterPlot .mlZeroY { left: 20px; right: 10px; height: 1px; }
+	.mlScatterPlot b { position: absolute; width: 5px; height: 5px; border: 1px solid rgba(148,163,184,.6); border-radius: 999px; background: rgba(148,163,184,.38); transform: translate(-50%, -50%); }
+	.mlScatterPlot b.latest { width: 8px; height: 8px; border-color: var(--amber); background: rgba(251,146,60,.72); box-shadow: 0 0 0 3px rgba(251,146,60,.12); }
+	.mlAxisLabel { position: absolute; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
+	.mlAxisLabel.x { right: 8px; bottom: 3px; }
+	.mlAxisLabel.y { left: 5px; top: 8px; writing-mode: vertical-rl; transform: rotate(180deg); }
+	.mlCoLimits { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+	.mlCoLimits span { border: 1px solid rgba(251,146,60,.22); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); background: rgba(251,146,60,.025); padding: 2px 7px; font-size: 9px; line-height: 1.25; }
 	.mlCoMovePanel p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10px; line-height: 1.35; }
 	.mlLegend { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 	.mlLegend span { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; padding: 4px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -1,10 +1,36 @@
 # 06. 진행 원장
 
-상태: v1.2
+상태: v1.3
 
 ---
 
 ## 2026-06-18
+
+### v1.3 — 관측점 기반 Co-movement Scatter 구현
+
+배경:
+
+- v1.2의 `Co-movement Gate`는 corr 위치 막대만 있어서 “표본이 실제로 어떻게 생겼는지”를 볼 수 없었다.
+- 전문 UI/매크로 비평 결과, 새 탭이나 첫 화면 노출은 금지하고 기존 `전파 지도` drilldown 안에서 반증 도구로만 쓰는 방향이 맞았다.
+
+완료:
+
+- `rankCoMovers()`가 corr/n만 반환하지 않고 월별 `ym`, `stockReturn`, `macroDiff` 관측점 배열을 함께 반환한다.
+- `MacroCoMoveGateView`가 산점도용 `points`, `displayedPoints`, `lagLabel`, `formula`, `limitations`, `x/y zero axis`, `x/y range`를 가진다.
+- `MacroLensDialog`의 `Co-movement Gate`는 점 배열이 있으면 실제 산점도를 그리고, 없으면 기존 corr 위치 gate를 fallback으로 유지한다.
+- UI는 `corr n`과 `shown`을 분리 표기한다. corr 계산 표본과 화면 표시점 수가 다를 때도 오해하지 않게 하기 위함이다.
+- 산점도 옆에 `lag 0M`, `x=거시 월말값 1차차분 · y=종목 월수익률`, `월말 겹침 표본`, `발표일·revision 미반영`, `outlier·우연상관 민감`을 고정 표시한다.
+- 회귀선, beta, 설명력, 수혜/피해 색상은 추가하지 않았다. 산점도는 전파 증명이 아니라 동행 후보와 반증 조건 확인용이다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+
+NEXT:
+
+1. Playwright로 desktop/mobile에서 점이 보이고 텍스트가 겹치지 않는지 확인한다.
+2. `analysis.macroExposure`의 품질 계약이 더 길어진 표본을 공급하기 전까지 `OPEN/정량 민감도`는 계속 품질 gate 뒤에 둔다.
+3. 발표일·빈티지 데이터가 생기면 산점도와 별도로 release reaction view를 검토한다. 현재 scatter는 발표일 반응 분석이 아니다.
 
 ### v1.2 — Release/Source/Contribution 시각화 구현
 

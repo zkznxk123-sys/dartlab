@@ -173,6 +173,16 @@ export interface MacroContributionView {
 	sourceRef: string;
 }
 
+export interface MacroCoMovePointView {
+	ym: string;
+	x: number;
+	y: number;
+	px: number;
+	py: number;
+	latest: boolean;
+	label: string;
+}
+
 export interface MacroCoMoveGateView {
 	driverId: string;
 	label: string;
@@ -182,6 +192,15 @@ export interface MacroCoMoveGateView {
 	status: 'candidate' | 'unstable' | 'missing';
 	sourceRef: string;
 	detail: string;
+	points: MacroCoMovePointView[];
+	displayedPoints: number;
+	lagLabel: string;
+	formula: string;
+	limitations: string[];
+	xZero: number;
+	yZero: number;
+	xRange: string;
+	yRange: string;
 }
 
 export interface MacroEvidenceGateView {
@@ -580,6 +599,56 @@ function changeIntensity(m: MacroLatest): number {
 	if (unit === '$/t') return Math.min(24, abs / 120);
 	if (unit === 'pt') return Math.min(24, (abs / Math.max(1, Math.abs(m.v))) * 500);
 	return Math.min(24, abs);
+}
+
+function signedValue(v: number, maximumFractionDigits = 2): string {
+	const abs = Math.abs(v).toLocaleString('en-US', { maximumFractionDigits });
+	return `${v > 0 ? '+' : v < 0 ? '-' : ''}${abs}`;
+}
+
+function paddedDomain(values: number[]): [number, number] {
+	const finite = values.filter((v) => Number.isFinite(v));
+	if (!finite.length) return [-1, 1];
+	let lo = Math.min(0, ...finite);
+	let hi = Math.max(0, ...finite);
+	if (lo === hi) {
+		const pad = Math.max(0.01, Math.abs(lo) * 0.12);
+		return [lo - pad, hi + pad];
+	}
+	const pad = (hi - lo) * 0.08;
+	return [lo - pad, hi + pad];
+}
+
+function domainPct(v: number, lo: number, hi: number): number {
+	const span = hi - lo || 1;
+	return Math.max(0, Math.min(100, ((v - lo) / span) * 100));
+}
+
+function buildCoMoveScatter(cm?: CoMover): Pick<MacroCoMoveGateView, 'points' | 'displayedPoints' | 'lagLabel' | 'formula' | 'limitations' | 'xZero' | 'yZero' | 'xRange' | 'yRange'> {
+	const raw = (cm?.points ?? [])
+		.filter((p) => Number.isFinite(p.macroDiff) && Number.isFinite(p.stockReturn))
+		.slice(-72);
+	const [xMin, xMax] = paddedDomain(raw.map((p) => p.macroDiff));
+	const [yMin, yMax] = paddedDomain(raw.map((p) => p.stockReturn));
+	return {
+		points: raw.map((p, i) => ({
+			ym: p.ym,
+			x: p.macroDiff,
+			y: p.stockReturn,
+			px: domainPct(p.macroDiff, xMin, xMax),
+			py: 100 - domainPct(p.stockReturn, yMin, yMax),
+			latest: i === raw.length - 1,
+			label: `${p.ym}: macro Δ ${signedValue(p.macroDiff, 2)} · stock ${signedValue(p.stockReturn * 100, 1)}%`
+		})),
+		displayedPoints: raw.length,
+		lagLabel: 'lag 0M',
+		formula: 'x=거시 월말값 1차차분 · y=종목 월수익률',
+		limitations: ['월말 겹침 표본', '발표일·revision 미반영', 'outlier·우연상관 민감'],
+		xZero: domainPct(0, xMin, xMax),
+		yZero: 100 - domainPct(0, yMin, yMax),
+		xRange: `${signedValue(xMin, 2)} to ${signedValue(xMax, 2)}`,
+		yRange: `${signedValue(yMin * 100, 1)}% to ${signedValue(yMax * 100, 1)}%`
+	};
 }
 
 function coMovementOf(cm?: CoMover): MacroDriverView['coMovement'] | null {
@@ -1202,22 +1271,28 @@ function buildContributionStacks(
 	});
 }
 
-function buildCoMoveGates(drivers: MacroDriverView[]): MacroCoMoveGateView[] {
+function buildCoMoveGates(drivers: MacroDriverView[], coMovers: CoMover[]): MacroCoMoveGateView[] {
+	const coById = new Map(coMovers.map((m) => [m.id, m]));
 	return drivers
 		.filter((driver) => driver.relevance !== 'context')
 		.slice(0, 10)
-		.map((driver) => ({
-			driverId: driver.id,
-			label: driver.label,
-			corr: driver.coMovement?.corr ?? null,
-			n: driver.coMovement?.n ?? null,
-			window: driver.coMovement?.window ?? 'overlap missing',
-			status: driver.coMovement?.status ?? 'missing',
-			sourceRef: 'terminal coMovement',
-			detail: driver.coMovement
-				? `${driver.coMovement.label}. 방향성 claim이나 beta가 아니라 동행 후보 gate다.`
-				: '가격과 macro observation의 겹친 표본이 부족하다.'
-		}));
+		.map((driver) => {
+			const cm = coById.get(driver.id);
+			const scatter = buildCoMoveScatter(cm);
+			return {
+				driverId: driver.id,
+				label: driver.label,
+				corr: driver.coMovement?.corr ?? null,
+				n: driver.coMovement?.n ?? null,
+				window: driver.coMovement?.window ?? 'overlap missing',
+				status: driver.coMovement?.status ?? 'missing',
+				sourceRef: 'terminal coMovement',
+				detail: driver.coMovement
+					? `${driver.coMovement.label}. 각 점은 월별 macro 1차차분(x)과 종목 월수익률(y)이다. 방향성 claim이나 beta가 아니라 동행 후보 gate다.`
+					: '가격과 macro observation의 겹친 표본이 부족하다.',
+				...scatter
+			};
+		});
 }
 
 export function buildMacroLensSnapshot(args: {
@@ -1243,7 +1318,7 @@ export function buildMacroLensSnapshot(args: {
 	const releaseRail = buildReleaseRail(drivers);
 	const sourcePackets = buildSourcePackets(drivers, transmission);
 	const contributionStacks = buildContributionStacks(drivers, edges, macroLatest, exposureQuality);
-	const coMoveGates = buildCoMoveGates(drivers);
+	const coMoveGates = buildCoMoveGates(drivers, coMovers);
 	const falsifiers = buildFalsifiers(coMovers, drivers, macro, exposureQuality);
 	const marketPhase = {
 		kr: phaseView('KR', macro?.kr),
