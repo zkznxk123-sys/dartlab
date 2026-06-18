@@ -377,6 +377,146 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
     )
 
 
+def _encodeVarintArray(vals: np.ndarray) -> tuple[bytes, np.ndarray]:
+    """비음수 정수 배열을 LEB128 unsigned varint 로 벡터 인코딩.
+
+    Sig:
+        _encodeVarintArray(vals: np.ndarray) -> tuple[bytes, np.ndarray]
+
+    Args:
+        vals: 비음수 정수 배열 (docId delta-gap 또는 termFreq).
+
+    Returns:
+        tuple[bytes, np.ndarray] — (연접 varint 바이트, 값별 byte 수 배열).
+
+    Example:
+        >>> b, n = _encodeVarintArray(np.array([1, 300], dtype=np.int64))
+        >>> int(n[0]), int(n[1])
+        (1, 2)
+    """
+    v = np.asarray(vals, dtype=np.uint64)
+    nbits = np.where(v > 0, np.floor(np.log2(v.astype(np.float64) + 0.5)).astype(np.int64) + 1, 1)
+    nbytes = np.maximum(1, (nbits + 6) // 7).astype(np.int64)
+    out = np.zeros(int(nbytes.sum()), dtype=np.uint8)
+    starts = np.zeros(len(v), dtype=np.int64)
+    if len(v) > 1:
+        np.cumsum(nbytes[:-1], out=starts[1:])
+    for k in range(int(nbytes.max())):
+        mask = nbytes > k
+        out[starts[mask] + k] = ((v[mask] >> np.uint64(7 * k)) & np.uint64(0x7F)).astype(np.uint8) | (
+            (k < (nbytes[mask] - 1)).astype(np.uint8) * np.uint8(0x80)
+        )
+    return out.tobytes(), nbytes
+
+
+# meta.bin doc-카드에 담는 필드 (top-k snippet/회사점프용 — main_meta 의 부분집합, bounded).
+_SHARD_META_FIELDS = ("corp_name", "stock_code", "report_nm", "rcept_dt", "source", "sourceRef", "url")
+_SHARD_SNIPPET_LIMIT = 400
+
+
+def saveShardedSegment(idx: dict, meta: pl.DataFrame, name: str = "main", outDir: Path | None = None) -> dict:
+    """range-friendly sidecar(postings/terms/docLengths/meta).bin 을 npz 옆에 동거 생성.
+
+    엔진 ``main.npz`` 는 DEFLATE 라 임의 위치 디코딩 불가(브라우저 range fetch 불능)이므로,
+    동일 CSR 을 STORED(비압축 컨테이너) sidecar 로 재배치한다. npz 는 손대지 않는다(엔진 SSOT 보존).
+    각 산출물은 "offset 표 + STORED blob" 패턴 — 클라이언트가 질의어 term 의 postings 범위와 top-k
+    doc 의 meta 범위만 HTTP range 로 받아 full BM25 와 동일한 결과를 낸다(검증: byte-range=full overlap 1.0).
+
+    Sig:
+        saveShardedSegment(idx: dict, meta: pl.DataFrame, name: str = "main", outDir: Path | None = None) -> dict
+
+    Args:
+        idx: ``loadSegment``/빌더의 인덱스 dict (offsets/docIds/termFreqs/docLengths/stemDict/nDocs/avgDocLength).
+        meta: doc_id 순(row i = doc i) 메타 DataFrame. ``_SHARD_META_FIELDS`` + snippet(evidenceText/text) 컬럼 사용.
+        name: 세그먼트 이름 ("main" 또는 "delta").
+        outDir: 출력 디렉터리. None 이면 ``_contentIndexDir()``.
+
+    Returns:
+        dict — 생성 파일명→바이트크기 + nDocs/nTerms (search_meta.json 에도 기록).
+
+    Raises:
+        KeyError: idx 에 필수 키(offsets/docIds/termFreqs/docLengths)가 없을 때.
+
+    Example:
+        >>> seg = loadSegment("main")
+        >>> saveShardedSegment(seg[0], seg[1], "main")["postings.bin"] > 0  # doctest: +SKIP
+        True
+    """
+    outDir = outDir or _contentIndexDir()
+    outDir.mkdir(parents=True, exist_ok=True)
+    offsets = np.asarray(idx["offsets"], dtype=np.int64)
+    docIds = np.asarray(idx["docIds"])
+    termFreqs = np.asarray(idx["termFreqs"])
+    docLengths = np.asarray(idx["docLengths"], dtype=np.int64)
+    nTerms = len(offsets) - 1
+
+    # postings.bin: term 별 [docId delta-gap varint][termFreq varint] 블록 연접.
+    gaps = np.empty(len(docIds), dtype=np.int64)
+    if len(docIds):
+        gaps[1:] = np.diff(docIds.astype(np.int64))
+        gaps[0] = int(docIds[0])
+        gaps[offsets[1:-1]] = docIds[offsets[1:-1]]  # term 경계 = 절대 docId 로 reset
+    gapBytes, gapNb = _encodeVarintArray(gaps)
+    tfBytes, tfNb = _encodeVarintArray(termFreqs)
+    gapCum = np.zeros(len(docIds) + 1, dtype=np.int64)
+    tfCum = np.zeros(len(docIds) + 1, dtype=np.int64)
+    np.cumsum(gapNb, out=gapCum[1:])
+    np.cumsum(tfNb, out=tfCum[1:])
+    postings = bytearray()
+    termRecs = np.zeros((nTerms, 4), dtype=np.uint32)  # byteStart, gapLen, tfLen, df
+    for t in range(nTerms):
+        s, e = int(offsets[t]), int(offsets[t + 1])
+        g0, g1, f0, f1 = int(gapCum[s]), int(gapCum[e]), int(tfCum[s]), int(tfCum[e])
+        start = len(postings)
+        postings += gapBytes[g0:g1]
+        postings += tfBytes[f0:f1]
+        termRecs[t] = (start, g1 - g0, f1 - f0, e - s)
+    (outDir / f"{name}.postings.bin").write_bytes(bytes(postings))
+    (outDir / f"{name}.terms.bin").write_bytes(termRecs.tobytes())  # stemId 순 uint32×4
+    (outDir / f"{name}.docLengths.bin").write_bytes(np.minimum(docLengths, 0xFFFFFFFF).astype(np.uint32).tobytes())
+
+    # meta.bin: doc 별 카드(JSON) + metaOffsets.bin(uint64×(nDocs+1)) — top-k 만 range fetch.
+    metaCols = [c for c in _SHARD_META_FIELDS if c in meta.columns]
+    snippetCol = "evidenceText" if "evidenceText" in meta.columns else ("text" if "text" in meta.columns else None)
+    metaBlob = bytearray()
+    metaOff = [0]
+    sel = meta.select(metaCols + ([snippetCol] if snippetCol else []))
+    for row in sel.iter_rows(named=True):
+        card = {k: row.get(k) for k in metaCols}
+        if snippetCol:
+            sn = row.get(snippetCol) or ""
+            card["snippet"] = str(sn)[:_SHARD_SNIPPET_LIMIT]
+        metaBlob += json.dumps(card, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        metaOff.append(len(metaBlob))
+    (outDir / f"{name}.meta.bin").write_bytes(bytes(metaBlob))
+    (outDir / f"{name}.metaOffsets.bin").write_bytes(np.asarray(metaOff, dtype=np.uint64).tobytes())
+
+    files = {
+        f"{name}.postings.bin": len(postings),
+        f"{name}.terms.bin": int(termRecs.nbytes),
+        f"{name}.docLengths.bin": len(docLengths) * 4,
+        f"{name}.meta.bin": len(metaBlob),
+        f"{name}.metaOffsets.bin": len(metaOff) * 8,
+    }
+    (outDir / f"{name}.search_meta.json").write_text(
+        json.dumps(
+            {
+                "nDocs": int(idx["nDocs"]),
+                "nTerms": nTerms,
+                "avgDocLength": float(idx["avgDocLength"]),
+                "schemaVersion": INDEX_SCHEMA_VERSION,
+                "snippetField": snippetCol,
+                "metaFields": metaCols,
+                "files": files,
+                "builtAt": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    return {**files, "nDocs": int(idx["nDocs"]), "nTerms": nTerms}
+
+
 def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFrame] | None:
     """세그먼트를 디스크에서 로드. 파일이 없으면 None.
 
