@@ -6,6 +6,7 @@ category: reading-disclosures
 series: industry-reading
 seriesOrder: 3
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/19-financial-company-filings.webp
 ---
 
 # 금융업 사업보고서는 무엇이 다른가

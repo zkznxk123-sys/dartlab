@@ -6,6 +6,7 @@ category: reading-disclosures
 series: audit-and-governance
 seriesOrder: 3
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/09-internal-controls-and-audit-committee.webp
 ---
 
 # 내부회계관리제도와 감사위원회 활동은 어디서 위험 신호가 보이나

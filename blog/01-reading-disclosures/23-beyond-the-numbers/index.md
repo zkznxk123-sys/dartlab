@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 1
 thumbnail: /avatar-celebrate.png
+ogImage: /thumbnails/23-beyond-the-numbers.webp
 ---
 
 # 재무제표, 숫자만 보면 안 되는 이유

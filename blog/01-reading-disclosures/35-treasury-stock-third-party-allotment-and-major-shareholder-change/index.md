@@ -1,4 +1,4 @@
-﻿---
+---
 title: 자기주식·제3자배정·최대주주 변경은 누구에게 유리한가
 date: 2026-03-18
 description: 자기주식, 제3자배정, 최대주주 변경은 모두 지배력과 이해관계를 움직이는 공시다. 상대방, 가격, 소각 여부, 자금 출처를 어떤 순서로 봐야 하는지 실전 기준으로 정리한다.
@@ -6,6 +6,7 @@ category: reading-disclosures
 series: capital-and-earnings
 seriesOrder: 4
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/35-treasury-stock-third-party-allotment-and-major-shareholder-change.webp
 ---
 
 # 자기주식·제3자배정·최대주주 변경은 누구에게 유리한가

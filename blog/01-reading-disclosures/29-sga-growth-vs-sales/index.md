@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 7
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/29-sga-growth-vs-sales.webp
 ---
 
 # 판관비가 매출보다 빨리 불어날 때 무엇을 먼저 봐야 하나

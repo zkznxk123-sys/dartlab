@@ -6,6 +6,7 @@ category: reading-disclosures
 series: ownership-and-governance
 seriesOrder: 5
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/16-how-to-read-agm-notice.webp
 ---
 
 # 주주총회소집공고에서 꼭 봐야 할 것은 무엇인가

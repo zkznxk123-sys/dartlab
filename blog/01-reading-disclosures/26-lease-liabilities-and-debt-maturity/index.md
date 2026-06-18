@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 4
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/26-lease-liabilities-and-debt-maturity.webp
 ---
 
 # 리스부채와 차입 만기 구조는 어디서 먼저 터지나

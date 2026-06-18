@@ -6,6 +6,7 @@ category: reading-disclosures
 series: edgar-reading
 seriesOrder: 1
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/02-everything-about-edgar.webp
 ---
 
 # EDGAR의 모든 것

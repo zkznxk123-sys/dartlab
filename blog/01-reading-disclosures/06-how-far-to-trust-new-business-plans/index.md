@@ -6,6 +6,7 @@ category: reading-disclosures
 series: report-reading-foundations
 seriesOrder: 3
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/06-how-far-to-trust-new-business-plans.webp
 ---
 
 # 공시에서 신규사업 계획은 어디까지 믿어야 하나

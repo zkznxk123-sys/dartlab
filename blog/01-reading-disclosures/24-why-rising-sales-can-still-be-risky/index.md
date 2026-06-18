@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 2
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/24-why-rising-sales-can-still-be-risky.webp
 ---
 
 # 매출은 느는데 왜 위험할 수 있나

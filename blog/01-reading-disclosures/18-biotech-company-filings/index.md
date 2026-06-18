@@ -6,6 +6,7 @@ category: reading-disclosures
 series: industry-reading
 seriesOrder: 2
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/18-biotech-company-filings.webp
 ---
 
 # 바이오·제약 공시는 어디가 과열 신호인가

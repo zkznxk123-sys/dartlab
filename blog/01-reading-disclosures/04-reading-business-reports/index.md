@@ -6,6 +6,7 @@ category: reading-disclosures
 series: report-reading-foundations
 seriesOrder: 1
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/04-reading-business-reports.webp
 ---
 
 # 사업보고서 텍스트, 이렇게 읽는다

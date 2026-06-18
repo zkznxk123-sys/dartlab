@@ -6,6 +6,7 @@ category: reading-disclosures
 series: dart-foundations
 seriesOrder: 1
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/01-everything-about-dart.webp
 youtubeId: "-Y3kY1zs62I"
 ---
 

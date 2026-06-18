@@ -6,6 +6,7 @@ category: reading-disclosures
 series: audit-and-governance
 seriesOrder: 4
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/10-restatement-before-audit-and-reaudit-signals.webp
 ---
 
 # 감사 전 재무제표 정정과 재감사는 어디서 위험 신호가 보이나

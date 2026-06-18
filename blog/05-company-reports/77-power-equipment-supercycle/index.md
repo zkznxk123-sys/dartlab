@@ -6,6 +6,7 @@ category: company-reports
 series: interesting-story
 seriesOrder: 1
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/power-equipment-supercycle.webp
 tags: ["전력기기", "AI데이터센터", "변압기", "배전반", "HD현대일렉트릭", "LS전기", "효성중공업", "일진전기", "슈퍼사이클", "OPM비교"]
 ai:
   verdict: "AI 데이터센터 전력 수요로 전력기기 4사 모두 성장 중이지만, 변압기(HD현대일렉트릭 OPM 24%)와 배전반(LS전기 OPM 8.6%)의 마진 차이는 제품 구조·수주 단가·경쟁 강도에서 비롯된다. 4사 모두 밸류에이션 '과열' 구간이며, 마진 격차는 수요 정점 이후 더 벌어질 가능성이 있다."

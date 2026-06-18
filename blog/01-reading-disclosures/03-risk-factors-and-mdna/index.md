@@ -6,6 +6,7 @@ category: reading-disclosures
 series: edgar-reading
 seriesOrder: 2
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/03-risk-factors-and-mdna.webp
 ---
 
 # Risk Factors와 MD&A를 같이 읽는 법

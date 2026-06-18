@@ -6,6 +6,7 @@ category: reading-disclosures
 series: capital-and-earnings
 seriesOrder: 2
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/33-receivables-and-allowance.webp
 ---
 
 # 매출채권과 대손충당금 읽는 법

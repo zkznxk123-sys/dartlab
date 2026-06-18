@@ -6,6 +6,7 @@ category: reading-disclosures
 series: data-pipeline
 seriesOrder: 1
 thumbnail: /avatar-code.png
+ogImage: /thumbnails/36-opendart-material-events.webp
 ---
 
 # OpenDART로 주요사항보고서 읽는 법

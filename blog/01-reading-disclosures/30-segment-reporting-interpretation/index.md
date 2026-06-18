@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 8
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/30-segment-reporting-interpretation.webp
 ---
 
 # 세그먼트 공시는 어디서 읽고 무엇을 비교해야 하나

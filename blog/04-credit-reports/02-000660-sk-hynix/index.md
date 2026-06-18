@@ -4,8 +4,10 @@ date: 2026-04-05
 description: "SK하이닉스 독립 신용등급 dCR-AA+ (투자적격 상위+). 공시 데이터 기반 정량 분석 등급 근거, 재무 하이라이트, 등급 전망."
 category: credit-reports
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/credit-02-000660-sk-hynix.webp
 ---
 
+![SK하이닉스 (000660) 신용분석 보고서 ?? ???](./assets/02-credit-dashboard.webp)
 > ⚠️ **면책**: 본 보고서는 dartlab dCR v4.0 방법론에 따라 공시 데이터만으로 작성되었습니다. 제도권 신용등급과 다를 수 있으며, 투자 권유가 아닙니다. [방법론](https://github.com/eddmpython/dartlab/blob/master/src/dartlab/analysis/CREDIT.md)
 
 > **dCR-AA+** | 투자적격 상위+ | 2026-04-05 | 방법론 v4.0

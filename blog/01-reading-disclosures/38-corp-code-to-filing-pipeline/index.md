@@ -6,6 +6,7 @@ category: reading-disclosures
 series: data-pipeline
 seriesOrder: 3
 thumbnail: /avatar-code.png
+ogImage: /thumbnails/38-corp-code-to-filing-pipeline.webp
 ---
 
 # corp_code부터 filing 원문까지 DART 수집 파이프라인 설계

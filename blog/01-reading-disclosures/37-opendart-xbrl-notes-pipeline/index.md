@@ -6,6 +6,7 @@ category: reading-disclosures
 series: data-pipeline
 seriesOrder: 2
 thumbnail: /avatar-code.png
+ogImage: /thumbnails/37-opendart-xbrl-notes-pipeline.webp
 ---
 
 # XBRL 재무제표 원문과 주석 다운로드 파이프라인

@@ -6,6 +6,7 @@ category: reading-disclosures
 series: industry-reading
 seriesOrder: 1
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/17-construction-company-filings.webp
 ---
 
 # 건설업 사업보고서는 어디부터 읽어야 하나

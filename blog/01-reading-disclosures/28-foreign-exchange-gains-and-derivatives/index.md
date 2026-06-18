@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 6
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/28-foreign-exchange-gains-and-derivatives.webp
 ---
 
 # 환율 손익과 파생상품은 본업을 어떻게 왜곡하나

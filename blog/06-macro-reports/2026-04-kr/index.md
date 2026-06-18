@@ -4,9 +4,12 @@ date: 2026-04-05
 description: dartlab macro 엔진 자동 발간. 11축 분석 + 3막 서사.
 category: macro-reports
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/macro-2026-04-kr.webp
 ---
 
 ## KR 경제 (MACRO)
+
+![KR 경제분석 보고서 2026-04 ?? ???](./assets/2026-04-kr-macro-dashboard.webp)
 
 
 > **재무 순환 서사**

@@ -6,6 +6,7 @@ category: reading-disclosures
 series: data-pipeline
 seriesOrder: 5
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/40-dart-edgar-unified-structure.webp
 ---
 
 한국 주식만 보던 투자자가 미국 주식을 처음 분석하려 하면, 가장 먼저 부딪히는 벽은 언어가 아니다. **데이터 구조가 완전히 다르다는 것**이다. DART 전자공시에서 삼성전자의 재무제표를 뽑는 방식과 EDGAR에서 Apple의 10-K를 뽑는 방식은 API도 다르고, 계정 체계도 다르고, 보고서 구조도 다르다.

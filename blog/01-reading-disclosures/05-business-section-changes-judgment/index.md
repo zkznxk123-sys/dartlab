@@ -6,6 +6,7 @@ category: reading-disclosures
 series: report-reading-foundations
 seriesOrder: 2
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/05-business-section-changes-judgment.webp
 ---
 
 # 사업보고서 II. 사업의 내용, 이 섹션이 투자 판단을 바꾼다

@@ -6,6 +6,7 @@ category: reading-disclosures
 series: ownership-and-governance
 seriesOrder: 1
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/12-major-shareholder-and-related-parties.webp
 ---
 
 # 최대주주와 특수관계인은 어떻게 읽어야 하나

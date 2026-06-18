@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 10
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/41-revenue-structure-how-to-read.webp
 ---
 
 # 이 회사는 무엇으로 돈을 버는가 — 수익 구조 읽기

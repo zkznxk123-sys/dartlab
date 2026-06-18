@@ -6,6 +6,7 @@ category: reading-disclosures
 series: data-pipeline
 seriesOrder: 4
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/39-data-quality-validation.webp
 ---
 
 # 수집한 재무 데이터를 어떻게 자동으로 검증하나

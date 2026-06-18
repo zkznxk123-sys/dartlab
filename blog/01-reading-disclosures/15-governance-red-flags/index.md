@@ -6,6 +6,7 @@ category: reading-disclosures
 series: ownership-and-governance
 seriesOrder: 4
 thumbnail: /avatar-curious.png
+ogImage: /thumbnails/15-governance-red-flags.webp
 ---
 
 # 지배구조가 위험한 회사는 어떤 패턴을 보이나

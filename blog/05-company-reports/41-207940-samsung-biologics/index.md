@@ -19,6 +19,7 @@ tags:
   - 매출총이익률
   - 재무제표
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/207940-samsung-biologics.webp
 youtubeId: ""
 ai:
   verdict: "공장 자체가 제품인 CMO. 규모의 경제가 제조업 상식을 뒤집어 OPM 45%를 찍는다."

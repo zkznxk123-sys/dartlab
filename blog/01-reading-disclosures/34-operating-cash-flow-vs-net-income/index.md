@@ -1,4 +1,4 @@
-﻿---
+---
 title: 영업현금흐름이 순이익을 부정할 때
 date: 2026-03-18
 description: 순이익이 좋아 보여도 영업현금흐름이 따라오지 않으면 해석이 달라진다. 매출채권, 재고, 선수금, 비현금 이익을 어떤 순서로 묶어 봐야 하는지 실전 기준으로 정리한다.
@@ -6,6 +6,7 @@ category: reading-disclosures
 series: capital-and-earnings
 seriesOrder: 3
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/34-operating-cash-flow-vs-net-income.webp
 ---
 
 # 영업현금흐름이 순이익을 부정할 때

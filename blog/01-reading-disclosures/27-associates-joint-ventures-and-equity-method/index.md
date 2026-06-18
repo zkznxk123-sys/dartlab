@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 5
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/27-associates-joint-ventures-and-equity-method.webp
 ---
 
 # 관계기업·공동기업투자는 본업 숫자를 어떻게 흐리나

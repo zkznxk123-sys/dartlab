@@ -6,6 +6,7 @@ category: reading-disclosures
 series: financial-context
 seriesOrder: 12
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/43-cashflow-how-to-read.webp
 ---
 
 # 현금흐름 분석 — 손익계산서 이익과 현금흐름표 현금은 왜 다른가
