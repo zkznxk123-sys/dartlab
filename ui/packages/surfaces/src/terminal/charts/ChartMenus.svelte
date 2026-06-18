@@ -47,7 +47,10 @@
 		return keys.map((m) => ({ market: m, label: lbl[m] ?? m, items: [...by.get(m)!].sort((a, b) => a.name.localeCompare(b.name)) }));
 	});
 	const styleShown = $derived(indexLine ? 'area' : ctl.candleStyle); // US 지수면 'area'(라인) 강조 — disabled 세그먼트 정합
-	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'bt' | 'rail'>('none');
+	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'rail'>('none');
+	// ★전략 백테스트 = persistent dock (transient 드롭다운 menu 와 분리). 차트 클릭 auto-close 면제 →
+	// 설정·차트 동시 가시(보면서 고침). 닫힘은 ✕·BT 토글뿐. (02 §1 persistent dock)
+	let btOpen = $state(false);
 	let editing = $state<string | null>(null); // IND 메뉴 내 인라인 파라미터 편집 대상
 	const hasParams = (k: string) => (IND_DEFS[k]?.params.length ?? 0) > 0;
 	$effect(() => {
@@ -211,9 +214,17 @@
 		{/if}
 	</div>
 	<div class="ctWrap">
-		<button class={ctl.btKey && subject !== 'index' ? 'chartTool on' : 'chartTool'} disabled={subject === 'index'} onclick={() => { if (subject === 'index') return; if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } menu = menu === 'bt' ? 'none' : 'bt'; }} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : T('전략 백테스트', 'Backtest')}>{T('백테스트', 'BT')}</button>
-		{#if menu === 'bt'}
-			<div class="ctMenu"><BtConfig {ctl} {lang} /></div>
+		<button class={(btOpen || ctl.btStrategies.length) && subject !== 'index' ? 'chartTool on' : 'chartTool'} disabled={subject === 'index'} onclick={() => { if (subject === 'index') return; if (ctl.tf !== 'D') { if (ctl.period === 'MAX') ctl.period = '3Y'; ctl.tf = 'D'; } btOpen = !btOpen; menu = 'none'; }} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : ctl.tf !== 'D' ? T('일봉 기준 — 클릭 시 일봉 전환', 'daily-based — switches to D') : T('전략 백테스트 — 고정 패널(차트 조작해도 안 닫힘)', 'Strategy Lab — pinned panel')}>{T('백테스트', 'BT')}</button>
+		{#if btOpen && subject !== 'index'}
+			<!-- ★persistent dock — .ctMenu 클래스 유지(자식 스타일) + .btDock(고정·헤더). 차트 클릭에 안 닫힘. -->
+			<div class="ctMenu btDock">
+				<div class="btDockHd">
+					<span class="btDockTtl">{T('전략 백테스트', 'Strategy Lab')}</span>
+					<span class="btDockPin" title={T('고정됨 — 차트를 조작해도 닫히지 않음', 'pinned — survives chart interaction')}>📌</span>
+					<button class="btDockX" onclick={() => (btOpen = false)} aria-label="close" title={T('패널 닫기', 'close panel')}>✕</button>
+				</div>
+				<div class="btDockBody"><BtConfig {ctl} {lang} /></div>
+			</div>
 		{/if}
 	</div>
 	<button class="chartTool" onclick={() => onSnapshot?.()} title={T('차트 PNG 저장 (출처 띠 포함)', 'save PNG')} aria-label="snapshot">
