@@ -418,7 +418,7 @@
 <!-- 포렌식 적신호 — 풀스크린 재무탭에 묻힌 결정론 위험지표(감사독립성·단기상환벽) 승격. 임계 초과만 표시(정상=무표시). -->
 {#if forensic.length}
 	<Panel {lang} className="eCredit" prov="real" title={{ kr: '포렌식 적신호', en: 'FORENSIC FLAGS' }} sub={{ kr: '감사·부채 기준 · report', en: 'audit·debt · report' }} flush>
-		{#snippet right()}<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'open financials fullscreen' : '재무 전체화면에서 상세 보기'}>⤢</button>{/snippet}
+		{#snippet right()}<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'open financials fullscreen' : '재무 전체화면에서 상세 보기'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		<div class="riskWrap">
 			{#each forensic as f (f.id)}
 				<div class={'riskRow ' + (f.level === 'red' ? 'red' : 'yellow')}>
@@ -496,7 +496,7 @@
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
-		<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'quantitative statements (viewer dialog)' : '정량재무제표 — 공시뷰어와 동일 (IS/BS/CF/CIS/자본변동 · 연결/별도)'}>⤢</button>
+		<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'quantitative statements (viewer dialog)' : '정량재무제표 — 공시뷰어와 동일 (IS/BS/CF/CIS/자본변동 · 연결/별도)'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
 	{/snippet}
 	<div class="finTabs">{#each tabs as t (t.k)}<button class={'finTab ' + (stmt === t.k ? 'on' : '')} onclick={() => (stmt = t.k)}>{lang === 'en' ? t.en : t.kr}</button>{/each}</div>
 	{#if finView}
@@ -567,7 +567,7 @@
 <!-- 타법인 출자 (자회사·투자 — 장부가액 상위) -->
 {#if inv && inv.rows.length}
 	<Panel {lang} className="eCredit" prov="real" title={{ kr: '타법인 출자', en: 'HOLDINGS' }} sub={{ kr: 'report · ' + inv.year + ' · 장부가순', en: 'report · ' + inv.year + ' · by book value' }} flush>
-		{#snippet right()}<span class="dim">{(inv?.rows.length ?? 0) + (inv?.moreCount ?? 0)}{lang === 'en' ? '' : '개사'}</span><button class="finFullBtn" onclick={() => (holdingsOpen = true)} title={lang === 'en' ? 'Relationship analysis (fullscreen)' : '출자 관계 분석 — 전체화면'}>⤢</button>{/snippet}
+		{#snippet right()}<span class="dim">{(inv?.rows.length ?? 0) + (inv?.moreCount ?? 0)}{lang === 'en' ? '' : '개사'}</span><button class="finFullBtn" onclick={() => (holdingsOpen = true)} title={lang === 'en' ? 'Relationship analysis (fullscreen)' : '출자 관계 분석 — 전체화면'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		<div class="finScroll"><table class="finTable">
 			<thead><tr>
 				<th class="finAcct">{lang === 'en' ? 'COMPANY' : '법인명'}</th>
@@ -656,7 +656,7 @@
 <!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할. data-fdate = 주가차트 공시 dot 클릭 시 스크롤·하이라이트 대상 키(YYYYMMDD). -->
 <div class="rowSplit" bind:this={filingWrap}>
 	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
-		{#snippet right()}<button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">⤢</button>{/snippet}
+		{#snippet right()}<button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		{#if regFilings.length}
 			<div class="filingList">
 				{#each regFilings as f (f.rceptNo)}

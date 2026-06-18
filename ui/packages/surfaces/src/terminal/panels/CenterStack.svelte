@@ -484,7 +484,7 @@
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
-		<button class="finFullBtn" onclick={() => (finFull = true)} title={lang === 'en' ? 'fullscreen analysis' : '전체화면 분석'} aria-label="fullscreen">⤢</button>
+		<button class="finFullBtn" onclick={() => (finFull = true)} title={lang === 'en' ? 'fullscreen analysis' : '전체화면 분석'} aria-label="fullscreen">{lang === 'en' ? 'detail' : '상세보기'}</button>
 	{/snippet}
 	{#if finState === 'ready' && finData}
 		<div class="finGrid">
