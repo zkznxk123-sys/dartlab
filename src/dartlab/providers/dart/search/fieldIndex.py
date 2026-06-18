@@ -91,11 +91,20 @@ def _contentIndexDir(tier: str | None = None) -> Path:
     return base
 
 
+def _hasMainPostings(d: Path) -> bool:
+    """flat/tier 디렉터리에 로드 가능한 main postings 가 있나 — sidecar(SSOT, compact-only) 또는 legacy npz.
+
+    clean publish 후 인덱스는 npz 없이 sidecar(``main.postings.bin``)만 있으므로 npz 단독 검사는
+    sidecar-only 배포를 '부재'로 오판한다(local/pip tier 오선택·재다운로드 회귀).
+    """
+    return (d / "main.postings.bin").exists() or (d / "main.npz").exists()
+
+
 def _activeIndexDir() -> Path:
     """런타임 검색이 읽을 *유효* 인덱스 디렉터리 — flat 우선, 없으면 tier(기본 lite).
 
     1) ``contentIndex/active.json`` 이 유효하면 해당 artifact dir.
-    2) flat ``contentIndex/main.npz`` 존재 → flat(기존 배포·dev). 기존 동작 보존.
+    2) flat 에 main postings(sidecar 또는 npz) 존재 → flat(기존 배포·dev). 기존 동작 보존.
     3) 없으면 tier = env ``DARTLAB_SEARCH_TIER`` 또는 ``lite`` → ``contentIndex/{tier}/``.
     모두 없으면 flat(빈 디렉터리 → graceful 빈 결과).
     """
@@ -107,11 +116,11 @@ def _activeIndexDir() -> Path:
     active = resolveActiveIndexDir(base)
     if active is not None:
         return active
-    if (base / "main.npz").exists():
+    if _hasMainPostings(base):
         return base
     tier = (os.environ.get("DARTLAB_SEARCH_TIER") or "lite").strip()
     tierDir = base / tier
-    if (tierDir / "main.npz").exists():
+    if _hasMainPostings(tierDir):
         return tierDir
     return base
 
@@ -412,6 +421,8 @@ def _encodeVarintArray(vals: np.ndarray) -> tuple[bytes, np.ndarray]:
         (1, 2)
     """
     v = np.asarray(vals, dtype=np.uint64)
+    if v.size == 0:  # 빈 스트림(예: df 0 또는 term 단독 doc) — .max() 빈 reduction 회피
+        return b"", np.zeros(0, dtype=np.int64)
     nbits = np.where(v > 0, np.floor(np.log2(v.astype(np.float64) + 0.5)).astype(np.int64) + 1, 1)
     nbytes = np.maximum(1, (nbits + 6) // 7).astype(np.int64)
     out = np.zeros(int(nbytes.sum()), dtype=np.uint8)

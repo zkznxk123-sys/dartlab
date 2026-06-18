@@ -71,7 +71,8 @@ def test_prepare_search_delta_inputs_writes_env(tmp_path) -> None:
     assert proc.returncode == 0, proc.stderr
     assert current.exists()
     text = envFile.read_text(encoding="utf-8")
-    assert "DARTLAB_SEARCH_DELTA_MODE=catalog" in text
+    # compact-only — delta 엔진 폐기. MAIN_MODE 단일(옛 DELTA_MODE 제거).
+    assert "DARTLAB_SEARCH_DELTA_MODE" not in text
     assert "DARTLAB_SEARCH_MAIN_MODE=catalog" in text
     assert "DARTLAB_SEARCH_CURRENT_CATALOG=" in text
     assert "DARTLAB_SEARCH_SOURCE_MANIFEST_SET=" in text

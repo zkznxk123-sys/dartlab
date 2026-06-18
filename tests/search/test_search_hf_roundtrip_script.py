@@ -29,8 +29,8 @@ class FakeHfApi:
 
 
 def test_verify_search_hf_roundtrip_script_with_local_remote(tmp_path) -> None:
-    from dartlab.providers.dart.search.fieldIndex import buildContentSegment, saveSegment
-    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import saveSegmentWithSidecar, writeIndexManifest
     from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
     artifact = tmp_path / "artifact"
@@ -52,7 +52,7 @@ def test_verify_search_hf_roundtrip_script_with_local_remote(tmp_path) -> None:
         }
     ]
     idx, meta = buildContentSegment(rows, showProgress=False)
-    saveSegment(idx, meta, "main", outDir=artifact)
+    saveSegmentWithSidecar(idx, meta, "main", artifact)
     manifest = writeIndexManifest(artifact, tier="full", buildCommand="test.verifySearchHfRoundTrip")
 
     publishContentIndexFiles(
@@ -99,8 +99,8 @@ def test_verify_search_hf_roundtrip_script_with_local_remote(tmp_path) -> None:
 
 
 def test_verify_search_hf_roundtrip_script_accepts_staged_candidate_manifest(tmp_path) -> None:
-    from dartlab.providers.dart.search.fieldIndex import buildContentSegment, saveSegment
-    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import saveSegmentWithSidecar, writeIndexManifest
     from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
     artifact = tmp_path / "artifact"
@@ -122,7 +122,7 @@ def test_verify_search_hf_roundtrip_script_accepts_staged_candidate_manifest(tmp
         }
     ]
     idx, meta = buildContentSegment(rows, showProgress=False)
-    saveSegment(idx, meta, "main", outDir=artifact)
+    saveSegmentWithSidecar(idx, meta, "main", artifact)
     manifest = writeIndexManifest(artifact, tier="full", buildCommand="test.verifySearchHfRoundTrip.stage")
 
     summary = publishContentIndexFiles(

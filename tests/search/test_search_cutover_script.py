@@ -259,9 +259,7 @@ def test_replacement_evidence_builder_promotes_release_bundle_to_s4(tmp_path: Pa
             "--round-trip",
             str(lite),
             "--workflow",
-            ".github/workflows/searchIndexMain.yml",
-            "--workflow",
-            ".github/workflows/searchIndexDelta.yml",
+            ".github/workflows/searchIndexBuild.yml",
             "--out",
             str(replacement),
             "--fail-on-incomplete",
@@ -380,8 +378,8 @@ def _writeJson(path: Path, payload: dict) -> Path:
 
 def _remoteEvidence() -> dict:
     producer = {
-        "workflow": "Search Index Main (monthly)",
-        "job": "build-main",
+        "workflow": "Search Index Build",
+        "job": "build",
         "runId": "123",
         "sha": "abcdef",
         "artifactName": "search-catalog-test",

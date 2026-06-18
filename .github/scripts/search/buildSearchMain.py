@@ -1,9 +1,17 @@
-"""Search content index main 풀리빌드 + HF 업로드.
+"""Search content index 단일 빌드 스크립트 (compact-only) + HF 업로드.
 
-월 1회 실행 (또는 수동):
-1. 전체 allFilings + panel → main 세그먼트 풀리빌드 (rebuildContent)
-2. HF staging 업로드 후 `dart/contentIndex/manifest.json` current pointer publish
-3. delta 비움 (main에 흡수되었으므로)
+일·월 단일 워크플로(`searchIndexBuild`)에서 호출 — delta 세그먼트는 폐기되었고(PRD 기둥1·D)
+신규 공시는 매일 source catalog compaction 으로 main 에 흡수된다.
+
+흐름:
+1. previous(이전 current) + current catalog 둘 다 있고 변화 0 + 이전 manifest 가 이미 clean 이면
+   → main 재빌드 없이 manifest pointer 만 re-point(no-change 단락). 이전 manifest 에 delta 잔존 시엔
+   clean 풀 압축 재빌드로 강제(마이그레이션).
+2. 변화 有(또는 previous 부재=월간 풀빌드) → source catalog → main 세그먼트 풀 compaction.
+3. per-source 하한 가드(allFilings/panel/edgar/news) + 총량 가드 → partial HF pull 회귀 차단.
+4. clean publish — `indexPublishNames`(npz·delta 제외=sidecar SSOT), `previousManifestPath` seed 안 함
+   → 새 fileSources 에 delta 키 자연 부재(HF pointer main-only flip).
+5. lite tier(최근 N개월) 동반 빌드/업로드.
 
 환경:
 - HF_TOKEN: HuggingFace 업로드용
@@ -11,6 +19,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
@@ -19,10 +28,113 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
-def _catalogInputsFromEnv() -> tuple[str | None, list[str], list[str]]:
+# per-source 하한(runtime source 명) — 2026-06 풀셋 실측(allFilings 165k·panel 98k·edgar 56k·news 103k)의
+# ~80%. 총량 350k 만으로는 한 소스(예: news → 319k)가 통째로 누락돼도 통과(silent partial-pull)하므로,
+# 소스별 하한으로 partial HF pull 회귀를 개별 차단한다. env(JSON dict)로 재정의 가능.
+_DEFAULT_MIN_DOCS_BY_SOURCE: dict[str, int] = {
+    "allFilings": 130000,
+    "panel": 70000,
+    "edgar-panel": 40000,
+    "news": 70000,
+}
+
+
+def _catalogInputsFromEnv() -> tuple[str | None, str | None, list[str], list[str]]:
     manifestPaths = [p for p in os.environ.get("DARTLAB_SEARCH_SOURCE_MANIFESTS", "").split(os.pathsep) if p]
     expectedSources = [p.strip() for p in os.environ.get("DARTLAB_SEARCH_EXPECTED_SOURCES", "").split(",") if p.strip()]
-    return os.environ.get("DARTLAB_SEARCH_CURRENT_CATALOG") or None, manifestPaths, expectedSources
+    return (
+        os.environ.get("DARTLAB_SEARCH_PREVIOUS_CATALOG") or None,
+        os.environ.get("DARTLAB_SEARCH_CURRENT_CATALOG") or None,
+        manifestPaths,
+        expectedSources,
+    )
+
+
+def _isNoChange(previousCatalog: str | None, currentCatalog: str | None) -> bool:
+    """previous+current catalog 변화 0 + 이전 current manifest 가 이미 clean(delta 없음)이면 True.
+
+    변화가 있거나, previous 가 없거나(=월간 풀빌드), 이전 manifest 에 delta 가 잔존하면 False →
+    상위가 풀 compaction 재빌드(후자는 clean publish 로 delta 키를 떨군다=마이그레이션).
+    """
+    if not (currentCatalog and previousCatalog and Path(previousCatalog).exists()):
+        return False
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.pipeline import _loadCatalog, exportDeltaRowsForContentIndex
+
+    rows = exportDeltaRowsForContentIndex(_loadCatalog(previousCatalog), _loadCatalog(currentCatalog))
+    if rows.height > 0:
+        return False  # 신규/정정 有 → 풀 compaction
+    if _previousManifestNeedsCompaction(_contentIndexDir() / "previous_manifest.json"):
+        print("[build] catalog 변화 0 이나 이전 current 에 delta 잔존 → clean 풀 압축 재빌드(마이그레이션)")
+        return False
+    return True
+
+
+def _previousManifestNeedsCompaction(path: Path) -> bool:
+    """이전 current manifest 가 delta 를 품고 있나 — hasDelta 플래그 또는 fileSources/requiredFiles 의 delta 키."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if bool(data.get("hasDelta")):
+        return True
+    fileSources = data.get("fileSources") if isinstance(data.get("fileSources"), dict) else {}
+    requiredFiles = data.get("requiredFiles") if isinstance(data.get("requiredFiles"), list) else []
+    return any(str(k).startswith("delta") for k in fileSources) or any(
+        str(n).startswith("delta") for n in requiredFiles
+    )
+
+
+def _publishNoChangeManifest(hfToken: str) -> None:
+    """main 재빌드 없이 manifest pointer 만 re-point(이전 fileSources 보존). 빌드 0·fast."""
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, clearCache
+    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+    from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
+
+    outDir = _contentIndexDir()
+    writeIndexManifest(outDir, tier="full", buildCommand="buildSearchMain.noChange")
+    clearCache()
+    if not hfToken:
+        print("[build] HF_TOKEN 없음 — no-change manifest 로컬 재작성만 수행")
+        return
+    summary = publishContentIndexFiles(
+        token=hfToken,
+        indexDir=outDir,
+        files=["manifest.json"],
+        tier="full",
+        previousManifestPath=outDir / "previous_manifest.json",
+        promoteCurrent=_promoteCurrent(),
+    )
+    _writeCandidateEnv(summary)
+    print(
+        f"  [no-change-manifest] {summary.get('candidateManifestPath', '')} "
+        f"-> {summary['currentPrefix']} {summary['publishMode']}"
+    )
+
+
+def _perSourceGuard(nDocsBySource: dict) -> str | None:
+    """소스별 하한 검사 — 미달/누락 소스가 있으면 사람용 에러 문자열, 없으면 None.
+
+    한 소스 통째 누락(silent partial-pull)은 총량 가드를 통과할 수 있어 소스별로 개별 차단한다.
+    env ``DARTLAB_SEARCH_MIN_DOCS_BY_SOURCE`` (JSON dict, runtime source 명) 로 재정의 가능.
+    """
+    minimums = dict(_DEFAULT_MIN_DOCS_BY_SOURCE)
+    raw = os.environ.get("DARTLAB_SEARCH_MIN_DOCS_BY_SOURCE", "").strip()
+    if raw:
+        # env 제공 시 *대체*(merge 아님) — 빈 {} 면 per-source 가드 비활성(테스트/특수 운영).
+        try:
+            override = json.loads(raw)
+            if isinstance(override, dict):
+                minimums = {str(k): int(v) for k, v in override.items()}
+        except (json.JSONDecodeError, ValueError, TypeError):
+            print(f"[main] ⚠ DARTLAB_SEARCH_MIN_DOCS_BY_SOURCE 파싱 실패(기본값 사용): {raw!r}")
+    counts = {str(k): int(v or 0) for k, v in (nDocsBySource or {}).items()}
+    failures = [
+        f"{source}={counts.get(source, 0):,}(< {minimum:,})"
+        for source, minimum in minimums.items()
+        if counts.get(source, 0) < minimum
+    ]
+    return "소스별 하한 미달: " + ", ".join(failures) if failures else None
 
 
 def _buildRouterArtifact(tier: str = "full") -> int:
@@ -58,6 +170,14 @@ def main() -> int:
         print("[lite] 단독 완료")
         return 0
 
+    # ── no-change 단락 — previous+current catalog 변화 0 + 이전 manifest clean 이면 pointer 만 re-point ──
+    previousCatalog, currentCatalog, manifestPaths, expectedSources = _catalogInputsFromEnv()
+    if mainMode != "legacy" and _isNoChange(previousCatalog, currentCatalog):
+        print("[build] catalog 변화 0 + 이전 manifest clean — main 재빌드 없이 manifest pointer 만 re-point")
+        _publishNoChangeManifest(hfToken)
+        print("[build] no-change 완료")
+        return 0
+
     nDocs = _buildMainFromCatalog(mainMode)
     if nDocs is None:
         print("[main] content 인덱스 풀리빌드 시작 (allFilings + DART panel + EDGAR panel + 뉴스)")
@@ -79,18 +199,17 @@ def main() -> int:
     from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
 
     outDir = _contentIndexDir()
-    _printEntityGraphSummary(prepareEntityGraphCatalogArtifact(outDir, sourceCatalogPath=_catalogInputsFromEnv()[0]))
-    writeIndexManifest(outDir, tier="full", buildCommand="buildSearchMain")
+    _printEntityGraphSummary(prepareEntityGraphCatalogArtifact(outDir, sourceCatalogPath=currentCatalog))
+    manifest = writeIndexManifest(outDir, tier="full", buildCommand="buildSearchMain")
 
     if nDocs == 0:
         print("[main] 빌드된 문서 없음")
         return 1
 
-    # 퇴행 가드 — HF pull 이 429 등으로 조용히 빈 데이터를 반환하면 nDocs/router 가 0 이 된다.
+    # 퇴행 가드 — HF pull 이 429 등으로 조용히 빈 데이터를 반환하면 nDocs/router/소스별 행수가 빈다.
     # 이 상태로 업로드하면 프로덕션 인덱스를 빈 산출물로 *덮어쓰는 퇴행*. 업로드 중단.
-    # 임계 350k 산정(2026-06-10 풀셋 실측 422,558 = panel 98k + EDGAR 56k + allFilings 165k + 뉴스 103k):
-    # panel 누락(→324k)·allFilings 누락(→258k)·뉴스 누락(→319k)을 총량으로 차단. EDGAR/개별 소스
-    # 누락은 워크플로 pull 검증(af/pn/ep>0)이 1차 차단. 옛 500k 는 은퇴한 docs 섹션-행(200만) 기준 유산.
+    # ① 총량(350k) ② 소스별 하한(allFilings/panel/edgar/news) — 한 소스 통째 누락(silent partial-pull)
+    # 은 총량만으로는 통과할 수 있어(예: news → 319k) 소스별로 개별 차단한다(2026-06 풀셋 ~80%).
     minDocs = int(os.environ.get("DARTLAB_SEARCH_MIN_DOCS", "350000"))
     if nEvents == 0 or nDocs < minDocs:
         print(
@@ -98,37 +217,27 @@ def main() -> int:
             f"allFilings/panel pull 누락 의심 → 업로드 중단(프로덕션 보호)."
         )
         return 1
+    sourceGuardError = _perSourceGuard(manifest.get("nDocsBySource") or {})
+    if sourceGuardError:
+        print(f"[main] ✗ per-source 가드 발동 — {sourceGuardError} → 업로드 중단(partial pull 회귀 차단).")
+        return 1
 
     if not hfToken:
         print("[main] HF_TOKEN 없음 — 업로드 스킵")
         return 0
 
-    print("[main] HF staging 업로드 후 current manifest pointer publish (full = flat)")
+    print("[main] HF staging 업로드 후 current manifest pointer publish (full = flat, clean=delta 키 0)")
+    from dartlab.providers.dart.search.fieldIndexRebuild import indexPublishNames
     from dartlab.providers.dart.search.publishIndex import publishContentIndexFiles
 
-    files = [
-        "main.npz",
-        "main_stems.json",
-        "main_meta.parquet",
-        "main_info.json",
-        "router.json",
-        "catalog_snapshot.parquet",
-        "source_manifest_set.json",
-        "entityGraphCatalog.parquet",
-        "manifest.json",
-    ]
+    # clean publish — indexPublishNames(main sidecar+공용+manifest, npz·delta 제외=sidecar SSOT).
+    # previousManifestPath seed 안 함 → 새 fileSources 에 delta 키 자연 부재(HF pointer main-only flip).
     summary = publishContentIndexFiles(
         token=hfToken,
         indexDir=outDir,
-        files=files,
+        files=indexPublishNames(outDir),
         tier="full",
         promoteCurrent=_promoteCurrent(),
-        obsoleteCurrentFiles=[
-            "delta.npz",
-            "delta_stems.json",
-            "delta_meta.parquet",
-            "delta_info.json",
-        ],
     )
     _printPublishSummary(summary)
     _writeCandidateEnv(summary)
@@ -144,7 +253,7 @@ def main() -> int:
 def _buildMainFromCatalog(mainMode: str) -> int | None:
     if mainMode == "legacy":
         return None
-    currentCatalog, manifestPaths, expectedSources = _catalogInputsFromEnv()
+    _, currentCatalog, manifestPaths, expectedSources = _catalogInputsFromEnv()
     if not currentCatalog:
         if mainMode == "catalog":
             print("[main] catalog mode requires DARTLAB_SEARCH_CURRENT_CATALOG")
@@ -193,7 +302,7 @@ def _buildAndUploadLite(hfToken: str) -> None:
     from dartlab.providers.dart.search.fieldIndexRebuild import pushContentIndex, rebuildMain, writeIndexManifest
 
     clearCache()
-    currentCatalog, _, _ = _catalogInputsFromEnv()
+    _, currentCatalog, _, _ = _catalogInputsFromEnv()
     if currentCatalog:
         nLite = _buildLiteFromCatalog(currentCatalog, sinceDate)
     else:

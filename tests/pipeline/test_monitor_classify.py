@@ -197,8 +197,7 @@ def test_monitored_covers_core_scheduled_pipelines():
         "News Archive Sync",
         "GDELT Sync",
         "Valuation Snapshot",
-        "Search Index Delta (daily)",
-        "Search Index Main (monthly)",
+        "Search Index Build",
         "Quant Audit",
         "Update KindList",
     }

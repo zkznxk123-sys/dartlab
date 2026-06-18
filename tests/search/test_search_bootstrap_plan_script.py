@@ -54,7 +54,7 @@ def test_plan_search_bootstrap_for_missing_sources(tmp_path: Path) -> None:
     assert "gh workflow run originalSync.yml -f jobs=edgar" in commands
     assert "gh workflow run newsArchiveSync.yml" in commands
     assert "search_catalog_bootstrap=true" in commands
-    assert "gh workflow run searchIndexMain.yml -f build_mode=catalog" in commands
+    assert "gh workflow run searchIndexBuild.yml -f build_mode=catalog" in commands
     assert "checkSearchRemoteEvidence.py" in commands
     assert "buildSearchProofBundle.py" in commands
 
@@ -92,7 +92,7 @@ def test_plan_search_bootstrap_skips_source_bootstrap_when_catalogs_exist(tmp_pa
     assert plan["missingSources"] == []
     assert plan["missingContentTiers"] == ["full", "lite"]
     assert "search_catalog_bootstrap=true" not in commands
-    assert "gh workflow run searchIndexMain.yml -f build_mode=catalog" in commands
+    assert "gh workflow run searchIndexBuild.yml -f build_mode=catalog" in commands
 
 
 def test_plan_search_bootstrap_maps_status_blockers_to_actions(tmp_path: Path) -> None:

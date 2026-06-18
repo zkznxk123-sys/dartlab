@@ -70,8 +70,8 @@ def main(argv: list[str] | None = None) -> int:
 def _runDrill(workDir: Path) -> dict[str, Any]:
     import polars as pl
 
-    from dartlab.providers.dart.search.fieldIndex import buildContentSegment, saveSegment
-    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import saveSegmentWithSidecar, writeIndexManifest
     from dartlab.providers.dart.search.localUpdate import (
         activateStagedIndex,
         downloadAndActivateContentIndex,
@@ -126,7 +126,7 @@ def _runDrill(workDir: Path) -> dict[str, Any]:
     )
     rows = exportCatalogRowsForContentIndex(currentCatalog)
     idx, meta = buildContentSegment(rows.to_dicts(), showProgress=False)
-    saveSegment(idx, meta, "main", outDir=indexDir)
+    saveSegmentWithSidecar(idx, meta, "main", indexDir)  # npz + range-fetch sidecar(=manifest SSOT)
     shutil.copyfile(currentPath, indexDir / "catalog_snapshot.parquet")
     shutil.copyfile(manifestSetPath, indexDir / "source_manifest_set.json")
     manifest = writeIndexManifest(indexDir, tier="full", buildCommand="runSearchPipelineDrill")
@@ -165,7 +165,7 @@ def _runDrill(workDir: Path) -> dict[str, Any]:
     oldActive = activeBase / "_staging" / "old"
     oldActive.mkdir(parents=True, exist_ok=True)
     oldIdx, oldMeta = buildContentSegment([_oldActiveRow()], showProgress=False)
-    saveSegment(oldIdx, oldMeta, "main", outDir=oldActive)
+    saveSegmentWithSidecar(oldIdx, oldMeta, "main", oldActive)
     writeIndexManifest(oldActive, tier="full", buildCommand="runSearchPipelineDrill.old")
     _patchManifest(oldActive, {"builtAt": "2026-06-14T00:00:00", "canaryQueries": ["기존 공시"]})
     oldActivation = activateStagedIndex(oldActive, baseDir=activeBase)

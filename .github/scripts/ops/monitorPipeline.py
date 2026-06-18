@@ -34,8 +34,7 @@ MONITORED_WORKFLOWS = [
     "GDELT Sync",
     "Naver News Sync",  # 네이버 뉴스 private archive (cron 30 9) — 무키 시 green-noop, 키 설정 시 실데이터
     "Valuation Snapshot",
-    "Search Index Delta (daily)",
-    "Search Index Main (monthly)",
+    "Search Index Build",  # 일·월 단일 검색 인덱스 빌드(compact-only) — 옛 Delta(일간)+Main(월간) fold
     "Quant Audit",
     "Update KindList",
     "Intent Model Pipeline",  # 공시 Q&A 라우팅 모델 빌드+회귀게이트+HF 업로드 (cron 0 20 일요일)

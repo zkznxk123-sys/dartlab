@@ -61,8 +61,7 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 
 | 스크립트 | 역할 | 호출 workflow |
 |---|---|---|
-| [search/buildSearchDelta.py](search/buildSearchDelta.py) | 최근 N 일 content delta 인덱스 빌드 + HF 업로드 | `searchIndexDelta.yml` |
-| [search/buildSearchMain.py](search/buildSearchMain.py) | content main 인덱스 빌드 + HF 업로드 | `searchIndexMain.yml` |
+| [search/buildSearchMain.py](search/buildSearchMain.py) | content 인덱스 단일 빌드(compact-only) — no-change 단락/풀 compaction + per-source 가드 + clean publish + lite | `searchIndexBuild.yml` |
 | [search/buildSkillMarket.py](search/buildSkillMarket.py) | GitHub Discussion → Skill Market 정적 인덱스 | `deploy-landing.yml` |
 
 ### ops/ — operational
@@ -74,7 +73,7 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 
 ## sub-dir 스크립트의 `_hfRetry` import 규약
 
-5 개 스크립트 (`sync/uploadData`, `sync/prebuildValuation`, `prebuild/prebuildData`, `search/buildSearchDelta`, `search/buildSearchMain`) 가 `_hfRetry` 사용. sub-dir 의 sys.path 가 부모를 못 잡으므로 다음 boilerplate:
+4 개 스크립트 (`sync/uploadData`, `sync/prebuildValuation`, `prebuild/prebuildData`, `search/buildSearchMain`) 가 `_hfRetry` 사용. sub-dir 의 sys.path 가 부모를 못 잡으므로 다음 boilerplate:
 
 ```python
 import sys

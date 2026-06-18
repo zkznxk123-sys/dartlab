@@ -680,14 +680,14 @@ def ensureContentIndex(tier: str | None = None) -> None:
     import os
 
     global _HF_CONTENTINDEX_ATTEMPTED
-    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir, _hasMainPostings
     from dartlab.providers.dart.search.localUpdate import downloadAndActivateContentIndex, resolveActiveIndexDir
 
     base = _contentIndexDir()
     if resolveActiveIndexDir(base) is not None:
         return
-    if (base / "main.npz").exists():
-        return  # flat(legacy/full) 로컬 존재 — no-op
+    if _hasMainPostings(base):
+        return  # flat 로컬 존재(sidecar SSOT 또는 legacy npz) — no-op
     if os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
         return
     if _HF_CONTENTINDEX_ATTEMPTED:
@@ -713,7 +713,7 @@ def ensureContentIndex(tier: str | None = None) -> None:
             allow_patterns=[f"{ciDir}/{tier}/*"],
             local_dir=str(Path(_cfg.dataDir)),
         )
-        if (base / tier / "main.npz").exists():
+        if _hasMainPostings(base / tier):
             return
         # 2) 전환기 fallback — tier 미배포 시 flat(legacy full) pull (기존 사용자 동작 보호).
         retryHfCall(

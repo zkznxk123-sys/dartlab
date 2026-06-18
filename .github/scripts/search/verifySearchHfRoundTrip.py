@@ -168,8 +168,8 @@ def _defaultRepoId() -> str:
 
 
 def _ensurePreviousActive(baseDir: Path) -> Path:
-    from dartlab.providers.dart.search.fieldIndex import buildContentSegment, saveSegment
-    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import saveSegmentWithSidecar, writeIndexManifest
 
     oldDir = baseDir / "_staging" / "roundtrip-previous"
     if oldDir.exists():
@@ -190,7 +190,7 @@ def _ensurePreviousActive(baseDir: Path) -> Path:
         }
     ]
     idx, meta = buildContentSegment(rows, showProgress=False)
-    saveSegment(idx, meta, "main", outDir=oldDir)
+    saveSegmentWithSidecar(idx, meta, "main", oldDir)  # npz + range-fetch sidecar(=manifest SSOT)
     writeIndexManifest(oldDir, tier="full", buildCommand="verifySearchHfRoundTrip.previous")
     manifestPath = oldDir / "manifest.json"
     manifest = json.loads(manifestPath.read_text(encoding="utf-8"))

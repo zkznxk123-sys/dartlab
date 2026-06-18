@@ -5,7 +5,7 @@
 ``{date}``=YYYYMMDD)만 유지. 일자가 immutable 키라 윈도가 월 경계를 넘어도 손상 0(각 날짜 독립
 파일). 정기보고서(사업/분기/반기)는 ``report_nm`` 으로 자동 제외 → docs(정기 zip) 와 중복 0.
 ``pushAllFilings`` 가 자체 HF 업로드(``_meta`` 제외, dart/allFilings 단일 소유 = 본 stage —
-searchIndexDelta 의 옛 이중 push 제거됨). lookback 일수는 ``SYNC_LOOKBACK_DAYS`` env(기본 7)
+옛 검색 인덱스 워크플로의 이중 push 제거됨). lookback 일수는 ``SYNC_LOOKBACK_DAYS`` env(기본 7)
 또는 ``DART_ALLFILINGS_LOOKBACK``.
 """
 

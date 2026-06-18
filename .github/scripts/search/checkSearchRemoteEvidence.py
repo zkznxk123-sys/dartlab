@@ -153,6 +153,9 @@ def _auditContentIndex(
         errors.extend(
             f"missingContentFileSourceMapping:{tier}:{rel}" for rel in manifestSummary["missingFileSourceMappings"]
         )
+        # compact-only clean publish — published pointer 에 delta 키가 0 이어야 한다(PRD 기둥1·D).
+        # delta 세그먼트는 폐기됐고 clean publish(previousManifestPath seed 안 함)가 delta 키를 떨군다.
+        errors.extend(f"deltaFileSourceLeak:{tier}:{rel}" for rel in manifestSummary["deltaFileSources"])
         manifests[tier] = {
             "manifestPath": manifestPath,
             "exists": exists,
@@ -277,6 +280,10 @@ def _contentManifestSummary(
 ) -> dict[str, Any]:
     fileSources = manifest.get("fileSources") if isinstance(manifest.get("fileSources"), dict) else {}
     requiredFiles = manifest.get("requiredFiles") if isinstance(manifest.get("requiredFiles"), list) else []
+    deltaFileSources = sorted(
+        {str(k) for k in fileSources if str(k).startswith("delta")}
+        | {str(n) for n in requiredFiles if isinstance(n, str) and n.startswith("delta")}
+    )
     missingMappings: list[str] = []
     missingSources: list[str] = []
     for rel in requiredFiles:
@@ -324,6 +331,7 @@ def _contentManifestSummary(
         "fileSourcesCount": len(fileSources),
         "missingFileSourceMappings": missingMappings,
         "missingFileSources": missingSources,
+        "deltaFileSources": deltaFileSources,
         "stagingPrefix": manifest.get("stagingPrefix") or "",
     }
 
@@ -422,6 +430,8 @@ def _blockers(*, sourceCatalog: dict[str, Any], contentIndex: dict[str, Any]) ->
         blockers.append("contentIndexManifestMissing")
     if any(str(error).startswith("missingContentFileSource") for error in contentIndex.get("errors") or []):
         blockers.append("contentIndexFileSourceMissing")
+    if any(str(error).startswith("deltaFileSourceLeak") for error in contentIndex.get("errors") or []):
+        blockers.append("contentIndexDeltaLeak")
     return blockers
 
 

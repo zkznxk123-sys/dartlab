@@ -182,29 +182,24 @@ def _surfaceNamingReviewed() -> bool:
 
 
 def _singleEngineDefault(workflows: dict[str, str]) -> bool:
-    combined = "\n".join(workflows.values())
-    return "DARTLAB_SEARCH_MAIN_MODE" in combined and "DARTLAB_SEARCH_DELTA_MODE" in combined
+    # compact-only — 단일 searchIndexBuild 워크플로(MAIN_MODE catalog)에 별도 delta 엔진 없음.
+    build = _workflowText(workflows, "searchIndexBuild.yml")
+    return "DARTLAB_SEARCH_MAIN_MODE" in build and "DARTLAB_SEARCH_DELTA_MODE" not in build
 
 
 def _defaultBuildModeCatalog(workflows: dict[str, str]) -> bool:
-    main = _workflowText(workflows, "searchIndexMain.yml")
-    delta = _workflowText(workflows, "searchIndexDelta.yml")
-    return "default: catalog" in main and "default: 'catalog'" in delta
+    build = _workflowText(workflows, "searchIndexBuild.yml")
+    return "default: catalog" in build
 
 
 def _scheduledBuildModeCatalog(workflows: dict[str, str]) -> bool:
-    main = _workflowText(workflows, "searchIndexMain.yml")
-    delta = _workflowText(workflows, "searchIndexDelta.yml")
-    return (
-        "${{ inputs.build_mode || 'catalog' }}" in main
-        and "${{ github.event.inputs.delta_mode || 'catalog' }}" in delta
-    )
+    build = _workflowText(workflows, "searchIndexBuild.yml")
+    return "${{ inputs.build_mode || 'catalog' }}" in build
 
 
 def _legacyFallbackOperatorOnly(workflows: dict[str, str]) -> bool:
-    main = _workflowText(workflows, "searchIndexMain.yml")
-    delta = _workflowText(workflows, "searchIndexDelta.yml")
-    return "options:\n          - catalog\n          - legacy" in main and "default: 'catalog'" in delta
+    build = _workflowText(workflows, "searchIndexBuild.yml")
+    return "options:\n          - catalog\n          - legacy" in build
 
 
 def _failClosedPublish(workflows: dict[str, str]) -> bool:

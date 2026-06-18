@@ -9,7 +9,10 @@ from typing import Any
 
 ACTIVE_POINTER_NAME = "active.json"
 STAGING_DIR_NAME = "_staging"
-CORE_INDEX_FILES: tuple[str, ...] = ("main.npz", "main_stems.json", "main_meta.parquet", "main_info.json")
+# 세그먼트 동반물(항상 존재) — postings 표현은 별도(_CORE_POSTINGS_ANY).
+CORE_INDEX_FILES: tuple[str, ...] = ("main_stems.json", "main_meta.parquet", "main_info.json")
+# 로드 가능한 postings 표현 — sidecar(SSOT, compact-only) 또는 legacy npz 중 하나면 충분(P0 양읽기 호환).
+_CORE_POSTINGS_ANY: tuple[str, ...] = ("main.postings.bin", "main.npz")
 
 
 def resolveActiveIndexDir(baseDir: str | Path) -> Path | None:
@@ -20,7 +23,8 @@ def resolveActiveIndexDir(baseDir: str | Path) -> Path | None:
 
     Returns:
         Path | None: Active artifact directory when the pointer is valid and has
-        `main.npz`; otherwise None.
+        loadable postings (sidecar ``main.postings.bin`` or legacy ``main.npz``)
+        + segment companions + manifest; otherwise None.
 
     Raises:
         None.
@@ -43,6 +47,8 @@ def resolveActiveIndexDir(baseDir: str | Path) -> Path | None:
     for name in CORE_INDEX_FILES:
         if not (target / name).exists():
             return None
+    if not any((target / name).exists() for name in _CORE_POSTINGS_ANY):
+        return None  # postings 표현 부재(sidecar·npz 둘 다 없음) → 로드 불가
     if not (target / "manifest.json").exists():
         return None
     return target
@@ -133,8 +139,8 @@ def selfcheckLocalIndex(
     if manifest is None:
         if requireManifest:
             errors.append("missing:manifest")
-        if not (base / "main.npz").exists():
-            errors.append("missingFile:main.npz")
+        if not any((base / name).exists() for name in _CORE_POSTINGS_ANY):
+            errors.append("missingFile:postings")  # sidecar(SSOT)·npz 둘 다 없음
     else:
         from dartlab.providers.dart.search.fieldIndex import INDEX_SCHEMA_VERSION
 
@@ -144,11 +150,11 @@ def selfcheckLocalIndex(
         errors.extend(_canaryErrors(base, manifest.get("canaryQueries") or []))
         errors.extend(_sourceCanaryPackErrors(base, manifest.get("sourceCanaryPack") or []))
 
-    if requireLoadable and (base / "main.npz").exists():
+    if requireLoadable and any((base / name).exists() for name in _CORE_POSTINGS_ANY):
         try:
             from dartlab.providers.dart.search.fieldIndex import loadSegment
 
-            if loadSegment("main", base) is None:
+            if loadSegment("main", base) is None:  # 양읽기 — sidecar 우선, 없으면 npz
                 errors.append("loadSmoke:main")
         except Exception:  # noqa: BLE001 — corrupt local artifact must not activate.
             errors.append("loadSmoke:main")

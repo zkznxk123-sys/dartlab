@@ -75,8 +75,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     env = {
-        "DARTLAB_SEARCH_DELTA_MODE": "catalog",
-        "DARTLAB_SEARCH_MAIN_MODE": "catalog",
+        "DARTLAB_SEARCH_MAIN_MODE": "catalog",  # compact-only — delta 엔진 폐기, main 단일
         "DARTLAB_SEARCH_PREVIOUS_CATALOG": str(previous) if previousExists else "",
         "DARTLAB_SEARCH_CURRENT_CATALOG": str(outCurrent),
         "DARTLAB_SEARCH_SOURCE_MANIFESTS": os.pathsep.join(str(path) for path in eligible["manifests"]),

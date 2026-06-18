@@ -156,11 +156,11 @@ def _searchMainAction(expectedSources: list[str]) -> dict[str, Any]:
         "expected_sources": ",".join(expectedSources),
         "productization_gate": "ops",
     }
-    argv = _workflowRunArgv("searchIndexMain.yml", inputs)
+    argv = _workflowRunArgv("searchIndexBuild.yml", inputs)
     return {
         "id": "buildContentIndex:mainCatalog",
         "kind": "githubWorkflowDispatch",
-        "workflow": "searchIndexMain.yml",
+        "workflow": "searchIndexBuild.yml",
         "inputs": inputs,
         "reason": "Publish full/lite contentIndex from source catalogs and produce ops evidence artifacts.",
         "command": shlex.join(argv),
