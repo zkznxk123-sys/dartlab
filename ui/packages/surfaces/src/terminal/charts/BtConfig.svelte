@@ -99,7 +99,12 @@
 								{#each conds as c, ci (ci)}
 									<div class="condRow">
 										<select class="condSel" value={c.left} onchange={(e) => setLeft(i, side, ci, e.currentTarget.value as SeriesKey)}>
-											{#each SERIES_CATALOG as sd (sd.key)}<option value={sd.key}>{T(sd.kr, sd.en)}</option>{/each}
+											<optgroup label={T('가격·기술', 'price/technical')}>
+												{#each SERIES_CATALOG as sd (sd.key)}<option value={sd.key}>{T(sd.kr, sd.en)}</option>{/each}
+											</optgroup>
+											<optgroup label={T('펀더게이트 (재무·panel)', 'fundamental gate')}>
+												<option value="fundGate">{T('Piotroski F (재무건강 0~9)', 'Piotroski F (0~9)')}</option>
+											</optgroup>
 										</select>
 										{#each seriesDef(c.left)?.params ?? [] as pp (pp.name)}
 											<span class="condP"><button onclick={() => stepLeftParam(i, side, ci, pp.name, -1)}>−</button><b>{c.leftParams[pp.name] ?? pp.def}</b><button onclick={() => stepLeftParam(i, side, ci, pp.name, 1)}>+</button></span>

@@ -9,7 +9,8 @@
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../lib/types';
 	import type { MacroLensTab } from '../lib/macroLens';
-	import { runPortfolioBacktest, type PortfolioBtResult } from '../lib/backtest';
+	import { runPortfolioBacktest, type PortfolioBtResult, buildGateSeries, ruleUsesGate } from '../lib/backtest';
+	import { loadGateRows, type FundamentalGateRow } from '@dartlab/ui-runtime/data/gateRows'; // 펀더게이트(W2) PIT 행
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
 	import { rankCoMovers, type CoMover } from '../lib/coMovement';
 	import { loadMarketIndexSeries, MARKET_INDEX_REFS, marketIndexDef } from '../lib/marketIndex';
@@ -781,7 +782,21 @@
 		applyPeriodFull(c);
 	});
 
-	// 백테스트 — 의존: 전략 슬롯 N(프리셋·파라미터·색·라벨)·포커스·비용(토글+bp)·기간·dataRev.
+	// ★펀더게이트(W2 간판②) — fundGate 조건 쓰는 룰 있을 때만 종목별 게이트 행 로드(비동기, 불필요 로드 회피).
+	//   완료 시 btGateRows 갱신 → BT effect 재실행(반응). 종목 전환 시 재로드. 캐시는 data/fetch 코어가 공유.
+	let btGateRows = $state<FundamentalGateRow[] | null>(null);
+	let btGateCode = $state<string | null>(null);
+	$effect(() => {
+		const usesGate = ctl.btStrategies.some((s) => s.rule && ruleUsesGate(s.rule));
+		if (!usesGate || subject === 'index') return;
+		if (btGateCode === code) return; // 이미 로드된 종목
+		btGateCode = code;
+		loadGateRows(code)
+			.then((rows) => { if (btGateCode === code) btGateRows = rows ?? []; })
+			.catch(() => { if (btGateCode === code) btGateRows = []; });
+	});
+
+	// 백테스트 — 의존: 전략 슬롯 N(프리셋·파라미터·색·라벨)·포커스·비용(토글+bp)·기간·dataRev·게이트.
 	$effect(() => {
 		const c = chart;
 		const slots = ctl.btStrategies; // 반응 의존 (배열 신참조마다 재실행)
@@ -790,6 +805,7 @@
 		const bp = ctl.btCostsBp;
 		void dataRev;
 		void ctl.period;
+		const gateRows = btGateRows; // 반응 의존 — 게이트 로드 완료 시 재계산
 		if (!c) return;
 		// 지수 subject = 거래 대상 아님 — BT 비활성(슬롯 보존, 종목 복귀 시 복원, 01 §4.3)
 		if (subject === 'index' || !slots.length) {
@@ -803,9 +819,12 @@
 		const all = displaySeries();
 		if (!all.length) return;
 		const win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
+		// 펀더게이트 PIT 시계열 — 게이트 룰 있을 때만(공시일 이후 봉 계단, look-ahead 0). 없으면 null(회귀 0).
+		const usesGate = slots.some((s) => s.rule && ruleUsesGate(s.rule));
+		const gate = usesGate ? buildGateSeries(all.map((cd) => cd.t), gateRows ?? []) : null;
 		// 다전략(N≤3) + 동일가중 조합. look-ahead 차단은 displaySeries 절단이 N전략에 상속(01 §2.2).
 		// extendData 신참조가 재계산 트리거(CMP 식). 슬롯별 spec.code 공통(단일종목).
-		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
+		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, gate, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btPf = pf;
 		const ext = buildBtExtend(pf, all, slots, focus);
 		if (ext) applyBt(c, ext);
