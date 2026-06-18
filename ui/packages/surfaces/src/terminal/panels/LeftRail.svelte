@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Candle, FilingHit } from '@dartlab/ui-contracts';
+	import type { Candle } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine, IndustryMacro } from '../lib/engine';
 	import ScatterMap, { type ScatterPt } from './ScatterMap.svelte';
@@ -45,32 +45,6 @@
 	// 30거래일 스파크 — recent.parquet 전종목 1파일 (티커 스트립과 어댑터 캐시 공유, 추가 다운로드 0)
 	let recentMap = $state<Record<string, Candle[]> | null>(null);
 	rt.price.govRecent().then((m) => (recentMap = m));
-
-	// ── 공시 본문 전역검색(좌측 상단) — cmdBar 종목점프와 다른 intent: 462k 코퍼스 BM25.
-	//    rt.search.queryFilings = HF sidecar byte-range fetch(무서버·exact). 결과 행 클릭 = 관련 회사로 점프.
-	let fq = $state('');
-	let fHits = $state<FilingHit[]>([]);
-	let fBusy = $state(false);
-	let fErr = $state(false);
-	let fSeq = 0;
-	$effect(() => {
-		const q = fq.trim();
-		if (!q) { fHits = []; fBusy = false; fErr = false; return; }
-		const seq = ++fSeq;
-		const t = setTimeout(async () => {
-			fBusy = true;
-			fErr = false;
-			try {
-				const hits = await rt.search.queryFilings({ text: q, limit: 12 });
-				if (seq === fSeq) { fHits = hits; fBusy = false; }
-			} catch {
-				if (seq === fSeq) { fErr = true; fBusy = false; fHits = []; }
-			}
-		}, 200);
-		return () => clearTimeout(t);
-	});
-	const openFiling = (h: FilingHit) => { if (h.stockCode) onPick(h.stockCode); };
-	const viewerHref = (h: FilingHit) => (h.stockCode ? `${base}/viewer/company/${h.stockCode}${h.rceptNo ? `?rcept=${h.rceptNo}` : ''}` : '');
 
 	// 조건 검색 — query 즉시 반영(입력 반응성) + queryD 140ms 디바운스(무거운 rows 재계산 억제)
 	let query = $state('');
@@ -133,39 +107,6 @@
 	const twBot = $derived(tailwinds.length > 3 ? tailwinds.slice(-3).reverse() : []);
 	const macroAsOf = $derived(macro?.asOf ?? '');
 </script>
-
-<!-- 공시 본문 전역검색 — 좌측 최상단. cmdBar(종목 점프)와 다른 intent: 462k 코퍼스 본문 BM25.
-     결과 행 클릭 = 관련 회사로 점프(onPick) · "공시 열기 ↗" = 뷰어 딥링크. 무서버 HF sidecar range fetch. -->
-<section class="panel filingSrch">
-	<div class="fsBar">
-		<input
-			class="fsInput mono"
-			bind:value={fq}
-			spellcheck={false}
-			placeholder={lang === 'en' ? 'search filings — 증자·소송·배당…' : '공시 본문 검색 — 증자·소송·배당…'}
-		/>
-		{#if fq}<button class="fsX" onclick={() => (fq = '')} title={lang === 'en' ? 'clear' : '지우기'}>✕</button>{/if}
-	</div>
-	{#if fq.trim()}
-		<div class="fsResults">
-			{#if fBusy}
-				<div class="fsMsg">{lang === 'en' ? 'searching…' : '검색 중…'}</div>
-			{:else if fErr}
-				<div class="fsMsg">{lang === 'en' ? 'search index unavailable' : '검색 인덱스 미배포'}</div>
-			{:else if !fHits.length}
-				<div class="fsMsg">{lang === 'en' ? 'no filings' : '결과 없음'}</div>
-			{:else}
-				{#each fHits as h (h.sourceRef)}
-					<div class="fsRow" role="button" tabindex="0" onclick={() => openFiling(h)} onkeydown={(e) => e.key === 'Enter' && openFiling(h)}>
-						<div class="fsRowTop"><b class="fsCorp">{h.corpName || h.stockCode || '—'}</b><span class="fsReport">{h.reportNm}</span><span class="fsDate mono">{h.rceptDt}</span></div>
-						{#if h.snippet}<div class="fsSnip">{h.snippet}</div>{/if}
-						{#if h.stockCode}<a class="fsOpen" href={viewerHref(h)} target="_blank" rel="noopener" onclick={(e) => e.stopPropagation()}>{lang === 'en' ? 'open ↗' : '공시 열기 ↗'}</a>{/if}
-					</div>
-				{/each}
-			{/if}
-		</div>
-	{/if}
-</section>
 
 <!-- 경제 — 최상단 고정 (탭 토글 폐지, 항상 노출) -->
 {#if macro}
@@ -266,29 +207,3 @@
 
 <ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {#if finLegendOpen}<FinTypeLegendDialog {lang} onClose={() => (finLegendOpen = false)} />{/if}
-
-<style>
-	/* 공시 본문 전역검색 — 좌측 상단. 터미널 토큰(--dl-*) 사용, 미정의 시 fallback. 운영자 눈검수 대상. */
-	.filingSrch { padding: 5px 6px; border-bottom: 1px solid var(--dl-line, #1c2433); }
-	.fsBar { display: flex; align-items: center; gap: 4px; }
-	.fsInput {
-		flex: 1; min-width: 0; background: var(--dl-bg-raised, #0b1018);
-		border: 1px solid var(--dl-line-strong, #2a3650); color: var(--dl-text, #cdd6e4);
-		border-radius: 4px; padding: 4px 7px; font-size: 11px;
-	}
-	.fsInput::placeholder { color: var(--dl-text-dim, #5b6678); }
-	.fsX { background: none; border: none; color: var(--dl-text-dim, #5b6678); cursor: pointer; font-size: 11px; padding: 2px 4px; }
-	.fsResults { margin-top: 4px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
-	.fsMsg { font-size: 10.5px; color: var(--dl-text-dim, #5b6678); padding: 6px 2px; }
-	.fsRow { padding: 5px 6px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; }
-	.fsRow:hover { background: var(--dl-bg-raised, #0b1018); border-color: var(--dl-line-strong, #2a3650); }
-	.fsRowTop { display: flex; align-items: baseline; gap: 5px; }
-	.fsCorp { font-size: 11px; color: var(--dl-text, #cdd6e4); white-space: nowrap; }
-	.fsReport { font-size: 10px; color: var(--dl-text-dim, #8a94a6); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.fsDate { font-size: 9.5px; color: var(--dl-text-dim, #5b6678); }
-	.fsSnip {
-		font-size: 10px; color: var(--dl-text-dim, #8a94a6); margin-top: 2px; line-height: 1.35;
-		display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-	}
-	.fsOpen { font-size: 9.5px; color: var(--dl-accent, #5b9bd5); text-decoration: none; margin-top: 2px; display: inline-block; }
-</style>
