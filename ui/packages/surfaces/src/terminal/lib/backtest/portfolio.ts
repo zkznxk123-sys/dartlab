@@ -56,10 +56,20 @@ export interface PortfolioBtResult {
 export function runPortfolioBacktest(
 	candles: Candle[],
 	slots: StrategySlot[],
-	opts: { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput; oosSplit?: number }
+	opts: {
+		windowBars: number;
+		withCosts: boolean;
+		costsBp?: BtCostsBp;
+		spec?: BtSpecInput;
+		oosSplit?: number;
+		gate?: (number | null)[] | null; // 펀더게이트 PIT 시계열 — rule 슬롯의 fundGate 조건 소비(W2). 전 슬롯 공유(같은 종목).
+	}
 ): PortfolioBtResult {
 	const computed = slots
-		.map((s) => ({ id: s.id, result: s.rule ? runBacktestRule(candles, s.rule, opts) : runBacktest(candles, s.preset, s.params, opts) }))
+		.map((s) => ({
+			id: s.id,
+			result: s.rule ? runBacktestRule(candles, s.rule, opts, opts.gate ?? null) : runBacktest(candles, s.preset, s.params, opts)
+		}))
 		.filter((x): x is { id: string; result: BtResult } => x.result != null);
 
 	if (computed.length === 0) return { slots: [], combo: null, startIdx: 0, bhEquity: [] };
