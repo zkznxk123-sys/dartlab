@@ -26,6 +26,7 @@
 	const seriesDef = (key: SeriesKey) => SERIES_CATALOG.find((s) => s.key === key);
 
 	let collapsed = $state(false);
+	let presetsOpen = $state(false); // 전략 ≥1 일 때 프리셋 그리드 접힘 토글(빈 상태는 항상 펼침)
 	// 폭 리사이즈 — 드래그 핸들(우측 가장자리). 세션 한정 $state.
 	let dockW = $state(320);
 	function startResize(e: PointerEvent) {
@@ -216,7 +217,8 @@
 						{/if}
 					</div>
 				{/each}
-				{#if ctl.btStrategies.length < 3}
+				{#if ctl.btStrategies.length === 0}
+					<!-- 빈 상태 = 런치패드(프리셋 전체 노출). 전략 추가 후엔 토글로 접어 검증·고지 공간 확보(깎기). -->
 					<div class="btPresetGrid">
 						{#each BT_PRESETS as p (p.key)}<button class="btPresetBtn" onclick={() => ctl.addStrategy(p)} title={T('출발점 · 추천 아님', 'starting point · not advice')}>{T(p.kr, p.en)}</button>{/each}
 						{#each RULE_PRESETS as rp (rp.key)}<button class="btPresetBtn rule" onclick={() => ctl.addRulePreset(rp)} title={T('규칙 프리셋(편집가능) · 출발점', 'editable rule preset · starting point')}>{T(rp.kr, rp.en)}</button>{/each}
@@ -225,6 +227,17 @@
 						<button class="btCustomBtn" onclick={() => ctl.addCustomRule()}>＋ {T('커스텀 규칙 빌더', 'custom rule builder')}</button>
 						<span class="btCustomHint">{T('지표·연산자·임계값 직접 조립 · 추천 아님', 'compose indicators/operators/thresholds')}</span>
 					</div>
+				{:else if ctl.btStrategies.length < 3}
+					<button class="btAddToggle" onclick={() => (presetsOpen = !presetsOpen)} aria-expanded={presetsOpen}>＋ {T('전략 추가', 'add strategy')} <span class="btAddCaret">{presetsOpen ? '▴' : '▾'}</span></button>
+					{#if presetsOpen}
+						<div class="btPresetGrid">
+							{#each BT_PRESETS as p (p.key)}<button class="btPresetBtn" onclick={() => { ctl.addStrategy(p); presetsOpen = false; }} title={T('출발점 · 추천 아님', 'starting point · not advice')}>{T(p.kr, p.en)}</button>{/each}
+							{#each RULE_PRESETS as rp (rp.key)}<button class="btPresetBtn rule" onclick={() => { ctl.addRulePreset(rp); presetsOpen = false; }} title={T('규칙 프리셋(편집가능) · 출발점', 'editable rule preset · starting point')}>{T(rp.kr, rp.en)}</button>{/each}
+						</div>
+						<div class="btCustomCard">
+							<button class="btCustomBtn" onclick={() => { ctl.addCustomRule(); presetsOpen = false; }}>＋ {T('커스텀 규칙 빌더', 'custom rule builder')}</button>
+						</div>
+					{/if}
 				{/if}
 				{#if ctl.btStrategies.length >= 2}
 					<div class="btDesc warn">{T('⚠ 여러 전략 같은 데이터 비교 = 사후선택 편향 · 단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'selection bias · single-stock combo = timing not asset')}</div>
@@ -288,6 +301,10 @@
 				<div class="btDesc">{T('펀더게이트는 ① 전략의 진입 조건으로 추가 · 가격 배경 음영(PIT 공시일 이후)', 'add the fundamental gate as an ENTRY condition · tints the price background (PIT, post-disclosure)')}</div>
 			</div>
 
+		</div>
+
+		<!-- 정직 고지 띠(sticky bottom·상존) — 체결모델·미래참조차단·B&H. 스크롤에 밀려나지 않음(정직 OS 사상). -->
+		<div class="sdHonestBar">
 			<div class="btBench">{T('비교 기준 · 보유(B&H) · 동일 비용', 'benchmark · buy & hold · same costs')}</div>
 			<div class="btModelNote">{T('신호 t일 종가 → t+1일 시가 체결 · 미래참조 차단 · 과거 가정 노출형 시뮬레이션(추천 아님)', 'signal close(t) → fill open(t+1) · no look-ahead · not advice')}</div>
 		</div>
@@ -365,7 +382,13 @@
 	.btParamVal { font-size: 12px; min-width: 30px; text-align: center; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
 	.btDesc { font-size: 10.5px; color: var(--dim, #8b94a3); line-height: 1.5; margin-top: 3px; }
 	.btDesc.warn { color: var(--amber, #fb923c); }
-	.btBench { font-size: 10.5px; color: var(--dim, #8b94a3); margin-top: 5px; }
+	/* 정직 고지 띠 — sdBody 밖 sticky 하단(flex:none). 스크롤 내용과 무관하게 항상 보임. */
+		.sdHonestBar { flex: none; padding: 5px 8px 6px; border-top: 1px solid var(--dl-line-strong, #2a3142); background: var(--dl-bg-base, #0a0e15); }
+		.btBench { font-size: 10.5px; color: var(--dim, #8b94a3); }
+		/* 전략 추가 토글 — 프리셋 그리드 접힘(전략 >=1). 빈 상태는 그리드 직접 노출. */
+		.btAddToggle { width: 100%; margin-top: 4px; font-size: 11px; background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--dl-line-strong, #2a3142); color: #aeb6c2; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
+		.btAddToggle:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
+		.btAddCaret { color: var(--dimmer, #5b6573); }
 	.btModelNote { font-size: 10px; color: var(--dimmer, #5b6573); line-height: 1.5; margin-top: 2px; }
 	.btTfNote { font-size: 11px; color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; line-height: 1.5; }
 	.btTfSwitch { font-size: 10.5px; background: rgba(251, 146, 60, 0.16); border: 1px solid rgba(251, 146, 60, 0.5); color: var(--amber, #fb923c); border-radius: 3px; padding: 1px 8px; cursor: pointer; font-family: inherit; margin-left: 2px; }
