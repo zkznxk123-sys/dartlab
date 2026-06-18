@@ -8,7 +8,15 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan.builders.kr.common import BATCH_SIZE, mergeBatchFiles, mergeIncremental, panelDir, say, scanDir
+from dartlab.scan.builders.kr.common import (
+    BATCH_SIZE,
+    mergeBatchFiles,
+    mergeIncremental,
+    panelDir,
+    releaseNativeMemory,
+    say,
+    scanDir,
+)
 
 
 def _buildRawChanges(stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | None:
@@ -220,6 +228,7 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True, incremental: bo
                 del batch
                 batchChunks = []
                 batchIdx += 1
+                releaseNativeMemory()
 
         if verbose and (i + 1) % 500 == 0:
             say(
@@ -241,6 +250,7 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True, incremental: bo
     else:
         finalRows = mergeBatchFiles(batchDir, outputPath)
     shutil.rmtree(batchDir, ignore_errors=True)
+    releaseNativeMemory()
 
     elapsed = time.perf_counter() - t0
     diskMb = outputPath.stat().st_size / 1024 / 1024

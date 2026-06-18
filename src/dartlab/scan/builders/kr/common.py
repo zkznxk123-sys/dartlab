@@ -36,7 +36,10 @@ LLM Specifications:
 
 from __future__ import annotations
 
+import ctypes
+import gc
 import json
+import os
 from pathlib import Path
 
 import polars as pl
@@ -45,7 +48,34 @@ from dartlab.core.logger import getLogger
 
 _log = getLogger(__name__)
 
-BATCH_SIZE = 200
+
+def configuredBatchSize(default: int = 200) -> int:
+    """Return scan-builder batch size, optionally capped by env for constrained runners."""
+    raw = os.environ.get("DARTLAB_SCAN_BATCH_SIZE", "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return max(1, value)
+
+
+BATCH_SIZE = configuredBatchSize()
+
+
+def releaseNativeMemory() -> None:
+    """Ask Python and the libc allocator to return freed Polars/native memory."""
+    gc.collect()
+    if os.name != "posix":
+        return
+    try:
+        trim = getattr(ctypes.CDLL("libc.so.6"), "malloc_trim", None)
+    except OSError:
+        return
+    if trim is not None:
+        trim(0)
+
 
 # 증분 prebuild 변경 감지 ledger 파일명 (scanDir 아래). panel HF listing 의
 # {filename: size} 스냅샷을 직전 빌드가 남기고, 다음 사이클이 size 차이로 변경 종목을 가린다.

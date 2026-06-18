@@ -47,6 +47,7 @@ import polars as pl
 
 from dartlab.scan.builders.kr.common import BATCH_SIZE as _BATCH
 from dartlab.scan.builders.kr.common import mergeBatchFiles as _mergeBatchFiles
+from dartlab.scan.builders.kr.common import releaseNativeMemory as _releaseNativeMemory
 from dartlab.scan.builders.kr.common import reportDir as _reportDir
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
@@ -214,6 +215,7 @@ def buildReport(*, sinceYear: int = 2016, verbose: bool = True, apiTypes: Iterab
                     del batch
                     apiChunks[apiType] = []
                     apiBatchIdx[apiType] = idx + 1
+                    _releaseNativeMemory()
 
         if verbose and (i + 1) % 500 == 0:
             _say(f"  [{i + 1}/{len(allFiles)}] {processed}ok {time.perf_counter() - t0:.0f}s")
@@ -229,6 +231,7 @@ def buildReport(*, sinceYear: int = 2016, verbose: bool = True, apiTypes: Iterab
             )
             del batch
             apiBatchIdx[apiType] = idx + 1
+            _releaseNativeMemory()
 
         if apiBatchIdx[apiType] == 0:
             shutil.rmtree(apiBatchDirs[apiType], ignore_errors=True)
@@ -237,6 +240,7 @@ def buildReport(*, sinceYear: int = 2016, verbose: bool = True, apiTypes: Iterab
         outPath = outDir / f"{apiType}.parquet"
         _mergeBatchFiles(apiBatchDirs[apiType], outPath, how="diagonal_relaxed")
         shutil.rmtree(apiBatchDirs[apiType], ignore_errors=True)
+        _releaseNativeMemory()
 
         diskMb = outPath.stat().st_size / 1024 / 1024
         outputs.append(outPath)
