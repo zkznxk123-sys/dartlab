@@ -475,7 +475,7 @@ def yoyPct(cur: float | None, prev: float | None) -> float | None:
     """
     if cur is None or prev is None or prev == 0:
         return None
-    if prev > 0 and cur > 0:
+    if prev > 0 and cur >= 0:
         return round(((cur - prev) / prev) * 100, 2)
     if prev < 0 and cur < 0:
         return round(((cur - prev) / abs(prev)) * 100, 2)
