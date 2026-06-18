@@ -17,6 +17,10 @@ export type Prov = 'real' | 'derived' | 'wire';
 
 export type MacroExposureQualityStatus = 'quantCandidate' | 'qualitativeOnly' | 'blocked';
 export interface MacroExposureQualityPayload {
+	method?: string | null;
+	modelVersion?: string | null;
+	targetMetric?: string | null;
+	minObs?: number | null;
 	status: MacroExposureQualityStatus;
 	reason: string;
 	blockedReason: string;
@@ -30,6 +34,10 @@ export interface MacroExposureQualityPayload {
 	coverage: 'company' | 'sectorOnly' | 'missing';
 }
 export interface MacroExposureIndicatorPayload {
+	method?: string | null;
+	modelVersion?: string | null;
+	targetMetric?: string | null;
+	minObs?: number | null;
 	label?: string;
 	seriesId: string;
 	axis?: string;

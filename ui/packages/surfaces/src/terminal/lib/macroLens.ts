@@ -96,6 +96,10 @@ export interface MacroScenarioView {
 }
 
 export interface MacroExposureQualityView {
+	method: string | null;
+	modelVersion: string | null;
+	targetMetric: string | null;
+	minObs: number | null;
 	status: 'quantCandidate' | 'qualitativeOnly' | 'blocked';
 	reason: string;
 	blockedReason: string;
@@ -110,6 +114,10 @@ export interface MacroExposureQualityView {
 }
 
 export interface MacroExposureIndicatorView {
+	method: string | null;
+	modelVersion: string | null;
+	targetMetric: string | null;
+	minObs: number | null;
 	label: string;
 	seriesId: string;
 	axis: string;
@@ -1016,6 +1024,10 @@ function normalizeExposureQuality(q: MacroExposureQualityPayload | undefined | n
 			? q.status
 			: 'blocked';
 	return {
+		method: q.method ?? null,
+		modelVersion: q.modelVersion ?? null,
+		targetMetric: q.targetMetric ?? null,
+		minObs: typeof q.minObs === 'number' ? q.minObs : null,
 		status,
 		reason: q.reason || '회사 매출과 매크로 지표의 공개 품질 계약입니다.',
 		blockedReason: q.blockedReason || (status === 'quantCandidate' ? '' : 'quality gate closed'),
@@ -1033,6 +1045,10 @@ function normalizeExposureQuality(q: MacroExposureQualityPayload | undefined | n
 function normalizeExposureIndicators(rows: MacroExposureIndicatorPayload[] | undefined | null): MacroExposureIndicatorView[] {
 	if (!Array.isArray(rows)) return [];
 	return rows.slice(0, 6).map((row) => ({
+		method: row.method ?? null,
+		modelVersion: row.modelVersion ?? null,
+		targetMetric: row.targetMetric ?? null,
+		minObs: typeof row.minObs === 'number' ? row.minObs : null,
 		label: row.label || row.seriesId,
 		seriesId: row.seriesId,
 		axis: row.axis || 'macro',
@@ -1053,6 +1069,10 @@ function buildExposureQuality(co: Company): MacroExposureQualityView {
 	const actual = normalizeExposureQuality(co.macroExposure?.exposureQuality, co.code);
 	if (actual) return actual;
 	return {
+		method: null,
+		modelVersion: null,
+		targetMetric: null,
+		minObs: null,
 		status: 'qualitativeOnly',
 		reason: '회사별 회귀/민감도는 nObs/R²/window/lag/coverage 공개 계약 전까지 정성 경로만 표시',
 		blockedReason: 'nObs/R²/window/lag/coverage/sourceRef 공개 계약 전',

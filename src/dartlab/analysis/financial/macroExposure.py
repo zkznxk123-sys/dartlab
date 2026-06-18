@@ -13,6 +13,20 @@ from dartlab.core.memory import memoizedCalc
 
 log = logging.getLogger(__name__)
 
+MACRO_EXPOSURE_MODEL_VERSION = "macroExposure.v1"
+MACRO_EXPOSURE_METHOD = "annual_revenue_yoy_macro_yoy_ols"
+MACRO_EXPOSURE_TARGET_METRIC = "annualRevenueYoY"
+MACRO_EXPOSURE_MIN_OBS = 5
+
+
+def _modelSpec() -> dict:
+    return {
+        "method": MACRO_EXPOSURE_METHOD,
+        "modelVersion": MACRO_EXPOSURE_MODEL_VERSION,
+        "targetMetric": MACRO_EXPOSURE_TARGET_METRIC,
+        "minObs": MACRO_EXPOSURE_MIN_OBS,
+    }
+
 
 def _loadMacroIndicator(g, seriesId: str, source: str = "ecos", start: str = "2014-01-01"):
     """gather에서 단일 매크로 지표 로드 — source로 KR/US 자동 분기."""
@@ -84,6 +98,7 @@ def _qualityFromSelected(selected: list[dict], *, stockCode: str) -> dict:
     """Macro Lens가 소비하는 회사 단위 매크로 노출 품질 블록."""
     if not selected:
         return {
+            **_modelSpec(),
             "status": "blocked",
             "reason": "회사 매출과 매크로 지표의 겹친 표본이 부족합니다.",
             "blockedReason": "selected macro regression absent",
@@ -101,14 +116,15 @@ def _qualityFromSelected(selected: list[dict], *, stockCode: str) -> dict:
     nObs = best.get("nObs")
     rSquared = best.get("rSquared")
     missingEvidence = []
-    if not isinstance(nObs, int) or nObs < 5:
-        missingEvidence.append("nObs>=5")
+    if not isinstance(nObs, int) or nObs < MACRO_EXPOSURE_MIN_OBS:
+        missingEvidence.append(f"nObs>={MACRO_EXPOSURE_MIN_OBS}")
     if not isinstance(rSquared, int | float) or rSquared < 0.2:
         missingEvidence.append("R²>=0.20")
     if not best.get("sourceRef"):
         missingEvidence.append("sourceRef")
 
     return {
+        **_modelSpec(),
         "status": "qualitativeOnly" if missingEvidence else "quantCandidate",
         "reason": "연간 매출 성장률과 매크로 지표 변화율의 공개 품질 계약입니다.",
         "blockedReason": " · ".join(missingEvidence) if missingEvidence else "",
@@ -201,6 +217,7 @@ def _regressAnnualIndicators(
 
         results.append(
             {
+                **_modelSpec(),
                 "label": getattr(ind, "label", seriesId),
                 "seriesId": seriesId,
                 "axis": getattr(ind, "axis", ""),
@@ -494,6 +511,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 
             results.append(
                 {
+                    **_modelSpec(),
                     "label": ind.label,
                     "seriesId": ind.seriesId,
                     "axis": ind.axis,

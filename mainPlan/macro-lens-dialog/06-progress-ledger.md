@@ -1,10 +1,37 @@
 # 06. 진행 원장
 
-상태: v1.6
+상태: v1.7
 
 ---
 
 ## 2026-06-18
+
+### v1.7 — macroExposure Model Spec 계약
+
+배경:
+
+- v1.6의 `Model Card`는 회사별 `exposureIndicators` 후보와 품질 gate를 보여줬지만, 산출물 자체에 `method/modelVersion/targetMetric/minObs`가 없어 실제 모델 명세 카드로는 약했다.
+- UI 문구를 늘리는 방식이 아니라, `analysis.macroExposure` 산출 계약을 보강해 누가 무엇을 계산했고 어떤 표본 gate로 열렸는지 고정할 필요가 있었다.
+
+완료:
+
+- `analysis.financial.macroExposure`에 `method=annual_revenue_yoy_macro_yoy_ols`, `modelVersion=macroExposure.v1`, `targetMetric=annualRevenueYoY`, `minObs=5` 계약을 추가했다.
+- 지표별 `selected` row와 top-level `exposureQuality`가 같은 모델 명세를 낸다. blocked 상태에서도 같은 명세와 결손 사유를 같이 반환한다.
+- UI raw payload 타입과 `MacroExposureQualityView`/`MacroExposureIndicatorView` 정규화에 모델 명세 필드를 추가했다.
+- `출처·한계` 탭의 `Quality Gate` 안에 `method/version/target/minObs` spec strip을 추가해 Model Card가 실제 산출 계약을 보여주게 했다.
+- `test_macro_exposure_quality.py`는 모델 명세 필드가 산출되는지 직접 검증한다.
+
+검증:
+
+- `python -X utf8 -m pytest tests\analysis\test_macro_exposure_quality.py -q` 통과.
+- `uv run ruff check src\dartlab\analysis\financial\macroExposure.py tests\analysis\test_macro_exposure_quality.py` 통과.
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+- `uv run python -X utf8 .github/scripts/prebuild/buildFinanceJson.py`로 `landing/static/dashboards/finance.json` 재생성. 예: `005930`의 `macroExposure.exposureQuality`와 `selected[0]`에 `method=annual_revenue_yoy_macro_yoy_ols`, `modelVersion=macroExposure.v1`, `targetMetric=annualRevenueYoY`, `minObs=5` 포함.
+- Playwright desktop/mobile: `/terminal` Sources 탭에서 spec strip 4개(`method/version/target/minObs`), metric 6개, claim chip 3개, `Model Card`, `Missing Ledger`, `Falsifier Strip` 표시 확인. 페이지/모달 수평 overflow 없음, page error 없음, console error 없음.
+
+NEXT:
+
+1. 실제 발표 캘린더/빈티지 데이터가 생기면 `Release freshness`를 release reaction view로 확장한다. 현재 화면은 관측 artifact freshness policy다.
 
 ### v1.6 — Sources Quality Gate / Model Card 구현
 
@@ -33,7 +60,7 @@
 
 NEXT:
 
-1. `Model Card`는 현재 `exposureIndicators` 후보 표시다. 예측 모델이나 beta 카드로 승격하려면 `method/modelVersion/targetMetric/minObs` 계약을 별도 추가해야 한다.
+1. v1.7에서 `method/modelVersion/targetMetric/minObs` 계약을 추가했다. 예측 모델이나 beta 카드로 승격하는 범위는 여전히 금지한다.
 2. 실제 발표 캘린더/빈티지 데이터가 생기면 `Release freshness`를 release reaction view로 확장한다. 현재 화면은 관측 artifact freshness policy다.
 
 ### v1.5 — Evidence Contribution Lens 구현

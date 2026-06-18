@@ -79,6 +79,12 @@
 		{ label: 'lag', value: snapshot.exposureQuality.lagMonths != null ? `${snapshot.exposureQuality.lagMonths}M` : '—', status: snapshot.exposureQuality.lagMonths != null ? 'ok' : 'blocked' },
 		{ label: 'coverage', value: snapshot.exposureQuality.coverage, status: snapshot.exposureQuality.coverage === 'company' ? 'ok' : snapshot.exposureQuality.coverage === 'sectorOnly' ? 'watch' : 'blocked' }
 	]);
+	const modelSpecRows = $derived([
+		{ label: 'method', value: snapshot.exposureQuality.method ?? '—', status: snapshot.exposureQuality.method ? 'ok' : 'blocked' },
+		{ label: 'version', value: snapshot.exposureQuality.modelVersion ?? '—', status: snapshot.exposureQuality.modelVersion ? 'ok' : 'blocked' },
+		{ label: 'target', value: snapshot.exposureQuality.targetMetric ?? '—', status: snapshot.exposureQuality.targetMetric ? 'ok' : 'blocked' },
+		{ label: 'minObs', value: snapshot.exposureQuality.minObs != null ? String(snapshot.exposureQuality.minObs) : '—', status: snapshot.exposureQuality.minObs != null ? 'ok' : 'blocked' }
+	]);
 	const modelClaimRows = $derived([
 		{
 			label: T('경로 설명', 'Path narrative'),
@@ -513,6 +519,14 @@
 								<em>{T('정량 claim gate · 추천/목표가 아님', 'quant claim gate · no recommendation')}</em>
 							</div>
 							<p>{snapshot.exposureQuality.reason}</p>
+							<div class="mlModelSpec" aria-label="Macro exposure model specification">
+								{#each modelSpecRows as r (r.label)}
+									<div class={'mlModelSpecItem ' + r.status} title={r.value}>
+										<span>{r.label}</span>
+										<b>{r.value}</b>
+									</div>
+								{/each}
+							</div>
 							<div class="mlModelMetrics">
 								{#each modelMetricRows as r (r.label)}
 									<div class={'mlModelMetric ' + r.status}>
@@ -541,7 +555,7 @@
 									<div class="mlIndicatorStats">
 										<span>n {x.nObs ?? '—'}</span>
 										<span>R² {fmtR2(x.rSquared)}</span>
-										<span>{x.window ?? '—'}</span>
+										<span>{x.targetMetric ?? x.window ?? '—'}</span>
 									</div>
 									<small title={x.sourceRefs.join(' · ')}>{x.sourceRef}</small>
 								</div>
@@ -807,6 +821,13 @@
 	.mlQualityCard.watch .mlQualityTop b { color: var(--warn); }
 	.mlQualityCard.blocked .mlQualityTop b { color: var(--dn); }
 	.mlQualityCard p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
+	.mlModelSpec { display: grid; grid-template-columns: 1.35fr .85fr 1fr .62fr; gap: 5px; margin-top: 8px; }
+	.mlModelSpecItem { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 6px; }
+	.mlModelSpecItem.ok { border-color: rgba(52,211,153,.28); }
+	.mlModelSpecItem.blocked { border-color: rgba(248,113,113,.36); }
+	.mlModelSpecItem span, .mlModelSpecItem b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlModelSpecItem span { color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+	.mlModelSpecItem b { margin-top: 3px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
 	.mlModelMetrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
 	.mlModelMetric { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 6px; }
 	.mlModelMetric.ok { border-color: rgba(52,211,153,.28); }
@@ -884,7 +905,7 @@
 		.mlMobileDrillRail em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; text-align: right; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
 		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
-		.mlQualityTop, .mlClaimRail, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
+		.mlQualityTop, .mlModelSpec, .mlClaimRail, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
 		.mlQualityTop em { text-align: left; }
 		.mlModelMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	}

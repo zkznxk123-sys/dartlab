@@ -62,6 +62,10 @@ def test_macro_sensitivity_exposes_quality_gate(monkeypatch):
     assert row["frequency"] == "annual"
     assert row["lagMonths"] == 0
     assert row["coverage"] == "company"
+    assert row["method"] == "annual_revenue_yoy_macro_yoy_ols"
+    assert row["modelVersion"] == "macroExposure.v1"
+    assert row["targetMetric"] == "annualRevenueYoY"
+    assert row["minObs"] == 5
     assert row["sourceRef"] == "analysis.macroExposure:FAKE:FEDFUNDS"
     assert "Company.select:IS:매출액" in row["sourceRefs"]
 
@@ -69,6 +73,10 @@ def test_macro_sensitivity_exposes_quality_gate(monkeypatch):
     assert quality["status"] == "quantCandidate"
     assert quality["missingEvidence"] == []
     assert quality["nObs"] == 5
+    assert quality["method"] == "annual_revenue_yoy_macro_yoy_ols"
+    assert quality["modelVersion"] == "macroExposure.v1"
+    assert quality["targetMetric"] == "annualRevenueYoY"
+    assert quality["minObs"] == 5
     assert quality["window"] == "2020-2024 annual"
     assert quality["sourceRef"].startswith("analysis.macroExposure:FAKE:")
 
@@ -83,6 +91,10 @@ def test_macro_sensitivity_blocks_quality_without_macro_observations(monkeypatch
     assert result["selected"] == []
     assert result["exposureQuality"]["status"] == "blocked"
     assert result["exposureQuality"]["coverage"] == "missing"
+    assert result["exposureQuality"]["method"] == "annual_revenue_yoy_macro_yoy_ols"
+    assert result["exposureQuality"]["modelVersion"] == "macroExposure.v1"
+    assert result["exposureQuality"]["targetMetric"] == "annualRevenueYoY"
+    assert result["exposureQuality"]["minObs"] == 5
     assert "sourceRef" in result["exposureQuality"]["missingEvidence"]
 
 
@@ -106,6 +118,10 @@ def test_public_annual_revenue_helper_opens_quant_candidate():
     assert quality["status"] == "quantCandidate"
     assert quality["nObs"] == 6
     assert quality["rSquared"] == 1.0
+    assert quality["method"] == "annual_revenue_yoy_macro_yoy_ols"
+    assert quality["modelVersion"] == "macroExposure.v1"
+    assert quality["targetMetric"] == "annualRevenueYoY"
+    assert quality["minObs"] == 5
     assert quality["window"] == "2020-2025 annual"
     assert quality["sourceRef"].startswith("analysis.macroExposure:FAKE:")
     assert result["selected"]

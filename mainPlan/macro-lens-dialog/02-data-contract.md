@@ -137,6 +137,10 @@ export interface MacroTransmissionEdgeView {
 }
 
 export interface MacroExposureQuality {
+  method: string | null;
+  modelVersion: string | null;
+  targetMetric: string | null;
+  minObs: number | null;
   status: 'quantCandidate' | 'qualitativeOnly' | 'blocked';
   reason: string;
   blockedReason: string;
@@ -151,6 +155,10 @@ export interface MacroExposureQuality {
 }
 
 export interface MacroExposureIndicator {
+  method: string | null;
+  modelVersion: string | null;
+  targetMetric: string | null;
+  minObs: number | null;
   label: string;
   seriesId: string;
   axis: string;
@@ -198,7 +206,7 @@ export interface MacroFalsifierView {
 원칙:
 
 - `macro.transmission`은 `MacroDriverView`와 `MacroTransmissionEdgeView`를 낸다. 현재 공개 호출은 `dartlab.macro("transmission", market="KR", sectorKey="semiconductor")`다.
-- 기존 analysis macro 표면은 `MacroExposureQuality`와 회사별 checkpoint를 낸다. `macroExposure.calcMacroSensitivity`의 지표별 결과는 `nObs`, `window`, `frequency`, `lagMonths`, `coverage`, `sourceRef`, `sourceRefs`를 포함해야 한다.
+- 기존 analysis macro 표면은 `MacroExposureQuality`와 회사별 checkpoint를 낸다. `macroExposure.calcMacroSensitivity`의 지표별 결과는 `method`, `modelVersion`, `targetMetric`, `minObs`, `nObs`, `window`, `frequency`, `lagMonths`, `coverage`, `sourceRef`, `sourceRefs`를 포함해야 한다.
 - public prebuild는 회사 객체를 호출하지 않고 `finance.parquet`의 연매출과 `macro/{fred,ecos}/observations.parquet`의 연평균으로 `macroExposure.exposureQuality`를 만든 뒤 기존 `finance.json` 회사 엔트리에 포함한다.
 - UI는 `finance.json`의 `macroExposure.exposureQuality`와 `macro.transmission` 산출물을 합쳐 보여주되 숨은 수학을 만들지 않는다.
 - `blocked` edge는 숨기지 않고 이유를 표시한다.
@@ -244,7 +252,10 @@ export interface MacroFalsifierView {
 - `rSquared`
 - `window`
 - `frequency`
+- `method`
+- `modelVersion`
 - `targetMetric`
+- `minObs`
 - `sourceRef`
 
 ---
