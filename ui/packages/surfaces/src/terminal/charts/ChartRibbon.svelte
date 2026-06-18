@@ -232,7 +232,7 @@
 		</div>
 		<div class="crGrp">
 			<!-- BT = 차트 좌측 영구 도크(StrategyDock) 토글. 전체화면에서도 도크가 차트 좌측에 마운트(차트는 안 건드림·일봉 안내는 도크 안). -->
-			<button class={(ctl.btDockOpen || ctl.btStrategies.length) && subject !== 'index' ? 'crChip on' : 'crAdd'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 — 차트 좌측 영구 패널', 'Strategy backtest — persistent left panel')} onclick={() => { if (subject === 'index') return; ctl.btDockOpen = !ctl.btDockOpen; pop = 'none'; }}>
+			<button class={(ctl.btDockOpen || ctl.btStrategies.length) && subject !== 'index' ? 'crChip on' : 'crAdd'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 — 차트 좌측 영구 패널', 'Strategy backtest — persistent left panel')} onclick={() => { if (subject === 'index') return; ctl.btDockOpen = !ctl.btDockOpen; ctl.btReportMode = ctl.btDockOpen; pop = 'none'; }}>
 				{ctl.btStrategies.length ? T('전략 백테스트', 'Backtest') : `＋ ${T('전략 백테스트', 'Backtest')}`}
 			</button>
 		</div>

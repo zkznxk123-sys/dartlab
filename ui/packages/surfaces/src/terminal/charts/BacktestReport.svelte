@@ -1,0 +1,331 @@
+<script lang="ts">
+	// 백테스트 보고서 — 다이얼로그 폐기, CenterStack 하단(재무그래프 자리) 인라인 tearsheet. 차트는 위에 고정·공시.
+	// 탭 아닌 스택 섹션(거래표 spine 상시) + 정직 헤더 띠(증거등급·명세스탬프). 단일종목 변형(시장=동일엔진·index벤치, 유니버스=별도 본문).
+	// BacktestDialog 본문 도출 그대로 흡수(eq/bhq/dd/oosDecay/tradeStats/cumPct/worstTrades) — 새 통계 0, 재배치.
+	import type { PortfolioBtResult, StrategySlot } from '../lib/backtest';
+	import { GOV_ATTRIBUTION } from '@dartlab/ui-contracts';
+	import type { Lang } from '../lib/types';
+	import EquityChart from './EquityChart.svelte';
+	import MonthlyReturnsHeatmap from './MonthlyReturnsHeatmap.svelte';
+	import TradeScatter from './TradeScatter.svelte';
+	import YearlyReturnsBars from './YearlyReturnsBars.svelte';
+	import ReturnHistogram from './ReturnHistogram.svelte';
+
+	interface Props {
+		pf: PortfolioBtResult;
+		slots: StrategySlot[];
+		focus: number;
+		period: string;
+		withCosts: boolean;
+		adjusted: boolean;
+		candleTs: string[];
+		scope: 'single' | 'market' | 'universe';
+		lang: Lang;
+		onFocus: (i: number) => void;
+		onFocusBar?: (t: string) => void;
+		onBack: () => void; // 재무그래프로 복귀(모드 끔)
+	}
+	let { pf, slots, focus, period, withCosts, adjusted, candleTs, scope, lang, onFocus, onFocusBar, onBack }: Props = $props();
+	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
+
+	const focusId = $derived(slots[focus]?.id ?? slots[0]?.id);
+	const result = $derived(pf.slots.find((s) => s.id === focusId)?.result ?? pf.slots[0].result);
+	const stratColor = $derived(slots.find((s) => s.id === focusId)?.color ?? '#fb923c');
+	const combo = $derived(pf.combo);
+	const multi = $derived(pf.slots.length >= 2);
+	const metaOf = (id: string) => slots.find((s) => s.id === id);
+	const idxOf = (id: string) => slots.findIndex((s) => s.id === id);
+	const m = $derived(result.metrics);
+	const rs = $derived(result.runSpec);
+	const oos = $derived(result.oos);
+	const sgn = (v: number, d = 1) => (v >= 0 ? '+' : '') + v.toFixed(d);
+	const cls = (v: number) => (v > 0 ? 'tUp' : v < 0 ? 'tDn' : 'tNeu');
+	const fmtD = (t: string) => (t && t.length >= 8 ? `${t.slice(0, 4)}.${t.slice(4, 6)}.${t.slice(6, 8)}` : '—');
+	const num = (v: number, d = 0) => v.toLocaleString('en-US', { maximumFractionDigits: d });
+	const beats = $derived(m.retPct >= result.bh.retPct);
+
+	const eq = $derived(result.equity.filter((v): v is number => v != null));
+	const bhq = $derived(result.bhEquity.filter((v): v is number => v != null));
+	const nBars = $derived(eq.length);
+	const tsWin = $derived(candleTs.slice(result.startIdx, result.startIdx + nBars));
+	const dd = $derived.by(() => {
+		let peak = -Infinity;
+		return eq.map((v) => {
+			if (v > peak) peak = v;
+			return peak > 0 ? (v / peak - 1) * 100 : 0;
+		});
+	});
+	const splitFrac = $derived.by<number | null>(() => {
+		if (!oos || nBars < 2) return null;
+		const rel = oos.splitIdx - result.startIdx;
+		if (rel <= 0 || rel >= nBars) return null;
+		return rel / (nBars - 1);
+	});
+	const eqRange = $derived.by(() => {
+		const all = [...eq, ...bhq];
+		if (!all.length) return { lo: 90, hi: 110 };
+		let lo = Math.min(...all);
+		let hi = Math.max(...all);
+		if (hi - lo < 1) { lo -= 1; hi += 1; }
+		return { lo, hi };
+	});
+	const ddMin = $derived(dd.length ? Math.min(...dd, -1) : -1);
+	const cumPct = $derived.by(() => {
+		let acc = 1;
+		return result.trades.map((t) => {
+			acc *= 1 + t.retPct / 100;
+			return (acc - 1) * 100;
+		});
+	});
+	const worstTrades = $derived([...result.trades].sort((a, b) => a.retPct - b.retPct).slice(0, 6));
+	const tradeStats = $derived.by(() => {
+		const ts = result.trades.filter((t) => t.maePct != null);
+		if (!result.trades.length) return null;
+		const exp = result.trades.reduce((s, t) => s + t.retPct, 0) / result.trades.length;
+		const mae = ts.length ? ts.reduce((s, t) => s + (t.maePct ?? 0), 0) / ts.length : null;
+		const mfe = ts.length ? ts.reduce((s, t) => s + (t.mfePct ?? 0), 0) / ts.length : null;
+		return { exp, mae, mfe };
+	});
+	const recovered = $derived(result.mddWindow?.recoverIdx != null);
+	const oosDecay = $derived.by<number | null>(() => {
+		if (!oos || oos.train.sharpe == null || oos.test.sharpe == null || oos.train.sharpe <= 0) return null;
+		return (oos.test.sharpe / oos.train.sharpe - 1) * 100;
+	});
+
+	// ★증거 등급 — 표본이 헤드라인(수익률 아님). 봉<252 또는 거래<10 = 일화(1경로), OOS 있으면 다구간 서술.
+	const evidence = $derived.by(() => {
+		const trades = m.tradeCount;
+		if (nBars < 60 || trades < 5) return { tier: T('일화 · 1경로', 'anecdote · 1 path'), tone: 'evDn' };
+		if (nBars < 252 || trades < 10) return { tier: T('서술적 · 표본 얕음', 'descriptive · thin'), tone: 'evMid' };
+		if (oos) return { tier: T('서술적 · 학습/검증 분할', 'descriptive · train/test'), tone: 'evUp' };
+		return { tier: T('서술적 · 단일구간', 'descriptive · single window'), tone: 'evMid' };
+	});
+
+	function jumpToBar(t: string) { onFocusBar?.(t); }
+
+	function exportCsv() {
+		const head = ['entry', 'entryPx', 'exit', 'exitPx', 'retPct', 'maePct', 'mfePct', 'cumPct', 'holdDays', 'exitReason'];
+		const rows = result.trades.map((t, i) => [t.entryT, t.entryPx.toFixed(2), t.exitT ?? '', t.exitPx != null ? t.exitPx.toFixed(2) : '', t.retPct.toFixed(2), t.maePct != null ? t.maePct.toFixed(2) : '', t.mfePct != null ? t.mfePct.toFixed(2) : '', cumPct[i].toFixed(2), t.holdDays, t.exitReason]);
+		const csv = [head, ...rows].map((r) => r.join(',')).join('\n');
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `backtest_${rs?.symbol.code ?? 'trades'}_${rs?.dataAsOf ?? ''}.csv`;
+		a.click();
+		URL.revokeObjectURL(url);
+	}
+	const scopeLabel = $derived(scope === 'market' ? T('시장(지수)', 'market') : scope === 'universe' ? T('유니버스', 'universe') : T('단일종목', 'single stock'));
+</script>
+
+<div class="btReport">
+	<!-- 마스트헤드 — 보고서 제목 + 스코프 + 재무로 복귀 -->
+	<div class="brHead">
+		<span class="brMark" aria-hidden="true"></span>
+		<span class="brTitle">{T('백테스트 보고서', 'BACKTEST REPORT')}</span>
+		<span class="brScope">{scopeLabel}</span>
+		<span class="brHeadline mono">
+			<b class={cls(m.retPct)}>{slots.find((s) => s.id === focusId)?.label ?? ''} {sgn(m.retPct)}%</b>
+			<i>vs</i><b class={cls(result.bh.retPct)}>{T('보유', 'B&H')} {sgn(result.bh.retPct)}%</b>
+			<em class={'brExcess ' + cls(m.retPct - result.bh.retPct)}>{sgn(m.retPct - result.bh.retPct)}%p</em>
+		</span>
+		<button class="brBack" onclick={onBack} title={T('재무 그래프로 복귀', 'back to financials')}>{T('재무로 ↩', 'financials ↩')}</button>
+	</div>
+
+	{#if multi}
+		<div class="brTabs">
+			{#each pf.slots as s (s.id)}
+				{@const meta = metaOf(s.id)}
+				<button class="brTab" class:on={s.id === focusId} onclick={() => onFocus(idxOf(s.id))}>
+					<i class="brSw" style={`background:${meta?.color ?? '#8b919e'}`}></i>{meta?.label ?? s.id}
+					<em class={cls(s.result.metrics.retPct)}>{sgn(s.result.metrics.retPct)}%</em>
+				</button>
+			{/each}
+		</div>
+	{/if}
+
+	<!-- ★정직 헤더 띠 (상존·11px+) — 증거등급이 헤드라인, 수익률은 부차 -->
+	<div class="brHonest">
+		<span class={'brEv ' + evidence.tone}>{evidence.tier}</span>
+		<span class="brStamp">{T('체결 t+1 시가', 'fill t+1 open')}</span>
+		<span class="brStamp">{withCosts ? T('비용 반영', 'costs on') : T('⚠ 비용 미포함', '⚠ costs off')}</span>
+		<span class="brStamp">{adjusted ? T('배당미반영·수정주가', 'div excl·adj') : T('배당미반영·무수정주가', 'div excl·unadj')}</span>
+		<span class="brStamp">{T('단일구간', 'single window')}</span>
+		{#if rs}<span class="brStamp">{T('기준일', 'as of')} {fmtD(rs.dataAsOf)}</span>{/if}
+		{#each result.warnings as w (w.kind)}<span class="brWarn">⚠ {w.kind}</span>{/each}
+	</div>
+
+	{#if combo}
+		<div class="brBanner mag">{T('동일가중 조합 (리밸런싱 없음) · 단일종목 = 타이밍 분산이지 자산 분산 아님', 'equal-weight combo · timing not asset diversification')} · {T('수익률', 'return')} <b class={'mono ' + cls(combo.metrics.retPct)}>{sgn(combo.metrics.retPct)}%</b></div>
+	{/if}
+	{#if !beats}<div class="brBanner lag">{T('이 구간에선 단순 보유(B&H)가 전략을 앞섰습니다.', 'buy & hold beat the strategy over this window.')}</div>{/if}
+
+	<!-- 히어로 5 카드 -->
+	<div class="brHero">
+		<div class="brCard"><span>{T('전략 순수익', 'net return')}</span><b class={'mono ' + cls(m.retPct)}>{sgn(m.retPct)}%</b></div>
+		<div class="brCard"><span>CAGR</span><b class={'mono ' + (m.cagrPct != null ? cls(m.cagrPct) : 'tNeu')}>{m.cagrPct != null ? sgn(m.cagrPct) + '%' : '—'}</b></div>
+		<div class="brCard"><span>{T('최대 낙폭', 'max DD')}</span><b class="mono tDn">{m.mddPct.toFixed(1)}%</b></div>
+		<div class="brCard"><span>Sharpe</span><b class="mono">{m.sharpe != null ? m.sharpe.toFixed(2) : '—'}</b></div>
+		{#if scope === 'market'}
+			<div class="brCard"><span>{T('노출', 'exposure')}</span><b class="mono">{m.exposurePct.toFixed(0)}%</b></div>
+		{:else}
+			<div class="brCard"><span>{T('승률', 'win rate')}</span><b class="mono">{m.winRatePct != null ? m.winRatePct.toFixed(0) + '%' : '—'}</b><em>{result.trades.filter((t) => t.retPct > 0).length}/{m.tradeCount}</em></div>
+		{/if}
+	</div>
+
+	<!-- 자산곡선 (verdict 시각) + OOS -->
+	<section class="brSec">
+		<div class="brSecHd">{T('자산 곡선 — 계좌가치 (시작 = 100)', 'equity curve (start = 100)')}</div>
+		<EquityChart {eq} {bhq} {dd} ts={tsWin} {splitFrac} {eqRange} {ddMin} {stratColor} {lang} />
+		{#if oos}
+			<div class="brOosLine">{T('학습 → 검증(OOS)', 'train → test (OOS)')} · {T('수익률', 'ret')} <b class={cls(oos.train.retPct)}>{sgn(oos.train.retPct)}%</b> → <b class={cls(oos.test.retPct)}>{sgn(oos.test.retPct)}%</b>{#if oosDecay != null} · <b class={'brDecay ' + (oosDecay < -2 ? 'tDn' : oosDecay > 2 ? 'tUp' : 'tNeu')}>Sharpe {oosDecay >= 0 ? '+' : ''}{oosDecay.toFixed(0)}%</b>{/if} <i>{T('고정 파라미터 · walk-forward 아님', 'fixed params · not walk-forward')}</i></div>
+		{/if}
+	</section>
+
+	<!-- 소형 다중 — 월별·연간·분포 -->
+	<section class="brSec">
+		<div class="brSecHd">{T('월별 수익률', 'monthly returns')}</div>
+		<MonthlyReturnsHeatmap {eq} ts={tsWin} {lang} />
+	</section>
+	<section class="brSec">
+		<div class="brSecHd">{T('연간 수익률 — 전략 vs 보유', 'yearly returns')}</div>
+		<YearlyReturnsBars {eq} {bhq} ts={tsWin} {lang} />
+	</section>
+	{#if result.trades.length >= 2}
+		<section class="brSec">
+			<div class="brSecHd">{T('거래 수익률 분포', 'trade return distribution')}</div>
+			<ReturnHistogram rets={result.trades.map((t) => t.retPct)} {lang} />
+		</section>
+	{/if}
+
+	<!-- 거래별 MAE 산점 -->
+	{#if result.trades.some((t) => t.maePct != null)}
+		<section class="brSec">
+			<div class="brSecHd">{T('거래별 위험·보상 (MAE 산점)', 'per-trade MAE scatter')}</div>
+			<TradeScatter trades={result.trades} {lang} onPick={jumpToBar} />
+		</section>
+	{/if}
+
+	<!-- 보조 지표 -->
+	<section class="brSec">
+		<div class="brSecHd">{T('보조 지표', 'secondary metrics')}</div>
+		<div class="brGrid">
+			<div class="brRow"><span>{T('보유(B&H)', 'buy & hold')}</span><b class={'mono ' + cls(result.bh.retPct)}>{sgn(result.bh.retPct)}%</b></div>
+			<div class="brRow"><span>{T('초과 수익', 'excess')}</span><b class={'mono ' + cls(m.retPct - result.bh.retPct)}>{sgn(m.retPct - result.bh.retPct)}%p</b></div>
+			<div class="brRow"><span>Sortino</span><b class="mono">{m.sortino != null ? m.sortino.toFixed(2) : '—'}</b></div>
+			<div class="brRow"><span>{T('손익비', 'profit factor')}</span><b class="mono">{m.profitFactor != null ? m.profitFactor.toFixed(2) : '—'}</b></div>
+			{#if tradeStats}<div class="brRow"><span>{T('기대값/거래', 'expectancy')}</span><b class={'mono ' + (tradeStats.exp >= 0 ? 'tUp' : 'tDn')}>{tradeStats.exp >= 0 ? '+' : ''}{tradeStats.exp.toFixed(2)}%</b></div>{/if}
+			<div class="brRow"><span>{T('비용 드래그', 'cost drag')}</span><b class="mono tDn">{m.costDragPct.toFixed(1)}%p</b></div>
+			<div class="brRow"><span>{T('최장 수면', 'longest underwater')}</span><b class="mono">{m.mddDays != null ? m.mddDays + T('일', 'd') : '—'}</b></div>
+			<div class="brRow"><span>{T('회복', 'recovered')}</span><b class={'mono ' + (recovered ? 'tUp' : 'tDn')}>{recovered ? T('회복함', 'yes') : T('미회복', 'no')}</b></div>
+			<div class="brRow"><span>{T('베타', 'beta')}</span><b class="mono">{m.beta != null ? m.beta.toFixed(2) : '—'}</b></div>
+			<div class="brRow"><span>{T('알파(연)', 'alpha p.a.')}</span><b class={'mono ' + (m.alphaPct != null ? cls(m.alphaPct) : 'tNeu')}>{m.alphaPct != null ? sgn(m.alphaPct) + '%' : '—'}</b></div>
+		</div>
+	</section>
+
+	<!-- 일자별 거래표 (spine·상시) -->
+	<section class="brSec">
+		<div class="brSecHd">{T('거래 내역', 'trades')} <span class="brN">{m.tradeCount}</span><button class="brCsv" onclick={exportCsv}>{T('CSV', 'CSV')}</button><span class="brHint">{T('행 클릭 → 차트 진입봉', 'row → chart bar')}</span></div>
+		{#if result.trades.length}
+			<div class="brTableWrap">
+				<table class="brTable mono">
+					<thead><tr><th>#</th><th>{T('진입', 'entry')}</th><th class="r">{T('진입가', 'in')}</th><th>{T('청산', 'exit')}</th><th class="r">{T('청산가', 'out')}</th><th class="r">{T('수익률', 'ret')}</th><th class="r">{T('누적', 'cum')}</th><th class="r">{T('보유', 'd')}</th><th>{T('사유', 'why')}</th></tr></thead>
+					<tbody>
+						{#each result.trades.slice().reverse() as t, i (t.entryT)}
+							{@const cum = cumPct[result.trades.length - 1 - i]}
+							<tr class="brRowT" onclick={() => jumpToBar(t.entryT)} title={T('차트로 이동', 'jump to chart')}>
+								<td class="dim">{result.trades.length - i}</td>
+								<td>{fmtD(t.entryT)}</td>
+								<td class="r">{num(t.entryPx)}</td>
+								<td>{t.exitT ? fmtD(t.exitT) : T('보유중', 'open')}</td>
+								<td class="r">{t.exitPx != null ? num(t.exitPx) : '—'}</td>
+								<td class={'r ' + cls(t.retPct)}>{sgn(t.retPct)}%</td>
+								<td class={'r ' + cls(cum)}>{sgn(cum)}%</td>
+								<td class="r">{t.holdDays}</td>
+								<td class="dim">{t.exitReason === 'finalMark' ? T('미청산', 'open') : t.exitReason === 'stop' ? T('손절', 'stop') : t.exitReason === 'take' ? T('익절', 'take') : T('신호', 'signal')}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{:else}
+			<div class="brEmpty">{T('이 구간에서 진입 거래가 없습니다.', 'no entries in this window.')}</div>
+		{/if}
+	</section>
+
+	<!-- 가정·RunSpec -->
+	<section class="brSec">
+		<div class="brSecHd">{T('체결·데이터 가정', 'assumptions')}</div>
+		<ul class="brAssume">
+			<li>{T('신호 t일 종가 → t+1일 시가 체결 (미래참조 구조적 차단)', 'signal close(t) → fill open(t+1) · look-ahead blocked')}</li>
+			<li>{withCosts ? T('비용 반영 — 수수료 0.015% + 거래세 0.15% + 슬리피지 0.1%', 'costs on') : T('⚠ 비용 미포함 — 실거래 대비 낙관', '⚠ costs excluded')}</li>
+			<li>{T('벤치마크 = 보유(B&H), 동일 비용', 'benchmark = buy & hold, same costs')}</li>
+			<li class="warn">{T('⚠ 배당 미반영', '⚠ dividends excluded')} · {adjusted ? T('수정주가', 'adjusted') : T('⚠ 무수정주가 — 분할 시 B&H 왜곡', '⚠ unadjusted')}</li>
+		</ul>
+		{#if rs}<div class="brSpec mono"><span>{T('종목', 'symbol')}: {rs.symbol.name ?? ''} {rs.symbol.code}</span><span>{T('구간', 'range')}: {fmtD(rs.range.from)} ~ {fmtD(rs.range.to)} · {rs.range.bars}{T('봉', ' bars')}</span><span>{T('데이터', 'source')}: {rs.dataSource} · {T('엔진', 'engine')} {rs.engineVersion}</span></div>{/if}
+		<div class="brFoot">⚠ {T('과거 가정 노출형 시뮬레이션 — 미래 수익 보장 없음 · 추천 아님', 'assumption-exposed historical simulation — not advice')} │ {GOV_ATTRIBUTION}</div>
+	</section>
+</div>
+
+<style>
+	.btReport { display: flex; flex-direction: column; gap: 10px; padding: 4px 2px 14px; }
+	.brHead { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+	.brMark { width: 4px; height: 18px; border-radius: 2px; background: var(--amber, #fb923c); }
+	.brTitle { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: var(--dl-ink, #c8cfdb); }
+	.brScope { font-size: 10.5px; color: var(--dim, #8b94a3); border: 1px solid var(--dl-line, #1b2130); border-radius: 9px; padding: 1px 8px; }
+	.brHeadline { margin-left: auto; display: flex; align-items: baseline; gap: 8px; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+	.brHeadline i { font-style: normal; font-size: 10px; font-weight: 400; color: var(--dimmer, #5b6573); }
+	.brExcess { font-style: normal; font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--dl-line, #1b2130); }
+	.brBack { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 11px; padding: 2px 10px; border-radius: 3px; cursor: pointer; font-family: inherit; }
+	.brBack:hover { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
+	.brTabs { display: flex; gap: 4px; flex-wrap: wrap; }
+	.brTab { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; padding: 3px 9px; cursor: pointer; font-family: inherit; font-size: 11px; color: #aeb6c2; }
+	.brTab.on { background: rgba(255, 255, 255, 0.03); color: var(--dl-ink, #c8cfdb); border-color: #2a3142; }
+	.brTab .brSw { width: 9px; height: 9px; border-radius: 2px; }
+	.brTab em { font-style: normal; font-family: var(--dl-font-mono, monospace); font-size: 11px; }
+	.brHonest { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 5px 0; border-top: 1px solid var(--dl-line, #1b2130); border-bottom: 1px solid var(--dl-line, #1b2130); }
+	.brEv { font-size: 11.5px; font-weight: 700; padding: 1px 9px; border-radius: 4px; }
+	.brEv.evUp { color: var(--up, #34d399); background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.35); }
+	.brEv.evMid { color: #aeb6c2; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--dl-line, #1b2130); }
+	.brEv.evDn { color: var(--amber, #fb923c); background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.4); }
+	.brStamp { font-size: 11px; color: #8b94a3; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 0 6px; }
+	.brWarn { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 6px; }
+	.brBanner { font-size: 11px; border-radius: 4px; padding: 6px 11px; line-height: 1.5; }
+	.brBanner.mag { color: #cbb4f5; background: rgba(232, 121, 249, 0.07); border: 1px solid rgba(232, 121, 249, 0.25); }
+	.brBanner.lag { color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); }
+	.brHero { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+	.brCard { display: flex; flex-direction: column; gap: 2px; padding: 9px 11px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; }
+	.brCard > span { font-size: 11px; color: var(--dim, #8b94a3); }
+	.brCard > b { font-size: 21px; font-weight: 700; line-height: 1.1; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
+	.brCard > em { font-style: normal; font-size: 10px; color: var(--dimmer, #5b6573); font-family: var(--dl-font-mono, monospace); }
+	.brSec { display: flex; flex-direction: column; gap: 7px; }
+	.brSecHd { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: #aeb6c2; text-transform: uppercase; display: flex; align-items: center; gap: 9px; }
+	.brN { font-family: var(--dl-font-mono, monospace); font-size: 11px; color: var(--dimmer, #5b6573); font-weight: 400; }
+	.brCsv { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 11px; padding: 1px 8px; border-radius: 3px; cursor: pointer; font-family: inherit; }
+	.brHint { font-size: 10px; color: var(--dimmer, #5b6573); font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: auto; }
+	.brOosLine { font-size: 11.5px; color: #aeb6c2; font-variant-numeric: tabular-nums; }
+	.brOosLine i { font-style: normal; font-size: 10px; color: var(--dimmer, #5b6573); margin-left: 4px; }
+	.brOosLine b { font-weight: 700; }
+	.brDecay { font-family: var(--dl-font-mono, monospace); }
+	.brGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 4px 14px; }
+	.brRow { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 9px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; font-size: 12.5px; }
+	.brRow > span { color: #aeb6c2; }
+	.brRow > b { font-weight: 700; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
+	.brTableWrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; }
+	.brTable { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+	.brTable thead th { position: sticky; top: 0; background: var(--dl-bg-raised, #0e141f); text-align: left; color: #8b94a3; font-weight: 600; padding: 5px 9px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); font-size: 11px; }
+	.brTable th.r, .brTable td.r { text-align: right; }
+	.brTable td { padding: 4px 9px; border-bottom: 1px solid rgba(27, 33, 48, 0.6); color: #aeb6c2; }
+	.brTable td.dim { color: var(--dimmer, #5b6573); }
+	.brRowT { cursor: pointer; }
+	.brRowT:hover td { background: rgba(96, 165, 250, 0.1); }
+	.brEmpty { font-size: 11px; color: var(--dimmer, #5b6573); padding: 14px; text-align: center; }
+	.brAssume { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+	.brAssume li { font-size: 11.5px; color: #aeb6c2; line-height: 1.5; }
+	.brAssume li.warn { color: var(--amber, #fb923c); }
+	.brSpec { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: #8b94a3; margin-top: 4px; }
+	.brFoot { font-size: 11px; color: var(--dimmer, #5b6573); margin-top: 6px; line-height: 1.5; }
+	.tUp { color: var(--up, #34d399); }
+	.tDn { color: var(--dn, #f0616f); }
+	.tNeu { color: #aeb6c2; }
+</style>

@@ -53,13 +53,6 @@
 		ctl.btStop = { ...ctl.btStop, [k]: next === 0 ? undefined : next };
 	}
 
-	// 추가 메뉴 디스패치 — custom / rule:키 / preset:키 (프리셋은 출발점, 히어로 아님)
-	function addPick(v: string) {
-		if (v === 'custom') ctl.addCustomRule();
-		else if (v.startsWith('rule:')) { const rp = RULE_PRESETS.find((r) => r.key === v.slice(5)); if (rp) ctl.addRulePreset(rp); }
-		else if (v.startsWith('preset:')) { const pd = BT_PRESETS.find((d) => d.key === v.slice(7)); if (pd) ctl.addStrategy(pd); }
-	}
-
 	// ── 룰 불변 편집 — 슬롯의 rule 을 clone·변형 후 setSlotRule ──
 	function editRule(i: number, fn: (r: StrategyRule) => void) {
 		const slot = ctl.btStrategies[i];
@@ -119,6 +112,12 @@
 		</div>
 
 		<div class="sdBody">
+			<div class="sdScope">
+				{#each [{ v: 'single' as const, kr: '단일종목', en: 'Stock' }, { v: 'market' as const, kr: '시장', en: 'Market' }, { v: 'universe' as const, kr: '유니버스', en: 'Universe' }] as o (o.v)}
+					<button class={ctl.btScope === o.v ? 'sdScopeBtn on' : 'sdScopeBtn'} onclick={() => (ctl.btScope = o.v)}>{T(o.kr, o.en)}</button>
+				{/each}
+			</div>
+			<div class="sdScopeNote">{ctl.btScope === 'universe' ? T('전 종목 횡단면 팩터 · 17년 상폐보존 — 제어·결과는 하단 보고서.', 'cross-sectional factor; controls in report below') : ctl.btScope === 'market' ? T('지수 타이밍 — 상단에서 지수를 선택해 시장 백테스트.', 'index timing; pick an index above') : T('이 종목에 매매 규칙을 적용해 검증.', 'apply a rule to this stock')}</div>
 			<!-- 컨텍스트 — 종목·봉주기(비파괴 일봉 안내) -->
 			<div class="sdCtx">
 				<span class="sdCtxSym">{name ?? ''} {code ?? ''}</span>
@@ -217,16 +216,14 @@
 					</div>
 				{/each}
 				{#if ctl.btStrategies.length < 3}
-					<select class="btSelect btAdd mono" value="" onchange={(e) => { addPick(e.currentTarget.value); e.currentTarget.value = ''; }} title={T('전략 추가', 'add')}>
-						<option value="">{ctl.btStrategies.length ? T('＋ 전략 추가…', '+ add…') : T('전략 추가…', 'add strategy…')}</option>
-						<optgroup label={T('직접 조립', 'custom')}><option value="custom">{T('＋ 커스텀 규칙 빌더', '+ custom rule builder')}</option></optgroup>
-						<optgroup label={T('규칙 프리셋 (OHLCV·편집가능)', 'rule presets')}>
-							{#each RULE_PRESETS as rp (rp.key)}<option value={`rule:${rp.key}`}>{T(rp.kr, rp.en)}</option>{/each}
-						</optgroup>
-						<optgroup label={T('퀵 프리셋 (종가)', 'quick presets')}>
-							{#each BT_PRESETS as p (p.key)}<option value={`preset:${p.key}`}>{T(p.kr, p.en)}</option>{/each}
-						</optgroup>
-					</select>
+					<div class="btPresetGrid">
+						{#each BT_PRESETS as p (p.key)}<button class="btPresetBtn" onclick={() => ctl.addStrategy(p)} title={T('출발점 · 추천 아님', 'starting point · not advice')}>{T(p.kr, p.en)}</button>{/each}
+						{#each RULE_PRESETS as rp (rp.key)}<button class="btPresetBtn rule" onclick={() => ctl.addRulePreset(rp)} title={T('규칙 프리셋(편집가능) · 출발점', 'editable rule preset · starting point')}>{T(rp.kr, rp.en)}</button>{/each}
+					</div>
+					<div class="btCustomCard">
+						<button class="btCustomBtn" onclick={() => ctl.addCustomRule()}>＋ {T('커스텀 규칙 빌더', 'custom rule builder')}</button>
+						<span class="btCustomHint">{T('지표·연산자·임계값 직접 조립 · 추천 아님', 'compose indicators/operators/thresholds')}</span>
+					</div>
 				{/if}
 				{#if ctl.btStrategies.length >= 2}
 					<div class="btDesc warn">{T('⚠ 여러 전략 같은 데이터 비교 = 사후선택 편향 · 단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'selection bias · single-stock combo = timing not asset')}</div>
@@ -386,6 +383,17 @@
 	.condDel:hover { color: var(--dn, #f0616f); }
 	.condAdd { font-size: 10px; background: none; border: 1px dashed var(--dl-line-strong, #2a3142); color: #8b94a3; border-radius: 3px; padding: 3px 8px; cursor: pointer; font-family: inherit; margin-top: 2px; }
 	.condAdd:hover { color: var(--dl-ink, #c8cfdb); }
+		.sdScope { display: flex; gap: 3px; margin-bottom: 4px; }
+	.sdScopeBtn { flex: 1 1 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 4px 0; cursor: pointer; font-family: inherit; }
+	.sdScopeBtn.on { background: var(--amber, #fb923c); color: #1a1206; border-color: var(--amber, #fb923c); font-weight: 700; }
+	.sdScopeNote { font-size: 10.5px; color: var(--dim, #8b94a3); line-height: 1.5; margin-bottom: 5px; }
+	.btPresetGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 2px; }
+	.btPresetBtn { font-size: 11px; background: rgba(255, 255, 255, 0.03); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 6px 8px; cursor: pointer; font-family: inherit; text-align: left; }
+	.btPresetBtn:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
+	.btPresetBtn.rule { border-style: dashed; }
+	.btCustomCard { margin-top: 5px; padding: 6px; border: 1px dashed var(--dl-line-strong, #2a3142); border-radius: 4px; display: flex; flex-direction: column; gap: 2px; }
+	.btCustomBtn { font-size: 11px; background: none; border: none; color: #a78bfa; cursor: pointer; font-family: inherit; text-align: left; padding: 0; font-weight: 600; }
+	.btCustomHint { font-size: 10px; color: var(--dimmer, #5b6573); }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }
 </style>

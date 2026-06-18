@@ -30,7 +30,6 @@
 	import DrawToolbar from './DrawToolbar.svelte';
 	import StrategyDock from './StrategyDock.svelte';
 	import BtChip from './BtChip.svelte';
-	import BacktestDialog from './BacktestDialog.svelte';
 
 	interface Props {
 		candles: Candle[]; // 초기(현재+직전 연도)
@@ -49,6 +48,8 @@
 		onSrc?: (line: string) => void; // 출처(공공누리)를 차트 하단 대신 패널 헤더에 표기하도록 부모로 끌어올림(econ/adj 반응 유지)
 		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 		onCoMovers?: (rows: CoMover[]) => void;
+		// 백테스트 결과 상향 — 엔진은 PriceChart 소유, 결과(pf+candleTs)를 CenterStack 으로 올려 하단 BacktestReport 가 렌더.
+		onBtResult?: (pf: PortfolioBtResult | null, candleTs: string[]) => void;
 		// 차트 주체(subject) — 'price'=회사 주가(기본) · 'index'=KR gov/US FRED 지수(01). CenterStack-local 소유(ctl 미상향).
 		subject?: 'price' | 'index';
 		// US 지수(FRED 종가전용) = 라인 강제 + 고저 파생지표 degenerate. KR 지수·주가는 false (01 §3.6).
@@ -58,14 +59,21 @@
 		// 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유, 04 §5). PriceChart 가 new 하지 않고 받는다.
 		ctl: ChartCtl;
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, onMacroLens, onCoMovers, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, onMacroLens, onCoMovers, onBtResult, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 	let el: HTMLDivElement | null = $state(null);
 	let chart = $state<any>(null);
 	let btPf = $state<PortfolioBtResult | null>(null); // 다전략 결과(N≤3 + 조합)
-	let btCandleTs = $state<string[]>([]); // 백테스트 캔들 t(YYYYMMDD) — equity 정렬(BacktestDialog 슬라이스)
-	let btReportOpen = $state(false); // [백테스팅 상세] → BacktestDialog(전문 화면) 오픈
+	let btCandleTs = $state<string[]>([]); // 백테스트 캔들 t(YYYYMMDD) — equity 정렬(BacktestReport 슬라이스)
+	// 결과를 CenterStack 으로 상향 — 하단 BacktestReport 가 렌더(보고서 모드). 다이얼로그 폐기.
+	$effect(() => { onBtResult?.(btPf, btCandleTs); });
+	// 보고서 거래행 클릭 → ctl.btHoverBar 설정 → 차트 해당 진입봉으로 스크롤(다이얼로그 onFocusBar 대체).
+	$effect(() => {
+		const t = ctl.btHoverBar;
+		if (!t || !chart) return;
+		try { chart.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ }
+	});
 	// 종목↔거시 동행(상관) — "어떤 거시가 이 종목과 같이 움직였나"(04 §5, 인과 아님). 회사전환 시 캔들 기준 재계산.
 	let coMovers = $state<CoMover[]>([]);
 	// 종목↔국내 시장지수 동행(베타) — 거시와 별도 행(지수 상관은 거의 항상 최상위라 섞으면 거시 발견을 가림).
@@ -1171,7 +1179,7 @@
 	<!-- 차트 워크스페이스 = [좌측 전략 도크 | 차트]. 도크는 static row(el.offsetParent 유지 → 레일 geometry 무변). -->
 	<div class="chartBody">
 		{#if ctl.btDockOpen && subject !== 'index'}
-			<StrategyDock {ctl} {lang} pf={btPf} {code} {name} onOpenReport={() => (btReportOpen = true)} onClose={() => { ctl.clearBtAll(); ctl.btDockOpen = false; }} />
+			<StrategyDock {ctl} {lang} pf={btPf} {code} {name} onOpenReport={() => (ctl.btReportMode = true)} onClose={() => { ctl.clearBtAll(); ctl.btDockOpen = false; ctl.btReportMode = false; }} />
 		{/if}
 		<div class="chartHost" bind:this={el}></div>
 	</div>
@@ -1312,10 +1320,7 @@
 
 	<!-- 차트 위 요약 칩 — railBox geometry 로 가격 페인 좌상단(OHLC 레전드 아래). 전체 정직 푸터는 도크가 담당. -->
 	{#if btPf && ctl.btStrategies.length && railBox}
-		<BtChip pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} {lang} left={railBox.left + 8} top={railBox.canvasTop + 52} onOpenReport={() => (btReportOpen = true)} />
-	{/if}
-	{#if btPf && ctl.btStrategies.length && btReportOpen}
-		<BacktestDialog pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClose={() => (btReportOpen = false)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />
+		<BtChip pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} {lang} left={railBox.left + 8} top={railBox.canvasTop + 52} onOpenReport={() => (ctl.btReportMode = true)} />
 	{/if}
 </div>
 

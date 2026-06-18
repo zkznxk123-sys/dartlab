@@ -10,6 +10,9 @@
 	import type { CoMover } from '../lib/coMovement';
 	import type { MacroLensTab } from '../lib/macroLens';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
+	import BacktestReport from '../charts/BacktestReport.svelte';
+	import { UniverseBacktester } from '../../scan'; // 유니버스 횡단면 백테스터(자급형) — 보고서 모드 universe 스코프 재호스팅
+	import type { PortfolioBtResult } from '../lib/backtest';
 	import FinFullscreen from './FinFullscreen.svelte';
 	import GradeExplainDialog from './GradeExplainDialog.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
@@ -119,6 +122,9 @@
 		untrack(() => { subject = 'price'; }); // subject 읽기 의존 차단(자기루프 방지) — mount 시 'price' 재설정은 no-op
 	});
 
+	// 백테스트 결과 — PriceChart 가 onBtResult 로 올려줌(엔진은 PriceChart 소유). 보고서 모드에서 하단 BacktestReport 에 전달.
+	let btPf = $state<PortfolioBtResult | null>(null);
+	let btCandleTs = $state<string[]>([]);
 	// 재무 카드 — dart/finance/{code}.parquet (HF hyparquet) 연간/분기/TTM, 온디맨드·회사별
 	let finBundle = $state<TerminalFinanceBundle | null>(null);
 	let finMode = $state<FinMode>('ttm'); // 그래프 기본 = TTM (추세) — 표는 분기 원값 (우측 패널·다이얼로그)
@@ -463,7 +469,8 @@
 			disclosures={subject === 'index' ? [] : disclosureEvents}
 			valBand={subject === 'index' ? null : priceValBand}
 			peers={subject === 'index' ? [] : chartPeers}
-			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onMacroLens} {onCoMovers} />
+			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onMacroLens} {onCoMovers}
+				onBtResult={(pf, ts) => { btPf = pf; btCandleTs = ts; }} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? (subject === 'index' ? 'loading index series …' : 'loading daily prices …') : (subject === 'index' ? '지수 시계열 불러오는 중 …' : '일별 시세 불러오는 중 …')}</div>
 	{:else if subject === 'index'}
@@ -473,6 +480,20 @@
 	{/if}
 </Panel>
 
+<!-- ★백테스트 보고서 모드 — [백테스트] 시 하단(재무+판정+DuPont)을 보고서로 스왑(차트는 위에 고정·비파괴). 끄면 재무 복귀(finBundle 유지). -->
+{#if ctl.btReportMode}
+	{#if ctl.btScope === 'universe'}
+		<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '유니버스 백테스트', en: 'UNIVERSE BACKTEST' }} sub={{ kr: '횡단면 팩터 · 17년 상폐보존', en: 'cross-sectional · 17yr delisting-preserved' }} flush>
+			<UniverseBacktester lang={lang === 'en' ? 'en' : 'ko'} onClose={() => { ctl.btReportMode = false; ctl.btDockOpen = false; }} onDrillDown={(c) => onPick?.(c)} />
+		</Panel>
+	{:else if btPf}
+		<BacktestReport pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} scope={ctl.btScope} {lang} onFocus={(i) => ctl.setBtFocus(i)} onFocusBar={(t) => (ctl.btHoverBar = t)} onBack={() => { ctl.btReportMode = false; ctl.btDockOpen = false; ctl.clearBtAll(); }} />
+	{:else}
+		<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '백테스트 보고서', en: 'BACKTEST REPORT' }} sub={{ kr: '결과 대기', en: 'awaiting result' }} flush>
+			<div class="storyEmpty">{lang === 'en' ? 'Pick a preset on the left to run a backtest — the report appears here.' : '왼쪽에서 프리셋(또는 커스텀 규칙)을 고르면 — 백테스트 결과 보고서가 여기 나옵니다.'}</div>
+		</Panel>
+	{/if}
+{:else}
 <!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.
      ui/web analysis.financial 의 핵심 카드 체계를 한 화면에 빽빽하게. -->
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
@@ -577,3 +598,4 @@
 		<Panel {lang} className="eValuation" prov="derived" title={{ kr: '밸류에이션', en: 'VALUATION' }} flush><div class="storyEmpty">{lang === 'en' ? 'Insufficient data.' : '데이터 부족.'}</div></Panel>
 	{/if}
 </div>
+{/if}
