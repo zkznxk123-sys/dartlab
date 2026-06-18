@@ -11,13 +11,10 @@ const uiPackagesDir = path.resolve(__dirname, '..', '..', 'packages');
 // 빌드(정적 SPA)에서는 같은 오리진(Python 서버 서빙)이라 apiBase='' — 프록시는 dev 전용.
 const apiTarget = process.env.DARTLAB_API_BASE || 'http://127.0.0.1:8400';
 
-// 공개 CF 워커 프록시(secret 아님, 전 환경 동일) 기본값 — 로컬도 공개와 "공통 배선"으로 워커를 쓴다.
-// price·macro 와 달리 news 는 HF 직독 fallback 이 없어(private) env 미설정 시 빈 섹션이 됐다.
-// deploy-landing 은 step env 로 주입하므로 여기 기본값은 로컬/직접빌드 전용 — ??= 라 operator 명시값이 우선(가역).
-const DARTLAB_WORKER = 'https://dartlab-hf-proxy.eddmpython.workers.dev';
-process.env.VITE_DARTLAB_HF_RESOLVE ??= `${DARTLAB_WORKER}/hf`;
-process.env.VITE_DARTLAB_NAVER_PROXY ??= `${DARTLAB_WORKER}/naver`;
-process.env.VITE_DARTLAB_NEWS_PROXY ??= `${DARTLAB_WORKER}/news`;
+// 종목 뉴스 워커 프록시 기본값(secret 아님) — news 는 private 라 HF 직독 fallback 이 없어 env 미설정 시 빈 섹션.
+// 로컬도 공개와 "공통 배선"으로 워커 /news 를 쓰게 한다(??= 라 operator 명시값 우선·가역).
+// ⚠ HF_RESOLVE/NAVER 는 안 건드린다 — fallback(HF 직독) 있어 불필요, dev 데이터 흐름 보존.
+process.env.VITE_DARTLAB_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/news';
 
 export default defineConfig({
 	plugins: [sveltekit()],

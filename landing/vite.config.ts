@@ -17,13 +17,11 @@ const versionMatch = pyprojectText.match(/^version\s*=\s*"([^"]+)"/m);
 if (!versionMatch) throw new Error('pyproject.toml version not found');
 const dartlabVersion = versionMatch[1];
 
-// 공개 CF 워커 프록시(secret 아님, 전 환경 동일) 기본값 — dev/로컬빌드도 공개와 "공통 배선"으로 워커를 쓴다.
-// news 는 private 라 HF 직독 fallback 이 없어 env 미설정 시 빈 섹션. deploy-landing 은 step env 로 주입하므로
-// prod 는 그 값이 우선(??= 라 가역) — 여기 기본값은 dev/직접빌드 전용. price·naver 도 동일 패턴으로 묶음.
-const DARTLAB_WORKER = 'https://dartlab-hf-proxy.eddmpython.workers.dev';
-process.env.VITE_DARTLAB_HF_RESOLVE ??= `${DARTLAB_WORKER}/hf`;
-process.env.VITE_DARTLAB_NAVER_PROXY ??= `${DARTLAB_WORKER}/naver`;
-process.env.VITE_DARTLAB_NEWS_PROXY ??= `${DARTLAB_WORKER}/news`;
+// 종목 뉴스 워커 프록시 기본값(secret 아님) — news 는 private 라 HF 직독 fallback 이 없어 env 미설정 시 빈 섹션.
+// dev/직접빌드도 공개와 "공통 배선"으로 워커 /news 를 쓰게 한다. deploy-landing step env 가 우선(??= 가역).
+// ⚠ HF_RESOLVE/NAVER 는 여기서 안 건드린다 — dev 는 원래 HF 직독 + /__gov·/__naver dev 플러그인 경로라,
+//    워커로 강제하면 dev 데이터 로드 흐름이 바뀐다. news 만 fallback 부재라 기본값이 필요하다.
+process.env.VITE_DARTLAB_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/news';
 
 function contentType(filePath: string): string {
 	const ext = path.extname(filePath).toLowerCase();
