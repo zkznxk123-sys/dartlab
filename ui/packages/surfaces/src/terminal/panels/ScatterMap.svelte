@@ -142,13 +142,13 @@
 	.smHiRing { fill: none; stroke: var(--amber, #fb923c); stroke-width: 1.3; }
 	.smDot:focus-visible .smC { stroke: var(--amber, #fb923c); stroke-width: 2; }
 	.smCtop { fill: none; stroke-width: 2; }
-	.smLbl { fill: #8b93a0; font-size: 8.5px; pointer-events: none; }
-	.sm-mini .smLbl { font-size: 7.5px; }
-	.smDot.on .smLbl, .smDot.hi .smLbl, .smLtop { fill: var(--dl-ink, #c8cfdb); font-weight: 700; }
-	.smAxLbl { fill: #aeb6c2; font-size: 9px; }
-	.smTick { fill: #6b7280; font-size: 8px; }
-	.smInfo { font-size: 9.5px; color: #aeb6c2; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 26px; }
-	.smInfo b { color: var(--dl-ink, #c8cfdb); }
+	.smLbl { fill: #c2cad6; font-size: 9.5px; pointer-events: none; }
+	.sm-mini .smLbl { font-size: 8.5px; }
+	.smDot.on .smLbl, .smDot.hi .smLbl, .smLtop { fill: #f0f3f7; font-weight: 700; }
+	.smAxLbl { fill: #d2d8e2; font-size: 10px; }
+	.smTick { fill: #aab2bf; font-size: 9px; }
+	.smInfo { font-size: 10.5px; color: #c2cad6; line-height: 1.45; margin-top: 4px; padding: 0 2px; min-height: 26px; }
+	.smInfo b { color: #f0f3f7; }
 	.smInfo em { font-style: normal; color: var(--amber, #fb923c); }
-	.smEmpty { font-size: 10px; color: #6b7280; padding: 12px; text-align: center; }
+	.smEmpty { font-size: 10px; color: #aab2bf; padding: 12px; text-align: center; }
 </style>
