@@ -45,25 +45,25 @@ def test_match_theme_text_negative_guard():
 
 
 def test_theme_exposure_unregistered():
-    """미등록 테마 = None."""
-    assert themeRevenueExposure("051910", "nonexistentTheme") is None
+    """미등록 테마 = None. (인자 관례: themeId 먼저, code 다음)"""
+    assert themeRevenueExposure("nonexistentTheme", "051910") is None
 
 
 @pytest.mark.requires_data
 def test_theme_exposure_branches():
     """테마-인지 노출% 정직 분기 — graded / pure_play / no_segment_keywords. 허울 정정 가드."""
     # 희석 대형 → graded, 노출% 산출.
-    lg = themeRevenueExposure("051910", "secondaryBattery")  # LG화학
+    lg = themeRevenueExposure("secondaryBattery", "051910")  # LG화학
     assert lg["basis"] == "graded"
     assert 40 < lg["exposurePct"] < 60  # LG에너지솔루션 부문 ~48%
 
     # pure-play 단일사업 → None(100% 등치 금지).
-    eco = themeRevenueExposure("247540", "secondaryBattery")  # 에코프로비엠
+    eco = themeRevenueExposure("secondaryBattery", "247540")  # 에코프로비엠
     assert eco["exposurePct"] is None
     assert eco["basis"] == "pure_play_candidate"
 
     # segmentKeywords 미정의 테마 → None(등급 미산출).
-    rob = themeRevenueExposure("000660", "robotics")
+    rob = themeRevenueExposure("robotics", "000660")
     assert rob["exposurePct"] is None
     assert rob["basis"] == "theme_no_segment_keywords"
 

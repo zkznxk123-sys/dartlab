@@ -531,30 +531,34 @@ class Industry:
     def theme(
         self,
         themeId: str | None = None,
+        stockCode: str | None = None,
         *,
         grade: bool = False,
         discover: bool = False,
     ) -> pl.DataFrame:
-        """횡단 투자 테마 → 멤버 종목 (+선택적 매출노출 등급·공급망 발견).
+        """횡단 투자 테마 단일 진입점 — 테마→멤버 또는 종목→소속 테마(도시에).
 
         Capabilities:
-            themes.json 키워드를 KIND 주요제품에 substring 매칭해 테마 멤버를 태깅(근거 동반).
-            ``grade=True`` 면 멤버별 부문 매출노출%(테마-인지, panel SSOT) 추가, ``discover=True``
-            면 공급망 거래엣지로 키워드 미언급 수혜주 발견. 인포스탁 리스트와 달리 *근거 투명*.
+            ``themeId`` → 그 테마 멤버 종목(주요제품 substring 태깅, 근거 동반). ``stockCode`` →
+            그 종목의 소속 테마 + 근거 + 매출노출%(테마-인지). 둘 다 없으면 등록 테마 목록.
+            ``grade``/``discover`` 는 themeId 모드 전용. 인포스탁 리스트와 달리 *근거 투명*.
 
         Parameters
         ----------
         themeId : str | None
-            테마 ID. None 이면 등록 테마 목록(themeId/name/gradeable) 반환.
+            테마 ID. (None & stockCode None) 이면 테마 목록. stockCode 와 함께면 stockCode 우선.
+        stockCode : str | None
+            6자리 종목코드. 지정 시 그 종목의 소속 테마 도시에(근거+노출%) 반환.
         grade : bool
-            True 면 ``노출%``·``등급근거`` 컬럼 추가 (멤버별 panel 조회 — 느림).
+            themeId 모드에서 멤버별 ``노출%``·``등급근거`` 추가 (멤버별 panel 조회 — 느림).
         discover : bool
-            True 면 공급망 거래엣지(supplier/customer)로 발견한 비키워드 종목 추가(``발견`` = 공급망).
+            themeId 모드에서 공급망 거래엣지(supplier/customer)로 비키워드 수혜주 추가(``발견``=공급망).
 
         Returns
         -------
         pl.DataFrame
-            themeId=None: ``themeId, name, keywords, gradeable``.
+            (인자 없음): ``themeId, name, keywords, gradeable``.
+            stockCode 지정: ``themeId, 테마, 근거, 노출%, 등급근거`` (그 종목의 테마들).
             themeId 지정: ``종목코드, 회사명, 업종, 근거, 발견`` (+grade: ``노출%, 등급근거``).
             ``노출%``=None 은 미산출(추출실패/단일사업/테마 segmentKeywords 부재) — 100% 등치 금지.
 
@@ -589,7 +593,10 @@ class Industry:
         AIContext:
             테마 단일 진입점. 멤버십(근거)·노출%(등급근거)를 cite. None 노출은 "미산출"로 정직 표기.
         """
-        from dartlab.industry.themes import listThemes, loadThemes, matchThemeText
+        from dartlab.industry.themes import listThemes, loadThemes, matchThemeText, themeRevenueExposure
+
+        if stockCode is not None:
+            return self._themeDossier(stockCode, loadThemes(), matchThemeText, themeRevenueExposure)
 
         if themeId is None:
             return pl.DataFrame(
@@ -634,10 +641,8 @@ class Industry:
         if grade:
             import gc
 
-            from dartlab.industry.themes import themeRevenueExposure
-
             for m in members:
-                g = themeRevenueExposure(m["종목코드"], themeId) or {}
+                g = themeRevenueExposure(themeId, m["종목코드"]) or {}
                 m["노출%"] = g.get("exposurePct")
                 m["등급근거"] = g.get("basis")
                 gc.collect()
@@ -681,6 +686,45 @@ class Industry:
             }
             for code, via in found.items()
         ]
+
+    @staticmethod
+    def _themeDossier(stockCode, themes, matchThemeText, themeRevenueExposure) -> pl.DataFrame:
+        """한 종목의 소속 테마 + 근거 + 매출노출% (도시에) — ``theme(stockCode=...)`` 위임처.
+
+        주요제품 키워드로 소속 테마를 찾고 테마별 노출%를 등급. 인포스탁이 못 주는 "왜 이
+        테마·매출 몇%"의 엔진 SSOT — themeTool stockCode 모드가 본 메서드를 wrap 한다.
+        """
+        import gc
+
+        from dartlab.gather.krx.listing.registry import getKindList
+
+        kind = getKindList()
+        row = kind.filter(kind["종목코드"] == stockCode)
+        product = row["주요제품"][0] if row.height else ""
+        schema = {
+            "themeId": pl.Utf8,
+            "테마": pl.Utf8,
+            "근거": pl.Utf8,
+            "노출%": pl.Float64,
+            "등급근거": pl.Utf8,
+        }
+        rows: list[dict] = []
+        for tid, th in themes.items():
+            hits = matchThemeText(th, product or "")
+            if not hits:
+                continue
+            g = themeRevenueExposure(tid, stockCode) or {}
+            rows.append(
+                {
+                    "themeId": tid,
+                    "테마": th.name,
+                    "근거": ", ".join(hits),
+                    "노출%": g.get("exposurePct"),
+                    "등급근거": g.get("basis"),
+                }
+            )
+            gc.collect()
+        return pl.DataFrame(rows, schema=schema)
 
 
 def addOverride(

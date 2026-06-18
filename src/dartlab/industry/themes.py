@@ -140,7 +140,7 @@ def matchThemeText(theme: ThemeDef, text: str) -> list[str]:
     return [kw for kw in theme.keywords if kw.lower() in low]
 
 
-def themeRevenueExposure(stockCode: str, themeId: str) -> dict | None:
+def themeRevenueExposure(themeId: str, code: str) -> dict | None:
     """한 종목의 *해당 테마* 매출 노출% — 테마별 segmentKeywords 로만 등급 (테마-인지).
 
     Capabilities:
@@ -150,10 +150,10 @@ def themeRevenueExposure(stockCode: str, themeId: str) -> dict | None:
 
     Parameters
     ----------
-    stockCode : str
-        6자리 종목코드.
     themeId : str
         테마 ID.
+    code : str
+        6자리 종목코드.
 
     Returns
     -------
@@ -170,7 +170,7 @@ def themeRevenueExposure(stockCode: str, themeId: str) -> dict | None:
 
     Example:
         >>> from dartlab.industry.themes import themeRevenueExposure
-        >>> themeRevenueExposure("051910", "secondaryBattery")["exposurePct"]  # LG화학
+        >>> themeRevenueExposure("secondaryBattery", "051910")["exposurePct"]  # LG화학
         48.4
 
     Guide:
@@ -195,7 +195,7 @@ def themeRevenueExposure(stockCode: str, themeId: str) -> dict | None:
 
     from dartlab.providers.dart.panel.cell import segmentRevenueExposure
 
-    exp = segmentRevenueExposure(stockCode)
+    exp = segmentRevenueExposure(code)
     if exp is None:
         return {"exposurePct": None, "basis": "no_segment_data", "topSegment": None}
     if not exp:

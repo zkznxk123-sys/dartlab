@@ -76,59 +76,30 @@ def themeTool(
     """
     from dartlab.industry import Industry
 
+    # 엔진 verb 와 동일 시그니처 — 본 도구는 thin wrapper (로직 재구현 0).
+    rows = Industry().theme(themeId, stockCode, grade=grade, discover=discover).to_dicts()
     confidence = baseScore("ratio")
 
     if stockCode:
-        from dartlab.gather.krx.listing.registry import getKindList
-        from dartlab.industry.themes import loadThemes, matchThemeText, themeRevenueExposure
-
-        kind = getKindList()
-        row = kind.filter(kind["종목코드"] == stockCode)
-        corpName = row["회사명"][0] if row.height else stockCode
-        product = row["주요제품"][0] if row.height else ""
-        themes = []
-        for tid, theme in loadThemes().items():
-            hits = matchThemeText(theme, product or "")
-            if not hits:
-                continue
-            g = themeRevenueExposure(stockCode, tid) or {}
-            themes.append(
-                {
-                    "themeId": tid,
-                    "theme": theme.name,
-                    "근거": ", ".join(hits),
-                    "exposurePct": g.get("exposurePct"),
-                    "basis": g.get("basis"),
-                }
-            )
-        payload = {"stockCode": stockCode, "corpName": corpName, "themes": themes, "confidence": confidence}
-        ref = Ref(
-            id=f"theme:{stockCode}",
-            kind="tableRef",
-            title=f"{corpName} 테마 노출",
-            source="themeTool",
-            payload=payload,
+        idKey, title, summary, key = (
+            f"theme:{stockCode}",
+            f"{stockCode} 테마 노출",
+            f"{stockCode} 소속 테마 {len(rows)}개 (근거+매출노출%)",
+            "themes",
         )
-        msg = f"{corpName} 소속 테마 {len(themes)}개 (근거+매출노출%)" if themes else f"{corpName} 매칭 테마 없음"
-        return ToolResult(True, msg, refs=[ref], data=payload)
-
-    if themeId:
-        df = Industry().theme(themeId, grade=grade, discover=discover)
-        rows = df.to_dicts()
-        payload = {"themeId": themeId, "members": rows, "count": len(rows), "confidence": confidence}
-        ref = Ref(
-            id=f"theme:{themeId}",
-            kind="tableRef",
-            title=f"테마 {themeId} 멤버",
-            source="themeTool",
-            payload=payload,
+    elif themeId:
+        idKey, title, summary, key = (
+            f"theme:{themeId}",
+            f"테마 {themeId} 멤버",
+            f"테마 '{themeId}' 멤버 {len(rows)}종목",
+            "members",
         )
-        return ToolResult(True, f"테마 '{themeId}' 멤버 {len(rows)}종목", refs=[ref], data=payload)
+    else:
+        idKey, title, summary, key = "theme:list", "테마 목록", f"등록 테마 {len(rows)}개", "themes"
 
-    rows = Industry().theme().to_dicts()
-    payload = {"themes": rows, "confidence": confidence}
-    ref = Ref(id="theme:list", kind="tableRef", title="테마 목록", source="themeTool", payload=payload)
-    return ToolResult(True, f"등록 테마 {len(rows)}개", refs=[ref], data=payload)
+    payload = {key: rows, "count": len(rows), "confidence": confidence}
+    ref = Ref(id=idKey, kind="tableRef", title=title, source="themeTool", payload=payload)
+    return ToolResult(True, summary, refs=[ref], data=payload)
 
 
 __all__ = ["themeTool"]

@@ -22,16 +22,16 @@ def test_theme_tool_registered():
 @pytest.mark.requires_data
 def test_theme_tool_stock_dossier():
     """stockCode 모드 — 소속 테마 + 근거 + 노출%(정직 분기). 허울 정정 가드."""
-    # LG화학 → 2차전지 graded 노출%.
+    # LG화학 → 2차전지 graded 노출%. (도구는 엔진 verb 한국어 컬럼 그대로 노출)
     lg = themeTool(stockCode="051910")
     assert lg.ok
     bat = next(t for t in lg.data["themes"] if t["themeId"] == "secondaryBattery")
     assert bat["근거"]  # 키워드 증거 동반
-    assert 40 < bat["exposurePct"] < 60 and bat["basis"] == "graded"
+    assert 40 < bat["노출%"] < 60 and bat["등급근거"] == "graded"
 
     # 삼성SDI pure-play → 노출% None(100% 등치 금지).
     sdi = next(t for t in themeTool(stockCode="006400").data["themes"] if t["themeId"] == "secondaryBattery")
-    assert sdi["exposurePct"] is None and sdi["basis"] == "pure_play_candidate"
+    assert sdi["노출%"] is None and sdi["등급근거"] == "pure_play_candidate"
 
     # 매칭 테마 없는 코드 → 빈 themes(에러 아님).
     none = themeTool(stockCode="000000")

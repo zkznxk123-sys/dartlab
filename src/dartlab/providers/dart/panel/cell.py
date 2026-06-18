@@ -250,7 +250,7 @@ def _isRevenueLabel(label: str) -> bool:
     )
 
 
-def segmentRevenueExposure(stockCode: str, *, marketNs: str = "kr") -> dict[str, float] | None:
+def segmentRevenueExposure(code: str, *, marketNs: str = "kr") -> dict[str, float] | None:
     """영업부문별 매출 *상대 노출%* (최신연도). 축-태깅(OperatingSegmentsMember) 회사만.
 
     Capabilities:
@@ -260,7 +260,7 @@ def segmentRevenueExposure(stockCode: str, *, marketNs: str = "kr") -> dict[str,
         절대 세그매출(원 단위·단위환산)은 ``analysis.financial`` 의 ``_segmentSeriesFromNote`` 가 별도 담당.
 
     Args:
-        stockCode: 6자리 종목코드.
+        code: 6자리 종목코드 (panel 인자 관례 — readCellWide·panelTextRows 등과 동일).
         marketNs: 시장 namespace (기본 "kr"). EDGAR(US)는 NT_D871100 부재 → None.
 
     Returns:
@@ -294,7 +294,7 @@ def segmentRevenueExposure(stockCode: str, *, marketNs: str = "kr") -> dict[str,
         ``dartlab.analysis.financial._revenueSelect._segmentSeriesFromNote`` : 절대 세그매출(원·단위환산).
         ``dartlab.providers.dart.panel.cell._noteCellsFromPanel`` : 주석 셀 소스.
     """
-    cells = _noteCellsFromPanel(stockCode, "NT_D871100", marketNs=marketNs)
+    cells = _noteCellsFromPanel(code, "NT_D871100", marketNs=marketNs)
     if cells is None or cells.height == 0:
         return None
     revByYear: dict[str, dict[str, float]] = {}
