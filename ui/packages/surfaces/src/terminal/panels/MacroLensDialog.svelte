@@ -41,14 +41,30 @@
 	const relevantDrivers = $derived(snapshot.drivers.filter((d) => d.relevance !== 'context').slice(0, 16));
 	const contextDrivers = $derived(snapshot.drivers.filter((d) => d.relevance === 'context').slice(0, 18));
 	const visibleDrivers = $derived([...relevantDrivers, ...contextDrivers]);
-	const focusDriver = $derived(localFocus ? snapshot.drivers.find((d) => d.id === localFocus) : null);
-	const focusEdge = $derived(localFocus ? snapshot.transmissionEdges.find((e) => e.driverId === localFocus || e.sectorKey === localFocus) : null);
-	const focusIndicator = $derived(localFocus ? snapshot.exposureIndicators.find((x) => x.seriesId === localFocus || x.sourceRef.includes(localFocus)) : null);
-	const focusFalsifiers = $derived(localFocus ? snapshot.falsifiers.filter((f) => !f.driverId || f.driverId === localFocus).slice(0, 3) : snapshot.falsifiers.slice(0, 3));
-	const focusRelease = $derived(localFocus ? snapshot.releaseRail.find((r) => r.driverId === localFocus) : snapshot.releaseRail[0]);
-	const focusSource = $derived(localFocus ? snapshot.sourcePackets.find((p) => p.driverId === localFocus || p.seriesId === localFocus) : snapshot.sourcePackets[0]);
-	const focusContribution = $derived(localFocus ? snapshot.contributionStacks.find((c) => c.driverId === localFocus) : snapshot.contributionStacks[0]);
-	const focusCoMove = $derived(localFocus ? snapshot.coMoveGates.find((c) => c.driverId === localFocus) : snapshot.coMoveGates[0]);
+	const focusableIds = $derived(new Set([
+		...snapshot.drivers.map((d) => d.id),
+		...snapshot.transmissionEdges.map((e) => e.driverId),
+		...snapshot.releaseRail.map((r) => r.driverId),
+		...snapshot.sourcePackets.flatMap((p) => [p.driverId, p.seriesId]),
+		...snapshot.contributionStacks.map((c) => c.driverId),
+		...snapshot.coMoveGates.map((c) => c.driverId)
+	].filter(Boolean)));
+	const defaultFocusId = $derived(
+		snapshot.topPressures.find((d) => focusableIds.has(d.id))?.id
+		?? snapshot.coMoveGates.find((c) => c.points.length)?.driverId
+		?? relevantDrivers.find((d) => focusableIds.has(d.id))?.id
+		?? snapshot.drivers[0]?.id
+		?? ''
+	);
+	const activeFocusId = $derived(localFocus && focusableIds.has(localFocus) ? localFocus : defaultFocusId);
+	const focusDriver = $derived(activeFocusId ? snapshot.drivers.find((d) => d.id === activeFocusId) : null);
+	const focusEdge = $derived(activeFocusId ? snapshot.transmissionEdges.find((e) => e.driverId === activeFocusId || e.sectorKey === activeFocusId) : null);
+	const focusIndicator = $derived(activeFocusId ? snapshot.exposureIndicators.find((x) => x.seriesId === activeFocusId || x.sourceRefs.includes(activeFocusId)) : null);
+	const focusFalsifiers = $derived(activeFocusId ? snapshot.falsifiers.filter((f) => !f.driverId || f.driverId === activeFocusId).slice(0, 3) : snapshot.falsifiers.slice(0, 3));
+	const focusRelease = $derived(activeFocusId ? snapshot.releaseRail.find((r) => r.driverId === activeFocusId) : snapshot.releaseRail[0]);
+	const focusSource = $derived(activeFocusId ? snapshot.sourcePackets.find((p) => p.driverId === activeFocusId || p.seriesId === activeFocusId) : snapshot.sourcePackets[0]);
+	const focusContribution = $derived(activeFocusId ? snapshot.contributionStacks.find((c) => c.driverId === activeFocusId) : snapshot.contributionStacks[0]);
+	const focusCoMove = $derived(activeFocusId ? snapshot.coMoveGates.find((c) => c.driverId === activeFocusId) : snapshot.coMoveGates[0]);
 	const exposureRows = $derived(buildExposureRows());
 	const gateRows = $derived(snapshot.evidenceGates);
 	const econBlocked = (id: string) => !activeEcon.includes(id) && activeEcon.length >= ECON_MAX;
@@ -87,7 +103,7 @@
 		return key === 'rising' ? '상승' : key === 'falling' ? '하락' : key === 'stable' ? '횡보' : raw;
 	}
 	function goto(tabName: MacroLensTab, id = '') {
-		localFocus = id || localFocus;
+		localFocus = id || activeFocusId;
 		onTab(tabName);
 	}
 	function onDialogKeydown(e: KeyboardEvent) {
@@ -144,7 +160,7 @@
 				</section>
 				<section class="mlPulseStrip" aria-label="Macro pulse">
 					{#each exposureRows.slice(0, 6) as row (row.driver.id)}
-						<button class={'mlPulse ' + row.driver.pressureLevel} class:on={activeEcon.includes(row.driver.id) || localFocus === row.driver.id} disabled={econBlocked(row.driver.id)} onclick={() => { localFocus = row.driver.id; onToggleEcon?.(row.driver.id); }} title={econBlocked(row.driver.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle ECON overlay')}>
+						<button class={'mlPulse ' + row.driver.pressureLevel} class:on={activeEcon.includes(row.driver.id) || activeFocusId === row.driver.id} disabled={econBlocked(row.driver.id)} onclick={() => { localFocus = row.driver.id; onToggleEcon?.(row.driver.id); }} title={econBlocked(row.driver.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle ECON overlay')}>
 							<span>{row.driver.label}</span>
 							<b>{row.driver.value}</b>
 							<em>{row.driver.change}</em>
@@ -177,6 +193,15 @@
 						</div>
 					{/each}
 				</section>
+				<section class="mlMobileDrillRail" aria-label="Mobile macro drilldown">
+					{#each exposureRows.slice(0, 6) as row (row.driver.id)}
+						<button class:focused={activeFocusId === row.driver.id} onclick={() => goto('transmission', row.driver.id)} title={row.driver.pressureReason}>
+							<span>{row.driver.label}</span>
+							<b>{row.driver.coMovement?.status === 'candidate' ? 'Co-move' : row.driver.pressureLevel.toUpperCase()}</b>
+							<em>{row.driver.coMovement ? `corr ${row.driver.coMovement.corr > 0 ? '+' : ''}${row.driver.coMovement.corr.toFixed(2)}` : row.driver.freshness.label}</em>
+						</button>
+					{/each}
+				</section>
 				<section class="mlGateStrip" aria-label="Evidence gates">
 					{#each gateRows as g (g.id)}
 						<div class={'mlGate ' + g.status}>
@@ -190,7 +215,7 @@
 					<div class="mlRailTitle"><span class="mlBlockK">Release Rail</span><b>{T('값을 다시 확인할 시점', 'When to re-check')}</b></div>
 					<div class="mlRailRows">
 						{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
-							<button class={'mlRailItem ' + r.status} class:focused={localFocus === r.driverId} onclick={() => goto('transmission', r.driverId)} title={r.sourceRef}>
+							<button class={'mlRailItem ' + r.status} class:focused={activeFocusId === r.driverId} onclick={() => goto('transmission', r.driverId)} title={r.sourceRef}>
 								<span>{r.label}</span>
 								<b>{r.lastObservation}</b>
 								<em>{r.frequency}</em>
@@ -226,7 +251,7 @@
 						<span>{T('Driver', 'Driver')}</span><span>{T('품질', 'Quality')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
 					</div>
 					{#each visibleDrivers as d (d.id)}
-						<div class={'mlDriverRow ' + d.relevance} class:focused={localFocus === d.id}>
+						<div class={'mlDriverRow ' + d.relevance} class:focused={activeFocusId === d.id}>
 							<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
 							<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText[d.pressureLevel]}</b><em>{d.qualityHint}</em></span>
 							<span class="mono">{d.value}</span>
@@ -252,7 +277,7 @@
 					<section class="mlDrill">
 						<div class="mlDrillCard">
 							<span class="mlBlockK">{T('전파 chain', 'Transmission chain')}</span>
-							<b>{(focusDriver?.label ?? focusEdge?.driverLabel ?? localFocus) || '—'}</b>
+							<b>{(focusDriver?.label ?? focusEdge?.driverLabel ?? activeFocusId) || '—'}</b>
 							<p>{focusEdge ? `${focusEdge.sectorLabel} → ${focusEdge.financialLine} → ${focusEdge.valuationLever}` : T('선택 driver의 표준 전파 경로가 아직 없습니다.', 'No mapped transmission chain for the selected driver yet.')}</p>
 							<em>{focusEdge ? `${focusEdge.evidenceLevel} · ${focusEdge.confidence} · lag ${focusEdge.lagMonths ? `${focusEdge.lagMonths[0]}-${focusEdge.lagMonths[1]}M` : '—'}` : focusDriver?.sourceLineage ?? '—'}</em>
 							<div class="mlEvidence compact">
@@ -333,7 +358,7 @@
 				{/if}
 				<section class="mlGrid edgeGrid">
 					{#each snapshot.transmissionEdges as e (e.id)}
-						<div class="mlEdge" class:focused={localFocus === e.driverId || localFocus === e.sectorKey}>
+						<div class="mlEdge" class:focused={activeFocusId === e.driverId || activeFocusId === e.sectorKey}>
 							<div class="mlEdgeTop">
 								<span class="mlSign">{signText[e.sign]}</span>
 								<b>{e.driverLabel}</b>
@@ -398,7 +423,7 @@
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('출처', 'Sources')}</span><b>{T('source/date/value lineage', 'source/date/value lineage')}</b></div>
 						{#each snapshot.sourcePackets.slice(0, 8) as p (p.driverId)}
-							<button class={'mlSrcPacket ' + p.status} class:focused={localFocus === p.driverId} onclick={() => { localFocus = p.driverId; }} title={p.sourceRef}>
+							<button class={'mlSrcPacket ' + p.status} class:focused={activeFocusId === p.driverId} onclick={() => { localFocus = p.driverId; }} title={p.sourceRef}>
 								<b>{p.seriesId}</b>
 								<span>{p.source} · {p.unit} · {p.frequency}</span>
 								<em>{p.asOf} · {p.value} · {p.transform}</em>
@@ -488,6 +513,7 @@
 	.mlXCell:hover:not(.none) { box-shadow: inset 0 0 0 1px rgba(251,146,60,.45); }
 	.mlXCell b { color: var(--amber); font-size: 13px; }
 	.mlXCell em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlMobileDrillRail { display: none; }
 	.mlGateStrip { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 	.mlGate.ok { border-color: rgba(52,211,153,.42); }
 	.mlGate.watch { border-color: rgba(251,146,60,.42); }
@@ -637,6 +663,13 @@
 		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill, .mlRailRows { grid-template-columns: 1fr; }
 		.mlMatrix { overflow-x: auto; }
 		.mlMatrixHead, .mlMatrixRow { min-width: 640px; }
+		.mlMobileDrillRail { display: grid; grid-template-columns: 1fr; gap: 6px; }
+		.mlMobileDrillRail button { display: grid; grid-template-columns: minmax(0, 1fr) 68px 82px; gap: 7px; align-items: center; min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); color: var(--dl-ink); padding: 8px; text-align: left; }
+		.mlMobileDrillRail button.focused { border-color: rgba(251,146,60,.58); background: rgba(251,146,60,.045); }
+		.mlMobileDrillRail span, .mlMobileDrillRail b, .mlMobileDrillRail em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.mlMobileDrillRail span { font-size: 11px; font-weight: 800; }
+		.mlMobileDrillRail b { color: var(--amber); font-family: var(--dl-font-mono); font-size: 9.5px; text-align: right; }
+		.mlMobileDrillRail em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; text-align: right; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
 		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
 	}

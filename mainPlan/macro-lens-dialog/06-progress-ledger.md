@@ -1,10 +1,36 @@
 # 06. 진행 원장
 
-상태: v1.3
+상태: v1.4
 
 ---
 
 ## 2026-06-18
+
+### v1.4 — 모바일 드릴다운 포커스 보강
+
+배경:
+
+- 브라우저 QA에서 좌측 매크로 카드의 `상세보기`가 `focusId='KR'`로 다이얼로그를 열면, `전파 지도`의 기본 drilldown이 유효 driver가 아닌 market-level focus에 묶이는 문제가 확인됐다.
+- 모바일에서는 matrix가 가로 스크롤 표로 유지되기 때문에, 작은 셀 클릭을 주 진입로로 삼으면 drilldown 발견성과 조작성이 약했다.
+
+완료:
+
+- `MacroLensDialog`가 `focusableIds`를 만들고, 외부 `focusId`가 실제 driver/series 계약에 맞을 때만 `activeFocusId`로 채택하게 했다.
+- 기본 focus는 유효한 `topPressures` driver, 관측점 보유 `coMoveGates`, relevant driver 순서로 회수한다.
+- `focusIndicator`는 더 이상 `sourceRef.includes()`로 느슨하게 맞추지 않고 `seriesId/sourceRefs`의 정확한 id만 사용한다.
+- 모바일 대시보드에 `Mobile Drill Rail`을 추가했다. 6개 큰 터치 타깃이 `전파 지도`로 이동하며 기존 matrix, release rail, source packet, contribution, co-movement gate와 같은 focus를 공유한다.
+- 데스크톱에서는 모바일 레일을 숨기고 기존 matrix를 유지한다.
+
+검증:
+
+- `npm run check -w @dartlab/ui-surfaces` 통과(기존 Svelte warning 46개 유지).
+- Playwright desktop: 좌측 `상세보기`로 열린 `KR` focus 경로에서 `전파 지도` 클릭 시 `Co-movement Gate`, 산점도 72점, latest 1점, `인과 아님`, formula 표시, 수평 overflow 없음 확인.
+- Playwright mobile: `Mobile Drill Rail` display `grid`, 버튼 6개, 첫 버튼 클릭 시 `전파 지도`와 산점도 72점, latest 1점, `인과 아님`, formula 표시, 수평 overflow 없음 확인.
+
+NEXT:
+
+1. 실제 발표 캘린더/빈티지 데이터가 생기면 산점도와 별도로 release reaction view를 검토한다. 현재 scatter는 발표일 반응 분석이 아니다.
+2. `analysis.macroExposure`의 표본 길이가 늘어나도 `OPEN/정량 민감도`는 품질 gate 뒤에 둔다.
 
 ### v1.3 — 관측점 기반 Co-movement Scatter 구현
 

@@ -1,6 +1,6 @@
 # 매크로 렌즈 다이얼로그
 
-상태: 구현 v1.3 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 v0.5 재조사 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷 · Release/Source/Contribution 시각화 · 관측점 기반 co-movement scatter)
+상태: 구현 v1.4 (2026-06-18, Phase 1~4 완료 · 대시보드 시각화 방식 v0.5 재조사 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷 · Release/Source/Contribution 시각화 · 관측점 기반 co-movement scatter · 모바일 드릴다운 포커스 보강)
 범위: 퍼블릭 터미널의 `경제지표분석`을 Macro Lens 분석 코어로 승격한다. 화면은 다이얼로그지만, 핵심은 `dartlab.macro`의 시장·섹터 전파 산출물과 `analysis`의 회사 노출 품질을 하나의 검증 가능한 전파 사슬로 묶는 것이다.
 
 ---
@@ -34,7 +34,8 @@
 - 첫 화면 구현은 기존 산출물 재사용이다: `dashboards/macro.json`, `macro/{fred,ecos}/observations.parquet`, `MACRO_SERIES`, `co.tailwind`, `eng.sectorTailwinds()`, 차트 co-movement.
 - 첫 화면은 `대시보드`다. `Macro Phase Strip`, `Driver Pulse Strip`, `Exposure Matrix`, `Evidence Gate`, `Legend`로 구성하고 결론형 문단을 전면에 두지 않는다.
 - 시각화는 판정을 만들지 않는다. `OBS/PRIOR/TPL/LOCK/OPEN/QUAL/STALE/MISSING` 상태는 `macro.transmission`, `macroExposure.exposureQuality`, source lineage, freshness policy가 만든다.
-- `Release Rail`, 구조화된 `Source Packet`, `Contribution Stack`, `Co-movement Gate`는 matrix 선택 driver 하나(`localFocus`)에 동기화한다. `Co-movement Gate`는 원시 월별 관측점이 있으면 `macro 월말 1차차분 × 종목 월수익률` 산점도를 그리고, 없을 때만 corr 위치 gate로 fallback한다. 산점도는 beta·회귀선·인과 증명이 아니라 동행 후보의 표본 모양을 보는 반증 도구다.
+- `Release Rail`, 구조화된 `Source Packet`, `Contribution Stack`, `Co-movement Gate`는 유효한 driver focus 하나에 동기화한다. 외부에서 `KR` 같은 market-level focus가 들어오면 driver로 간주하지 않고 기본 driver로 회수한다. `Co-movement Gate`는 원시 월별 관측점이 있으면 `macro 월말 1차차분 × 종목 월수익률` 산점도를 그리고, 없을 때만 corr 위치 gate로 fallback한다. 산점도는 beta·회귀선·인과 증명이 아니라 동행 후보의 표본 모양을 보는 반증 도구다.
+- 모바일에서는 matrix의 작은 셀을 주 터치 경로로 쓰지 않는다. `대시보드` 아래 `Mobile Drill Rail` 6개 버튼이 `전파 지도` drilldown과 같은 focus 계약을 사용하며, matrix는 세부 표로 유지한다.
 - 엔진 강화는 `tests/_attempts/macroLensEngine/` proof를 거쳐 `macro.transmission` 최소 축까지 `src/dartlab/macro`에 승격했다. 회사별 `analysis.macroExposure`는 `nObs/R²/window/lag/coverage/sourceRef` 품질 계약을 내며, Macro Lens는 이 값을 우선 소비하고 없을 때만 fallback 잠금 상태를 표시한다.
 - 매수/매도, 목표주가, 위기 임박, 수혜 확정 표현은 금지한다.
 - public/local 공통배선이 기본이다. 로컬 백엔드 없이 퍼블릭 데이터만으로 떠야 한다.
