@@ -79,7 +79,7 @@
 			[...dots].sort((a, b) => b.r - a.r).forEach((d) => {
 				if (d.p.faint) return;
 				const nm = (d.p.label || '').slice(0, 5);
-				const lx = d.cx + d.r + 2, ly = d.cy - 7, lw = nm.length * 9.5 + 12, lh = 14;
+				const lx = d.cx + d.r + (compact ? 2 : 6), ly = d.cy - 7, lw = nm.length * 9.5 + 12, lh = 14;
 				const box = { x1: lx, y1: ly, x2: lx + lw, y2: ly + lh };
 				const hit = placed.some((q) => !(box.x2 < q.x1 || box.x1 > q.x2 || box.y2 < q.y1 || box.y1 > q.y2));
 				if (!hit) { d.lbl = true; placed.push(box); }
@@ -118,12 +118,12 @@
 					<circle cx={d.cx} cy={d.cy} r={Math.max(d.r + 1.5, compact ? 5 : 7)} fill="transparent" />
 					<circle cx={d.cx} cy={d.cy} r={d.r} class="smC" class:faint={d.p.faint} style={`fill:${d.tone.f};stroke:${d.tone.s}`} />
 					{#if highlightId === d.p.id}<circle cx={d.cx} cy={d.cy} r={d.r + 3} class="smHiRing" />{/if}
-					{#if d.lbl || highlightId === d.p.id}<text x={d.cx + d.r + 2} y={d.cy + 3} class="smLbl">{d.p.label.slice(0, compact ? 4 : 5)}</text>{/if}
+					{#if d.lbl || highlightId === d.p.id}<text x={d.cx + d.r + (compact ? 2 : 6)} y={d.cy + 3} class="smLbl">{d.p.label.slice(0, compact ? 4 : 5)}</text>{/if}
 				</g>
 			{/each}
 			{#if hover}
 				<circle cx={hover.cx} cy={hover.cy} r={hover.r} class="smCtop" pointer-events="none" style={`stroke:${hover.tone.s}`} />
-				<text x={hover.cx + hover.r + 2} y={hover.cy + 3} class="smLbl smLtop" pointer-events="none">{hover.p.label}</text>
+				<text x={hover.cx + hover.r + (compact ? 3 : 6)} y={hover.cy + 3} class="smLbl smLtop" pointer-events="none">{hover.p.label}</text>
 			{/if}
 			{#if !compact}
 				<text x={(g.x0 + g.x1) / 2} y={g.H - 2} class="smAxLbl" text-anchor="middle">{xLabel} →</text>

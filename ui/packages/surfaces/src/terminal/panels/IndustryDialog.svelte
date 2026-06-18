@@ -284,10 +284,11 @@
 	.indMGr.up { color: #3fb950; } .indMGr.good { color: #6fbf73; } .indMGr.neutral { color: #8b93a0; } .indMGr.warn { color: #d29922; } .indMGr.down { color: #f85149; }
 	/* 뷰 토글 + 순위표(보조) */
 	.indLensRow { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; align-items: center; }
-	.indViewTog { display: inline-flex; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; overflow: hidden; margin-right: 4px; }
-	.indVBtn { font-size: 10px; padding: 2px 9px; border: 0; background: rgba(255, 255, 255, 0.02); color: #c2cad6; cursor: pointer; }
-	.indVBtn:hover { color: var(--dl-ink, #c8cfdb); }
-	.indVBtn.on { color: var(--amber, #fb923c); background: color-mix(in srgb, var(--amber, #fb923c) 14%, transparent); }
+	.indViewTog { display: inline-flex; border: 1px solid var(--amber, #fb923c); border-radius: 4px; overflow: hidden; margin-right: 4px; }
+	.indVBtn { font-size: 10px; padding: 3px 11px; border: 0; border-left: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.05); color: #aab2bf; cursor: pointer; transition: background 0.12s, color 0.12s; }
+	.indVBtn:first-child { border-left: 0; }
+	.indVBtn:hover { color: var(--dl-ink, #c8cfdb); background: rgba(255, 255, 255, 0.1); }
+	.indVBtn.on { color: var(--amber, #fb923c); background: color-mix(in srgb, var(--amber, #fb923c) 22%, transparent); font-weight: 700; }
 	.indLensBtn { font-size: 10px; padding: 2px 9px; border-radius: 3px; border: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.02); color: #c2cad6; cursor: pointer; }
 	.indLensBtn:hover { color: var(--dl-ink, #c8cfdb); }
 	.indLensBtn.on { color: var(--amber, #fb923c); border-color: color-mix(in srgb, var(--amber, #fb923c) 55%, transparent); background: color-mix(in srgb, var(--amber, #fb923c) 12%, transparent); }
