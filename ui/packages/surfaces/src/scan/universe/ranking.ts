@@ -32,15 +32,26 @@ export function rankValue(row: UniverseRow, signal: RankSignalKey): number | nul
 	return RANK_SIGNAL_LABEL[signal].lowerBetter ? -v : v;
 }
 
-/** 정렬 가능한 (code, value) 리스트 — value 큰 순(상위분위) 정렬은 호출부. null 값 제외. */
+/** 그 리밸 시점 turnover 퍼센타일 임계 — PIT(절대 임계는 16년 인플레로 왜곡, 퍼센타일이 robust). */
+function turnoverThreshold(rows: UniverseRow[], liquidityPctile: number): number {
+	if (liquidityPctile <= 0) return 0;
+	const ts = rows.map((r) => r.turnover).filter((t) => t > 0).sort((a, b) => a - b);
+	if (!ts.length) return 0;
+	const idx = Math.min(ts.length - 1, Math.floor(liquidityPctile * ts.length));
+	return ts[idx];
+}
+
+/** 정렬 가능한 (code, value) 리스트 — value 큰 순(상위분위) 정렬은 호출부. null·저유동성 제외.
+ *  ★유동성 컷 필수(실측): 없으면 penny-stock 인공물이 저분위를 폭발시킴(Q5 230배). U-G3. */
 export function eligibleRanked(
 	rows: UniverseRow[],
 	signal: RankSignalKey,
-	minTurnover: number
+	liquidityPctile: number
 ): { code: string; value: number }[] {
+	const thr = turnoverThreshold(rows, liquidityPctile); // PIT 퍼센타일(그 리밸 시점)
 	const out: { code: string; value: number }[] = [];
 	for (const r of rows) {
-		if (minTurnover > 0 && r.turnover < minTurnover) continue; // PIT 유동성 컷(그 시점 데이터)
+		if (r.turnover < thr) continue; // 저유동성 컷
 		const v = rankValue(r, signal);
 		if (v == null) continue;
 		out.push({ code: r.stockCode, value: v });

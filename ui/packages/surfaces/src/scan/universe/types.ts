@@ -24,7 +24,7 @@ export interface UniverseSpec {
 	rebalance: 'M' | 'Q'; // 월/분기 리밸런싱
 	rankSignal: RankSignalKey;
 	buckets: number; // 분위 수(5=5분위)
-	minTurnover: number; // 유동성 컷(그 리밸 시점 데이터로만 — PIT). 0=컷 없음
+	liquidityPctile: number; // ★유동성 컷 — 그 리밸 시점 turnover 상위 (1−p) 만(PIT). 0.7=상위30%. 필수(실측: 없으면 penny 인공물). U-G3
 	windowFrom: string; // YYYYMM
 	windowTo: string;
 	// P1 고정(데이터 보기 전 결정된 규칙): 동일가중·long-only·OOS 강제. selection 자유도 봉인.

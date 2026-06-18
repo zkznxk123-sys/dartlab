@@ -100,7 +100,7 @@ export function runUniverse(rows: UniverseRow[], spec: UniverseSpec): UniverseBt
 		const fillYm = ymAxis[i + 1]; // decisionYm < fillYm 불변
 		const rowMap = byYm.get(decisionYm)!;
 		const rowsAt = [...rowMap.values()];
-		const ranked = eligibleRanked(rowsAt, spec.rankSignal, spec.minTurnover);
+		const ranked = eligibleRanked(rowsAt, spec.rankSignal, spec.liquidityPctile);
 		const bucketOf = assignBuckets(ranked, spec.buckets);
 
 		const bucketOutcomes: Outcome[][] = Array.from({ length: spec.buckets }, () => []);

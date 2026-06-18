@@ -30,7 +30,7 @@ const SPEC: UniverseSpec = {
 	rebalance: 'M',
 	rankSignal: 'mom12_1',
 	buckets: 2,
-	minTurnover: 0,
+	liquidityPctile: 0,
 	windowFrom: '202001',
 	windowTo: '202005'
 };

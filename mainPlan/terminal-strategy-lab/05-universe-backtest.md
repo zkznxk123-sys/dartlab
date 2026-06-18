@@ -83,6 +83,7 @@ interface UniverseBtResult {
 > - **G-M1 PASS**: 443,422행 · 3,693종목 · ym 201001~202606 · **11.91MB(<20MB)** → floor 단일파일 로드 OK.
 > - **폐지 886종목** · **F2 reindex 적용**(정지월 stitching 차단, 합성+실데이터 로직검증 PASS).
 > - ⚠ **F1 merger=0 (중요 한계)**: 검출윈도(last ym≥202406) 폐지 151종목이 **allFilings recent에 0 출현** — `recent.parquet`(2024-09+)은 *활성기업* 수시공시라 *폐지기업 공시를 안 담음*. 즉 F1 merger 검출은 *코드는 정상(합성검증 PASS)이나 현 데이터로 실질 no-op* → **밴드가 전부 conservative(886 unknown)**. 정직-degradation 설계대로(거짓 제외 0)지만, 진짜 merger 제외 = **정밀 폐지사유 데이터 소스(KRX 상폐사유)가 별도 트랙**(U4와 함께). 현재는 밴드 폭이 진짜보다 넓을 수 있음을 라벨(보수 안전).
+> - ★**엔진 실데이터 교차검증(mom12-1·분기·5분위)**: **유동성 컷이 필수**(없으면 Q5 저모멘텀 = penny-stock 인공물로 *230배* 폭발 — 거래불가 소형주 극단 반등) → 엔진 `liquidityPctile`(PIT 퍼센타일, 절대임계 아님 — 16년 인플레 robust) **기본 ON(상위30%)**. 정직 결론 둘: ① **liquid 한국주식 모멘텀 프리미엄 약함**(Q1≈Q5, 스프레드 ≈0, 단조성 없음) — "팩터가 먹힌다" 주장 금지의 실증. ② 저모멘텀 bucket 잔여 초과는 *임의 캡으로 숨기지 않음*(folk-stat) — reversal/소형주 틸트로 **U-G3(턴오버·ADV)·U-G4(size 틸트) 라벨로 정직 노출**. vitest 3 PASS(NAV 회계·이중밴드·표본).
 
 `buildUniversePanel.py`가 *존재하나* 데이터층에 U-G1·수익률을 깨는 결함 2종이 박혀 있다(아래 = 수정 전 진단). **코딩 착수 첫 스텝 = `--skip-upload`로 측정 + 아래 수정.**
 
