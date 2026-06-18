@@ -8,15 +8,18 @@
     "allowed": [
       "dartlab.core",
       "dartlab.gather",
-      "dartlab.scan",
-      "dartlab.industry"
+      "dartlab.scan"
     ],
     "forbidden": [
+      "dartlab.analysis",
+      "dartlab.credit",
+      "dartlab.industry",
+      "dartlab.quant",
       "dartlab.story",
       "dartlab.ai",
       "dartlab.company"
     ],
-    "note": "동급 L2 단방향 import 허용. 양방향 cycle 절대금지."
+    "note": "L2 peer 직접 import 금지. macro 산출물은 story/sink 또는 public contract에서 조합한다."
   },
   "examples": [
     "scenario",
@@ -30,5 +33,5 @@
     "dartlab.ai",
     "dartlab.Company"
   ],
-  "lastUpdated": "2026-05-10"
+  "lastUpdated": "2026-06-18"
 }

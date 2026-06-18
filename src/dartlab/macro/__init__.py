@@ -128,6 +128,14 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         example='macro("교역", market="KR")',
         act=2,
     ),
+    "transmission": _AxisEntry(
+        module="dartlab.macro.transmission.transmission",
+        fn="analyzeTransmission",
+        label="전파",
+        description="driver → sector → financial line → valuation lever 전파 edge와 source lineage",
+        example='macro("전파", market="KR", sectorKey="semiconductor")',
+        act=2,
+    ),
     # ── 3막: 정부는 뭘 하고 있나 (중앙은행 대응) ──
     "rates": _AxisEntry(
         module="dartlab.macro.rates.rates",
@@ -241,6 +249,9 @@ _ALIASES: dict[str, str] = {
     "교역": "trade",
     "교역조건": "trade",
     "수출": "trade",
+    "전파": "transmission",
+    "매크로전파": "transmission",
+    "트랜스미션": "transmission",
     "종합": "summary",
     "매크로종합": "summary",
     "시나리오": "scenario",

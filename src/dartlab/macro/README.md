@@ -18,7 +18,7 @@ print(rotation.recommend(asOf="latest"))
 | 모듈 | 역할 |
 |------|------|
 | `macro/cycle.py` | 사이클 regime 분류 (PMI / 금리 / 유동성) |
-| `macro/sectorRotation.py` | regime 전환 시 섹터별 historical hit rate |
+| `macro/transmission/transmission.py` | driver → sector → financial line → valuation lever 전파 edge |
 | `macro/scenario.py` | macro scenario 시뮬레이션 |
 | `macro/forecast/` | 거시 forecast 모듈 |
 

@@ -1,6 +1,6 @@
 # 04. 범위 · Phase · 가드레일
 
-상태: 설계 v0.2
+상태: 구현 v0.3
 범위: 구현 단계와 정직 가드.
 
 ---
@@ -14,11 +14,11 @@
 | 2 | 지표/driver 행 ↔ 차트 ECON 연동 | `ChartCtl.toggleEcon`, `MACRO_SERIES` | row에서 오버레이 토글, ECON_MAX 준수 |
 | 3 | 전파 지도 view-model | `co.tailwind`, `eng.sectorTailwinds`, company finance shape | Driver Chain Map, Company Checkpoints, Falsifier 표시 |
 | 4 | `tests/_attempts/macroLensEngine` proof | attempts gate | driver registry/edge/quality 샘플과 실패 케이스 기록 |
-| 5 | `macro.transmission` 축 또는 시장 artifact | `src/dartlab/macro`, HF artifact 경계 | 시장·섹터 전파 edge, source/date/value lineage, 회사 import 0 |
+| 5 | `macro.transmission` 축 또는 시장 artifact | `src/dartlab/macro`, HF artifact 경계 | 최소 완료: 시장·섹터 전파 edge, source/date/value lineage, 회사 import 0 |
 | 6 | analysis macro 노출 품질 surface | `calcMacroSensitivity`, `calcMacroRegression` | nObs/R²/window/lag/coverage 없으면 정량 block 닫힘 |
 | 7 | 선택적 L2.5 조합기 | 공개 L2 API | 수학 0, 내부 import 0, UI와 story가 같은 계약 소비 |
 
-Phase 1~3이 첫 화면 제품 단위다. Phase 4는 엔진 강화 전 필수 proof다. Phase 5~7은 Macro Lens를 분석 코어로 올리는 본 트랙이며, 코드로 들어가기 전 attempts 결과와 guard 통과가 필요하다.
+Phase 1~3이 첫 화면 제품 단위다. Phase 4는 엔진 강화 전 필수 proof다. Phase 5는 `macro.transmission` 최소 축으로 시작했다. Phase 6~7은 Macro Lens를 분석 코어로 올리는 남은 본 트랙이며, 회사 노출 품질과 조합 계약은 별도 guard 통과가 필요하다.
 
 ---
 
@@ -67,7 +67,7 @@ Phase 1~3이 첫 화면 제품 단위다. Phase 4는 엔진 강화 전 필수 pr
 | 기능 | 소유 |
 |---|---|
 | 매크로 국면·지표·시나리오 카탈로그 | `engines.macro` |
-| 시장·섹터 전파 edge | `macro.transmission` 후보 |
+| 시장·섹터 전파 edge | `macro.transmission` |
 | 회사별 매크로 노출·회귀 품질 | 기존 analysis macro 표면 확장 |
 | 회사 재무제표 심층 판단·reverseDCF | `financial-statement-lab` |
 | 미래 what-if·Play replay | `scenario-simulator` |

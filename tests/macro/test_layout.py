@@ -49,6 +49,7 @@ EXPECTED_LAYOUT: dict[str, set[str]] = {
         "historicalContext.py",  # F2.1: root → corporate
     },
     "trade": {"trade.py", "termsOfTrade.py"},
+    "transmission": {"transmission.py"},
 }
 
 
@@ -106,3 +107,4 @@ def test_macro_subfolder_imports() -> None:
     from dartlab.macro.rates import bondRiskPremia, impliedERP, rates, riskPremiums, yieldCurve  # noqa: F401
     from dartlab.macro.scenarios import dalio48Match, dalioCaseMatch, scenario  # noqa: F401
     from dartlab.macro.trade import termsOfTrade, trade  # noqa: F401
+    from dartlab.macro.transmission import transmission  # noqa: F401

@@ -1,6 +1,6 @@
 # 02. 데이터 계약
 
-상태: 설계 v0.3
+상태: 구현 v0.4
 범위: Macro Lens 다이얼로그가 읽는 데이터, 매크로 전파 엔진 산출물, 향후 확장 계약.
 
 ---
@@ -14,6 +14,7 @@
 | macro regime | `dashboards/macro.json` | KR/US phase, quadrant, sectorTailwind |
 | macro observations | `macro/{fred,ecos}/observations.parquet` | 지표 최신값·스파크라인·차트 오버레이 |
 | macro catalog | `ui/packages/contracts/src/macro.ts::MACRO_SERIES` | 지표명·단위·소스·그룹 |
+| macro transmission | `src/dartlab/macro/transmission/transmission.py` | driver → sector → financial line → valuation lever edge |
 | company tailwind | `ui/packages/surfaces/src/terminal/lib/engine.ts::tailwindOf` | 선택 종목 업종의 blended tailwind |
 | sector tailwinds | `eng.sectorTailwinds()` | 좌측 순풍/역풍 섹터 목록 |
 | co-movement | `ui/packages/surfaces/src/terminal/lib/coMovement.ts` | 종목 월수익률과 거시 1차차분 상관 |
@@ -94,6 +95,16 @@ export interface MacroDriverView {
   directionSemantics: string;
   defaultLagMonths: number | null;
   sourceRef: string;
+  sourceLineage?: {
+    source: 'ECOS' | 'FRED';
+    sourceSeriesId: string;
+    date: string | null;
+    value: number | null;
+    unit: string | null;
+    artifactPath: string;
+    asOfPolicy: string;
+    status: 'observed' | 'missing';
+  };
 }
 
 export interface MacroTransmissionEdgeView {
@@ -108,7 +119,9 @@ export interface MacroTransmissionEdgeView {
   lagMonths: [number, number] | null;
   confidence: 'high' | 'medium' | 'low' | 'blocked';
   evidenceLevel: 'observed' | 'sectorPrior' | 'template';
+  evidenceLabel?: 'OBS' | 'PRIOR' | 'TPL' | 'LOCK';
   requiredCompanyEvidence: string[];
+  falsifiers?: string[];
   sourceRefs: string[];
 }
 
@@ -157,7 +170,7 @@ export interface MacroFalsifierView {
 
 원칙:
 
-- `macro.transmission`은 `MacroDriverView`와 `MacroTransmissionEdgeView`를 낸다.
+- `macro.transmission`은 `MacroDriverView`와 `MacroTransmissionEdgeView`를 낸다. 현재 공개 호출은 `dartlab.macro("transmission", market="KR", sectorKey="semiconductor")`다.
 - 기존 analysis macro 표면은 `MacroExposureQuality`와 회사별 checkpoint를 낸다.
 - UI는 두 산출물을 합쳐 보여주되 숨은 수학을 만들지 않는다.
 - `blocked` edge는 숨기지 않고 이유를 표시한다.

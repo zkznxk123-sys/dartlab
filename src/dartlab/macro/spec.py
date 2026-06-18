@@ -5,7 +5,7 @@ from __future__ import annotations
 SPEC = {
     "engine": "macro",
     "layer": "L2",
-    "description": "시장 레벨 매크로 경제 분석. Company 불필요. 11축 + 40개 투자전략.",
+    "description": "시장 레벨 매크로 경제 분석. Company 불필요. 14축 + 40개 투자전략.",
     "entrypoint": "dartlab.macro()",
     "axes": {
         "cycle": {
@@ -68,9 +68,15 @@ SPEC = {
             "when": "한국 GDP 40%+ 수출. 교역조건이 최선행 지표",
             "key_output": "termsOfTrade, totProxy, exportProfit",
         },
+        "transmission": {
+            "label": "전파",
+            "description": "driver → sector → financial line → valuation lever 전파 edge",
+            "when": "Macro Lens가 지표를 회사 손익·밸류 경로로 연결할 때",
+            "key_output": "drivers, edges, regimeEvidence, sourceRefs, missing",
+        },
         "summary": {
             "label": "종합",
-            "description": "10축 종합 + 40전략 + 포트폴리오 매핑",
+            "description": "14축 종합 + 40전략 + 포트폴리오 매핑",
             "when": "전체 그림을 한 번에. 축별 기여도 + 자산배분 포함",
             "key_output": "overall, score, contributions, allocation, strategies",
         },
@@ -96,8 +102,8 @@ SPEC = {
         "FCI": "Hatzius(2010) — 5변수 z-score 금융환경지수 (US+KR)",
     },
     "features": {
-        "scenario": "overrides 파라미터 — 전체 11축 시나리오 시뮬레이션",
-        "backtest": "as_of 파라미터 — 전체 11축 과거 시점 재현",
+        "scenario": "overrides 파라미터 — 전체 14축 시나리오 시뮬레이션",
+        "backtest": "as_of 파라미터 — 전체 14축 과거 시점 재현",
         "walkForward": "walkForwardBacktest() — NBER 침체 기준 precision/recall",
         "allocation": "regimeToAllocation() — regime×phase → 주식/채권/금/현금 %",
         "strategies40": "evaluateStrategies() — 40개 투자전략 활성/방향/강도/신뢰도",

@@ -1,6 +1,6 @@
 # 07. 매크로 엔진 강화 트랙
 
-상태: 설계 v0.2
+상태: 구현 v0.3
 범위: Macro Lens를 분석 코어로 만들기 위해 필요한 macro/analysis 엔진 개선 계획.
 
 ---
@@ -28,6 +28,8 @@ macroLens view-model 또는 L2.5 조합기
 
 ## 2. `macro.transmission`
 
+구현 상태: `src/dartlab/macro/transmission/transmission.py` 최소 승격 완료. 공개 호출은 `dartlab.macro("transmission", market="KR", sectorKey="semiconductor")`다.
+
 ### 목적
 
 시장 국면과 지표를 사람이 읽는 문장으로 끝내지 않고, 기계가 추적할 수 있는 전파 edge로 만든다.
@@ -47,6 +49,7 @@ USDKRW ↑
 - `TransmissionEdge`: driver → market/sector/industry → financial line → valuation lever.
 - `RegimeEvidence`: 국면 판단의 핵심 지표, 방향, 기준일, freshness.
 - `SourceLineage`: source/date/value/path.
+- `Missing`: source/date/value가 닫힌 이유 또는 미배선 driver.
 
 ### 허용 입력
 
@@ -152,7 +155,7 @@ graduation 조건:
 최종 이름은 구현 전 재검토한다. 방향만 고정한다.
 
 ```python
-dartlab.macro("transmission", market="KR")
+dartlab.macro("transmission", market="KR", sectorKey="semiconductor")
 ```
 
 반환 후보:
@@ -160,7 +163,8 @@ dartlab.macro("transmission", market="KR")
 ```python
 {
     "market": "KR",
-    "asOf": "2026-06-17",
+    "sectorKey": "semiconductor",
+    "asOf": "2026-06-18",
     "drivers": [...],
     "edges": [...],
     "regimeEvidence": [...],
@@ -186,7 +190,7 @@ company.analysis("macro", "매크로민감도")
 }
 ```
 
-UI는 위 산출물을 직접 계산하지 않고 `MacroLensSnapshot`으로만 변환한다.
+UI는 위 산출물을 직접 계산하지 않고 `MacroLensSnapshot`으로만 변환한다. 현재 UI는 아직 자체 view-model edge를 쓰므로, 다음 단계에서 `macro.transmission` 산출물을 우선 입력으로 받게 바꾼다.
 
 ---
 

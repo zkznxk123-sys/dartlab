@@ -1,10 +1,37 @@
 # 06. 진행 원장
 
-상태: v0.5
+상태: v0.6
 
 ---
 
 ## 2026-06-18
+
+### v0.6 — `macro.transmission` src 최소 승격
+
+배경:
+
+- Macro Lens의 첫 화면 gate와 matrix는 UI view-model로 정리됐지만, `OBS/PRIOR/TPL` edge의 원천이 아직 UI 임시 번역에 가까웠다.
+- 강한 분석의 본체는 UI가 아니라 `macro.transmission`과 analysis macro exposure 품질 산출물이어야 한다.
+
+완료:
+
+- `src/dartlab/macro/transmission/transmission.py`를 추가했다.
+- 공개 축 `dartlab.macro("transmission", market="KR", sectorKey="semiconductor")`를 `_AXIS_REGISTRY`에 등록했다.
+- 산출물은 회사 객체 없이 `drivers`, `edges`, `regimeEvidence`, `sourceRefs`, `missing`만 반환한다.
+- 각 driver는 canonical id, sourceSeriesId, sourceLineage(`date/value/unit/artifactPath/status`)를 가진다.
+- 각 edge는 `driver -> sector -> financialLine -> valuationLever`와 `evidenceLabel(OBS/PRIOR/TPL)`, requiredCompanyEvidence, falsifier를 가진다.
+- `macro` 엔진은 `analysis`, `Company`, terminal UI state를 import하지 않는다.
+- `engines.macro` Skill OS 원문을 14축 공개 계약으로 갱신했다.
+
+검증:
+
+- `python -X utf8 -m pytest tests\macro\test_transmission.py -q` 통과.
+- `python -X utf8 -m pytest tests\_attempts\macroLensEngine\test_macroLensEngine.py -q` 통과.
+
+NEXT:
+
+1. `analysis.macroExposure`가 `nObs/R²/window/lag/coverage/sourceRef`를 안정적으로 내도록 회사 단위 품질 산출물을 보강한다.
+2. UI `MacroLensSnapshot`의 edge 생성은 다음 단계에서 `dartlab.macro("transmission")` 산출물을 우선 입력으로 받게 바꾼다.
 
 ### v0.5 — 매크로 대시보드 시각화 방식 조사
 
@@ -28,10 +55,12 @@
 - P1 상세 탭: contribution waterfall, update path chart, co-movement scatter, falsifier rail, data packet drawer.
 - P2 후순위: country map, peer comparator, scenario fan chart, data story canvas.
 - 첫 화면 금지: gauge, donut, 단일 macro score, 뉴스 카드 wall. 원인·경로·결손을 숨기기 때문이다.
+- 조사 방식은 차트 종류가 아니라 질문 처리 방식으로 재분류했다. 첫 화면은 `상태 위젯형`, `시계열형`, `매트릭스형`, `반증형`, `원천 패킷형`만 채택한다.
+- `기여도 분해`, `업데이트 경로`, `비교`, `불확실성 band/fan`은 셀 클릭 후 상세 탭으로 둔다.
 
 문서 반영:
 
-- [08-dashboard-visual-patterns.md](08-dashboard-visual-patterns.md)를 v0.2로 확장했다.
+- [08-dashboard-visual-patterns.md](08-dashboard-visual-patterns.md)를 v0.3으로 확장했다.
 
 NEXT:
 
