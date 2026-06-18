@@ -28,7 +28,8 @@
 	import ChartMenus from './ChartMenus.svelte';
 	import ChartRibbon from './ChartRibbon.svelte';
 	import DrawToolbar from './DrawToolbar.svelte';
-	import BacktestStrip from './BacktestStrip.svelte';
+	import StrategyDock from './StrategyDock.svelte';
+	import BtChip from './BtChip.svelte';
 	import BacktestDialog from './BacktestDialog.svelte';
 
 	interface Props {
@@ -1167,7 +1168,13 @@
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
 		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} {onMacroLens} />
 	{/if}
-	<div class="chartHost" bind:this={el}></div>
+	<!-- 차트 워크스페이스 = [좌측 전략 도크 | 차트]. 도크는 static row(el.offsetParent 유지 → 레일 geometry 무변). -->
+	<div class="chartBody">
+		{#if ctl.btDockOpen && subject !== 'index'}
+			<StrategyDock {ctl} {lang} pf={btPf} {code} {name} onOpenReport={() => (btReportOpen = true)} onClose={() => { ctl.clearBtAll(); ctl.btDockOpen = false; }} />
+		{/if}
+		<div class="chartHost" bind:this={el}></div>
+	</div>
 
 	{#if railBox && railDots.length}
 		<!-- 공시 위치 레일(02 §4) — x축 날짜라벨 아래 전용 띠. left/top/width=캔버스 geometry(전체화면 padding 자동 반영).
@@ -1303,8 +1310,9 @@
 
 	<!-- 출처(공공누리)는 차트 하단 캡션이 아니라 패널 헤더로 — onSrc 콜백(srcText). 스냅샷 PNG 는 srcText 를 띠로 합성(SSOT 유지). -->
 
-	{#if btPf && ctl.btStrategies.length}
-		<BacktestStrip pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClear={() => ctl.clearBtAll()} onOpenReport={() => (btReportOpen = true)} />
+	<!-- 차트 위 요약 칩 — railBox geometry 로 가격 페인 좌상단(OHLC 레전드 아래). 전체 정직 푸터는 도크가 담당. -->
+	{#if btPf && ctl.btStrategies.length && railBox}
+		<BtChip pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} {lang} left={railBox.left + 8} top={railBox.canvasTop + 52} onOpenReport={() => (btReportOpen = true)} />
 	{/if}
 	{#if btPf && ctl.btStrategies.length && btReportOpen}
 		<BacktestDialog pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} {lang} onFocus={(i) => ctl.setBtFocus(i)} onClose={() => (btReportOpen = false)} onFocusBar={(t) => { try { chart?.scrollToTimestamp(Date.UTC(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)), 300); } catch { /* */ } }} />

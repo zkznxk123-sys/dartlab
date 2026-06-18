@@ -13,7 +13,6 @@
 	import { paramSummary, IND_DEFS } from './indicatorParams';
 	import { loadTemplates, saveTemplate, deleteTemplate, applyTemplate } from './templateStore';
 	import IndParamEditor from './IndParamEditor.svelte';
-	import BtConfig from './BtConfig.svelte';
 
 	interface Props {
 		ctl: ChartCtl;
@@ -231,12 +230,11 @@
 				{/if}
 			</span>
 		</div>
-		<div class="crGrp crPop">
-			<!-- BT 는 일봉 기준 — 차트를 강제 변형하지 않는다(사용자가 보던 tf/기간 보존). tf≠D 안내·전환은 BtConfig 패널 안에서. -->
-			<button class={ctl.btKey && subject !== 'index' ? 'crChip on' : 'crAdd'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 (일봉 기준)', 'Strategy backtest (daily-based)')} onclick={() => { if (subject === 'index') return; pop = pop === 'bt' ? 'none' : 'bt'; }}>
-				{ctl.activeBt ? T(ctl.activeBt.kr, ctl.activeBt.en) : `＋ ${T('전략 백테스트', 'Backtest')}`}
+		<div class="crGrp">
+			<!-- BT = 차트 좌측 영구 도크(StrategyDock) 토글. 전체화면에서도 도크가 차트 좌측에 마운트(차트는 안 건드림·일봉 안내는 도크 안). -->
+			<button class={(ctl.btDockOpen || ctl.btStrategies.length) && subject !== 'index' ? 'crChip on' : 'crAdd'} disabled={subject === 'index'} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 — 차트 좌측 영구 패널', 'Strategy backtest — persistent left panel')} onclick={() => { if (subject === 'index') return; ctl.btDockOpen = !ctl.btDockOpen; pop = 'none'; }}>
+				{ctl.btStrategies.length ? T('전략 백테스트', 'Backtest') : `＋ ${T('전략 백테스트', 'Backtest')}`}
 			</button>
-			{#if pop === 'bt'}<div class="crMenu crMenuR"><BtConfig {ctl} {lang} /></div>{/if}
 		</div>
 		<div class="crGrp crPop">
 			<button class={templates.length ? 'cbtn on' : 'cbtn'} onclick={() => (pop = pop === 'tmpl' ? 'none' : 'tmpl')} title={T('차트틀 — 지표·축·봉주기 설정 저장/적용', 'chart templates')}>{T('틀', 'TMPL')} ▾</button>

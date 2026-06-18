@@ -430,26 +430,18 @@
    ⚠ width 강제 필수 — absolute 메뉴는 폭이 내용에 맞춰 수축(가장 넓은 버튼)해서, max-width 만으론 1개씩 세로 줄바꿈. width 로 그리드 폭 고정. */
 .dlTerm .ctMenu .ctRow.ctRowWrap { flex-wrap: wrap; width: 340px; }
 .dlTerm .ctMenu.ctMenuWide .ctRow.ctRowWrap { width: 440px; }
-/* ★persistent dock — BT 설정이 차트 클릭에 안 닫히는 고정 패널(.ctMenu 자식 스타일 유지 + 고정·헤더·스크롤). 02 §1 */
-.dlTerm .ctMenu.btDock { z-index: 40; width: 384px; max-height: 76vh; padding: 0; gap: 0; border-top: 2px solid var(--amber, #fb923c); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); }
-.dlTerm .btDockHd { display: flex; align-items: center; gap: 8px; padding: 8px 11px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); background: rgba(251, 146, 60, 0.06); flex: 0 0 auto; }
-.dlTerm .btDockMark { width: 3px; align-self: stretch; border-radius: 2px; background: var(--amber, #fb923c); flex: 0 0 auto; }
-.dlTerm .btDockTtlWrap { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.dlTerm .btDockTtl { font-size: 12px; font-weight: 700; color: var(--dl-ink, #c8cfdb); letter-spacing: 0.06em; text-transform: uppercase; }
-.dlTerm .btDockSub { font-size: 10px; color: var(--dim, #8b94a3); line-height: 1.3; }
-.dlTerm .btDockPin { font-size: 10.5px; opacity: 0.65; margin-left: auto; }
-.dlTerm .btDockX { margin-left: auto; background: none; border: none; color: var(--dim, #8b94a3); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; }
-.dlTerm .btDockX:hover { color: var(--dl-ink, #c8cfdb); }
-.dlTerm .btDockBody { overflow-y: auto; padding: 7px; display: flex; flex-direction: column; gap: 4px; }
+/* 전략 백테스트 = 차트 좌측 영구 도크(StrategyDock.svelte). 드롭다운 폐기 — 스타일 SSOT 는 컴포넌트 scoped. */
 .dlTerm .btParamRow { align-items: center; gap: 4px; }
 .dlTerm .btParamLbl { font-size: 11px; color: var(--dim); min-width: 42px; }
 .dlTerm .btParamVal { font-size: 13px; color: var(--txt); min-width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
 
-/* 백테스트 결과 strip(.btStrip)·헤드라인 스타일 SSOT = BacktestStrip.svelte scoped <style>.
-   (구 글로벌 .dlTerm .bt* strip 블록은 이중정의·specificity 충돌로 제거 — positioning 포함 전부 scoped 로 이관) */
-
-/* 백테스트 스트립(.btStrip, 하단 도킹)이 뜨면 공시 레일 숨김 — 같은 하단 띠 점유 겹침 방지. (출처는 패널 헤더 sub 로 이동) */
-.dlTerm .chartWrap:has(.btStrip) .discRail { display: none; }
+/* 차트 워크스페이스 = [좌측 전략 도크 | 차트] 행. chartBody=static → el(chartHost).offsetParent 가 chartWrap 유지
+   → 공시 레일(discRail) geometry 가 도크 폭을 자동 반영(railBox=el.offsetLeft). 도크 토글 시 ResizeObserver(el) 가 chart.resize() 동행. */
+.dlTerm .chartWrap .chartBody { display: flex; flex-direction: row; min-width: 0; }
+.dlTerm .chartWrap:not(.full) .chartBody { flex: 1 1 auto; min-height: 0; }
+.dlTerm .chartWrap.full .chartBody { height: 100%; min-height: 0; }
+.dlTerm .chartBody .chartHost { min-width: 0; }
+/* 백테스트 결과 SSOT = HonestyFooter(도크 하단)·BtChip(차트 위). 구 .btStrip 하단 도킹 폐기. */
 
 /* 전체화면 전문가 리본 (2단) — 캔버스 밖 불투명 overlay, 차트 리플로우 0.
    전체화면 = 작업 화면이라 일반 모드보다 한 단계 큰 타이포·히트영역 (행 34px·버튼 10.5px). */

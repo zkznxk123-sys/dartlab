@@ -115,6 +115,9 @@ export class ChartCtl {
 	btCostsBp = $state<BtCostsBp>({ ...BT_COSTS });
 	btOosSplit = $state<number>(0); // OOS 학습/검증 분할 비율 (0=없음, 0.7=70:30, 0.6=60:40). 세션 한정.
 	btStop = $state<BtStopConfig>({}); // 손절/익절 %(S2) — 전 슬롯 공유. 빈값=미적용(회귀 0). "당일 인트라바 가정" 라벨.
+	// 전략 도크(좌측 영구 패널) 열림 — 세션 한정. ChartMenus 로컬 btOpen 을 상향(차트 클릭에 안 닫히는 SSOT).
+	// 차트 워크스페이스 레이아웃(좌 도크 | 차트)이 이 값을 읽어 도크를 마운트한다. 닫아도 btStrategies 는 유지(재오픈 시 복원).
+	btDockOpen = $state(false);
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀

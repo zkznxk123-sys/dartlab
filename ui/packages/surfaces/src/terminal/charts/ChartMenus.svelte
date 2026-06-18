@@ -10,7 +10,6 @@
 	import { EVENT_CATS } from '../lib/eventRail';
 	import { IND_DEFS, paramSummary } from './indicatorParams';
 	import IndParamEditor from './IndParamEditor.svelte';
-	import BtConfig from './BtConfig.svelte';
 
 	interface Props {
 		ctl: ChartCtl;
@@ -50,7 +49,6 @@
 	let menu = $state<'none' | 'ind' | 'econ' | 'draw' | 'view' | 'rail'>('none');
 	// ★전략 백테스트 = persistent dock (transient 드롭다운 menu 와 분리). 차트 클릭 auto-close 면제 →
 	// 설정·차트 동시 가시(보면서 고침). 닫힘은 ✕·BT 토글뿐. (02 §1 persistent dock)
-	let btOpen = $state(false);
 	let editing = $state<string | null>(null); // IND 메뉴 내 인라인 파라미터 편집 대상
 	const hasParams = (k: string) => (IND_DEFS[k]?.params.length ?? 0) > 0;
 	$effect(() => {
@@ -214,22 +212,7 @@
 		{/if}
 	</div>
 	<div class="ctWrap">
-		<button class={(btOpen || ctl.btStrategies.length) && subject !== 'index' ? 'chartTool on' : 'chartTool'} disabled={subject === 'index'} onclick={() => { if (subject === 'index') return; btOpen = !btOpen; menu = 'none'; }} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 — 고정 패널(차트 조작해도 안 닫힘, 차트는 안 건드림)', 'Strategy Lab — pinned panel (never alters your chart)')}>{T('백테스트', 'BT')}</button>
-		{#if btOpen && subject !== 'index'}
-			<!-- ★persistent dock — .ctMenu 클래스 유지(자식 스타일) + .btDock(고정·헤더). 차트 클릭에 안 닫힘. -->
-			<div class="ctMenu btDock">
-				<div class="btDockHd">
-					<span class="btDockMark" aria-hidden="true"></span>
-					<div class="btDockTtlWrap">
-						<span class="btDockTtl">{T('전략 백테스트', 'STRATEGY LAB')}</span>
-						<span class="btDockSub">{T('규칙을 조립하면 차트 위에서 바로 검증됩니다', 'compose a rule · verify right on the chart')}</span>
-					</div>
-					<span class="btDockPin" title={T('고정됨 — 차트를 조작해도 닫히지 않음', 'pinned — survives chart interaction')}>📌</span>
-					<button class="btDockX" onclick={() => (btOpen = false)} aria-label="close" title={T('패널 닫기', 'close panel')}>✕</button>
-				</div>
-				<div class="btDockBody"><BtConfig {ctl} {lang} /></div>
-			</div>
-		{/if}
+		<button class={(ctl.btDockOpen || ctl.btStrategies.length) && subject !== 'index' ? 'chartTool on' : 'chartTool'} disabled={subject === 'index'} onclick={() => { if (subject === 'index') return; ctl.btDockOpen = !ctl.btDockOpen; menu = 'none'; }} title={subject === 'index' ? T('지수는 거래 대상 아님', 'index not tradable') : T('전략 백테스트 — 차트 좌측 영구 패널(차트 조작해도 안 닫힘)', 'Strategy Lab — persistent left panel (survives chart interaction)')}>{T('백테스트', 'BT')}</button>
 	</div>
 	<button class="chartTool" onclick={() => onSnapshot?.()} title={T('차트 PNG 저장 (출처 띠 포함)', 'save PNG')} aria-label="snapshot">
 		<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h2.4L6 3.2h4L11.6 5H14v8H2z"/><circle cx="8" cy="8.6" r="2.5"/></svg>
