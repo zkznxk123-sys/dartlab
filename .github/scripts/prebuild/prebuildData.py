@@ -3,7 +3,7 @@
 수집 완료 후 실행되어 scan 프리빌드 데이터를 생성하고 HuggingFace에 업로드.
 
 일일 흐름 (증분 — 기본):
-  1. base seed: finance/report(full, cacheable) + scan(직전 산출물 + _scanBuildState) 를 HF 에서 seed
+  1. base seed: finance/report 는 Actions cache 우선, scan 은 알려진 산출물 직접 seed
   2. panel listing 1 회(다운로드 0) → 직전 ledger 대비 변경/삭제 종목 가림
   3. 변경 종목 panel parquet 만 다운로드 (전 92K seed 금지 = OOM/디스크 고갈 회피)
   4. buildScan(incremental=True): changes/sharesOutstanding 는 변경분만 재계산 후 기존 parquet 에
@@ -27,8 +27,12 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR.parent))
 from _hfRetry import retryHfCall  # noqa: E402
+from planning.prebuildManifest import categoryFileCount, scanArtifactRelPaths  # noqa: E402
+from planning.prebuildPlan import DEFAULT_INCREMENTAL_DOWNLOAD_CAP, planBaseSeed, planPanelDelta  # noqa: E402
 
 # scan 프리빌드가 읽는 입력 카테고리 SSOT — buildScan 하위 빌더의 원천.
 #   finance/report → 재무·보고서 빌더, panel → changes/sharesOutstanding/docsIndex 빌더.
@@ -45,20 +49,62 @@ SCAN_OUTPUT_KEYS = (
 
 # 일일 증분 변경분 다운로드 상한 — 초과분은 다음 사이클로 drain (대량 변경 시 디스크/시간 폭주
 # 방지, OOM 근본원인 재발 차단). 정상 일일 변경은 수십~수백이라 거의 닿지 않는다.
-INCREMENTAL_DOWNLOAD_CAP = 8000
+INCREMENTAL_DOWNLOAD_CAP = DEFAULT_INCREMENTAL_DOWNLOAD_CAP
 
 
 def _isFullMode() -> bool:
     return os.environ.get("PREBUILD_FULL", "").strip().lower() in ("1", "true", "yes")
 
 
+def _categoryFileCount(dataDir: str, category: str) -> int:
+    """Return local file count for a data category."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+
+    return categoryFileCount(dataDir, category, DATA_RELEASES)
+
+
+def _knownScanRelPaths() -> list[str]:
+    """Return fixed scan artifacts for direct seed without HF tree listing."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.scan.builders.kr.report.build import SCAN_API_TYPES
+
+    return scanArtifactRelPaths(DATA_RELEASES["scan"]["dir"], SCAN_API_TYPES)
+
+
+def _seedKnownScanArtifacts(dataDir: str) -> tuple[int, int, float]:
+    """Seed known scan outputs by direct resolve URLs, avoiding HF tree-list 429."""
+    from dartlab.pipeline.seed import downloadCategoryFiles
+
+    root = Path(dataDir)
+    missing = [rel for rel in _knownScanRelPaths() if not (root / rel).exists()]
+    if missing:
+        downloaded, skipped404 = downloadCategoryFiles("scan", missing, dataDir=dataDir)
+    else:
+        downloaded, skipped404 = 0, 0
+
+    downloadedBytes = sum((root / rel).stat().st_size for rel in missing if (root / rel).exists())
+    total = _categoryFileCount(dataDir, "scan")
+    skip = f", 404-skip {skipped404}" if skipped404 else ""
+    print(
+        f"[prebuild] base seed scan: 로컬 {total}개 (known 신규 {downloaded}{skip} / {downloadedBytes / 1024 / 1024:.1f}MB)"
+    )
+    return total, downloaded, downloadedBytes / 1024 / 1024
+
+
 def _seedBaseInputs(dataDir: str) -> None:
-    """finance/report(full 입력) + scan(직전 산출물 + ledger) 를 HF 에서 idempotent seed."""
+    """finance/report full inputs cache-first + scan known artifacts direct seed."""
     from dartlab.pipeline.seed import seedCategoriesFromHf
 
-    summary = seedCategoriesFromHf(list(BASE_SEED_CATEGORIES), dataDir=dataDir)
+    localCounts = {cat: _categoryFileCount(dataDir, cat) for cat in ("finance", "report")}
+    seedPlan = planBaseSeed(localCounts)
+    for cat in seedPlan.cachedCategories:
+        print(f"[prebuild] base seed {cat}: 로컬 {localCounts[cat]}개 (Actions cache 사용, HF listing skip)")
+
+    categories = list(seedPlan.missingCategories)
+    summary = seedCategoriesFromHf(categories, dataDir=dataDir) if categories else {}
     for cat, (total, new, mb) in summary.items():
         print(f"[prebuild] base seed {cat}: 로컬 {total}개 (신규 {new} / {mb:.1f}MB)")
+    _seedKnownScanArtifacts(dataDir)
 
 
 def _seedKindAndCorpProfile(dataDir: str) -> None:
@@ -112,37 +158,31 @@ def _prepareIncrementalPanel(dataDir: str) -> tuple[list[str], list[str], dict[s
     from dartlab.pipeline.seed import downloadCategoryFiles, listRemoteFiles
     from dartlab.scan.builders.kr.common import loadScanBuildState
 
-    remote = listRemoteFiles("panel")  # {dart/panel/CODE.parquet: size}
     prior = loadScanBuildState()
+    try:
+        remote = listRemoteFiles("panel")  # {dart/panel/CODE.parquet: size}
+    except Exception as exc:  # noqa: BLE001 — HF tree 429 시 직전 ledger 로 no-change degrade
+        if prior:
+            print(f"[prebuild] ⚠ panel listing 실패 — no-change 사이클로 degrade: {type(exc).__name__}: {exc}")
+            return [], [], dict(prior)
+        raise
     print(f"[prebuild] panel listing: 원격 {len(remote)}개, 직전 ledger {len(prior)}개")
 
-    if not prior:
+    panelPlan = planPanelDelta(prior, remote, cap=INCREMENTAL_DOWNLOAD_CAP)
+    if panelPlan.bootstrap:
         # 부트스트랩: 전량 다운로드 금지. ledger 만 기록 → 다음 사이클부터 진짜 변경분만.
         print(
             "[prebuild] ⚠ ledger 부재(부트스트랩) — panel 다운로드 skip, ledger 만 기록. baseline 은 full cron 이 생성"
         )
-        return [], [], dict(remote)
+        return [], [], dict(panelPlan.newState)
 
-    changedRel = sorted(rel for rel, size in remote.items() if prior.get(rel) != size)
-    removedRel = [rel for rel in prior if rel not in remote]
-
-    capped = len(changedRel) > INCREMENTAL_DOWNLOAD_CAP
-    processRel = changedRel[:INCREMENTAL_DOWNLOAD_CAP] if capped else changedRel
-    if capped:
+    processRel = list(panelPlan.processRel)
+    if panelPlan.capped:
+        totalChanged = len(panelPlan.processRel) + len(panelPlan.deferredRel)
         print(
-            f"[prebuild] ⚠ 변경 {len(changedRel)}개 > 상한 {INCREMENTAL_DOWNLOAD_CAP} — "
+            f"[prebuild] ⚠ 변경 {totalChanged}개 > 상한 {INCREMENTAL_DOWNLOAD_CAP} — "
             f"{len(processRel)}개만 처리, 나머지는 다음 사이클 drain"
         )
-
-    # ledger 는 '처리한 것'만 반영(미처리 changed 는 다음 사이클 재감지). 삭제는 즉시 반영.
-    newState = dict(prior)
-    for rel in removedRel:
-        newState.pop(rel, None)
-    for rel in processRel:
-        newState[rel] = remote[rel]
-
-    changedCodes = sorted(Path(r).stem for r in processRel)
-    removedCodes = sorted(Path(r).stem for r in removedRel)
 
     if processRel:
         print(f"[prebuild] 변경 종목 {len(processRel)}개 panel 다운로드")
@@ -152,7 +192,7 @@ def _prepareIncrementalPanel(dataDir: str) -> tuple[list[str], list[str], dict[s
     else:
         print("[prebuild] 변경 종목 없음 — panel 다운로드 skip")
 
-    return changedCodes, removedCodes, newState
+    return list(panelPlan.changedCodes), list(panelPlan.removedCodes), dict(panelPlan.newState)
 
 
 def _checkDataReady(dataDir: str) -> dict[str, int]:

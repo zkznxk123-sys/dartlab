@@ -145,3 +145,83 @@ def test_prebuild_incremental_allows_zero_panel():
     # base seed 실패로 전부 0 이면 증분이어도 실패
     with pytest.raises(SystemExit):
         mod._validateInputCoverage({"finance": 0, "report": 0, "panel": 0}, incremental=True)
+
+
+def test_prebuild_base_seed_skips_hf_listing_for_cached_finance_report(monkeypatch, tmp_path):
+    """Actions cache 로 finance/report 가 있으면 HF tree listing 을 다시 열지 않는다."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.pipeline import seed
+
+    mod = _loadScript(".github/scripts/prebuild/prebuildData.py")
+
+    for cat in ("finance", "report"):
+        catDir = tmp_path / DATA_RELEASES[cat]["dir"]
+        catDir.mkdir(parents=True)
+        (catDir / "005930.parquet").write_bytes(b"cached")
+
+    calledCategories: list[list[str]] = []
+    scanSeeded: list[str] = []
+
+    def fakeSeedCategories(categories, *, dataDir=None, token=None):
+        calledCategories.append(list(categories))
+        return {}
+
+    def fakeSeedKnownScanArtifacts(dataDir):
+        scanSeeded.append(dataDir)
+        return (0, 0, 0.0)
+
+    monkeypatch.setattr(seed, "seedCategoriesFromHf", fakeSeedCategories)
+    monkeypatch.setattr(mod, "_seedKnownScanArtifacts", fakeSeedKnownScanArtifacts)
+
+    mod._seedBaseInputs(str(tmp_path))
+
+    assert calledCategories == []
+    assert scanSeeded == [str(tmp_path)]
+
+
+def test_prebuild_incremental_panel_listing_429_uses_prior_ledger(monkeypatch):
+    """HF panel tree listing 이 429 로 막히면 기존 ledger 를 보존하고 no-change 로 진행한다."""
+    from dartlab.pipeline import seed
+    from dartlab.scan.builders.kr import common
+
+    mod = _loadScript(".github/scripts/prebuild/prebuildData.py")
+    prior = {"dart/panel/005930.parquet": 123}
+
+    def fakeListRemoteFiles(category, *, token=None):
+        assert category == "panel"
+        raise RuntimeError("simulated HF 429")
+
+    monkeypatch.setattr(seed, "listRemoteFiles", fakeListRemoteFiles)
+    monkeypatch.setattr(common, "loadScanBuildState", lambda: prior)
+
+    changed, removed, newState = mod._prepareIncrementalPanel("unused")
+
+    assert changed == []
+    assert removed == []
+    assert newState == prior
+
+
+def test_data_prebuild_workflow_keeps_long_runs_observable():
+    """prebuild 장기 실행은 버퍼링/무로그 실패 없이 heartbeat 와 HF retry cap 을 갖는다."""
+    text = (ROOT / ".github/workflows/dataPrebuild.yml").read_text(encoding="utf-8")
+
+    assert "timeout-minutes: 120" in text
+    assert text.count("Free disk space") == 2
+    assert text.count("df -h /") >= 7
+    assert text.count("free -h || true") >= 6
+    assert "uv run python -u -X utf8 .github/scripts/prebuild/prebuildData.py" in text
+    assert text.count('PYTHONUNBUFFERED: "1"') == 2
+    assert text.count("DARTLAB_SCAN_BATCH_SIZE: '50'") == 2
+    assert text.count("POLARS_MAX_THREADS: '2'") == 2
+    assert text.count("MALLOC_ARENA_MAX: '2'") == 2
+    assert text.count("DARTLAB_HF_RETRY_ATTEMPTS: '3'") == 2
+    assert text.count("DARTLAB_HF_RETRY_MAX_SINGLE_WAIT_SECONDS: '120'") == 2
+    assert text.count("set +e") == 2
+    assert text.count("set -e") == 2
+    assert text.count("sleep 60") == 2
+    assert "start incremental" in text
+    assert "heartbeat incremental elapsed=${elapsed}s" in text
+    assert "child incremental exit=${status}" in text
+    assert "start full" in text
+    assert "heartbeat full elapsed=${elapsed}s" in text
+    assert "child full exit=${status}" in text
