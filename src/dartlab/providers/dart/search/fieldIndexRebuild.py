@@ -724,6 +724,7 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     saveSegment(idx, meta, "delta")
     from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
+    _buildSearchSidecar(idx, meta, "delta", _contentIndexDir())  # 신규 공시 range-fetch — UI main+delta 병합
     writeIndexManifest(_contentIndexDir(), tier="full", buildCommand="rebuildDelta")
     clearCache()
     return idx["nDocs"]
@@ -1120,8 +1121,8 @@ def pushContentIndex(token: str | None = None, *, tier: str = "full", promoteCur
         ENTITY_GRAPH_CATALOG_NAME,
     ]
     names.extend(
-        n for n in _searchSidecarNames("main") if (outDir / n).exists()
-    )  # range-fetch sidecar(있으면 동반 publish)
+        n for n in (*_searchSidecarNames("main"), *_searchSidecarNames("delta")) if (outDir / n).exists()
+    )  # range-fetch sidecar(main+delta, 있으면 동반 publish)
     if promoteCurrent is None:
         promoteCurrent = _envFlag("DARTLAB_SEARCH_PROMOTE_CURRENT", default=True)
     return publishContentIndexFiles(
@@ -1182,6 +1183,7 @@ def pullContentIndex(tier: str = "full") -> int:
         "router.json",
         ENTITY_GRAPH_CATALOG_NAME,
         *_searchSidecarNames("main"),  # range-fetch sidecar(per-file tolerant pull — 미존재 무시)
+        *_searchSidecarNames("delta"),  # 신규 공시 sidecar(있으면 같이 pull)
     ]
     ok = 0
     from dartlab.core.hfRetry import retryHfCall
