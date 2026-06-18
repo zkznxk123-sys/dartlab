@@ -249,10 +249,16 @@ export class ChartCtl {
 			this.compares = [...this.compares, p];
 		}
 	}
+	/** 첫 미사용 전략 색 — 위치/성과 무관 고정(색 충돌 0, 순서 신호 0). 위치 기반(length 인덱스)은
+	 *  remove+add 시 동색 충돌 + 미묘한 순위 신호 → 04 §6 "색=성과 무관 고정". */
+	private _nextColor(): string {
+		const used = new Set(this.btStrategies.map((s) => s.color));
+		return STRAT_COLORS.find((c) => !used.has(c)) ?? STRAT_COLORS[0];
+	}
 	/** 전략 슬롯 추가 (≤3). 새 슬롯에 포커스 — 추가 즉시 그 전략 마커·리포트. */
 	addStrategy(pd: BtPresetDef) {
 		if (this.btStrategies.length >= 3) return;
-		const color = STRAT_COLORS[this.btStrategies.length] ?? STRAT_COLORS[0];
+		const color = this._nextColor();
 		const slot: StrategySlot = { id: `s${++this.btIdSeq}`, preset: pd.key, params: Object.fromEntries(pd.params.map((x) => [x.name, x.def])), color, label: pd.kr };
 		this.btStrategies = [...this.btStrategies, slot];
 		this.btFocus = this.btStrategies.length - 1;
@@ -283,14 +289,14 @@ export class ChartCtl {
 	/** rule 프리셋 추가(편집 가능 — 빌더에서 조건 수정). 전문가급 조작패널. */
 	addRulePreset(rp: RulePreset) {
 		if (this.btStrategies.length >= 3) return;
-		const color = STRAT_COLORS[this.btStrategies.length] ?? STRAT_COLORS[0];
+		const color = this._nextColor();
 		this.btStrategies = [...this.btStrategies, { id: `s${++this.btIdSeq}`, preset: 'maCross', params: {}, color, label: rp.kr, rule: rp.make() }];
 		this.btFocus = this.btStrategies.length - 1;
 	}
 	/** 빈 커스텀 룰(직접 조립) 추가 — 진입 1조건·청산 1조건 시드. */
 	addCustomRule() {
 		if (this.btStrategies.length >= 3) return;
-		const color = STRAT_COLORS[this.btStrategies.length] ?? STRAT_COLORS[0];
+		const color = this._nextColor();
 		const seed: StrategyRule = {
 			entry: [{ left: 'rsi', leftParams: { period: 14 }, op: '<', right: { kind: 'const', value: 30 } }],
 			entryCombine: 'AND',
