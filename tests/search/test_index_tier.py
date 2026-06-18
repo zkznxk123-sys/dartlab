@@ -36,19 +36,19 @@ def test_content_index_dir_tier_path(synthRoot):
 
 
 def test_active_index_dir_flat_first(synthRoot):
-    """flat main.npz 존재 → 활성 디렉터리 = flat (기존 배포 보존)."""
+    """flat main.postings.bin(sidecar SSOT) 존재 → 활성 디렉터리 = flat (기존 배포 보존)."""
     from dartlab.providers.dart.search.fieldIndex import _activeIndexDir, _contentIndexDir
 
-    (_contentIndexDir() / "main.npz").write_bytes(b"\x00")
+    (_contentIndexDir() / "main.postings.bin").write_bytes(b"\x00")
     assert _activeIndexDir() == _contentIndexDir()
 
 
 def test_active_index_dir_tier_fallback(synthRoot, monkeypatch):
-    """flat 부재 + lite/main.npz 존재 + env tier=lite → 활성 디렉터리 = lite."""
+    """flat 부재 + lite/main.postings.bin 존재 + env tier=lite → 활성 디렉터리 = lite."""
     from dartlab.providers.dart.search.fieldIndex import _activeIndexDir, _contentIndexDir
 
     monkeypatch.setenv("DARTLAB_SEARCH_TIER", "lite")
-    (_contentIndexDir("lite") / "main.npz").write_bytes(b"\x00")
+    (_contentIndexDir("lite") / "main.postings.bin").write_bytes(b"\x00")
     assert _activeIndexDir() == _contentIndexDir("lite")
 
 
@@ -95,8 +95,8 @@ def test_rebuild_main_lite_sincedate_reduces(synthRoot):
     n_lite = FIR.rebuildMain(includePanel=False, tier="lite", sinceDate="20240601", showProgress=False)
     assert n_full == 2
     assert n_lite == 1  # 20240101 제외, 20241201 포함
-    assert (FI._contentIndexDir() / "main.npz").exists()
-    assert (FI._contentIndexDir("lite") / "main.npz").exists()
+    assert (FI._contentIndexDir() / "main.postings.bin").exists()
+    assert (FI._contentIndexDir("lite") / "main.postings.bin").exists()
 
 
 def test_rebuild_main_stores_bounded_evidence_text(synthRoot):
@@ -204,7 +204,7 @@ def test_lite_sincedate_keeps_recent_panel(synthRoot):
     )
     # 20240115 제외, 20250320 보존 = 1
     assert n == 1
-    assert (FI._contentIndexDir("lite") / "main.npz").exists()
+    assert (FI._contentIndexDir("lite") / "main.postings.bin").exists()
 
 
 def test_index_info_hasrouter_nonempty(synthRoot):

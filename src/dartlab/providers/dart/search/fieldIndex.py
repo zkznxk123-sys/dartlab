@@ -10,13 +10,11 @@
 
 저장 구조::
 
-    data/dart/contentIndex/
-    ├── main.npz        # content CSR (offsets, docIds, termFreqs, docLengths)
-    ├── main_meta.parquet
-    ├── main_stems.json
-    ├── delta.npz       # 동일 구조, 최근 N일 증분
-    ├── delta_meta.parquet
-    └── delta_stems.json
+    data/dart/contentIndex/        # compact-only — main 단일 세그먼트, postings=STORED sidecar(npz 폐기)
+    ├── main.postings.bin   # content CSR (term별 docId delta-gap + tf varint) = postings SSOT
+    ├── main.terms.bin · main.docLengths.bin · main.meta.bin · main.metaOffsets.bin · main.search_meta.json
+    ├── main_meta.parquet   # 엔진/searchUnified 전체 스캔용 meta SSOT
+    └── main_stems.json · main_info.json   # stem→id · nDocs/avgDocLength
 
 병합 검색::
 
@@ -92,12 +90,11 @@ def _contentIndexDir(tier: str | None = None) -> Path:
 
 
 def _hasMainPostings(d: Path) -> bool:
-    """flat/tier 디렉터리에 로드 가능한 main postings 가 있나 — sidecar(SSOT, compact-only) 또는 legacy npz.
+    """flat/tier 디렉터리에 로드 가능한 main postings(STORED sidecar = SSOT)가 있나.
 
-    clean publish 후 인덱스는 npz 없이 sidecar(``main.postings.bin``)만 있으므로 npz 단독 검사는
-    sidecar-only 배포를 '부재'로 오판한다(local/pip tier 오선택·재다운로드 회귀).
+    compact-only(P2): postings 표현은 ``main.postings.bin`` 단독(npz 폐기).
     """
-    return (d / "main.postings.bin").exists() or (d / "main.npz").exists()
+    return (d / "main.postings.bin").exists()
 
 
 def _activeIndexDir() -> Path:
@@ -361,30 +358,28 @@ def _weightedIndexText(row: dict, content: str) -> str:
 # ── 저장/로드 ──
 
 
-def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = None) -> None:
-    """세그먼트를 디스크에 저장.
+def writeSegmentCompanions(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = None) -> None:
+    """세그먼트 동반물(stems/info/meta.parquet)을 디스크에 저장 — postings 표현(npz)은 쓰지 않는다.
+
+    compact-only(P2): postings SSOT 는 STORED sidecar(``saveShardedSegment``) 단독. 본 함수는
+    sidecar 가 읽어들이는 동반물(stem→id·nDocs/avg·doc meta)만 기록한다. ``saveSegmentWithSidecar`` 가
+    본 함수 + sidecar 를 한 묶음으로 호출(유일 writer).
 
     Args:
-        idx: 인자.
-        meta: 인자.
-        name: 인자.
-        outDir: 인자.
+        idx: 인덱스 dict (stemDict/nDocs/avgDocLength 사용).
+        meta: doc 순 meta DataFrame.
+        name: 세그먼트 이름("main").
+        outDir: 출력 디렉터리. None 이면 ``_contentIndexDir()``.
 
     Raises:
-        없음.
+        OSError: 파일 기록 실패.
 
     Example:
-        >>> saveSegment(...)
+        >>> callable(writeSegmentCompanions)
+        True
     """
     outDir = outDir or _contentIndexDir()
     outDir.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(
-        outDir / f"{name}.npz",
-        offsets=idx["offsets"],
-        docIds=idx["docIds"],
-        termFreqs=idx["termFreqs"],
-        docLengths=idx["docLengths"],
-    )
     (outDir / f"{name}_stems.json").write_text(
         json.dumps(idx["stemDict"], ensure_ascii=False),
         encoding="utf-8",
@@ -483,7 +478,7 @@ def loadShardedSegment(name: str = "main", inDir: Path | None = None, *, include
 
     ``saveShardedSegment`` 의 역연산. ``postings.bin`` 전체를 ``_decodeVarintStream`` 으로 한 번에 디코드한
     뒤 term 별로 [gap×df][tf×df] 로 분리하고, term 경계마다 절대 docId 로 reset 되는 gap 을 세그먼트
-    cumsum 으로 docIds 복원한다. 반환 idx 는 ``loadSegment``/``saveSegment`` 와 동일 키라 ``_scoreBM25`` 가
+    cumsum 으로 docIds 복원한다. 반환 idx 는 ``loadSegment`` 와 동일 키라 ``_scoreBM25`` 가
     그대로 소비(랭킹 불변·byte-parity). meta/info 는 ``loadSegment`` 와 동일하게 parquet/json 에서 읽는다.
 
     Sig:
@@ -558,10 +553,10 @@ _SHARD_SNIPPET_LIMIT = 400
 
 
 def saveShardedSegment(idx: dict, meta: pl.DataFrame, name: str = "main", outDir: Path | None = None) -> dict:
-    """range-friendly sidecar(postings/terms/docLengths/meta).bin 을 npz 옆에 동거 생성.
+    """range-friendly sidecar(postings/terms/docLengths/meta).bin = postings SSOT (compact-only, npz 폐기).
 
-    엔진 ``main.npz`` 는 DEFLATE 라 임의 위치 디코딩 불가(브라우저 range fetch 불능)이므로,
-    동일 CSR 을 STORED(비압축 컨테이너) sidecar 로 재배치한다. npz 는 손대지 않는다(엔진 SSOT 보존).
+    DEFLATE npz 는 임의 위치 디코딩 불가(브라우저 range fetch 불능)라, CSR 을 STORED(비압축 컨테이너)
+    sidecar 로 재배치한다. 엔진(loadShardedSegment)도 이 sidecar 에서 CSR 을 무손실 복원해 읽는다(단일 SSOT).
     각 산출물은 "offset 표 + STORED blob" 패턴 — 클라이언트가 질의어 term 의 postings 범위와 top-k
     doc 의 meta 범위만 HTTP range 로 받아 full BM25 와 동일한 결과를 낸다(검증: byte-range=full overlap 1.0).
 
@@ -684,27 +679,10 @@ def loadSegment(
         tuple[dict, pl.DataFrame] 또는 None — (인덱스, meta).
     """
     inDir = inDir or _contentIndexDir()
-    # 양읽기: STORED sidecar 가 있으면 그걸 SSOT 로(npz 불필요), 없으면 legacy npz fallback (전환기 호환).
+    # compact-only(P2): postings SSOT = STORED sidecar 단독(npz 폐기). postings.bin 부재면 None.
     if (inDir / f"{name}.postings.bin").exists():
         return loadShardedSegment(name, inDir, includeEvidenceText=includeEvidenceText)
-    npzPath = inDir / f"{name}.npz"
-    if not npzPath.exists():
-        return None
-    arrs = np.load(npzPath)
-    stemDict = json.loads((inDir / f"{name}_stems.json").read_text(encoding="utf-8"))
-    info = json.loads((inDir / f"{name}_info.json").read_text(encoding="utf-8"))
-    metaPath = inDir / f"{name}_meta.parquet"
-    meta = pl.read_parquet(metaPath, columns=_segmentMetaColumns(metaPath, includeEvidenceText=includeEvidenceText))
-    idx = {
-        "stemDict": stemDict,
-        "offsets": arrs["offsets"],
-        "docIds": arrs["docIds"],
-        "termFreqs": arrs["termFreqs"],
-        "docLengths": arrs["docLengths"],
-        "avgDocLength": float(info["avgDocLength"]),
-        "nDocs": int(info["nDocs"]),
-    }
-    return idx, meta
+    return None
 
 
 def _segmentMetaColumns(metaPath: Path, *, includeEvidenceText: bool) -> list[str] | None:

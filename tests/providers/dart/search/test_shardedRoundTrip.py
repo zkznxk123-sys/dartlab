@@ -1,7 +1,7 @@
-"""sidecar(STORED) round-trip + BM25 byte-parity — npz 폐기 기반(P0) 게이트.
+"""sidecar(STORED) round-trip + BM25 byte-parity — npz 폐기 기반(P0/P2) 게이트.
 
 ``saveShardedSegment`` 산출(postings/terms/docLengths.bin)을 ``loadShardedSegment`` 가 무손실 복원해
-CSR(offsets/docIds/termFreqs/docLengths)이 빌더 원본과 array-equal 이고, ``_scoreBM25`` 결과가 npz 로드와
+CSR(offsets/docIds/termFreqs/docLengths)이 빌더 원본과 array-equal 이고, ``_scoreBM25`` 결과가 빌더 원본과
 동일함을 검증한다. 이 게이트가 통과해야 엔진이 npz 없이 sidecar 만으로 검색 가능(PRD 기둥1·§13).
 """
 
@@ -16,9 +16,9 @@ from dartlab.providers.dart.search.fieldIndex import (
     _IncrementalBuilder,
     _scoreBM25,
     loadShardedSegment,
-    saveSegment,
     saveShardedSegment,
     tokenizeContent,
+    writeSegmentCompanions,
 )
 
 
@@ -77,7 +77,7 @@ def test_sharded_roundtrip_and_bm25_parity(tmp_path):
     ]
     idx0 = _build(docs)
     meta = _meta(len(docs))
-    saveSegment(idx0, meta, "main", tmp_path)
+    writeSegmentCompanions(idx0, meta, "main", tmp_path)  # stems/info/meta.parquet (loadShardedSegment 동반물)
     saveShardedSegment(idx0, meta, "main", tmp_path)
 
     res = loadShardedSegment("main", tmp_path)
@@ -91,7 +91,7 @@ def test_sharded_roundtrip_and_bm25_parity(tmp_path):
     assert idxS["stemDict"] == idx0["stemDict"]
     assert metaS.height == len(docs)
 
-    # BM25 byte-parity (sidecar 복원 idx == npz 원본 idx)
+    # BM25 byte-parity (sidecar 복원 idx == 빌더 원본 idx)
     for q in ["반도체 매출", "배당 자사주", "삼성 반도체", "현대차 배당", "HBM 투자", "없는단어"]:
         toks = tokenizeContent(q)
         np.testing.assert_array_equal(_scoreBM25(idxS, toks), _scoreBM25(idx0, toks))

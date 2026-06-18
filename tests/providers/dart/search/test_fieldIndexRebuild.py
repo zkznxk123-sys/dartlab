@@ -31,8 +31,8 @@ def test_rebuild_main_from_catalog_callable() -> None:
 
 
 def test_write_index_manifest_includes_artifact_canary_pack(tmp_path) -> None:
-    from dartlab.providers.dart.search.fieldIndex import buildContentSegment, saveSegment
-    from dartlab.providers.dart.search.fieldIndexRebuild import writeIndexManifest
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import saveSegmentWithSidecar, writeIndexManifest
 
     idx, meta = buildContentSegment(
         [
@@ -52,7 +52,7 @@ def test_write_index_manifest_includes_artifact_canary_pack(tmp_path) -> None:
         ],
         showProgress=False,
     )
-    saveSegment(idx, meta, "main", outDir=tmp_path)
+    saveSegmentWithSidecar(idx, meta, "main", tmp_path)
     (tmp_path / "source_manifest_set.json").write_text(
         json.dumps(
             {

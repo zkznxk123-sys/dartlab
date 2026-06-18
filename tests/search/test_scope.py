@@ -125,11 +125,11 @@ def test_bm25_ranks_relevant_doc():
 
 
 def test_segment_save_load_roundtrip(tmp_path):
-    """saveSegment + loadSegment 왕복."""
+    """saveSegmentWithSidecar + loadSegment 왕복 (compact-only — sidecar SSOT)."""
     from dartlab.providers.dart.search.fieldIndex import (
         buildContentSegment,
         loadSegment,
-        saveSegment,
+        saveSegmentWithSidecar,
     )
 
     rows = [
@@ -147,7 +147,7 @@ def test_segment_save_load_roundtrip(tmp_path):
         },
     ]
     idx, meta = buildContentSegment(rows, showProgress=False)
-    saveSegment(idx, meta, "test_main", outDir=tmp_path)
+    saveSegmentWithSidecar(idx, meta, "test_main", tmp_path)
 
     loaded = loadSegment("test_main", inDir=tmp_path)
     assert loaded is not None

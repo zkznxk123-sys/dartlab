@@ -79,10 +79,11 @@ def test_rebuild_main_callable() -> None:
 
 
 def test_save_segment_callable() -> None:
-    """saveSegment() callable smoke."""
-    from dartlab.providers.dart.search.fieldIndex import saveSegment
+    """compact-only writer 스모크 — writeSegmentCompanions(동반물) + saveSegmentWithSidecar(=SSOT)."""
+    from dartlab.providers.dart.search.fieldIndex import saveSegmentWithSidecar, writeSegmentCompanions
 
-    assert callable(saveSegment)
+    assert callable(writeSegmentCompanions)
+    assert callable(saveSegmentWithSidecar)
 
 
 def test_search_content_callable() -> None:

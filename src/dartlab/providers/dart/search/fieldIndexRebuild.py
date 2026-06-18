@@ -44,8 +44,8 @@ def _stripTags(raw: str, *, limit: int) -> str:
 # fieldIndex ↔ fieldIndexRebuild 양방향 import 회피 — 함수 본문 lazy import.
 # fieldIndex.py 가 본 모듈의 rebuildMain / rebuildDelta 외 7 항목을 re-export 하므로
 # module-level `from fieldIndex import ...` 시 direct import 가 partially initialized
-# 로 실패. fieldIndex 의 9 항목 (CONTENT_LIMIT · _contentIndexDir · _getSegments ·
-# _IncrementalBuilder · buildContentSegment · clearCache · loadSegment · saveSegment ·
+# 로 실패. fieldIndex 항목 (CONTENT_LIMIT · _contentIndexDir · _getSegments ·
+# _IncrementalBuilder · buildContentSegment · clearCache · loadSegment · writeSegmentCompanions ·
 # searchContent) 사용은 모두 함수 본문 안 → 각 함수 시작 lazy import.
 
 _log = getLogger(__name__)
@@ -659,7 +659,7 @@ def ensureContentIndex(tier: str | None = None) -> None:
     """content 인덱스(main.*) 부재 시 HF lazy 다운로드 — 1회, graceful. (panel ensurePanelFromHf 미러)
 
     pip 사용자 진입점: `dartlab.search()` 첫 호출 시 인덱스를 HF 에서 자동 fetch. 배포 전략:
-    - flat ``contentIndex/main.npz`` 가 로컬에 있으면(기존 배포·dev) 즉시 반환(no-op).
+    - flat ``contentIndex/main.postings.bin`` 가 로컬에 있으면(sidecar SSOT) 즉시 반환(no-op).
     - 없으면 tier(기본 lite, env ``DARTLAB_SEARCH_TIER``) 서브디렉터리를 HF 에서 pull
       (``contentIndex/{tier}/*``) — 사용자 다운로드 부담 격감(최근·주요종목 경량).
     - tier 가 아직 HF 에 미배포(전환기)면 flat ``contentIndex/*`` 로 fallback(기존 full 보호).
@@ -687,7 +687,7 @@ def ensureContentIndex(tier: str | None = None) -> None:
     if resolveActiveIndexDir(base) is not None:
         return
     if _hasMainPostings(base):
-        return  # flat 로컬 존재(sidecar SSOT 또는 legacy npz) — no-op
+        return  # flat 로컬 존재(sidecar SSOT) — no-op
     if os.environ.get("DARTLAB_NO_HF_DOWNLOAD", "").strip() in ("1", "true", "True"):
         return
     if _HF_CONTENTINDEX_ATTEMPTED:
@@ -876,9 +876,10 @@ def _buildSearchSidecar(idx: dict, meta: pl.DataFrame, name: str, saveDir: Path 
 
 
 def saveSegmentWithSidecar(idx: dict, meta: pl.DataFrame, name: str = "main", saveDir: Path | None = None) -> None:
-    """세그먼트 저장 **단일 choke point** — 엔진 동반물(stems/info/parquet[+npz, P2 제거]) + STORED sidecar 동거.
+    """세그먼트 저장 **단일 choke point**(유일 writer) — 동반물(stems/info/parquet) + STORED sidecar.
 
-    빌드 경로(rebuildMain/rebuildMainFromCatalog)는 이 함수만 호출 — sidecar 생성이 흩어지지 않게 한곳.
+    compact-only(P2): postings SSOT = sidecar 단독(npz 폐기). 빌드 경로(rebuildMain/rebuildMainFromCatalog)·
+    드릴·round-trip 은 이 함수만 호출 — postings 표현이 흩어지지 않게 한곳.
 
     Args:
         idx: 인덱스 dict.
@@ -896,10 +897,10 @@ def saveSegmentWithSidecar(idx: dict, meta: pl.DataFrame, name: str = "main", sa
         >>> callable(saveSegmentWithSidecar)
         True
     """
-    from dartlab.providers.dart.search.fieldIndex import saveSegment
+    from dartlab.providers.dart.search.fieldIndex import writeSegmentCompanions
 
-    saveSegment(idx, meta, name, saveDir)
-    _buildSearchSidecar(idx, meta, name, saveDir)
+    writeSegmentCompanions(idx, meta, name, saveDir)  # stems/info/meta.parquet (npz 없음)
+    _buildSearchSidecar(idx, meta, name, saveDir)  # postings/terms/docLengths/meta.bin (=SSOT)
 
 
 def writeIndexManifest(indexDir: str | Path, *, tier: str = "full", buildCommand: str = "") -> dict:

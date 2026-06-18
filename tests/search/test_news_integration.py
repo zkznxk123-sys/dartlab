@@ -74,7 +74,7 @@ def test_search_scope_news(tmp_path, monkeypatch):
         _newsRow("news:x1", "유상증자 관련 속보 기사", source="news", url="https://n.example/a", title="google_news"),
     ]
     idx, meta = fieldIndex.buildContentSegment(rows, showProgress=False)
-    fieldIndex.saveSegment(idx, meta, "main", outDir=tmp_path)
+    fieldIndex.saveSegmentWithSidecar(idx, meta, "main", tmp_path)
     fieldIndex.clearCache()
 
     df = dartlab.search("유상증자", scope="news", limit=5)

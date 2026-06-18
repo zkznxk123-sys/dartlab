@@ -22,7 +22,7 @@ def _patchIndexDir(monkeypatch, tmp_path):
 
 def _buildSegment(fieldIndex, tmp_path, rows):
     idx, meta = fieldIndex.buildContentSegment(rows, showProgress=False)
-    fieldIndex.saveSegment(idx, meta, "main", outDir=tmp_path)
+    fieldIndex.saveSegmentWithSidecar(idx, meta, "main", tmp_path)
     fieldIndex.clearCache()
 
 

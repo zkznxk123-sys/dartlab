@@ -15,10 +15,22 @@ def test_import() -> None:
     assert mod is not None
 
 
+# compact-only(P2): postings SSOT = sidecar. loadShardedSegment 가 읽는 engine-load 파일 집합.
+_REQUIRED = [
+    "main.postings.bin",
+    "main.terms.bin",
+    "main.docLengths.bin",
+    "main_stems.json",
+    "main_meta.parquet",
+    "main_info.json",
+]
+
+
 def _writeRealSegment(outDir):
     import polars as pl
 
-    from dartlab.providers.dart.search.fieldIndex import buildContentSegment, saveSegment
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import saveSegmentWithSidecar
 
     rows = [
         {
@@ -36,7 +48,7 @@ def _writeRealSegment(outDir):
     ]
     idx, meta = buildContentSegment(rows, showProgress=False)
     assert isinstance(meta, pl.DataFrame)
-    saveSegment(idx, meta, "main", outDir=outDir)
+    saveSegmentWithSidecar(idx, meta, "main", outDir)
 
 
 def _writeManifest(outDir):
@@ -50,7 +62,7 @@ def _writeManifest(outDir):
                 "builtAt": "2026-06-15T00:00:00",
                 "sourceDataAsOf": {"allFilings": "20260615"},
                 "nDocsBySource": {"allFilings": 1},
-                "requiredFiles": ["main.npz", "main_stems.json", "main_meta.parquet", "main_info.json"],
+                "requiredFiles": _REQUIRED,
             }
         ),
         encoding="utf-8",
@@ -68,7 +80,7 @@ def _writeManifestWithCanary(outDir, queries):
                 "builtAt": "2026-06-15T00:00:00",
                 "sourceDataAsOf": {"allFilings": "20260615"},
                 "nDocsBySource": {"allFilings": 1},
-                "requiredFiles": ["main.npz", "main_stems.json", "main_meta.parquet", "main_info.json"],
+                "requiredFiles": _REQUIRED,
                 "canaryQueries": queries,
             }
         ),
@@ -87,7 +99,7 @@ def _writeManifestWithSourceCanary(outDir, rows):
                 "builtAt": "2026-06-15T00:00:00",
                 "sourceDataAsOf": {"allFilings": "20260615"},
                 "nDocsBySource": {"allFilings": 1},
-                "requiredFiles": ["main.npz", "main_stems.json", "main_meta.parquet", "main_info.json"],
+                "requiredFiles": _REQUIRED,
                 "sourceCanaryPack": rows,
             }
         ),
@@ -156,10 +168,7 @@ def test_download_and_activate_uses_manifest_file_sources(tmp_path):
     _writeRealSegment(stagedRemote)
     _writeManifest(stagedRemote)
     manifest = json.loads((stagedRemote / "manifest.json").read_text(encoding="utf-8"))
-    manifest["fileSources"] = {
-        name: f"dart/contentIndex/lite/_staging/run1/{name}"
-        for name in ["main.npz", "main_stems.json", "main_meta.parquet", "main_info.json"]
-    }
+    manifest["fileSources"] = {name: f"dart/contentIndex/lite/_staging/run1/{name}" for name in _REQUIRED}
     (current / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
 
     def fakeDownload(repoPath, downloadRoot):
@@ -172,7 +181,7 @@ def test_download_and_activate_uses_manifest_file_sources(tmp_path):
     assert result["activated"] is True
     active = resolveActiveIndexDir(base)
     assert active is not None
-    assert (active / "main.npz").exists()
+    assert (active / "main.postings.bin").exists()
 
 
 def test_activate_staged_index_runs_manifest_canary_queries(tmp_path):
