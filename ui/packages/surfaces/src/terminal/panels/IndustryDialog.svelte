@@ -150,7 +150,7 @@
 				<section class="indSec">
 					<h3 class="indH">{lang === 'en' ? '3 · Member topology' : '3 · 구성원 지형'} <i class="indHsub">{lang === 'en' ? 'click → company' : '클릭 → 종목'}</i></h3>
 					<div class="indMembers">
-						{#each [{ kr: 'ROE 상위', en: 'Top ROE', list: m.top.roe, unit: '%' }, { kr: '성장 상위', en: 'Top growth', list: m.top.growth, unit: '%' }, { kr: '부채 주의', en: 'High debt', list: m.top.risk, unit: '%' }] as col (col.en)}
+						{#each [{ kr: 'ROE 상위', en: 'Top ROE', list: m.top.roe, unit: '%' }, { kr: '성장 상위', en: 'Top growth', list: m.top.growth, unit: '%' }, { kr: '부실 주의', en: 'Distressed', list: m.top.risk, unit: '%' }] as col (col.en)}
 							<div class="indMemCol">
 								<div class="indMemHd">{lang === 'en' ? col.en : col.kr}</div>
 								{#each col.list as mem (mem.code)}
@@ -162,6 +162,9 @@
 							</div>
 						{/each}
 					</div>
+					<div class="indHint">※ {lang === 'en'
+						? 'Distressed = flagged by debt-grade (주의/고위험) OR loss OR cash-distress pattern (value shown = debt ratio) — not raw high-debt. Click → company.'
+						: '부실 주의 = 부채등급(주의·고위험) 또는 적자 또는 현금위기 패턴으로 플래그(표시값=부채비율) — 절대 고부채 아님. 클릭 → 종목.'}</div>
 				</section>
 			{:else}
 				<!-- ── 랜드스케이프: 전체 산업 랭킹 + 분포 ── -->

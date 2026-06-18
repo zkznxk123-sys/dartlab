@@ -957,6 +957,7 @@ export function createEngine(raw: RawData): Engine {
 		liq: new Set(['주의', '위험'])
 	};
 	const _CF_DISTRESS = new Set(['현금위기형', '쇠퇴형', '외부의존형']);
+	const _DISTRESS_DEBT = new Set(['주의', '고위험']); // 부실 멤버 선별 — 부채등급 위험권(절대 부채액 아님)
 
 	function _band(arr: number[]): IndustryDist | null {
 		const s = arr.filter((v) => v != null && !Number.isNaN(v)).sort((a, b) => a - b);
@@ -1035,7 +1036,12 @@ export function createEngine(raw: RawData): Engine {
 		const cfTop = Object.entries(cfCount).sort((a, b) => b[1] - a[1])[0];
 		const cfSignature = cfTop && cfTot ? { pattern: cfTop[0], share: Math.round((cfTop[1] / cfTot) * 100) } : null;
 
-		// (4) 멤버 지형 — 지표 top5 → 종목 드릴인
+		// (4) 멤버 지형 — 지표 top5 → 종목 드릴인. '부실 주의' = distress 복합(고부채≠부실: CF·수익성·부채등급 합성).
+		const distressed: IndustryMacroMember[] = nodes
+			.filter((n) => (n.debtGrade && _DISTRESS_DEBT.has(n.debtGrade)) || n.profGrade === '적자' || (n.cfPattern && _CF_DISTRESS.has(n.cfPattern)))
+			.sort((a, b) => (b.debtRatio ?? 0) - (a.debtRatio ?? 0))
+			.slice(0, 5)
+			.map((n) => ({ code: n.id, name: byCode[n.id]?.corpName || n.id, value: n.debtRatio ?? 0 }));
 		const topBy = (field: keyof EcoNode, desc: boolean): IndustryMacroMember[] =>
 			nodes
 				.filter((n) => n[field] != null)
@@ -1058,7 +1064,7 @@ export function createEngine(raw: RawData): Engine {
 			direction,
 			tailwind: tw && tw.blended != null ? tw.blended : null,
 			macroPhase: raw.macro?.kr?.phaseLabel || raw.macro?.kr?.phase || '',
-			top: { roe: topBy('roe', true), growth: topBy('revCagr', true), risk: topBy('debtRatio', true) }
+			top: { roe: topBy('roe', true), growth: topBy('revCagr', true), risk: distressed }
 		};
 	}
 
