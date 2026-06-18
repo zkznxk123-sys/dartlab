@@ -113,7 +113,6 @@
 	<Panel {lang} className="eMacro" prov="real" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : ''), en: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : '') }} flush>
 		{#snippet right()}
 			<button class="finFullBtn" onclick={() => onMacroLens?.('regime', 'KR')} title={lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
-			<span class="dim">{lang === 'en' ? 'daily batch' : '일배치'}</span>
 		{/snippet}
 		<div class="quadWrap">
 			{#each [{ side: 'kr', label: 'KR' }, { side: 'us', label: 'US' }] as box (box.side)}
@@ -148,7 +147,7 @@
      전 산업을 (수익 수준×마진 격차) 점구름으로 — 현재 산업 강조·클릭=스크리너 필터+상세. 상세는 다이얼로그. -->
 <Panel {lang} className="eIndustry" prov="real" title={{ kr: '산업 스윕', en: 'INDUSTRY SWEEP' }} sub={{ kr: '구조 · 클릭=상세', en: 'structure · click=detail' }}>
 	{#snippet right()}
-		<button class="scrOpenBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'detail · all industries' : '상세보기 · 전체 산업'}>{lang === 'en' ? 'Detail ↗' : '상세보기 ↗'}</button>
+		<button class="finFullBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'detail · all industries' : '상세보기 · 전체 산업'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
 	{/snippet}
 	<div class="swMap">
 		<ScatterMap pts={industryPts} compact highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
