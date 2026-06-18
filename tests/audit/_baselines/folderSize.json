@@ -7,8 +7,13 @@
   "under_split": [
     "src/dartlab/providers/dart/company.py",
     "src/dartlab/providers/dart/panel/build/noteTaxonomyData.py",
+    "src/dartlab/providers/dart/panel/cell.py",
     "src/dartlab/providers/dart/panel/read.py",
+    "src/dartlab/providers/dart/search/api.py",
+    "src/dartlab/providers/dart/search/fieldIndex.py",
     "src/dartlab/providers/dart/search/fieldIndexRebuild.py",
+    "src/dartlab/providers/dart/search/qualityGate.py",
+    "src/dartlab/providers/dart/search/semanticConstraints.py",
     "src/dartlab/providers/edgar/builder/dataDispatcher.py",
     "src/dartlab/providers/edgar/company.py",
     "src/dartlab/providers/edinet/company.py",
