@@ -54,7 +54,7 @@
 ## 3. F2 — 비용 성격별 % stacked 시계열 (제조업 ~6% 한정 정직승리)
 
 ### 3.1 무엇이 갇혀 있나
-- `calcCostByNatureAnalysis`(_costStructureDeep.py L22-220)가 **이미** 원재료/인건비/감가/외주/기타의 연도별 `{amount,ratio,direction}` + `insight` 자동생성. 단위스케일 `_inferNoteUnitScale`(costStructure.py L406-418) 해결. **백엔드 신규계산 0.**
+- `calcCostByNatureAnalysis`(_costStructureDeep.py L22-220)가 **이미** 원재료/인건비/감가/외주/기타의 연도별 `{amount,ratio,direction}` + `insight` 자동생성. 단위스케일 `_inferNoteUnitScale`(costStructure.py L406-418) 해결. **단 계산 엔진은 `fetchNotesDetail`(L92-98)로 note-cell(Python L2 panel)을 읽는다 — 공개 터미널은 Python·note-cell 접근 0** ⚠(08 G1): "백엔드 0·reportSource read"는 *오류*. 공개 경로 = CI가 `report/costByNature.parquet`를 bake(엔진 출력 per-company 직렬화)하고 reportSource가 그 parquet를 read. bake 전 공개 불가(F4 rndIntensity와 동급).
 - PROFIT 탭(FS_TABS[0])은 `finKey:'profitability'`만 있고 **`load` 슬롯이 비어있다** → `load: profitReport` 추가가 깨끗한 additive. FinFullscreen 렌더경로가 finCards+reportList 병합 → 기존 costStructure(기능별: 매출원가/판관비) *직하* 에 nature-view(왜 원가가 움직였나) 배치 = '무엇' 다음 '왜', 설계상 인접.
 
 ### 3.2 메커니즘 + 필수 신규 가드 2개
@@ -95,7 +95,7 @@
 | 데이터 | 분류 | 커버리지 | 진짜 작업 |
 |---|---|---|---|
 | 배당 frmtrm/lwfr/rcept_no | **structured-ready** | 4분기 배당 공시사 | dividend SELECT 에 3컬럼 추가 + chainTriplet. workforce/treasury/ownership 파케이 = triplet 미populate(dead code, 미배선) |
-| 비용 성격별(NT_D834300) | **structured-ready** | ~6%(173사, 제조업) | `report.costByNature` 포트 + profitReport load. None→미렌더 |
+| 비용 성격별(NT_D834300) | **NEEDS-PARSING/CI-bake** ⚠(08 G1 정정 — 옛 'structured-ready'는 오류) | ~6%(173사, 제조업, Phase-0 probe로 재측정) | `calcCostByNatureAnalysis`는 note-cell(`fetchNotesDetail` Python L2)을 읽어 공개 터미널 도달 불가 — F3 희석과 *동일 벽*. CI가 `report/costByNature.parquet` bake → reportSource가 *그 parquet* read(엔진 아님). F4 rndIntensity와 단일 bake 의존 |
 | 인건비 정합(주석 vs fyer_salary) | **structured-ready** | F2 ∩ payroll, 단일-최신년 | 양변 live. proxy/단위/주기 가드. 다년=F1 의존 |
 | 미전환 전환사채 carrying(NT_D822450) | **BLOCKED** | segments-grade(~2/10) | reportSource note-cell 접근 0 + convertible/bond 동일코드. GATE 1 sink 선결 |
 | 23 주석(담보/보증/충당부채/RPT/...) | **narrative-only / 축깨짐** | varies | 뷰어 원문 ↗ only. dossier 비승격 |
@@ -123,7 +123,7 @@
 - `finTabs.ts` shareholderReport `note` 1절 + cardGuide 빗금/hollow 범례.
 
 **F2/F2b(엔진+브라우저, P2)**:
-- `report.costByNature(code)` 포트(엔진 `calcCostByNatureAnalysis` 래핑) — runtime ReportPort + 신규 reportSource read.
+- `report.costByNature(code)` 포트 — ⚠ 엔진 직접 래핑 아님(08 G1): CI-baked `report/costByNature.parquet`를 reportSource가 read(F4 rndIntensity와 단일 bake 작업). 엔진은 bake 시점에만 호출.
 - `finTabs.ts` FS_TABS[0]에 `load: profitReport` + `profitReport` 빌더(100% stacked, 기타>40% 가드, F2b 조건부 배지).
 - `_inferNoteUnitScale` ratio 前 적용 확인.
 

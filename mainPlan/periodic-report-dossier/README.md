@@ -28,6 +28,7 @@
 | [05-scope-phasing-guardrails.md](05-scope-phasing-guardrails.md) | Phase 0~3 · 경계(다른 PRD 소유권) · 게이트 |
 | [06-progress-ledger.md](06-progress-ledger.md) | 진행 원장 + 재개 NEXT 포인터 |
 | [07-deep-facts-and-timeseries.md](07-deep-facts-and-timeseries.md) | **확장 delta** — 당기/전기 체이닝(배당 1.4x)·비용 성격별 시계열·인건비 정합·희석 DEFER·주석 23종 컷 (11에이전트 토론 `wf_c62ab765-ea5`) |
+| [08-hardening-and-uiux.md](08-hardening-and-uiux.md) | **경화 delta** — 적대 재검토 평결("조건부 강함: 강한 제품, 약한 기반")·실버그 수정(DuckDB→hyparquet)·검증된 6갭(F2 도달불가·F5 경로·grep가드 신규·lossPct lift·공개로컬패리티·−1 드롭)·UI/UX 상태기계 §8·Phase-0 probe (4에이전트 `wf_c451d741-93f`) |
 
 ---
 

@@ -58,7 +58,7 @@
 - `ui/packages/surfaces/src/viewer/lib/dartUrl.ts` (`viewerUrl` 재사용, 신규 0)
 
 **엔진/CI(Phase 2)**:
-- `src/dartlab/scan/workforce/snapshot.py` (인적자본 분위 배열 bake — `scanValueAdded`/`computeSalaryVsRevenue`)
+- `src/dartlab/scan/builders/kr/snapshot.py:159-161` (인적자본 분위 배열 bake — `scanValueAdded`/`computeSalaryVsRevenue`; ⚠ `scan/workforce/snapshot.py` 아님, 08 G2)
 - R&D consolidation: rndIntensity parquet bake(`calcRndExpense` 소비) + `reportSource.ts` 5번째 read + `report.rndIntensity` 포트
 - `ui/packages/surfaces/src/terminal/lib/engine.ts` (인적자본 백분위 축 `mk()`/`pctRank` 1행)
 

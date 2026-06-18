@@ -2,14 +2,15 @@
 
 ## 상태
 
-- **2026-06-19**: PRD v0.1 작성 완료. 13인 전문가 토론(`wf_c20526bc-bed`, 도메인 5 + 적대검증 5 + UI/UX 2 + 종합 리드) + 이번 세션 실측 인벤토리 기반. 착수 대기(운영자 go).
-- 구현 코드 **0**. 전부 설계 단계.
+- **2026-06-19**: PRD v0.1 작성(13인 토론 `wf_c20526bc-bed`) → 확장 v0.2(07, 11인 `wf_c62ab765-ea5`) → **경화 v0.3(08, 4인 `wf_c451d741-93f`)**. 착수 대기(운영자 go).
+- **구현 코드 1건(perf 버그 수정, commit `e801f42f0`)**: 정기보고서 팩트 패널 멈춤 = DuckDB→hyparquet 이관(실측 수십초→4.3초·svelte-check 0err·시각변화 없음). 나머지 feature 구현 0.
+- **경화 평결**: "조건부 강함 — 강한 제품, 약한 기반". SHIP 전 정정 필수 6갭(08 §2): F2 도달불가(→NEEDS-PARSING)·F5 경로·grep가드 신규·lossPct lift·공개로컬 패리티·−1 4팩트 드롭. **Phase-0 사전점검 probe**(체이닝 1.4x·6%·shard0 대표성 측정)가 새 SHIP 게이트.
 
 ## NEXT (재개 포인터)
 
-> 운영자 go 시 Phase 0 부터. 재조사 불요 — 본 문서들이 자기충족 설계.
+> 운영자 go 시 **Phase-0 사전점검 probe(08 §4.1) 먼저** — 체이닝 1.4x·cost-by-nature 6%·shard0 대표성을 전 유니버스 측정해 SHIP 숫자 확정. 그 뒤 Phase 0 스파인. 08 §2 정정 6갭 + §3 UI/UX 상태기계 반영.
 
-1. **Phase 0 (스파인, 단독 ship 가능)**: `companyLive.ts` 6 SELECT 에 `rcept_no`+`stlm_dt` 추가 → `LiveCompanyReportFact` contract → 도시에 헤더 리본 → 평면 팩트 패널 흡수. svelte-check 0 + 헤더 회귀 가드 + 공개/로컬 동일.
+1. **Phase 0 (스파인, 단독 ship 가능)**: `companyLive.ts` 6 SELECT 에 `rcept_no`+`stlm_dt` 추가 (⚠ reportFacts는 이미 hyparquet 이관됨 — `e801f42f0`, 라인 L286-322·DuckDB 아님) → `LiveCompanyReportFact` contract → 도시에 헤더 리본 → 평면 팩트 패널 흡수. svelte-check 0 + 헤더 회귀 가드 + 공개/로컬 동일.
 2. **Phase 1 (zero-fetch 리프레임)**: 환원흐름 문장+RETURN 막대 / lossPct+control-shift / 인력 자기이력+`상세보기` / CARD_GUIDE 리프레임. NEVER-CLAIM grep + 3-케이스 소형주 데모 → 운영자 push 승인.
 3. **Phase 2 (엔진 bake)**: 인적자본 분위 배열 + rndIntensity CI parquet. slip 허용.
 4. **Phase 3 (선택)**: 가동률 원문 발췌(zero 추출 한정).
