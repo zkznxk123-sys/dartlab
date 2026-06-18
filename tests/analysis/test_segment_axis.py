@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from dartlab.analysis.financial._revenueSelect import _segNameFromAxis
 
 # 삼성전자류 — 파이프 접미사 형식
@@ -54,3 +56,32 @@ def test_operating_segments_rollup_excluded():
     "OperatingSegments" 로 잡아 삼성전자에 가짜 50% 부문을 만든 회귀.
     """
     assert _segNameFromAxis("ConsolidatedMember|OperatingSegmentsMember") is None
+
+
+def test_panel_reexport_identity():
+    """``_segNameFromAxis`` SSOT 는 panel(L1) — analysis 는 동일 객체 re-export."""
+    from dartlab.providers.dart.panel.cell import _segNameFromAxis as panelFn
+
+    assert _segNameFromAxis is panelFn
+
+
+@pytest.mark.requires_data
+def test_segment_revenue_exposure_branches():
+    """``segmentRevenueExposure`` 정직 분기 — dict(축-태깅)·{}(미산출)·None(추출실패).
+
+    허울 정정 가드: None·{} 를 100% 로 등치하지 않는다.
+    """
+    from dartlab.providers.dart.panel.cell import segmentRevenueExposure
+
+    # 축-태깅 다부문사 → dict, Σ≈100, 배터리 부문 포함.
+    lg = segmentRevenueExposure("051910")  # LG화학
+    assert isinstance(lg, dict) and lg
+    assert abs(sum(lg.values()) - 100.0) < 0.5
+    assert "LgEnergySolutionLtd" in lg
+
+    # 삼성전자 = 4부문 (롤업 허위부문 미포함).
+    ss = segmentRevenueExposure("005930")
+    assert isinstance(ss, dict) and "OperatingSegments" not in ss
+
+    # 추출 실패(존재하지 않는 코드) → None (≠ {}, ≠ 100%).
+    assert segmentRevenueExposure("000000") is None

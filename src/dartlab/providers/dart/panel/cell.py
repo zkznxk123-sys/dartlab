@@ -215,6 +215,112 @@ def _noteCellsFromPanel(code: str, ntCode: str, marketNs: str = "kr") -> pl.Data
     return pl.DataFrame(rows, schema=CELL_SCHEMA)
 
 
+# ── 영업부문(OperatingSegments) 주석 파싱 — NT_D871100 axisPath 해석 SSOT ──
+# 부문 멤버 토큰 추출 정규식. 두 XBRL 인코딩 형식(파이프 접미사 / 평탄화) 모두 흡수.
+_SEG_TOKEN_RE = re.compile(r"entity\d+_([A-Za-z0-9]+?)Member", re.I)
+_SEG_FLAT_RE = re.compile(r"entity\d+_([A-Za-z0-9]+?)MemberOfOperatingSegmentsMember", re.I)
+
+
+def _segNameFromAxis(axisPath: str | None) -> str | None:
+    """NT_D871100 axisPath → 영업부문 멤버 토큰. ``OperatingSegmentsMember`` 하위 멤버만.
+
+    두 XBRL 인코딩 형식 지원:
+    - 파이프 접미사: ``...|OperatingSegmentsMember|entity00126380_DxDivisionMemberOf...`` →
+      ``"DxDivision"`` (삼성전자류).
+    - 평탄화(flattened): ``...|entity00356361_LgEnergySolutionLtdMemberOfOperatingSegmentsMemberOf...``
+      → ``"LgEnergySolutionLtd"`` (LG화학류 — 옛 코드가 파이프 접미사만 인식해 0부문으로 떨군 회귀).
+    조정행(``ReconcilingItems``)·총계(단독 ``ConsolidatedMember``)·부문축 없는 단일축 = None.
+    """
+    if not axisPath or "OperatingSegmentsMember" not in axisPath:
+        return None
+    if "ReconcilingItems" in axisPath:
+        return None
+    last = axisPath.split("|")[-1]
+    # 부문 멤버는 반드시 entity 접두 토큰. 롤업 총계행(``...|OperatingSegmentsMember``)
+    # 처럼 entity 접두가 없으면 None (옛 ``re.sub`` 폴백이 "OperatingSegments" 를
+    # 허위 부문으로 잡던 회귀 차단).
+    m = _SEG_FLAT_RE.search(last) or _SEG_TOKEN_RE.search(last)
+    return m.group(1) if m else None
+
+
+def _isRevenueLabel(label: str) -> bool:
+    """부문 주석 행 label 이 '매출/수익' 행인가 (이익·원가·비용·자산·부채 행 제외)."""
+    return ("매출" in label or "수익" in label) and not any(
+        k in label for k in ("이익", "원가", "비용", "자산", "부채")
+    )
+
+
+def segmentRevenueExposure(stockCode: str, *, marketNs: str = "kr") -> dict[str, float] | None:
+    """영업부문별 매출 *상대 노출%* (최신연도). 축-태깅(OperatingSegmentsMember) 회사만.
+
+    Capabilities:
+        NT_D871100(부문별정보) 주석 셀의 axisPath 부문 멤버를 매출행만 골라 최신연도 합산 →
+        ``{부문토큰: 노출%}`` (Σ=100). **상대%라 단위추론 불요** — 분자(부문매출)·분모(Σ부문매출)가
+        같은 raw scale 이라 약분된다. 그래서 ``Company`` 객체·단위환산 없이 L1 panel 에서 산출 가능.
+        절대 세그매출(원 단위·단위환산)은 ``analysis.financial`` 의 ``_segmentSeriesFromNote`` 가 별도 담당.
+
+    Args:
+        stockCode: 6자리 종목코드.
+        marketNs: 시장 namespace (기본 "kr"). EDGAR(US)는 NT_D871100 부재 → None.
+
+    Returns:
+        dict[str, float] | None
+            - ``{부문토큰: 노출%}`` — 축-태깅 다부문사 (예: LG화학 ``{"LgEnergySolutionLtd": 48.4, ...}``).
+            - ``{}`` — 주석 셀은 있으나 축-태깅 부문매출 0행 (pure-play 후보 또는 행-라벨 부문 — 미구분).
+            - ``None`` — 추출 실패: NT_D871100 주석 부재 / EDGAR / 데이터 없음.
+        **정직 계약**: ``None``·``{}`` 를 "노출 0%" 로 해석 금지. 둘 다 "노출 미산출" 이다 (소비층이
+        pure-play 100% 로 등치하면 허울 — 본 함수는 그 등치를 하지 않는다).
+
+    Raises:
+        없음 — 데이터 부재·파싱 실패는 None/{} 로 흡수.
+
+    Example:
+        >>> from dartlab.providers.dart.panel.cell import segmentRevenueExposure
+        >>> segmentRevenueExposure("051910")["LgEnergySolutionLtd"]  # LG화학
+        48.4
+
+    Guide:
+        테마 노출 등급·부문 집중도 산출의 입력. 부문토큰은 XBRL 멤버명(예: "DxDivision") 이라
+        사람이 읽는 라벨이 아님 — 표시용 매핑은 호출측 책임.
+
+    When:
+        ``industry.themes.themeRevenueExposure`` (테마 노출%) · 부문 집중도 분석이 호출.
+
+    How:
+        ``_noteCellsFromPanel(code, "NT_D871100")`` → consolidated 매출행(``_isRevenueLabel``) 만
+        ``_segNameFromAxis`` 부문토큰으로 그룹 → 최신연도 Σ 정규화.
+
+    See Also:
+        ``dartlab.analysis.financial._revenueSelect._segmentSeriesFromNote`` : 절대 세그매출(원·단위환산).
+        ``dartlab.providers.dart.panel.cell._noteCellsFromPanel`` : 주석 셀 소스.
+    """
+    cells = _noteCellsFromPanel(stockCode, "NT_D871100", marketNs=marketNs)
+    if cells is None or cells.height == 0:
+        return None
+    revByYear: dict[str, dict[str, float]] = {}
+    for r in cells.iter_rows(named=True):
+        if (r.get("scope") or "consolidated") != "consolidated":
+            continue
+        seg = _segNameFromAxis(r.get("axisPath"))
+        if not seg or not _isRevenueLabel(r.get("label") or ""):
+            continue
+        year, raw = r.get("ctxYear"), r.get("valueRaw")
+        if not year or raw in (None, ""):
+            continue
+        val = parseNumStr(raw)
+        if val is None or val <= 0:
+            continue
+        revByYear.setdefault(str(year), {}).setdefault(seg, 0.0)
+        revByYear[str(year)][seg] += val
+    if not revByYear:
+        return {}  # 셀은 있으나 축-태깅 부문매출 0 (pure-play 후보 / 행-라벨 — 미구분)
+    latest = max(revByYear)
+    total = sum(revByYear[latest].values())
+    if total <= 0:
+        return {}
+    return {s: round(v / total * 100, 2) for s, v in sorted(revByYear[latest].items(), key=lambda x: -x[1])}
+
+
 def _freqMask(freq: str) -> pl.Expr:
     """freq → ctxFlow/ctxMode filter mask (토큰 선택, 산수 0).
 
