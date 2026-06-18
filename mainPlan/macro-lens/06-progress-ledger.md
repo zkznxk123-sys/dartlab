@@ -1,8 +1,39 @@
 # 06. Progress Ledger
 
-상태: 구현 v1.5
+상태: 구현 v1.6
 
 ## 2026-06-19
+
+### v1.6 — Direction Contest / A-B Matrix / evidence-first ranking
+
+배경:
+
+- v1.5는 첫 화면에 command와 evidence cockpit을 붙였지만, UI는 여전히 "읽는 카드"에 가까웠다.
+- 전문 UI/엔진 재검토 결과, 첫 화면은 판정 이유를 같은 축으로 비교하고 바로 조치하는 보드가 되어야 했다.
+
+완료:
+
+- `MacroLensDialog` 판정 화면을 보드형으로 재배치했다. 점수와 판정 문구, 반증 kill switch, 방향 meter, 전환 조건, action queue가 첫 화면에 들어온다.
+- 모바일은 점수와 판정 문구를 같은 행으로 압축하고 action queue를 2열로 보여 조치 버튼이 첫 화면에 남게 했다.
+- `Direction Contest`를 추가해 순풍/역풍/혼합 점수와 상위 경로 3개를 별도 대결판으로 보여준다.
+- `A/B Matrix`를 추가해 상위 driver 3개를 `change/lag/path`와 `변화/경로/회사/동행` component score로 같은 축에서 비교한다.
+- `buildMacroVerdict()` 랭킹을 evidence-first로 바꿨다. template/sectorPrior/missing path는 rank cap을 적용해 관측 path보다 과장되지 않게 했다.
+- `Action Queue`는 hard lock 복구, 종목 선택, quant 검산, 회사 claim 잠금, 경로 검증, 반증 확인을 탭 이동 가능한 구조 데이터로 낸다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과. 13개 테스트.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning 45개, error 0.
+- Playwright smoke: direction board/falsifier/contest/action/matrix/command 렌더, action/kill switch/matrix 클릭 탭 이동, desktop/mobile overflow 0 확인.
+- QA screenshots: `output/playwright/macro-verdict-board-desktop.png`, `output/playwright/macro-verdict-board-mobile.png`.
+
+NEXT:
+
+1. driver-local falsifier kill-chain을 별도 구조로 확장한다.
+2. 방향 전환 threshold를 조작 가능한 sensitivity mini view로 승격한다.
+3. claim score와 evidence confidence를 분리해 더 강한 검증 UI로 정리한다.
+
+---
 
 ### v1.5 — Command Bar / Evidence Cockpit / hard-lock guards
 

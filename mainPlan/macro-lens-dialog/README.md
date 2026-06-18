@@ -1,6 +1,6 @@
 # 매크로 렌즈 다이얼로그
 
-상태: 구현 v1.10 (2026-06-19, Phase 1~4 완료 · 대시보드 시각화 방식 v0.6 반영 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷 · Release/Source/Evidence Contribution 시각화 · 관측점 기반 co-movement scatter · 모바일 드릴다운 포커스 보강 · Sources 탭 Quality Gate/Model Card 구현 · macroExposure 모델 명세 계약 · Macro Verdict Engine/UI · keyboard/focus shell · Command Bar/Evidence Cockpit · hard-lock verdict guards)
+상태: 구현 v1.11 (2026-06-19, Phase 1~4 완료 · 대시보드 시각화 방식 v0.6 반영 · `macro.transmission` 터미널 배선 · 회사 macroExposure 품질 UI 소비 · matrix drilldown 패킷 · Release/Source/Evidence Contribution 시각화 · 관측점 기반 co-movement scatter · 모바일 드릴다운 포커스 보강 · Sources 탭 Quality Gate/Model Card 구현 · macroExposure 모델 명세 계약 · Macro Verdict Engine/UI · keyboard/focus shell · Command Bar/Evidence Cockpit · hard-lock verdict guards · Direction Contest/A-B Matrix/Action Queue)
 범위: 퍼블릭 터미널의 `경제지표분석`을 Macro Lens 분석 코어로 승격한다. 화면은 다이얼로그지만, 핵심은 `dartlab.macro`의 시장·섹터 전파 산출물과 `analysis`의 회사 노출 품질을 하나의 검증 가능한 전파 사슬로 묶는 것이다.
 
 ---
@@ -32,7 +32,12 @@
 - `macro` 개선은 허용한다. 단, `macro.transmission`은 시장·섹터 레벨 산출물만 만들고 회사/analysis 내부를 import하지 않는다.
 - 회사별 민감도는 기존 analysis macro 표면을 확장해 연결한다. public 터미널은 새 per-company artifact 없이 `dashboards/finance.json`의 회사 엔트리에 포함된 `macroExposure.exposureQuality`를 소비한다. `nObs`, `rSquared`, `lag`, `window`, `coverage`, `sourceRef`가 없으면 deep block을 닫는다.
 - 첫 화면 구현은 기존 산출물 재사용이다: `dashboards/macro.json`, `macro/{fred,ecos}/observations.parquet`, `MACRO_SERIES`, `co.tailwind`, `eng.sectorTailwinds()`, 차트 co-movement.
-- 첫 화면은 `판정` 콘솔이다. `Macro Verdict Hero`가 점수·claim level·핵심 경로·다음 행동을 먼저 보여주고, `Command Bar`가 핵심 지표 차트 오버레이, 전파 경로 검증, 출처/반증 확인으로 바로 이어진다. 바로 아래 `Verdict Engine Rail`은 변화/경로/신선도/섹터/회사/동행 게이트 중 어디가 열리고 막혔는지 보여준다.
+- 첫 화면은 `판정` 콘솔이 아니라 `판정 보드`다. 점수·claim level·핵심 경로·반증 kill switch·방향 대결 meter·다음 행동 queue·Command Bar가 첫 시야 안에서 하나의 조종판으로 읽혀야 한다.
+- `Direction Contest`는 순풍/역풍/혼합 점수와 spread를 첫 화면에서 분리한다. hard lock 상태에서는 우세 방향보다 `LOCK 해소 전까지 방향 판정 금지`가 먼저 보인다.
+- `A/B 비교`는 카드 설명이 아니라 같은 행렬 축으로 검산한다. 상위 driver 3개를 변화량, lag, path evidence/confidence, 변화/경로/회사/동행 component score로 비교한다.
+- `Action Queue`는 설명 문장이 아니라 클릭 가능한 작업 목록이다. 시계열 복구, 회사 claim 잠금, 전파 경로 검증, 반증 확인이 해당 탭/driver로 바로 이동한다.
+- `buildMacroVerdict()`는 driver를 먼저 자르지 않고 evidence를 붙인 뒤 랭킹한다. template path는 0.42, sectorPrior는 0.68, missing/blocked path는 0.22로 rank cap을 받아 관측 경로를 단순 변화량만으로 이기지 못한다.
+- 바로 아래 `Verdict Engine Rail`은 변화/경로/신선도/섹터/회사/동행 게이트 중 어디가 열리고 막혔는지 보여준다.
 - `Evidence Cockpit`은 접힌 상세 표 밖에 항상 노출한다. 시계열/경로/동행/회사노출/민감도 5개 gate와 핵심 driver release freshness를 한 줄 조종판으로 보여주고, raw matrix와 전체 release rail만 접힌 상세 영역으로 내린다.
 - 시각화는 판정을 만들지 않는다. verdict score와 `LOCK/OPEN/WATCH` 상태는 `macro.transmission`, `macroExposure.exposureQuality`, source lineage, freshness policy, co-movement gate를 `buildMacroVerdict()`가 구조화한 결과다. UI는 이 결과를 표시할 뿐 재계산하거나 추천·목표가로 승격하지 않는다.
 - hard-lock 가드는 보수적으로 동작한다. 핵심 primary driver stale, `macro.transmission` 결손/fallback template, 불완전한 `quantCandidate`, 변화 0의 polarity 오독은 정량·회사 claim을 열지 않는다. `locked` verdict는 점수도 잠금 영역으로 제한한다.

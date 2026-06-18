@@ -1,10 +1,43 @@
 # 06. 진행 원장
 
-상태: v1.10
+상태: v1.11
 
 ---
 
 ## 2026-06-19
+
+### v1.11 — Direction Contest / A-B Matrix / Action Queue
+
+배경:
+
+- v1.10은 command/cockpit을 붙였지만, 첫 화면이 여전히 여러 카드 조각처럼 보였다.
+- UI red-team은 "상위 driver가 왜 이기는지"를 같은 축으로 비교하고, 반증/잠금/다음 행동이 문장이 아니라 클릭 가능한 조작이어야 한다고 지적했다.
+- 엔진 red-team은 `topPressures`를 먼저 자른 뒤 evidence를 붙이면 template path가 실제 관측 path보다 앞설 수 있다고 지적했다.
+
+완료:
+
+- `Macro Verdict Hero`를 `판정 보드`로 압축했다. 점수, claim level, 핵심 경로, 반증 kill switch, 방향 meter, 전환 조건, action queue, command button을 첫 시야에 묶었다.
+- 모바일은 점수와 판정 문구를 같은 행에 배치하고 action queue를 2열로 보여 첫 화면에서 조치 버튼이 보이게 했다.
+- `Direction Contest`를 추가했다. 순풍/역풍/혼합 점수, spread, leader, confidence, 상위 경로 3개를 별도 경로 대결판으로 표시한다.
+- `A/B 비교`를 카드 묶음에서 행렬형 비교로 바꿨다. 상위 driver 3개를 `change/lag/path`와 `변화/경로/회사/동행` component score로 같은 축에서 검산한다.
+- `Action Queue`를 구조화했다. hard lock 복구, 종목 선택, quant 검산, 회사 claim 잠금, 전파 경로 검증, 반증 확인이 해당 탭/driver로 이동한다.
+- `buildMacroVerdict()`는 relevance driver 전체에 evidence를 붙인 뒤 랭킹한다. missing/blocked path 0.22, template 0.42, sectorPrior 0.68 rank cap으로 관측 path를 우선한다.
+
+검증:
+
+- `npx vitest run ui/packages/surfaces/src/terminal/lib/macroMappings.test.ts ui/packages/surfaces/src/terminal/lib/macroLens.test.ts` 통과. 13개 테스트.
+- 추가 회귀: template path가 단순 변화량만으로 observed path를 이기지 못함.
+- `npm run check -w @dartlab/ui-surfaces` 통과. 기존 warning 45개, error 0.
+- Playwright smoke 통과: direction board 1개, falsifier kill switch 1개, contest rows 3개, action item 4개, compare rows 3개, command button 3개, action/kill switch/compare 클릭 탭 이동, desktop/mobile first-screen overflow 0, page/console error 0.
+- QA screenshots: `output/playwright/macro-verdict-board-desktop.png`, `output/playwright/macro-verdict-board-mobile.png`.
+
+NEXT:
+
+1. falsifier를 단일 버튼에서 driver-local kill-chain으로 확장한다.
+2. 방향 전환 threshold를 static label에서 조작 가능한 mini sensitivity로 승격한다.
+3. claim score와 evidence confidence를 분리해 UI에서 같은 점수처럼 보이지 않게 한다.
+
+---
 
 ### v1.10 — Command Bar / Evidence Cockpit / hard-lock guards
 

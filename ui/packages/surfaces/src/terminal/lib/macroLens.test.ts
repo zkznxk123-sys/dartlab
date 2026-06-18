@@ -124,6 +124,21 @@ const macroWithSingleMixedEdge = (): MacroFile => {
 	return m;
 };
 
+const macroWithObservedVsTemplate = (): MacroFile => {
+	const m = cloneMacro();
+	const drivers = ['EXPORT', 'BASE_RATE'].map((id) => m.transmission!.drivers.find((d) => d.id === id)!);
+	const edges = [
+		m.transmission!.edges.find((e) => e.driverId === 'EXPORT')!,
+		m.transmission!.edges.find((e) => e.driverId === 'BASE_RATE' && e.evidenceLevel === 'template')!
+	];
+	m.transmission = {
+		...m.transmission!,
+		drivers,
+		edges
+	};
+	return m;
+};
+
 describe('macroLens builders — current macro v19 artifact', () => {
 	it('builds a 2x2 regime model without leaking raw coordinate signals', () => {
 		const view = buildRegimeQuadrant(macro);
@@ -188,6 +203,9 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		expect(snapshot.verdict.nextActionKr).toContain('종목 선택');
 		expect(snapshot.verdict.drivers.length).toBeGreaterThan(0);
 		expect(snapshot.verdict.sourceRefs.length).toBeGreaterThan(0);
+		expect(snapshot.verdict.contest.rows.length).toBeGreaterThan(0);
+		expect(snapshot.verdict.actions.some((action) => action.id === 'select-company')).toBe(true);
+		expect(snapshot.verdict.contest.supportiveScore + snapshot.verdict.contest.pressureScore + snapshot.verdict.contest.mixedScore + snapshot.verdict.contest.unknownScore).toBeGreaterThan(0);
 
 		const forbidden = [
 			snapshot.verdict.titleKr,
@@ -293,5 +311,33 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		expect(snapshot.verdict.direction).toBe('mixed');
 		expect(snapshot.verdict.drivers[0]?.direction).toBe('mixed');
 		expect(snapshot.verdict.titleKr).not.toMatch(/우호 경로 우세|부담 경로 우세/);
+	});
+
+	it('ranks drivers after evidence so a template path cannot beat an observed path on move alone', () => {
+		const m = macroWithObservedVsTemplate();
+		const latest: MacroLatest[] = ['EXPORT', 'BASE_RATE'].flatMap((id) => {
+			const def = MACRO_SERIES.find((series) => series.id === id);
+			if (!def) return [];
+			return [{
+				def,
+				v: id === 'BASE_RATE' ? 3 : 100,
+				d: '20260618',
+				chg: id === 'BASE_RATE' ? 100 : 1,
+				spark: id === 'BASE_RATE' ? [2, 3, 4] : [99, 100, 101]
+			}];
+		});
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture(),
+			macro: m,
+			macroLatest: latest,
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		expect(snapshot.verdict.drivers[0]?.driverId).toBe('EXPORT');
+		expect(snapshot.verdict.drivers[0]?.evidenceLabel).toBe('OBS');
+		const templateDriver = snapshot.verdict.drivers.find((d) => d.driverId === 'BASE_RATE');
+		expect(templateDriver?.evidenceLabel).toBe('TPL');
+		expect(templateDriver?.score).toBeLessThanOrEqual(42);
+		expect(snapshot.verdict.contest.rows[0]?.driverId).toBe('EXPORT');
 	});
 });
