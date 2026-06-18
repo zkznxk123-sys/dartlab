@@ -20,6 +20,7 @@
 	}
 	let { pf, slots, focus, period, withCosts, adjusted, lang, onFocus, onClear, onOpenReport }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
+	let methodOpen = $state(false); // ⓘ 방법론 — 가정 원장 on-demand (Bloomberg 패턴, 02 §4.2)
 	const sgn = (v: number, d = 1) => (v >= 0 ? '+' : '') + v.toFixed(d);
 	const cls = (v: number) => (v > 0 ? 'tUp' : v < 0 ? 'tDn' : 'tNeu');
 	const fmtDate = (t: string) => `${t.slice(2, 4)}.${t.slice(4, 6)}.${t.slice(6, 8)}`;
@@ -64,24 +65,42 @@
 			</button>
 		{/each}
 		<span class="btSpacer"></span>
-		{#each focusRes?.warnings ?? [] as w (w.kind)}
-			<span class="btWarn" title={w.date ?? ''}>{T(WARN_LABEL[w.kind].kr, WARN_LABEL[w.kind].en)}{w.date ? ' ' + fmtDate(w.date) : ''}</span>
-		{/each}
 		<button class="btMore" onclick={onOpenReport} title={T('전문 화면 — 자산곡선·거래·낙폭·가정', 'professional view')}>{T('백테스팅 상세', 'details')} ▸</button>
 		<button class="btClose" onclick={onClear} title={T('백테스트 해제', 'clear backtest')}>✕</button>
 	</div>
+
+	<!-- ★정직 3단 위계 (02 §4·04 §2): active(amber·트리거 시만) / caution(slate·N≥2) / spec(중립·항상). 닫기 불가, 11px floor. -->
+	{#if (focusRes?.warnings ?? []).length}
+		<div class="btTier btTierActive">
+			{#each focusRes?.warnings ?? [] as w (w.kind)}
+				<span class="btWarnChip" title={w.date ?? ''}>⚠ {T(WARN_LABEL[w.kind].kr, WARN_LABEL[w.kind].en)}{w.date ? ' ' + fmtDate(w.date) : ''}</span>
+			{/each}
+		</div>
+	{/if}
 	{#if multi}
-		<div class="btSel">
-			⚠ {T('여러 전략을 같은 데이터에 비교 = 사후선택 편향(위 곡선이 미래 최고 아님)', 'comparing strategies on the same data = selection bias')}
-			· {T('단일종목 조합 = 타이밍 분산이지 자산 분산 아님(분산효과 주장 금지)', 'single-stock combo = timing diversification, not asset diversification')}
+		<div class="btTier btTierCaution">
+			{T('여러 전략 같은 데이터 비교 = 사후선택 편향(위 곡선이 미래 최고 아님)', 'comparing strategies on the same data = selection bias (top curve ≠ best future)')}
+			· {T('단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'single-stock combo = timing, not asset diversification')}
 			{#if pf.combo}· {T('조합 = 동일가중 보유합성(리밸런싱 없음)', 'combo = equal-weight, no rebalancing')}{#if comboMddBetter} · {T('조합 낙폭이 개별보다 얕음', 'combo MDD shallower than singles')}{/if}{/if}
 		</div>
 	{/if}
-	<div class="btFoot">
-		⚠ {T('과거 시뮬레이션 — 미래 수익 보장 없음 · 익일 시가 체결', 'historical simulation — no guarantee · next-open fills')}
-		· {withCosts ? T('수수료·세금·슬리피지 반영', 'fees·tax·slippage on') : T('비용 미포함', 'costs excluded')}
-		· {adjusted ? T('배당 미반영 · 수정주가', 'dividends excluded · adjusted') : T('배당 미반영 · 무수정주가', 'dividends excluded · unadjusted')}{#if focusRes?.runSpec} · {T('기준일', 'as of')} {fmtDate(focusRes.runSpec.dataAsOf)}{/if} │ {GOV_ATTRIBUTION}
+	<div class="btTier btTierSpec">
+		<span class="btStamp">{T('체결 t+1 시가', 'fill t+1 open')}</span>
+		<span class="btStamp">{withCosts ? T('비용 반영', 'costs on') : T('비용 미포함', 'costs off')}</span>
+		<span class="btStamp">{adjusted ? T('배당미반영·수정주가', 'div excl·adj') : T('배당미반영·무수정주가', 'div excl·unadj')}</span>
+		<span class="btStamp">{T('단일구간', 'single window')}</span>
+		{#if focusRes?.runSpec}<span class="btStamp">{T('기준일', 'as of')} {fmtDate(focusRes.runSpec.dataAsOf)}</span>{/if}
+		<button class="btMethod" class:on={methodOpen} onclick={() => (methodOpen = !methodOpen)} title={T('방법론·가정 펼치기', 'methodology')}>ⓘ {T('방법론', 'method')}</button>
+		<span class="btAttr">{GOV_ATTRIBUTION}</span>
 	</div>
+	{#if methodOpen}
+		<div class="btLedger">
+			<div>{T('· 신호 t일 종가 → t+1일 시가 체결 — 미래참조 구조적 차단', '· signal close(t) → fill open(t+1) — look-ahead structurally blocked')}</div>
+			<div>{T('· 거래정지·갭 봉(v=0/o=0) = 체결 이연 (감사 카운터로 노출)', '· halted/gap bars (v=0/o=0) = fill deferred (audit counter)')}</div>
+			<div>{T('· 배당 미반영 + 무수정주가 기본 → B&H를 보수적으로 깎음(전략이 상대적 유리) — 상존 편향', '· dividends excluded + unadjusted price haircut B&H — persistent bias favoring strategy')}</div>
+			<div>{T('· 단일구간 in-sample · 과거 가정 노출형 시뮬레이션 — 미래 수익 보장 없음 · 추천 아님', '· single-window in-sample · assumption-exposed historical simulation — no guarantee · not advice')}</div>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -99,13 +118,21 @@
 	.btChipLbl { color: var(--dl-ink, #c8cfdb); }
 	.btChip b { font-size: 10.5px; }
 	.btSpacer { flex: 1 1 auto; }
-	.btWarn { font-size: 9.5px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 3px; padding: 0 5px; }
-	.btMore { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 10px; padding: 2px 9px; border-radius: 3px; cursor: pointer; font-family: inherit; }
+	.btMore { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 10.5px; padding: 2px 9px; border-radius: 3px; cursor: pointer; font-family: inherit; }
 	.btMore:hover { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
 	.btClose { background: none; border: none; color: var(--dimmer); cursor: pointer; font-size: 13px; padding: 0 2px; }
 	.btClose:hover { color: var(--dl-ink, #c8cfdb); }
-	.btSel { font-size: 9.5px; color: #8b94a3; margin-top: 3px; line-height: 1.5; }
-	.btFoot { font-size: 9.5px; color: var(--dimmer); margin-top: 3px; line-height: 1.4; }
+	/* ★정직 3단 위계 — 11px floor(권위로 읽히게, 9.5px 위반 교정) */
+	.btTier { margin-top: 3px; line-height: 1.5; font-size: 11px; }
+	.btTierActive { display: flex; flex-wrap: wrap; gap: 5px; }
+	.btWarnChip { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 6px; }
+	.btTierCaution { color: #8b94a3; font-style: italic; }
+	.btTierSpec { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--dimmer); }
+	.btStamp { color: #8b94a3; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 0 6px; letter-spacing: 0.01em; }
+	.btMethod { font-size: 11px; background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; border-radius: 3px; padding: 0 7px; cursor: pointer; font-family: inherit; }
+	.btMethod:hover, .btMethod.on { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
+	.btAttr { margin-left: auto; color: #5b6573; font-size: 10.5px; }
+	.btLedger { margin-top: 4px; padding: 6px 8px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; font-size: 11px; color: #8b94a3; line-height: 1.6; }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }
 	.tNeu { color: #aeb6c2; }

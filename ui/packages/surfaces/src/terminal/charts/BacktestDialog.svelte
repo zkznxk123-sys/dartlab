@@ -320,7 +320,7 @@
 	.bdStrat { font-size: 13px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }
 	.bdStrat i { font-style: normal; font-weight: 400; margin-left: 8px; font-size: 10.5px; color: #aeb6c2; }
 	.bdHeadline { margin-left: auto; display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 700; }
-	.bdHeadline i { font-style: normal; font-size: 10px; font-weight: 400; color: var(--dimmer); }
+	.bdHeadline i { font-style: normal; font-size: 10.5px; font-weight: 400; color: var(--dimmer); }
 	.bdExcess { font-style: normal; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--dl-line, #1b2130); }
 	/* 전략 탭 */
 	.bdTabs { display: flex; gap: 4px; padding: 6px 18px 0; flex-wrap: wrap; border-bottom: 1px solid var(--dl-line, #1b2130); }
@@ -330,7 +330,7 @@
 	.bdTab em { font-style: normal; font-family: var(--dl-font-mono, monospace); font-size: 11px; }
 	.bdCombo { font-size: 11px; color: #cbb4f5; background: rgba(232, 121, 249, 0.07); border: 1px solid rgba(232, 121, 249, 0.25); border-radius: 4px; padding: 7px 12px; line-height: 1.6; display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
 	.bdCombo b { font-weight: 700; }
-	.bdCombo i { flex-basis: 100%; font-style: normal; font-size: 10px; color: #8b94a3; }
+	.bdCombo i { flex-basis: 100%; font-style: normal; font-size: 10.5px; color: #8b94a3; }
 	.bdBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 18px; }
 	.bdBanner { font-size: 11px; color: #93c5fd; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 4px; padding: 7px 12px; line-height: 1.55; }
 	.bdBanner.lag { color: #fbbf77; background: rgba(251, 146, 60, 0.08); border-color: rgba(251, 146, 60, 0.3); }
@@ -338,9 +338,9 @@
 	.bdSecHd { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: #aeb6c2; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
 	.bdSecHd.dd { margin-top: 6px; }
 	.bdN { font-family: var(--dl-font-mono, monospace); font-size: 11px; color: var(--dimmer); font-weight: 400; }
-	.bdCsv { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 10px; padding: 2px 9px; border-radius: 3px; cursor: pointer; font-family: inherit; }
+	.bdCsv { background: none; border: 1px solid var(--dl-line-strong, #2a3142); color: #aeb6c2; font-size: 10.5px; padding: 2px 9px; border-radius: 3px; cursor: pointer; font-family: inherit; }
 	.bdCsv:hover { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
-	.bdHint { font-size: 10px; color: var(--dimmer); font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: auto; }
+	.bdHint { font-size: 10.5px; color: var(--dimmer); font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: auto; }
 	/* 자산 곡선 */
 	.bdChartWrap { position: relative; width: 100%; height: 230px; background: rgba(8, 11, 18, 0.55); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; }
 	.bdChartWrap.dd { height: 78px; }
@@ -353,7 +353,7 @@
 	.bdSplitLbls span { padding: 0 4px; }
 	.bdSplitLbls .test { color: #60a5fa; }
 	.bdXlabs { display: flex; justify-content: space-between; font-family: var(--dl-font-mono, monospace); font-size: 9.5px; color: var(--dimmer); margin-top: -2px; }
-	.bdLegend { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #aeb6c2; }
+	.bdLegend { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: #aeb6c2; }
 	.bdLegend .lk { display: inline-block; width: 14px; height: 0; border-top-width: 2px; border-top-style: solid; margin: 0 1px 0 10px; }
 	.bdLegend .lk:first-child { margin-left: 0; }
 	.bdLegend .lk.strat { border-top-color: #fb923c; }
@@ -364,7 +364,7 @@
 	.bdCard { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; }
 	.bdCard > span { font-size: 10.5px; color: #aeb6c2; }
 	.bdCard > b { font-size: 17px; font-weight: 700; color: var(--dl-ink, #c8cfdb); line-height: 1.1; }
-	.bdCard > i { font-style: normal; font-size: 9.5px; color: var(--dimmer); font-family: var(--dl-font-mono, monospace); }
+	.bdCard > i { font-style: normal; font-size: 10.5px; color: var(--dimmer); font-family: var(--dl-font-mono, monospace); }
 	.bdSubHd { font-size: 10.5px; color: #8b94a3; margin-top: 8px; letter-spacing: 0.02em; }
 	/* OOS 2열 */
 	.bdOos { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; }
@@ -391,7 +391,7 @@
 	.bdAssume li { font-size: 11px; color: #aeb6c2; line-height: 1.55; }
 	.bdAssume li.warn { color: var(--amber, #fb923c); }
 	.bdSpec { display: flex; flex-direction: column; gap: 2px; font-size: 10.5px; color: #8b94a3; }
-	.bdFoot { font-size: 10px; color: var(--dimmer); margin-top: 6px; line-height: 1.5; }
+	.bdFoot { font-size: 11px; color: var(--dimmer); margin-top: 6px; line-height: 1.5; }
 	/* 톤 색 — 터미널 토큰 */
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }
