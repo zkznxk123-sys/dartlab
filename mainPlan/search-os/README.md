@@ -21,13 +21,13 @@
 - ✅ **P0** 엔진 양읽기 — `loadShardedSegment`(벡터 varint-decode) + `loadSegment` 양읽기 + round-trip/BM25 parity 테스트. **실데이터 475,968 docs array-equal + 5쿼리 BM25 byte-parity** 검증. 콜드 npz 1.2s vs sharded 9.2s. commit `ef17da7e0`.
 - ✅ **P1-engine** compact-only — searchContent/_getSegments main 단일, rebuildDelta/_clearDelta 삭제, api.rebuildContentDelta=NotImplementedError, saveSegmentWithSidecar + indexPublishNames/_segmentFiles, manifest/push/pull main-only. **45 search 테스트 green**. commit `162db241d`.
 - ✅ **P1-UI** main 단일 — filingSearch.ts delta 병합·dedup 제거(−33 LoC), manifest pointer resolve 유지. tsc 0. commit `1f9cb8d7f`.
-- ⏳ **P1-pipeline** (운영자 coordinated) — `buildSearchMain.py` per-source 가드+indexPublishNames+no-change 흡수, `buildSearchDelta.py`(374) 삭제, `searchIndexDelta.yml`→`searchIndexMain.yml` body 재사용으로 `searchIndexBuild` 단일화(cron 변경=운영자 게이트), clean publish. **buildSearchDelta 삭제는 searchIndexDelta.yml 재배선과 커플링**(워크플로 깨지 않게 동시).
-- ⏳ **P2** npz/saveSegment 삭제 + INDEX_SCHEMA_VERSION bump + 죽은 UI delta 분기 정리 — **P0 PyPI 선배포 후**.
-- ⏳ **P3** `FilingSearchDialog.svelte` + TerminalSurface 4지점 배선 — sidecar 배포(P1 run) 후 + 운영자 dev 눈검수/push.
+- ✅ **P1-pipeline** — `buildSearchMain.py`에 no-change 단락(previous==current+이전 manifest clean→pointer만 re-point, delta 잔존시 clean 풀압축 강제)+per-source 하한 가드(allFilings130k/panel70k/edgar40k/news70k, env 대체)+`indexPublishNames` clean publish(previousManifestPath seed 안함→fileSources delta키0). `buildSearchDelta.py`(374) 삭제. `searchIndexMain.yml`+`searchIndexDelta.yml`→**단일 `searchIndexBuild.yml`**(일간 cron+월간 cron force_full+4 source workflow_run+build_mode catalog/legacy[operator-only recovery]·gate 일간·workflow_run=ops/월간·수동=release). `checkSearchRemoteEvidence` delta키0 assert. 로컬 활성/해상(resolveActiveIndexDir/selfcheck/_activeIndexDir/ensureContentIndex)을 main.npz→**main.postings.bin(sidecar SSOT)|legacy npz** 판정으로 전환(sidecar-only 오판 회귀 수정). `_encodeVarintArray` 빈 스트림 가드. monitor·planSearchBootstrap·drill/roundtrip·테스트 정합. **424 search/pipeline 테스트 green**. commit `b55003fe6`. ⏳cron 변경+searchIndexBuild 1회 실행(HF flip)=운영자.
+- ⏳ **P2** npz/saveSegment writer+loadSegment npz fallback 삭제 + saveSegmentWithSidecar sidecar-only 화 + INDEX_SCHEMA_VERSION bump — **P0 PyPI 선배포(dual-read 전파)+P1 HF flip(sidecar-only) 후에만 안전**(플랜 §14·§19, 지금 작성 시 dual-read 창 파괴). 운영자 게이트.
+- ✅ **P3** `FilingSearchDialog.svelte`(커맨드 팔레트 ⌘⇧F+statusBar) + TerminalSurface 4지점(import·state·onDocKey ⌘⇧F·statusBar 버튼·마운트). useDartLabRuntime().search 경유·140ms 디바운스+stale 토큰·lazy 콜드·행 클릭 soft-swap+원문↗(DART rcpNo/EDGAR 회사브라우즈)·최근검색·정직 한계 라벨. 전 스타일 컴포넌트 scoped(terminal.css 무변경). **svelte-check 0 err·runtime tsc·checkUiDataWiring PASS**. commit `d0609517f`. ⏳운영자 dev 눈검수+push.
 
 ## 배포 순서 (운영자 게이트)
 1. P0 → PyPI 선배포(양읽기). 2. P1 코드 push + `searchIndexBuild` 1회(clean publish, HF flip) + cron 변경. 3. P2 정리 push. 4. P3 dev 눈검수 후 push.
-**현재 5 커밋 미push**(P0/P1-engine/P1-UI + 무관 2). UI surfaces/runtime·CI 변경이라 운영자 push 승인 필요.
+**현재 미push 2(이번 세션): `b55003fe6`(P1-pipeline·CI/워크플로) + `d0609517f`(P3·UI surface)** — 운영자 push 승인 필요. P0/P1-engine/P1-UI+PRD는 origin/master 반영됨(PyPI 발행·HF flip은 별개 운영자 액션).
 
 ## 정직한 미해소
 본문 직행 진입(ViewerStudio rceptNo prop 부재·후속) / 회사인덱스 검색(cmdBar) / snippet 고정 400자 / `fieldIndexRebuild` >800 LoC.
