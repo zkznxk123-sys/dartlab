@@ -701,6 +701,13 @@ export function buildMacroLensSnapshot(args: {
 		.sort((a, b) => priorityRank[a.pressureLevel] - priorityRank[b.pressureLevel])
 		.slice(0, 3);
 	const edges = buildEdges(co, drivers);
+	const checkpoints = buildCheckpoints(co);
+	const scenarios = buildScenarios(drivers, edges);
+	const falsifiers = buildFalsifiers(coMovers, drivers, macro);
+	const marketPhase = {
+		kr: phaseView('KR', macro?.kr),
+		us: phaseView('US', macro?.us)
+	};
 	const missing: string[] = [];
 	if (!macro) missing.push('macro.json');
 	if (!macroLatest.length) missing.push('macro latest');
@@ -719,14 +726,11 @@ export function buildMacroLensSnapshot(args: {
 			sector: co.sector.kr,
 			industry: co.industry
 		},
-		marketPhase: {
-			kr: phaseView('KR', macro?.kr),
-			us: phaseView('US', macro?.us)
-		},
+		marketPhase,
 		drivers,
 		topPressures: topPressures.length ? topPressures : drivers.slice(0, 3),
 		transmissionEdges: edges,
-		companyCheckpoints: buildCheckpoints(co),
+		companyCheckpoints: checkpoints,
 		sectorBinding: {
 			tailwind: co.tailwind,
 			top: sectorTailwinds.slice(0, 4),
@@ -741,8 +745,8 @@ export function buildMacroLensSnapshot(args: {
 			lagMonths: null,
 			coverage: 'sectorOnly'
 		},
-		falsifiers: buildFalsifiers(coMovers, drivers, macro),
-		scenarios: buildScenarios(drivers, edges),
+		falsifiers,
+		scenarios,
 		sourceRefs: [
 			MACRO_ATTRIBUTION,
 			'dashboards/macro.json',
