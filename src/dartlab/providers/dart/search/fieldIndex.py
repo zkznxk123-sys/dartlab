@@ -426,6 +426,121 @@ def _encodeVarintArray(vals: np.ndarray) -> tuple[bytes, np.ndarray]:
     return out.tobytes(), nbytes
 
 
+def _decodeVarintStream(raw: bytes, count: int) -> np.ndarray:
+    """``_encodeVarintArray`` 의 역연산 — 연접 LEB128 varint 바이트열을 ``count`` 개 int64 로 벡터 디코드.
+
+    각 바이트는 자신이 속한 값 그룹(continuation 비트 0 = 그룹 끝)을 ``cumsum`` 으로 식별하고,
+    그룹 내 위치 × 7 만큼 shift 한 7-bit 페이로드를 ``np.add.reduceat`` 로 그룹별 합산한다. Python
+    바이트 루프 없이 전 스트림을 한 번에 디코드(콜드 로드 속도·RSS 가드).
+
+    Sig:
+        _decodeVarintStream(raw: bytes, count: int) -> np.ndarray
+
+    Args:
+        raw: 연접 varint 바이트열.
+        count: 디코드할 값 개수 (continuation 0 바이트 수와 일치해야 함).
+
+    Returns:
+        np.ndarray(int64) — 길이 ``count`` 값 배열.
+
+    Raises:
+        ValueError: 스트림의 값 개수가 ``count`` 와 다를 때(인코딩 불일치).
+
+    Example:
+        >>> b, _ = _encodeVarintArray(np.array([1, 300, 5], dtype=np.int64))
+        >>> _decodeVarintStream(b, 3).tolist()
+        [1, 300, 5]
+    """
+    if count == 0:
+        return np.zeros(0, dtype=np.int64)
+    b = np.frombuffer(raw, dtype=np.uint8)
+    isLast = (b & 0x80) == 0
+    lastPos = np.nonzero(isLast)[0]  # 각 값의 마지막 바이트 위치
+    if len(lastPos) != count:
+        raise ValueError(f"varint stream 값 개수 {len(lastPos)} != 기대 {count}")
+    groupStart = np.empty(count, dtype=np.int64)
+    groupStart[0] = 0
+    groupStart[1:] = lastPos[:-1] + 1
+    valueIndex = np.cumsum(isLast.astype(np.int64)) - isLast.astype(np.int64)  # 바이트별 0-based 값 그룹
+    shift = (np.arange(len(b), dtype=np.int64) - groupStart[valueIndex]) * 7
+    contrib = (b & 0x7F).astype(np.int64) << shift
+    return np.add.reduceat(contrib, groupStart)
+
+
+def loadShardedSegment(name: str = "main", inDir: Path | None = None, *, includeEvidenceText: bool = False):
+    """STORED sidecar(postings/terms/docLengths.bin)에서 CSR 인덱스를 무손실 복원 — npz 없이 로드.
+
+    ``saveShardedSegment`` 의 역연산. ``postings.bin`` 전체를 ``_decodeVarintStream`` 으로 한 번에 디코드한
+    뒤 term 별로 [gap×df][tf×df] 로 분리하고, term 경계마다 절대 docId 로 reset 되는 gap 을 세그먼트
+    cumsum 으로 docIds 복원한다. 반환 idx 는 ``loadSegment``/``saveSegment`` 와 동일 키라 ``_scoreBM25`` 가
+    그대로 소비(랭킹 불변·byte-parity). meta/info 는 ``loadSegment`` 와 동일하게 parquet/json 에서 읽는다.
+
+    Sig:
+        loadShardedSegment(name="main", inDir=None, *, includeEvidenceText=False) -> tuple[dict, pl.DataFrame] | None
+
+    Args:
+        name: 세그먼트 이름("main").
+        inDir: 인덱스 디렉터리. None 이면 ``_contentIndexDir()``.
+        includeEvidenceText: True 면 evidenceText 컬럼까지 meta 로드.
+
+    Returns:
+        tuple[dict, pl.DataFrame] 또는 None — sidecar(postings.bin) 부재 시 None.
+
+    Raises:
+        ValueError: postings 디코드 값 개수가 terms.bin df 합과 불일치할 때.
+
+    Example:
+        >>> loadShardedSegment("main")  # doctest: +SKIP
+    """
+    inDir = inDir or _contentIndexDir()
+    postingsPath = inDir / f"{name}.postings.bin"
+    if not postingsPath.exists():
+        return None
+    stemDict = json.loads((inDir / f"{name}_stems.json").read_text(encoding="utf-8"))
+    info = json.loads((inDir / f"{name}_info.json").read_text(encoding="utf-8"))
+    terms = np.frombuffer((inDir / f"{name}.terms.bin").read_bytes(), dtype=np.uint32).reshape(-1, 4)
+    df = terms[:, 3].astype(np.int64)  # term 별 posting 수
+    nTerms = len(df)
+    offsets = np.zeros(nTerms + 1, dtype=np.int64)
+    np.cumsum(df, out=offsets[1:])
+    nPost = int(offsets[-1])
+    docLengths = np.frombuffer((inDir / f"{name}.docLengths.bin").read_bytes(), dtype=np.uint32).astype(np.int32)
+
+    if nPost == 0:
+        docIds = np.zeros(0, dtype=np.int32)
+        termFreqs = np.zeros(0, dtype=np.int32)
+    else:
+        # postings.bin = term0[gap×df0 | tf×df0] term1[...] ... (stemId 순 연접). 전체를 한 번에 디코드.
+        values = _decodeVarintStream(postingsPath.read_bytes(), 2 * nPost)
+        perTerm = 2 * df
+        termOfValue = np.repeat(np.arange(nTerms, dtype=np.int64), perTerm)
+        cumStart = np.zeros(nTerms, dtype=np.int64)
+        np.cumsum(perTerm[:-1], out=cumStart[1:])
+        within = np.arange(2 * nPost, dtype=np.int64) - cumStart[termOfValue]
+        isGap = within < df[termOfValue]  # term 내 앞 df 개=gap, 뒤 df 개=tf
+        gaps = values[isGap]
+        termFreqs = values[~isGap].astype(np.int32)
+        # term 경계마다 첫 gap=절대 docId(reset) → 세그먼트 cumsum 으로 docIds 복원.
+        full = np.cumsum(gaps)
+        startIdx = offsets[:-1]
+        prevIdx = np.where(startIdx > 0, startIdx - 1, 0)
+        baseVals = np.where(startIdx > 0, full[prevIdx], 0)
+        docIds = (full - np.repeat(baseVals, df)).astype(np.int32)
+
+    metaPath = inDir / f"{name}_meta.parquet"
+    meta = pl.read_parquet(metaPath, columns=_segmentMetaColumns(metaPath, includeEvidenceText=includeEvidenceText))
+    idx = {
+        "stemDict": stemDict,
+        "offsets": offsets,
+        "docIds": docIds,
+        "termFreqs": termFreqs,
+        "docLengths": docLengths,
+        "avgDocLength": float(info["avgDocLength"]),
+        "nDocs": int(info["nDocs"]),
+    }
+    return idx, meta
+
+
 # meta.bin doc-카드에 담는 필드 (top-k snippet/회사점프용 — main_meta 의 부분집합, bounded).
 _SHARD_META_FIELDS = ("rcept_no", "corp_name", "stock_code", "report_nm", "rcept_dt", "source", "sourceRef", "url")
 _SHARD_SNIPPET_LIMIT = 400
@@ -558,6 +673,9 @@ def loadSegment(
         tuple[dict, pl.DataFrame] 또는 None — (인덱스, meta).
     """
     inDir = inDir or _contentIndexDir()
+    # 양읽기: STORED sidecar 가 있으면 그걸 SSOT 로(npz 불필요), 없으면 legacy npz fallback (전환기 호환).
+    if (inDir / f"{name}.postings.bin").exists():
+        return loadShardedSegment(name, inDir, includeEvidenceText=includeEvidenceText)
     npzPath = inDir / f"{name}.npz"
     if not npzPath.exists():
         return None
