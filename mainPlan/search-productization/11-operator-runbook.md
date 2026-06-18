@@ -74,13 +74,13 @@
 15. `searchQualityDrill.{delta,main}.json` 이 `valid=true` 인지 확인한다. 이 drill 은 query-log gold 도구 체인 smoke 이며 `releaseEvidence=false` 이므로 real query-log gold 를 대체하지 않는다.
 16. `searchPipelineDrill.{delta,main}.json` 이 `valid=true` 이고 `sourceManifestSet.id` 와 4개 source 가 기록됐는지 확인한다. 이 drill 은 raw source -> source catalog -> source manifest set -> contentIndex publish/activate/rollback 경로가 깨지지 않았다는 로컬 하한 증거이며, 실제 HF Actions round-trip 증거를 대체하지 않는다.
 
-2026-06-17 현재 실제 HF bootstrap/증분 병합 점검 기준:
+2026-06-18 현재 실제 HF bootstrap/증분 병합 점검 기준:
 
 - `dart/searchCatalog/{allFilings,dartPanel,edgarPanel,newsPublic}/` 는 source manifest/catalog snapshot 을 갖고 remote evidence audit 에서 `valid=true` 다.
 - source-owner 증분 병합 dry-run 은 실제 HF previous manifest/catalog 를 내려받아 allFilings 192,096 / DART panel 104,762 / EDGAR panel 84,294 / news 81,799 rows full snapshot 으로 valid 통과했다. 업로드 없이 부분 parquet 1행씩만 넣은 검증이므로, runner partial tree 문제의 제품 해법은 이전 HF full catalog merge 이다.
 - full current manifest 는 462,947 docs, lite current manifest 는 280,747 docs 다. full/lite 모두 staged candidate round-trip 과 promote 를 통과했다.
-- direct-review proof bundle 은 `opsReady=true`, `releaseReady=true`, blockers=[] 다. 품질팩은 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 coverage, `overallReadyRate=1.0`, `noAnswerFalseAcceptRate=0.0` 을 기록했다.
-- cutover evidence 는 `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json` 과 `searchCutover.json` 이며, `state=S4_DEFAULT_REPLACEMENT`, `defaultReplacement=true` 다. 새 Search Main/Delta Actions run 에서 같은 artifact 가 생성되는지는 다음 운영 확인 대상이다.
+- direct-review proof bundle 은 `opsReady=true`, `releaseReady=true`, blockers=[] 다. 최신 HF current 기준 품질팩은 106 real reviewed userLog rows, filing 54 / news 20 / EDGAR 20 / noAnswer 12 coverage, `overallReadyRate=0.9811`, `docHit10=0.9787`, `memoryCitationTop3Exact=0.9468`, `newsSourcePrecision10=1.0`, `noAnswerFalseAcceptRate=0.0` 을 기록했다.
+- cutover evidence 는 `data/dart/searchCatalog/searchProofBundle.directReview/searchReplacementEvidence.json` 과 `searchCutover.json` 이며, `state=S4_DEFAULT_REPLACEMENT`, `defaultReplacement=true` 다. 2026-06-18 `Search Index Delta` release dispatch `27734759585` 는 candidate full/lite round-trip, result contract, canary, real query-log quality, remote evidence, productization status, proof bundle, replacement evidence, cutover state 를 모두 success 로 통과했다. 월간 `Search Index Main` 은 다음 scheduled/dispatch run 에서 같은 artifact 를 재확인한다.
 - Search Main/Delta release gate 는 S4 를 hard fail 한다. replacement evidence 가 incomplete 이거나 cutover 가 `defaultReplacement=true` 를 만들지 못하면 workflow 는 red 여야 한다. ops gate 는 S2 운영 가능성까지만 강제한다.
 - lite 18개월 tier 는 326.3MB 로 경량 목표 300MB 를 넘었다. 월간 점검 때 12개월/상위 universe/metadata 압축을 별도 실험한다.
 - graph catalog 는 optional sidecar 다. 운영자가 `DARTLAB_SEARCH_ENTITY_GRAPH_CATALOG` 로 검증된 parquet 를 넘기거나 `DARTLAB_SEARCH_ENTITY_GRAPH_BUILD=1` 을 명시한 run 에서만 `entityGraphCatalog.parquet` 를 만든다. 이 파일이 current manifest required file 로 올라간 run 에서는 `searchRemoteEvidence` / `searchProductizationStatus` 의 `entityGraphCatalog.{tier}` summary 에 `fileSourceExists=true`, `nEntities>0`, `dataAsOf` 가 남는지 보고, `dartlab.search(...)` 결과의 `entityCards` smoke 를 추가로 확인한다. 없으면 검색 자체는 기존 result contract 로 판단한다.

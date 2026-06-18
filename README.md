@@ -471,11 +471,11 @@ publishReport("068270")    # 셀트리온 — 6막 기업이야기 자동 발간
 [셀트리온 이야기 보기](https://www.youtube.com/watch?v=d7RUQIlimVM) · [DartLab 30초 데모](https://www.youtube.com/shorts/97lYLWMWzvA) · [유튜브 채널](https://www.youtube.com/@eddmpython)
 </div>
 
-### Search — 공시를 의미로 검색 *(beta — 인덱스 신선도 한계)*
+### Search — 공시·뉴스를 의미로 검색
 
 > 설계: [engines.search](https://eddmpython.github.io/dartlab/skills)
 
-> ⚠ 현재 인덱스가 일정 시점까지만 빌드됨 (매일 증분 자동화 미완성). 단일 종목 공시 조회는 `Company.disclosure` / `Company.liveFilings` 권장. 인프라(CI cron + HF push) 구축 후 stable 승격 예정.
+HuggingFace current search artifact 를 자동 사용한다. `Search Index Delta` 와 `Data Prebuild` 가 source manifest 기준으로 증분 반영하며, source별 최신성은 결과의 `dataAsOf`/`sourceRef` 로 확인한다. 당일 미러 전 단일 종목 공시 확인은 `Company.disclosure` / `Company.liveFilings` 를 함께 사용한다.
 
 모델 없음, GPU 없음, cold start 없음. 400만 문서 95% 정밀도 — 임베딩보다 정확, 1/100 비용. 벤치마크 상세는 [methodology](https://eddmpython.github.io/dartlab/skills/operation.methodology) 참조.
 

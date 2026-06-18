@@ -478,6 +478,7 @@ search delta 는 이 source catalog 들을 직접 원천 데이터로 보지 않
 | pending | pending | catalog | pending | pending | pending | pending | 실제 scheduled/dispatch run 대기 |
 | 2026-06-16 | local prepareSearchDeltaInputs | catalog | none | 361,136-doc current catalog | 361,136 new / 0 changed / 0 deleted | local only | pass. current catalog 174.5MB, unique docKey 100%, dry-run 약 2.1초 |
 | 2026-06-18 KST | Search Index Delta scheduled run 27719942258 | catalog | HF current full/lite | lite current 292,568 docs | current publish | `dart/contentIndex/lite/manifest.json` staging `lite-27719942258` | completed/success. full source set allFilings/dartPanel/edgarPanel/newsPublic preserved, source manifest set producerRun complete, remote evidence valid. |
+| 2026-06-18 KST | Search Index Delta release dispatch 27734759585 | catalog | HF current full/lite | HF source catalog set | workflow-computed delta/no-change | `searchProofBundle.delta/**`, `searchCutover.delta.json` | completed/success on commit `7bc64b0c6`. Candidate round-trip, current lite no-change round-trip, result contract, canary, real query-log quality, remote evidence, release productization status, proof bundle, replacement evidence, cutover state all passed. |
 
 ### GitHub Actions Snapshot
 
@@ -497,6 +498,11 @@ search delta 는 이 source catalog 들을 직접 원천 데이터로 보지 않
 | 2026-06-18 KST | CI Full | 27728624435, push `929942475` | completed/success | Data Prebuild planner split head SHA. cross-os smoke, fixture integration, product-smoke-wheel, Python 3.12/3.13 full gates passed. |
 | 2026-06-18 KST | Data Prebuild (DART) | 27729224525, dispatch `929942475` | completed/success | new planning package path proved in Actions. `prebuild-scan` completed; `prebuild-full` skipped by full=false. |
 | 2026-06-18 KST | Search Index Delta | 27729224528, dispatch `929942475` | completed/success | release dispatch completed on same head. build-delta job passed with candidate verify/promote/status evidence uploaded by workflow. |
+| 2026-06-18 KST | Search Index Delta | 27734759585, dispatch `7bc64b0c6` | completed/success | latest release gate after no-change/canary ranking fix. build-delta passed full candidate round-trip, current lite no-change round-trip, result contract, canary passRate 1.0, real query-log quality, remote evidence, proof bundle, replacement evidence, cutover state. |
+| 2026-06-18 KST | Data Prebuild (DART) | 27734759598, dispatch `7bc64b0c6` | completed/success | latest DART scan prebuild dispatch green. `prebuild-scan` completed; `prebuild-full` skipped by full=false. |
+| 2026-06-18 KST | CI Fast | 27734740493, push `7bc64b0c6` | completed/success | latest search delta/no-change fix head. format, lint, typecheck, quality, fast tests, architecture, product smoke quick, wheel smoke passed. |
+| 2026-06-18 KST | CI Full | 27734740472, push `7bc64b0c6` | completed/success | latest search delta/no-change fix head. cross-os smoke, fixture integration, product-smoke-wheel, realdata suites, Python 3.12/3.13 full gates passed. |
+| 2026-06-18 KST | CodeQL | 27734740475, push `7bc64b0c6` | completed/success | latest search delta/no-change fix head security scan green. |
 
 ### Publish / Local Activation
 
