@@ -824,7 +824,8 @@
 		const gate = usesGate ? buildGateSeries(all.map((cd) => cd.t), gateRows ?? []) : null;
 		// 다전략(N≤3) + 동일가중 조합. look-ahead 차단은 displaySeries 절단이 N전략에 상속(01 §2.2).
 		// extendData 신참조가 재계산 트리거(CMP 식). 슬롯별 spec.code 공통(단일종목).
-		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, gate, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
+		const stop = ctl.btStop.lossPct || ctl.btStop.gainPct ? { ...ctl.btStop } : null; // 손절/익절(S2) — 빈값=미적용
+		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, gate, stop, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btPf = pf;
 		// 펀더게이트 배경 틴트 — 포커스 전략의 fundGate 조건(임계값)으로 활성 구간 산출(공시일 이후 PIT 계단).
 		let gateVis: { active: (0 | 1)[]; label: string } | null = null;

@@ -41,10 +41,15 @@ export interface BtTrade {
 	holdDays: number; // 거래일(봉) 수
 	open: boolean;
 	// 03 §0.5.4 — 청산 사유 명시(현 open:true 암묵 → 명시). signal=신호청산 / finalMark=미청산 종가 가상평가.
-	exitReason: 'signal' | 'finalMark';
+	exitReason: 'signal' | 'finalMark' | 'stop' | 'take'; // stop=손절·take=익절(당일 인트라바 가정, S2)
 	maePct?: number; // 최대역행(보유 중 worst 미실현 %, MAE) — 거래 분석(S2)
 	mfePct?: number; // 최대순행(보유 중 best 미실현 %, MFE)
 	entryDeferredBars: number; // v=0/거래정지로 진입이 이연된 봉 수(0=신호 다음 봉 즉시 체결, 감사용)
+}
+/** 손절/익절 설정(S2) — 보유 중 인트라바 트리거. null/빈값이면 미적용(회귀 0). t+1 시가 모델과 시점 충돌 → "당일 인트라바 가정" 라벨. */
+export interface BtStopConfig {
+	lossPct?: number; // 손절 % (진입가 대비 −, 예 8 = −8%에서 손절)
+	gainPct?: number; // 익절 % (진입가 대비 +)
 }
 export interface BtWarning {
 	kind: 'fewTrades' | 'shortRange' | 'splitSuspect' | 'costsOff';

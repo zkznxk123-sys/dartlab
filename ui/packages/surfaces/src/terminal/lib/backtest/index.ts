@@ -5,6 +5,7 @@ export type {
 	BtParamDef,
 	BtPresetDef,
 	BtCostsBp,
+	BtStopConfig,
 	BtTrade,
 	BtWarning,
 	BtMetrics,

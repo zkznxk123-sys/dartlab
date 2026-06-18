@@ -25,6 +25,12 @@
 		ctl.btCostsBp = { ...ctl.btCostsBp, [k.k]: next };
 	}
 	const costsDefault = $derived(ctl.btCostsBp.commissionBp === BT_COSTS.commissionBp && ctl.btCostsBp.sellTaxBp === BT_COSTS.sellTaxBp && ctl.btCostsBp.slippageBp === BT_COSTS.slippageBp);
+	// 손절/익절(S2) — 0~50%, 2%씩. 0=미적용(undefined). 전 슬롯 공유.
+	function stepStop(k: 'lossPct' | 'gainPct', dir: 1 | -1) {
+		const cur = ctl.btStop[k] ?? 0;
+		const next = Math.max(0, Math.min(50, cur + dir * 2));
+		ctl.btStop = { ...ctl.btStop, [k]: next === 0 ? undefined : next };
+	}
 
 	// 추가 메뉴 디스패치 — custom / rule:키 / preset:키
 	function addPick(v: string) {
@@ -190,6 +196,28 @@
 			{#if !costsDefault}<div class="ctRow"><button class="mItem" onclick={() => (ctl.btCostsBp = { ...BT_COSTS })}>{T('비용 기본값', 'reset')}</button></div>{/if}
 		{/if}
 	</div>
+
+	<!-- 손절/익절 (공유 · S2) — 0=미적용 -->
+	{#if ctl.btStrategies.length}
+		<div class="btSection">
+			<div class="ctMenuLbl">{T('손절·익절 (공유)', 'Stop / Take (shared)')}</div>
+			<div class="ctRow btParamRow">
+				<span class="btParamLbl">{T('손절', 'stop')}</span>
+				<button class="mItem" onclick={() => stepStop('lossPct', -1)}>−</button>
+				<b class="btParamVal mono">{ctl.btStop.lossPct != null ? '−' + ctl.btStop.lossPct : '—'}</b>
+				<span class="btParamLbl">%</span>
+				<button class="mItem" onclick={() => stepStop('lossPct', 1)}>+</button>
+			</div>
+			<div class="ctRow btParamRow">
+				<span class="btParamLbl">{T('익절', 'take')}</span>
+				<button class="mItem" onclick={() => stepStop('gainPct', -1)}>−</button>
+				<b class="btParamVal mono">{ctl.btStop.gainPct != null ? '+' + ctl.btStop.gainPct : '—'}</b>
+				<span class="btParamLbl">%</span>
+				<button class="mItem" onclick={() => stepStop('gainPct', 1)}>+</button>
+			</div>
+			{#if ctl.btStop.lossPct || ctl.btStop.gainPct}<div class="btDesc warn">{T('⚠ 당일 인트라바 가정 — t+1 시가 체결과 시점 충돌(보수: 손절 우선)', 'intraday assumption — conflicts with t+1 fill')}</div>{/if}
+		</div>
+	{/if}
 
 	<!-- ④ 검증(OOS) 공유 -->
 	{#if ctl.btStrategies.length}

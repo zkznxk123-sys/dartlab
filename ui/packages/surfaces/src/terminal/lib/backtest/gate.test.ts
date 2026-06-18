@@ -70,6 +70,22 @@ describe('fundGate 조건 — 재무 게이트 진입 차단', () => {
 		expect(tr.mfePct).toBeCloseTo(30, 5); // 고가 130 / 진입 100 − 1
 	});
 
+	it('손절: 인트라바 stopPx 트리거 → exitReason stop · retPct=−손절% (S2)', () => {
+		const cs: Candle[] = Array.from({ length: 8 }, (_, i) => ({ t: `2021${String(i + 1).padStart(4, '0')}`, o: 100, h: 100, l: 100, c: 100, v: 1000 }));
+		cs[3] = { ...cs[3], l: 85 }; // 봉3 저가 85 → 손절 10%(stopPx 90) 인트라바 트리거
+		const rule: StrategyRule = {
+			entry: [{ left: 'price', leftParams: {}, op: '>', right: { kind: 'const', value: 0 } }],
+			entryCombine: 'AND',
+			exit: [],
+			exitCombine: 'OR'
+		};
+		const res = runBacktestRule(cs, rule, { windowBars: 8, withCosts: false, costsBp: { commissionBp: 0, sellTaxBp: 0, slippageBp: 0 }, stop: { lossPct: 10 } });
+		expect(res).not.toBeNull();
+		const stopTrade = res!.trades.find((t) => t.exitReason === 'stop');
+		expect(stopTrade).toBeTruthy();
+		expect(stopTrade!.retPct).toBeCloseTo(-10, 5); // stopPx 90 / 진입 100 − 1
+	});
+
 	it('runBacktestRule: gate 없으면 fundGate 조건=항상 0(진입 0, 회귀 안전)', () => {
 		const cs = mkCandles(40);
 		const rule: StrategyRule = {

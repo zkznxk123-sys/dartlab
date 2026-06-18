@@ -4,7 +4,7 @@
 import { BT_PRESETS } from './presets';
 import { evalRule, ruleWarmup, type StrategyRule } from './conditions';
 import { BT_COSTS, BT_ENGINE_VERSION } from './types';
-import type { BtCostsBp, BtPresetKey, BtResult, BtRunSpec, BtSplitMetrics, BtSpecInput, BtTrade, BtWarning, Candle } from './types';
+import type { BtCostsBp, BtStopConfig, BtPresetKey, BtResult, BtRunSpec, BtSplitMetrics, BtSpecInput, BtTrade, BtWarning, Candle } from './types';
 
 interface Costs {
 	comm: number;
@@ -22,7 +22,7 @@ interface PassOut {
 }
 
 // 단일 패스 — target[i-1] 을 i 봉 시가에 적용 (1봉 shift). 4,000봉 < 1ms.
-function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Costs): PassOut {
+function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Costs, stop: BtStopConfig | null = null): PassOut {
 	const n = candles.length;
 	const equity: (number | null)[] = new Array(n).fill(null);
 	const trades: BtTrade[] = [];
@@ -36,6 +36,8 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 	let deferredBars = 0;
 	let maePct = 0;
 	let mfePct = 0;
+	let stopPx: number | null = null;
+	let takePx: number | null = null;
 	equity[startIdx] = 100;
 	for (let i = startIdx + 1; i < n; i++) {
 		const b = candles[i];
@@ -52,6 +54,8 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 					entryIdx = i;
 					maePct = 0;
 					mfePct = 0;
+					stopPx = stop?.lossPct ? entryPx * (1 - stop.lossPct / 100) : null;
+					takePx = stop?.gainPct ? entryPx * (1 + stop.gainPct / 100) : null;
 				} else {
 					const px = b.o * (1 - k.slip);
 					const exitPx = px * (1 - k.comm - k.tax);
@@ -75,6 +79,16 @@ function runPass(candles: Candle[], target: Int8Array, startIdx: number, k: Cost
 			} else {
 				deferredBars++; // 신호 변경을 원했으나 거래정지(v=0/o=0) — 다음 거래가능 봉까지 이연(감사)
 			}
+		}
+		// 손절/익절 인트라바(gated) — 신호청산 후 보유 중이면 당일 트리거(보수: 손절 우선). t+1 모델과 시점 충돌=라벨.
+		if (pos === 1 && stopPx != null && b.l <= stopPx) {
+			const exitPx = stopPx * (1 - k.slip) * (1 - k.comm - k.tax);
+			cash = shares * exitPx; shares = 0; pos = 0;
+			trades.push({ entryT: candles[entryIdx].t, exitT: b.t, entryPx, exitPx, retPct: (cash / entryCash - 1) * 100, holdDays: i - entryIdx, open: false, exitReason: 'stop', entryDeferredBars: 0, maePct, mfePct });
+		} else if (pos === 1 && takePx != null && b.h >= takePx) {
+			const exitPx = takePx * (1 - k.slip) * (1 - k.comm - k.tax);
+			cash = shares * exitPx; shares = 0; pos = 0;
+			trades.push({ entryT: candles[entryIdx].t, exitT: b.t, entryPx, exitPx, retPct: (cash / entryCash - 1) * 100, holdDays: i - entryIdx, open: false, exitReason: 'take', entryDeferredBars: 0, maePct, mfePct });
 		}
 		if (pos === 1) {
 			heldBars++;
@@ -274,7 +288,7 @@ function computeOos(
 
 /** 백테스트 실행 — 전략(선택 비용)·전략(비용 OFF, 비용드래그용)·B&H(동일 비용) 3패스. null = candles 부족. */
 interface StrategyForSpec { id: BtPresetKey | 'custom'; params: Record<string, number> }
-type BtOpts = { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput; oosSplit?: number };
+type BtOpts = { windowBars: number; withCosts: boolean; costsBp?: BtCostsBp; spec?: BtSpecInput; oosSplit?: number; stop?: BtStopConfig | null };
 
 /** 6 레거시 프리셋(종가 신호) 경로 — 기존 계약 무변경. */
 export function runBacktest(candles: Candle[], preset: BtPresetKey, params: Record<string, number>, opts: BtOpts): BtResult | null {
@@ -304,9 +318,9 @@ function runBacktestCore(candles: Candle[], target: Int8Array, opts: BtOpts, spe
 	const full = toCosts(opts.costsBp);
 	const costs = opts.withCosts ? full : ZERO_COSTS;
 
-	const strat = runPass(candles, target, startIdx, costs);
-	const stratOn = opts.withCosts ? strat : runPass(candles, target, startIdx, full);
-	const stratOff = opts.withCosts ? runPass(candles, target, startIdx, ZERO_COSTS) : strat;
+	const strat = runPass(candles, target, startIdx, costs, opts.stop ?? null);
+	const stratOn = opts.withCosts ? strat : runPass(candles, target, startIdx, full, opts.stop ?? null);
+	const stratOff = opts.withCosts ? runPass(candles, target, startIdx, ZERO_COSTS, opts.stop ?? null) : strat;
 	const hold = new Int8Array(n).fill(1);
 	const bhPass = runPass(candles, hold, startIdx, costs);
 

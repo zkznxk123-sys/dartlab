@@ -8,7 +8,7 @@
 //   UI 에서 명시적 "—". equity 메트릭(수익·MDD·Sharpe·Calmar·vs B&H)만 산출.
 import { benchmarkStats, cagr, endRet, mdd, mddWindowOf, riskRatios, runBacktest, runBacktestRule } from './engine';
 import type { StrategyRule } from './conditions';
-import type { BtCostsBp, BtPresetKey, BtResult, BtSpecInput, Candle } from './types';
+import type { BtCostsBp, BtStopConfig, BtPresetKey, BtResult, BtSpecInput, Candle } from './types';
 
 export interface StrategySlot {
 	id: string;
@@ -63,6 +63,7 @@ export function runPortfolioBacktest(
 		spec?: BtSpecInput;
 		oosSplit?: number;
 		gate?: (number | null)[] | null; // 펀더게이트 PIT 시계열 — rule 슬롯의 fundGate 조건 소비(W2). 전 슬롯 공유(같은 종목).
+		stop?: BtStopConfig | null; // 손절/익절(S2) — 전 슬롯 공유(opts 통과로 runBacktest 가 소비).
 	}
 ): PortfolioBtResult {
 	const computed = slots

@@ -2,7 +2,7 @@
 // ChartRibbon(전체화면)이 같은 인스턴스를 공유한다 — 상태 중복 0. 차트 인스턴스 명령(드로잉 생성 등)은
 // 상태가 아니므로 콜백으로 — "상태에 요청 넣고 effect 소비" 안티패턴 금지.
 const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
-import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp, type StrategySlot, type StrategyRule, type RulePreset } from '../lib/backtest';
+import { BT_PRESETS, BT_COSTS, type BtPresetKey, type BtPresetDef, type BtParamDef, type BtCostsBp, type BtStopConfig, type StrategySlot, type StrategyRule, type RulePreset } from '../lib/backtest';
 import { STRAT_COLORS } from './btLayer';
 import { IND_DEFS } from './indicatorParams';
 import { EVENT_CAT_KEYS } from '../lib/eventRail';
@@ -114,6 +114,7 @@ export class ChartCtl {
 	btCosts = $state(true);
 	btCostsBp = $state<BtCostsBp>({ ...BT_COSTS });
 	btOosSplit = $state<number>(0); // OOS 학습/검증 분할 비율 (0=없음, 0.7=70:30, 0.6=60:40). 세션 한정.
+	btStop = $state<BtStopConfig>({}); // 손절/익절 %(S2) — 전 슬롯 공유. 빈값=미적용(회귀 0). "당일 인트라바 가정" 라벨.
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀

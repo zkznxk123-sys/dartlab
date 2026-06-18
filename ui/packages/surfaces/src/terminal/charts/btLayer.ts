@@ -237,8 +237,8 @@ export function buildBtExtend(
 		const trades: BtStrategyVis['trades'] = [];
 		for (const tr of result.trades) {
 			trades.push({ ts: toMs(tr.entryT), side: 'B', px: tr.entryPx, stop: false });
-			// exitReason='stop' 은 P2(손절) 도입 후 — 현재는 signal/finalMark 뿐이라 stop=false.
-			if (tr.exitT && tr.exitPx != null) trades.push({ ts: toMs(tr.exitT), side: 'S', px: tr.exitPx, stop: false });
+			// 손절 청산(exitReason='stop')은 빨강 마커로 구분(S2). take/signal/finalMark 는 전략색.
+			if (tr.exitT && tr.exitPx != null) trades.push({ ts: toMs(tr.exitT), side: 'S', px: tr.exitPx, stop: tr.exitReason === 'stop' });
 		}
 		return { id, color: meta?.color ?? STRAT_COLORS[si % STRAT_COLORS.length], label: meta?.label ?? `전략${si + 1}`, equity: result.equity, trades };
 	});
