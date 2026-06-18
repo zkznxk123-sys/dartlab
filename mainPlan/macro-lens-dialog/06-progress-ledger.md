@@ -1,10 +1,40 @@
 # 06. 진행 원장
 
-상태: v0.9
+상태: v1.1
 
 ---
 
 ## 2026-06-18
+
+### v1.1 — 매크로 대시보드 시각화 방식 재조사 보강
+
+배경:
+
+- 운영자가 "매크로 분석에 쓰이는 대시보드 시각화를 조사해라. 방식들"을 다시 요청했다.
+- 이전 문서는 방향은 맞았지만, "판정형"으로 오해될 수 있는 지점과 실제 화면 문법의 실패 신호가 부족했다.
+
+완료:
+
+- [08-dashboard-visual-patterns.md](08-dashboard-visual-patterns.md)를 v0.5로 갱신했다.
+- FRED, OECD, ECB, IMF, Atlanta Fed GDPNow, Chicago Fed NFCI, NY Fed GSCPI, OFR FSVM, BIS Credit-to-GDP gaps, World Bank DataBank 사례를 다시 확인했다.
+- 공식 사례에서 반복되는 규칙을 별도 표로 뽑았다.
+  - 최신값은 단독으로 두지 않는다.
+  - 국면 음영에는 기준 주체가 필요하다.
+  - 복합지수는 구성요소 기여도 없이 headline으로 쓰지 않는다.
+  - heatmap은 결론이 아니라 추가 조사 신호다.
+  - metadata/source/frequency/coverage는 차트와 같은 레벨이다.
+- `OBS/PRIOR/TPL/LOCK/OPEN/QUAL/STALE/MISSING` 상태가 누가 만드는지 명시했다. 사람, AI, UI 문구가 아니라 `macro.transmission`, `macroExposure.exposureQuality`, source lineage, freshness policy가 만든다.
+- `대시보드 문법`을 추가해 Phase Strip, Driver Pulse, Exposure Matrix, Evidence Gate, Release Rail, Drilldown Packet, Contribution/Scatter의 읽을 것과 실패 신호를 정리했다.
+- [README.md](README.md)에 "시각화는 판정을 만들지 않는다"는 상위 결정으로 반영했다.
+
+검증:
+
+- 문서 변경만 수행했다. 코드·데이터 산출물 변경 없음.
+
+NEXT:
+
+1. UI에서 `Release Rail`과 `Contribution/Scatter`가 아직 P1이므로, 구현 시 첫 화면이 아니라 matrix 셀 클릭 상세 아래에만 붙인다.
+2. heatmap, map, fan chart는 데이터 계약이 열릴 때까지 계속 P2/금지로 둔다.
 
 ### v1.0 — Matrix drilldown evidence packet
 
