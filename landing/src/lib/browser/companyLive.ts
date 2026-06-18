@@ -1,4 +1,5 @@
-import { loadDartDb, sqlEscape } from '$lib/data/duckdb';
+import { loadDartDb } from '$lib/data/duckdb';
+import { createDataCore, type DataCore } from '@dartlab/ui-runtime/data/fetch/request';
 import { loadHfJson, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import { loadHfValuationFor, type ValuationRuntimeMetrics } from '$lib/data/valuationRuntime';
 import { loadCompanyChanges, type CompanyChange } from '@dartlab/ui-surfaces/scan';
@@ -263,69 +264,53 @@ export async function loadLiveCompanyChanges(stockCode: string, limit = 8): Prom
 	return await loadChangesForCompany(stockCode, limit);
 }
 
+// 정기보고서 팩트 — hyparquet 직독(reportSource 와 동일 빠른 경로, 60분 read 캐시).
+// ⛔ DuckDB-WASM 경유 폐기: 단일 워커 직렬 큐에 6개 전시장 parquet 등록+스캔이 묶여 첫 표시가
+//   수십 초로 멈추던 회귀(인력·주주환원 패널은 이미 hyparquet 이관, 본 패널만 잔류했었다).
+//   origin='hfRange' 는 표기용 — URL 은 hfRangeUrl 이 자동 해석(HF_RESOLVE). core 미주입이라 모듈 1회 생성.
+const REPORT_FACTS_TTL = 3_600_000;
+let _reportFactsCore: DataCore | null = null;
+function reportFactsCore(): DataCore {
+	return (_reportFactsCore ??= createDataCore());
+}
+
+// 4자리 달력연도만 인식 — auditOpinion 등은 year 가 '제58기 1분기' 기수 라벨이라
+// 단순 숫자추출(→581)은 오정렬. 기수만 있으면 -1 로 후순위(DuckDB NULLS LAST 대체).
+const factYear = (r: any): number => {
+	const m = String(r?.year ?? '').match(/(?:19|20)\d{2}/);
+	return m ? Number(m[0]) : -1;
+};
+
+// 최신 연도 우선 정렬(DuckDB ORDER BY TRY_CAST(year) DESC 대체). stockCode 컬럼 필요(filter 기준).
+async function readReportFactRows(path: string, code: string, columns: string[]): Promise<any[]> {
+	const rows = await reportFactsCore().requestParquetRows<Record<string, unknown>>({
+		origin: 'hfRange',
+		path: `dart/scan/report/${path}.parquet`,
+		columns: ['stockCode', 'year', ...columns],
+		filter: { stockCode: { $eq: code } },
+		cacheKey: `reportFacts.${path}:${code}`,
+		cache: { scope: 'memory', ttlMs: REPORT_FACTS_TTL, maxEntries: 256 }
+	});
+	return rows.slice().sort((a, b) => factYear(b) - factYear(a));
+}
+
 export async function loadLiveCompanyReportFacts(stockCode: string): Promise<LiveCompanyReportFact[]> {
 	try {
-		const db = await loadDartDb();
-		if (!db) return [];
-		await Promise.all([
-			db.registerHfParquet('reportDividend', 'dart/scan/report/dividend.parquet'),
-			db.registerHfParquet('reportTreasuryStock', 'dart/scan/report/treasuryStock.parquet'),
-			db.registerHfParquet('reportExecutive', 'dart/scan/report/executive.parquet'),
-			db.registerHfParquet('reportAuditOpinion', 'dart/scan/report/auditOpinion.parquet'),
-			db.registerHfParquet('reportMajorHolder', 'dart/scan/report/majorHolder.parquet'),
-			db.registerHfParquet('reportCorporateBond', 'dart/scan/report/corporateBond.parquet')
-		]);
-		const safeCode = sqlEscape(stockCode);
 		const [dividend, treasury, executive, audit, holder, bond] = await Promise.all([
-			db.query<any>(`
-				SELECT year, stlm_dt, se, thstrm, frmtrm, lwfr
-				FROM reportDividend
-				WHERE stockCode = '${safeCode}'
-				ORDER BY TRY_CAST(year AS INTEGER) DESC NULLS LAST
-				LIMIT 1
-			`),
-			db.query<any>(`
-				SELECT year, stock_knd, trmend_qy, change_qy_acqs, change_qy_dsps
-				FROM reportTreasuryStock
-				WHERE stockCode = '${safeCode}'
-				ORDER BY TRY_CAST(year AS INTEGER) DESC NULLS LAST
-				LIMIT 1
-			`),
-			db.query<any>(`
-				SELECT year, nm, ofcps, chrg_job
-				FROM reportExecutive
-				WHERE stockCode = '${safeCode}'
-				  AND nm IS NOT NULL
-				ORDER BY TRY_CAST(year AS INTEGER) DESC NULLS LAST
-				LIMIT 3
-			`),
-			db.query<any>(`
-				SELECT year, adtor, adt_opinion, emphs_matter, core_adt_matter
-				FROM reportAuditOpinion
-				WHERE stockCode = '${safeCode}'
-				ORDER BY TRY_CAST(year AS INTEGER) DESC NULLS LAST
-				LIMIT 1
-			`),
-			db.query<any>(`
-				SELECT year, mxmm_shrholdr_nm, posesn_stock_co, qota_rt, change_cause
-				FROM reportMajorHolder
-				WHERE stockCode = '${safeCode}'
-				ORDER BY TRY_CAST(year AS INTEGER) DESC NULLS LAST
-				LIMIT 1
-			`),
-			db.query<any>(`
-				SELECT year, scrits_knd_nm, isu_de, facvalu_totamt, intrt, evl_grad_instt
-				FROM reportCorporateBond
-				WHERE stockCode = '${safeCode}'
-				ORDER BY TRY_CAST(year AS INTEGER) DESC NULLS LAST
-				LIMIT 1
-			`)
+			readReportFactRows('dividend', stockCode, ['stlm_dt', 'se', 'thstrm', 'frmtrm', 'lwfr']),
+			readReportFactRows('treasuryStock', stockCode, ['stock_knd', 'trmend_qy', 'change_qy_acqs', 'change_qy_dsps']),
+			readReportFactRows('executive', stockCode, ['nm', 'ofcps', 'chrg_job']),
+			readReportFactRows('auditOpinion', stockCode, ['adtor', 'adt_opinion', 'emphs_matter', 'core_adt_matter']),
+			readReportFactRows('majorHolder', stockCode, ['mxmm_shrholdr_nm', 'posesn_stock_co', 'qota_rt', 'change_cause']),
+			readReportFactRows('corporateBond', stockCode, ['scrits_knd_nm', 'isu_de', 'facvalu_totamt', 'intrt', 'evl_grad_instt'])
 		]);
-
+		// 임원: 최신 연도의 이름 있는 행 최대 3 (DuckDB nm IS NOT NULL ... LIMIT 3 대체).
+		const execTopYear = executive.length ? factYear(executive[0]) : -1;
+		const execRows = executive.filter((r) => factYear(r) === execTopYear && r.nm != null).slice(0, 3);
 		return [
 			toDividendFact(dividend[0]),
 			toTreasuryFact(treasury[0]),
-			toExecutiveFact(executive),
+			toExecutiveFact(execRows),
 			toAuditFact(audit[0]),
 			toMajorHolderFact(holder[0]),
 			toCorporateBondFact(bond[0])
