@@ -41,16 +41,54 @@
     return { sections, focusQuestions: activeRt.focusQuestions ?? [], missing };
   });
 
-  // 표지 인트로 — 실제 존재하는 섹션 제목으로 동적 구성(억지 단정 없음)
+  // 한글 받침 판정 조사 선택 (을/를) — 폼필러 "을(를)" 노출 방지
+  function josaEul(word: string): string {
+    const last = String(word ?? '').slice(-1);
+    const c = last.charCodeAt(0);
+    if (c >= 0xac00 && c <= 0xd7a3) return (c - 0xac00) % 28 !== 0 ? '을' : '를';
+    return '를'; // 비한글(숫자·영문)은 '를'로 통일
+  }
+
+  // 표지 인트로 — 섹션 도메인(질문 부제 제외)으로 동적 구성, 상위 4개+축약
   const introLine = $derived.by(() => {
-    const titles = view.sections.map((s: Sec) => s.title).filter(Boolean);
-    const domains = titles.length ? titles.join(' · ') : '재무 분석';
-    return `${domains}을(를) 종합한 dartlab 기업분석 리포트입니다. 모든 수치는 공시 확정 데이터 기준이며, 각 섹션에 계산 출처 엔진을 표기했습니다.`;
+    const heads = view.sections.map((s: Sec) => splitTitle(s.title).head).filter(Boolean);
+    let domains: string;
+    if (!heads.length) domains = '재무 분석';
+    else if (heads.length <= 4) domains = heads.join(' · ');
+    else domains = heads.slice(0, 4).join(' · ') + ` 외 ${heads.length - 4}개 영역`;
+    return `${domains}${josaEul(domains)} 종합한 dartlab 기업분석 리포트입니다. 모든 수치는 공시 확정 데이터 기준이며, 각 섹션에 계산 출처 엔진을 표기했습니다.`;
   });
+
+  // 렌더 가드 — 마크다운 별표 잔재 스트립 (bake 회귀 시 화면 노출 방지)
+  function clean(t: any): string {
+    return String(t ?? '').replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*\*/g, '');
+  }
 
   const engineLabel: Record<string, string> = {
     analysis: '재무분석', credit: '신용평가', quant: '시장·기술', industry: '산업비교', macro: '거시', story: '종합서사'
   };
+
+  // 관점 라벨 정화 — 엔진 내부 어휘("막") 화면 노출 제거
+  const labelOverride: Record<string, string> = { full: '전체' };
+  function ptLabel(rt: any): string {
+    return labelOverride[rt.key] ?? String(rt.label ?? '').replace(/\s*\d+막/g, '').trim();
+  }
+
+  // 핵심 발견의 출처가 전부 동일 엔진이면 출처 컬럼 생략 (반복 컬럼 제거)
+  const kfUniformEngine = $derived.by<string | null>(() => {
+    const kf = report?.keyFindings ?? [];
+    if (!kf.length) return null;
+    const engines = new Set<string>(kf.map((x: any) => String(x.sourceEngine)));
+    return engines.size === 1 ? [...engines][0] : null;
+  });
+
+  // 모든 섹션이 동일 엔진이면 섹션 헤더 배지 억제(반복 도배 제거) — 출처는 근거·출처 1회
+  const secUniformEngine = $derived.by<string | null>(() => {
+    const secs: Sec[] = view.sections;
+    if (!secs.length) return null;
+    const engs = new Set<string>(secs.map((s: Sec) => String(s.sourceEngine)));
+    return engs.size === 1 ? [...engs][0] : null;
+  });
 
   function presentCount(rt: any): number {
     if (!report) return 0;
@@ -69,14 +107,19 @@
     return '';
   }
 
-  // 시계열 행 → 스파크라인 (시간순) + 추세색 + 0-baseline + 최신값 endpoint dot
+  // 시계열 행 → 스파크라인. (연도, 값) 쌍을 연도 오름차순 정렬 → 표마다 다른 컬럼 순서
+  // (신구순/구신순 혼재)와 무관하게 항상 시간순(왼=과거·오른=최신)으로 그리고 추세색 판정.
   function spark(row: any, yearCols: string[]) {
-    const nums: number[] = [];
-    for (let i = yearCols.length - 1; i >= 0; i--) {
-      const raw = String(row[yearCols[i]] ?? '').replace(/[^0-9.\-]/g, '');
+    const pairs: { yr: number; n: number }[] = [];
+    for (const yk of yearCols) {
+      const yr = parseInt(yk, 10);
+      if (!Number.isFinite(yr)) continue;
+      const raw = String(row[yk] ?? '').replace(/[^0-9.\-]/g, '');
       const n = parseFloat(raw);
-      nums.push(Number.isFinite(n) ? n : NaN);
+      pairs.push({ yr, n: Number.isFinite(n) ? n : NaN });
     }
+    pairs.sort((a, b) => a.yr - b.yr);
+    const nums: number[] = pairs.map((p) => p.n);
     const valid = nums.filter((n) => Number.isFinite(n));
     if (valid.length < 3) return null;
     let min = Math.min(...valid);
@@ -92,7 +135,8 @@
     const zeroY = min < 0 && max > 0 ? (h - ((0 - min) / range) * h).toFixed(1) : null;
     const first = valid[0];
     const lastV = valid[valid.length - 1];
-    const tone = lastV > first * 1.001 ? 'up' : lastV < first * 0.999 ? 'down' : 'flat';
+    // 부호 의미 계열(음수 포함)은 추세색이 셀 부호색과 충돌(빨간 숫자+초록 선) → 중립 단색
+    const tone = hasNeg ? 'flat' : lastV > first * 1.001 ? 'up' : lastV < first * 0.999 ? 'down' : 'flat';
     return { points, tone, zeroY, lastX: last.x.toFixed(1), lastY: last.y.toFixed(1) };
   }
 
@@ -150,14 +194,15 @@
     <article class="sheet">
       <!-- ── 표지 / 제목 블록 ── -->
       <header class="cover">
-        <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> dartlab</div>
+        <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> DARTLAB</div>
         <h1 class="coverTitle">{report.corpName}<span class="code">{report.stockCode}</span></h1>
-        <div class="coverMeta">
-          {#if report.template}<span>{report.template}</span><span class="dot">·</span>{/if}
-          <span>기준 {report.bakedAt}</span>
-          <span class="dot">·</span><span>작성 dartlab 분석엔진</span>
-          {#if report.meta?.qualityLabel === 'conditional'}<span class="dot">·</span><span class="condBadge">조건부</span>{/if}
-        </div>
+        <dl class="coverFacts">
+          {#if report.template}<div class="fact"><dt>기업유형</dt><dd>{report.template}</dd></div>{/if}
+          <div class="fact"><dt>기준일</dt><dd>{report.bakedAt}</dd></div>
+          <div class="fact"><dt>작성</dt><dd>dartlab 분석엔진</dd></div>
+          <div class="fact"><dt>분석범위</dt><dd>{view.sections.length}개 섹션 · 최대 8개년</dd></div>
+          {#if report.meta?.qualityLabel === 'conditional'}<div class="fact"><dt>등급</dt><dd><span class="condBadge">조건부</span></dd></div>{/if}
+        </dl>
         <p class="coverIntro">{introLine}</p>
       </header>
 
@@ -168,7 +213,7 @@
           <button class="tab" class:on={rt.key === activeType} class:thin={presentCount(rt) < 3}
             onclick={() => (activeType = rt.key)}
             title={presentCount(rt) < 3 ? `${rt.description} — 데이터 제한(${presentCount(rt)}섹션)` : rt.description}>
-            {rt.label}{#if presentCount(rt) < 3}<span class="thinMark">·제한</span>{/if}
+            {ptLabel(rt)}{#if presentCount(rt) < 3}<span class="thinMark">·제한</span>{/if}
           </button>
         {/each}
       </div>
@@ -181,13 +226,13 @@
       <!-- ── 핵심 요약 ── -->
       <section class="block summary">
         <h2 class="blockTitle">핵심 요약</h2>
-        <div class="conclusion">{report.summaryCard?.conclusion}</div>
+        <div class="conclusion">{clean(report.summaryCard?.conclusion)}</div>
         {#if report.headlineKpis?.length}
           <div class="kpiBand">
             {#each report.headlineKpis as k}<div class="kpi"><span class="kLabel">{k.label}</span><span class="kVal {cellTone(k.value)}">{k.value}</span></div>{/each}
           </div>
         {/if}
-        {#if report.narrativeOverview}<p class="overview">{report.narrativeOverview}</p>{/if}
+        {#if report.narrativeOverview}<p class="overview">{clean(report.narrativeOverview)}</p>{/if}
         <div class="gradeChips">
           {#each Object.entries(report.summaryCard?.grades ?? {}) as [area, grade]}
             <span class="chip grade g{grade}">{area} <b>{grade}</b></span>
@@ -200,9 +245,13 @@
 
       {#if report.keyFindings?.length}
         <section class="block keyFindings">
-          <h2 class="blockTitle">핵심 발견 <span class="subNote">엔진 측정값 자동 추출</span></h2>
+          <h2 class="blockTitle">핵심 발견 <span class="subNote">엔진 측정값 자동 추출{#if kfUniformEngine} · 출처 {engineLabel[kfUniformEngine] ?? kfUniformEngine}{/if}</span></h2>
           {#each report.keyFindings as kf}
-            <div class="kfRow"><span class="chip kfTag">{kf.key}</span><span class="kfText">{kf.finding}</span><span class="kfSrc">{engineLabel[kf.sourceEngine] ?? kf.sourceEngine}</span></div>
+            <div class="kfRow" class:noSrc={kfUniformEngine}>
+              <span class="chip kfTag">{kf.key}</span>
+              <span class="kfText">{clean(kf.finding)}</span>
+              {#if !kfUniformEngine}<span class="kfSrc">{engineLabel[kf.sourceEngine] ?? kf.sourceEngine}</span>{/if}
+            </div>
           {/each}
         </section>
       {/if}
@@ -234,13 +283,13 @@
                 <h2 class="secTitle">{t.head}</h2>
                 {#if t.sub}<div class="secSub">{t.sub}</div>{/if}
               </div>
-              <span class="chip srcBadge src-{sec.sourceEngine}">{engineLabel[sec.sourceEngine] ?? sec.sourceEngine}</span>
+              {#if !secUniformEngine}<span class="chip srcBadge src-{sec.sourceEngine}">{engineLabel[sec.sourceEngine] ?? sec.sourceEngine}</span>{/if}
             </div>
             {#each sec.blocks as b}
               {#if b.type === 'heading'}
                 <h3 class="bHeading">{b.title}</h3>
               {:else if b.type === 'text'}
-                <p class="bText">{b.text}</p>
+                <p class="bText">{clean(b.text)}</p>
               {:else if b.type === 'metrics'}
                 <div class="bMetrics">{#each b.metrics as m}<div class="metric"><span class="mLabel">{m.label}</span><span class="mValue {cellTone(m.value)}">{m.value}</span></div>{/each}</div>
               {:else if b.type === 'table' && b.data?.length}
@@ -270,7 +319,7 @@
 
       <!-- ── 근거·출처 ── -->
       <section class="block evidenceStrip">
-        <h2 class="blockTitle">근거·출처 <span class="subNote">이 보고서를 계산한 dartlab 엔진</span></h2>
+        <h2 class="blockTitle">근거·출처 <span class="subNote">{#if secUniformEngine}모든 섹션 = {engineLabel[secUniformEngine] ?? secUniformEngine} 엔진 산출{:else}이 보고서를 계산한 dartlab 엔진{/if}</span></h2>
         <div class="evEngines">
           {#each Object.entries(report.provenanceFrame?.engines ?? {}) as [eng, info]}
             <div class="evEngine"><span class="evDot"></span><span class="evLabel">{(info as any).label ?? engineLabel[eng] ?? eng}</span><span class="evMeta">{(info as any).sections}섹션 · {(info as any).blocks}블록</span></div>
@@ -314,8 +363,8 @@
 
   /* ── 다크 용지 테마 (참조 보고서 색조: 청 #5C97FF · 녹 #2BC583 · 자 #9385FF) ── */
   .rptRoot.dark {
-    --backdrop: #0a0c10; --sheet: #14181f; --ink: #e8eef5; --dim: #8b949e;
-    --bd: rgba(255, 255, 255, 0.09); --bd2: rgba(255, 255, 255, 0.16); --soft: #1b212b;
+    --backdrop: #0a0c10; --sheet: #161b24; --ink: #e8eef5; --dim: #8b949e;
+    --bd: rgba(255, 255, 255, 0.10); --bd2: rgba(255, 255, 255, 0.18); --soft: #222a36;
     --accent: #5c97ff; --up: #2bc583; --down: #f85149; --warn: #d29922; --emph: #5c97ff;
     --e-analysis: #5c97ff; --e-credit: #f85149; --e-quant: #56d4dd; --e-industry: #2bc583; --e-macro: #d29922; --e-story: #9385ff;
   }
@@ -342,15 +391,17 @@
   .skip h1 { font-size: 22px; } .skipReason { font-family: var(--mono); color: var(--warn); }
 
   /* ── 표지 ── */
-  .cover { border-bottom: 2px solid var(--ink); padding-bottom: 20px; margin-bottom: 24px; }
-  .coverKicker { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .cover { border-bottom: 2px solid var(--ink); padding: 8px 0 22px; margin-bottom: 26px; }
+  .coverKicker { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
   .coverKicker .kSep { opacity: 0.4; margin: 0 4px; }
-  .coverTitle { font-size: 34px; font-weight: 800; letter-spacing: -0.025em; margin: 0 0 10px; line-height: 1.12; }
+  .coverTitle { font-size: 36px; font-weight: 800; letter-spacing: -0.025em; margin: 0 0 18px; line-height: 1.1; }
   .coverTitle .code { font-family: var(--mono); font-size: 16px; color: var(--dim); font-weight: 500; margin-left: 11px; letter-spacing: 0; }
-  .coverMeta { font-size: 12.5px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
-  .coverMeta .dot { opacity: 0.4; }
+  .coverFacts { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 0; }
+  .coverFacts .fact { display: flex; flex-direction: column; gap: 2px; }
+  .coverFacts dt { font-size: 10px; color: var(--dim); letter-spacing: 0.05em; text-transform: uppercase; }
+  .coverFacts dd { font-size: 13px; font-weight: 600; margin: 0; }
   .condBadge { color: var(--warn); border: 1px solid var(--warn); border-radius: 4px; padding: 0 6px; font-size: 11px; }
-  .coverIntro { font-size: 13px; line-height: 1.75; color: var(--dim); margin: 14px 0 0; max-width: 64ch; }
+  .coverIntro { font-size: 13px; line-height: 1.75; color: var(--dim); margin: 18px 0 0; max-width: 66ch; }
 
   /* ── 칩 프리미티브 ── */
   .chip { font-size: 11.5px; border-radius: 6px; padding: 3px 9px; border: 1px solid var(--bd2); color: var(--ink); white-space: nowrap; }
@@ -381,9 +432,9 @@
 
   /* ── 핵심 요약 ── */
   .conclusion { font-size: 19px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.01em; line-height: 1.45; }
-  .kpiBand { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 9px; margin: 4px 0 16px; }
-  .kpi { background: var(--soft); border: 1px solid var(--bd); border-radius: 8px; padding: 10px 13px; display: flex; flex-direction: column; gap: 4px; }
-  .kLabel { font-size: 10.5px; color: var(--dim); }
+  .kpiBand { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 9px; margin: 4px 0 16px; }
+  .kpi { background: var(--soft); border: 1px solid var(--bd); border-radius: 8px; padding: 10px 13px; display: flex; flex-direction: column; justify-content: space-between; gap: 4px; }
+  .kLabel { font-size: 11.5px; color: var(--dim); font-weight: 500; min-height: 2.5em; line-height: 1.25; }
   .kVal { font-size: 18px; font-weight: 800; font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
   .kVal.neg { color: var(--down); } .kVal.pos { color: var(--up); }
   .overview { font-size: 13.5px; line-height: 1.78; margin: 0 0 14px; }
@@ -392,7 +443,8 @@
   .sw.strengths li { color: var(--up); } .sw.warnings li { color: var(--warn); }
 
   /* ── 핵심 발견 ── */
-  .kfRow { display: grid; grid-template-columns: 92px 1fr auto; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bd); align-items: baseline; }
+  .kfRow { display: grid; grid-template-columns: max-content 1fr auto; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bd); align-items: baseline; }
+  .kfRow.noSrc { grid-template-columns: max-content 1fr; }
   .chip.kfTag { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 28%, transparent); font-weight: 600; padding: 1px 8px; font-size: 11px; justify-self: start; }
   .kfText { font-size: 12.5px; line-height: 1.55; }
   .kfSrc { font-size: 10.5px; color: var(--dim); }
@@ -419,6 +471,10 @@
   .secTitleWrap { flex: 1; }
   .secTitle { font-size: 19px; font-weight: 800; margin: 0; letter-spacing: -0.015em; }
   .secSub { font-size: 12px; color: var(--dim); margin-top: 3px; font-weight: 500; }
+  /* 다크: 밝은 2px ink 괘선이 화면을 자르는 인상 → 1px 완화 */
+  .rptRoot.dark .cover { border-bottom-width: 1px; border-bottom-color: var(--bd2); }
+  .rptRoot.dark .secHead { border-bottom-width: 1px; border-bottom-color: var(--bd2); }
+  .rptRoot.dark .rptFooter { border-top-width: 1px; border-top-color: var(--bd2); }
   .chip.srcBadge { font-size: 10.5px; padding: 2px 8px; color: var(--dim); align-self: center; }
   .chip.srcBadge.src-analysis { color: var(--e-analysis); border-color: color-mix(in srgb, var(--e-analysis) 30%, transparent); }
   .chip.srcBadge.src-credit { color: var(--e-credit); border-color: color-mix(in srgb, var(--e-credit) 30%, transparent); }
@@ -474,20 +530,24 @@
   /* ── 인쇄 — A4, 화이트 강제 ── */
   @media print {
     .rptRoot, .rptRoot.dark {
-      --backdrop: #fff; --sheet: #fff; --soft: #f5f7f9; --ink: #161616; --dim: #555a60;
-      --bd: #e2e6ea; --bd2: #c3cad1;
+      --backdrop: #fff; --sheet: #fff; --soft: #eef2f6; --ink: #161616; --dim: #555a60;
+      --bd: #d8dde3; --bd2: #b9c1c9;
       --accent: #0550ae; --up: #1a7f37; --down: #b02a1a; --warn: #8a6100; --emph: #0550ae;
       --e-analysis: #0550ae; --e-credit: #b02a1a; --e-quant: #0a7d86; --e-industry: #1a7f37; --e-macro: #8a6100; --e-story: #6f42c1;
       background: #fff; font-size: 10.2pt;
+      print-color-adjust: exact; -webkit-print-color-adjust: exact;
     }
     .toolbar, .tabs, .toc { display: none !important; }
     .printPerspective { display: block; font-size: 11px; color: #555; margin-bottom: 12px; font-weight: 600; }
     .sheet { width: 100%; max-width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; }
     .rptSection, .summary, .keyFindings, .evidenceStrip { break-inside: avoid; }
+    .bTableWrap { break-inside: avoid; }
     .secHead { break-after: avoid; }
-    .bTable tbody tr:nth-child(even) { background: #f4f6f8 !important; }
-    .spark polyline { stroke-width: 1.7px; }
-    .spark.flat { color: #6b7280; }
+    .kpi { background: #eef2f6 !important; }
+    .bTable th { border-bottom-color: #161616; }
+    .bTable tbody tr:nth-child(even) { background: #eaeff4 !important; }
+    .spark polyline { stroke-width: 2px; }
+    .spark.flat { color: #5b6470; }
     .chip.focus { background: none; }
     @page { size: A4; margin: 14mm 13mm; }
   }

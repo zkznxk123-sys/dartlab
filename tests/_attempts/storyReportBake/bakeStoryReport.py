@@ -175,7 +175,9 @@ def _guardMissingRatios(data: list[dict]) -> list[dict]:
 
 
 # 표와 모순되거나 버그인 파생 metric 라벨 — 드롭 (데이터는 표가 SSOT)
-_DROP_METRIC_LABELS = {"FCF 양수 연속", "마진 방향", "전환 신호"}
+# "ROIC - WACC" 합성 metric 칩은 헤드라인 KPI(투자효율 표 측정 Spread SSOT)와 충돌 →
+# 본문 가치평가 칩에서 제거(헤드라인이 측정값으로 단일 표시).
+_DROP_METRIC_LABELS = {"FCF 양수 연속", "마진 방향", "전환 신호", "ROIC - WACC"}
 # 영문 metric 값 → 한글
 _METRIC_VALUE_KO = {
     "dcf": "FCFF DCF",
@@ -203,6 +205,24 @@ def _fixMetricsBlock(metrics: list[dict]) -> list[dict]:
             continue
         out.append({"label": label, "value": val})
     return out
+
+
+def _sortYearCols(data: list[dict]) -> list[dict]:
+    """시계열 표의 연도 컬럼을 오름차순(과거→최신)으로 통일.
+
+    story 엔진이 표마다 다른 순서(현금흐름=과거순·투자효율=최신순)로 내려보내 독자가
+    매 표 방향을 다시 읽어야 하는 문제 + 스파크라인(좌=과거 고정)과 표 방향 불일치 해소.
+    """
+    if not data:
+        return data
+    cols = list(data[0].keys())
+    label = cols[0]
+    years = [c for c in cols[1:] if re.fullmatch(r"\d{4}", str(c))]
+    if len(years) < 3:  # 시계열 아님 — 원본 유지
+        return data
+    others = [c for c in cols[1:] if c not in years]
+    newCols = [label] + sorted(years, key=int) + others
+    return [{c: row.get(c) for c in newCols} for row in data]
 
 
 def _dropOrphanHeadings(blocks: list[dict]) -> list[dict]:
@@ -243,10 +263,32 @@ def _cleanStr(text: str) -> str:
     if not text:
         return text
     text = re.sub(r"-?\d{6,}\.?\d*조", lambda m: _rescaleManwon(m.group()), text)
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)  # 마크다운 **강조** → 평문 (별표 노출 방지)
+    text = text.replace("**", "")  # 짝 안 맞는 stray ** 제거
+    # 미번역 생애주기 단계 영문 토큰 한글화 (엔진 enum 누수)
+    for _en, _ko in (
+        ("matureGrowth", "성숙성장"),
+        ("matureStable", "성숙안정"),
+        ("earlyGrowth", "초기성장"),
+        ("hyperGrowth", "고성장"),
+    ):
+        text = text.replace(_en, _ko)
     text = _JUDGMENT_RE.sub("", text)
     text = re.sub(r"\s*\d{4}\s*년?에?\s*(급락|급등|하락 전환|상승 전환)\s*\([^)]*\)\.?", "", text)
     text = re.sub(r"\s*(급락|급등|하락 전환|상승 전환)\s*\([^)]*\)\.?", "", text)
     text = _TREND_RE.sub("", text)
+    # lifecycle "지표: 매출 CAGR …, ROIC-WACC -1.4%p, 배당성향 …%." 절 제거 — KPI 밴드와 중복 +
+    # 그 안의 합성 ROIC-WACC 가 투자효율 표 측정 Spread(SSOT)와 충돌 → 통째 제거.
+    # 종결 "%." 까지 매칭(소수점에서 끊기지 않도록). 값들은 "%," "%p," 라 첫 "%."가 절 끝.
+    text = re.sub(r"\s*지표:.*?%\s*\.", "", text)
+    # 미번역 placeholder "(피어 분포 대비) 위치: within" 제거
+    text = re.sub(r"\s*(피어 분포 대비\s*)?위치:\s*within\.?", "", text)
+    # 합성 "ROIC - WACC ±X%p" 토큰 제거 — 투자효율 표 측정 Spread(SSOT)와 충돌 (요약 문자열 정합)
+    text = re.sub(r"\s*/?\s*ROIC\s*[-−]\s*WACC\s*[-+]?[\d.]+%p", "", text)
+    # 생애주기 enum 고정 정성 단정 제거 — 측정값 없이 박힌 판정, 표 Spread 와 모순 위험
+    # (예: NAVER 는 Spread 5년 연속 음수인데 enum 템플릿이 "ROIC ≈ WACC 수렴" 단정)
+    text = re.sub(r"\s*\+?\s*ROIC\s*[≈≒~∼]\s*WACC\s*수렴", "", text)
+    text = re.sub(r"\s*방어적\s*사업\s*[,，]?\s*현금\s*배분\s*이슈\.?", "", text)
     # 본문과 모순되는 lifecycle "전환 신호: 쇠퇴 방향 (score 0.55)." 절 통째 제거 (괄호 포함)
     text = re.sub(r"\s*전환 신호[:：][^()]*(\([^)]*\))?\.?", "", text)
     # 피어 "상위 0%" = 최상위인데 0%로 읽혀 혼동 → 명확화
@@ -291,7 +333,7 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
             if bt == "chart":
                 continue  # P2 — placeholder 무가치 + 빈 차트(series=null) 위험. 표가 데이터 보유
             if bt == "table" and b.get("data"):
-                b["data"] = _guardMissingRatios(_dropEmptyRows(_fixTableUnits(b["data"])))
+                b["data"] = _guardMissingRatios(_dropEmptyRows(_fixTableUnits(_sortYearCols(b["data"]))))
                 if not b["data"]:
                     continue
             elif bt == "text":
@@ -338,6 +380,7 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
         for b in sec.get("blocks", []):
             if b.get("type") == "text" and (b.get("text") or "").strip():
                 t = _stripJudgment(b["text"].strip())
+                t = re.sub(r"\*\*(.+?)\*\*", r"\1", t).replace("**", "")  # 마크다운 별표 제거
                 # 검증 안 된 전환 절(YYYY(년)에 급락 (X%→Y%)) 통째 제거 — narrate 오수치 차단
                 t = re.sub(r"\s*\d{4}\s*년?에?\s*(급락|급등|하락 전환|상승 전환)\s*\([^)]*\)\.?", "", t)
                 t = re.sub(r"\s*(급락|급등|하락 전환|상승 전환)\s*\([^)]*\)\.?", "", t)
@@ -346,25 +389,41 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
         return ""
 
     def _latestFromTables(sec: dict | None, rowLabel: str) -> str | None:
+        """행의 최신 연도 값 — 컬럼 순서(과거순/최신순 혼재)와 무관하게 max(year) 우선."""
         if not sec:
             return None
         for b in sec.get("blocks", []):
             if b.get("type") == "table" and b.get("data"):
                 cols = list(b["data"][0].keys())
                 labelKey, yearKeys = cols[0], cols[1:]
+                # 연도 컬럼은 최신순으로 훑어 첫 비어있지 않은 값(=가장 최근 실측) 반환
+                yrCols = sorted((y for y in yearKeys if re.fullmatch(r"\d{4}", str(y))), key=int, reverse=True)
+                ordered = yrCols + [y for y in yearKeys if y not in yrCols]
                 for row in b["data"]:
                     if str(row.get(labelKey, "")).strip() == rowLabel:
-                        for yk in yearKeys:
+                        for yk in ordered:
                             v = row.get(yk)
                             if v not in (None, "", "-"):
                                 return str(v)
         return None
+
+    def _isNegVal(v: str | None) -> bool:
+        s = str(v or "").strip()
+        return s.startswith("-") or s.startswith("−") or s.startswith("△") or s.startswith("▲") or s.startswith("(")
 
     keyFindings = []
     for s in sections:
         if not s.get("blocks"):
             continue
         txt = _cleanText(s)
+        # FCF 부호 모순 가드 — narrate "FCF -" 단정이 표 최신 FCF 양수와 충돌하면 드롭
+        if (
+            txt
+            and s.get("key") == "현금흐름"
+            and ("FCF -" in txt or "FCF 음수" in txt or "투자가 영업현금을 초과" in txt)
+        ):
+            if not _isNegVal(_latestFromTables(s, "FCF")):
+                txt = ""
         if txt and len(txt) > 8 and ":" not in txt[:14]:
             keyFindings.append(
                 {
@@ -375,6 +434,22 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
                     "finding": txt,
                 }
             )
+
+    # FCF 부호 모순 가드 (text 블록 + summary) — 표 최신 FCF 양수면 "FCF -로 투자가 영업현금을
+    # 초과한다" 거짓 단정을 본문/요약에서도 제거(keyFindings 가드만으론 본문에 잔존).
+    secCF = _byKey("현금흐름")
+    if secCF and not _isNegVal(_latestFromTables(secCF, "FCF")):
+        _fcfBad = re.compile(r"\s*FCF\s*[-−]\s*로[^.]*\.?|\s*투자가\s*영업현금을\s*초과[^.]*\.?")
+        newBlocks = []
+        for b in secCF.get("blocks", []):
+            if b.get("type") == "text":
+                b["text"] = _fcfBad.sub("", b.get("text", "")).strip()
+                if not b["text"]:
+                    continue
+            newBlocks.append(b)
+        secCF["blocks"] = _dropOrphanHeadings(newBlocks)
+        if secCF.get("summary") and _fcfBad.search(secCF["summary"]):
+            secCF["summary"] = _fcfBad.sub("", secCF["summary"]).strip()
 
     def _minYearFromTable(sec: dict | None, rowLabel: str) -> tuple[str, str] | None:
         """행의 최저값 연도+값 — 변곡점(저점) 자동 추출."""
@@ -410,22 +485,14 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
     latest = _latestFromTables(secProfit, "영업이익률")
     if mn and latest and mn[1] != latest:  # 저점이 최신연도가 아니면 = 회복 변곡점
         inflection = f"{mn[0]} 영업이익률 {mn[1]} 저점 후 회복"
-    lifecycle = _cleanText(_byKey("가치평가") or {})
-    peer = _cleanText(_byKey("매출전망") or {})
+    lifecycle = _cleanStr(_cleanText(_byKey("가치평가") or {}))
+    peer = _cleanStr(_cleanText(_byKey("매출전망") or {}))
     narrativeOverview = ". ".join(p.rstrip(". ") for p in [measuredLine, inflection, lifecycle, peer] if p).strip()
     narrativeOverview = re.sub(r"\.{2,}", ".", narrativeOverview) + (
         "." if narrativeOverview and not narrativeOverview.endswith(".") else ""
     )
 
-    # conclusion 보강: 약하면 grades 합성 (절대 등급 — 동종 백분위 아님)
-    grades = summaryCard.get("grades") or {}
-    if (not conclusion or len(conclusion) < 12) and grades:
-        gradeStr = " · ".join(f"{k} {v}" for k, v in grades.items())
-        summaryCard["conclusion"] = f"재무 등급 — {gradeStr}"
-        conclusion = summaryCard["conclusion"]
-    summaryCard["gradesNote"] = "절대 등급 (동종 대비 백분위 아님)"
-
-    # ── headline KPI 밴드 (한눈 핵심 숫자) ──
+    # ── 측정값 lookup (metrics 블록) ──
     def _findMetricVal(label: str) -> str | None:
         for s in sections:
             for b in s.get("blocks", []):
@@ -435,26 +502,64 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
                             return str(m.get("value", "")).strip()
         return None
 
+    # ROIC−WACC 는 투자효율 표의 연도별 측정 Spread(SSOT) 최신값으로 통일.
+    # (lifecycle 합성 metric 은 표와 다른 정의라 헤드라인↔본문 충돌 → 측정값 단일화)
+    secInvest = _byKey("투자효율")
+    latestSpread = _latestFromTables(secInvest, "Spread(%p)")
+    cagrVal = _findMetricVal("매출 CAGR")
+
+    # conclusion 보강: 약하거나 등급 나열이면 측정값 한 줄 서술로 합성
+    # (등급은 아래 gradeChips 로 별도 표시 → 문장+칩 중복 회피)
+    grades = summaryCard.get("grades") or {}
+    if not conclusion or len(conclusion) < 12 or conclusion.startswith("재무 등급"):
+        # 생애주기 단계 + 핵심 지표 2개로 압축 (KPI 밴드 6지표와 과중복 회피 · 데이터 덤프 방지)
+        stageM = re.search(r"생애주기\s+(\S+)", lifecycle or "")
+        opVal = _latestFromTables(secProfit, "영업이익률")
+        bits = []
+        if stageM:
+            bits.append(f"{stageM.group(1)} 단계")
+        if opVal:
+            bits.append(f"영업이익률 {opVal}")
+        if latestSpread:
+            bits.append(f"ROIC−WACC 최근 {latestSpread}")
+        if bits:
+            summaryCard["conclusion"] = f"{corpName} — " + ", ".join(bits) + "."
+        elif grades:
+            summaryCard["conclusion"] = "재무 등급 — " + " · ".join(f"{k} {v}" for k, v in grades.items())
+        conclusion = summaryCard.get("conclusion", conclusion)
+    summaryCard["gradesNote"] = "절대 등급 (동종 대비 백분위 아님)"
+
     headlineKpis = []
     for lab, val in (
         ("영업이익률", _latestFromTables(secProfit, "영업이익률")),
         ("매출총이익률", _latestFromTables(secProfit, "매출총이익률")),
         ("부채비율", _latestFromTables(secStab, "부채비율")),
         ("매출 CAGR", _findMetricVal("매출 CAGR")),
-        ("ROIC-WACC", _findMetricVal("ROIC - WACC")),
+        ("ROIC−WACC(최근)", latestSpread),
         ("배당성향", _findMetricVal("배당성향")),
     ):
         if val:
             headlineKpis.append({"label": lab, "value": val})
 
-    # ── strengths / warnings (등급 + ROIC-WACC 신호 기반) — 통찰 표면 채움 ──
+    def _spreadNum(s: str | None) -> float | None:
+        if not s:
+            return None
+        try:
+            return float(str(s).replace("%p", "").replace("+", "").replace(",", "").strip())
+        except ValueError:
+            return None
+
+    # ── strengths / warnings (등급 + 측정 Spread 신호 기반) — 통찰 표면 채움 ──
     if not summaryCard.get("strengths"):
         summaryCard["strengths"] = [f"{area} 등급 {g}" for area, g in grades.items() if g in ("A", "B")]
+        sv = _spreadNum(latestSpread)
+        if sv is not None and sv >= 3.0:  # ROIC 가 WACC 를 뚜렷이 초과 = 가치창출
+            summaryCard["strengths"].append(f"ROIC가 WACC 초과 (최근 {latestSpread})")
     if not summaryCard.get("warnings"):
         warns = [f"{area} 등급 {g}" for area, g in grades.items() if g in ("D", "F")]
-        rw = _findMetricVal("ROIC - WACC")
-        if rw and rw.strip().startswith("-"):
-            warns.append(f"ROIC가 WACC 미달 ({rw})")
+        sv = _spreadNum(latestSpread)
+        if sv is not None and sv <= -1.0:  # 수렴(-0.1%p 등)은 경고 아님 — 뚜렷한 미달만
+            warns.append(f"ROIC가 WACC 미달 (최근 {latestSpread})")
         summaryCard["warnings"] = warns
 
     # ── 일회성 손익 자동 플래그 (순이익률 >100% = 비경상 가능) ──
@@ -474,6 +579,10 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
                                     extraNotes.append(f"{yk} 순이익률 {row[yk]} (일회성 손익 가능 — 정상화 전)")
                             except ValueError:
                                 continue
+
+    # ── 표준 KPI 결측 고지 (침묵 대신 명시) ──
+    if _latestFromTables(secProfit, "매출총이익률") is None:
+        extraNotes.append("매출총이익률 — 미표기(이 회사 손익 표에 매출원가/매출총이익 구분 없음)")
 
     # ── honest-skip reject-gate ──
     coreActsWithBlocks = len({s["key"] for s in nonEmpty if s["key"] in CORE_SECTIONS})
