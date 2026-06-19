@@ -1,6 +1,6 @@
 ---
 title: "넷플릭스 (NFLX) — 영업이익률은 두 배가 됐는데, 2021년엔 마진이 올라도 현금은 주저앉았다"
-date: 2026-06-14
+date: 2026-06-20
 description: "넷플릭스 영업이익률은 12.9→29.5%로 두 배가 됐다. 그런데 2021년엔 마진을 올리고도 영업현금흐름은 +2.43B에서 +0.39B로 주저앉았다. 콘텐츠 자본화가 만든 '장부이익'과 '현금'의 시차를 손익이 증명하는 범위 안에서만 따라 읽는다."
 category: company-reports
 series: company-reports
@@ -21,7 +21,7 @@ ai:
   strengths: ["영업이익률 12.9%→29.5%, 순이익률 9.3%→24.3%로 손익계산서상 수익성은 추세적 확대(모두 차트 내 실측)", "영업현금흐름이 2023년 +7.27B, 2024년 +7.36B, 2025년 +10.15B로 자리잡아 장부이익과 현금이 같은 방향을 보기 시작(차트 내 실측)", "순이익 1.87B→10.98B, 영업이익 2.60B→13.33B로 절대액 자체가 크게 증가", "2021년 영업이익률↑·영업현금흐름↓의 어긋남이 차트 내 실측 두 값만으로 잡혀, 회계 시차 주장이 외부 인용에 기대지 않음"]
   weaknesses: ["2021년 영업이익률은 18.4→20.8%로 올랐는데 영업현금흐름은 +2.43B→+0.39B로 급감 — 마진 확대와 현금 전환이 같은 해에 일어나지 않은 가장 깨끗한 증거", "콘텐츠 자본화 회계상 제작비는 현금으로 먼저 나가고 손익엔 상각만 반영돼, 마진만으로 현금 창출력을 단정할 수 없음", "2019년 영업현금흐름도 음수였으나 데이터의 -1.43B는 3개 분기만 집계된 부분치(차트 미사용)이며 실제 소각의 절반에도 못 미침 — 정확한 FY2019는 약 -2.9B [외부 인용]", "구독자 수 공시 중단·브라질 세무 비용·워너 인수 경쟁입찰 등 외부 불확실성은 연결 손익에 아직 분해되어 들어오지 않음 [외부 인용]"]
   keyMetrics: {revenue: 45.18, opm: 29.5, npm: 24.3, ocf: 10.15}
-  dataAsOf: "2026-06-14"
+  dataAsOf: "2026-06-20"
 ---
 
 <script>
@@ -29,7 +29,7 @@ import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
-> **데이터 기준**: 2026-06-14 dartlab 실측 — Netflix(NFLX) **미국 연결(USD)** 기준, 분기 데이터를 역년(calendar year)으로 정규화·합산. 광고요금제·워너브라더스 인수·콘텐츠 상각 세부·구독자 수·잉여현금흐름은 연결 손익에 안 나오므로 **10-K·IR·언론(외부 인용)**으로 표기. **차트의 영업현금흐름은 2020~2025만 사용**(2019는 3개 분기만 집계된 부분치). ※대차대조표 항목은 매핑이 불안정해 인용에 주의.
+> **데이터 기준**: 2026-06-20 dartlab 실측 — Netflix(NFLX) **미국 연결(USD)** 기준, 분기 데이터를 역년(calendar year)으로 정규화·합산. 광고요금제·워너브라더스 인수·콘텐츠 상각 세부·구독자 수·잉여현금흐름은 연결 손익에 안 나오므로 **10-K·IR·언론(외부 인용)**으로 표기. **차트의 영업현금흐름은 2020~2025만 사용**(2019는 3개 분기만 집계된 부분치). ※대차대조표 항목은 매핑이 불안정해 인용에 주의.
 >
 > **핵심 숫자**: 매출 **$45.18B** (2019→2025) · 영업이익 **$13.33B** (OPM **29.5%**) · 당기순이익 **$10.98B** (NPM **24.3%**) · OPM 2019 **12.9%** → 2025 **29.5%** · 영업현금흐름 2021 **+0.39B**(거의 바닥) → 2023 **+7.27B** → 2025 **+10.15B**
 >
@@ -142,6 +142,88 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 
 ---
 
+## 7막 — 2025년 콘텐츠 표: 상각 16.4B와 additions 17.1B는 같은 숫자가 아니다
+
+**콘텐츠 회계를 진짜 숫자로 열면 무엇이 보이나.** 2025년 10-K는 이 글의 가설을 더 날카롭게 만든다. Netflix의 2025년 매출은 $45.183B, operating income은 $13.327B, operating margin은 29.5%, net income은 $10.981B다. 여기까지만 보면 “이익이 잘 나는 스트리밍 회사”다. 그런데 현금흐름표의 조정 항목을 열면 다른 시간표가 나온다.
+
+2025년 additions to content assets는 **-$17.097B**다. content liabilities change는 **-$0.611B**다. 반대로 amortization of content assets는 **+$16.422B**로 순이익에서 영업현금흐름으로 조정된다. 이 세 줄이 넷플릭스 회계의 핵심이다. 제작·취득의 현금 박자는 additions와 liabilities change 쪽에 있고, 손익계산서의 비용 박자는 content amortization에 있다.
+
+![Netflix 2025 — 제작 현금과 장부 상각은 같은 줄이 아니다](./assets/114-content-cash-bridge.svg)
+
+그래서 “콘텐츠 비용이 16.4B였다”라고만 쓰면 절반만 맞다. 손익계산서에 비용으로 들어간 content amortization은 16.4B였다. 그러나 현금흐름표에서 콘텐츠 자산 additions는 17.1B였다. 둘은 비슷해 보이지만 같은 개념이 아니다. 상각은 과거에 자산으로 잡은 콘텐츠를 올해 비용으로 나누어 넣는 장부의 시간표이고, additions는 올해 새로 자산으로 올린 콘텐츠 현금의 시간표다. 둘을 섞으면 넷플릭스의 현금 전환을 잘못 읽는다.
+
+이 숫자가 2021년의 반전을 설명하는 방식도 조심해야 한다. 2021년에 OPM은 올랐고 OCF는 떨어졌다. 그 현상은 콘텐츠 자본화 구조와 양립한다. 그러나 “2021년에 정확히 어떤 콘텐츠 항목 때문에 얼마가 빠졌다”를 말하려면 그해의 content additions, liabilities, amortization을 함께 열어야 한다. 이 글은 지금 2025년 10-K를 통해 구조를 설명하되, 2021년의 원인을 한 항목으로 단정하지 않는다. 연결 손익이 증명하는 것은 어긋남이고, 공시 주석이 설명하는 것은 그 어긋남이 가능한 회계 구조다.
+
+또 하나 중요한 점은 Netflix가 하나의 operating segment로 보고한다는 사실이다. 2025년 10-K는 CODM이 consolidated operating margin과 net income을 보고 성과와 자원배분을 판단한다고 설명한다. 지역별 매출은 보여주지만, “광고”, “게임”, “라이브”, “한국 콘텐츠”, “미국 콘텐츠” 같은 독자가 궁금해할 축은 손익 세그먼트로 분해되지 않는다. 그래서 지역 매출을 가입자 수나 ARPU처럼 바로 환산하면 오독이다. 세그먼트가 하나라는 것은, 외부에서 보는 섬세한 제품 이야기와 공시 손익의 칸이 다르다는 뜻이다.
+
+이 막이 더하는 결론은 간단하다. 넷플릭스의 강점은 2025년에 OPM 29.5%와 OCF $10.149B를 동시에 찍었다는 점이다. 그러나 그 강점의 회계 구조는 여전히 콘텐츠 현금과 콘텐츠 상각이 다른 박자로 움직인다는 사실 위에 있다. 지금은 두 곡선이 같은 방향을 보지만, 같은 줄이 된 것은 아니다.
+
+---
+
+## 8막 — 콘텐츠 의무 24.0B: 부채 5.7B와 장부 밖 18.4B를 나눠 읽는다
+
+**콘텐츠 약속은 모두 부채인가.** 아니다. 2025년 10-K는 total content obligations를 약 $24.0B로 제시한다. 이 중 balance sheet에 잡힌 content liabilities는 current $4.1B와 non-current $1.6B, 합계 약 **$5.7B**다. 나머지 약 **$18.4B**는 아직 인식 조건을 충족하지 않아 balance sheet에 반영되지 않은 obligations다.
+
+이 구분은 넷플릭스 글에서 특히 중요하다. 콘텐츠 회사는 미래 작품·라이선스·제작 약속을 계속 맺는다. 그러나 모든 약속이 같은 날 부채가 되는 것은 아니다. 어떤 약속은 이미 서비스를 제공받았거나 조건을 충족해 content liability가 되고, 어떤 약속은 아직 장부에 들어오지 않는다. “콘텐츠 의무 24B”를 “부채 24B”라고 쓰면 틀린다. 반대로 “대차대조표 부채 5.7B뿐이니 나머지는 없는 돈”이라고 쓰는 것도 틀린다.
+
+공시가 알려주는 더 실전적인 질문은 지급 시점이다. 2025년 말 content obligations $24.0B 중 less than one year가 $11.5B, one through three years가 $8.4B, three through five years가 $3.0B, after five years가 $1.1B다. 즉 의무의 상당 부분이 3년 안에 현금 박자로 다가온다. 이 현금 박자가 콘텐츠 additions와 OCF의 다음 리듬을 만든다.
+
+그래서 넷플릭스의 “현금 전환”은 단순히 OCF가 플러스냐 마이너스냐로 끝나지 않는다. 2025년 OCF $10.149B는 매우 강하다. 하지만 콘텐츠 obligations는 다음 작품 사이클의 현금 요구를 미리 보여준다. OCF가 강하더라도, 신규 콘텐츠 약속의 속도가 더 빨라지면 additions와 liabilities change가 다시 현금을 당겨갈 수 있다. 이때 손익계산서의 OPM은 여전히 좋아 보일 수 있다. 2021년에 보았던 어긋남이 다시 나타나는 구조가 여기에 있다.
+
+이 구분은 Warner Bros. 거래 이야기와도 연결된다. 2026년 Q1 shareholder letter에는 Warner Bros. transaction termination fee $2.8B가 interest and other income에 인식되어 Q1 net income을 키운다. 이 항목은 영업이익이 아니다. 콘텐츠 사업의 경쟁력도 아니고 반복 영업현금도 아니다. 그래서 2026년 Q1 순이익만 보고 “현금 창출력이 갑자기 폭발했다”고 읽으면 안 된다. 넷플릭스에서 중요한 것은 operating income, operating margin, operating cash flow, free cash flow, content obligations가 같은 방향으로 버티는지다.
+
+결국 콘텐츠 의무는 넷플릭스의 약점이 아니라, 비즈니스의 연료탱크다. 문제는 연료가 있느냐가 아니라, 그 연료를 넣는 현금 박자가 손익계산서보다 빨리 오느냐다. 넷플릭스의 2025년은 이 박자를 잘 관리한 해였고, 2026년 이후의 시험은 그 관리가 광고·라이브·지역 콘텐츠·가격 인상 사이에서도 유지되는지다.
+
+---
+
+## 9막 — 2026년 1분기: 마진은 32.3%, 현금은 5.29B, 그러나 순이익엔 일회성이 섞였다
+
+**최신 분기는 어떤 답을 줬나.** 2026년 1분기는 넷플릭스의 방향을 더 좋게 보이게 하지만, 해석에는 한 번 더 필터가 필요하다.
+
+Q1 2026 shareholder letter에 따르면 revenue는 $12.250B, operating income은 $3.957B, operating margin은 **32.3%**다. operating cash flow는 $5.290B, free cash flow는 $5.094B다. 회사는 2026년 revenue guidance를 $50.7B~$51.7B, full-year operating margin target을 31.5%로 유지했다. 광고 매출은 2026년에 약 $3B를 목표로 하고, 전년 대비 두 배 수준을 언급했다.
+
+이 숫자는 2025년의 “마진과 현금이 같은 방향을 보기 시작했다”는 해석을 강화한다. 2025년 연간 OPM 29.5%에서 Q1 2026 OPM 32.3%로 올라갔고, Q1 OCF도 $5.29B로 강했다. Q2 forecast도 operating margin 32.6%를 제시한다. 손익계산서와 현금흐름표가 동시에 좋아 보이는 구간이다.
+
+하지만 Q1 순이익 $5.283B에는 주의가 필요하다. shareholder letter는 diluted EPS가 예상을 웃돈 이유 중 하나로 Warner Bros. transaction과 관련된 $2.8B termination fee가 interest and other income에 인식됐다고 설명한다. 즉 Q1 net income은 영업이익보다 훨씬 큰 일회성 기타수익 효과를 포함한다. 이 글이 OPM과 OCF를 중심으로 보는 이유가 여기에 있다. 순이익 한 줄은 가끔 콘텐츠 사업과 무관한 사건을 안고 뛴다.
+
+2026년의 더 중요한 문장은 “content amortization growth가 first-half weighted이고 Q2에 가장 높을 것”이라는 회사 설명이다. 이것은 넷플릭스가 여전히 콘텐츠 출시 타이밍과 상각 곡선의 영향을 크게 받는다는 뜻이다. Q2 operating margin forecast 32.6%는 전년 Q2 34.1%보다 낮다. 하지만 회사는 Q3·Q4에서 year-over-year operating margin growth를 기대한다고 했다. 그러면 투자자가 봐야 할 것은 1분기 숫자의 환호가 아니라, 상각 타이밍이 지나간 뒤에도 연간 31.5% margin target이 지켜지는지다.
+
+광고 매출도 마찬가지다. “광고 매출이 두 배”라는 말은 강하지만, 이 글의 검증 범위에서는 아직 별도 세그먼트 손익으로 보이지 않는다. 광고가 매출 성장에 기여하고 있다는 회사 설명은 공식 자료로 확인되지만, 광고가 어느 정도 OPM을 올렸는지, 어느 정도 FCF를 만들었는지는 연결 손익으로 분해되지 않는다. 광고를 새 성장축으로 인정하되, “광고 때문에 마진이 올랐다”는 인과는 보류해야 한다.
+
+그래서 Q1 2026은 넷플릭스 글의 결론을 이렇게 업데이트한다. 장부이익과 현금의 시차는 2025~Q1 2026에 많이 안정됐다. 그러나 콘텐츠 상각 타이밍, 광고 매출의 미분해성, Warner Bros. termination fee 같은 영업 밖 항목 때문에, 손익계산서의 한 줄만으로 미래 현금을 단정하는 습관은 여전히 위험하다.
+
+---
+
+## 10막 — 이 글이 틀리려면 무엇이 바뀌어야 하나
+
+**어떤 숫자가 나오면 이 해석을 버려야 하나.** 넷플릭스에서는 네 가지다.
+
+첫째, OPM이 높아지는데 OCF가 다시 꺾이면 이 글의 경고가 재등장한다. 2021년이 바로 그 사례였다. 2026년 이후에도 operating margin이 31%대에 머무르거나 더 높아지는데 operating cash flow와 free cash flow가 내려앉으면, 콘텐츠 additions와 obligations가 손익보다 빨리 현금을 먹는 국면으로 돌아간다. 그때는 “마진 확대”보다 “현금 박자”가 앞줄로 와야 한다.
+
+둘째, content additions가 amortization을 크게 앞지르는 국면이 길어지면 현금 전환의 질이 낮아진다. 2025년 additions to content assets는 $17.097B, content amortization은 $16.422B로 비교적 가까웠다. 그러나 additions가 여러 해 동안 상각보다 훨씬 빠르게 늘면, 손익계산서의 안정적인 OPM 뒤에 더 큰 현금 선지출이 숨어 있을 수 있다. 이 경우 “콘텐츠 자본화가 만드는 시차”는 다시 투자자의 중심 질문이 된다.
+
+셋째, content obligations의 1년 내 지급분이 커지는데 FCF가 버티지 못하면, 콘텐츠 약속은 성장 연료가 아니라 현금 압박이 된다. 2025년 말 total content obligations는 $24.0B이고, 1년 내 지급 예정은 $11.5B다. 이 숫자가 매출 성장보다 더 빨리 커지면, 넷플릭스는 좋은 OPM을 유지하면서도 현금흐름 변동성이 커질 수 있다.
+
+넷째, 광고·라이브·게임 같은 새 축이 연결 손익에서 분해되지 않는 기간이 길어지면, 외부 서사를 보수적으로 다뤄야 한다. 회사는 광고 매출 $3B 목표와 라이브 이벤트 성과를 말한다. 그러나 공시 손익은 아직 하나의 operating segment다. 새 축이 정말로 마진을 올리는지는 별도 공시, 명확한 KPI, 또는 연결 비용 구조의 변화가 있어야 단정할 수 있다. 그 전까지는 “성장 기여 가능성”이지 “마진 개선 원인”이 아니다.
+
+다섯째, 순이익이 영업이익보다 크게 뛰는 분기에는 기타수익을 먼저 확인해야 한다. Q1 2026은 좋은 예다. operating income은 $3.957B였지만 net income은 $5.283B였다. 그 차이에는 Warner Bros. transaction termination fee $2.8B가 interest and other income에 들어간 영향이 있다. 이익이 커진 것은 사실이지만, 콘텐츠 사업의 반복 영업력이 갑자기 그만큼 좋아졌다는 뜻은 아니다. 넷플릭스 글에서 순이익은 항상 두 번째 줄이다. 첫 번째 줄은 revenue, operating income, operating margin, OCF, FCF, content additions다.
+
+여섯째, 콘텐츠 상각 성장률이 특정 반기에 몰릴 때는 분기 OPM을 과대해석하지 않아야 한다. 회사는 Q2 2026에서 content amortization growth가 가장 높을 것으로 설명했다. 콘텐츠 출시 타이밍이 비용 인식 타이밍을 흔들면, 한 분기 OPM은 작품 슬레이트와 상각 일정의 그림자를 안는다. 그래서 Q1 32.3%와 Q2 forecast 32.6%를 보고 “항구적 32%대 마진”이라고 쓰면 아직 빠르다. 연간 target 31.5%가 지켜지는지, 그리고 그 과정에서 OCF와 FCF가 같이 버티는지를 봐야 한다.
+
+일곱째, regional revenue를 가입자 수처럼 읽는 실수를 피해야 한다. 2025년 10-K는 지역별 streaming revenue를 보여주지만, 가입자 수 공시는 중단됐고 회사는 revenue와 operating margin을 primary financial metrics로 삼겠다고 설명한다. 지역 매출이 늘었다고 해서 그 지역 가입자가 같은 비율로 늘었다고 볼 수 없다. 가격 인상, 환율, 광고, 계정공유 단속, 지역별 콘텐츠 흥행이 모두 섞인다. 따라서 지역 매출은 “어디서 돈이 들어왔는가”를 보여줄 뿐, “몇 명이 얼마를 냈는가”를 완전히 복원해주지 않는다.
+
+여덟째, content obligations가 안정적으로 보이더라도 지급 시점은 계속 봐야 한다. 2025년 말 total content obligations는 $24.039B이고, Q1 2026 말 supplemental information은 $24.139B를 보여준다. 총액만 보면 거의 안정적이다. 그러나 1년 내 지급분, 1~3년 지급분, 장부상 liabilities와 장부 밖 obligations의 구성은 현금 박자를 바꾼다. 총액이 비슷해도 단기 지급분이 커지면 OCF에 더 직접적인 압박이 된다. 반대로 장기 약속 비중이 늘면 콘텐츠 파이프라인은 유지되지만 단기 현금 부담은 완화될 수 있다.
+
+아홉째, 광고 매출 목표를 FCF 목표로 착각하지 말아야 한다. 2026년 광고 매출 $3B 목표는 성장성 면에서 중요하다. 그러나 광고 사업은 판매조직, 측정기술, 파트너 계약, 콘텐츠 내 광고 인벤토리, 가격 정책이 필요하다. 매출이 두 배가 되어도 그 매출이 어떤 incremental margin을 갖는지는 연결 손익에서 아직 보이지 않는다. 광고가 진짜로 고마진 축이면 시간이 지나면서 operating margin과 FCF가 같이 좋아질 것이다. 그 전에는 “광고가 FCF를 만든다”가 아니라 “광고 매출이 커진다고 회사가 말했다”까지가 정확하다.
+
+열째, 넷플릭스의 강점을 콘텐츠 회계의 약점으로만 읽으면 반대로 틀린다. 콘텐츠 자본화는 현금과 손익의 시차를 만들지만, 동시에 대규모 콘텐츠 투자를 여러 해의 수익 창출 기간과 맞추는 회계 방식이다. 문제는 자본화 자체가 아니라, 현금 지출과 상각, obligations와 OCF를 섞어서 읽는 습관이다. 2025년과 Q1 2026의 숫자는 넷플릭스가 이 박자를 꽤 잘 맞추고 있음을 보여준다. 경고는 비관이 아니라 검산 순서다. 먼저 박자를 분리하고, 그 다음에 강점을 인정해야 한다.
+
+마지막으로, 이 글은 넷플릭스가 약하다는 글이 아니다. 오히려 2025년 OPM 29.5%, OCF $10.149B, Q1 2026 OPM 32.3%, OCF $5.290B는 매우 강한 숫자다. 다만 강한 숫자일수록 어떤 표에서 왔는지를 더 엄격히 봐야 한다. 손익계산서의 상각, 현금흐름표의 additions, 대차대조표의 content assets, 주석의 content obligations가 서로 다른 표라는 사실을 기억하면, 넷플릭스의 강점은 더 깨끗하게 보인다.
+
+이 네 조건은 모두 같은 문장으로 묶인다. 넷플릭스는 이제 현금을 벌기 시작한 회사가 아니라, 이미 큰 현금을 버는 회사다. 다만 그 현금은 콘텐츠 시간표 위에서 움직인다. 독자가 봐야 할 것은 OPM 30%라는 예쁜 숫자가 아니라, content additions·amortization·obligations·OCF가 서로 어느 박자로 움직이는지다. 그 박자가 다시 어긋나면 이 글의 경고는 현재형으로 돌아온다.
+
+---
+
 ## 2026년에 봐야 할 다섯 가지
 
 1. **영업이익률(OPM)이 29%대를 지키는가** — 회사는 2025 하반기 OPM이 상반기보다 낮을 것으로 안내했다(사유=외부). 비율의 추세를 본다.
@@ -150,7 +232,47 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 4. **워너브라더스 인수의 손익 반영** — 외부 합의가 우리 연결 손익(매출·영업이익·OCF)에 항목별로 들어오기 시작하는가. 들어오기 전까지 '현금을 바꿀 것'은 외부 가설.
 5. **광고요금제가 매출·마진에 분리 기여로 나타나는가** — '광고가 마진을 올렸다'는 연결 손익이 분리해 보여줄 때만 인과로 쓴다.
 
+이 다섯 줄 중 가장 중요한 것은 두 번째와 세 번째다. OPM이 높아지는 회사는 많지만, 콘텐츠 사업에서 OCF가 같은 방향으로 오래 유지되는 회사는 훨씬 적다. 넷플릭스가 2025년과 Q1 2026에 강해 보이는 이유는 손익과 현금이 동시에 좋아졌기 때문이다. 그러나 그 동행은 매 분기 새로 검산해야 한다. 콘텐츠 additions가 다시 커지고 obligations의 단기 지급분이 늘면, 손익계산서의 OPM은 늦게 반응하고 현금흐름표가 먼저 흔들릴 수 있다. 넷플릭스 투자자는 손익계산서보다 현금흐름표에서 먼저 힌트를 볼 가능성이 높다.
+
+워너브라더스 거래는 특히 조심해야 한다. 거래가 완료되기 전에는 termination fee, bridge commitment, transaction cost, regulatory timeline 같은 영업 밖 사건이 순이익과 현금 항목을 흔들 수 있다. 거래가 완료된 뒤에는 콘텐츠 라이브러리, 부채, 통합 비용, 상각, 지역별 권리 구조가 한꺼번에 들어온다. 어느 쪽이든 “워너가 들어오면 콘텐츠가 많아진다”는 말만으로는 부족하다. 재무제표에서는 콘텐츠 자산, 콘텐츠 부채, 장기부채, interest expense, operating margin, FCF가 함께 움직인다. 이 글의 방법은 거래 전후에도 같다. 먼저 표를 나누고, 그다음 서사를 붙인다.
+
+광고요금제도 같은 방식으로 봐야 한다. 광고는 구독 매출과 다른 수익 곡선을 가질 수 있고, 같은 콘텐츠에서 추가 매출을 만들 수 있다는 점에서 매력적이다. 그러나 광고 사업은 판매조직과 측정 기술, 브랜드 세이프티, 광고주 수요, 지역별 규제가 필요하다. 매출이 늘면 좋은 일이지만, 그 매출이 고마진인지 초기 투자비를 먹는지, 기존 구독 가격과 충돌하는지는 따로 봐야 한다. 회사가 광고 매출 목표를 말하는 것과 투자자가 광고의 incremental margin을 아는 것은 다른 일이다.
+
+라이브 이벤트도 마찬가지다. 라이브는 가입과 유지에 큰 순간을 만들 수 있지만, 스포츠·이벤트 권리는 선지급과 장기 계약을 동반한다. 큰 이벤트 하나가 가입자 관심을 끌어도, 그 계약이 content obligations와 cash payments에 어떤 박자로 들어오는지 봐야 한다. 넷플릭스가 스포츠 채널로 변한다는 식의 과장보다, 라이브가 전체 콘텐츠 예산 안에서 어떤 현금 박자를 만드는지가 더 중요하다. 2026년 이후 라이브 이벤트 확대는 revenue보다 obligations에서 먼저 흔적을 남길 수 있다.
+
+마지막으로, 넷플릭스의 강한 OPM을 전통 미디어와 단순 비교하는 것도 위험하다. 전통 미디어는 극장, 케이블, 광고 경기, 네트워크 편성, 스포츠 권리, 선형 TV 쇠퇴가 섞이고, 넷플릭스는 글로벌 구독과 스트리밍 사용 시간을 중심으로 움직인다. 같은 콘텐츠 회사라도 현금의 시간표가 다르다. 그래서 넷플릭스의 핵심 비교 대상은 다른 미디어 회사의 P/E가 아니라, 자기 자신의 content additions, amortization, obligations, OCF의 박자다. 이 네 줄이 맞으면 강점은 유지되고, 어긋나면 좋은 콘텐츠가 오히려 현금을 먼저 먹는다.
+
+또 하나의 경보는 “한 작품의 흥행”을 곧바로 재무제표로 번역하는 습관이다. 넷플릭스는 개별 작품의 views와 engagement를 말할 수 있고, 특정 라이브 이벤트가 가입과 팬덤을 만들 수 있다. 그러나 작품 흥행은 revenue와 retention을 통해 천천히 연결되고, 비용은 제작·라이선스 계약과 상각 일정으로 따로 움직인다. 한 작품이 대히트해도 그 작품의 경제성이 전체 OPM에 얼마나 기여했는지는 공시 손익만으로 분해되지 않는다. 그래서 작품 이야기는 서사의 배경이고, 검증은 항상 연결 손익과 현금흐름표로 돌아와야 한다.
+
+두 번째 경보는 환율이다. 넷플릭스는 글로벌 매출을 올리고, Q1 2026 letter도 FX-neutral growth를 따로 제시한다. 달러 기준 revenue와 local currency 기준 성장률이 달라질 수 있다. 콘텐츠 제작비와 마케팅비도 지역별 통화와 계약 구조에 따라 다르게 움직인다. 그래서 달러 매출 증가율만 보고 수요를 판단하면 안 된다. FX-neutral revenue growth, reported revenue, operating margin을 함께 읽어야 지역별 가격 인상과 환율 효과를 구분할 수 있다.
+
+세 번째 경보는 기술 투자와 제품 변화다. 넷플릭스는 추천, 광고, 모바일 경험, 게임, 콘텐츠 제작 도구를 계속 바꾼다. 이런 변화는 비용으로 먼저 나타나고, retention이나 광고 수익으로 나중에 나타날 수 있다. 손익계산서에서는 technology and development, sales and marketing, G&A가 함께 움직인다. 만약 기술 투자와 광고 영업비가 빠르게 늘면서 operating margin target이 흔들리면, “콘텐츠 현금 박자”뿐 아니라 플랫폼 비용 박자도 별도로 봐야 한다. 넷플릭스가 콘텐츠 회사이면서 기술 회사라는 사실은 강점이지만, 비용 검산을 더 어렵게 만든다.
+
+네 번째 경보는 buyback과 per-share 지표다. 넷플릭스는 주당순이익을 제시하지만, 2025년 11월 10-for-1 stock split 이후 과거 주당 수치가 retroactively adjusted되어 비교된다. 주가·주식수·자사주 매입은 per-share 성과를 바꿀 수 있지만, 이 글의 중심인 operating margin과 OCF의 박자를 대체하지 못한다. EPS가 좋아져도 content additions가 커지고 FCF가 흔들리면 품질은 낮아진다. 반대로 EPS가 일회성 기타수익 때문에 튀어도 OPM과 FCF가 안정적이면 본업은 별도로 평가해야 한다.
+
+다섯 번째 경보는 “글로벌 1위라서 가격을 올릴 수 있다”는 쉬운 문장이다. 가격 인상은 매출을 올릴 수 있지만, churn과 engagement, 지역별 구매력, 광고요금제 전환, 계정공유 정책과 함께 움직인다. 가격이 올라 revenue가 늘어도 engagement가 약해지면 장기 retention이 흔들릴 수 있고, 반대로 engagement가 강하면 가격 인상을 흡수할 수 있다. 공시 숫자에서 이 관계는 revenue growth, operating margin, cash flow, 회사가 언급하는 engagement 지표로 간접 확인할 수 있을 뿐이다.
+
+여섯 번째 경보는 “콘텐츠 예산을 줄이면 FCF가 좋아진다”는 단순화다. 콘텐츠 지출을 줄이면 단기 현금은 좋아질 수 있지만, 몇 년 뒤 engagement와 retention이 약해질 수 있다. 반대로 콘텐츠 지출을 늘리면 단기 OCF는 눌릴 수 있지만 장기 가입과 가격 결정력은 강해질 수 있다. 넷플릭스의 어려움은 바로 이 시간 차이다. 좋은 콘텐츠 투자는 올해 현금흐름표를 누르고, 나쁜 콘텐츠 투자는 몇 년 뒤 손익계산서를 누른다. 그래서 한 해 FCF만으로 콘텐츠 전략의 성패를 말하면 늦거나 빠르다.
+
+따라서 다음 넷플릭스 공시는 작품 라인업보다 표의 연결을 먼저 봐야 한다. revenue가 늘고 OPM이 버티며 OCF와 FCF가 같이 따라오고, content obligations가 통제된다면 강한 회사라는 결론은 더 선명해진다. 반대로 작품 흥행 뉴스가 많아도 additions와 obligations가 먼저 뛰고 FCF가 꺾이면, 그 흥행은 아직 주주 현금으로 번역되지 않은 것이다.
+
+결국 넷플릭스의 질문은 “좋은 콘텐츠가 있나”에서 끝나지 않는다. 좋은 콘텐츠가 반복 매출, 높은 OPM, 안정적인 FCF, 관리 가능한 obligations로 번역되는지가 마지막 검산이다.
+
+다음 공시에서 이 네 줄이 동시에 좋아지면 넷플릭스는 단순한 콘텐츠 히트 회사가 아니라 콘텐츠 현금흐름을 통제하는 플랫폼으로 더 강하게 읽힌다. 한두 작품의 흥행보다 중요한 것은 흥행이 끝난 뒤에도 매출과 현금이 남는 구조다. 그 구조가 유지될 때 콘텐츠 자본화는 위험한 장부 기술이 아니라 대규모 제작을 견디는 회계 장치가 된다.
+
 ![넷플릭스 — 2026년에 봐야 할 다섯 가지](./assets/114-checkpoints.svg)
+
+---
+
+## 공시 / Filings
+
+이 글에서 콘텐츠 자산 additions, content amortization, content liabilities, content obligations, Q1 2026 실적과 2026 guidance는 아래 공식 자료만 사용했다. 광고·라이브·Warner Bros. 관련 항목은 연결 손익에서 분해되지 않는 영역이므로, 공식 자료에 적힌 범위 밖으로 인과를 확장하지 않는다.
+
+| 자료 | 이 글에서 쓰는 항목 |
+|---|---|
+| [Netflix 2025 Form 10-K (SEC)](https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm) | FY2025 매출 $45.183B, OPM 29.5%, content amortization $16.422B, content additions -$17.097B, total content obligations $24.0B |
+| [Netflix Q1 2026 Shareholder Letter](https://s22.q4cdn.com/959853165/files/doc_financials/2026/q1/FINAL-Q1-26-Shareholder-Letter.pdf) | Q1 2026 revenue $12.250B, operating income $3.957B, OPM 32.3%, OCF $5.290B, 2026 revenue guidance $50.7B~$51.7B |
+| [Netflix Annual Reports & Proxies](https://ir.netflix.net/financials/annual-reports-and-proxies/default.aspx) | 연도별 공식 보고서 접근 경로 |
 
 ---
 
@@ -181,7 +303,7 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 
 ## 검증표
 
-본문 인용 수치를 dartlab 호출과 결과로 검증한다. 외부 출처(광고·워너·세무·구독자·상각 세부)는 분리 표기. 📅 dartlab 실측 2026-06-14 · Netflix(NFLX) 미국 연결(USD)·분기 역년 정규화 기준.
+본문 인용 수치를 dartlab 호출과 결과로 검증한다. 외부 출처(광고·워너·세무·구독자·상각 세부)는 분리 표기. 📅 dartlab 실측 2026-06-20 · Netflix(NFLX) 미국 연결(USD)·분기 역년 정규화 기준.
 
 | 본문 수치 | 출처 / 호출 | 결과 |
 |---|---|---|
@@ -197,5 +319,13 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 | 브라질 세무 비용·구독자 공시 중단·콘텐츠 상각 세부·하반기 OPM 가이던스 | [Netflix IR](https://ir.netflix.net/) · 공시 | 외부 인용 |
 | 마진이 '왜' 올랐는지(가격·믹스·상각·마케팅) | 손익 항목별(연결 미세분) | 분해 불가 |
 | BS(대차대조표) 매핑 불안정 — 인용 주의 | dartlab 데이터 한계 | 주의/제외 |
+| FY2025 매출 45.183B, operating income 13.327B, OPM 29.5%, net income 10.981B | [Netflix 2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm) | 외부 인용 |
+| FY2025 content additions -17.097B, content liabilities change -0.611B, content amortization 16.422B | [Netflix 2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm) | 외부 인용 |
+| FY2025 total content obligations 24.039B, 장부상 content liabilities 5.7B, 장부 밖 obligations 18.4B | [Netflix 2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm) | 외부 인용 |
+| FY2025 1년 내 content obligations 11.528B, 1~3년 8.376B, 3~5년 3.042B, 5년 초과 1.094B | [Netflix 2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm) | 외부 인용 |
+| Netflix는 단일 operating segment, CODM은 consolidated operating margin과 net income 사용 | [Netflix 2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm) | 외부 인용 |
+| Q1 2026 revenue 12.250B, operating income 3.957B, OPM 32.3%, OCF 5.290B, FCF 5.094B | [Netflix Q1 2026 Shareholder Letter](https://s22.q4cdn.com/959853165/files/doc_financials/2026/q1/FINAL-Q1-26-Shareholder-Letter.pdf) | 외부 인용 |
+| 2026 guidance: revenue 50.7B~51.7B, operating margin 31.5%, 광고 revenue 목표 약 3B | [Netflix Q1 2026 Shareholder Letter](https://s22.q4cdn.com/959853165/files/doc_financials/2026/q1/FINAL-Q1-26-Shareholder-Letter.pdf) | 외부 인용·전망 |
+| Q1 2026 Warner Bros. termination fee 2.8B는 interest and other income 항목 | [Netflix Q1 2026 Shareholder Letter](https://s22.q4cdn.com/959853165/files/doc_financials/2026/q1/FINAL-Q1-26-Shareholder-Letter.pdf) | 외부 인용·영업이익 아님 |
 
 본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 광고·워너·세무·구독자·상각 세부는 dartlab 연결로 증명되지 않으며 외부 인용임을 명시한다 — 연결이 증명하는 것은 'OPM 12.9→29.5% 확대, 2021년 OPM↑·OCF↓ 어긋남, OCF가 2023년 +7.27B로 자리 잡음(마진 본격 확대보다 앞선 해)'까지다.
