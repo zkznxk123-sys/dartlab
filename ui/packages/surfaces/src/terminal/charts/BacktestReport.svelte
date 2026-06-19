@@ -27,8 +27,9 @@
 		onBack: () => void; // 재무그래프로 복귀(모드 끔)
 		tearsheetOpen?: boolean; // 무거운 통계(자산곡선·MC·월별·분포·MAE·보조지표) 접힘 — 상시 도크(밴드·히어로·매매표)와 분리
 		onToggleTearsheet?: () => void;
+		hoverTs?: string | null; // 차트 crosshair 가 거래봉 위면 그 진입일(YYYYMMDD) — 그 매매행 co-highlight (역 hover-sync)
 	}
-	let { pf, slots, focus, period, withCosts, adjusted, candleTs, scope, lang, onFocus, onFocusBar, onBack, tearsheetOpen = false, onToggleTearsheet }: Props = $props();
+	let { pf, slots, focus, period, withCosts, adjusted, candleTs, scope, lang, onFocus, onFocusBar, onBack, tearsheetOpen = false, onToggleTearsheet, hoverTs = null }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
 	const focusId = $derived(slots[focus]?.id ?? slots[0]?.id);
@@ -219,7 +220,7 @@
 					<tbody>
 						{#each result.trades.slice().reverse() as t, i (t.entryT)}
 							{@const cum = cumPct[result.trades.length - 1 - i]}
-							<tr class={'brRowT' + (t.retPct > 0 ? ' winRow' : t.retPct < 0 ? ' lossRow' : '')} onclick={() => jumpToBar(t.entryT)} title={T('차트로 이동', 'jump to chart')}>
+							<tr class={'brRowT' + (t.retPct > 0 ? ' winRow' : t.retPct < 0 ? ' lossRow' : '') + (hoverTs === t.entryT ? ' hl' : '')} onclick={() => jumpToBar(t.entryT)} title={T('차트로 이동', 'jump to chart')}>
 								<td class="dim">{result.trades.length - i}</td>
 								<td>{fmtD(t.entryT)}</td>
 								<td class="r">{num(t.entryPx)}</td>
@@ -410,6 +411,8 @@
 	.brTable td.dim { color: var(--dimmer, #5b6573); }
 	.brRowT { cursor: pointer; }
 	.brRowT:hover td { background: rgba(96, 165, 250, 0.1); }
+	/* 역 hover-sync — 차트 crosshair 가 이 거래봉 위면 행 강조(앰버=crosshair 색). 차트↔표 루프 완성. */
+	.brRowT.hl td { background: rgba(251, 146, 60, 0.16); }
 	.brEmpty { font-size: 11px; color: var(--dimmer, #5b6573); padding: 14px; text-align: center; }
 	.brAssume { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
 	.brAssume li { font-size: 11.5px; color: #aeb6c2; line-height: 1.5; }

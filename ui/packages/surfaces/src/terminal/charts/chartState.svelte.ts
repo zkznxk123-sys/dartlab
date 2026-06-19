@@ -127,6 +127,8 @@ export class ChartCtl {
 	btHoverBar = $state<string | null>(null);
 	// 보고서 상세 통계(tearsheet) 접힘 — false 면 도크(밴드·히어로·매매표)만, true 면 무거운 통계 펼침. BtChip '상세 ▸' 가 연다.
 	btTearsheetOpen = $state(false);
+	// 차트→보고서 역 hover-sync — 차트 crosshair 가 거래봉 위면 그 진입일 ts(YYYYMMDD), 아니면 null. 보고서가 그 행 하이라이트(루프 완성). btHoverBar 와 분리(차트 자기 스크롤 방지).
+	btCrosshairTs = $state<string | null>(null);
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀

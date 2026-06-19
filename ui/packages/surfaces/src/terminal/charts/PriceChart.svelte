@@ -67,6 +67,14 @@
 	let btCandleTs = $state<string[]>([]); // 백테스트 캔들 t(YYYYMMDD) — equity 정렬(BacktestReport 슬라이스)
 	// 결과를 CenterStack 으로 상향 — 하단 BacktestReport 가 렌더(보고서 모드). 다이얼로그 폐기.
 	$effect(() => { onBtResult?.(btPf, btCandleTs); });
+	// 차트→보고서 역 hover-sync — 포커스 전략 거래 진입일 ts(YYYYMMDD) 집합. crosshair 구독이 읽어 ctl.btCrosshairTs 설정(거래봉 위일 때만).
+	const tradeEntrySet = $derived.by<Set<string>>(() => {
+		const set = new Set<string>();
+		const slot = btPf?.slots[Math.min(ctl.btFocus, (btPf?.slots.length ?? 1) - 1)];
+		for (const tr of slot?.result.trades ?? []) set.add(tr.entryT);
+		return set;
+	});
+	const tsToYmd = (ms: number): string => { const d = new Date(ms); return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`; };
 	// 보고서 거래행 클릭 → ctl.btHoverBar 설정 → 차트 해당 진입봉으로 스크롤(다이얼로그 onFocusBar 대체).
 	$effect(() => {
 		const t = ctl.btHoverBar;
@@ -342,6 +350,13 @@
 			try {
 				local.subscribeAction('onScroll', () => requestAnimationFrame(recomputeRail));
 				local.subscribeAction('onZoom', () => requestAnimationFrame(recomputeRail));
+				// 역 hover-sync — crosshair 가 거래 진입봉 위면 보고서 그 행 하이라이트(차트↔표 루프 완성). 거래봉 아니면 null(변경 시만 설정).
+				local.subscribeAction('onCrosshairChange', (data: any) => {
+					const ms = data?.kLineData?.timestamp ?? data?.timestamp;
+					const ymd = typeof ms === 'number' ? tsToYmd(ms) : null;
+					const next = ymd && tradeEntrySet.has(ymd) ? ymd : null;
+					if (ctl.btCrosshairTs !== next) ctl.btCrosshairTs = next;
+				});
 			} catch { /* 구버전 무시 */ }
 			// timestamp 는 Date.UTC 자정 — timezone 미설정 시 XAxis 라벨이 브라우저 로컬 TZ 로 풀려
 			// 미주 사용자에게 하루 전 날짜로 표시되는 조용한 오류. 명시 고정.
