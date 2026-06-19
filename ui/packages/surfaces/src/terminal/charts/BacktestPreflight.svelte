@@ -59,7 +59,7 @@
 	.bpHero { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; padding: 9px 12px; background: rgba(255, 255, 255, 0.02); }
 	.bpHeroLbl { font-size: 11.5px; color: #aeb6c2; margin-bottom: 7px; }
 	.bpHeroLbl b { color: var(--amber, #fb923c); font-weight: 700; }
-	.bpHeroLbl i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 10.5px; }
+	.bpHeroLbl i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 11px; }
 	.bpNums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 22px; }
 	.bpBig { display: flex; flex-direction: column; gap: 1px; }
 	.bpBig > span { font-size: 11px; color: var(--dim, #8b94a3); }

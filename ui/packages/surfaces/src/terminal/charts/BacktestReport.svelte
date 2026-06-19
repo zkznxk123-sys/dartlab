@@ -44,6 +44,8 @@
 	const fmtD = (t: string) => (t && t.length >= 8 ? `${t.slice(0, 4)}.${t.slice(4, 6)}.${t.slice(6, 8)}` : '—');
 	const num = (v: number, d = 0) => v.toLocaleString('en-US', { maximumFractionDigits: d });
 	const beats = $derived(m.retPct >= result.bh.retPct);
+	// 경고 enum → 한국어 라벨(영문 토큰 누수 차단). BtChip WARN_TOKEN 과 동일 어휘.
+	const warnLabel = (k: string) => (k === 'splitSuspect' ? T('분할의심', 'split?') : k === 'shortRange' ? T('기간 부족', 'short range') : k === 'fewTrades' ? T('표본 부족', 'few trades') : k === 'costsOff' ? T('비용 미포함', 'costs off') : k);
 
 	const eq = $derived(result.equity.filter((v): v is number => v != null));
 	const bhq = $derived(result.bhEquity.filter((v): v is number => v != null));
@@ -164,7 +166,7 @@
 		<span class="brStamp">{adjusted ? T('배당미반영·수정주가', 'div excl·adj') : T('배당미반영·무수정주가', 'div excl·unadj')}</span>
 		{#if oos}<span class="brStamp">{T('학습/검증 분할', 'train/test split')}</span>{:else if rs}<span class="brStamp">{T('구간', 'window')} {fmtD(rs.range.from)}~{fmtD(rs.range.to)} · {rs.range.bars}{T('봉', 'b')}</span>{:else}<span class="brStamp">{T('단일구간', 'single window')}</span>{/if}
 		{#if rs}<span class="brStamp">{T('기준일', 'as of')} {fmtD(rs.dataAsOf)}</span>{/if}
-		{#each result.warnings as w (w.kind)}<span class="brWarn">⚠ {w.kind}</span>{/each}
+		{#each result.warnings as w (w.kind)}<span class="brWarn">⚠ {warnLabel(w.kind)}</span>{/each}
 	</div>
 
 	{#if combo}
