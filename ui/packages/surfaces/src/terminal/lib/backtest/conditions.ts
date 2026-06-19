@@ -3,7 +3,7 @@
 // terminal-strategy-lab 01 §2.4. 봉별 조건 만족(satisfied)도 산출 → 조건 레인 시각화(02 §1.5).
 // look-ahead 0: 전 series 는 t 이전 데이터로만(지표 내부 보장), 체결은 엔진의 t+1 shift 가 상속.
 import { atr, bollinger, ema, macd, realizedVol, rsi, sma, stochastic, volSma } from '../indicators';
-import type { BtParamDef, Candle } from './types';
+import type { BtParamDef, Candle, PresetFamily } from './types';
 
 const closesOf = (cs: Candle[]) => cs.map((c) => c.c);
 
@@ -27,7 +27,7 @@ export const SERIES_CATALOG: SeriesDef[] = [
 	{ key: 'price', kr: '종가', en: 'price', unit: '원', params: [], calc: (cs) => closesOf(cs) },
 	{ key: 'ma', kr: '이동평균(SMA)', en: 'SMA', unit: '원', params: [{ name: 'period', kr: '기간', en: 'period', min: 5, max: 200, step: 5, def: 20 }], calc: (cs, p) => sma(closesOf(cs), p.period) },
 	{ key: 'ema', kr: '지수이평(EMA)', en: 'EMA', unit: '원', params: [{ name: 'period', kr: '기간', en: 'period', min: 5, max: 200, step: 5, def: 20 }], calc: (cs, p) => ema(closesOf(cs), p.period) },
-	{ key: 'rsi', kr: 'RSI', en: 'RSI', unit: 'idx', params: [{ name: 'period', kr: '기간', en: 'period', min: 7, max: 28, step: 7, def: 14 }], calc: (cs, p) => rsi(closesOf(cs), p.period) },
+	{ key: 'rsi', kr: 'RSI', en: 'RSI', unit: 'idx', params: [{ name: 'period', kr: '기간', en: 'period', min: 2, max: 28, step: 1, def: 14 }], calc: (cs, p) => rsi(closesOf(cs), p.period) },
 	{ key: 'stochK', kr: '스토캐스틱 %K', en: 'Stoch %K', unit: 'idx', params: [{ name: 'k', kr: 'K', en: 'k', min: 5, max: 21, step: 2, def: 14 }], calc: (cs, p) => stochastic(cs.map((c) => c.h), cs.map((c) => c.l), closesOf(cs), p.k, 3).k },
 	{ key: 'macdHist', kr: 'MACD 히스토그램', en: 'MACD hist', unit: 'idx', params: [], calc: (cs) => macd(closesOf(cs), 12, 26, 9).hist },
 	{ key: 'bbPctB', kr: '볼린저 %B', en: 'BB %B', unit: '비율', params: [{ name: 'period', kr: '기간', en: 'period', min: 10, max: 60, step: 5, def: 20 }, { name: 'mult', kr: '승수', en: 'mult', min: 1, max: 4, step: 0.5, def: 2 }], calc: (cs, p) => { const bb = bollinger(closesOf(cs), p.period, p.mult); return bb.upper.map((u, i) => (u != null && bb.lower[i] != null && u !== bb.lower[i] ? (cs[i].c - (bb.lower[i] as number)) / (u - (bb.lower[i] as number)) : null)); } },
@@ -135,38 +135,88 @@ const cond = (left: SeriesKey, leftParams: Record<string, number>, op: Op, right
 const k = (value: number): Condition['right'] => ({ kind: 'const', value });
 const ser = (key: SeriesKey, params: Record<string, number>): Condition['right'] => ({ kind: 'series', key, params });
 
-export interface RulePreset { key: string; kr: string; en: string; descKr: string; descEn: string; make: () => StrategyRule; }
+export type { PresetFamily };
+export const FAMILY_LABEL: Record<PresetFamily, { kr: string; en: string }> = {
+	trend: { kr: '추세', en: 'Trend' }, momentum: { kr: '모멘텀', en: 'Momentum' }, meanRevert: { kr: '평균회귀', en: 'Mean-Revert' }, volatility: { kr: '변동성', en: 'Volatility' }
+};
+export const FAMILY_ORDER: PresetFamily[] = ['trend', 'momentum', 'meanRevert', 'volatility'];
+export interface RulePreset { key: string; kr: string; en: string; descKr: string; descEn: string; family: PresetFamily; make: () => StrategyRule; }
 
 export const RULE_PRESETS: RulePreset[] = [
 	{
-		key: 'volConfirmTrend', kr: '거래량 확인 추세', en: 'Volume-Confirmed Trend',
+		key: 'volConfirmTrend', family: 'trend', kr: '거래량 확인 추세', en: 'Volume-Confirmed Trend',
 		descKr: '가격 > 60일선 그리고 거래량 평균 1.5배 초과(fake breakout 제거)', descEn: 'price>MA60 AND volume>1.5× avg',
 		make: () => ({ entry: [cond('price', {}, '>', ser('ma', { period: 60 })), cond('volRatio', { period: 20 }, '>', k(1.5))], entryCombine: 'AND', exit: [cond('price', {}, '<', ser('ma', { period: 60 }))], exitCombine: 'OR' })
 	},
 	{
-		key: 'lowVolMomentum', kr: '저변동 모멘텀', en: 'Low-Vol Momentum',
+		key: 'lowVolMomentum', family: 'momentum', kr: '저변동 모멘텀', en: 'Low-Vol Momentum',
 		descKr: '120일 수익률 > 0 그리고 실현변동성 < 30%(추세 + 낮은 변동)', descEn: '120d return>0 AND realized vol<30%',
 		make: () => ({ entry: [cond('momRet', { lookback: 120 }, '>', k(0)), cond('realizedVol', { period: 60 }, '<', k(30))], entryCombine: 'AND', exit: [cond('momRet', { lookback: 120 }, '<', k(0))], exitCombine: 'OR' })
 	},
 	{
-		key: 'breakoutVolume', kr: '거래량 신고가 돌파', en: 'Volume Breakout',
+		key: 'breakoutVolume', family: 'volatility', kr: '거래량 신고가 돌파', en: 'Volume Breakout',
 		descKr: '60일 신고가 99% 근접 그리고 거래량 2배 급증', descEn: 'near 60d high AND volume>2× avg',
 		make: () => ({ entry: [cond('high20Prox', { period: 60 }, '>=', k(99)), cond('volRatio', { period: 20 }, '>', k(2))], entryCombine: 'AND', exit: [cond('high20Prox', { period: 60 }, '<', k(90))], exitCombine: 'OR' })
 	},
 	{
-		key: 'stochRevert', kr: '스토캐스틱 반전', en: 'Stochastic Revert',
+		key: 'stochRevert', family: 'meanRevert', kr: '스토캐스틱 반전', en: 'Stochastic Revert',
 		descKr: '%K < 20 진입, > 80 청산(과매도 반등)', descEn: 'enter %K<20, exit %K>80',
 		make: () => ({ entry: [cond('stochK', { k: 14 }, '<', k(20))], entryCombine: 'AND', exit: [cond('stochK', { k: 14 }, '>', k(80))], exitCombine: 'OR' })
 	},
 	{
-		key: 'bbMeanRevert', kr: '볼린저 %B 평균회귀', en: 'BB %B Mean-Revert',
+		key: 'bbMeanRevert', family: 'meanRevert', kr: '볼린저 %B 평균회귀', en: 'BB %B Mean-Revert',
 		descKr: '%B < 0.05(하단 이탈) 진입, > 0.5(중심) 청산', descEn: 'enter %B<0.05, exit %B>0.5',
 		make: () => ({ entry: [cond('bbPctB', { period: 20, mult: 2 }, '<', k(0.05))], entryCombine: 'AND', exit: [cond('bbPctB', { period: 20, mult: 2 }, '>', k(0.5))], exitCombine: 'OR' })
 	},
 	{
-		key: 'maCrossVol', kr: '저변동 골든크로스', en: 'Low-Vol MA Cross',
+		key: 'maCrossVol', family: 'trend', kr: '저변동 골든크로스', en: 'Low-Vol MA Cross',
 		descKr: '20일선 상향돌파 60일선 그리고 ATR < 4%(변동성 스파이크 회피)', descEn: 'MA20 crossUp MA60 AND ATR<4%',
 		make: () => ({ entry: [cond('ma', { period: 20 }, 'crossUp', ser('ma', { period: 60 })), cond('atrPct', { period: 14 }, '<', k(4))], entryCombine: 'AND', exit: [cond('ma', { period: 20 }, 'crossDown', ser('ma', { period: 60 }))], exitCombine: 'OR' })
+	},
+	{
+		key: 'ma200Trend', family: 'trend', kr: '200일선 추세필터', en: '200MA Trend Filter',
+		descKr: '50일선이 200일선 상향돌파 & 가격>200일선(하락장 휩쏘 차단)', descEn: 'MA50 crosses up MA200 while price>MA200',
+		make: () => ({ entry: [cond('ma', { period: 50 }, 'crossUp', ser('ma', { period: 200 })), cond('price', {}, '>', ser('ma', { period: 200 }))], entryCombine: 'AND', exit: [cond('ma', { period: 50 }, 'crossDown', ser('ma', { period: 200 }))], exitCombine: 'OR' })
+	},
+	{
+		key: 'dualMomentum', family: 'momentum', kr: '듀얼 모멘텀', en: 'Dual Momentum',
+		descKr: '12개월 수익률>0 & 가격>200일선(절대+추세)', descEn: '12m return>0 AND price>MA200',
+		make: () => ({ entry: [cond('momRet', { lookback: 252 }, '>', k(0)), cond('price', {}, '>', ser('ma', { period: 200 }))], entryCombine: 'AND', exit: [cond('momRet', { lookback: 252 }, '<', k(0)), cond('price', {}, '<', ser('ma', { period: 200 }))], exitCombine: 'OR' })
+	},
+	{
+		key: 'trendPullback', family: 'meanRevert', kr: '추세 눌림목', en: 'Trend Pullback',
+		descKr: '상승추세(>200일선)에서 RSI(7)<15 눌림 매수, RSI>70/5일선 이탈 청산', descEn: 'buy dips (RSI7<15) in an uptrend (>MA200)',
+		make: () => ({ entry: [cond('price', {}, '>', ser('ma', { period: 200 })), cond('rsi', { period: 7 }, '<', k(15))], entryCombine: 'AND', exit: [cond('rsi', { period: 7 }, '>', k(70)), cond('price', {}, '<', ser('ma', { period: 5 }))], exitCombine: 'OR' })
+	},
+	{
+		key: 'connorsRsi2', family: 'meanRevert', kr: 'RSI(2) 단기반전', en: 'Connors RSI-2',
+		descKr: '상승추세에서 RSI(2)<10 급락 매수(단기·노이즈 높음), RSI>70/5일선 회복 청산', descEn: 'RSI(2)<10 dip in uptrend (short-term, noisy)',
+		make: () => ({ entry: [cond('price', {}, '>', ser('ma', { period: 200 })), cond('rsi', { period: 2 }, '<', k(10))], entryCombine: 'AND', exit: [cond('rsi', { period: 2 }, '>', k(70)), cond('price', {}, '>', ser('ma', { period: 5 }))], exitCombine: 'OR' })
+	},
+	{
+		key: 'high52wTrend', family: 'momentum', kr: '52주 신고가 추세', en: '52W High Trend',
+		descKr: '52주 신고가 98% 근접 & 가격>50일선(신고가 추세추종)', descEn: 'near 52w high AND price>MA50',
+		make: () => ({ entry: [cond('high20Prox', { period: 252 }, '>=', k(98)), cond('price', {}, '>', ser('ma', { period: 50 }))], entryCombine: 'AND', exit: [cond('price', {}, '<', ser('ma', { period: 50 }))], exitCombine: 'OR' })
+	},
+	{
+		key: 'squeezeBreakout', family: 'volatility', kr: '변동성 수축 돌파', en: 'Squeeze Breakout',
+		descKr: 'ATR<3%(조용) & 60일 신고가 & 거래량 2배(터짐), 20일선 이탈/ATR>7% 청산', descEn: 'low ATR squeeze + breakout on 2x volume',
+		make: () => ({ entry: [cond('atrPct', { period: 14 }, '<', k(3)), cond('high20Prox', { period: 60 }, '>=', k(99)), cond('volRatio', { period: 20 }, '>', k(2))], entryCombine: 'AND', exit: [cond('price', {}, '<', ser('ma', { period: 20 })), cond('atrPct', { period: 14 }, '>', k(7))], exitCombine: 'OR' })
+	},
+	{
+		key: 'lowVolTrend', family: 'volatility', kr: '저변동 추세추종', en: 'Low-Vol Trend',
+		descKr: '가격>200일선 & 실현변동성<30% & 120일 수익률>0(저변동 우위)', descEn: 'uptrend with low realized vol',
+		make: () => ({ entry: [cond('price', {}, '>', ser('ma', { period: 200 })), cond('realizedVol', { period: 60 }, '<', k(30)), cond('momRet', { lookback: 120 }, '>', k(0))], entryCombine: 'AND', exit: [cond('price', {}, '<', ser('ma', { period: 200 })), cond('realizedVol', { period: 60 }, '>', k(50))], exitCombine: 'OR' })
+	},
+	{
+		key: 'emaDualTrend', family: 'trend', kr: 'EMA 듀얼 추세', en: 'EMA 8-21 Trend',
+		descKr: 'EMA8이 EMA21 상향돌파 & 가격>100일선(빠른 스윙 추세)', descEn: 'EMA8 crosses up EMA21 above MA100',
+		make: () => ({ entry: [cond('ema', { period: 8 }, 'crossUp', ser('ema', { period: 21 })), cond('price', {}, '>', ser('ma', { period: 100 }))], entryCombine: 'AND', exit: [cond('ema', { period: 8 }, 'crossDown', ser('ema', { period: 21 }))], exitCombine: 'OR' })
+	},
+	{
+		key: 'bbFullRevert', family: 'meanRevert', kr: '볼린저 2시그마 반대편', en: 'BB Full Revert',
+		descKr: '하단밴드 이탈(%B<0)에서 상승추세만 매수, 상단밴드(%B>1) 청산', descEn: 'enter below lower band in uptrend, exit above upper',
+		make: () => ({ entry: [cond('bbPctB', { period: 20, mult: 2 }, '<', k(0)), cond('price', {}, '>', ser('ma', { period: 200 }))], entryCombine: 'AND', exit: [cond('bbPctB', { period: 20, mult: 2 }, '>', k(1))], exitCombine: 'OR' })
 	}
 ];
 

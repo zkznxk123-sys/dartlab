@@ -11,7 +11,8 @@ export type {
 	BtMetrics,
 	BtRunSpec,
 	BtResult,
-	BtSpecInput
+	BtSpecInput,
+	BtFullRef
 } from './types';
 export { BT_PRESETS } from './presets';
 export { runBacktest, runBacktestRule } from './engine';
@@ -23,8 +24,9 @@ export type { StrategySlot, ComboMetrics, ComboResult, PortfolioBtResult } from 
 export { backtestPreflight } from './preflight';
 export type { BtPreflight } from './preflight';
 // 조건 빌더(전문가급 커스텀 패널) — 지표 카탈로그·룰 프리셋·평가.
-export { SERIES_CATALOG, RULE_PRESETS, OP_LABEL, evalRule, evalCondition, ruleWarmup } from './conditions';
+export { SERIES_CATALOG, RULE_PRESETS, OP_LABEL, evalRule, evalCondition, ruleWarmup, FAMILY_LABEL, FAMILY_ORDER } from './conditions';
 export type { SeriesKey, SeriesDef, Op, Condition, StrategyRule, RulePreset, RuleEval } from './conditions';
+export type { PresetFamily } from './types';
 // 펀더게이트(W2 간판②) — PIT 시계열 빌더 + 룰 게이트 사용 가드.
 export { buildGateSeries, ruleUsesGate } from './gate';
 export type { GateRow } from './gate';

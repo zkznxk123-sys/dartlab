@@ -4,6 +4,9 @@ import type { Candle } from '@dartlab/ui-contracts';
 
 export type BtPresetKey = 'maCross' | 'rsiRevert' | 'bbRevert' | 'macdCross' | 'donchian' | 'momentum';
 
+// 전략 패밀리 — 프리셋 그리드 카테고리(추세/모멘텀/평균회귀/변동성). BT_PRESETS·RULE_PRESETS 공통(순수 타입).
+export type PresetFamily = 'trend' | 'momentum' | 'meanRevert' | 'volatility';
+
 export interface BtParamDef {
 	name: string;
 	kr: string;
@@ -15,6 +18,7 @@ export interface BtParamDef {
 }
 export interface BtPresetDef {
 	key: BtPresetKey;
+	family: PresetFamily;
 	kr: string;
 	en: string;
 	descKr: string;
@@ -41,12 +45,12 @@ export interface BtTrade {
 	holdDays: number; // 거래일(봉) 수
 	open: boolean;
 	// 03 §0.5.4 — 청산 사유 명시(현 open:true 암묵 → 명시). signal=신호청산 / finalMark=미청산 종가 가상평가.
-	exitReason: 'signal' | 'finalMark' | 'stop' | 'take'; // stop=손절·take=익절(당일 인트라바 가정, S2)
+	exitReason: 'signal' | 'finalMark' | 'stop' | 'take'; // stop=손절·take=익절(갭조정 인트라바: 갭 관통 시 시가 체결, 보수, S2)
 	maePct?: number; // 최대역행(보유 중 worst 미실현 %, MAE) — 거래 분석(S2)
 	mfePct?: number; // 최대순행(보유 중 best 미실현 %, MFE)
 	entryDeferredBars: number; // v=0/거래정지로 진입이 이연된 봉 수(0=신호 다음 봉 즉시 체결, 감사용)
 }
-/** 손절/익절 설정(S2) — 보유 중 인트라바 트리거. null/빈값이면 미적용(회귀 0). t+1 시가 모델과 시점 충돌 → "당일 인트라바 가정" 라벨. */
+/** 손절/익절 설정(S2) — 보유 중 인트라바 트리거. null/빈값이면 미적용(회귀 0). 갭 관통 시 시가 체결(갭조정·보수: 손절 우선) → t+1 시가 모델과 시점 충돌. */
 export interface BtStopConfig {
 	lossPct?: number; // 손절 % (진입가 대비 −, 예 8 = −8%에서 손절)
 	gainPct?: number; // 익절 % (진입가 대비 +)
@@ -121,6 +125,16 @@ export interface BtResult {
 	warnings: BtWarning[];
 	runSpec?: BtRunSpec; // opts.spec 주입 시 — 재현·푸터·export 용 (미주입이면 undefined)
 	oos?: { splitIdx: number; splitT: string; train: BtSplitMetrics; test: BtSplitMetrics } | null; // opts.oosSplit ∈ (0,1) 시 — 학습/검증 분할 성과
+}
+
+/** 커스텀 구간 체리피킹 대조(G3) — 같은 전략을 *전체 기간*에 돌린 포커스 결과 요약. 보고서가 '이 구간 vs 전체'로 병기해 표본운을 구조적으로 자백. */
+export interface BtFullRef {
+	retPct: number;
+	bhRetPct: number;
+	cagrPct: number | null;
+	fromT: string;
+	toT: string;
+	bars: number;
 }
 
 /** runBacktest opts.spec 입력 — 호출측(PriceChart)이 아는 종목/데이터 메타. */

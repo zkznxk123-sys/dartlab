@@ -6,6 +6,7 @@ import type { BtPresetDef } from './types';
 export const BT_PRESETS: BtPresetDef[] = [
 	{
 		key: 'maCross',
+		family: 'trend',
 		kr: '골든크로스',
 		en: 'MA Cross',
 		descKr: '단기 이평 > 장기 이평이면 보유',
@@ -25,6 +26,7 @@ export const BT_PRESETS: BtPresetDef[] = [
 	},
 	{
 		key: 'rsiRevert',
+		family: 'meanRevert',
 		kr: 'RSI 과매도 반등',
 		en: 'RSI Revert',
 		descKr: 'RSI < 매수선 진입, > 매도선 청산',
@@ -49,6 +51,7 @@ export const BT_PRESETS: BtPresetDef[] = [
 	},
 	{
 		key: 'bbRevert',
+		family: 'meanRevert',
 		kr: '볼린저 하단회귀',
 		en: 'BB Revert',
 		descKr: '종가 < 하단밴드 진입, ≥ 중심선 청산',
@@ -73,6 +76,7 @@ export const BT_PRESETS: BtPresetDef[] = [
 	},
 	{
 		key: 'macdCross',
+		family: 'trend',
 		kr: 'MACD 시그널',
 		en: 'MACD Cross',
 		descKr: 'MACD선 > 시그널선이면 보유',
@@ -93,6 +97,7 @@ export const BT_PRESETS: BtPresetDef[] = [
 	},
 	{
 		key: 'donchian',
+		family: 'trend',
 		kr: '채널 돌파 (터틀)',
 		en: 'Donchian Break',
 		descKr: 'N일 최고가 돌파 진입, M일 최저가 이탈 청산',
@@ -122,6 +127,7 @@ export const BT_PRESETS: BtPresetDef[] = [
 	},
 	{
 		key: 'momentum',
+		family: 'momentum',
 		kr: '절대 모멘텀',
 		en: 'Momentum',
 		descKr: 'N일 수익률 > 0 이면 보유 (듀얼모멘텀의 절대축)',

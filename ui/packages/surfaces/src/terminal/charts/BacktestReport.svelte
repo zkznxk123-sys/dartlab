@@ -2,7 +2,7 @@
 	// 백테스트 보고서 — 다이얼로그 폐기, CenterStack 하단(재무그래프 자리) 인라인 tearsheet. 차트는 위에 고정·공시.
 	// 탭 아닌 스택 섹션(거래표 spine 상시) + 정직 헤더 띠(증거등급·명세스탬프). 단일종목 변형(시장=동일엔진·index벤치, 유니버스=별도 본문).
 	// BacktestDialog 본문 도출 그대로 흡수(eq/bhq/dd/oosDecay/tradeStats/cumPct/worstTrades) — 새 통계 0, 재배치.
-	import type { PortfolioBtResult, StrategySlot } from '../lib/backtest';
+	import type { PortfolioBtResult, StrategySlot, BtFullRef } from '../lib/backtest';
 	import { GOV_ATTRIBUTION } from '@dartlab/ui-contracts';
 	import type { Lang } from '../lib/types';
 	import EquityChart from './EquityChart.svelte';
@@ -21,6 +21,7 @@
 		adjusted: boolean;
 		candleTs: string[];
 		scope: 'single' | 'market' | 'universe';
+		fullRef?: BtFullRef | null; // 커스텀 구간 전체기간 대조(G3 체리피킹 가드) — 있으면 '이 구간 vs 전체' 배너
 		lang: Lang;
 		onFocus: (i: number) => void;
 		onFocusBar?: (t: string) => void;
@@ -29,7 +30,7 @@
 		onToggleTearsheet?: () => void;
 		hoverTs?: string | null; // 차트 crosshair 가 거래봉 위면 그 진입일(YYYYMMDD) — 그 매매행 co-highlight (역 hover-sync)
 	}
-	let { pf, slots, focus, period, withCosts, adjusted, candleTs, scope, lang, onFocus, onFocusBar, onBack, tearsheetOpen = false, onToggleTearsheet, hoverTs = null }: Props = $props();
+	let { pf, slots, focus, period, withCosts, adjusted, candleTs, scope, fullRef = null, lang, onFocus, onFocusBar, onBack, tearsheetOpen = false, onToggleTearsheet, hoverTs = null }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
 	const focusId = $derived(slots[focus]?.id ?? slots[0]?.id);
@@ -136,6 +137,20 @@
 	// 거래순서 몬테카를로(경로운) — 실현 거래만 재배열. 표본<15면 null(거짓 좁은 밴드 차단).
 	const mcCone = $derived.by(() => tradeShuffleCone(result.trades.map((t) => t.retPct)));
 
+	// 청산사유 분해 — 사유별 건수·평균손익(신규 통계 0, exitReason 이미 기록). 손절이 너무 자주 끊는지·수익이 어디서 났는지 한 줄.
+	// 사유 ≥2 일 때만(전부 신호청산이면 거래표 사유열과 중복 → 생략). 막대=평균손익 크기, 색=사유.
+	const exitBreakdown = $derived.by(() => {
+		const by = new Map<string, { n: number; sum: number }>();
+		for (const t of result.trades) {
+			const e = by.get(t.exitReason) ?? { n: 0, sum: 0 };
+			e.n += 1; e.sum += t.retPct;
+			by.set(t.exitReason, e);
+		}
+		const rows = (['stop', 'take', 'signal', 'finalMark'] as const).filter((r) => by.has(r)).map((r) => ({ reason: r, n: by.get(r)!.n, avg: by.get(r)!.sum / by.get(r)!.n }));
+		const maxAbs = Math.max(1, ...rows.map((r) => Math.abs(r.avg)));
+		return rows.length >= 2 ? rows.map((r) => ({ ...r, w: (Math.abs(r.avg) / maxAbs) * 100 })) : null;
+	});
+
 	function jumpToBar(t: string) { onFocusBar?.(t); }
 
 	function exportCsv() {
@@ -194,6 +209,15 @@
 		<div class="brBanner mag">{T('동일가중 조합 (리밸런싱 없음) · 단일종목 = 타이밍 분산이지 자산 분산 아님', 'equal-weight combo · timing not asset diversification')} · {T('수익률', 'return')} <b class={'mono ' + cls(combo.metrics.retPct)}>{sgn(combo.metrics.retPct)}%</b></div>
 	{/if}
 	{#if !beats}<div class="brBanner lag">{T('이 구간에선 단순 보유(B&H)가 전략을 앞섰습니다.', 'buy & hold beat the strategy over this window.')}</div>{/if}
+	{#if fullRef}
+		{@const winExcess = m.retPct - result.bh.retPct}
+		{@const fullExcess = fullRef.retPct - fullRef.bhRetPct}
+		<!-- G3 체리피킹 대조 — 선택 구간은 전체의 일부. 같은 전략을 전체 기간에 돌린 결과를 병기해 표본운/구간선택 편향을 구조적으로 자백. -->
+		<div class="brBanner cherry">
+			<b>{T('구간 선택 주의', 'window-pick check')}</b> · {T('선택 구간은 전체의 일부입니다. 같은 전략 전체', 'this is a slice; same strategy over the full period')} <i>({fmtD(fullRef.fromT)}~{fmtD(fullRef.toT)})</i>: {T('전략', 'strat')} <b class={'mono ' + cls(fullRef.retPct)}>{sgn(fullRef.retPct)}%</b> {T('vs 보유', 'vs B&H')} <b class={'mono ' + cls(fullRef.bhRetPct)}>{sgn(fullRef.bhRetPct)}%</b>{#if fullRef.cagrPct != null} · CAGR <b class="mono">{sgn(fullRef.cagrPct)}%</b>{/if}
+			{#if winExcess > fullExcess + 3}<span class="brCherryFlag">⚠ {T('이 구간이 전체 기간보다 전략에 유리해 보입니다 — 체리피킹 위험', 'this window flatters the strategy vs the full period — cherry-pick risk')}</span>{/if}
+		</div>
+	{/if}
 
 	<!-- 히어로 5 카드 -->
 	<div class="brHero">
@@ -213,6 +237,19 @@
 	<!-- 일자별 거래표 (spine·상시) -->
 	<section class="brSec">
 		<div class="brSecHd">{T('거래 내역', 'trades')} <span class="brN">{m.tradeCount}</span><button class="brCsv" onclick={exportCsv}>{T('CSV', 'CSV')}</button><span class="brHint">{T('행 클릭 → 차트 진입봉', 'row → chart bar')}</span></div>
+		{#if exitBreakdown}
+			<!-- 청산사유 분해 — 사유별 건수+평균손익(막대=평균 크기·색=사유). 손절이 자주 끊는지/수익이 어디서 났는지 한눈에. -->
+			<div class="brExit">
+				{#each exitBreakdown as e (e.reason)}
+					<div class="brExitRow" title={T('평균 손익', 'avg P&L per exit')}>
+						<span class={'brExitLbl ' + reasonCls(e.reason)}>{reasonLbl(e.reason)}</span>
+						<span class="brExitN">{e.n}{T('건', '')}</span>
+						<span class="brExitBar"><i class={e.avg >= 0 ? 'u' : 'd'} style={`width:${e.w}%`}></i></span>
+						<span class={'brExitAvg mono ' + cls(e.avg)}>{sgn(e.avg)}%</span>
+					</div>
+				{/each}
+			</div>
+		{/if}
 		{#if result.trades.length}
 			<div class="brTableWrap">
 				<table class="brTable mono">
@@ -366,6 +403,10 @@
 	.brBanner { font-size: 11px; border-radius: 4px; padding: 6px 11px; line-height: 1.5; }
 	.brBanner.mag { color: #cbb4f5; background: rgba(232, 121, 249, 0.07); border: 1px solid rgba(232, 121, 249, 0.25); }
 	.brBanner.lag { color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); }
+	/* G3 체리피킹 대조 — 이 구간 vs 전체 기간 병기(표본운 구조적 자백). */
+	.brBanner.cherry { color: #d7c4a8; background: rgba(251, 146, 60, 0.06); border: 1px solid rgba(251, 146, 60, 0.28); display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
+	.brBanner.cherry i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 11px; }
+	.brCherryFlag { flex-basis: 100%; color: var(--amber, #fb923c); font-size: 11px; }
 	.brHero { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 	.brCard { display: flex; flex-direction: column; gap: 2px; padding: 9px 11px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; }
 	/* 히어로 카드 #1 = 보유 대비 초과수익 — 백테스트의 진짜 답. 앰버 좌측 액센트 + 가장 큰 숫자(CAGR 압도 차단). */
@@ -414,6 +455,16 @@
 	/* 역 hover-sync — 차트 crosshair 가 이 거래봉 위면 행 강조(앰버=crosshair 색). 차트↔표 루프 완성. */
 	.brRowT.hl td { background: rgba(251, 146, 60, 0.16); }
 	.brEmpty { font-size: 11px; color: var(--dimmer, #5b6573); padding: 14px; text-align: center; }
+	/* 청산사유 분해 — 사유별 건수+평균손익 막대(신규 통계 0, exitReason 표면화). */
+	.brExit { display: flex; flex-direction: column; gap: 3px; padding: 5px 9px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; }
+	.brExitRow { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+	.brExitLbl { flex: 0 0 44px; font-weight: 600; }
+	.brExitN { flex: 0 0 40px; color: var(--dim, #8b94a3); font-family: var(--dl-font-mono, monospace); }
+	.brExitBar { flex: 1 1 auto; height: 7px; background: rgba(255, 255, 255, 0.03); border-radius: 4px; overflow: hidden; }
+	.brExitBar i { display: block; height: 100%; border-radius: 4px; }
+	.brExitBar i.u { background: var(--up, #34d399); }
+	.brExitBar i.d { background: var(--dn, #f0616f); }
+	.brExitAvg { flex: 0 0 56px; text-align: right; font-weight: 700; }
 	.brAssume { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
 	.brAssume li { font-size: 11.5px; color: #aeb6c2; line-height: 1.5; }
 	.brAssume li.warn { color: var(--amber, #fb923c); }

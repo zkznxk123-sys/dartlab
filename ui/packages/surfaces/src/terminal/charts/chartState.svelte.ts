@@ -129,6 +129,17 @@ export class ChartCtl {
 	btTearsheetOpen = $state(false);
 	// 차트→보고서 역 hover-sync — 차트 crosshair 가 거래봉 위면 그 진입일 ts(YYYYMMDD), 아니면 null. 보고서가 그 행 하이라이트(루프 완성). btHoverBar 와 분리(차트 자기 스크롤 방지).
 	btCrosshairTs = $state<string | null>(null);
+	// 백테스트 검증 구간 — 커스텀 시작/종료(YYYYMMDD). 둘 다 set 이면 period 칩 대신 이 구간(엔진 입력 슬라이싱·차트 줌 동기). null = period 칩.
+	btWinFrom = $state<string | null>(null);
+	btWinTo = $state<string | null>(null);
+	get btCustomWin(): boolean { return !!this.btWinFrom && !!this.btWinTo; }
+	/** period 칩 선택 — 커스텀 구간 해제(칩↔커스텀 상호배타). */
+	setPeriodChip(p: PeriodKey) { this.period = p; this.btWinFrom = null; this.btWinTo = null; }
+	/** 커스텀 구간 설정(둘 다 유효해야 활성). from>to 면 스왑. */
+	setCustomWin(from: string, to: string) {
+		if (!from || !to) return;
+		[this.btWinFrom, this.btWinTo] = from <= to ? [from, to] : [to, from];
+	}
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀

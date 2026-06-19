@@ -14,7 +14,7 @@
 	import BacktestPreflight from '../charts/BacktestPreflight.svelte'; // 대기 상태 — void 대신 실행 전 프리플라이트(B&H 기준선·데이터품질·비용·체결모델)
 	import { UniverseBacktester } from '../../scan'; // 유니버스 횡단면 백테스터(자급형) — 보고서 모드 universe 스코프 재호스팅
 	import { backtestPreflight } from '../lib/backtest';
-	import type { PortfolioBtResult, BtPreflight } from '../lib/backtest';
+	import type { PortfolioBtResult, BtPreflight, BtFullRef } from '../lib/backtest';
 	import FinFullscreen from './FinFullscreen.svelte';
 	import GradeExplainDialog from './GradeExplainDialog.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
@@ -140,9 +140,17 @@
 	// 백테스트 결과 — PriceChart 가 onBtResult 로 올려줌(엔진은 PriceChart 소유). 보고서 모드에서 하단 BacktestReport 에 전달.
 	let btPf = $state<PortfolioBtResult | null>(null);
 	let btCandleTs = $state<string[]>([]);
+	let btFullRef = $state<BtFullRef | null>(null); // 커스텀 구간 전체기간 대조(G3) — BacktestReport 가 '이 구간 vs 전체' 병기
 	// 대기 프리플라이트 — 백테스트 모드(단일) + 결과 없음 + 캔들 일치일 때만. 백테스트와 같은 창(PERIOD_N[period]) 실현 B&H·데이터품질.
 	const btPreflight = $derived.by<BtPreflight | null>(() => {
 		if (!ctl.btReportMode || ctl.btScope !== 'single' || btPf || !candles || candles.length < 2 || chartCode !== co.code) return null;
+		if (ctl.btCustomWin && ctl.btWinFrom && ctl.btWinTo) {
+			// 커스텀 구간 — 끝을 toIdx 로 절단 + win=구간봉수 (백테스트와 동일 계약).
+			let fi = 0; while (fi < candles.length && candles[fi].t < ctl.btWinFrom) fi++;
+			let ti = candles.length - 1; while (ti > 0 && candles[ti].t > ctl.btWinTo) ti--;
+			if (ti < fi) return null;
+			return backtestPreflight(candles.slice(0, ti + 1), ti - fi + 1, ctl.btCostsBp);
+		}
 		const win = Math.min(PERIOD_N[ctl.period] ?? candles.length, candles.length);
 		return backtestPreflight(candles, win, ctl.btCostsBp);
 	});
@@ -494,7 +502,7 @@
 			valBand={subject === 'index' ? null : priceValBand}
 			peers={subject === 'index' ? [] : chartPeers}
 			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onMacroLens} {onCoMovers}
-				onBtResult={(pf, ts) => { btPf = pf; btCandleTs = ts; }} />
+				onBtResult={(pf, ts, fullRef) => { btPf = pf; btCandleTs = ts; btFullRef = fullRef; }} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? (subject === 'index' ? 'loading index series …' : 'loading daily prices …') : (subject === 'index' ? '지수 시계열 불러오는 중 …' : '일별 시세 불러오는 중 …')}</div>
 	{:else if subject === 'index'}
@@ -518,7 +526,7 @@
 				: (lang === 'en' ? 'Index timing — pick an index from the [INDEX] button on the chart bar above. For a per-stock backtest, switch the scope to ‘Stock’.' : '지수 타이밍 — 차트 상단의 [지수] 버튼에서 지수를 선택하세요. 종목별 백테스트는 스코프를 ‘단일종목’으로 바꾸세요.')}</div>
 		</Panel>
 	{:else if btPf}
-		<BacktestReport pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} scope={ctl.btScope} {lang} tearsheetOpen={ctl.btTearsheetOpen} onToggleTearsheet={() => (ctl.btTearsheetOpen = !ctl.btTearsheetOpen)} hoverTs={ctl.btCrosshairTs} onFocus={(i) => ctl.setBtFocus(i)} onFocusBar={(t) => (ctl.btHoverBar = t)} onBack={() => { ctl.btReportMode = false; ctl.btDockOpen = false; ctl.clearBtAll(); }} />
+		<BacktestReport pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} scope={ctl.btScope} fullRef={btFullRef} {lang} tearsheetOpen={ctl.btTearsheetOpen} onToggleTearsheet={() => (ctl.btTearsheetOpen = !ctl.btTearsheetOpen)} hoverTs={ctl.btCrosshairTs} onFocus={(i) => ctl.setBtFocus(i)} onFocusBar={(t) => (ctl.btHoverBar = t)} onBack={() => { ctl.btReportMode = false; ctl.btDockOpen = false; ctl.clearBtAll(); }} />
 	{:else}
 		<!-- 대기 = void 금지. 실행 전 프리플라이트(이겨야 할 선·데이터품질·비용·체결모델) + 재무 small-multiples 유지(파괴적 교체 차단). -->
 		<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '백테스트 준비', en: 'PREFLIGHT' }} sub={{ kr: '이 종목·이 창의 진실 — 실행 전', en: 'this symbol · this window' }} flush>

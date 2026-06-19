@@ -9,7 +9,7 @@
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../lib/types';
 	import type { MacroLensTab } from '../lib/macroLens';
-	import { runPortfolioBacktest, type PortfolioBtResult, buildGateSeries, ruleUsesGate } from '../lib/backtest';
+	import { runPortfolioBacktest, type PortfolioBtResult, type BtFullRef, buildGateSeries, ruleUsesGate } from '../lib/backtest';
 	import { loadGateRows, type FundamentalGateRow } from '@dartlab/ui-runtime/data/gateRows'; // 펀더게이트(W2) PIT 행
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
 	import { rankCoMovers, type CoMover } from '../lib/coMovement';
@@ -48,7 +48,7 @@
 		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 		onCoMovers?: (rows: CoMover[]) => void;
 		// 백테스트 결과 상향 — 엔진은 PriceChart 소유, 결과(pf+candleTs)를 CenterStack 으로 올려 하단 BacktestReport 가 렌더.
-		onBtResult?: (pf: PortfolioBtResult | null, candleTs: string[]) => void;
+		onBtResult?: (pf: PortfolioBtResult | null, candleTs: string[], fullRef: BtFullRef | null) => void;
 		// 차트 주체(subject) — 'price'=회사 주가(기본) · 'index'=KR gov/US FRED 지수(01). CenterStack-local 소유(ctl 미상향).
 		subject?: 'price' | 'index';
 		// US 지수(FRED 종가전용) = 라인 강제 + 고저 파생지표 degenerate. KR 지수·주가는 false (01 §3.6).
@@ -65,8 +65,9 @@
 	let chart = $state<any>(null);
 	let btPf = $state<PortfolioBtResult | null>(null); // 다전략 결과(N≤3 + 조합)
 	let btCandleTs = $state<string[]>([]); // 백테스트 캔들 t(YYYYMMDD) — equity 정렬(BacktestReport 슬라이스)
+	let btFullRef = $state<BtFullRef | null>(null); // 커스텀 구간 시 전체기간 대조(G3 체리피킹 가드) — 비커스텀이면 null
 	// 결과를 CenterStack 으로 상향 — 하단 BacktestReport 가 렌더(보고서 모드). 다이얼로그 폐기.
-	$effect(() => { onBtResult?.(btPf, btCandleTs); });
+	$effect(() => { onBtResult?.(btPf, btCandleTs, btFullRef); });
 	// 차트→보고서 역 hover-sync — 포커스 전략 거래 진입일 ts(YYYYMMDD) 집합. crosshair 구독이 읽어 ctl.btCrosshairTs 설정(거래봉 위일 때만).
 	const tradeEntrySet = $derived.by<Set<string>>(() => {
 		const set = new Set<string>();
@@ -522,13 +523,26 @@
 	function applySpacing(c: any) {
 		const tfv = untrack(() => ctl.tf);
 		const len = hist.viewLen || candles.length || 1;
-		const N = Math.min(Math.ceil((PERIOD_N[ctl.period] ?? len) / TF_DIV[tfv]), len);
 		const w = el?.clientWidth || 800;
+		const btActive = untrack(() => ctl.btReportMode || ctl.btOn);
+		// 커스텀 검증 구간(일봉 전용) — 구간 봉수로 barSpace + toT 우측 정렬(엔진 슬라이싱과 차트 줌 시각 일치).
+		if (btActive && tfv === 'D' && untrack(() => ctl.btCustomWin)) {
+			const base = fullSeries();
+			const fromT = untrack(() => ctl.btWinFrom) as string;
+			const toT = untrack(() => ctl.btWinTo) as string;
+			let fi = 0; while (fi < base.length && base[fi].t < fromT) fi++;
+			let ti = base.length - 1; while (ti > 0 && base[ti].t > toT) ti--;
+			if (ti >= fi && base[ti]) {
+				const nC = Math.max(2, ti - fi + 1);
+				try { c.setBarSpace(Math.max(0.12, Math.min(30, w / nC))); c.scrollToTimestamp(toMs(base[ti].t)); } catch { /* */ }
+				return;
+			}
+		}
+		const N = Math.min(Math.ceil((PERIOD_N[ctl.period] ?? len) / TF_DIV[tfv]), len);
 		const space = w / Math.max(1, N);
 		// 백테스트 중(전략 슬롯 보유 또는 보고서 모드) = 일봉 고정. 자동 tf 상향을 막는다 — 상향되면 일봉 ts 정렬
 		// 마커·에쿼티·보유밴드가 끊기고(btLayer ts 매칭 실패) 검증 창이 깨진다(과거 회귀: clearBtAll 래칫). 대신
 		// sub-1px 까지 허용해 선택 구간 전체를 일봉으로(촘촘한 가격 리본 + 에쿼티/밴드는 어떤 밀도에서도 가독).
-		const btActive = untrack(() => ctl.btReportMode || ctl.btOn);
 		if (space < 1 && (tfv === 'D' || tfv === 'W') && !btActive) {
 			const next = tfv === 'D' ? 'W' : 'M';
 			setNotice(T(`봉 ${N.toLocaleString()}개 — 1px 미달, ${next === 'W' ? '주봉' : '월봉'} 자동 전환`, `${N.toLocaleString()} bars — auto ${next} timeframe`));
@@ -565,7 +579,9 @@
 	const yearsForPeriod = (p: string): number => (p === 'MAX' ? 999 : Math.ceil((PERIOD_N[p] ?? 252) / 252) + 1);
 	function applyPeriodFull(c: any) {
 		applySpacing(c);
-		const target = ctl.period === 'MAX' ? KRX_MIN_YEAR : Math.max(KRX_MIN_YEAR, hist.newestYear - yearsForPeriod(ctl.period) + 1);
+		const target = ctl.btCustomWin && ctl.btWinFrom
+			? Math.max(KRX_MIN_YEAR, +ctl.btWinFrom.slice(0, 4) - 1) // 커스텀 시작연도까지 백필(워밍업 여유 −1)
+			: ctl.period === 'MAX' ? KRX_MIN_YEAR : Math.max(KRX_MIN_YEAR, hist.newestYear - yearsForPeriod(ctl.period) + 1);
 		void backfillTo(c, target);
 	}
 
@@ -803,9 +819,10 @@
 		}
 	});
 
-	// period 변경 → 가시 봉 수 + 필요 시 과거 백필. 리플레이는 시작점 기준이 달라지므로 자동 종료.
+	// period·커스텀구간 변경 → 가시 봉 수 + 필요 시 과거 백필. 리플레이는 시작점 기준이 달라지므로 자동 종료.
 	$effect(() => {
 		void ctl.period;
+		void ctl.btWinFrom; void ctl.btWinTo; // 커스텀 검증 구간 — 차트 줌·백필 동기
 		const c = chart;
 		if (!c || !candles.length) return;
 		untrack(() => { if (ctl.replay.on) ctl.replayExit(); }); // 비silent — replay effect 가 전체 복원
@@ -835,6 +852,7 @@
 		const bp = ctl.btCostsBp;
 		void dataRev;
 		void ctl.period;
+		void ctl.btWinFrom; void ctl.btWinTo; // 커스텀 검증 구간 — 변경 시 재계산(엔진 입력 슬라이싱)
 		const gateRows = btGateRows; // 반응 의존 — 게이트 로드 완료 시 재계산
 		if (!c) return;
 		// 지수 subject = 거래 대상 아님. 또한 종목별 백테스트 viz 는 '단일종목' 스코프 전용 —
@@ -843,15 +861,30 @@
 			clearBt(c);
 			btPf = null;
 			btCandleTs = [];
+			btFullRef = null;
 			return;
 		}
 		void ctl.adj;
 		const isDaily = ctl.tf === 'D'; // 주/월봉이면 캔버스 viz(마커·에쿼티) 숨김 — 일봉 ts 정렬 깨짐(숫자는 일봉으로 정확)
 		const oos = ctl.btOosSplit;
 		// 표시 시계열(수정주가 기본 ON)로 백테스트 — 원본이면 분할 절벽을 -98% 폭락으로 오인한다.
-		const all = displaySeries();
+		let all = displaySeries();
 		if (!all.length) return;
-		const win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
+		let win: number;
+		if (ctl.btCustomWin) {
+			// 커스텀 구간 — from/to 인덱스 찾아 끝을 toIdx 로 절단(엔진 무수정: 신호 워밍업은 fromIdx 이전 전이력으로 자동 확보). win=구간 봉수.
+			const fromT = ctl.btWinFrom as string;
+			const toT = ctl.btWinTo as string;
+			let fi = 0; while (fi < all.length && all[fi].t < fromT) fi++;
+			let ti = all.length - 1; while (ti >= 0 && all[ti].t > toT) ti--;
+			// 백필 진행 중(과거 연도 로드)이면 쓰레기 1봉 계산 대신 직전 결과 유지하고 대기(dataRev bump 시 재계산).
+			if ((ti < 0 || all[0].t > fromT) && hist.loading) return;
+			if (ti < 0 || fi >= all.length || ti < fi) { clearBt(c); btPf = null; btCandleTs = []; btFullRef = null; return; } // 구간이 데이터 범위 밖
+			all = all.slice(0, ti + 1);
+			win = ti - fi + 1;
+		} else {
+			win = Math.min(PERIOD_N[ctl.period] ?? all.length, all.length);
+		}
 		// 펀더게이트 PIT 시계열 — 게이트 룰 있을 때만(공시일 이후 봉 계단, look-ahead 0). 없으면 null(회귀 0).
 		const usesGate = slots.some((s) => s.rule && ruleUsesGate(s.rule));
 		const gate = usesGate ? buildGateSeries(all.map((cd) => cd.t), gateRows ?? []) : null;
@@ -861,6 +894,17 @@
 		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, gate, stop, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btPf = pf;
 		btCandleTs = all.map((cd) => cd.t); // equity 인덱스 정렬 — BacktestDialog 가 startIdx 오프셋으로 슬라이스
+		// G3 체리피킹 대조 — 커스텀 구간이면 같은 전략을 *전체 기간*에도 돌려 '이 구간 vs 전체'를 보고서가 병기(표본운 구조적 자백).
+		if (ctl.btCustomWin) {
+			const fullSer = displaySeries();
+			const fullGate = usesGate ? buildGateSeries(fullSer.map((cd) => cd.t), gateRows ?? []) : null;
+			// oosSplit:0 — 전체기간 대조는 in/out 분할 없는 순수 벤치(체리피킹 자백 기준선).
+			const pfFull = runPortfolioBacktest(fullSer, slots, { windowBars: fullSer.length, withCosts: wc, costsBp: bp, oosSplit: 0, gate: fullGate, stop, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
+			const fr = pfFull?.slots[Math.min(focus, (pfFull.slots.length || 1) - 1)]?.result ?? null;
+			btFullRef = fr ? { retPct: fr.metrics.retPct, bhRetPct: fr.bh.retPct, cagrPct: fr.metrics.cagrPct, fromT: fullSer[fr.startIdx]?.t ?? '', toT: fullSer[fullSer.length - 1]?.t ?? '', bars: fr.equity.filter((v) => v != null).length } : null;
+		} else {
+			btFullRef = null;
+		}
 		// 펀더게이트 배경 틴트 — 포커스 전략의 fundGate 조건(임계값)으로 활성 구간 산출(공시일 이후 PIT 계단).
 		let gateVis: { active: (0 | 1)[]; label: string } | null = null;
 		if (gate && usesGate) {

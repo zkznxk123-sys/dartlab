@@ -6,8 +6,8 @@
 	import type { Lang } from '../lib/types';
 	import { type ChartCtl, PERIODS } from './chartState.svelte';
 	import type { PortfolioBtResult } from '../lib/backtest';
-	import { BT_PRESETS, BT_COSTS, RULE_PRESETS, SERIES_CATALOG, OP_LABEL } from '../lib/backtest';
-	import type { Op, SeriesKey, StrategyRule } from '../lib/backtest';
+	import { BT_PRESETS, BT_COSTS, RULE_PRESETS, SERIES_CATALOG, OP_LABEL, FAMILY_LABEL, FAMILY_ORDER } from '../lib/backtest';
+	import type { Op, SeriesKey, StrategyRule, BtPresetDef, RulePreset } from '../lib/backtest';
 	import HonestyFooter from './HonestyFooter.svelte';
 
 	interface Props {
@@ -27,6 +27,39 @@
 
 	let collapsed = $state(false);
 	let presetsOpen = $state(false); // 전략 ≥1 일 때 프리셋 그리드 접힘 토글(빈 상태는 항상 펼침)
+	let presetQuery = $state(''); // 프리셋 검색 — 라벨·설명 토큰 매칭(15+ 프리셋 발견성)
+
+	// 통합 프리셋 목록 — BT_PRESETS(단일지표)·RULE_PRESETS(편집가능 룰)를 패밀리로 묶어 한 picker 로.
+	// '약하다'의 진짜 원인은 개수 아닌 평면 2열이 descKr 을 안 써서 발견성 0 → 패밀리 그룹 + 설명 동반.
+	type PickItem = { kind: 'preset'; def: BtPresetDef } | { kind: 'rule'; def: RulePreset };
+	const ALL_PRESETS: PickItem[] = [
+		...BT_PRESETS.map((d): PickItem => ({ kind: 'preset', def: d })),
+		...RULE_PRESETS.map((d): PickItem => ({ kind: 'rule', def: d }))
+	];
+	const presetsIn = (fam: string, q: string): PickItem[] => {
+		const qq = q.trim().toLowerCase();
+		return ALL_PRESETS.filter((it) => it.def.family === fam && (!qq || `${it.def.kr} ${it.def.en} ${it.def.descKr} ${it.def.descEn}`.toLowerCase().includes(qq)));
+	};
+	function pickPreset(it: PickItem) {
+		if (it.kind === 'preset') ctl.addStrategy(it.def);
+		else ctl.addRulePreset(it.def);
+		presetsOpen = false;
+		presetQuery = '';
+	}
+
+	// ── 검증 구간 — 시작/종료 자유선택(커스텀). period 칩과 상호배타. 국면 프리셋으로 원클릭 ──
+	let customOpen = $state(false);
+	const PHASE_PRESETS = [
+		{ k: 'covid', kr: '2020 코로나', en: '2020 COVID', from: '20200101', to: '20201231' },
+		{ k: 'bear22', kr: '2022 약세', en: '2022 bear', from: '20220101', to: '20221231' },
+		{ k: 'rec23', kr: '2023 회복', en: '2023 recovery', from: '20230101', to: '20231231' }
+	];
+	const dateInput = (t: string | null): string => (t && t.length === 8 ? `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}` : '');
+	function setWinPart(which: 'from' | 'to', v: string) {
+		const ymd = v ? v.replace(/-/g, '') : null;
+		if (which === 'from') ctl.btWinFrom = ymd;
+		else ctl.btWinTo = ymd;
+	}
 	// 폭 리사이즈 — 드래그 핸들(우측 가장자리). 세션 한정 $state.
 	let dockW = $state(320);
 	function startResize(e: PointerEvent) {
@@ -129,10 +162,26 @@
 			<div class="sdWindow">
 				<div class="sdWinHd"><span class="sdWinLbl">{T('검증 구간', 'window')}</span><span class="sdWinHint">{T('이 기간으로 백테스트 · 차트도 같은 구간 표시', 'backtest over this period · chart shows the same range')}</span></div>
 				<div class="sdWinSeg" role="radiogroup">
-					{#each PERIODS as p (p)}<button class={ctl.period === p ? 'sdWinBtn on' : 'sdWinBtn'} aria-pressed={ctl.period === p} onclick={() => (ctl.period = p)}>{p}</button>{/each}
+					{#each PERIODS as p (p)}<button class={ctl.period === p && !ctl.btCustomWin ? 'sdWinBtn on' : 'sdWinBtn'} aria-pressed={ctl.period === p && !ctl.btCustomWin} onclick={() => ctl.setPeriodChip(p)}>{p}</button>{/each}
+					<button class={ctl.btCustomWin || customOpen ? 'sdWinBtn cust on' : 'sdWinBtn cust'} title={T('사용자 지정 구간', 'custom range')} aria-pressed={ctl.btCustomWin} onclick={() => (customOpen = !customOpen)}>⋯</button>
 				</div>
+				{#if customOpen || ctl.btCustomWin}
+					<!-- 사용자 지정 구간 — 시작/종료 직접 입력 + 국면 프리셋. 시작/종료 둘 다 유효해야 활성(엔진 슬라이싱). -->
+					<div class="sdCustWin">
+						<div class="sdCustRow">
+							<input class="sdDate mono" type="date" value={dateInput(ctl.btWinFrom)} max={dateInput(ctl.btWinTo) || undefined} onchange={(e) => setWinPart('from', e.currentTarget.value)} aria-label={T('시작일', 'start')} />
+							<span class="sdCustTo">~</span>
+							<input class="sdDate mono" type="date" value={dateInput(ctl.btWinTo)} min={dateInput(ctl.btWinFrom) || undefined} onchange={(e) => setWinPart('to', e.currentTarget.value)} aria-label={T('종료일', 'end')} />
+						</div>
+						<div class="sdPhaseRow">
+							{#each PHASE_PRESETS as ph (ph.k)}<button class="sdPhase" onclick={() => ctl.setCustomWin(ph.from, ph.to)}>{T(ph.kr, ph.en)}</button>{/each}
+							{#if ctl.btCustomWin}<button class="sdPhase clr" onclick={() => { ctl.btWinFrom = null; ctl.btWinTo = null; customOpen = false; }}>{T('해제', 'clear')}</button>{/if}
+						</div>
+						<div class="sdCustNote">{ctl.btCustomWin ? T('⚠ 특정 구간만 보면 체리피킹(좋아 보이게 고른 구간) 위험 — 전체 기간과 비교하세요.', '⚠ a hand-picked window risks cherry-picking — compare with the full period.') : T('시작·종료를 모두 선택하면 적용됩니다.', 'pick both start and end to apply.')}</div>
+					</div>
+				{/if}
 			</div>
-			{#if ctl.period === 'MAX'}
+			{#if ctl.period === 'MAX' && !ctl.btCustomWin}
 				<div class="btTfNote">{T('MAX는 일봉이 촘촘합니다 — 수치는 정확, 개별 가격 캔들은 줌인 또는 주·월봉으로 확인하세요.', 'MAX packs daily bars tight — numbers are exact; zoom in or use W/M to read individual price candles.')}</div>
 			{/if}
 			{#if ctl.tf !== 'D'}
@@ -227,27 +276,31 @@
 						{/if}
 					</div>
 				{/each}
+				{#snippet presetPicker()}
+					<div class="ptPicker">
+						<input class="ptSearch mono" type="text" placeholder={T('전략 검색 (이름·설명)', 'search by name or description')} bind:value={presetQuery} />
+						<div class="ptScroll">
+							{#each FAMILY_ORDER as fam (fam)}
+								{@const items = presetsIn(fam, presetQuery)}
+								{#if items.length}
+									<div class="ptFamHd">{T(FAMILY_LABEL[fam].kr, FAMILY_LABEL[fam].en)} <span class="ptFamN">{items.length}</span></div>
+									{#each items as it (it.kind + it.def.key)}
+										<button class={'ptChip' + (it.kind === 'rule' ? ' rule' : '')} onclick={() => pickPreset(it)} title={it.kind === 'rule' ? T('편집가능 규칙 · 출발점', 'editable rule · starting point') : T('출발점 · 추천 아님', 'starting point · not advice')}>
+											<span class="ptChipName">{T(it.def.kr, it.def.en)}{#if it.kind === 'rule'}<em class="ptRuleTag">{T('규칙', 'rule')}</em>{/if}</span>
+											<span class="ptChipDesc">{T(it.def.descKr, it.def.descEn)}</span>
+										</button>
+									{/each}
+								{/if}
+							{/each}
+							<button class="ptCustom" onclick={() => { ctl.addCustomRule(); presetsOpen = false; presetQuery = ''; }}>＋ {T('커스텀 규칙 빌더 — 지표·연산자·임계값 직접 조립', 'custom rule builder')}</button>
+						</div>
+					</div>
+				{/snippet}
 				{#if ctl.btStrategies.length === 0}
-					<!-- 빈 상태 = 런치패드(프리셋 전체 노출). 전략 추가 후엔 토글로 접어 검증·고지 공간 확보(깎기). -->
-					<div class="btPresetGrid">
-						{#each BT_PRESETS as p (p.key)}<button class="btPresetBtn" onclick={() => ctl.addStrategy(p)} title={T('출발점 · 추천 아님', 'starting point · not advice')}>{T(p.kr, p.en)}</button>{/each}
-						{#each RULE_PRESETS as rp (rp.key)}<button class="btPresetBtn rule" onclick={() => ctl.addRulePreset(rp)} title={T('규칙 프리셋(편집가능) · 출발점', 'editable rule preset · starting point')}>{T(rp.kr, rp.en)}</button>{/each}
-					</div>
-					<div class="btCustomCard">
-						<button class="btCustomBtn" onclick={() => ctl.addCustomRule()}>＋ {T('커스텀 규칙 빌더', 'custom rule builder')}</button>
-						<span class="btCustomHint">{T('지표·연산자·임계값 직접 조립 · 추천 아님', 'compose indicators/operators/thresholds')}</span>
-					</div>
+					{@render presetPicker()}
 				{:else if ctl.btStrategies.length < 3}
 					<button class="btAddToggle" onclick={() => (presetsOpen = !presetsOpen)} aria-expanded={presetsOpen}>＋ {T('전략 추가', 'add strategy')} <span class="btAddCaret">{presetsOpen ? '▴' : '▾'}</span></button>
-					{#if presetsOpen}
-						<div class="btPresetGrid">
-							{#each BT_PRESETS as p (p.key)}<button class="btPresetBtn" onclick={() => { ctl.addStrategy(p); presetsOpen = false; }} title={T('출발점 · 추천 아님', 'starting point · not advice')}>{T(p.kr, p.en)}</button>{/each}
-							{#each RULE_PRESETS as rp (rp.key)}<button class="btPresetBtn rule" onclick={() => { ctl.addRulePreset(rp); presetsOpen = false; }} title={T('규칙 프리셋(편집가능) · 출발점', 'editable rule preset · starting point')}>{T(rp.kr, rp.en)}</button>{/each}
-						</div>
-						<div class="btCustomCard">
-							<button class="btCustomBtn" onclick={() => { ctl.addCustomRule(); presetsOpen = false; }}>＋ {T('커스텀 규칙 빌더', 'custom rule builder')}</button>
-						</div>
-					{/if}
+					{#if presetsOpen}{@render presetPicker()}{/if}
 				{/if}
 				{#if ctl.btStrategies.length >= 2}
 					<div class="btDesc warn">{T('⚠ 여러 전략 같은 데이터 비교 = 사후선택 편향 · 단일종목 조합 = 타이밍 분산이지 자산 분산 아님', 'selection bias · single-stock combo = timing not asset')}</div>
@@ -272,7 +325,7 @@
 						<span class="btParamLbl">%</span>
 						<button class="mItem" onclick={() => stepStop('gainPct', 1)}>+</button>
 					</div>
-					{#if ctl.btStop.lossPct || ctl.btStop.gainPct}<div class="btDesc warn">{T('⚠ 당일 인트라바 가정 — t+1 시가 체결과 시점 충돌(보수: 손절 우선)', 'intraday assumption — conflicts with t+1 fill')}</div>{/if}
+					{#if ctl.btStop.lossPct || ctl.btStop.gainPct}<div class="btDesc warn">{T('⚠ 장중 터치/갭 관통 시 보수 체결(갭조정) 가정 — t+1 시가 모델과 시점 충돌(보수: 손절 우선)', 'gap-adjusted stop/take (worse of stop or gap-open) — conflicts with the t+1 fill model')}</div>{/if}
 				</div>
 			{/if}
 
@@ -363,12 +416,23 @@
 	.sdWindow { display: flex; flex-direction: column; gap: 5px; margin: 2px 0 6px; padding: 6px 7px; border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 5px; background: rgba(251, 146, 60, 0.03); }
 	.sdWinHd { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
 	.sdWinLbl { font-size: 11px; font-weight: 600; color: #aeb6c2; letter-spacing: 0.02em; flex: none; }
-	.sdWinHint { font-size: 10px; color: var(--dim, #8b94a3); text-align: left; }
+	.sdWinHint { font-size: 11px; color: var(--dim, #8b94a3); text-align: left; }
 	.sdWinSeg { display: inline-flex; flex: 1 1 auto; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; overflow: hidden; }
 	.sdWinBtn { flex: 1 1 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: none; border-left: 1px solid var(--dl-line, #1b2130); padding: 3px 0; cursor: pointer; font-family: inherit; font-variant-numeric: tabular-nums; }
 	.sdWinBtn:first-child { border-left: none; }
 	.sdWinBtn:hover { color: var(--dl-ink, #c8cfdb); background: rgba(255, 255, 255, 0.04); }
 	.sdWinBtn.on { background: var(--amber, #fb923c); color: #1a1206; font-weight: 700; }
+	.sdWinBtn.cust { flex: 0 0 26px; font-size: 13px; line-height: 1; }
+	/* 사용자 지정 구간 — 시작/종료 입력 + 국면 프리셋 + 체리피킹 정직 노트. */
+	.sdCustWin { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
+	.sdCustRow { display: flex; align-items: center; gap: 5px; }
+	.sdDate { flex: 1 1 0; min-width: 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 3px 5px; font-family: inherit; color-scheme: dark; }
+	.sdCustTo { color: var(--dim, #8b94a3); font-size: 12px; flex: none; }
+	.sdPhaseRow { display: flex; flex-wrap: wrap; gap: 4px; }
+	.sdPhase { font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 3px 9px; cursor: pointer; font-family: inherit; }
+	.sdPhase:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
+	.sdPhase.clr { color: var(--dim, #8b94a3); border-style: dashed; margin-left: auto; }
+	.sdCustNote { font-size: 11px; color: var(--dim, #8b94a3); line-height: 1.5; }
 	.btSection { margin-top: 4px; }
 	/* 리사이즈 핸들 */
 	.sdResize { position: absolute; top: 0; right: -3px; width: 6px; height: 100%; cursor: col-resize; z-index: 2; }
@@ -436,13 +500,21 @@
 	.sdScopeBtn.on { background: var(--amber, #fb923c); color: #1a1206; border-color: var(--amber, #fb923c); font-weight: 700; }
 	.sdScopeNote { font-size: 10.5px; color: var(--dim, #8b94a3); line-height: 1.5; margin-bottom: 5px; }
 	.sdScopeNote.callout { color: #d7c4a8; background: rgba(251, 146, 60, 0.07); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 4px; padding: 5px 7px; }
-	.btPresetGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 2px; }
-	.btPresetBtn { font-size: 11px; background: rgba(255, 255, 255, 0.03); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 6px 8px; cursor: pointer; font-family: inherit; text-align: left; }
-	.btPresetBtn:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
-	.btPresetBtn.rule { border-style: dashed; }
-	.btCustomCard { margin-top: 5px; padding: 6px; border: 1px dashed var(--dl-line-strong, #2a3142); border-radius: 4px; display: flex; flex-direction: column; gap: 2px; }
-	.btCustomBtn { font-size: 11px; background: none; border: none; color: #a78bfa; cursor: pointer; font-family: inherit; text-align: left; padding: 0; font-weight: 600; }
-	.btCustomHint { font-size: 10px; color: var(--dimmer, #5b6573); }
+	/* 프리셋 picker — 4패밀리 카테고리 + 작은 칩(라벨+설명) + 스크롤 + 검색. '약하다'=발견성 0 해소(깎기). */
+	.ptPicker { margin-top: 2px; }
+	.ptSearch { width: 100%; box-sizing: border-box; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 4px 7px; margin-bottom: 4px; font-family: inherit; }
+	.ptSearch::placeholder { color: var(--dimmer, #5b6573); }
+	.ptScroll { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 2px; }
+	.ptFamHd { position: sticky; top: 0; background: var(--dl-bg-base, #0a0e15); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--amber, #fb923c); padding: 4px 2px 2px; display: flex; align-items: center; gap: 5px; z-index: 1; }
+	.ptFamN { font-size: 9.5px; color: var(--dimmer, #5b6573); font-weight: 400; border: 1px solid var(--dl-line, #1b2130); border-radius: 7px; padding: 0 5px; }
+	.ptChip { display: flex; flex-direction: column; gap: 1px; text-align: left; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 4px 7px; cursor: pointer; font-family: inherit; }
+	.ptChip:hover { border-color: var(--amber, #fb923c); background: rgba(251, 146, 60, 0.05); }
+	.ptChip.rule { border-left: 2px dashed rgba(167, 139, 250, 0.5); }
+	.ptChipName { font-size: 11.5px; color: var(--dl-ink, #c8cfdb); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+	.ptRuleTag { font-style: normal; font-size: 9px; color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 3px; padding: 0 3px; }
+	.ptChipDesc { font-size: 10px; color: var(--dim, #8b94a3); line-height: 1.35; }
+	.ptCustom { margin-top: 4px; width: 100%; text-align: center; font-size: 11px; background: none; border: 1px dashed var(--dl-line-strong, #2a3142); color: #a78bfa; border-radius: 4px; padding: 6px; cursor: pointer; font-family: inherit; }
+	.ptCustom:hover { border-color: #a78bfa; }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }
 </style>
