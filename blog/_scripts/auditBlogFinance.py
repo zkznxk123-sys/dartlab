@@ -1,15 +1,18 @@
-"""블로그 5편 + 셀트리온 finance 표 전수 검증.
+"""블로그 finance 표 전수 검증.
 
 각 글에서 markdown finance 표를 파싱하고 dartlab `c.select(..., freq="Y")`
 실측값과 1:1 비교한다. 코드/표/실측 3자 정합 확인.
 
 실행:
     uv run python -X utf8 blog/_scripts/auditBlogFinance.py
+    uv run python -X utf8 blog/_scripts/auditBlogFinance.py --post 090430:blog/05-company-reports/92-090430-amorepacific/index.md
 """
 
 from __future__ import annotations
 
+import argparse
 import re
+import tempfile
 from pathlib import Path
 
 import dartlab
@@ -207,9 +210,39 @@ def auditPost(code: str, path: str):
     return issues
 
 
+def parseArgs() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Audit markdown finance tables against dartlab c.select outputs.")
+    parser.add_argument(
+        "--post",
+        action="append",
+        default=[],
+        metavar="CODE:PATH",
+        help="Audit one post. Can be repeated. Defaults to the legacy first-post batch.",
+    )
+    parser.add_argument(
+        "--out",
+        default="",
+        help="Optional report path. Defaults to the OS temp directory; use 'none' to skip writing.",
+    )
+    return parser.parse_args()
+
+
+def parsePostArg(raw: str) -> tuple[str, str]:
+    if ":" not in raw:
+        raise ValueError(f"--post must be CODE:PATH, got {raw!r}")
+    code, path = raw.split(":", 1)
+    code = code.strip()
+    path = path.strip()
+    if not code or not path:
+        raise ValueError(f"--post must include both CODE and PATH, got {raw!r}")
+    return code, path
+
+
 def main():
+    args = parseArgs()
+    posts = [parsePostArg(raw) for raw in args.post] if args.post else POSTS
     all_issues = []
-    for code, path in POSTS:
+    for code, path in posts:
         print(f"\n=== {code} {Path(path).parent.name} ===")
         issues = auditPost(code, path)
         if not issues:
@@ -220,10 +253,15 @@ def main():
         all_issues.extend(issues)
 
     print(f"\n=== TOTAL: {len(all_issues)} issues ===")
-    Path("scripts/_audit_blog_finance_report.md").write_text(
+    if args.out.lower() == "none":
+        return
+    reportPath = Path(args.out) if args.out else Path(tempfile.gettempdir()) / "dartlab_audit_blog_finance_report.md"
+    reportPath.parent.mkdir(parents=True, exist_ok=True)
+    reportPath.write_text(
         "# Blog Finance Audit\n\n" + f"{len(all_issues)} mismatches\n\n" + "\n".join(f"- {it}" for it in all_issues),
         encoding="utf-8",
     )
+    print(f"report: {reportPath}")
 
 
 if __name__ == "__main__":
