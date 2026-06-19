@@ -411,19 +411,20 @@
 		<div class="symTop">
 			<button class={'symWatch' + (watchlist.has(co.code) ? ' on' : '')} onclick={() => watchlist.toggle(co.code)} aria-pressed={watchlist.has(co.code)} title={watchlist.has(co.code) ? (lang === 'en' ? 'remove from disclosure watch' : '공시 워치에서 제거') : (lang === 'en' ? 'add to disclosure watch' : '공시 워치에 추가')}>{watchlist.has(co.code) ? '★' : '☆'}</button>
 			<span class="symName">{co.name.kr}</span>
-			<span class="symBadge kr">{co.marketLabel}</span>
 		</div>
-		<span class="symCode">{co.code}</span>
+		<div class="symCodeRow"><span class="symCode">{co.code}</span><span class="symBadge kr">{co.marketLabel}</span></div>
 		<div class="symMeta">{tx(co.sector, lang)}{co.stage ? ' · ' + co.stage : ''}{co.role ? ' · ' + co.role : ''} · DART</div>
 	</div>
-	<!-- 중간 — 회사 기본정보(대표·결산월·상장일·본사) 위 / 주요제품 아래(좌), 회사 네비 세로 스택(우). 우측은 가격관련만(밀도↑·헤더 ~3줄). -->
+	<!-- 중간 — 회사 기본정보 2줄(대표·상장일 / 결산월·본사) 위 / 주요제품 아래(좌), 회사 네비 세로 스택(우). 우측 가격정보와 ~3행 높이 정렬. -->
 	<div class="symProd">
 		<div class="symProdInfo">
 			{#if corpInfo}
 				<div class="symInfoRow">
 					{#if corpInfo.ceo}<span class="sif"><i>{lang === 'en' ? 'CEO' : '대표'}</i><b>{corpInfo.ceo}</b></span>{/if}
-					{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산월'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
 					{#if corpInfo.listedDate}<span class="sif"><i>{lang === 'en' ? 'LISTED' : '상장일'}</i><b class="mono">{corpInfo.listedDate}</b></span>{/if}
+				</div>
+				<div class="symInfoRow">
+					{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산월'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
 					{#if corpInfo.region}<span class="sif"><i>{lang === 'en' ? 'HQ' : '본사'}</i><b>{corpInfo.region}</b></span>{/if}
 				</div>
 			{/if}
@@ -495,6 +496,13 @@
 	{#if ctl.btScope === 'universe'}
 		<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '유니버스 백테스트', en: 'UNIVERSE BACKTEST' }} sub={{ kr: '횡단면 팩터 · 17년 상폐보존', en: 'cross-sectional · 17yr delisting-preserved' }} flush>
 			<UniverseBacktester lang={lang === 'en' ? 'en' : 'ko'} onClose={() => { ctl.btReportMode = false; ctl.btDockOpen = false; }} onDrillDown={(c) => onPick?.(c)} />
+		</Panel>
+	{:else if ctl.btScope === 'market'}
+		<!-- 시장(지수) 타이밍 — 지수 미선택 시 종목 결과를 '시장'으로 오도하지 않도록 명시 안내(정직: silent/오도 차단). -->
+		<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '시장 백테스트', en: 'MARKET BACKTEST' }} sub={{ kr: '지수 타이밍', en: 'index timing' }} flush>
+			<div class="storyEmpty">{subject === 'index'
+				? (lang === 'en' ? 'Index selected. Index-timing backtest results are not rendered here yet — use the ‘Stock’ or ‘Universe’ scope for now.' : '지수가 선택되었습니다. 지수 타이밍 백테스트 결과는 아직 여기 표시되지 않습니다 — 지금은 ‘단일종목’ 또는 ‘유니버스’ 스코프를 이용하세요.')
+				: (lang === 'en' ? 'Index timing — pick an index from the [INDEX] button on the chart bar above. For a per-stock backtest, switch the scope to ‘Stock’.' : '지수 타이밍 — 차트 상단의 [지수] 버튼에서 지수를 선택하세요. 종목별 백테스트는 스코프를 ‘단일종목’으로 바꾸세요.')}</div>
 		</Panel>
 	{:else if btPf}
 		<BacktestReport pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} scope={ctl.btScope} {lang} tearsheetOpen={ctl.btTearsheetOpen} onToggleTearsheet={() => (ctl.btTearsheetOpen = !ctl.btTearsheetOpen)} hoverTs={ctl.btCrosshairTs} onFocus={(i) => ctl.setBtFocus(i)} onFocusBar={(t) => (ctl.btHoverBar = t)} onBack={() => { ctl.btReportMode = false; ctl.btDockOpen = false; ctl.clearBtAll(); }} />

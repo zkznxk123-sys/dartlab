@@ -340,7 +340,8 @@
 .dlTerm .symWatch { align-self: center; border: 0; background: transparent; cursor: pointer; padding: 0 2px; line-height: 1; font-size: 22px; color: var(--dim); transition: color 0.15s, transform 0.1s; }
 .dlTerm .symWatch:hover { color: var(--amber); transform: scale(1.12); }
 .dlTerm .symWatch.on { color: var(--amber); }
-.dlTerm .symCode { display: block; font-family: var(--mono); font-weight: 700; font-size: 11.5px; color: var(--dim); letter-spacing: 0.5px; margin-top: 1px; }
+.dlTerm .symCodeRow { display: flex; align-items: baseline; gap: 6px; margin-top: 1px; }
+.dlTerm .symCode { font-family: var(--mono); font-weight: 700; font-size: 11.5px; color: var(--dim); letter-spacing: 0.5px; }
 .dlTerm .symBadge { font-family: var(--cond); font-weight: 700; font-size: 9px; letter-spacing: 1px; padding: 1px 5px; border-radius: 2px; }
 .dlTerm .symBadge.kr { background: rgba(96, 165, 250, 0.15); color: var(--dl-info); border: 1px solid rgba(96, 165, 250, 0.3); }
 .dlTerm .symName { font-family: var(--cond); font-weight: 700; font-size: 17px; color: var(--dl-ink-print); letter-spacing: 0.2px; }
