@@ -46,7 +46,7 @@ if [ $RESET -eq 1 ]; then
     VIRTUAL_ENV="$(pwd)/$VENV" uv pip install --quiet \
         pytest pytest-asyncio pytest-cov hypothesis pytest-xdist pytest-benchmark
     VIRTUAL_ENV="$(pwd)/$VENV" uv pip install --quiet \
-        "pandera[polars]>=0.29.0" "vcrpy>=6.0.0" "syrupy>=4.7.0"
+        "pandera[polars]>=0.29.0,<0.32" "vcrpy>=6.0.0" "syrupy>=4.7.0"
     VIRTUAL_ENV="$(pwd)/$VENV" uv pip install --quiet -e ".[all]"
 fi
 

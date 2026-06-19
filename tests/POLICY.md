@@ -429,7 +429,7 @@ git diff tests/audit/_baselines/testCoverage.json
 | pytest-cov | ≥ 6.0.0 | coverage (`fail_under=40`, omit policy) |
 | hypothesis | ≥ 6.100.0 | property-based + ghostwriter |
 | syrupy | ≥ 4.7.0 | CLI 출력 snapshot |
-| pandera[polars] | ≥ 0.29.0 | DataFrame schema 계약 |
+| pandera[polars] | ≥ 0.29.0, < 0.32 | DataFrame schema 계약 (0.32.0 isin 빌트인 회귀로 상한) |
 | mutmut | (도입 예정 2026-Q3) | mutation testing |
 | vcrpy | (도입 예정 2026-Q3) | record-replay |
 | inspect-ai | (도입 예정 2026-Q2) | AI eval framework |
