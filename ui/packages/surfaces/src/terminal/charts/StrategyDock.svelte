@@ -278,7 +278,8 @@
 				{/each}
 				{#snippet presetPicker()}
 					<div class="ptPicker">
-						<input class="ptSearch mono" type="text" placeholder={T('전략 검색 (이름·설명)', 'search by name or description')} bind:value={presetQuery} />
+						<button class="ptCustomTop" onclick={() => { ctl.addCustomRule(); presetsOpen = false; presetQuery = ''; }}>＋ {T('커스텀 규칙 빌더 — 직접 조립', 'custom rule builder')}</button>
+						<input class="ptSearch mono" type="text" placeholder={T('또는 프리셋 검색 (이름·설명)', 'or search presets by name or description')} bind:value={presetQuery} />
 						<div class="ptScroll">
 							{#each FAMILY_ORDER as fam (fam)}
 								{@const items = presetsIn(fam, presetQuery)}
@@ -292,7 +293,6 @@
 									{/each}
 								{/if}
 							{/each}
-							<button class="ptCustom" onclick={() => { ctl.addCustomRule(); presetsOpen = false; presetQuery = ''; }}>＋ {T('커스텀 규칙 빌더 — 지표·연산자·임계값 직접 조립', 'custom rule builder')}</button>
 						</div>
 					</div>
 				{/snippet}
@@ -513,8 +513,9 @@
 	.ptChipName { font-size: 11.5px; color: var(--dl-ink, #c8cfdb); font-weight: 600; display: flex; align-items: center; gap: 5px; }
 	.ptRuleTag { font-style: normal; font-size: 9px; color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 3px; padding: 0 3px; }
 	.ptChipDesc { font-size: 10px; color: var(--dim, #8b94a3); line-height: 1.35; }
-	.ptCustom { margin-top: 4px; width: 100%; text-align: center; font-size: 11px; background: none; border: 1px dashed var(--dl-line-strong, #2a3142); color: #a78bfa; border-radius: 4px; padding: 6px; cursor: pointer; font-family: inherit; }
-	.ptCustom:hover { border-color: #a78bfa; }
+	/* 커스텀 빌더 진입점 — 검색창 위 상단 고정(스크롤 없이 발견). 클릭=슬롯 추가→프리셋 picker가 빌더로 교체(프리셋 공간 숨김). 보라=직접 규칙 신호. */
+		.ptCustomTop { width: 100%; text-align: center; font-size: 11.5px; font-weight: 600; background: rgba(167, 139, 250, 0.07); border: 1px solid rgba(167, 139, 250, 0.4); color: #a78bfa; border-radius: 4px; padding: 6px; margin-bottom: 5px; cursor: pointer; font-family: inherit; }
+	.ptCustomTop:hover { border-color: #a78bfa; background: rgba(167, 139, 250, 0.12); }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }
 </style>
