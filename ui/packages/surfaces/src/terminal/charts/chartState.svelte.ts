@@ -125,6 +125,8 @@ export class ChartCtl {
 	btScope = $state<'single' | 'market' | 'universe'>('single');
 	// 차트↔보고서 양방향 포커스 — 차트 호버 봉 ts(YYYYMMDD). 보고서 거래행 co-highlight 용(단방향 상태, effect 소비 금지).
 	btHoverBar = $state<string | null>(null);
+	// 보고서 상세 통계(tearsheet) 접힘 — false 면 도크(밴드·히어로·매매표)만, true 면 무거운 통계 펼침. BtChip '상세 ▸' 가 연다.
+	btTearsheetOpen = $state(false);
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)
 	private prevYMode: YMode = 'normal'; // 비교 진입 전 y축 — 마지막 비교 해제 시 복귀

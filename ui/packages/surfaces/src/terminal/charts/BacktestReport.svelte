@@ -25,8 +25,10 @@
 		onFocus: (i: number) => void;
 		onFocusBar?: (t: string) => void;
 		onBack: () => void; // 재무그래프로 복귀(모드 끔)
+		tearsheetOpen?: boolean; // 무거운 통계(자산곡선·MC·월별·분포·MAE·보조지표) 접힘 — 상시 도크(밴드·히어로·매매표)와 분리
+		onToggleTearsheet?: () => void;
 	}
-	let { pf, slots, focus, period, withCosts, adjusted, candleTs, scope, lang, onFocus, onFocusBar, onBack }: Props = $props();
+	let { pf, slots, focus, period, withCosts, adjusted, candleTs, scope, lang, onFocus, onFocusBar, onBack, tearsheetOpen = false, onToggleTearsheet }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
 	const focusId = $derived(slots[focus]?.id ?? slots[0]?.id);
@@ -111,6 +113,24 @@
 	const calmar = $derived(m.cagrPct != null && m.mddPct < 0 ? m.cagrPct / Math.abs(m.mddPct) : null);
 	// 청산(실현) 거래만 — 승률 분수 표기를 엔진 winRatePct(청산 기준)와 일치.
 	const closedTrades = $derived(result.trades.filter((t) => !t.open));
+	// 사유 색 — 손절=빨강·익절=초록·신호=중립·미청산=흐림 (4의미를 한 회색에서 분리, 손절 스캔성).
+	const reasonCls = (r: string) => (r === 'stop' ? 'tDn' : r === 'take' ? 'tUp' : r === 'finalMark' ? 'dim' : 'tNeu');
+	const reasonLbl = (r: string) => (r === 'finalMark' ? T('미청산', 'open') : r === 'stop' ? T('손절', 'stop') : r === 'take' ? T('익절', 'take') : T('신호', 'signal'));
+	// 거래표 합계 푸터 — 눈으로 계산하던 총계·평균을 sticky 푸터로(밀도표 강화, 운영자 #1 요구).
+	const tradeSummary = $derived.by(() => {
+		const tr = result.trades;
+		if (!tr.length) return null;
+		const closed = tr.filter((t) => !t.open);
+		const wins = closed.filter((t) => t.retPct > 0).length;
+		return {
+			n: tr.length,
+			closedN: closed.length,
+			winPct: closed.length ? (wins / closed.length) * 100 : null,
+			avgRet: tr.reduce((a, t) => a + t.retPct, 0) / tr.length,
+			avgHold: Math.round(tr.reduce((a, t) => a + t.holdDays, 0) / tr.length),
+			finalCum: cumPct.length ? cumPct[cumPct.length - 1] : 0
+		};
+	});
 
 	// 거래순서 몬테카를로(경로운) — 실현 거래만 재배열. 표본<15면 null(거짓 좁은 밴드 차단).
 	const mcCone = $derived.by(() => tradeShuffleCone(result.trades.map((t) => t.retPct)));
@@ -189,6 +209,52 @@
 		{/if}
 	</div>
 
+	<!-- 일자별 거래표 (spine·상시) -->
+	<section class="brSec">
+		<div class="brSecHd">{T('거래 내역', 'trades')} <span class="brN">{m.tradeCount}</span><button class="brCsv" onclick={exportCsv}>{T('CSV', 'CSV')}</button><span class="brHint">{T('행 클릭 → 차트 진입봉', 'row → chart bar')}</span></div>
+		{#if result.trades.length}
+			<div class="brTableWrap">
+				<table class="brTable mono">
+					<thead><tr><th>#</th><th>{T('진입', 'entry')}</th><th class="r">{T('진입가', 'in')}</th><th>{T('청산', 'exit')}</th><th class="r">{T('청산가', 'out')}</th><th class="r">{T('수익률', 'ret')}</th><th class="r" title={T('보유 중 최대역행(MAE)', 'max adverse')}>MAE</th><th class="r" title={T('보유 중 최대순행(MFE)', 'max favorable')}>MFE</th><th class="r">{T('누적', 'cum')}</th><th class="r">{T('보유', 'd')}</th><th>{T('사유', 'why')}</th></tr></thead>
+					<tbody>
+						{#each result.trades.slice().reverse() as t, i (t.entryT)}
+							{@const cum = cumPct[result.trades.length - 1 - i]}
+							<tr class={'brRowT' + (t.retPct > 0 ? ' winRow' : t.retPct < 0 ? ' lossRow' : '')} onclick={() => jumpToBar(t.entryT)} title={T('차트로 이동', 'jump to chart')}>
+								<td class="dim">{result.trades.length - i}</td>
+								<td>{fmtD(t.entryT)}</td>
+								<td class="r">{num(t.entryPx)}</td>
+								<td>{t.exitT ? fmtD(t.exitT) : T('보유중', 'open')}</td>
+								<td class="r">{t.exitPx != null ? num(t.exitPx) : '—'}</td>
+								<td class={'r ' + cls(t.retPct)}>{sgn(t.retPct)}%</td>
+								<td class="r tDn">{t.maePct != null ? t.maePct.toFixed(1) + '%' : '—'}</td>
+								<td class="r tUp">{t.mfePct != null ? '+' + t.mfePct.toFixed(1) + '%' : '—'}</td>
+								<td class={'r ' + cls(cum)}>{sgn(cum)}%</td>
+								<td class="r">{t.holdDays}</td>
+								<td class={reasonCls(t.exitReason)}>{reasonLbl(t.exitReason)}</td>
+							</tr>
+						{/each}
+					</tbody>
+					{#if tradeSummary}
+						<tfoot><tr class="brFoot">
+							<td colspan="5">Σ {tradeSummary.n}{T('건', '')} · {T('승률', 'win')} {tradeSummary.winPct != null ? tradeSummary.winPct.toFixed(0) + '%' : '—'} <i>({tradeSummary.closedN}{T(' 청산', ' closed')})</i></td>
+							<td class={'r ' + cls(tradeSummary.avgRet)}>{sgn(tradeSummary.avgRet)}%</td>
+							<td class="r dim" colspan="2">{T('평균', 'avg')}</td>
+							<td class={'r ' + cls(tradeSummary.finalCum)}>{sgn(tradeSummary.finalCum)}%</td>
+							<td class="r">{tradeSummary.avgHold}</td>
+							<td></td>
+						</tr></tfoot>
+					{/if}
+				</table>
+			</div>
+		{:else}
+			<div class="brEmpty">{T('이 구간에서 진입 거래가 없습니다.', 'no entries in this window.')}</div>
+		{/if}
+	</section>
+
+
+	<!-- 매매표가 선두(차트 바로 아래·운영자 #1). 무거운 통계는 ▸상세통계 토글로 분리(인라인 하이브리드). -->
+	<button class="brTearToggle" onclick={() => onToggleTearsheet?.()} aria-expanded={tearsheetOpen}><span class="brTearCaret">{tearsheetOpen ? '▾' : '▸'}</span> {tearsheetOpen ? T('상세 통계 접기', 'hide tearsheet') : T('상세 통계 — 자산곡선·몬테카를로·월별·분포·MAE·보조지표', 'detailed tearsheet — equity·MC·monthly·dist·MAE·metrics')}</button>
+	{#if tearsheetOpen}
 	<!-- 자산곡선 (verdict 시각) + OOS -->
 	<section class="brSec">
 		<div class="brSecHd">{T('자산 곡선 — 계좌가치 (시작 = 100)', 'equity curve (start = 100)')}</div>
@@ -257,35 +323,7 @@
 		</div>
 	</section>
 
-	<!-- 일자별 거래표 (spine·상시) -->
-	<section class="brSec">
-		<div class="brSecHd">{T('거래 내역', 'trades')} <span class="brN">{m.tradeCount}</span><button class="brCsv" onclick={exportCsv}>{T('CSV', 'CSV')}</button><span class="brHint">{T('행 클릭 → 차트 진입봉', 'row → chart bar')}</span></div>
-		{#if result.trades.length}
-			<div class="brTableWrap">
-				<table class="brTable mono">
-					<thead><tr><th>#</th><th>{T('진입', 'entry')}</th><th class="r">{T('진입가', 'in')}</th><th>{T('청산', 'exit')}</th><th class="r">{T('청산가', 'out')}</th><th class="r">{T('수익률', 'ret')}</th><th class="r">{T('누적', 'cum')}</th><th class="r">{T('보유', 'd')}</th><th>{T('사유', 'why')}</th></tr></thead>
-					<tbody>
-						{#each result.trades.slice().reverse() as t, i (t.entryT)}
-							{@const cum = cumPct[result.trades.length - 1 - i]}
-							<tr class="brRowT" onclick={() => jumpToBar(t.entryT)} title={T('차트로 이동', 'jump to chart')}>
-								<td class="dim">{result.trades.length - i}</td>
-								<td>{fmtD(t.entryT)}</td>
-								<td class="r">{num(t.entryPx)}</td>
-								<td>{t.exitT ? fmtD(t.exitT) : T('보유중', 'open')}</td>
-								<td class="r">{t.exitPx != null ? num(t.exitPx) : '—'}</td>
-								<td class={'r ' + cls(t.retPct)}>{sgn(t.retPct)}%</td>
-								<td class={'r ' + cls(cum)}>{sgn(cum)}%</td>
-								<td class="r">{t.holdDays}</td>
-								<td class="dim">{t.exitReason === 'finalMark' ? T('미청산', 'open') : t.exitReason === 'stop' ? T('손절', 'stop') : t.exitReason === 'take' ? T('익절', 'take') : T('신호', 'signal')}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		{:else}
-			<div class="brEmpty">{T('이 구간에서 진입 거래가 없습니다.', 'no entries in this window.')}</div>
-		{/if}
-	</section>
+	{/if}
 
 	<!-- 가정·RunSpec -->
 	<section class="brSec">
@@ -336,6 +374,10 @@
 	.brCard > span { font-size: 11px; color: var(--dim, #8b94a3); }
 	.brCard > b { font-size: 21px; font-weight: 700; line-height: 1.1; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
 	.brCard > em { font-style: normal; font-size: 11px; color: var(--dimmer, #5b6573); font-family: var(--dl-font-mono, monospace); }
+	/* 상세 통계 토글 — 무거운 tearsheet 접힘(매매표 선두 유지). */
+	.brTearToggle { width: 100%; text-align: left; font-size: 11.5px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; padding: 7px 11px; cursor: pointer; font-family: inherit; color: #aeb6c2; }
+	.brTearToggle:hover { border-color: #2a3142; color: var(--dl-ink, #c8cfdb); }
+	.brTearCaret { color: var(--amber, #fb923c); font-weight: 700; margin-right: 4px; }
 	.brSec { display: flex; flex-direction: column; gap: 7px; }
 	.brSecHd { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: #aeb6c2; text-transform: uppercase; display: flex; align-items: center; gap: 9px; }
 	.brN { font-family: var(--dl-font-mono, monospace); font-size: 11px; color: var(--dimmer, #5b6573); font-weight: 400; }
@@ -354,11 +396,17 @@
 	.brRow { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 9px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; font-size: 12.5px; }
 	.brRow > span { color: #aeb6c2; }
 	.brRow > b { font-weight: 700; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
-	.brTableWrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; }
+	.brTableWrap { max-height: 340px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; }
 	.brTable { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
-	.brTable thead th { position: sticky; top: 0; background: var(--dl-bg-raised, #0e141f); text-align: left; color: #8b94a3; font-weight: 600; padding: 5px 9px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); font-size: 11px; }
+	.brTable thead th { position: sticky; top: 0; background: var(--dl-bg-raised, #0e141f); text-align: left; color: #8b94a3; font-weight: 600; padding: 4px 7px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); font-size: 11px; white-space: nowrap; }
 	.brTable th.r, .brTable td.r { text-align: right; }
-	.brTable td { padding: 4px 9px; border-bottom: 1px solid rgba(27, 33, 48, 0.6); color: #aeb6c2; }
+	.brTable td { padding: 3px 7px; border-bottom: 1px solid rgba(27, 33, 48, 0.6); color: #aeb6c2; white-space: nowrap; }
+	/* 승패 좌측 엣지 액센트(전체 워시 아님 — 색 규율) + 사유 색은 셀 클래스(tUp/tDn/tNeu/dim) */
+	.brRowT.winRow td:first-child { box-shadow: inset 2px 0 0 var(--up, #34d399); }
+	.brRowT.lossRow td:first-child { box-shadow: inset 2px 0 0 var(--dn, #f0616f); }
+	/* sticky 합계 푸터 — thead 와 대칭(하단 고정). */
+	.brTable tfoot td { position: sticky; bottom: 0; background: var(--dl-bg-raised, #0e141f); border-top: 1px solid var(--dl-line-strong, #2a3142); padding: 5px 7px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }
+	.brTable tfoot i { font-style: normal; font-weight: 400; color: var(--dimmer, #5b6573); }
 	.brTable td.dim { color: var(--dimmer, #5b6573); }
 	.brRowT { cursor: pointer; }
 	.brRowT:hover td { background: rgba(96, 165, 250, 0.1); }

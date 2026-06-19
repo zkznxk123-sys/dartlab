@@ -480,8 +480,7 @@
 			valBand={subject === 'index' ? null : priceValBand}
 			peers={subject === 'index' ? [] : chartPeers}
 			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onMacroLens} {onCoMovers}
-				onBtResult={(pf, ts) => { btPf = pf; btCandleTs = ts; }}
-				compact={ctl.btReportMode && ctl.btScope !== 'universe'} />
+				onBtResult={(pf, ts) => { btPf = pf; btCandleTs = ts; }} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? (subject === 'index' ? 'loading index series …' : 'loading daily prices …') : (subject === 'index' ? '지수 시계열 불러오는 중 …' : '일별 시세 불러오는 중 …')}</div>
 	{:else if subject === 'index'}
@@ -498,7 +497,7 @@
 			<UniverseBacktester lang={lang === 'en' ? 'en' : 'ko'} onClose={() => { ctl.btReportMode = false; ctl.btDockOpen = false; }} onDrillDown={(c) => onPick?.(c)} />
 		</Panel>
 	{:else if btPf}
-		<BacktestReport pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} scope={ctl.btScope} {lang} onFocus={(i) => ctl.setBtFocus(i)} onFocusBar={(t) => (ctl.btHoverBar = t)} onBack={() => { ctl.btReportMode = false; ctl.btDockOpen = false; ctl.clearBtAll(); }} />
+		<BacktestReport pf={btPf} slots={ctl.btStrategies} focus={ctl.btFocus} period={ctl.period} withCosts={ctl.btCosts} adjusted={ctl.adj} candleTs={btCandleTs} scope={ctl.btScope} {lang} tearsheetOpen={ctl.btTearsheetOpen} onToggleTearsheet={() => (ctl.btTearsheetOpen = !ctl.btTearsheetOpen)} onFocus={(i) => ctl.setBtFocus(i)} onFocusBar={(t) => (ctl.btHoverBar = t)} onBack={() => { ctl.btReportMode = false; ctl.btDockOpen = false; ctl.clearBtAll(); }} />
 	{:else}
 		<!-- 대기 = void 금지. 실행 전 프리플라이트(이겨야 할 선·데이터품질·비용·체결모델) + 재무 small-multiples 유지(파괴적 교체 차단). -->
 		<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '백테스트 준비', en: 'PREFLIGHT' }} sub={{ kr: '이 종목·이 창의 진실 — 실행 전', en: 'this symbol · this window' }} flush>

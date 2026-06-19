@@ -24,6 +24,8 @@ export interface BtStrategyVis {
 	label: string;
 	equity: (number | null)[]; // candles-aligned (extend.ts 와 동일 인덱스)
 	trades: { ts: number; side: 'B' | 'S'; px: number; stop: boolean }[];
+	// 보유기간 승패 밴드 — 진입~청산(미청산=마지막봉) 구간. 마커가 사라지는 줌아웃에도 읽힘(차트에 직접 '언제 들고 있었고 이겼나').
+	holds: { entryTs: number; exitTs: number | null; ret: number; open: boolean }[];
 }
 export interface BtLayerExtend {
 	ts: number[]; // candles timestamps(ms) — equity 배열 인덱스 정렬 + kLineDataList ts 매칭용
@@ -78,10 +80,32 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 					ctx.restore();
 				}
 			}
-			if (!ext?.strategies?.length || barSpace.bar < 2) return true; // LOD-1: 초줌아웃 = 마커 생략(에쿼티가 성과 전달)
+			if (!ext?.strategies?.length) return true;
 			// N≥2 = 포커스 1전략만(클러터 차단). N=1 = 그 전략.
 			const s = ext.strategies[ext.focus] ?? ext.strategies[0];
 			if (!s) return true;
+			// 보유기간 승패 밴드 (배경·LOD 무관) — 진입~청산(미청산=마지막봉) 구간을 승=초록·패=빨강 저알파. 줌아웃에도 '언제 들고 이겼나' 직독.
+			if (s.holds?.length && bounding) {
+				const idxMap = new Map<number, number>();
+				for (let bi = 0; bi < kLineDataList.length; bi++) idxMap.set(kLineDataList[bi].timestamp, bi);
+				const vf = Math.max(0, visibleRange.from);
+				const lastIdx = Math.min(kLineDataList.length, visibleRange.to) - 1;
+				for (const h of s.holds) {
+					let ei = idxMap.get(h.entryTs);
+					if (ei == null && kLineDataList[vf] && h.entryTs <= kLineDataList[vf].timestamp) ei = vf; // 진입이 창 이전 → 창 시작 클램프
+					if (ei == null) continue;
+					const xiRaw = h.exitTs != null ? idxMap.get(h.exitTs) : lastIdx;
+					const xi = xiRaw == null ? lastIdx : xiRaw;
+					const f = Math.max(vf, ei);
+					const t = Math.min(lastIdx, xi);
+					if (t < f) continue;
+					const x0 = xAxis.convertToPixel(f);
+					const x1 = xAxis.convertToPixel(t);
+					ctx.fillStyle = h.open ? 'rgba(139,145,158,0.05)' : h.ret > 0 ? 'rgba(52,211,153,0.07)' : h.ret < 0 ? 'rgba(240,97,111,0.07)' : 'rgba(139,145,158,0.05)';
+					ctx.fillRect(x0, 0, Math.max(1, x1 - x0), bounding.height);
+				}
+			}
+			if (barSpace.bar < 2) return true; // LOD-1: 초줌아웃 = 마커 생략(밴드·에쿼티가 성과 전달)
 			// 펀더게이트 배경 틴트(W2 moat) — 재무 게이트 활성 구간 초록(공시일 이후 PIT 계단). 마커보다 먼저(배경).
 			if (ext.gate?.active?.length && bounding) {
 				const gmap = new Map<number, 0 | 1>();
@@ -216,6 +240,41 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 				ctx.restore();
 			}
 
+			// 2.5 B&H 대비 초과 음영 — 포커스 전략과 B&H 라인 사이 영역(최종 초과 부호로 틴트). 끝점 %p 를 시계열 면적으로(시장 대비 앞/뒤).
+			{
+				const fi = ext.focus;
+				let lastS: number | null = null;
+				let lastB: number | null = null;
+				for (let i = to - 1; i >= from; i--) {
+					const r = result[i];
+					if (!r) continue;
+					if (lastS == null && r.e[fi] != null) lastS = r.e[fi];
+					if (lastB == null && r.b != null) lastB = r.b;
+					if (lastS != null && lastB != null) break;
+				}
+				if (lastS != null && lastB != null) {
+					ctx.beginPath();
+					let st = false;
+					for (let i = from; i < to; i++) {
+						const r = result[i];
+						if (!r || r.e[fi] == null) continue;
+						const x = xAxis.convertToPixel(i);
+						const y = yOf(r.e[fi]!);
+						if (!st) { ctx.moveTo(x, y); st = true; } else ctx.lineTo(x, y);
+					}
+					if (st) {
+						for (let i = to - 1; i >= from; i--) {
+							const r = result[i];
+							if (!r || r.b == null) continue;
+							ctx.lineTo(xAxis.convertToPixel(i), yOf(r.b!));
+						}
+						ctx.closePath();
+						ctx.fillStyle = lastS >= lastB ? 'rgba(52,211,153,0.05)' : 'rgba(240,97,111,0.05)';
+						ctx.fill();
+					}
+				}
+			}
+
 			// 3. 100 기준선(시작=100 → 손익분기) — 가시범위 안일 때만
 			if (lo <= 100 && hi >= 100) {
 				ctx.save(); ctx.strokeStyle = 'rgba(139,145,158,0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
@@ -275,12 +334,14 @@ export function buildBtExtend(
 	const strategies: BtStrategyVis[] = pf.slots.map(({ id, result }, si) => {
 		const meta = metaById.get(id);
 		const trades: BtStrategyVis['trades'] = [];
+		const holds: BtStrategyVis['holds'] = [];
 		for (const tr of result.trades) {
 			trades.push({ ts: toMs(tr.entryT), side: 'B', px: tr.entryPx, stop: false });
 			// 손절 청산(exitReason='stop')은 빨강 마커로 구분(S2). take/signal/finalMark 는 전략색.
 			if (tr.exitT && tr.exitPx != null) trades.push({ ts: toMs(tr.exitT), side: 'S', px: tr.exitPx, stop: tr.exitReason === 'stop' });
+			holds.push({ entryTs: toMs(tr.entryT), exitTs: tr.exitT ? toMs(tr.exitT) : null, ret: tr.retPct, open: tr.open });
 		}
-		return { id, color: meta?.color ?? STRAT_COLORS[si % STRAT_COLORS.length], label: meta?.label ?? `전략${si + 1}`, equity: result.equity, trades };
+		return { id, color: meta?.color ?? STRAT_COLORS[si % STRAT_COLORS.length], label: meta?.label ?? `전략${si + 1}`, equity: result.equity, trades, holds };
 	});
 	// MDD 음영 = combo 우선, 없으면 포커스 슬롯
 	const ddSrc = pf.combo?.mddWindow ?? pf.slots[Math.min(focus, pf.slots.length - 1)]?.result.mddWindow ?? null;
