@@ -142,6 +142,69 @@ def _fixTableUnits(data: list[dict]) -> list[dict]:
     return [{k: _rescaleManwon(v) for k, v in row.items()} for row in data]
 
 
+def _dropEmptyRows(data: list[dict]) -> list[dict]:
+    """전 연도 결측/0 인 행 제거 — 결측을 0 으로 둔갑한 행을 표에서 숨김."""
+    if not data:
+        return data
+    cols = list(data[0].keys())
+    yearCols = cols[1:]
+    if not yearCols:
+        return data
+    empty = {"", "-", "0", "0.0", "0%", "0.0%", "N/A", "None", "nan"}
+    return [row for row in data if not all(str(row.get(c, "")).strip() in empty for c in yearCols)]
+
+
+# CF 비율행에서 "0%"/"0.0%" = 분자(영업CF) 결측 둔갑 → "-" (부분결측 가드)
+_CF_RATIO_HINT = ("CF", "현금", "전환", "FCF")
+_ZERO_PCT = {"0%", "0.0%", "0.00%", "0.0", "0"}
+
+
+def _guardMissingRatios(data: list[dict]) -> list[dict]:
+    """CF 전환 비율행의 0% 둔갑(분자 결측)을 '-' 로 — 실제 0 과 결측 0 혼동 차단."""
+    if not data:
+        return data
+    cols = list(data[0].keys())
+    labelKey, yearCols = cols[0], cols[1:]
+    for row in data:
+        label = str(row.get(labelKey, ""))
+        if any(h in label for h in _CF_RATIO_HINT):
+            for yk in yearCols:
+                if str(row.get(yk, "")).strip() in _ZERO_PCT:
+                    row[yk] = "-"
+    return data
+
+
+# 표와 모순되거나 버그인 파생 metric 라벨 — 드롭 (데이터는 표가 SSOT)
+_DROP_METRIC_LABELS = {"FCF 양수 연속", "마진 방향", "전환 신호"}
+# 영문 metric 값 → 한글
+_METRIC_VALUE_KO = {
+    "dcf": "FCFF DCF",
+    "relative": "상대가치",
+    "ddm": "DDM",
+    "contracting": "",
+    "expanding": "",
+    "stable": "",
+    "decline": "",
+    "growth": "",
+}
+
+
+def _fixMetricsBlock(metrics: list[dict]) -> list[dict]:
+    out = []
+    for m in metrics:
+        label = str(m.get("label", "")).strip()
+        if label in _DROP_METRIC_LABELS:
+            continue
+        val = str(m.get("value", "")).strip()
+        ko = _METRIC_VALUE_KO.get(val.lower())
+        if ko is not None:
+            val = ko
+        if not val or val in ("판별 불가", "판별불가", "-", "None"):
+            continue
+        out.append({"label": label, "value": val})
+    return out
+
+
 def _dropOrphanHeadings(blocks: list[dict]) -> list[dict]:
     """내용(비-heading) 없는 고아 heading 제거 — 빈 블록 드롭 후 댕글링 제목 정리."""
     out: list[dict] = []
@@ -184,8 +247,14 @@ def _cleanStr(text: str) -> str:
     text = re.sub(r"\s*\d{4}\s*년?에?\s*(급락|급등|하락 전환|상승 전환)\s*\([^)]*\)\.?", "", text)
     text = re.sub(r"\s*(급락|급등|하락 전환|상승 전환)\s*\([^)]*\)\.?", "", text)
     text = _TREND_RE.sub("", text)
+    # 본문과 모순되는 lifecycle "전환 신호: 쇠퇴 방향 (score 0.55)." 절 통째 제거 (괄호 포함)
+    text = re.sub(r"\s*전환 신호[:：][^()]*(\([^)]*\))?\.?", "", text)
+    # 피어 "상위 0%" = 최상위인데 0%로 읽혀 혼동 → 명확화
+    text = re.sub(r"상위\s*0\s*%", "최상위(상위 1% 미만)", text)
     text = re.sub(r"\(\s*\)", "", text)  # 빈 괄호 '( )' 제거
     text = re.sub(r"\s+\)", ")", text)  # ') 앞 stray space ("삼각검증 )" → "삼각검증)")
+    text = re.sub(r"\.{2,}", ".", text)  # 이중 마침표 '..' → '.'
+    text = re.sub(r"\s+\.", ".", text)  # ' .' → '.'
     text = re.sub(r"\s{2,}", " ", text).strip()
     text = re.sub(r"^[.\s—–-]+", "", text).strip()
     return text
@@ -222,17 +291,15 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
             if bt == "chart":
                 continue  # P2 — placeholder 무가치 + 빈 차트(series=null) 위험. 표가 데이터 보유
             if bt == "table" and b.get("data"):
-                b["data"] = _fixTableUnits(b["data"])
+                b["data"] = _guardMissingRatios(_dropEmptyRows(_fixTableUnits(b["data"])))
+                if not b["data"]:
+                    continue
             elif bt == "text":
                 b["text"] = _cleanStr(b.get("text", ""))
                 if not b["text"]:
                     continue
             elif bt == "metrics":
-                b["metrics"] = [
-                    m
-                    for m in b.get("metrics", [])
-                    if str(m.get("value", "")).strip() not in ("판별 불가", "판별불가", "-", "", "N/A", "없음", "None")
-                ]
+                b["metrics"] = _fixMetricsBlock(b.get("metrics", []))
                 if not b["metrics"]:
                     continue
             cleaned.append(b)
@@ -309,7 +376,28 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
                 }
             )
 
-    # 종합 의견 = 측정값 추출(표) + 신뢰 가능한 생애주기·피어 서술
+    def _minYearFromTable(sec: dict | None, rowLabel: str) -> tuple[str, str] | None:
+        """행의 최저값 연도+값 — 변곡점(저점) 자동 추출."""
+        if not sec:
+            return None
+        for b in sec.get("blocks", []):
+            if b.get("type") == "table" and b.get("data"):
+                cols = list(b["data"][0].keys())
+                labelKey, yearCols = cols[0], cols[1:]
+                for row in b["data"]:
+                    if str(row.get(labelKey, "")).strip() == rowLabel:
+                        vals = []
+                        for yk in yearCols:
+                            raw = str(row.get(yk, "")).strip().rstrip("%").replace(",", "")
+                            try:
+                                vals.append((float(raw), yk, str(row.get(yk))))
+                            except ValueError:
+                                continue
+                        if len(vals) >= 3:
+                            return min(vals, key=lambda x: x[0])[1:]
+        return None
+
+    # 종합 의견 = 측정값 추출(표) + 변곡점 + 신뢰 가능한 생애주기·피어 서술
     measured = []
     secProfit, secStab = _byKey("수익성"), _byKey("안정성")
     for label, sec in (("영업이익률", secProfit), ("매출총이익률", secProfit), ("부채비율", secStab)):
@@ -317,9 +405,17 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
         if v:
             measured.append(f"{label} {v}")
     measuredLine = " · ".join(measured)
+    inflection = ""
+    mn = _minYearFromTable(secProfit, "영업이익률")
+    latest = _latestFromTables(secProfit, "영업이익률")
+    if mn and latest and mn[1] != latest:  # 저점이 최신연도가 아니면 = 회복 변곡점
+        inflection = f"{mn[0]} 영업이익률 {mn[1]} 저점 후 회복"
     lifecycle = _cleanText(_byKey("가치평가") or {})
     peer = _cleanText(_byKey("매출전망") or {})
-    narrativeOverview = ". ".join(p for p in [measuredLine, lifecycle, peer] if p).strip()
+    narrativeOverview = ". ".join(p.rstrip(". ") for p in [measuredLine, inflection, lifecycle, peer] if p).strip()
+    narrativeOverview = re.sub(r"\.{2,}", ".", narrativeOverview) + (
+        "." if narrativeOverview and not narrativeOverview.endswith(".") else ""
+    )
 
     # conclusion 보강: 약하면 grades 합성 (절대 등급 — 동종 백분위 아님)
     grades = summaryCard.get("grades") or {}
@@ -328,6 +424,56 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
         summaryCard["conclusion"] = f"재무 등급 — {gradeStr}"
         conclusion = summaryCard["conclusion"]
     summaryCard["gradesNote"] = "절대 등급 (동종 대비 백분위 아님)"
+
+    # ── headline KPI 밴드 (한눈 핵심 숫자) ──
+    def _findMetricVal(label: str) -> str | None:
+        for s in sections:
+            for b in s.get("blocks", []):
+                if b.get("type") == "metrics":
+                    for m in b.get("metrics", []):
+                        if str(m.get("label", "")).strip() == label:
+                            return str(m.get("value", "")).strip()
+        return None
+
+    headlineKpis = []
+    for lab, val in (
+        ("영업이익률", _latestFromTables(secProfit, "영업이익률")),
+        ("매출총이익률", _latestFromTables(secProfit, "매출총이익률")),
+        ("부채비율", _latestFromTables(secStab, "부채비율")),
+        ("매출 CAGR", _findMetricVal("매출 CAGR")),
+        ("ROIC-WACC", _findMetricVal("ROIC - WACC")),
+        ("배당성향", _findMetricVal("배당성향")),
+    ):
+        if val:
+            headlineKpis.append({"label": lab, "value": val})
+
+    # ── strengths / warnings (등급 + ROIC-WACC 신호 기반) — 통찰 표면 채움 ──
+    if not summaryCard.get("strengths"):
+        summaryCard["strengths"] = [f"{area} 등급 {g}" for area, g in grades.items() if g in ("A", "B")]
+    if not summaryCard.get("warnings"):
+        warns = [f"{area} 등급 {g}" for area, g in grades.items() if g in ("D", "F")]
+        rw = _findMetricVal("ROIC - WACC")
+        if rw and rw.strip().startswith("-"):
+            warns.append(f"ROIC가 WACC 미달 ({rw})")
+        summaryCard["warnings"] = warns
+
+    # ── 일회성 손익 자동 플래그 (순이익률 >100% = 비경상 가능) ──
+    extraNotes: list[str] = []
+    for s in sections:
+        if s.get("key") != "수익성":
+            continue
+        for b in s.get("blocks", []):
+            if b.get("type") == "table" and b.get("data"):
+                cols = list(b["data"][0].keys())
+                for row in b["data"]:
+                    if str(row.get(cols[0], "")).strip() == "순이익률":
+                        for yk in cols[1:]:
+                            raw = str(row.get(yk, "")).rstrip("%").replace(",", "")
+                            try:
+                                if float(raw) > 100:
+                                    extraNotes.append(f"{yk} 순이익률 {row[yk]} (일회성 손익 가능 — 정상화 전)")
+                            except ValueError:
+                                continue
 
     # ── honest-skip reject-gate ──
     coreActsWithBlocks = len({s["key"] for s in nonEmpty if s["key"] in CORE_SECTIONS})
@@ -354,7 +500,12 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
         "circulationSummary": base.get("circulationSummary", ""),
         "summaryCard": summaryCard,
         "narrativeOverview": narrativeOverview,  # 종합 의견 (리드 섹션 측정값 문장 합성)
+        "headlineKpis": headlineKpis,  # 한눈 KPI 밴드 (핵심 6지표)
         "keyFindings": keyFindings,  # 핵심 발견 spine (섹션별 측정값 한 줄)
+        "assumptionsNote": (
+            "WACC 는 전기간 동일 가정(단순화) · 절대 등급은 동종 백분위 아님 · 경계연도 일부 지표 결측 가능"
+            + ("  ·  " + " · ".join(extraNotes) if extraNotes else "")
+        ),
         "evidenceFrame": evidenceFrame,  # sixActScore ready 축 (fresh 경로엔 보통 빈약)
         "provenanceFrame": provenanceFrame,  # ★신뢰 가능한 정직 토대 — 실제 엔진 출처 집계
         "sections": sections,
