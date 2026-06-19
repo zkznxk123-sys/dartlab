@@ -25,6 +25,15 @@
 	const focusSlot = $derived(pf.slots.find((s) => s.id === focusId) ?? pf.slots[0] ?? null);
 	const focusMeta = $derived(slots.find((s) => s.id === focusId) ?? slots[focus] ?? slots[0]);
 	const headRet = $derived(pf.combo ? pf.combo.metrics.retPct : focusSlot?.result.metrics.retPct ?? 0);
+	// ★정직 패리티 — 보고서와 동일한 일화(증거 약함: 봉<60 또는 거래<5) 규칙. 차트가 헤드라인 surface 가 됐으니
+	// 칩도 큰 초록 차단(NEVER-CLAIM): 약표본이면 수익·초과를 중립색으로(보고서 clsT 와 동일).
+	const weakTier = $derived.by(() => {
+		const r = focusSlot?.result;
+		if (!r) return false;
+		const nBars = r.equity.filter((v) => v != null).length;
+		return nBars < 60 || r.metrics.tradeCount < 5;
+	});
+	const clsT = (v: number) => (weakTier ? 'tNeu' : cls(v));
 	const headLabel = $derived(pf.combo ? T('조합', 'combo') : focusMeta?.label ?? '');
 	const dotColor = $derived(pf.combo ? '#e879f9' : focusMeta?.color ?? '#8b919e');
 
@@ -52,10 +61,11 @@
 		title={T('백테스팅 상세 — 자산곡선·거래·낙폭·가정', 'backtest details')}
 	>
 		<i class="oc-dot" style={`background:${dotColor}`}></i>
-		<b class={'oc-ret mono ' + cls(headRet)}>{headLabel} {sgn(headRet)}%</b>
+		<b class={'oc-ret mono ' + clsT(headRet)}>{headLabel} {sgn(headRet)}%</b>
 		<span class="oc-vs">vs {T('보유', 'B&H')}</span>
 		<b class={'oc-bh mono ' + cls(bhRet)}>{sgn(bhRet)}%</b>
-		<span class={'oc-xs mono ' + cls(headRet - bhRet)}>{sgn(headRet - bhRet)}%p</span>
+		<span class={'oc-xs mono ' + clsT(headRet - bhRet)}>{sgn(headRet - bhRet)}%p</span>
+		{#if weakTier}<span class="oc-anec">{T('일화', 'anecdote')}</span>{/if}
 		{#if topWarn}<span class="oc-warn">⚠ {T(topWarn.kr, topWarn.en)}</span>{/if}
 		<span class="oc-more">{T('상세', 'details')} ▸</span>
 	</button>
@@ -87,6 +97,8 @@
 	.oc-bh { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 	.oc-xs { font-size: 12px; font-weight: 700; padding: 0 6px; border-radius: 8px; border: 1px solid var(--dl-line, #1b2130); font-variant-numeric: tabular-nums; }
 	.oc-warn { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 5px; }
+	/* 일화 태그 — 증거 약함(봉<60 또는 거래<5). 수익 중립색과 함께 "한 경로의 운"을 명시(NEVER-CLAIM). */
+	.oc-anec { font-size: 10.5px; color: var(--dim, #8b94a3); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 0 5px; }
 	.oc-more { font-size: 11px; color: var(--amber, #fb923c); font-weight: 600; }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }

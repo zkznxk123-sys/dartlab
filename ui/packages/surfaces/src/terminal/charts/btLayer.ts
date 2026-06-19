@@ -269,7 +269,7 @@ export function registerBtIndicators(kc: { registerIndicator: (t: unknown) => vo
 							ctx.lineTo(xAxis.convertToPixel(i), yOf(r.b!));
 						}
 						ctx.closePath();
-						ctx.fillStyle = lastS >= lastB ? 'rgba(52,211,153,0.05)' : 'rgba(240,97,111,0.05)';
+						ctx.fillStyle = lastS >= lastB ? 'rgba(52,211,153,0.06)' : 'rgba(167,139,250,0.07)'; // 우위=초록·열위=보라(수중 낙폭 빨강과 분리)
 						ctx.fill();
 					}
 				}
