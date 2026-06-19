@@ -9,6 +9,7 @@
 	import ScreenerModal from './ScreenerModal.svelte';
 	import FinTypeLegendDialog from './FinTypeLegendDialog.svelte'; // 유형 칩 범례 — TYPE 컬럼 ⓘ 에서 연다
 	import Watchlist from './Watchlist.svelte'; // 공시 워치 — 큐레이션 종목 신선도 모니터 (recentMap 공유)
+	import MarketFeed from './MarketFeed.svelte'; // 시장 공시 피드 — 전상장사 3개월 수시공시(워치=내 종목 / 피드=시장 전체)
 	import { watchlist } from '../lib/watchlist.svelte'; // 워치 카운트 — 하단 탭 라벨 배지
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { buildMacroGlanceView } from '../lib/macroLens';
@@ -126,9 +127,16 @@
 	<div class="swMap">
 		<ScatterMap pts={industryPts} compact highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
 	</div>
-	<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `detail · ${industryPts.length} industries · companies →` : `상세보기 · ${industryPts.length}산업 · 회사 산포 →`}</button>
-	<div class="swNote">ⓘ {lang === 'en' ? 'x = margin · y = growth · ring = current · equal-weight · not KRX' : '가로=수익 · 세로=성장 · ◯=현재 산업 · 상장 동일가중 · KRX 아님'}</div>
+	<!-- 푸터 1줄 — 상세 버튼 + 축 범례(2줄→1줄로 ~16px 절감, 산점도 viewBox 불변. 전체 범례는 툴팁). -->
+	<div class="swFoot">
+		<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `detail · ${industryPts.length} ind →` : `상세 · ${industryPts.length}산업 →`}</button>
+		<span class="swNote" title={lang === 'en' ? 'x = margin · y = growth · ring = current · equal-weight · not KRX' : '가로=수익 · 세로=성장 · ◯=현재 산업 · 상장 동일가중 · KRX 아님'}>{lang === 'en' ? 'x margin · y growth ⓘ' : '가로 수익·세로 성장 ⓘ'}</span>
+	</div>
 </Panel>
+
+<!-- 시장 공시 피드 — 산업 아래 *전상장사* 최근 3개월 수시공시. 우측 단일기업/좌측 워치(내 종목)와 다른
+     시장 전체 멘탈모델. 고정높이 섹션(내부 스크롤) — fillCol 은 아래 eQuant(스크리너) 단독 유지. -->
+<MarketFeed {lang} {active} {onPick} />
 
 <!-- 하단 통합 — 스크리너 ⇄ 공시 워치 탭. 워치가 무한 증가해 스크리너를 가리던 문제 해소
      (한 자리를 탭으로 공유 · 각 탭이 잔여 높이 전부 차지 · 내부 스크롤). 탭 바가 패널 헤더 역할. -->
