@@ -28,13 +28,17 @@ export const EVENT_CAT_LABEL: Record<string, { kr: string; en: string }> = Objec
 	EVENT_CATS.map((c) => [c.key, { kr: c.kr, en: c.en }])
 );
 
+// 지분공시(소유) 패턴 — 차트 이벤트레일(classifyFiling 'equity')과 시장피드(marketFeedCategory
+// 'ownership')가 *공유*하는 단일 SSOT 리터럴. 복붙 금지 — 양쪽이 이 const 를 import 한다.
+export const RX_OWNERSHIP = /대량보유|특정증권|의결권|주식등의|임원[ㆍ·]?주요주주/;
+
 /**
  * 비정기 공시 원문명(reportNm) → 공시그룹 키워드 근사 분류. 순서 = 우선순위(첫 매치 채택).
  * 공식 DART 카테고리 필드 부재로 키워드 휴리스틱 — 모호하면 'etc'. 정기보고서는 kind 로 이미 'regular'.
  */
 export function classifyFiling(reportNm: string): string {
 	const s = reportNm || '';
-	if (/대량보유|특정증권|의결권|주식등의|임원[ㆍ·]?주요주주/.test(s)) return 'equity';
+	if (RX_OWNERSHIP.test(s)) return 'equity';
 	if (/증권신고서|투자설명서|발행조건|발행실적|일괄신고|증권발행/.test(s)) return 'issue';
 	if (/감사보고서|외부감사|회계감사/.test(s)) return 'audit';
 	if (/주요사항|유[ㆍ·]?무상증자|유상증자|무상증자|전환사채|신주인수권|교환사채|자기주식|영업[ 양]?양[수도]|합병|분할|감자|주식소각|주식교환|주식이전|해산|부도|회생|파산|채권은행|관리절차|유형자산양수|타법인주식/.test(s)) return 'major';
