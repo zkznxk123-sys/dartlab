@@ -37,7 +37,18 @@
       if (s && s.blocks?.length) present.push({ ...s, _emph: emphasize.has(key) });
       else missing.push(key);
     }
-    const sections = present.length ? present : (report.sections ?? []);
+    // 매니페스트 sectionOrder 에 없는 섹션(다엔진 신용/산업/시장 등)을 뒤에 추가 — 누락 방지
+    const META_KEYS = new Set(['storyValidation', 'improvementPlan', 'thesisReport']);
+    let sections: Sec[];
+    if (present.length) {
+      const presentKeys = new Set(present.map((s: Sec) => s.key));
+      const extras = (report.sections ?? []).filter(
+        (s: Sec) => s.blocks?.length && !presentKeys.has(s.key) && !META_KEYS.has(s.key)
+      );
+      sections = [...present, ...extras];
+    } else {
+      sections = (report.sections ?? []).filter((s: Sec) => !META_KEYS.has(s.key));
+    }
     return { sections, focusQuestions: activeRt.focusQuestions ?? [], missing };
   });
 
@@ -295,14 +306,16 @@
               {:else if b.type === 'table' && b.data?.length}
                 {@const cols = Object.keys(b.data[0])}
                 {@const ts = isTimeSeries(cols)}
+                {@const grouped = cols[0] === '구분'}
                 <div class="bTableWrap">
                   {#if b.label}<div class="tCap">{b.label}</div>{/if}
                   <table class="bTable">
                     <thead><tr>{#each cols as c, ci}<th class={ci === 0 ? 'lbl' : 'num'}>{c}</th>{/each}{#if ts}<th class="sparkCol">추이</th>{/if}</tr></thead>
                     <tbody>
-                      {#each b.data as row}
-                        <tr>
-                          {#each cols as c, ci}<td class={ci === 0 ? 'lbl' : 'num ' + cellTone(row[c])}>{row[c]}</td>{/each}
+                      {#each b.data as row, ri}
+                        {@const newGroup = grouped && (ri === 0 || b.data[ri - 1][cols[0]] !== row[cols[0]])}
+                        <tr class:groupStart={newGroup}>
+                          {#each cols as c, ci}<td class={ci === 0 ? 'lbl' + (grouped ? ' grp' : '') : 'num ' + cellTone(row[c])}>{ci === 0 && grouped && !newGroup ? '' : row[c]}</td>{/each}
                           {#if ts}{@const sp = spark(row, cols.slice(1))}<td class="sparkCol">{#if sp}<svg class="spark {sp.tone}" width="54" height="15" viewBox="0 0 54 15">{#if sp.zeroY}<line x1="0" y1={sp.zeroY} x2="54" y2={sp.zeroY} stroke="var(--dim)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.55" />{/if}<polyline points={sp.points} fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" /><circle cx={sp.lastX} cy={sp.lastY} r="1.5" fill="currentColor" /></svg>{/if}</td>{/if}
                         </tr>
                       {/each}
@@ -316,6 +329,20 @@
           </section>
         {/each}
       </div>
+
+      <!-- ── 종합 의견 (4엔진 수렴 클로징) ── -->
+      {#if report.closing?.length}
+        <section class="block closing">
+          <h2 class="blockTitle">종합 의견 <span class="subNote">재무·신용·산업·시장 4개 분석엔진 수렴 (투자판단 아님)</span></h2>
+          {#each report.closing as cl}
+            <div class="clRow src-{cl.engine}">
+              <span class="clLabel">{cl.label}</span>
+              <span class="clLine">{clean(cl.line)}</span>
+              <span class="clSrc">{engineLabel[cl.engine] ?? cl.engine}</span>
+            </div>
+          {/each}
+        </section>
+      {/if}
 
       <!-- ── 근거·출처 ── -->
       <section class="block evidenceStrip">
@@ -503,12 +530,25 @@
   .bTable td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
   .bTable td.num.neg { color: var(--down); } .bTable td.num.pos { color: var(--up); }
   .bTable tbody tr:nth-child(even) { background: var(--soft); }
+  .bTable td.lbl.grp { color: var(--dim); font-weight: 700; font-size: 11px; white-space: nowrap; }
+  .bTable tr.groupStart td { border-top: 2px solid var(--bd2); }
+  .bTable tr.groupStart:first-child td { border-top: 0; }
   .bTable td.sparkCol { text-align: right; padding-right: 4px; width: 58px; }
   .spark { vertical-align: middle; color: var(--dim); }
   .spark.up { color: var(--up); } .spark.down { color: var(--down); } .spark.flat { color: var(--dim); }
 
   .bFlags { padding-left: 18px; margin: 9px 0; font-size: 12.5px; line-height: 1.7; }
   .bFlags.warning li { color: var(--warn); } .bFlags.opportunity li { color: var(--up); }
+
+  /* ── 종합 의견 (수렴 클로징) ── */
+  .clRow { display: grid; grid-template-columns: 54px 1fr auto; gap: 13px; align-items: baseline; padding: 10px 0 10px 13px; border-bottom: 1px solid var(--bd); border-left: 3px solid var(--e-analysis); }
+  .clRow.src-credit { border-left-color: var(--e-credit); }
+  .clRow.src-industry { border-left-color: var(--e-industry); }
+  .clRow.src-quant { border-left-color: var(--e-quant); }
+  .clRow:last-child { border-bottom: 0; }
+  .clLabel { font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
+  .clLine { font-size: 13px; line-height: 1.55; }
+  .clSrc { font-size: 10.5px; color: var(--dim); white-space: nowrap; }
 
   /* ── 근거·출처 ── */
   .evEngines { display: flex; flex-wrap: wrap; gap: 16px; }

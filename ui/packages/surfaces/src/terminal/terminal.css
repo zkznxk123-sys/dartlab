@@ -147,6 +147,8 @@
 .dlTerm .hdrLink:hover { color: var(--amber); border-color: var(--bdAmber); background: rgba(251, 146, 60, 0.08); }
 .dlTerm button.hdrLink { background: transparent; cursor: pointer; line-height: inherit; }
 .dlTerm .hdrLink.on { color: var(--amber); border-color: var(--bdAmber); background: rgba(251, 146, 60, 0.1); }
+.dlTerm .hdrReport { color: var(--amber); border-color: var(--bdAmber); }
+.dlTerm .hdrReport:hover { color: var(--amber); background: rgba(251, 146, 60, 0.16); }
 
 /* 종목 토론 드로어 (giscus — GitHub Discussions). mount 유지 + 표시 토글로 iframe 보존. */
 .dlTerm .dscDrawer { position: fixed; top: 0; right: 0; bottom: 0; width: clamp(380px, 28vw, 460px); z-index: 120; display: none; flex-direction: column; background: var(--dl-bg-base); border-left: 1px solid var(--bdHi); box-shadow: -18px 0 42px rgba(0, 0, 0, 0.5); }

@@ -302,6 +302,272 @@ def _cleanStr(text: str) -> str:
     return text
 
 
+def _fmtNum(v) -> str:
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return str(v) if v not in (None, "") else "-"
+    if abs(f) >= 100:
+        return f"{f:,.0f}"
+    return f"{f:.2f}".rstrip("0").rstrip(".")
+
+
+def _fmtPct(v) -> str:
+    try:
+        return f"{float(v):.1f}%"
+    except (TypeError, ValueError):
+        return "-"
+
+
+def _pctRank(p) -> str:
+    """동종 백분위 → '상위 N%' (중복 인코딩 제거). 100백분위(상위 0%)는 '최상위'."""
+    try:
+        pf = float(p)
+    except (TypeError, ValueError):
+        return "-"
+    top = max(0.0, 100.0 - pf)
+    if top < 1.0:
+        return "최상위 (상위 1% 미만)"
+    return f"상위 {top:.0f}%"
+
+
+# 신용지표 단위/그룹 — 단위 없는 raw 숫자(355 가 %인지 배인지)는 오독 → 단위 부착 + 그룹핑.
+# "EBITDA/이자비용" 은 이자비용 미태깅 시 금융비용 fallback 으로 왜곡(무차입 기업이 3.72배 등,
+# 등급과 모순) → 신용 섹션에서 제외(레버리지/유동성 지표가 등급과 일관).
+# EBITDA/이자비용: 금융비용 fallback 왜곡 → 제외. 부채비율: 안정성 섹션(analysis, 시계열 정본)이
+# 소유 → 신용표에서 제외(교차엔진 같은 라벨 다른 값 = 독자 혼동 방지).
+_CREDIT_DROP = {"EBITDA/이자비용", "부채비율"}
+_CREDIT_GROUP = (
+    ("레버리지·차입구조", {"Debt/EBITDA", "순차입금/EBITDA", "차입금의존도", "단기차입금비중", "차입금리부담"}),
+    ("커버리지", {"FFO/총차입금", "FOCF/Debt"}),
+    ("유동성", {"유동비율", "현금비율"}),
+)
+
+
+def _creditUnit(name: str) -> str:
+    if name in ("Debt/EBITDA", "순차입금/EBITDA"):
+        return "배"
+    if any(k in name for k in ("비율", "총차입금", "FOCF", "단기차입금비중", "차입금리부담", "의존도")):
+        return "%"
+    return ""
+
+
+# ── 다엔진 섹션 빌더 (story full 템플릿 밖 — credit/industry/quant 를 직접 호출해 조립) ──
+# buildStory 가 fresh Company 경로에서 이 섹션들을 빈 반환하므로(=story 내부 한계),
+# 검증된 calc 함수를 *buildStory 전에* 직접 호출해 섹션을 만든다. NEVER-CLAIM 준수:
+# 등급·백분위·베타 = 측정값만, 매수/매도/목표가/투자판단 0.
+
+
+def _buildCreditSection(c) -> dict | None:
+    """신용분석 섹션 — dartlab 자체 신용모형(calcCreditScore) 등급 + 핵심 신용지표."""
+    from dartlab.credit.scoring.calcs import calcCreditScore
+
+    cs = calcCreditScore(c)
+    if not cs or not cs.get("grade"):
+        return None
+    grade = cs.get("grade")
+    desc = cs.get("gradeDescription") or ""
+    head = f"dartlab 자체 신용모형 추정 등급 {grade}"
+    if desc:
+        head += f" ({desc})"
+    head += "."
+    extra = []
+    if cs.get("outlook"):
+        extra.append(f"등급전망 {cs['outlook']}")
+    if cs.get("eCR"):
+        extra.append(f"현금흐름등급 {cs['eCR']}")
+    if cs.get("pdEstimate") is not None:
+        extra.append(f"부도확률(추정) {_fmtNum(cs['pdEstimate'])}%")
+    if cs.get("auditOpinion"):
+        extra.append(f"감사의견 {cs['auditOpinion']}")
+    if extra:
+        head += " " + " · ".join(extra) + "."
+    blocks: list[dict] = [{"type": "text", "text": head}]
+    # 7축 가중 구성
+    axes = cs.get("axes") or []
+    axRows = [{"신용 축": a.get("name", ""), "가중치": f"{a.get('weight', '')}%"} for a in axes if a.get("name")]
+    if axRows:
+        blocks.append({"type": "table", "label": "신용평가 7축 (가중치)", "data": axRows})
+    # 핵심 신용지표 — 단위(%/배) 부착 + 레버리지/커버리지/유동성 그룹핑 (왜곡 지표 제외)
+    mByName: dict[str, object] = {}
+    for a in axes:
+        for m in a.get("metrics") or []:
+            nm = m.get("name")
+            if nm and m.get("value") is not None and nm not in _CREDIT_DROP and nm not in mByName:
+                mByName[nm] = m["value"]
+    gRows: list[dict] = []
+    grouped: set[str] = set()
+    for gName, names in _CREDIT_GROUP:
+        for nm in mByName:
+            if nm in names:
+                gRows.append({"구분": gName, "지표": nm, "값": _fmtNum(mByName[nm]) + _creditUnit(nm)})
+                grouped.add(nm)
+    for nm, v in mByName.items():
+        if nm not in grouped:
+            gRows.append({"구분": "기타", "지표": nm, "값": _fmtNum(v) + _creditUnit(nm)})
+    if gRows:
+        blocks.append({"type": "table", "label": "핵심 신용지표 (그룹·단위)", "data": gRows[:14]})
+    return {
+        "key": "신용분석",
+        "title": "신용분석 -- dartlab 신용모형이 보는 이 회사의 등급",
+        "act": 5,
+        "sourceEngine": "credit",
+        "blocks": blocks,
+    }
+
+
+def _buildIndustrySection(c) -> dict | None:
+    """산업·동종비교 섹션 — 가치사슬 위치 + 동종 백분위 + 동일 공정 peers."""
+    from dartlab.industry.calcs.companyCalcs import calcChainPosition, calcSectorMetrics
+
+    ch = None
+    sm = None
+    try:
+        ch = calcChainPosition(c)
+    except Exception:  # noqa: BLE001
+        ch = None
+    try:
+        sm = calcSectorMetrics(c)
+    except Exception:  # noqa: BLE001
+        sm = None
+    if not ch and not sm:
+        return None
+    blocks: list[dict] = []
+    _STREAM_KO = {"upstream": "상류", "midstream": "중류", "downstream": "하류"}
+    if ch and ch.get("industryName"):
+        t = f"산업 {ch['industryName']}"
+        if ch.get("stageName"):
+            t += f" · 가치사슬 {ch['stageName']}"
+        streamKo = _STREAM_KO.get(str(ch.get("stream")), ch.get("stream"))
+        role = " · ".join(x for x in [ch.get("role"), streamKo] if x)
+        if role:
+            t += f" ({role})"
+        blocks.append({"type": "text", "text": t + "."})
+    if sm:
+        rows = []
+        for label, distKey, pctKey in (
+            ("영업이익률", "opmDistribution", "myOpmPercentile"),
+            ("매출 CAGR", "cagrDistribution", "myCagrPercentile"),
+            ("ROE", "roeDistribution", "myRoePercentile"),
+        ):
+            d = sm.get(distKey) or {}
+            myp = sm.get(pctKey)
+            if d and myp is not None:
+                rows.append(
+                    {
+                        "지표": label,
+                        "동종 중앙값": _fmtPct(d.get("median")),
+                        "동종 상위25%": _fmtPct(d.get("p75")),
+                        "이 회사 위치": _pctRank(myp),
+                    }
+                )
+        if rows:
+            peerN = sm.get("peerCount", "")
+            blocks.append({"type": "table", "label": f"동종 {peerN}개사 대비 위치", "data": rows})
+    if ch and ch.get("peers"):
+        prows = [
+            {
+                "동일 공정 비교기업": p.get("corpName", ""),
+                "코드": p.get("stockCode", ""),
+                "유사도": f"{round(float(p.get('confidence', 0)) * 100)}%",
+            }
+            for p in ch["peers"][:8]
+            if p.get("corpName")
+        ]
+        if prows:
+            blocks.append({"type": "table", "label": "동일 공정 비교 기업", "data": prows})
+    return {
+        "key": "산업비교",
+        "title": "산업·동종비교 -- 이 회사는 시장에서 어디에 서 있는가",
+        "act": 6,
+        "sourceEngine": "industry",
+        "blocks": blocks,
+    }
+
+
+def _buildMarketSection(c) -> dict | None:
+    """시장·주가 섹션 — 시장이 이 회사를 보는 통계(베타·CAPM·상대강도). 매수/매도 판단 없음."""
+    from dartlab.quant.screen.extended import calcMarketBeta
+
+    mb = calcMarketBeta(c)
+    if not mb or mb.get("value") is None:
+        return None
+    beta = mb.get("value")
+    # interpretation 에 이미 'β=...' 가 들어가므로 중복 회피 — 있으면 그것만, 없으면 베타 표기
+    interp = (mb.get("interpretation") or "").strip()
+    t = interp if interp else f"베타(β) {float(beta):.2f}"
+    blocks: list[dict] = [{"type": "text", "text": t.rstrip(".") + "."}]
+    metrics = [{"label": "베타(β)", "value": f"{float(beta):.2f}"}]
+    if mb.get("capm") is not None:
+        metrics.append({"label": "CAPM 기대수익률", "value": f"{_fmtNum(mb['capm'])}%"})
+    if mb.get("relativeStrength") is not None:
+        metrics.append({"label": "상대강도(vs 시장)", "value": f"{float(mb['relativeStrength']):+.1f}%p"})
+    if mb.get("rSquared") is not None:
+        metrics.append({"label": "설명력 R²", "value": f"{float(mb['rSquared']):.2f}"})
+    if mb.get("nObs"):
+        metrics.append({"label": "관측", "value": f"{mb['nObs']}일"})
+    blocks.append({"type": "metrics", "metrics": metrics})
+    return {
+        "key": "시장주가",
+        "title": "시장·주가 -- 시장은 이 회사를 어떻게 평가하나",
+        "act": 6,
+        "sourceEngine": "quant",
+        "blocks": blocks,
+    }
+
+
+def _buildEngineSections(c) -> list[dict]:
+    """다엔진 섹션 일괄 빌드 (buildStory 전 호출 — credit HTTP 클라이언트 닫힘 방지)."""
+    out: list[dict] = []
+    for builder in (_buildCreditSection, _buildIndustrySection, _buildMarketSection):
+        try:
+            sec = builder(c)
+        except Exception as exc:  # noqa: BLE001 — 엔진 빈약 시 honest-skip
+            print(f"  [warn] {builder.__name__}: {type(exc).__name__}: {str(exc)[:80]}", flush=True)
+            sec = None
+        if sec and sec.get("blocks"):
+            # 엔진 섹션 text 는 손수 작성한 측정값 문장 → _cleanStr 미적용
+            # (_JUDGMENT_RE 가 신용 outlook '안정적' 같은 정당한 값을 오인 제거함)
+            out.append(sec)
+    return out
+
+
+def _engineSectionsIsolated(code: str) -> list[dict]:
+    """다엔진 섹션을 *자식 프로세스*에서 계산해 반환.
+
+    credit/quant calc 이 모듈 전역 상태를 변형 → 같은 프로세스의 buildStory 가 본진
+    summary 버그(NAVER 등 일부 회사에서 ' / '.join 에 tuple)를 밟는다. 자식 프로세스로
+    격리하면 전역 변형이 자식에만 머물러 부모의 buildStory 가 깨끗이 동작(본진 미변경 우회).
+    """
+    import os
+    import subprocess
+    import tempfile
+
+    fd, tmp = tempfile.mkstemp(suffix=".json", prefix="engsec_")
+    os.close(fd)
+    try:
+        r = subprocess.run(
+            [sys.executable, "-X", "utf8", os.path.abspath(__file__), "--engine-only", code, tmp],
+            env={**os.environ, "PYTHONUTF8": "1"},
+            capture_output=True,
+            text=True,
+            timeout=240,
+        )
+        if r.returncode != 0:
+            print(f"  [warn] engine subprocess rc={r.returncode}: {(r.stderr or '')[-160:]}", flush=True)
+            return []
+        with open(tmp, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as exc:  # noqa: BLE001 — 격리 실패 시 다엔진 honest-skip
+        print(f"  [warn] engine subprocess: {type(exc).__name__}: {str(exc)[:120]}", flush=True)
+        return []
+    finally:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+
+
 def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
     """단일 회사 reportPayload bake. 자격 미달 시 None(honest-skip)."""
     import dartlab
@@ -310,6 +576,9 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
 
     c = dartlab.Company(code)
     corpName = getattr(c, "corpName", "") or ""
+
+    # 다엔진 섹션 (credit/industry/quant) — 자식 프로세스에서 계산(전역 변형 격리, 위 함수 docstring)
+    engineSections = _engineSectionsIsolated(code)
 
     story = buildStory(c, type="full", detail=True)
     base = json.loads(story.render("json"))  # {stockCode, corpName, sections[], summaryCard?, circulationSummary?}
@@ -360,6 +629,14 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
             s["summary"] = summ
         if act and s.get("blocks"):
             actsCovered.add(str(act))
+
+    # 다엔진 섹션 병합 (이미 정화된 블록 — analysis 9섹션 뒤에 신용/산업/시장 추가)
+    # provenanceFrame·keyFindings 가 이들을 포함하도록 evidenceFrame 계산 전에 extend.
+    if engineSections:
+        sections.extend(engineSections)
+        for es in engineSections:
+            if es.get("act"):
+                actsCovered.add(str(es["act"]))
 
     # evidenceFrame (score 분리)
     try:
@@ -486,8 +763,9 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
     if mn and latest and mn[1] != latest:  # 저점이 최신연도가 아니면 = 회복 변곡점
         inflection = f"{mn[0]} 영업이익률 {mn[1]} 저점 후 회복"
     lifecycle = _cleanStr(_cleanText(_byKey("가치평가") or {}))
-    peer = _cleanStr(_cleanText(_byKey("매출전망") or {}))
-    narrativeOverview = ". ".join(p.rstrip(". ") for p in [measuredLine, inflection, lifecycle, peer] if p).strip()
+    # peer(매출전망) 백분위는 전체 상장사 기준이라 산업비교 섹션(동종 기준)과 유니버스 충돌 →
+    # 산업비교 섹션이 동종 백분위 정본을 제공하므로 narrativeOverview 에서는 제외.
+    narrativeOverview = ". ".join(p.rstrip(". ") for p in [measuredLine, inflection, lifecycle] if p).strip()
     narrativeOverview = re.sub(r"\.{2,}", ".", narrativeOverview) + (
         "." if narrativeOverview and not narrativeOverview.endswith(".") else ""
     )
@@ -529,10 +807,12 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
         conclusion = summaryCard.get("conclusion", conclusion)
     summaryCard["gradesNote"] = "절대 등급 (동종 대비 백분위 아님)"
 
+    _gpm = _latestFromTables(secProfit, "매출총이익률")
     headlineKpis = []
     for lab, val in (
         ("영업이익률", _latestFromTables(secProfit, "영업이익률")),
-        ("매출총이익률", _latestFromTables(secProfit, "매출총이익률")),
+        # 매출총이익률 결측 시 침묵 대신 '—(공시 미구분)' 명시 (KPI 밴드 칸 정렬 + 정직 고지)
+        ("매출총이익률", _gpm if _gpm else "—"),
         ("부채비율", _latestFromTables(secStab, "부채비율")),
         ("매출 CAGR", _findMetricVal("매출 CAGR")),
         ("ROIC−WACC(최근)", latestSpread),
@@ -599,6 +879,44 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
     engineCount = len(provenanceFrame["engines"])
     qualityLabel = "verified" if (len(nonEmpty) >= 8 and engineCount >= 3) else "conditional"
 
+    # ── 종합 의견 — 4엔진 수렴 클로징 (참조 보고서 문서문법: 도메인별 1줄, NEVER-CLAIM) ──
+    # 문서가 시장 섹션 stub 으로 약하게 끝나는 대신, 재무/신용/산업/시장을 한 줄씩 수렴시켜 닫는다.
+    def _secFirstSentence(key: str) -> str:
+        s = next((x for x in sections if x.get("key") == key), None)
+        if not s:
+            return ""
+        txt = next(
+            (b.get("text", "").strip() for b in s.get("blocks", []) if b.get("type") == "text" and b.get("text")), ""
+        )
+        # 첫 문장만 — '. '(마침표+공백) 기준 분리 (β=1.27 같은 소수점에서 안 끊기게)
+        return re.split(r"\.\s", txt)[0].strip().rstrip(".")
+
+    def _industryClosing() -> str:
+        s = next((x for x in sections if x.get("key") == "산업비교"), None)
+        if not s:
+            return ""
+        for b in s.get("blocks", []):
+            if b.get("type") == "table" and b.get("data") and "이 회사 위치" in b["data"][0]:
+                row = next((r for r in b["data"] if r.get("지표") == "영업이익률"), None)
+                if row:
+                    return f"동종 대비 영업이익률 {row.get('이 회사 위치', '')}"
+        return _secFirstSentence("산업비교")
+
+    closing = []
+    if conclusion:
+        finLine = conclusion.split("—", 1)[-1].strip().rstrip(".")
+        if finLine:
+            closing.append({"label": "재무", "engine": "analysis", "line": finLine})
+    cr = _secFirstSentence("신용분석")
+    if cr:
+        closing.append({"label": "신용", "engine": "credit", "line": cr})
+    ind = _industryClosing()
+    if ind:
+        closing.append({"label": "산업", "engine": "industry", "line": ind})
+    mk = _secFirstSentence("시장주가")
+    if mk:
+        closing.append({"label": "시장", "engine": "quant", "line": mk})
+
     payload = {
         "schemaVersion": 1,
         "engine": "dartlab.story",
@@ -615,6 +933,7 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
             "WACC 는 전기간 동일 가정(단순화) · 절대 등급은 동종 백분위 아님 · 경계연도 일부 지표 결측 가능"
             + ("  ·  " + " · ".join(extraNotes) if extraNotes else "")
         ),
+        "closing": closing,  # 종합 의견 — 4엔진 수렴 클로징 (도메인별 측정 1줄)
         "evidenceFrame": evidenceFrame,  # sixActScore ready 축 (fresh 경로엔 보통 빈약)
         "provenanceFrame": provenanceFrame,  # ★신뢰 가능한 정직 토대 — 실제 엔진 출처 집계
         "sections": sections,
@@ -629,6 +948,15 @@ def bakeStoryReport(code: str, bakedAt: str) -> dict | None:
 
 
 def main(argv: list[str]) -> int:
+    # 자식 프로세스 모드: 다엔진 섹션만 계산해 파일로 (전역 변형 격리 — _engineSectionsIsolated)
+    if len(argv) >= 4 and argv[1] == "--engine-only":
+        code, outp = argv[2], argv[3]
+        import dartlab
+
+        secs = _buildEngineSections(dartlab.Company(code))
+        Path(outp).write_text(json.dumps(secs, ensure_ascii=False), encoding="utf-8")
+        return 0
+
     codes = argv[1:] or ["005930"]
     bakedAt: str | None = None
     realCodes: list[str] = []
