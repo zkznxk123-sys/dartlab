@@ -12,6 +12,7 @@ export interface BtPreflight {
 	bhRetPct: number; // 보유(B&H) 실현 수익 — 전략이 이겨야 할 선
 	bhMddPct: number; // 보유 최대낙폭 (감수해야 할 고통)
 	annVolPct: number | null; // 연환산 일수익 변동성 (낙폭 규모 기대)
+	bhSharpe: number | null; // 보유(B&H) 실현 Sharpe (rf=0) — 위험조정 "이겨야 할 선" (표본<60 null)
 	pos52wPct: number | null; // 52주 종가 범위 내 현재 위치 [0..100]
 	haltBars: number; // 거래정지(v<=0 || o<=0) 봉 — 체결 이연 = 결과 왜곡 잠재
 	splitSuspect: string | null; // 분할의심일 (무수정주가 → B&H 왜곡 경고)
@@ -38,10 +39,13 @@ export function backtestPreflight(candles: Candle[], windowBars: number, costsBp
 	const rets: number[] = [];
 	for (let i = 1; i < closes.length; i++) if (closes[i - 1] > 0) rets.push(closes[i] / closes[i - 1] - 1);
 	let annVolPct: number | null = null;
+	let bhSharpe: number | null = null;
 	if (rets.length >= 20) {
 		const mean = rets.reduce((a, r) => a + r, 0) / rets.length;
-		const variance = rets.reduce((a, r) => a + (r - mean) * (r - mean), 0) / rets.length;
-		annVolPct = Math.sqrt(variance) * Math.sqrt(252) * 100;
+		const sd = Math.sqrt(rets.reduce((a, r) => a + (r - mean) * (r - mean), 0) / rets.length);
+		annVolPct = sd * Math.sqrt(252) * 100;
+		// 보유 실현 Sharpe — 표본<60 이면 null(엔진 riskRatios 하한과 동일, 소표본 거짓말 차단).
+		if (rets.length >= 60 && sd > 0) bhSharpe = (mean / sd) * Math.sqrt(252);
 	}
 
 	// 52주 위치 — 최근 252봉(또는 창) 종가 범위 내 현재 위치
@@ -83,6 +87,7 @@ export function backtestPreflight(candles: Candle[], windowBars: number, costsBp
 		bhRetPct,
 		bhMddPct,
 		annVolPct,
+		bhSharpe,
 		pos52wPct,
 		haltBars,
 		splitSuspect,

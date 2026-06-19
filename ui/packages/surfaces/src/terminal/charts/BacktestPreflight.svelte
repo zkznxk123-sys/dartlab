@@ -21,10 +21,11 @@
 <div class="btPre">
 	<!-- ① 이겨야 할 선 — 이 창에서 그냥 보유(B&H) 한 결과. 전략이 못 이기면 노이즈. -->
 	<div class="bpHero">
-		<div class="bpHeroLbl">{T('이 창에서 그냥', 'just holding')} <b>{T('보유(B&H)', 'B&H')}</b> {T('하면 — 전략이 이겨야 할 선', '— the line your rule must beat')}</div>
+		<div class="bpHeroLbl">{T('이 창에서 ', 'over this window, ')}<b>{T('그냥 들고만 있었다면', 'just holding')}</b> <i>(B&H)</i> {T('— 전략이 이겨야 할 선', '— the line your rule must beat')}</div>
 		<div class="bpNums">
 			<div class="bpBig"><span>{T('보유 수익', 'B&H return')}</span><b class={'mono ' + cls(pf.bhRetPct)}>{sgn(pf.bhRetPct)}%</b></div>
 			<div class="bpBig"><span>{T('최대 낙폭', 'max DD')}</span><b class="mono tDn">{pf.bhMddPct.toFixed(1)}%</b></div>
+			{#if pf.bhSharpe != null}<div class="bpBig sub"><span>{T('보유 Sharpe', 'B&H Sharpe')}</span><b class="mono">{pf.bhSharpe.toFixed(2)}</b></div>{/if}
 			{#if pf.annVolPct != null}<div class="bpBig sub"><span>{T('연 변동성', 'ann. vol')}</span><b class="mono">{pf.annVolPct.toFixed(0)}%</b></div>{/if}
 			{#if pf.pos52wPct != null}<div class="bpBig sub"><span>{T('52주 위치', '52w pos')}</span><b class="mono">{pf.pos52wPct.toFixed(0)}%</b></div>{/if}
 		</div>
@@ -58,6 +59,7 @@
 	.bpHero { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; padding: 9px 12px; background: rgba(255, 255, 255, 0.02); }
 	.bpHeroLbl { font-size: 11.5px; color: #aeb6c2; margin-bottom: 7px; }
 	.bpHeroLbl b { color: var(--amber, #fb923c); font-weight: 700; }
+	.bpHeroLbl i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 10.5px; }
 	.bpNums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 22px; }
 	.bpBig { display: flex; flex-direction: column; gap: 1px; }
 	.bpBig > span { font-size: 11px; color: var(--dim, #8b94a3); }

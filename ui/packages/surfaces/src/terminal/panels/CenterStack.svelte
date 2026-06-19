@@ -448,7 +448,8 @@
 	</div>
 </div>
 
-<!-- GRADE STRIP -->
+<!-- GRADE STRIP — 백테스트 모드에선 숨김(비-백테스트 company 컨텍스트, 하단 보고서·프리플라이트 above-fold 확보). -->
+{#if !ctl.btReportMode}
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
 	{#snippet right()}<button class="finFullBtn" onclick={() => (gradeOpen = true)} title={lang === 'en' ? 'analysis detail' : '분석 내용'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
@@ -461,6 +462,7 @@
 		{/each}
 	</div>
 </Panel>
+{/if}
 {#if gradeOpen}<GradeExplainDialog {co} {lang} onClose={() => (gradeOpen = false)} />{/if}
 
 <!-- 주가 캔들(일별 실데이터·멀티 보조지표) — 메인 히어로. 재무는 아래 전용 섹션. -->

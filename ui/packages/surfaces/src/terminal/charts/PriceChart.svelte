@@ -1172,7 +1172,7 @@
 	export function pushTick(c: Candle) { if (ctl.tf !== 'D') return; try { chart?.updateData(toK(c)); } catch { /* */ } }
 </script>
 
-<div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : compact ? 'height:392px;min-height:340px;' : 'height:480px;min-height:360px;'}>
+<div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : compact ? 'height:372px;min-height:320px;' : 'height:480px;min-height:360px;'}>
 	{#if !ctl.full}
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
 		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} {onMacroLens} />

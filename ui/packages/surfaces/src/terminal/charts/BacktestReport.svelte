@@ -175,11 +175,13 @@
 	<!-- 히어로 5 카드 -->
 	<div class="brHero">
 		<div class="brCard hero"><span>{T('보유(B&H) 대비', 'vs buy & hold')}</span><b class={'mono ' + clsT(m.retPct - result.bh.retPct)}>{sgn(m.retPct - result.bh.retPct)}%p</b>{#if weakTier}<em>{T('일화 — 색 보류', 'anecdote — muted')}</em>{:else}<em>{T('전략 ' + sgn(m.retPct) + '% · 보유 ' + sgn(result.bh.retPct) + '%', 'strat ' + sgn(m.retPct) + '% · B&H ' + sgn(result.bh.retPct) + '%')}</em>{/if}</div>
-		<div class="brCard"><span>CAGR</span><b class={'mono ' + (m.cagrPct != null ? cls(m.cagrPct) : 'tNeu')}>{m.cagrPct != null ? sgn(m.cagrPct) + '%' : '—'}</b></div>
+		<div class="brCard"><span>CAGR</span><b class={'mono ' + (m.cagrPct != null ? clsT(m.cagrPct) : 'tNeu')}>{m.cagrPct != null ? sgn(m.cagrPct) + '%' : '—'}</b></div>
 		<div class="brCard"><span>{T('최대 낙폭', 'max DD')}</span><b class="mono tDn">{m.mddPct.toFixed(1)}%</b></div>
 		<div class="brCard"><span>Sharpe</span><b class="mono">{m.sharpe != null ? m.sharpe.toFixed(2) : '—'}</b></div>
 		{#if scope === 'market'}
 			<div class="brCard"><span>{T('노출', 'exposure')}</span><b class="mono">{m.exposurePct.toFixed(0)}%</b></div>
+		{:else if closedTrades.length === 0}
+			<div class="brCard"><span>{T('승률', 'win rate')}</span><b class="mono tNeu">{result.trades.length ? T('미청산', 'open') : T('—', '—')}</b><em>{result.trades.length ? T('청산 거래 없음', 'no closed trade') : T('신호 미발생', 'no signal')}</em></div>
 		{:else}
 			<div class="brCard"><span>{T('승률', 'win rate')}</span><b class="mono">{m.winRatePct != null ? m.winRatePct.toFixed(0) + '%' : '—'}</b><em>{closedTrades.filter((t) => t.retPct > 0).length}/{closedTrades.length} {T('청산', 'closed')}</em></div>
 		{/if}
@@ -325,8 +327,10 @@
 	.brBanner.lag { color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); }
 	.brHero { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 	.brCard { display: flex; flex-direction: column; gap: 2px; padding: 9px 11px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; }
-	/* 히어로 카드 #1 = 보유 대비 초과수익 — 백테스트의 진짜 답. 앰버 좌측 액센트로 강조. */
+	/* 히어로 카드 #1 = 보유 대비 초과수익 — 백테스트의 진짜 답. 앰버 좌측 액센트 + 가장 큰 숫자(CAGR 압도 차단). */
 	.brCard.hero { border-left: 3px solid var(--amber, #fb923c); background: rgba(251, 146, 60, 0.04); }
+	.brCard.hero > b { font-size: 27px; }
+	.brCard.hero > span { color: var(--amber, #fb923c); font-weight: 600; }
 	.brCard > span { font-size: 11px; color: var(--dim, #8b94a3); }
 	.brCard > b { font-size: 21px; font-weight: 700; line-height: 1.1; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
 	.brCard > em { font-style: normal; font-size: 11px; color: var(--dimmer, #5b6573); font-family: var(--dl-font-mono, monospace); }

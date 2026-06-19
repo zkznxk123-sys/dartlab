@@ -19,6 +19,7 @@ describe('backtestPreflight — 실행 전 진실(B&H·데이터품질·비용)'
 		expect(pf!.toT).toBe('20210004');
 		expect(pf!.windowShort).toBe(true); // 4 < 60
 		expect(pf!.annVolPct).toBeNull(); // 표본<20 → null(거짓 변동성 차단)
+		expect(pf!.bhSharpe).toBeNull(); // 표본<60 → null(소표본 Sharpe 거짓말 차단)
 	});
 
 	it('거래가능 봉 = v>0 && o>0, 정지봉 분리', () => {
