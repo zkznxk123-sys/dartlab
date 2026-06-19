@@ -410,10 +410,10 @@
 	<div class="symId">
 		<div class="symTop">
 			<button class={'symWatch' + (watchlist.has(co.code) ? ' on' : '')} onclick={() => watchlist.toggle(co.code)} aria-pressed={watchlist.has(co.code)} title={watchlist.has(co.code) ? (lang === 'en' ? 'remove from disclosure watch' : '공시 워치에서 제거') : (lang === 'en' ? 'add to disclosure watch' : '공시 워치에 추가')}>{watchlist.has(co.code) ? '★' : '☆'}</button>
-			<span class="symCode">{co.code}</span>
-			<span class="symBadge kr">{co.marketLabel}</span>
 			<span class="symName">{co.name.kr}</span>
+			<span class="symBadge kr">{co.marketLabel}</span>
 		</div>
+		<span class="symCode">{co.code}</span>
 		<div class="symMeta">{tx(co.sector, lang)}{co.stage ? ' · ' + co.stage : ''}{co.role ? ' · ' + co.role : ''} · DART</div>
 	</div>
 	<!-- 중간 — 회사 기본정보(대표·결산월·상장일·본사) 위 / 주요제품 아래(좌), 회사 네비 세로 스택(우). 우측은 가격관련만(밀도↑·헤더 ~3줄). -->
