@@ -2,19 +2,31 @@
 
 ## 상태
 
-- **2026-06-19**: PRD v0.1 작성 완료. 전문에이전트 토론(`wf_9f54e359-0c8`, 10에이전트·1.13M 토큰·19분: 5 도메인 설계 → 4 적대검증 → 종합) + 세션 코드 실측. **구현 0** — 착수 대기(운영자 go).
-- **검증 평결**: 데이터층 옵션 B 만장일치, 4 적대검증 전부 코드 실측 대조 통과. 종합이 *스스로* 자기 주장 2건 정정(옵션A falldown 메커니즘 오류·worker 파일명 endsWith 함정) = 검증 작동 증거.
-- **핵심 실측 SSOT**(설계 초안 정정값): 3개월 rolling = **38,015행 / 656KB** · etc(윈도) = **20.3%** · 기관 식별률 = **9.5%** · recent.parquet = stock_code 정렬(날짜 pruning 0건).
+- **2026-06-19 (PRD)**: v0.1 작성. 전문에이전트 토론(`wf_9f54e359-0c8`, 10에이전트·1.13M 토큰: 5 도메인 → 4 적대검증 → 종합) + 코드 실측. 데이터층 옵션 B 만장일치, 4 적대검증 코드 실측 대조 통과.
+- **2026-06-19 (구현 완료·as-built)**: **Phase 0~3 전부 구현·검증·커밋.** 운영자 `/goal` "플랜을 정공법으로 완성"으로 착수. UI push만 운영자 승인 대기.
 
-## NEXT (재개 포인터)
+### as-built 커밋
+| Phase | 커밋 | 내용 | 검증 |
+|---|---|---|---|
+| 0 bake | `77051445c` | `buildAllFilingsRecent.py` buildFeed(): 동적 cutoff·rcept_dt desc·rg5000·size assert·push 인자화 | 로컬 38,015행·656KB·desc·6컬럼·8rg |
+| 0 발행 | (HF) | `market_recent.parquet` HF publish + worker `endsWith('recent.parquet')`=true→600s 확인 | HF e2e read 38,015행·콜드 3.15s |
+| 1 read | `532268a73` | contracts `MarketFiling` + `loadMarketFeed`(whole-file·dedup·corp_name) + 포트 3곳(public/local/fake) | runtime/contracts tsc·data-wiring 0·단위 3/3 |
+| 2 분류 | `e9a2eda40` | eventRail `RX_OWNERSHIP` export(classifyFiling 불변) + `marketFeedCategory` 6키 + `isInstitutionalFiler` | 골든 31/31·실측 분포(ownership 26.1%·기관 10.0%) |
+| 3 UI | `fa1d83470` | `MarketFeed.svelte`(6탭·기관칩·.feedRow·4상태·200cap) + LeftRail 배선 + swFoot 1줄 + terminal.css | svelte-check 0err·dev 실렌더(콘솔 0) |
 
-> 운영자 go 시 **Phase 0(데이터층 bake)부터** — UI 무관·자동 push 가능 단위. 그 뒤 Phase 1(read 배선)·2(분류기)는 UI 미배선이면 자동 push, Phase 3(좌측 UI)는 운영자 명시 승인 후에만 push.
+### 핵심 실측 SSOT (설계 초안 정정값, 구현으로 재확인)
+3개월 rolling = **38,015행 / 656KB**(임계 43%) · etc(classifyFiling 윈도) 20.3% · 기관 식별률 **10.0%** · recent.parquet = stock_code 정렬(날짜 pruning 0건). marketFeedCategory etc = 58.5%(좁은 필터·의도).
 
-1. **Phase 0 — bake (백엔드/CI, 단독 ship):** `buildAllFilingsRecent.py` build() 끝에 ① `push()` `path_in_repo` 인자화 ② cutoff=데이터max−90d 동적 ③ `.filter().sort(rcept_dt desc).write_parquet(rg5000, zstd)` ④ size assert(>1.5MB CI 실패) ⑤ 파일명 `dart/allFilings/market_recent.parquet`(worker 600s 자동) → HF push. 검증=HF 656KB·rcept_dt desc·6컬럼.
-2. **Phase 1 — read 배선 (5곳):** contracts corpName + `loadMarketFeed(core)` + 어댑터 3곳(public/local/fake) filing 포트. core.requestParquetWholeFile 경유. 단위테스트.
-3. **Phase 2 — 분류기:** eventRail.ts 정규식 export(classifyFiling 불변) + `marketFeedCategory()` + `isInstitutionalFiler()`. 이벤트레일 골든 회귀 0.
-4. **Phase 3 — 좌측 UI:** eIndustry swNote/swMore 축약 + eMarketFeed 고정높이 섹션 + 칩 스트립 + .feedRow(div role=button + 중첩 a) + 상태기계 + 200cap 라벨 + [기관] 보조칩. svelte-check 0 + 스크린샷 눈검수. **UI push 운영자 승인.**
-5. **Phase 4(선택):** worker B안 채택 시만. A안(`market_recent.parquet`)이면 불필요.
+### 구현 중 정공법 수정 (적대검증 외 추가 발견)
+- 기관 ● 오탐: 증권사 *자기* 발행실적보고서에 ● → `flr_nm 기관 AND 제출자≠회사` 가드(자기보고 제외).
+- 회사명 truncation: `.feedRow` 그리드가 소스 뒤 `.filingRow`(0,2,0)에 밀림 → `.filingRow.feedRow`(0,3,0) 특이도.
+- ● 클리핑: feedCorp ellipsis가 ● 자름 → feedCorp flex(이름 ellipsis + ● flex:none).
+
+## NEXT (운영자 결정)
+
+1. **UI push 승인** — Phase 1~3(ui/packages/runtime·contracts·surfaces) + Phase 0(`buildAllFilingsRecent.py`)은 commit 완료, push 대기. ⚠ master에 동시 세션 미push UI 커밋 다수 → push 시 동행. 운영자 "푸시해"/"올려" 시 진행.
+2. **열린 결정 4건**(아래) 중 변경 원하면 반영. 기본값(A안 파일명·3개월·광의 사전·탭 분리)은 이미 구현됨.
+3. **Phase 4(worker)** = 불필요(A안 `market_recent.parquet` 채택, worker 600s 자동).
 
 ## 열린 결정 (착수 전 운영자 확인)
 
