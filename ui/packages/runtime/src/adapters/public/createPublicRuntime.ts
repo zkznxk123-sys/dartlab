@@ -27,7 +27,7 @@ import { loadCompanyRelations } from './sources/relationsSource';
 import { loadIndustryProfitPool } from './sources/industryPoolSource';
 import { loadHfProductIndexMap } from './sources/productIndexSource';
 import { loadCompanyRegularFilings } from './sources/regularFilingsSource';
-import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from './sources/nonRegularFilingsSource';
+import { loadCompanyNonRegularFilings, loadMarketFeed, loadRecentFilingsForCodes } from './sources/nonRegularFilingsSource';
 import { createDataCore, type DataCore } from '../../data/fetch/request';
 import { createSearchPort } from '../../data/search/filingSearch';
 import { loadCompanyNews } from './sources/newsSource';
@@ -111,6 +111,7 @@ function publicFilingPort(core: DataCore): FilingPort {
 		regular: (code, limit = 500) => loadCompanyRegularFilings(core, code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(core, code), // 전 이력 — fetch 코어(캐시·dedup), 전역 1파일 stock_code 필터
 		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes), // 워치 신선도 — fetch 코어(HF allFilings 배치·10분 TTL·dedup)
+		marketFeed: () => loadMarketFeed(core), // 시장 공시 피드 — 전상장사 3개월 통파일 1 GET(market_recent.parquet)
 		// panel 격자 3종은 공개 뷰어 코드(landing)가 단계-6(뷰어 추출)에서 어댑터로 들어온다.
 		panelToc: () => notWiredYet('filing.panelToc', '단계-6(viewer 추출)'),
 		panelInit: () => notWiredYet('filing.panelInit', '단계-6(viewer 추출)'),

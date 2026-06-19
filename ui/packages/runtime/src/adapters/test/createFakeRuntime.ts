@@ -136,6 +136,9 @@ function fakeFiling(): FilingPort {
 		async recentForCodes() {
 			return {};
 		},
+		async marketFeed() {
+			return [];
+		},
 		async panelToc(code) {
 			if (code !== FIXTURE_CODE) return null;
 			return {

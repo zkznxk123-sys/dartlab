@@ -3,7 +3,7 @@
 // filter pushdown 이 회사 row-group 만 읽음. content_raw 없음(빌드시 메타만). per-code 캐시.
 // 통합파일 생성: .github/scripts/sync/buildAllFilingsRecent.py (정기보고서는 이미 제외됨).
 // 타입 정본 = contracts (NonRegularFiling 승격 완료 — 중복 정의 금지).
-import type { NonRegularFiling } from '@dartlab/ui-contracts';
+import type { MarketFiling, NonRegularFiling } from '@dartlab/ui-contracts';
 import type { DataCore } from '../../../data/fetch/request';
 
 interface RecentRow extends Record<string, unknown> {
@@ -97,5 +97,49 @@ export async function loadRecentFilingsForCodes(
 		return out;
 	} catch {
 		return {};
+	}
+}
+
+// 시장 공시 피드(좌측 터미널) — 전상장사 최근 3개월 수시공시 시간순. 우측 단일기업 경로(stock_code
+// 필터 row-group)와 *경로 분리*: 이건 전체시장이라 필터가 없고, 전용 bake 파일(market_recent.parquet,
+// rcept_dt 내림차순·~656KB)을 통파일 1 GET 으로 읽는다(govRecent 동형). recent.parquet 은 stock_code
+// 정렬이라 날짜순을 못 뽑으므로 재사용 금지. category 는 UI 가 report_nm 으로 분류(여기선 원본만).
+const FEED_COLS = ['stock_code', 'corp_name', 'rcept_dt', 'report_nm', 'rcept_no', 'flr_nm'];
+interface FeedRow extends RecentRow {
+	corp_name?: unknown;
+}
+
+export async function loadMarketFeed(core: DataCore): Promise<MarketFiling[]> {
+	try {
+		const rows = await core.requestParquetWholeFile<FeedRow>({
+			origin: 'hf',
+			path: 'dart/allFilings/market_recent.parquet',
+			columns: FEED_COLS,
+			cacheKey: 'allFilings.marketFeed',
+			cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 2 } // 일일 cron 갱신 — 신선도 우선 10분 TTL(worker 엣지 600s 와 일치)
+		});
+		if (!rows) return [];
+		const seen = new Set<string>();
+		const result: MarketFiling[] = [];
+		for (const r of rows) {
+			const rceptNo = String(r.rcept_no ?? '').trim();
+			const stockCode = String(r.stock_code ?? '').trim();
+			const reportNm = String(r.report_nm ?? '').trim();
+			// bake 가 정기보고서·dedup 을 이미 했으나 belt-and-suspenders
+			if (!rceptNo || !stockCode || seen.has(rceptNo) || REGULAR.some((n) => reportNm.includes(n))) continue;
+			seen.add(rceptNo);
+			result.push({
+				rceptNo,
+				rceptDate: fmtDate(String(r.rcept_dt ?? '')),
+				stockCode,
+				corpName: String(r.corp_name ?? '').trim(),
+				reportNm,
+				filer: String(r.flr_nm ?? '').trim(),
+				url: `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}`
+			});
+		}
+		return result; // 파일이 이미 rcept_dt 내림차순(bake) — 재정렬 불필요. 캐시·dedup 은 코어/위.
+	} catch {
+		return [];
 	}
 }

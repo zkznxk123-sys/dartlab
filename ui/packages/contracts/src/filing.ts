@@ -17,6 +17,19 @@ export interface NonRegularFiling {
 	url: string;
 }
 
+// 시장 공시 피드 — 전상장사 수시공시 시간순(market_recent.parquet). 우측 단일기업(NonRegularFiling)과
+// 달리 행마다 회사가 바뀌므로 stockCode·corpName 보유(회사명이 피드 1순위 정보). category 는 클라
+// 분류(marketFeedCategory, report_nm 기반)라 계약에 두지 않는다 — 원본 reportNm 으로 UI 가 분류.
+export interface MarketFiling {
+	rceptNo: string;
+	rceptDate: string; // YYYY-MM-DD
+	stockCode: string;
+	corpName: string;
+	reportNm: string;
+	filer: string;
+	url: string;
+}
+
 // ── panel (공시뷰어 격자) — ui/web HTTP 판 기준 + leafType superset (landing↔ui/web 발산 1건 해소: 계약은 superset) ──
 
 export interface PanelTocBlock {
@@ -81,6 +94,8 @@ export interface FilingPort {
 	nonRegular(code: string, limit?: number): Promise<NonRegularFiling[]>;
 	/** 워치 신선도용 — 여러 종목의 수시공시(allFilings)를 한 번에 읽어 code→목록. 공개/로컬 공통배선(HF 직독, 백엔드 0). 미존재는 {}. */
 	recentForCodes(codes: string[]): Promise<Record<string, NonRegularFiling[]>>;
+	/** 전상장사 시장 공시 피드 — 최근 3개월 수시공시 rcept_dt 내림차순(market_recent.parquet 통파일 1 GET). 공개/로컬 공통배선. 미존재는 []. */
+	marketFeed(): Promise<MarketFiling[]>;
 	panelToc(code: string): Promise<PanelTocResponse | null>;
 	panelInit(code: string): Promise<PanelInitResponse | null>;
 	panelGrid(code: string, sectionKey: string): Promise<PanelGridResponse | null>;

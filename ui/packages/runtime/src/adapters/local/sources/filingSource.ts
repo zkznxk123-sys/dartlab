@@ -10,7 +10,7 @@ import type {
 import type { LocalApi } from '../api/localApi';
 import type { ClientPanelGrid, ClientPanelInit, ClientPanelToc, LocalCaches } from '../localTypes';
 import { loadCompanyRegularFilings } from '../../public/sources/regularFilingsSource';
-import { loadCompanyNonRegularFilings, loadRecentFilingsForCodes } from '../../public/sources/nonRegularFilingsSource';
+import { loadCompanyNonRegularFilings, loadMarketFeed, loadRecentFilingsForCodes } from '../../public/sources/nonRegularFilingsSource';
 import type { DataCore } from '../../../data/fetch/request';
 
 // 로컬 panel toc 는 leafType/disclosureKey 메타 미탑재 — 미제공 = null 정직 표기 (위조 금지).
@@ -79,6 +79,8 @@ export function localFilingPort(api: LocalApi, caches: LocalCaches, core: DataCo
 		regular: (code, limit = 500) => loadCompanyRegularFilings(core, code, limit),
 		nonRegular: (code) => loadCompanyNonRegularFilings(core, code),
 		recentForCodes: (codes) => loadRecentFilingsForCodes(core, codes),
+		marketFeed: () => loadMarketFeed(core), // 시장 공시 피드 — 공개와 동일 공통배선(HF 통파일)
+
 		async panelToc(code) {
 			const toc = await api.getJson<ClientPanelToc>(
 				`/api/company/${encodeURIComponent(code.trim())}/panel/toc`
