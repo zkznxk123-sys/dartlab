@@ -124,6 +124,19 @@
 		untrack(() => { subject = 'price'; }); // subject 읽기 의존 차단(자기루프 방지) — mount 시 'price' 재설정은 no-op
 	});
 
+	// 시장 스코프 디스커버리 — '시장(지수 타이밍)' 진입 시 차트를 지수 컨텍스트로 1회 자동 전환(어디서 지수를 고르나 헤매지 않게),
+	// 단일종목/유니버스로 벗어나면 자동 진입분만 주가 복원. 전이(prev≠cur)에서만 — 시장 스코프 안의 수동 주가/지수 토글과 안 다툼.
+	let btMktAuto = false;
+	let btPrevScopeMkt = false;
+	$effect(() => {
+		const market = ctl.btReportMode && ctl.btScope === 'market';
+		untrack(() => {
+			if (market && !btPrevScopeMkt && subject !== 'index') { setSubject('index'); btMktAuto = true; }
+			else if (!market && btPrevScopeMkt && btMktAuto) { subject = 'price'; btMktAuto = false; }
+			btPrevScopeMkt = market;
+		});
+	});
+
 	// 백테스트 결과 — PriceChart 가 onBtResult 로 올려줌(엔진은 PriceChart 소유). 보고서 모드에서 하단 BacktestReport 에 전달.
 	let btPf = $state<PortfolioBtResult | null>(null);
 	let btCandleTs = $state<string[]>([]);
@@ -412,19 +425,19 @@
 			<button class={'symWatch' + (watchlist.has(co.code) ? ' on' : '')} onclick={() => watchlist.toggle(co.code)} aria-pressed={watchlist.has(co.code)} title={watchlist.has(co.code) ? (lang === 'en' ? 'remove from disclosure watch' : '공시 워치에서 제거') : (lang === 'en' ? 'add to disclosure watch' : '공시 워치에 추가')}>{watchlist.has(co.code) ? '★' : '☆'}</button>
 			<span class="symName">{co.name.kr}</span>
 		</div>
-		<div class="symCodeRow"><span class="symCode">{co.code}</span><span class="symBadge kr">{co.marketLabel}</span></div>
+		<div class="symCodeRow"><span class="symBadge kr">{co.marketLabel}</span><span class="symCode">{co.code}</span></div>
 		<div class="symMeta">{tx(co.sector, lang)}{co.stage ? ' · ' + co.stage : ''}{co.role ? ' · ' + co.role : ''} · DART</div>
 	</div>
-	<!-- 중간 — 회사 기본정보 2줄(대표·상장일 / 결산월·본사) 위 / 주요제품 아래(좌), 회사 네비 세로 스택(우). 우측 가격정보와 ~3행 높이 정렬. -->
+	<!-- 중간 — 회사 기본정보 2줄(대표·결산월 / 상장일·본사) 위 / 주요제품 아래(좌), 회사 네비 세로 스택(우). 우측 가격정보와 ~3행 높이 정렬. -->
 	<div class="symProd">
 		<div class="symProdInfo">
 			{#if corpInfo}
 				<div class="symInfoRow">
 					{#if corpInfo.ceo}<span class="sif"><i>{lang === 'en' ? 'CEO' : '대표'}</i><b>{corpInfo.ceo}</b></span>{/if}
-					{#if corpInfo.listedDate}<span class="sif"><i>{lang === 'en' ? 'LISTED' : '상장일'}</i><b class="mono">{corpInfo.listedDate}</b></span>{/if}
+					{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산월'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
 				</div>
 				<div class="symInfoRow">
-					{#if corpInfo.fiscalMonth}<span class="sif"><i>{lang === 'en' ? 'FY END' : '결산월'}</i><b>{corpInfo.fiscalMonth}</b></span>{/if}
+					{#if corpInfo.listedDate}<span class="sif"><i>{lang === 'en' ? 'LISTED' : '상장일'}</i><b class="mono">{corpInfo.listedDate}</b></span>{/if}
 					{#if corpInfo.region}<span class="sif"><i>{lang === 'en' ? 'HQ' : '본사'}</i><b>{corpInfo.region}</b></span>{/if}
 				</div>
 			{/if}
