@@ -125,7 +125,7 @@
 		<button class="finFullBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'detail · all industries' : '상세보기 · 전체 산업'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
 	{/snippet}
 	<div class="swMap">
-		<ScatterMap pts={industryPts} compact highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
+		<ScatterMap pts={industryPts} compact compactH={104} highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
 	</div>
 	<!-- 푸터 1줄 — 상세 버튼 + 축 범례(2줄→1줄로 ~16px 절감, 산점도 viewBox 불변. 전체 범례는 툴팁). -->
 	<div class="swFoot">

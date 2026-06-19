@@ -24,6 +24,7 @@
 		xLabel: string;
 		yLabel: string;
 		compact?: boolean; // 미니(패널) 모드 — 축라벨·정보바·상시라벨 생략
+		compactH?: number; // 미니 모드 viewBox 높이(기본 134) — 좌측 패널 세로공간 절약 시 축소(점 위치 보존·잘림 없음)
 		showLabels?: boolean; // 상시 라벨(충돌 제거) — 지형도/회사맵 on, 미니 off
 		zeroX?: boolean; // x가 음수~양수 가로지르면 0 기준선
 		yFloor0?: boolean; // y축 0 시작(격차 등); 아니면 min 패딩
@@ -32,7 +33,7 @@
 		trails?: TrailPath[]; // 연도별 이동 꼬리(지형도 시간축). 끝점=현재 점·꼬리=과거. 축 범위에 꼬리점 포함.
 		onPick?: (id: string) => void;
 	}
-	let { pts, xLabel, yLabel, compact = false, showLabels = false, zeroX = false, yFloor0 = false, highlightId = '', hint = '', trails = [], onPick }: Props = $props();
+	let { pts, xLabel, yLabel, compact = false, compactH = 134, showLabels = false, zeroX = false, yFloor0 = false, highlightId = '', hint = '', trails = [], onPick }: Props = $props();
 	let hoverId = $state('');
 
 	const TONE: Record<string, { f: string; s: string }> = {
@@ -47,7 +48,7 @@
 	const geo = $derived.by(() => {
 		const ps = pts.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
 		if (ps.length < 2) return null;
-		const W = compact ? 220 : 700, H = compact ? 134 : 300;
+		const W = compact ? 220 : 700, H = compact ? compactH : 300;
 		const ml = compact ? 4 : 52, mr = compact ? 8 : 70, mt = compact ? 4 : 14, mb = compact ? 6 : 28;
 		const x0 = ml, x1 = W - mr, y0 = mt, y1 = H - mb;
 		const xs = ps.map((p) => p.x), ys = ps.map((p) => p.y);
