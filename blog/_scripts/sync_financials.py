@@ -157,7 +157,20 @@ def extract_data(stockCode: str) -> dict | None:
         for item in BS_ITEMS:
             filtered = df.filter(df["항목"] == item)
             if len(filtered) == 0:
-                rows.append((item, ["—"] * len(years)))
+                if item == "자본총계":
+                    assets = df.filter(df["항목"] == "자산총계")
+                    liabilities = df.filter(df["항목"] == "부채총계")
+                    if len(assets) and len(liabilities):
+                        vals = []
+                        for y in years:
+                            av = assets[y][0] if y in assets.columns else None
+                            lv = liabilities[y][0] if y in liabilities.columns else None
+                            vals.append(fmt_억(av - lv, is_edgar) if av is not None and lv is not None else "—")
+                        rows.append((item, vals))
+                    else:
+                        rows.append((item, ["—"] * len(years)))
+                else:
+                    rows.append((item, ["—"] * len(years)))
             else:
                 vals = []
                 for y in years:
