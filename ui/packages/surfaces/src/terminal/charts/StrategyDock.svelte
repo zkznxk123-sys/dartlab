@@ -4,7 +4,7 @@
 	// BtConfig 의 조건 빌더 로직을 그대로 흡수(ctl.bt* 변이 → PriceChart $effect 재계산, tweak→see 무배선). 그래프 금지(3열 규칙) — equity 는 차트.
 	// 접기=28px 스파인(결과 유지), 닫기=clearBtAll+도크 off(맨 차트 복귀). 폭 리사이즈(260~420).
 	import type { Lang } from '../lib/types';
-	import type { ChartCtl } from './chartState.svelte';
+	import { type ChartCtl, PERIODS } from './chartState.svelte';
 	import type { PortfolioBtResult } from '../lib/backtest';
 	import { BT_PRESETS, BT_COSTS, RULE_PRESETS, SERIES_CATALOG, OP_LABEL } from '../lib/backtest';
 	import type { Op, SeriesKey, StrategyRule } from '../lib/backtest';
@@ -119,14 +119,24 @@
 					<button class={ctl.btScope === o.v ? 'sdScopeBtn on' : 'sdScopeBtn'} onclick={() => (ctl.btScope = o.v)}>{T(o.kr, o.en)}</button>
 				{/each}
 			</div>
-			<div class="sdScopeNote">{ctl.btScope === 'universe' ? T('전 종목 횡단면 팩터 · 17년 상폐보존 — 제어·결과는 하단 보고서.', 'cross-sectional factor; controls in report below') : ctl.btScope === 'market' ? T('지수 타이밍 — 상단에서 지수를 선택해 시장 백테스트.', 'index timing; pick an index above') : T('이 종목에 매매 규칙을 적용해 검증.', 'apply a rule to this stock')}</div>
-			<!-- 컨텍스트 — 종목·봉주기(비파괴 일봉 안내) -->
+			<div class={ctl.btScope === 'single' ? 'sdScopeNote' : 'sdScopeNote callout'}>{ctl.btScope === 'universe' ? T('전 종목 횡단면 팩터 · 17년 상폐보존 — 제어·결과는 아래 보고서에 나타납니다.', 'cross-sectional factor · controls & results appear in the report below') : ctl.btScope === 'market' ? T('지수 타이밍 — 차트 상단의 [지수] 버튼에서 지수를 먼저 선택하세요. 선택한 지수에 전략을 적용합니다(미선택 시 결과 없음).', 'index timing — first pick an index from the [INDEX] button on the chart bar; the strategy then runs on that index (no result until chosen)') : T('이 종목에 매매 규칙을 적용해 검증.', 'apply a rule to this stock')}</div>
+			<!-- 컨텍스트 — 종목·일봉 -->
 			<div class="sdCtx">
 				<span class="sdCtxSym">{name ?? ''} {code ?? ''}</span>
-				<span class="sdCtxMeta">· {T('일봉', 'daily')} · {ctl.period}</span>
+				<span class="sdCtxMeta">· {T('일봉', 'daily')}</span>
 			</div>
+			<!-- 검증 구간 = 백테스트 창(차트 줌과 공유·일봉). 박스+헤더로 '차트 기간'이 아닌 '백테스트 창'임을 시각 명시. -->
+			<div class="sdWindow">
+				<div class="sdWinHd"><span class="sdWinLbl">{T('검증 구간', 'window')}</span><span class="sdWinHint">{T('이 기간으로 백테스트 · 차트도 같은 구간 표시', 'backtest over this period · chart shows the same range')}</span></div>
+				<div class="sdWinSeg" role="radiogroup">
+					{#each PERIODS as p (p)}<button class={ctl.period === p ? 'sdWinBtn on' : 'sdWinBtn'} aria-pressed={ctl.period === p} onclick={() => (ctl.period = p)}>{p}</button>{/each}
+				</div>
+			</div>
+			{#if ctl.period === 'MAX'}
+				<div class="btTfNote">{T('MAX는 일봉이 촘촘합니다 — 수치는 정확, 개별 가격 캔들은 줌인 또는 주·월봉으로 확인하세요.', 'MAX packs daily bars tight — numbers are exact; zoom in or use W/M to read individual price candles.')}</div>
+			{/if}
 			{#if ctl.tf !== 'D'}
-				<div class="btTfNote">{T('백테스트는 일봉 기준입니다 — 현재 차트는 일봉이 아닙니다.', 'Backtest runs on daily bars — your chart is not on daily.')} <button class="btTfSwitch" onclick={() => (ctl.tf = 'D')}>{T('일봉으로 전환', 'switch to daily')}</button></div>
+				<div class="btTfNote">{T('차트를 주/월봉으로 보는 동안 거래 마커·에쿼티는 표시되지 않습니다(일봉 시간축 기준). 백테스트 숫자는 일봉으로 정확합니다.', 'While the chart shows W/M bars, trade markers & equity are not drawn (they live on the daily time axis). Backtest numbers stay exact on daily.')} <button class="btTfSwitch" onclick={() => (ctl.tf = 'D')}>{T('일봉으로 전환', 'switch to daily')}</button></div>
 			{/if}
 
 			<!-- ① 전략 -->
@@ -271,7 +281,7 @@
 				<div class="ctMenuLbl">{T('③ 검증 — 비용·OOS·게이트 (공유)', '③ Validation — costs · OOS · gate')}</div>
 				<!-- (a) 비용 -->
 				<div class="ctRow">
-					<button class={ctl.btCosts ? 'mItem on' : 'mItem'} onclick={() => (ctl.btCosts = !ctl.btCosts)}>{T('수수료·세금 포함', 'include costs')}</button>
+					<button class={ctl.btCosts ? 'mItem on' : 'mItem'} onclick={() => (ctl.btCosts = !ctl.btCosts)}>{ctl.btCosts ? T('✓ 수수료·세금 포함', '✓ costs included') : T('수수료·세금 포함', 'include costs')}</button>
 				</div>
 				{#if ctl.btCosts}
 					{#each COST_FIELDS as cf (cf.k)}
@@ -298,7 +308,7 @@
 					{#if ctl.btOosSplit > 0}<div class="btDesc">{T('파란 구간 = 검증(고정 파라미터 · walk-forward 아님). 검증<학습이면 과최적화 신호', 'blue = out-of-sample (fixed params, not walk-forward); worse = overfit')}</div>{/if}
 				{/if}
 				<!-- (c) 펀더게이트 안내 -->
-				<div class="btDesc">{T('펀더게이트는 ① 전략의 진입 조건으로 추가 · 가격 배경 음영(PIT 공시일 이후)', 'add the fundamental gate as an ENTRY condition · tints the price background (PIT, post-disclosure)')}</div>
+				<div class="btDesc">{T('펀더게이트는 ① 전략의 진입 조건으로 추가 · 가격 배경 음영. 값은 공시일 이후부터 적용(look-ahead 0)이며 분기말 기준 재무(후행 지표 · 실시간 아님).', 'add the fundamental gate as an ENTRY condition · tints the background. Applied only after the filing date (no look-ahead); reflects quarter-end financials (a lagging metric, not real-time).')}</div>
 			</div>
 
 		</div>
@@ -349,6 +359,16 @@
 	.sdCtxSym { color: var(--dl-ink, #c8cfdb); font-weight: 600; }
 	.sdCtxMeta { color: var(--dim, #8b94a3); }
 	.sdSubLbl { font-size: 10.5px; color: var(--dim, #8b94a3); margin-top: 5px; }
+	/* 검증 구간 = 백테스트 창. 박스+헤더로 '차트 기간' 오인 차단(UIUX 그룹핑). 11px floor 준수. */
+	.sdWindow { display: flex; flex-direction: column; gap: 5px; margin: 2px 0 6px; padding: 6px 7px; border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 5px; background: rgba(251, 146, 60, 0.03); }
+	.sdWinHd { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+	.sdWinLbl { font-size: 11px; font-weight: 600; color: #aeb6c2; letter-spacing: 0.02em; flex: none; }
+	.sdWinHint { font-size: 10px; color: var(--dim, #8b94a3); text-align: left; }
+	.sdWinSeg { display: inline-flex; flex: 1 1 auto; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; overflow: hidden; }
+	.sdWinBtn { flex: 1 1 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: none; border-left: 1px solid var(--dl-line, #1b2130); padding: 3px 0; cursor: pointer; font-family: inherit; font-variant-numeric: tabular-nums; }
+	.sdWinBtn:first-child { border-left: none; }
+	.sdWinBtn:hover { color: var(--dl-ink, #c8cfdb); background: rgba(255, 255, 255, 0.04); }
+	.sdWinBtn.on { background: var(--amber, #fb923c); color: #1a1206; font-weight: 700; }
 	.btSection { margin-top: 4px; }
 	/* 리사이즈 핸들 */
 	.sdResize { position: absolute; top: 0; right: -3px; width: 6px; height: 100%; cursor: col-resize; z-index: 2; }
@@ -390,8 +410,8 @@
 		.btAddToggle:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
 		.btAddCaret { color: var(--dimmer, #5b6573); }
 	.btModelNote { font-size: 10px; color: var(--dimmer, #5b6573); line-height: 1.5; margin-top: 2px; }
-	.btTfNote { font-size: 11px; color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; line-height: 1.5; }
-	.btTfSwitch { font-size: 10.5px; background: rgba(251, 146, 60, 0.16); border: 1px solid rgba(251, 146, 60, 0.5); color: var(--amber, #fb923c); border-radius: 3px; padding: 1px 8px; cursor: pointer; font-family: inherit; margin-left: 2px; }
+	.btTfNote { font-size: 11px; color: #fcc98a; background: rgba(251, 146, 60, 0.14); border: 1px solid rgba(251, 146, 60, 0.5); border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; line-height: 1.5; }
+	.btTfSwitch { font-size: 10.5px; font-weight: 700; background: var(--amber, #fb923c); border: 1px solid var(--amber, #fb923c); color: #1a1206; border-radius: 3px; padding: 2px 9px; cursor: pointer; font-family: inherit; margin-left: 3px; white-space: nowrap; }
 	.btTfSwitch:hover { background: rgba(251, 146, 60, 0.26); }
 	.btEmpty { padding: 10px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--dl-line-strong, #2a3142); border-radius: 5px; margin-bottom: 4px; }
 	.btEmptyDesc { font-size: 11px; color: #aeb6c2; line-height: 1.6; }
@@ -415,6 +435,7 @@
 	.sdScopeBtn { flex: 1 1 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 4px 0; cursor: pointer; font-family: inherit; }
 	.sdScopeBtn.on { background: var(--amber, #fb923c); color: #1a1206; border-color: var(--amber, #fb923c); font-weight: 700; }
 	.sdScopeNote { font-size: 10.5px; color: var(--dim, #8b94a3); line-height: 1.5; margin-bottom: 5px; }
+	.sdScopeNote.callout { color: #d7c4a8; background: rgba(251, 146, 60, 0.07); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 4px; padding: 5px 7px; }
 	.btPresetGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 2px; }
 	.btPresetBtn { font-size: 11px; background: rgba(255, 255, 255, 0.03); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 6px 8px; cursor: pointer; font-family: inherit; text-align: left; }
 	.btPresetBtn:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }

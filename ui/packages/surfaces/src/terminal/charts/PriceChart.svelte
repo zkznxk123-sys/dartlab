@@ -525,13 +525,18 @@
 		const N = Math.min(Math.ceil((PERIOD_N[ctl.period] ?? len) / TF_DIV[tfv]), len);
 		const w = el?.clientWidth || 800;
 		const space = w / Math.max(1, N);
-		if (space < 1 && (tfv === 'D' || tfv === 'W')) {
+		// 백테스트 중(전략 슬롯 보유 또는 보고서 모드) = 일봉 고정. 자동 tf 상향을 막는다 — 상향되면 일봉 ts 정렬
+		// 마커·에쿼티·보유밴드가 끊기고(btLayer ts 매칭 실패) 검증 창이 깨진다(과거 회귀: clearBtAll 래칫). 대신
+		// sub-1px 까지 허용해 선택 구간 전체를 일봉으로(촘촘한 가격 리본 + 에쿼티/밴드는 어떤 밀도에서도 가독).
+		const btActive = untrack(() => ctl.btReportMode || ctl.btOn);
+		if (space < 1 && (tfv === 'D' || tfv === 'W') && !btActive) {
 			const next = tfv === 'D' ? 'W' : 'M';
 			setNotice(T(`봉 ${N.toLocaleString()}개 — 1px 미달, ${next === 'W' ? '주봉' : '월봉'} 자동 전환`, `${N.toLocaleString()} bars — auto ${next} timeframe`));
 			ctl.tf = next; // tf effect 가 재적용+재배치 이어받음 (분기·년은 수동 전용 — 자동 상향 제외)
 			return;
 		}
-		try { c.setBarSpace(Math.max(1, Math.min(30, space))); c.scrollToRealTime(0); } catch { /* */ }
+		const floor = btActive ? 0.12 : 1; // 백테스트는 창 전체 일봉 표시 우선(0.12px 까지 허용 — MAX 도 일봉 유지)
+		try { c.setBarSpace(Math.max(floor, Math.min(30, space))); c.scrollToRealTime(0); } catch { /* */ }
 	}
 
 	// 목표 연도까지 능동 백필 → (변경 시) 전체 재적용 + 재배치. 기간 점프·주/월봉 전환 공용.
@@ -564,7 +569,9 @@
 		void backfillTo(c, target);
 	}
 
-	// ── 봉 주기(일/주/월/분기/년) 전환 → 전체 백필 후 집계 재적용. BT 는 일봉 전용이라 자동 해제. ──
+	// ── 봉 주기(일/주/월/분기/년) 전환 → 전체 백필 후 집계 재적용. ──
+	// ⛔ BT 전략을 여기서 지우지 않는다(과거: clearBtAll). 백테스트 숫자는 항상 일봉(displaySeries)으로 정확히 계산되고,
+	//   주/월봉에선 캔버스 마커·에쿼티만 숨긴다(bt effect 의 isDaily 게이트). 일봉 복귀 시 그대로 복원 — 데이터 손실 0.
 	$effect(() => {
 		const tfv = ctl.tf;
 		const c = chart;
@@ -572,7 +579,6 @@
 		if (tfv === appliedTf) return;
 		appliedTf = tfv;
 		exitReplaySilently(); // 봉 주기 전환 — 리플레이 idx 좌표계가 깨지므로 자동 종료
-		if (tfv !== 'D') ctl.clearBtAll();
 		const code0 = hist.code;
 		(async () => {
 			if (tfv !== 'D') await backfillTo(c, KRX_MIN_YEAR);
@@ -831,14 +837,16 @@
 		void ctl.period;
 		const gateRows = btGateRows; // 반응 의존 — 게이트 로드 완료 시 재계산
 		if (!c) return;
-		// 지수 subject = 거래 대상 아님 — BT 비활성(슬롯 보존, 종목 복귀 시 복원, 01 §4.3)
-		if (subject === 'index' || !slots.length) {
+		// 지수 subject = 거래 대상 아님. 또한 종목별 백테스트 viz 는 '단일종목' 스코프 전용 —
+		// 시장(지수 타이밍)·유니버스 스코프에서 종목 결과를 그리면 '시장/유니버스'로 오도(정직: 칩·에쿼티도 비움).
+		if (subject === 'index' || !slots.length || ctl.btScope !== 'single') {
 			clearBt(c);
 			btPf = null;
 			btCandleTs = [];
 			return;
 		}
 		void ctl.adj;
+		const isDaily = ctl.tf === 'D'; // 주/월봉이면 캔버스 viz(마커·에쿼티) 숨김 — 일봉 ts 정렬 깨짐(숫자는 일봉으로 정확)
 		const oos = ctl.btOosSplit;
 		// 표시 시계열(수정주가 기본 ON)로 백테스트 — 원본이면 분할 절벽을 -98% 폭락으로 오인한다.
 		const all = displaySeries();
@@ -868,7 +876,8 @@
 				gateVis = { active, label: `Piotroski ${fc.op} ${thr}` };
 			}
 		}
-		const ext = buildBtExtend(pf, all, slots, focus, gateVis);
+		// 차트가 일봉일 때만 캔버스 viz — 주/월봉은 일봉 거래 ts 와 정렬 불가라 숨김(칩·보고서 숫자는 일봉 그대로 정확).
+		const ext = isDaily ? buildBtExtend(pf, all, slots, focus, gateVis) : null;
 		if (ext) applyBt(c, ext);
 		else clearBt(c);
 	});
