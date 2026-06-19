@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import polars as pl
@@ -35,6 +36,17 @@ from dartlab.gather.dart.allFilingsCollector import _ALLFILINGS_DIR_KEY, _META_S
 _KEEP = ["stock_code", "corp_name", "rcept_dt", "report_nm", "rcept_no", "flr_nm"]
 _REGULAR = ("사업보고서", "반기보고서", "분기보고서")
 _RECENT_NAME = "recent.parquet"
+
+# ── 시장 공시 피드(좌측 터미널) 전용 슬림 파일 ──
+# recent.parquet 은 stock_code 정렬 → 11 row-group 전부 rcept_dt 가 전(全) 범위라 *날짜* row-group
+# pruning 이 불가(전체시장 날짜순을 못 뽑음). 그래서 같은 out 프레임에서 rcept_dt 내림차순 + 최근
+# 윈도만 슬라이스한 별도 파일을 굽는다. 브라우저는 단일 whole-file GET 으로 읽는다(govRecent 동형).
+# ★파일명은 반드시 'recent.parquet' 로 끝나야 worker.js cacheControlFor 가 max-age=600(10분)을 준다
+#   ('market_recent'.endsWith('recent.parquet')=True. 'marketRecent'=False→1시간 stale). 바꾸지 말 것.
+_FEED_NAME = "market_recent.parquet"
+_FEED_WINDOW_DAYS = 90  # 3개월 고정 — 656KB(임계 1.5MB의 43%). 6개월은 임계 86%·가변이라 비권장.
+_FEED_ROW_GROUP = 5_000  # 38K행/~8 row-group — 상단(최신) row-group 만 range-fetch
+_FEED_MAX_BYTES = 1_536 * 1024  # hfRange WHOLE_FILE_MAX_BYTES — 초과 시 단일 GET 분기 falldown
 
 
 def _localFrames() -> list[pl.DataFrame]:
@@ -67,7 +79,38 @@ def _hfBaseFrame() -> pl.DataFrame | None:
         return None
 
 
-def build(*, mergeHf: bool = True) -> Path:
+def buildFeed(out: pl.DataFrame) -> Path:
+    """전체시장 시간순 피드 — recent.parquet 과 같은 out 프레임을 rcept_dt 내림차순 + 최근 90일만
+    슬라이스해 별도 슬림 파일(``market_recent.parquet``)로 굽는다. recent.parquet(stock_code 정렬)은
+    불변 — 우측 단일기업 경로(filter pushdown)가 그 정렬에 의존한다.
+
+    cutoff 는 *데이터 max - 90일* 동적 계산(절대일자 하드코딩 금지 — 데이터가 며칠 stale 일 때
+    빈 피드 방지). zstd·row_group 5000 으로 굽고, 1.5MB 임계 초과 시 SystemExit(whole-file GET
+    분기 falldown 을 조용히 겪지 않게 — 윈도 축소 가드).
+    """
+    dataMax = out["rcept_dt"].max()
+    if dataMax is None:
+        raise SystemExit("[feed] rcept_dt 전부 null — 피드 슬라이스 불가")
+    cutoff = (datetime.strptime(str(dataMax), "%Y%m%d") - timedelta(days=_FEED_WINDOW_DAYS)).strftime("%Y%m%d")
+    feed = out.filter(pl.col("rcept_dt") >= cutoff).sort("rcept_dt", descending=True)
+
+    dest = _allFilingsDir() / _FEED_NAME
+    feed.write_parquet(dest, compression="zstd", row_group_size=_FEED_ROW_GROUP)
+    size = dest.stat().st_size
+    if size > _FEED_MAX_BYTES:
+        raise SystemExit(
+            f"[feed] {dest.name} {size / 1e6:.2f}MB > {_FEED_MAX_BYTES / 1e6:.2f}MB 임계 — "
+            f"whole-file GET 분기 falldown 위험. 윈도(_FEED_WINDOW_DAYS={_FEED_WINDOW_DAYS}) 축소 필요."
+        )
+    span = f"{feed['rcept_dt'].min()}~{feed['rcept_dt'].max()}" if feed.height else "(빈 피드)"
+    print(
+        f"[feed] {feed.height:,} rows ({feed['stock_code'].n_unique():,} 종목, cutoff {cutoff}, {span}) "
+        f"→ {dest} ({size / 1e6:.2f} MB)"
+    )
+    return dest
+
+
+def build(*, mergeHf: bool = True) -> tuple[Path, Path]:
     """로컬 일자분 + (옵션) 기존 HF recent.parquet 을 merge·dedup → 단일 전 이력 파일.
 
     operator 머신(전체 로컬 store)이든 ephemeral CI(forward 7일만 로컬)든, HF baseline 과
@@ -97,10 +140,11 @@ def build(*, mergeHf: bool = True) -> Path:
     print(
         f"[build] {out.height:,} rows ({out['stock_code'].n_unique():,} 종목, {span}) → {dest} ({dest.stat().st_size / 1e6:.2f} MB)"
     )
-    return dest
+    feedDest = buildFeed(out)  # 좌측 시장 공시 피드 전용 슬림 파일(rcept_dt 정렬·최근 90일)
+    return dest, feedDest
 
 
-def push(dest: Path, token: str) -> None:
+def push(dest: Path, token: str, name: str = _RECENT_NAME) -> None:
     from huggingface_hub import HfApi
 
     from dartlab.core.hfRetry import retryHfCall
@@ -110,12 +154,12 @@ def push(dest: Path, token: str) -> None:
     retryHfCall(
         api.upload_file,
         path_or_fileobj=str(dest),
-        path_in_repo=f"{relDir}/{_RECENT_NAME}",
+        path_in_repo=f"{relDir}/{name}",
         repo_id=repoFor(_ALLFILINGS_DIR_KEY),
         repo_type="dataset",
-        commit_message="allFilings recent: 비정기공시 최근 통합 롤링 parquet",
+        commit_message=f"allFilings {name}: 비정기공시 메타 통합 parquet",
     )
-    print(f"[HF↑] pushed {relDir}/{_RECENT_NAME} → {repoFor(_ALLFILINGS_DIR_KEY)}")
+    print(f"[HF↑] pushed {relDir}/{name} → {repoFor(_ALLFILINGS_DIR_KEY)}")
 
 
 def main() -> int:
@@ -124,7 +168,7 @@ def main() -> int:
     ap.add_argument("--no-push", action="store_true", help="빌드만, HF push 생략")
     args = ap.parse_args()
 
-    dest = build()
+    dest, feedDest = build()
     if args.no_push:
         return 0
     token = os.environ.get("HF_TOKEN", "")
@@ -139,7 +183,8 @@ def main() -> int:
     if not token:
         print("[HF↑] HF_TOKEN 없음 — push skip (빌드만 완료)", file=sys.stderr)
         return 1
-    push(dest, token)
+    push(dest, token, _RECENT_NAME)
+    push(feedDest, token, _FEED_NAME)
     return 0
 
 
