@@ -32,7 +32,7 @@ ai:
   dataAsOf: "2026-06-14"
 ---
 
-> **데이터 기준**: 2026-06-14 dartlab 실측 — Mondelez International(MDLZ) **미국 연결(USD)** 기준, 분기 데이터를 역년(calendar-year)으로 합산. 세그먼트·제품별·원가 항목은 연결 손익에 안 나오므로 10-K/IR/언론 **외부 인용**으로 표기하며 일부는 미확정 정황이다.
+> **데이터 기준**: 2026-06-14 dartlab 실측 — Mondelez International(MDLZ) **미국 연결(USD)** 기준, 분기 데이터를 역년(calendar-year)으로 합산. 세그먼트·제품별·원가 항목은 연결 손익에 안 나오므로 SEC 10-K/10-Q와 회사 IR의 **공시 인용**으로 분리한다.
 >
 > **핵심 숫자**: 매출 **$38.54B**(2019→2025 연 **+6.9%**, 한 해도 안 꺾임) · 영업이익률 **17.4%(2024)→9.2%(2025)** · 영업이익 **$6.34B→$3.55B**(-44%) · 순이익 **$4.61B→$2.45B**(-47%) · 영업현금흐름 **$4.91B→$4.51B**(-8%)
 >
@@ -215,4 +215,62 @@ cash   = c.select("CF", ["영업활동현금흐름"], freq="Q")
 
 마지막으로, 이 글이 하지 않는 것을 분명히 한다. 목표주가도, 매수·매도 의견도 없다. 코코아가 범인이라는 단정도 없다. 우리가 확정한 것은 둘뿐이다 — 매출이 늘어난 해에 마진이 반토막 났다는 것(손익의 증명), 그리고 그 붕괴가 현금까지는 1대1로 따라가지 않았다는 것(현금의 정정). 그 사이의 모든 해석 — 코코아, 전가 실패, 비현금성 증폭 — 은 정황이지 증거가 아니다. 진짜 결론은 회사가 아니라 방법에 있다. 손익계산서 한 장을 믿기 전에, 현금흐름표 한 장을 더 넘겨라. 그리고 그 두 장이 같은 이야기를 하지 않을 때, 비로소 분석이 시작된다.
 
-> 본문의 외부 인용은 데이터가 아니라 맥락이다. 1차 출처는 [SEC 10-K(EDGAR)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MDLZ&type=10-K)와 [몬델리즈 IR](https://ir.mondelezinternational.com), 코코아 가격 맥락은 [국제코코아기구(ICCO)](https://www.icco.org), 마진·매출 시계열의 외부 교차 확인은 [Macrotrends 영업이익률](https://www.macrotrends.net/stocks/charts/MDLZ/mondelez-international/operating-margin)과 [Macrotrends 매출](https://www.macrotrends.net/stocks/charts/MDLZ/mondelez-international/revenue)에서 볼 수 있다. dartlab 연결 수치(매출·영업이익·순이익·영업현금흐름과 그 비율)는 2026-06-14 실측이며, 세그먼트·원가·일회성 분해는 전부 위 외부 출처의 영역으로 우리 검증 라인이 아니다.
+---
+
+## 공시 / Filings
+
+- 최신 분기 공시: [Mondelēz International 2026 Q1 Form 10-Q, quarter ended 2026-03-31](https://www.sec.gov/Archives/edgar/data/1103982/000162828026027937/mdlz-20260331.htm)
+- 최신 연간 공시: [Mondelēz International FY2025 Form 10-K, year ended 2025-12-31](https://www.sec.gov/Archives/edgar/data/1103982/000162828026005345/mdlz-20251231.htm)
+- 회사 공시 허브: [Mondelēz SEC filings](https://ir.mondelezinternational.com/financials/sec-filings)
+
+---
+
+## 재무제표 — 최근 7개년 (dartlab 연결, $B)
+
+단위는 USD 십억 달러다. dartlab의 분기 데이터를 역년으로 합산한 값이므로, 회사 10-K의 회계연도 표와 반올림·분기 경계가 다를 수 있다.
+
+```python
+import dartlab
+c = dartlab.Company("MDLZ")
+c.select("IS", ["sales", "operating_profit", "net_income"], freq="Y")
+```
+| 항목 ($B) | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 매출액 | 25.87 | 26.58 | 28.72 | 31.50 | 36.02 | 36.44 | 38.54 |
+| 영업이익 | 3.84 | 3.85 | 4.65 | 3.53 | 5.50 | 6.34 | 3.55 |
+| 당기순이익 | 3.88 | 3.56 | 4.30 | 2.72 | 4.96 | 4.61 | 2.45 |
+
+```python
+import dartlab
+c = dartlab.Company("MDLZ")
+c.select("CF", ["operating_cashflow"], freq="Y")
+```
+| 항목 ($B) | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 영업활동현금흐름 | 3.96 | 3.96 | 4.14 | 3.91 | 4.71 | 4.91 | 4.51 |
+
+| 보조 비율 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 영업이익률(OPM) | 14.9% | 14.5% | 16.2% | 11.2% | 15.3% | 17.4% | 9.2% |
+| 순이익률(NPM) | 15.0% | 13.4% | 15.0% | 8.6% | 13.8% | 12.7% | 6.4% |
+| OI/OCF | 0.97 | 0.97 | 1.12 | 0.90 | 1.17 | 1.29 | 0.79 |
+
+---
+
+## 검증표
+
+본문 인용 수치를 dartlab 호출과 공식 공시로 검증한다. 📅 dartlab 실측 2026-06-20 · MDLZ 미국 연결(USD)·분기 합산 기준.
+
+| 본문 수치 | 출처 / 호출 | 판정 |
+|---|---|---|
+| 매출 2019 25.87B → 2025 38.54B, 연 +6.9% | `c.select("IS", ["sales"], freq="Y")` | 실측 |
+| 영업이익률 2024 17.4% → 2025 9.2% | 영업이익÷매출 | 실측 |
+| 영업이익 2024 6.34B → 2025 3.55B(-44%) | `c.select("IS", ["operating_profit"], freq="Y")` | 실측 |
+| 순이익 2024 4.61B → 2025 2.45B(-47%) | `c.select("IS", ["net_income"], freq="Y")` | 실측 |
+| 영업활동현금흐름 2024 4.91B → 2025 4.51B(-8%) | `c.select("CF", ["operating_cashflow"], freq="Y")` | 실측 |
+| 2025 OI/OCF 0.79 | 영업이익÷영업활동현금흐름 | 실측 |
+| 2026 Q1 순매출 10.080B, 영업이익 808M, 귀속순이익 560M | [2026 Q1 10-Q](https://www.sec.gov/Archives/edgar/data/1103982/000162828026027937/mdlz-20260331.htm) | 공식 공시 |
+| 2026 Q1 Chocolate 순매출 3.603B, Biscuits & Baked Snacks 4.543B | 2026 Q1 10-Q product revenue table | 공식 공시 |
+| 2026 Q1 조정 영업이익 동인: net pricing +325M, input costs -439M, volume/mix -54M | 2026 Q1 10-Q adjusted operating income drivers | 공식 공시 |
+
+분해 한계: dartlab 연결은 마진 붕괴와 현금 방어를 증명하지만 코코아, 헤지, 가격전가, 지역·제품 믹스의 원인 분해는 직접 증명하지 않는다. 그래서 원가·가격전가 문장은 10-Q의 input costs/net pricing 표로만 보강하고, 본문 결론은 손익·현금흐름의 교차 검증에 둔다.
