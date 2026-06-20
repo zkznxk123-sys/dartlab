@@ -548,7 +548,7 @@ dev = [
     { name = "libcst", specifier = ">=1.8.6" },
     { name = "mutmut", specifier = ">=3.0.0" },
     { name = "networkx", extras = ["default"], specifier = ">=3.0" },
-    { name = "pandera", extras = ["polars"], specifier = ">=0.29.0" },
+    { name = "pandera", extras = ["polars"], specifier = ">=0.29.0,<0.32" },
     { name = "pillow", specifier = ">=12.1.1" },
     { name = "pre-commit", specifier = ">=4.0.0" },
     { name = "pyright", specifier = ">=1.1.0" },

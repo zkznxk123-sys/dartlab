@@ -37,6 +37,8 @@ TODO.md
 /main.py
 /skills-lock.json
 /BROKEN_LINKS_REPORT.txt
+# 로컬 스크래치 디렉토리 (디버그 산출물·임시 데이터 — CLAUDE.md 워크스페이스 청결: repo 추적 금지)
+/.tmp/
 # Data (repo-root 만 — src/dartlab/core/data/ 같은 패키지 번들 리소스는 제외하면 안 됨)
 /data/
 # DART 원본 zip — 절대 공개 금지 (CLAUDE.md "DART 원본 zip 비공개" 강행규칙).
