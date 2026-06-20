@@ -31,6 +31,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     canaries = _loadCanaries(args.canary, args.manifest)
+    canaries = _injectRefResolution(canaries, args.manifest)
     resultsByQuery = _loadResultsByQuery(args.results_json)
     if resultsByQuery is None:
         from dartlab.providers.dart.search.api import search
@@ -63,6 +64,28 @@ def main(argv: list[str] | None = None) -> int:
     if args.fail_on_error and not report["valid"]:
         return 1
     return 0
+
+
+def _injectRefResolution(canaries: list[dict[str, Any]], manifestPath: str | None) -> list[dict[str, Any]]:
+    """exact-ref 무결성을 결정론 ``_refResolved`` 로 주입 — publish selfcheck 와 동일 SSOT
+    (localUpdate.injectSourceRefResolution). bigram 토크나이저서 보일러플레이트 공시는 BM25
+    self-retrieval 이 불가능해 랭킹 멤버십 ref 검사는 flaky — 인덱스 아티팩트 직독으로 검증한다.
+    인덱스를 못 열면 원본 그대로(BM25 폴백)."""
+    if not manifestPath:
+        return canaries
+    try:
+        from dartlab.providers.dart.search.fieldIndex import loadSegment
+        from dartlab.providers.dart.search.localUpdate import injectSourceRefResolution, resolveActiveIndexDir
+
+        base = Path(manifestPath).resolve().parent
+        indexDir = resolveActiveIndexDir(base) or base
+        loaded = loadSegment("main", indexDir)
+        if loaded is None:
+            return canaries
+        idx, meta = loaded
+        return injectSourceRefResolution(canaries, idx, meta)
+    except Exception:  # noqa: BLE001 — 폴백: 결정론 주입 실패 시 기존 BM25 평가로 진행.
+        return canaries
 
 
 def _loadResultsByQuery(path: str | None) -> dict[str, list[dict[str, Any]]] | None:
