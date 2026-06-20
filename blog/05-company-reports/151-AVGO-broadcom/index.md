@@ -1,7 +1,7 @@
 ---
-title: "상각의 장막: 가장 좋아진 회사가 가장 나빠 보인 해 — 브로드컴 2024"
-date: 2026-06-14
-description: "매출이 +44% 뛴 2024년에 브로드컴 순이익은 반토막 났다. 손익계산서만 보면 망가진 해, 현금흐름표까지 보면 가장 크게 자란 해다. VMware 인수 회계가 순이익만 골라 누른 '상각의 장막'을 손익과 현금 두 데이터로 교차 검증한다."
+title: "브로드컴 (AVGO) — 상각의 장막 뒤에서 AI 반도체가 본체가 된 회사"
+date: 2026-06-20
+description: "브로드컴은 VMware 상각의 장막을 걷어낸 뒤 FY2026 Q2에 AI 반도체 매출 10.8B$, FCF 10.3B$를 동시에 보여줬다."
 category: company-reports
 series: company-reports
 seriesOrder: 151
@@ -24,17 +24,17 @@ storyTemplate: "amortization-veil"
 grade: ""
 youtubeId: ""
 ai:
-  verdict: "검증 가능한 손익·현금 데이터로 보면, 브로드컴 2024년 순이익 반토막(NPM 39.3%→11.4%)은 사업 악화가 아니라 VMware 인수에 따른 무형자산 상각·통합비용이 순이익만 누른 회계적 착시다. 근거는 ① 같은 해 영업현금흐름이 180.9억에서 199.6억 달러($18.09B→$19.96B)로 오히려 증가(상각은 비현금) ② OPM-NPM 격차가 14.7%포인트로 평년(6.0%포인트)의 두 배 ③ 분기 영업이익이 $2.083B→$4.627B로 한 해 안에 회복했고 네 분기 합($13.46B)이 연간 영업이익과 정합한다는 dartlab 분기 실측이다. 단, 'VMware 상각이 2024 dip의 원인'은 손익 안에서 직접 증명된 인과가 아니라 판관비 4배 급등($0.418B→$1.572B)의 시점 일치와 비현금성으로 추정한 정황이며, 분기 수치 자체가 연간 검증 표 밖이라 합산 정합 외에는 외부 검증이 안 되고 정확한 상각액은 10-K 외부 인용에 의존한다. 2025년 폭발(OPM 39.9%·NPM 36.2%)에서 'VMware 정상화'와 'AI 맞춤칩(ASIC)'의 기여 비중은 제공 데이터로 분해되지 않는다. 690억 달러 인수의 차입·이자·희석 등 롤업 모델의 청구서는 손익·현금 데이터 밖이라 본 분석으로 재무 건전성을 보증하지 못한다. 목표주가·투자의견은 제시하지 않는다."
+  verdict: "검증 가능한 손익·현금 데이터로 보면, 브로드컴 2024년 순이익 반토막(NPM 39.3%→11.4%)은 사업 악화가 아니라 VMware 인수에 따른 무형자산 상각·통합비용이 순이익만 누른 회계적 착시다. 2026-06-03 공식 FY2026 Q2 자료는 이 글의 결론을 한 단계 더 밀어 올린다. Q2 revenue는 22.187B$(+48%), GAAP net income은 9.310B$, FCF는 10.262B$였고, AI semiconductor revenue는 10.8B$(+143%)였다. 회사는 FY2026 Q3 revenue guidance 29.4B$, AI semiconductor revenue 16.0B$를 제시했다. 즉 2024년의 질문이 '상각이 순이익을 가렸나'였다면, 2026년의 질문은 'AI 반도체가 VMware 장막 뒤의 본체가 되었나'다. 단, Q2와 Q3 guidance는 회계연도 분기 숫자이고, 기존 표는 dartlab 역년 합산이므로 같은 줄에 직접 더하지 않는다. AI 반도체 매출은 전사 매출의 일부이며, non-GAAP margin은 GAAP OPM과 섞지 않는다. 목표주가·투자의견은 제시하지 않는다."
   direction: "혼조"
   confidence: "중간"
   archetype: "M&A상각"
   strengths: ["영업현금흐름이 2023~2025년 180.9억→199.6억→275.4억 달러($18.09B→$19.96B→$27.54B)로 한 번도 꺾이지 않고 우상향 — 순이익 변동성과 무관하게 현금 창출력 견고", "2024년 순이익을 누른 비용 대부분이 비현금성 무형자산 상각이라, 분기마다 소진되며 2025년 OPM 39.9%·NPM 36.2%로 정상 마진 회복", "인수 이전 본체가 이미 OPM 45.3%(2023, 정점)의 고마진 기계 — 2019년 15.2%에서 4년 만에 세 배, 고마진 포트폴리오와 비용 통합 규율의 결과", "2024년 분기 영업이익이 $2.083B→$2.965B→$3.788B→$4.627B로 한 해 안에 두 배 넘게 회복하고 합산이 연간 $13.46B과 정합, 4분기에 인수 직전 정상 분기($4.240B)를 초과 — 회복의 실시간 진행"]
   weaknesses: ["롤업 모델 의존: 외형 성장이 유기적 곡선이 아니라 인수의 계단이라 다음 성장이 또 다른 대형 인수와 그 차입에 구조적으로 의존", "690억 달러 VMware 인수의 차입·이자·재무상태표 무형자산 부담은 본 손익·현금 데이터 밖이라 부채·희석 리스크를 평가할 수 없음", "2025년 폭발에서 VMware 정상화와 AI 맞춤칩(ASIC)의 각 기여 비중이 제공 데이터로 분해되지 않아 성장 지속성의 원천 판단이 외부 인용에 의존", "dCR-A-(전망 부정적) 자동 배지가 현금흐름·재무신뢰성 축 점수 0으로 비어 있고, 회계연도 10~11월 말 마감으로 역년 합산 수치는 공식 회계연도와 ±1분기 귀속 차이 가능"]
   keyMetrics: {revenue: 63.89, opm: 39.9, npm: 36.2, ocf: 27.54}
-  dataAsOf: "2026-06-14"
+  dataAsOf: "2026-06-20"
 ---
 
-> **데이터 기준**: 2026-06-14 dartlab 실측 — Broadcom(AVGO) 미국 연결(USD), 분기→역년 합산. (세그먼트 등 손익 밖은 10-K/IR/언론 외부 인용).
+> **데이터 기준**: 2026-06-20 dartlab 실측 — Broadcom(AVGO) 미국 연결(USD), 분기→역년 합산. 세그먼트·AI semiconductor revenue·Q3 guidance는 Broadcom FY2026 Q2 IR 및 SEC filings로 분리 표기.
 > **핵심 숫자**: 매출 358.2억(2023)→515.7억(2024, +44%)→638.9억 달러(2025), 즉 $35.82B→$51.57B→$63.89B. 순이익 140.8억→58.9억→231.3억 달러($14.08B→$5.89B→$23.13B). 영업이익률 45.3%→26.1%→39.9%. 영업현금흐름 180.9억→199.6억→275.4억 달러($18.09B→$19.96B→$27.54B)로 2024년에도 증가.
 > **이 글의 용어**: '상각의 장막' = 인수로 생긴 무형자산을 비용으로 천천히 털어내는 회계 처리가 순이익만 골라 눌러 회사가 실제보다 나빠 보이게 만드는 현상. 화폐 단위는 모두 미국 달러이며, 본문은 십억 달러 단위 약어 $B(=10억 달러)와 한국어 '억 달러'를 함께 적는다($1B=10억 달러). 회계연도는 10~11월 말 마감.
 
@@ -136,7 +136,7 @@ is_q = c.select("IS", freq="Q")
 
 dartlab 분기 실측으로 판관비를 따라가면, 2023년 4분기 4.18억 달러($0.418B)였던 판관비가 2024년 1분기에 15.72억 달러($1.572B)로 약 4배 튀어 오른다. 이 급등은 VMware 인수가 종결된(2023년 11월) 바로 다음 분기에 일어났다. 그리고 이후 분기를 보면 13.0억($1.30B, 2024Q2), 11.0억($1.10B, 2024Q3), 10.1억($1.01B, 2024Q4)으로 계단처럼 내려오고, 2025년에는 9~11억 달러($0.9~1.1B)대에 안착한다. 인수 첫 분기에 가장 무겁고, 분기마다 가벼워지는 이 패턴이야말로 인수 회계의 전형적 지문이다.
 
-여기서 정직하게 한계를 적어야 한다. 분기 판관비·영업이익 수치는 제공된 연간 검증 표에 직접 실려 있지 않은 dartlab 분기 실측이라, 본 글이 외부에서 독립 검증할 수 없는 값이다(다만 2024년 분기 영업이익의 합은 뒤에서 보듯 연간 영업이익 $13.46B과 정확히 맞아떨어진다). 또한 손익 요약표는 이 판관비 급등액 중 정확히 얼마가 VMware 무형자산 상각이고 얼마가 통합비용(인력 재배치, 시스템 통합 등)인지 분해해 주지 않는다. 'VMware 상각이 2024년 순이익 하락의 원인'이라는 명제는 손익 데이터 안에서 직접 증명된 것이 아니라, ① 판관비 급등 시점이 인수 종결 직후와 정확히 일치하고 ② 그 비용이 비현금성이어서 영업현금흐름을 깎지 않았다는 두 가지 정황으로 추정한 것이다. 정확한 상각 명세는 [SEC 10-K(EDGAR)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=AVGO&type=10-K)와 [브로드컴 IR](https://investors.broadcom.com) 공시로만 확정된다.
+여기서 정직하게 한계를 적어야 한다. 분기 판관비·영업이익 수치는 제공된 연간 검증 표에 직접 실려 있지 않은 dartlab 분기 실측이라, 본 글이 외부에서 독립 검증할 수 없는 값이다(다만 2024년 분기 영업이익의 합은 뒤에서 보듯 연간 영업이익 $13.46B과 정확히 맞아떨어진다). 또한 손익 요약표는 이 판관비 급등액 중 정확히 얼마가 VMware 무형자산 상각이고 얼마가 통합비용(인력 재배치, 시스템 통합 등)인지 분해해 주지 않는다. 'VMware 상각이 2024년 순이익 하락의 원인'이라는 명제는 손익 데이터 안에서 직접 증명된 인과가 아니라, ① 판관비 급등 시점이 인수 종결 직후와 정확히 일치하고 ② 그 비용이 비현금성이어서 영업현금흐름을 깎지 않았다는 두 가지 정황으로 읽는다. 정확한 상각 명세는 [SEC 10-K(EDGAR)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=AVGO&type=10-K)와 [브로드컴 IR](https://investors.broadcom.com) 공시로만 확정된다.
 
 그러나 이 정황은 강력하다. 핵심 증거는 영업현금흐름이다. 만약 2024년 마진 하락이 사업의 진짜 악화 — 가격 하락, 비용 폭등, 수요 붕괴 — 였다면 영업현금흐름도 같이 빠졌어야 한다. 그런데 영업현금흐름은 199.6억 달러($19.96B)로, 2023년 180.9억 달러($18.09B)보다 오히려 늘었다. 순이익을 깎은 비용 대부분이 현금이 나가지 않는 비현금 항목, 즉 무형자산 상각이었기 때문이다. 회계이익은 인수의 비용을 앞당겨 한꺼번에 보여주었고, 현금은 그 비용을 실제로 지불하지 않았다.
 
@@ -167,7 +167,7 @@ is_q = c.select("IS", freq="Q")
 
 2024년 1분기 영업이익은 20.83억 달러($2.083B)였다. 2분기 29.65억($2.965B), 3분기 37.88억($3.788B), 4분기 46.27억 달러($4.627B). 네 분기를 더하면 134.6억 달러로, 검증 표의 연간 영업이익 134.6억 달러($13.46B)와 정확히 맞아떨어진다. 이 합산 일치가 분기 수치를 표 안의 연간 값과 묶어 주는 유일한 검증 고리다. 한 해 안에서 영업이익이 두 배 넘게 회복했다. 같은 회사의 같은 사업이 한 해 동안 갑자기 두 배로 좋아질 수는 없다. 변한 것은 사업이 아니라, 분기마다 가벼워진 비용 — 인수 첫 분기에 집중됐던 통합비용과 초기 상각 — 이다.
 
-바닥을 정확히 찍어 보면 더 분명하다. 분기 실측에 따르면 인수 직전 분기인 2023년 4분기 영업이익은 42.40억 달러($4.240B)였다. 그런데 인수 첫 분기인 2024년 1분기에 20.83억 달러($2.083B)로 거의 반토막 났다. 직전 분기의 절반. 이것이 통합비용과 초기 상각이 가장 무겁게 내려앉은 순간, 바로 장막이 가장 두꺼웠던 바닥으로 읽힌다. 그리고 그 바닥에서부터 분기마다 영업이익은 위로 올라갔다. 다만 이 분기 바닥·회복 곡선은 표 밖의 dartlab 분기 실측에 기댄 해석이므로, 연간 합산 정합을 넘어선 분기 단위 결론은 단정이 아니라 정황 추정으로 읽어야 한다.
+바닥을 정확히 찍어 보면 더 분명하다. 분기 실측에 따르면 인수 직전 분기인 2023년 4분기 영업이익은 42.40억 달러($4.240B)였다. 그런데 인수 첫 분기인 2024년 1분기에 20.83억 달러($2.083B)로 거의 반토막 났다. 직전 분기의 절반. 이것이 통합비용과 초기 상각이 가장 무겁게 내려앉은 순간, 바로 장막이 가장 두꺼웠던 바닥으로 읽힌다. 그리고 그 바닥에서부터 분기마다 영업이익은 위로 올라갔다. 다만 이 분기 바닥·회복 곡선은 표 밖의 dartlab 분기 실측에 기댄 해석이므로, 연간 합산 정합을 넘어선 분기 단위 결론은 단정이 아니라 정황 독해로 읽어야 한다.
 
 연간 스냅샷은 이 '회복의 실시간 진행'을 가린다. 2024년 한 해를 하나의 숫자(OPM 26.1%)로 뭉뚱그리면, 1분기 바닥($2.083B)과 4분기 정상($4.627B)이 평균으로 섞여 '그냥 나쁜 해'로 보인다. 그러나 분기로 펼치면 그것은 '나쁜 해'가 아니라 '바닥에서 매분기 올라온 회복의 해'로 보인다.
 
@@ -193,7 +193,7 @@ is_q = c.select("IS", freq="Q")
 
 2025년 폭발에는 두 동력이 겹쳤다. 첫째, 통합비용과 초기 상각이 빠지면서 VMware가 정상 마진으로 기여하기 시작했다. 인수 첫해의 무거운 비용이 소진되자, 인수한 사업이 본체의 고마진 구조에 합류한 것이다. 둘째, AI 데이터센터용 맞춤형 칩(ASIC) 수요가 본체 반도체를 밀어 올렸다.
 
-여기서 다시 정직하게 한계를 그어야 한다. 이 두 동력 — 'VMware 정상화'와 'AI 맞춤칩' — 각각이 2025년 폭발에 몇 퍼센트씩 기여했는지는 제공된 손익 데이터로 분해되지 않는다. 두 힘이 같은 해에 겹쳤다고 말할 수 있을 뿐, 'AI가 매출의 X%를 끌어올렸다'고 단언하면 그것은 과장이다. ASIC과 AI 데이터센터 수요는 손익 데이터 밖의 외부 서사이며, [브로드컴 IR](https://investors.broadcom.com)과 [로이터의 AVGO 보도](https://www.reuters.com/markets/companies/AVGO.O) 같은 외부 출처로만 그 맥락을 확인할 수 있다. 본 글의 손익·현금 데이터가 확실히 말하는 것은 '2025년에 두 마진이 회복했다'는 결과뿐이고, 그 원인 분해는 외부 인용에 의존한다.
+여기서 다시 정직하게 한계를 그어야 한다. 이 두 동력 — 'VMware 정상화'와 'AI 맞춤칩' — 각각이 2025년 폭발에 몇 퍼센트씩 기여했는지는 제공된 손익 데이터로 분해되지 않는다. 두 힘이 같은 해에 겹쳤다고 말할 수 있을 뿐, 'AI가 매출의 X%를 끌어올렸다'고 단언하면 그것은 과장이다. ASIC과 AI 데이터센터 수요는 손익 데이터 밖의 외부 서사이며, Broadcom IR과 SEC filings로만 그 맥락을 확인할 수 있다. 본 글의 손익·현금 데이터가 확실히 말하는 것은 '2025년에 두 마진이 회복했다'는 결과뿐이고, 그 원인 분해는 공식 세그먼트 공시에 의존한다.
 
 ![AI 데이터센터용 맞춤형 칩(ASIC) 이미지 — 2025년 본체 반도체를 밀어 올린 외부 동력. 단, 손익 데이터로 기여 비중은 분해되지 않는다.](./assets/151-ai-surge.webp)
 
@@ -228,8 +228,106 @@ cash = c.analysis("financial", "현금흐름")
 
 그러나 이 글은 여기서 멈추고 한계를 분명히 그어야 한다. 'OCF가 멀쩡했다'는 사실이 '롤업 모델이 건강하다'는 증명은 아니다. 롤업 모델에는 그 자체의 청구서가 따로 있다 — 690억 달러 인수에 동원된 차입(빚)과 이자, 재무상태표에 쌓인 막대한 무형자산, 그리고 외형 성장을 다음 인수에 의존하는 구조적 습관. 이 청구서들은 본 글이 다룬 손익·현금 데이터 바깥에 있다. 부채 규모, 이자 부담, 주식 희석 리스크는 이 데이터만으로는 평가할 수 없다. '수익력이 멀쩡하다'는 결론이 '재무 건전성이 보증됐다'로 과대 해석되면 안 되는 이유다.
 
-참고로 dartlab의 자동 신용등급 배지는 브로드컴에 dCR-A-(전망 부정적)를 부여하지만, 이 배지는 현금흐름·재무신뢰성 등 일부 축의 점수가 0으로 비어 있는 자동 산출물이라 본문 주장의 근거로는 쓰지 않았다. 등급 자체를 인용하려면 이 한계를 함께 적어야 한다. 또한 브로드컴의 회계연도는 10~11월 말 마감이라, 이 글이 '역년 합산'으로 정렬한 수치는 회사 공식 회계연도 수치와 분기 귀속이 ±1분기 다를 수 있다. [Macrotrends 매출](https://www.macrotrends.net/stocks/charts/AVGO/broadcom/revenue)이나 [Macrotrends 영업이익률](https://www.macrotrends.net/stocks/charts/AVGO/broadcom/operating-margin) 같은 외부 출처와 대조할 때는 이 정렬 차이를 염두에 둬야 한다.
+참고로 dartlab의 자동 신용등급 배지는 브로드컴에 dCR-A-(전망 부정적)를 부여하지만, 이 배지는 현금흐름·재무신뢰성 등 일부 축의 점수가 0으로 비어 있는 자동 산출물이라 본문 주장의 근거로는 쓰지 않았다. 등급 자체를 인용하려면 이 한계를 함께 적어야 한다. 또한 브로드컴의 회계연도는 10~11월 말 마감이라, 이 글이 '역년 합산'으로 정렬한 수치는 회사 공식 회계연도 수치와 분기 귀속이 ±1분기 다를 수 있다. 회사 IR·SEC 회계연도 수치와 대조할 때는 이 정렬 차이를 염두에 둬야 한다.
 
 결국 브로드컴을 읽는 법은 단순하다. 사들여 자라는 회사는 손익계산서 한 장으로 판단하지 말 것. 인수 첫해의 순이익 dip을 '어닝 쇼크'로 단정하기 전에, 영업이익률과 순이익률의 격차가 평년의 두 배로 벌어졌는지, 그 격차를 만든 비용이 비현금인지, 영업현금흐름은 멀쩡한지, 그리고 분기마다 그 비용이 빠지고 있는지를 확인할 것. 이 네 가지를 확인하면, '가장 좋아진 회사가 가장 나빠 보이는' 착시는 더 이상 착시가 아니라 읽어낼 수 있는 패턴이 된다. 그리고 이 네 가지 점검 도구는 브로드컴에만 쓰는 것이 아니다. 인수로 외형을 키우는 모든 회사 — 반도체든, 소프트웨어든, 제약이든 — 의 인수 첫해 손익을 읽을 때 똑같이 작동한다. 브로드컴 2024년은 그 도구를 가장 또렷하게 시연한 표본일 뿐이다.
 
 회계는 거짓말하지 않는다. 그러나 한 장만 보면, 가린 것을 못 본다.
+
+---
+
+## 2026 Q2 업데이트 — 장막 뒤에서 AI 반도체가 숫자로 올라왔다
+
+2024년의 브로드컴은 "가장 좋아진 회사가 가장 나빠 보인 해"였다. 2026년 2분기 공식자료를 붙이면 질문이 한 단계 바뀐다. 이제는 "나빠 보인 이유가 회계였나"에서 멈출 수 없다. 장막이 걷힌 뒤 무엇이 남았는지 봐야 한다.
+
+Broadcom의 2026년 6월 3일 FY2026 Q2 release는 답을 꽤 직접적으로 준다. Q2 매출은 22.187B$, 전년 동기 대비 +48%였다. GAAP net income은 9.310B$, non-GAAP net income은 12.074B$였다. 영업현금흐름은 10.493B$, capex는 0.231B$, 그래서 free cash flow는 10.262B$였다. 한 분기 FCF가 10B$를 넘는다. 이 숫자는 2024년 글의 핵심 명제와 잘 맞는다. 상각은 순이익을 가릴 수 있지만, 좋은 사업이면 현금은 결국 드러난다.
+
+더 중요한 숫자는 AI semiconductor revenue다. 회사는 Q2 AI semiconductor revenue가 10.8B$였고 전년 대비 +143%였다고 밝혔다. Q2 전사 매출 22.187B$와 비교하면, AI semiconductor revenue는 전사 매출의 약 49%에 해당한다. 단, 이 비율은 단순 나눗셈일 뿐 segment margin을 말하지 않는다. AI 반도체가 전사 매출의 절반 가까운 크기가 됐다는 사실과, 그것이 전사 이익률을 얼마만큼 만들었는지는 다른 질문이다.
+
+Q3 가이던스는 더 세다. 회사는 FY2026 Q3 revenue guidance를 약 29.4B$로 제시했고, AI semiconductor revenue가 16.0B$로 전년 대비 200% 이상 성장할 것으로 봤다. 만약 Q3 revenue 29.4B$와 AI semiconductor revenue 16.0B$가 동시에 맞으면, AI semiconductor revenue는 전사 매출의 약 54%가 된다. 브로드컴을 더 이상 "VMware를 산 소프트웨어 롤업"으로만 읽을 수 없게 된다. 맞춤형 AI accelerator와 AI networking이 전사 숫자의 중심으로 올라오는 회사가 된다.
+
+여기서 오독을 막아야 한다. 첫째, Q2와 Q3는 Broadcom의 회계연도 분기 숫자이고, 위의 2019~2025 표는 dartlab이 분기 데이터를 역년으로 합산한 숫자다. 두 표를 같은 연도 숫자처럼 더하면 안 된다. 둘째, Q3의 non-GAAP operating income guidance 67%는 GAAP OPM이 아니다. Broadcom은 acquisition-related amortization, stock-based compensation, restructuring 등을 non-GAAP에서 제외한다. 기존 글이 말한 '상각의 장막'은 바로 이 GAAP와 non-GAAP 사이에 놓인다. 셋째, AI semiconductor revenue는 segment revenue이지 전사 순이익이 아니다. AI 매출이 크다고 해서 전부 높은 margin으로 남는다고 쓰면 숫자를 넘어선다.
+
+그럼에도 결론은 바뀐다. 2024년 글의 결론이 "순이익 반토막은 사업 악화가 아니라 인수 회계의 장막이었다"였다면, 2026년판 결론은 "그 장막 뒤에서 AI 반도체가 전사 매출의 중심으로 올라왔다"다. 2024년은 회계의 해였고, 2026년은 mix의 해다. 이제 브로드컴을 볼 때는 상각을 조정하는 것만으로 충분하지 않다. AI semiconductor revenue의 크기, infrastructure software의 안정성, GAAP와 non-GAAP 간극, debt service를 동시에 봐야 한다.
+
+### GAAP와 non-GAAP 사이가 여전히 핵심이다
+
+Broadcom의 FY2026 Q2 10-Q는 이 간극을 숫자로 다시 보여준다. Q2 GAAP operating income은 10.788B$였고, 두 분기 누적 operating income은 19.351B$였다. 같은 표에는 acquisition-related intangible assets amortization이 cost of revenue와 operating expenses 양쪽에 남아 있다. 장막이 사라진 것이 아니라, 장막을 통과한 상태에서도 회사가 돈을 더 많이 벌고 있는 것이다.
+
+그래서 non-GAAP 67%라는 Q3 guidance를 읽을 때는 두 단계가 필요하다. 첫 번째 단계는 "운영 체력"이다. 상각·주식보상·구조조정 등을 빼면 회사가 어느 정도의 run-rate를 만들 수 있는가. 두 번째 단계는 "주주 몫"이다. 그 조정 항목이 반복적으로 계속 나오면 GAAP 주주 이익은 non-GAAP보다 낮게 남는다. Broadcom의 장점은 두 번째 질문을 덮을 만큼 첫 번째 질문의 현금 창출력이 크다는 데 있다. 그러나 큰 FCF가 조정 항목을 없애는 것은 아니다. 큰 FCF는 조정 항목을 감당할 수 있게 만드는 힘이다.
+
+### AI 반도체가 좋다는 말과 Broadcom이 좋은 사업이라는 말은 다르다
+
+AI semiconductor revenue 10.8B$는 강한 숫자다. 그러나 독자는 여기서 한 번 멈춰야 한다. AI accelerator와 networking 수요가 강하다는 사실은 반도체 매출을 설명한다. Broadcom 전체가 좋은 사업이라는 결론은 그 매출이 cash flow와 margin으로 번역될 때만 성립한다. Q2에서 그 번역은 일단 좋았다. FCF 10.262B$, FCF margin 약 46%가 같은 분기에 나왔기 때문이다.
+
+다음 분기에는 이 번역이 더 중요해진다. Q3 revenue guidance 29.4B$가 맞아도, capex와 working capital이 흔들리면 FCF는 덜 남을 수 있다. AI networking과 custom accelerator의 고객 집중도가 높으면 매출은 크지만 수요 timing이 더 거칠 수 있다. 반대로 FCF margin이 40%대 중후반을 유지하면서 AI semiconductor revenue가 16.0B$에 접근하면, 2024년에 보였던 장막 논쟁은 뒤로 밀린다. 그때의 핵심은 "가려진 이익"이 아니라 "드러난 현금"이다.
+
+### Broadcom과 다른 AI 반도체 글을 나란히 읽는 법
+
+[엔비디아](/blog/NVDA-nvidia)는 AI 수요가 거의 곧바로 GPU 매출과 gross margin으로 보이는 회사다. [AMD](/blog/AMD-amd)는 AI 가속기 성장과 Xilinx 인수 회계가 같이 놓인 회사다. [마이크론](/blog/MU-micron)은 AI 수요가 memory 가격 사이클로 번역되는 회사다. Broadcom은 그 셋과 다르다. 맞춤형 AI accelerator와 AI networking을 팔지만, 동시에 VMware를 품은 infrastructure software 회사이고, GAAP 손익에는 인수 상각이 남아 있다.
+
+그래서 Broadcom을 AI 반도체 peer처럼만 읽으면 software cash flow를 놓치고, VMware 롤업처럼만 읽으면 AI semiconductor의 매출 전환을 놓친다. 이 회사의 2026년은 두 문장을 동시에 붙여야 한다. "VMware 장막은 아직 GAAP와 non-GAAP 사이에 남아 있다." "그러나 AI semiconductor revenue는 이미 전사 매출의 절반에 접근했다." 둘 중 하나만 쓰면 지금의 브로드컴을 반만 읽는다.
+
+---
+
+## 2026년에 봐야 할 다섯 가지
+
+1. **AI semiconductor revenue가 Q3 16.0B$ 가이던스에 접근하는가** — Q2 10.8B$에서 한 분기 만에 16.0B$로 가면, 전사 mix가 사실상 AI 중심으로 재편된다. 단 revenue이지 profit이 아니다.
+2. **FCF margin이 40%대 중후반을 유지하는가** — Q2 FCF 10.262B$는 revenue 대비 약 46%다. AI 매출이 커져도 현금이 같이 남아야 한다.
+3. **GAAP와 non-GAAP 간극이 좁아지는가** — acquisition-related amortization과 stock-based compensation을 빼야 높은 margin이 나오는 구조인지, GAAP 자체가 좋아지는지 분리한다.
+4. **interest expense와 debt balance가 내려오는가** — FY2026 Q2 10-Q의 Q2 interest expense는 776M$다. VMware 인수의 청구서가 줄어드는지 봐야 한다.
+5. **infrastructure software가 안정적으로 남는가** — AI 반도체가 강해질수록 software는 변동성 완충 장치가 된다. software가 약해지면 Broadcom은 더 순수 반도체 사이클에 가까워진다.
+
+---
+
+## 공시 / Filings
+
+- [Broadcom FY2026 Q2 earnings release](https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial) — 2026-06-03 공식 IR. Q2 revenue 22.187B$, GAAP net income 9.310B$, FCF 10.262B$, AI semiconductor revenue 10.8B$, Q3 revenue guidance 29.4B$의 정본.
+- [Broadcom FY2026 Q2 Form 10-Q](https://www.sec.gov/Archives/edgar/data/1730168/000173016826000054/avgo-20260503.htm) — 2026년 5월 3일 종료 분기 10-Q. operating income, interest expense, debt, acquisition-related amortization 확인용.
+- [Broadcom FY2026 Q2 8-K Exhibit 99.1](https://www.sec.gov/Archives/edgar/data/1730168/000173016826000051/avgo-05032026x8kxex99.htm) — earnings release의 SEC 제출본. IR 페이지와 같은 숫자를 SEC archive에서 재확인한다.
+- [Broadcom Investor Relations](https://investors.broadcom.com) — earnings release, SEC filings, quarterly results의 공식 입구.
+
+---
+
+## 재무제표 — 최근 7개 연도 (dartlab 연결, $B, 역년 정규화)
+
+미국 연결(USD)·분기 데이터를 역년으로 합산한 표다. 회사의 공식 FY2026 Q2 숫자는 회계연도 분기 기준이므로 이 표와 직접 더하지 않는다.
+
+```python
+import dartlab
+c = dartlab.Company("AVGO")
+c.select("IS", ["매출액","영업이익","당기순이익"], freq="Q")
+c.select("CF", ["영업활동현금흐름"], freq="Q")
+```
+
+| 항목 ($B) | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 매출 | 22.60 | 23.89 | 27.45 | 33.20 | 35.82 | 51.57 | 63.89 |
+| 영업이익 | 3.44 | 4.01 | 8.51 | 14.21 | 16.21 | 13.46 | 25.48 |
+| 당기순이익 | 2.72 | 2.96 | 6.67 | 11.50 | 14.08 | 5.89 | 23.13 |
+| 연결 OPM | 15.2% | 16.8% | 31.0% | 42.8% | 45.3% | 26.1% | 39.9% |
+| 연결 NPM | 12.0% | 12.4% | 24.3% | 34.6% | 39.3% | 11.4% | 36.2% |
+| 영업현금흐름 | 9.70 | 11.65 | 13.76 | 16.74 | 18.09 | 19.96 | 27.54 |
+
+이 표를 한 줄로 읽으면 이렇다. 매출은 2024년에 VMware 인수 효과로 계단처럼 뛰고, 순이익은 같은 해 깊게 꺼지지만, 영업현금흐름은 2019~2025 내내 올라간다. 2024년 순이익 dip만 보면 회사가 망가진 것처럼 보이고, OCF를 같이 보면 회계 장막이 순이익만 눌렀다는 구조가 보인다. 2026 Q2의 FCF 10.262B$는 이 현금 서사를 다음 단계로 잇는 공식자료다.
+
+---
+
+## 검증표
+
+본문 인용 수치를 dartlab 호출과 공식자료로 검증한다. dartlab 표는 역년 합산이고, Broadcom IR/SEC는 회계연도 분기 기준이다. 둘을 같은 기간처럼 더하지 않는다.
+
+| 본문 수치 | 출처 / 호출 | 결과 |
+|---|---|---|
+| 2023 매출 35.82B$ → 2024 51.57B$ → 2025 63.89B$ | `c.select("IS",["매출액"],freq="Q")` 역년 합산 | 실측 |
+| 2024 순이익 5.89B$, NPM 11.4% | `c.select("IS",["당기순이익"],freq="Q")` | 실측 |
+| 2024 OPM 26.1%, 2025 OPM 39.9% | 영업이익÷매출 | 실측·계산 |
+| OCF 18.09B$ → 19.96B$ → 27.54B$(2023~2025) | `c.select("CF",["영업활동현금흐름"],freq="Q")` | 실측 |
+| FY2026 Q2 revenue 22.187B$, GAAP net income 9.310B$ | [Broadcom FY2026 Q2 release](https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial) | 공식 IR |
+| FY2026 Q2 FCF 10.262B$, CFO 10.493B$, capex 0.231B$ | [Broadcom FY2026 Q2 release](https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial) | 공식 IR |
+| FY2026 Q2 AI semiconductor revenue 10.8B$(+143%) | [Broadcom FY2026 Q2 release](https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial) | 공식 IR |
+| FY2026 Q3 revenue guidance 29.4B$, AI semiconductor revenue guidance 16.0B$ | [Broadcom FY2026 Q2 release](https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial) | 공식 IR, forward-looking |
+| Q2 FY2026 operating income 10.788B$, interest expense 0.776B$ | [Broadcom FY2026 Q2 Form 10-Q](https://www.sec.gov/Archives/edgar/data/1730168/000173016826000054/avgo-20260503.htm) | SEC filing |
+| GAAP/non-GAAP 조정 항목 | Broadcom release non-GAAP reconciliation | GAAP와 non-GAAP 분리 필요 |
+
+본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 이 글이 새로 더한 핵심은 Q2의 AI semiconductor revenue와 FCF가 동시에 컸다는 점이다. 그러나 AI revenue는 전사 revenue의 일부이고, non-GAAP margin은 GAAP OPM이 아니다.
