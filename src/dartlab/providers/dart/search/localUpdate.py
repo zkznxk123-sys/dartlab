@@ -499,11 +499,17 @@ def injectSourceRefResolution(rows: Any, idx: Any, meta: Any) -> list[dict[str, 
     cols = getattr(meta, "columns", [])
     refs = meta["sourceRef"].to_list() if "sourceRef" in cols else [None] * meta.height
     rcepts = meta["rcept_no"].to_list() if "rcept_no" in cols else [None] * meta.height
+    sources = meta["source"].to_list() if "source" in cols else [None] * meta.height
     refToDoc: dict[str, int] = {}
-    for docId, (sref, rno) in enumerate(zip(refs, rcepts)):
-        key = str(sref or rno or "")
+    sourcesIndexed: set[str] = set()
+    for docId in range(int(meta.height)):
+        indexed = docLengths is None or int(docLengths[docId]) > 0
+        key = str(refs[docId] or rcepts[docId] or "")
         if key and key not in refToDoc:
             refToDoc[key] = docId
+        src = str(sources[docId] or "")
+        if src and indexed:
+            sourcesIndexed.add(src)
 
     def _resolved(expectedRefs: set[str]) -> bool:
         for ref in expectedRefs:
@@ -518,6 +524,11 @@ def injectSourceRefResolution(rows: Any, idx: Any, meta: Any) -> list[dict[str, 
         expectedRefs = _expectedSourceRefs(row)
         if expectedRefs:
             enrichedRow["_refResolved"] = _resolved(expectedRefs)
+        # source-lane 도 결정론: expectedSource 가 색인된 doc 을 가진 source 인가(랭킹 무관). 보일러플레이트
+        # self-query 가 top-K 를 못 채워도 source 가 색인돼 있으면 lane 무결성은 통과해야 한다.
+        expectedSource = str(row.get("expectedSource") or row.get("source") or "").strip()
+        if expectedSource:
+            enrichedRow["_sourceResolved"] = expectedSource in sourcesIndexed
         out.append(enrichedRow)
     return out
 
