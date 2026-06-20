@@ -51,6 +51,15 @@
 			check: { workflow: 'originalSync.yml', expectDays: 1 } // panel·allFilings 매일 02:00 UTC
 		},
 		{
+			data: { kr: '공시 본문 검색 인덱스 (전문)', en: 'Filing full-text search index' },
+			org: { kr: 'dartlab 자체 구축 (공시 파싱)', en: 'dartlab-built (parsed filings)' },
+			path: 'dart/contentIndex',
+			cadence: { kr: '매일 (증분)', en: 'daily (incremental)' },
+			license: { kr: '파생 산출물', en: 'derived artifact' },
+			sync: { dir: 'dart/contentIndex', file: 'manifest.json', expectDays: 1 },
+			check: { workflow: 'searchIndexBuild.yml', expectDays: 1 } // 검색 코퍼스 매일 04:00 KST 증분(이번 하루 RED 가시화)
+		},
+		{
 			data: { kr: '재무제표 (분기·연간·TTM)', en: 'Financial statements (Q · FY · TTM)' },
 			org: { kr: 'DART 정기보고서 XBRL', en: 'DART XBRL filings' },
 			path: 'dart/finance/{code}',
