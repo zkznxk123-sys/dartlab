@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import sys
+import time
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -21,6 +22,15 @@ KIND_DATA = {
     "fiscalYearEnd": "all",
     "location": "all",
 }
+# KRX KIND 는 기본 python-requests UA 에 드물게 비-테이블 오류 페이지를 반환한다(WAF/혼잡). 브라우저
+# UA + 짧은 재시도로 일시 응답을 흡수 — 2026-06 cron 단발 실패(테이블 미발견)가 재시도 0 갭이었다.
+KIND_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+    )
+}
+_RETRIES = 3
+_BACKOFF_SEC = 2.0
 
 OUTPUT_DIR = Path("dist")
 OUTPUT_FILE = OUTPUT_DIR / "corpList.parquet"
@@ -62,16 +72,29 @@ class _TableParser(HTMLParser):
             self._cell += data
 
 
-def fetchKind() -> pl.DataFrame:
-    r = requests.post(KIND_URL, data=KIND_DATA, timeout=30)
-    html = r.content.decode("euc-kr", errors="replace")
+def _fetchKindRows() -> list[list[str]]:
+    """KRX KIND 다운로드 → 표 행. 일시 장애(비-테이블 응답·네트워크)는 짧게 재시도 후 소진 시 종료."""
+    lastErr = "알 수 없는 오류"
+    for attempt in range(_RETRIES):
+        try:
+            r = requests.post(KIND_URL, data=KIND_DATA, headers=KIND_HEADERS, timeout=30)
+            html = r.content.decode("euc-kr", errors="replace")
+            parser = _TableParser()
+            parser.feed(html)
+            if len(parser._rows) >= 2:
+                return parser._rows
+            lastErr = "KIND 응답에서 테이블을 찾을 수 없음"
+        except requests.RequestException as exc:
+            lastErr = f"KIND 요청 실패: {type(exc).__name__}"
+        if attempt < _RETRIES - 1:
+            print(f"{lastErr} — 재시도 {attempt + 1}/{_RETRIES - 1}")
+            time.sleep(_BACKOFF_SEC * (attempt + 1))
+    print(lastErr)
+    sys.exit(1)
 
-    parser = _TableParser()
-    parser.feed(html)
-    rows = parser._rows
-    if len(rows) < 2:
-        print("KIND 응답에서 테이블을 찾을 수 없음")
-        sys.exit(1)
+
+def fetchKind() -> pl.DataFrame:
+    rows = _fetchKindRows()
 
     header = rows[0]
     data = rows[1:]

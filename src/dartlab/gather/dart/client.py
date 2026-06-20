@@ -24,6 +24,12 @@ BASE_URL = "https://opendart.fss.or.kr/api"
 # 키 020 (rate limit) 시 cooldown — DART 분당 580 rpm 회복 대기.
 _COOLDOWN_SEC = 60.0
 
+# 전송 계층 일시 장애(연결 끊김·read/connect 타임아웃·일시 5xx) 한정 재시도 횟수·백오프(지수, 초).
+# DART 가 응답 없이 끊거나(RemoteProtocolError) 일시 5xx 를 낼 때 단발 실패가 파이프라인 잡 전체를
+# 죽이던 갭 방어(Original SSOT Sync dart-reconcile). status(013/020) cooldown 은 호출자 루프가 담당.
+_TRANSIENT_RETRIES = 3
+_TRANSIENT_BACKOFF_SEC = 0.5
+
 
 @dataclass
 class _KeySlot:
@@ -170,6 +176,48 @@ class DartClient:
         with self._poolLock:
             return all(s.coolDownUntil > now for s in self._slots)
 
+    def _getWithTransientRetry(self, url: str, params: dict[str, Any], timeout: float) -> httpx.Response:
+        """전송 계층 일시 장애(연결 끊김·타임아웃·일시 5xx)에 한정 재시도하는 GET.
+
+        DART 서버는 드물게 응답 없이 연결을 끊거나(``httpx.RemoteProtocolError``) 일시 5xx 를
+        반환한다 — 애플리케이션 status(013/020 등) 와 무관한 전송 계층 단발 장애로, 이전엔 재시도
+        없이 그대로 propagate 돼 한 번의 끊김이 파이프라인 잡 전체를 죽였다(Original SSOT Sync
+        dart-reconcile). 이 계층에서만 짧게 재시도하고(슬롯·키 로테이션·020 cooldown 은 호출자 루프
+        유지), 소진 시 마지막 예외를 그대로 올린다. 4xx·정상 응답은 즉시 반환해 호출자가 status 판정.
+
+        Args:
+            url: 요청 URL.
+            params: 쿼리 파라미터 (crtfc_key 포함).
+            timeout: 요청 타임아웃 (초).
+
+        Returns:
+            httpx.Response — 전송 성공 응답 (status_code < 500 보장, 2xx 는 비보장).
+            raise_for_status / status 판정은 호출자 책임.
+
+        Raises:
+            httpx.TransportError | httpx.HTTPStatusError: 재시도 소진 후 마지막 예외.
+
+        Example:
+            >>> callable(DartClient._getWithTransientRetry)
+            True
+        """
+        lastExc: Exception | None = None
+        for attempt in range(_TRANSIENT_RETRIES):
+            try:
+                resp = self._session.get(url, params=params, timeout=timeout)
+            except httpx.TransportError as exc:  # 연결 끊김·read/connect 타임아웃 등 전송 계층 장애
+                lastExc = exc
+            else:
+                if resp.status_code < 500:
+                    return resp
+                lastExc = httpx.HTTPStatusError(
+                    f"DART 일시 서버 오류 {resp.status_code}", request=resp.request, response=resp
+                )
+            if attempt < _TRANSIENT_RETRIES - 1:
+                time.sleep(_TRANSIENT_BACKOFF_SEC * (2**attempt))
+        assert lastExc is not None  # 루프가 최소 1회 실행되므로 항상 설정됨
+        raise lastExc
+
     def getJson(
         self,
         endpoint: str,
@@ -244,7 +292,7 @@ class DartClient:
                 merged = {"crtfc_key": slot.key}
                 if params:
                     merged.update(params)
-                resp = self._session.get(url, params=merged, timeout=30)
+                resp = self._getWithTransientRetry(url, merged, 30)
                 resp.raise_for_status()
                 data = resp.json()
                 status = data.get("status", "000")
@@ -334,7 +382,7 @@ class DartClient:
                 merged = {"crtfc_key": slot.key}
                 if params:
                     merged.update(params)
-                resp = self._session.get(url, params=merged, timeout=60)
+                resp = self._getWithTransientRetry(url, merged, 60)
                 resp.raise_for_status()
                 # OpenDART 는 바이너리 에러 시에도 JSON 반환 가능.
                 contentType = resp.headers.get("Content-Type", "")
