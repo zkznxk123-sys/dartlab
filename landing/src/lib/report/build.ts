@@ -196,11 +196,14 @@ interface ValPeer {
 // 같은 업종(search-index industry) 종목들의 per/pbr 을 모아 분포화 — peer n<3 또는 분포 둘 다 null 이면 생략.
 function buildValPeer(snap: ValuationSnapshot | null, universe: IndexRow[] | null, code: string, industry: string | undefined, industryName: string | undefined): ValPeer | null {
 	if (!snap || !industry || !universe) return null;
-	const peers = universe.filter((r) => r.industry === industry).map((r) => r.stockCode);
+	// 동종 멤버십 = 같은 업종, *주체 자신 제외*('대비'는 나머지 동종 대비 — 작은 업종·극단값이 자기 분포를 끌어올려 위치를 덜 극단으로 보이게 하는 self-inclusion 편향 차단).
+	const peers = universe.filter((r) => r.industry === industry && r.stockCode !== code).map((r) => r.stockCode);
 	if (peers.length < 3) return null;
+	// per/pbr 은 양수만 분포 편입 — per 는 네이버가 적자사 null, pbr 음수(자본잠식)는 좌측 꼬리를 오염시켜 위기기업을 '싼 쪽'으로 오표시하므로 명시 제외.
+	const pos = (v: Num): Num => (v != null && Number.isFinite(v) && (v as number) > 0 ? v : null);
 	const subj = snap[code] ?? null;
-	const per = { v: subj?.per ?? null, dist: distFromValues(peers.map((c) => snap[c]?.per ?? null)) };
-	const pbr = { v: subj?.pbr ?? null, dist: distFromValues(peers.map((c) => snap[c]?.pbr ?? null)) };
+	const per = { v: pos(subj?.per ?? null), dist: distFromValues(peers.map((c) => pos(snap[c]?.per ?? null))) };
+	const pbr = { v: pos(subj?.pbr ?? null), dist: distFromValues(peers.map((c) => pos(snap[c]?.pbr ?? null))) };
 	if (!per.dist && !pbr.dist) return null;
 	return { industryName: industryName ?? industry, per, pbr };
 }
@@ -801,7 +804,16 @@ function buildLiquidity(
 			// 펀딩 갭 — 배당 후 잔여가 음수인 해(투자·배당이 영업CF 초과)는 어떻게 메웠나(지속가능성).
 			const deficitYrs = yrs.filter((_, i) => residS[i] != null && (residS[i] as number) < 0);
 			const gapNote = deficitYrs.length ? ` ${deficitYrs.join('·')}년은 투자·배당이 영업현금흐름을 초과해(배당 후 잔여 음수) 보유현금 소진이나 차입으로 메웠습니다 — 투자 우선형의 지속가능성은 곳간(현금·차입 여력)과 함께 봐야 합니다.` : '';
-			const allocText = `${corpName}가 최근 ${yrs.length}년 번 영업현금을 어디에 쓰는지 추세로 본 것입니다(단년 스냅샷은 노이즈라 흐름으로 봅니다). 누적 영업현금흐름 ${fmtAmt1(sOp)} 중 설비투자에 ${fmtAmt1(sCx)}(${fmtPct(capexPct)}), 배당에 ${fmtAmt1(sDv)}(${fmtPct(divPct)})를 배분해${tilt ? `, 자본배분은 ${tilt}에 가깝습니다` : ''}.${gapNote} (투자 → 주주환원 → 적립·상환 우선순위의 흐름)`;
+			// 재투자 질 좌표 — 투자(CAPEX) 우선형일 때 같은 기간 ROE 추세를 병치(늘린 자본이 수익으로 회수되는지의 *좌표*, 자본비용 비교·투자판정 아님). 환원형은 해당 질문이 약해 생략.
+			const roeAw = aw5.pick(tfA.ratios.find((r) => r.key === 'roe')?.values ?? []);
+			const roe0 = roeAw.find((v) => v != null && Number.isFinite(v)) ?? null;
+			const roe1 = lastNonNull(roeAw);
+			const investLean = capexPct != null && divPct != null && capexPct > divPct;
+			const roeNote =
+				investLean && roe0 != null && roe1 != null
+					? ` 투자에 무게가 실린 배분이라 늘린 자본이 수익으로 회수되는지가 관건인데, 같은 기간 ROE는 ${fmtPct(roe0)} → ${fmtPct(roe1)}로 ${(roe1 as number) >= (roe0 as number) + 1 ? '개선됐습니다' : (roe1 as number) <= (roe0 as number) - 1 ? '낮아졌습니다' : '대체로 유지됐습니다'} — 재투자가 거둔 자본효율의 *좌표*이며 자본비용 비교·투자판단이 아닙니다.`
+					: '';
+			const allocText = `${corpName}가 최근 ${yrs.length}년 번 영업현금을 어디에 쓰는지 추세로 본 것입니다(단년 스냅샷은 노이즈라 흐름으로 봅니다). 누적 영업현금흐름 ${fmtAmt1(sOp)} 중 설비투자에 ${fmtAmt1(sCx)}(${fmtPct(capexPct)}), 배당에 ${fmtAmt1(sDv)}(${fmtPct(divPct)})를 배분해${tilt ? `, 자본배분은 ${tilt}에 가깝습니다` : ''}.${gapNote}${roeNote} (투자 → 주주환원 → 적립·상환 우선순위의 흐름)`;
 			sections.push({ key: 'capitalAllocation', title: '자본 배분 -- 번 현금을 매년 어디에 쓰나 (연간 추세)', sourceEngine: 'analysis', blocks: [{ type: 'text', text: allocText }, allocTbl] });
 			findings.push({ key: '자본배분', finding: `최근 ${yrs.length}년 누적 영업CF ${fmtAmt1(sOp)} 중 CAPEX ${fmtPct(capexPct)}·배당 ${fmtPct(divPct)}${tilt ? ` (${tilt})` : ''}.`, sourceEngine: 'analysis' });
 		}
@@ -1270,14 +1282,17 @@ function buildMarket(
 			if (pos) vphrases.push(`${r.label} ${fmtMult(r.v)} → 동종 ${pos.label}`);
 		}
 		if (vdata.length) {
-			const maxN = Math.max(valPeer.per.dist?.n ?? 0, valPeer.pbr.dist?.n ?? 0);
+			// 지표별 유효표본 분리 표기 — per 는 적자 제외로 pbr 보다 작을 수 있어 한 수(maxN)로 합치지 않는다(애널리스트 정직성).
+			const perN = valPeer.per.dist?.n ?? 0;
+			const pbrN = valPeer.pbr.dist?.n ?? 0;
+			const nLabel = perN && pbrN ? `PER ${perN}·PBR ${pbrN}사` : `${Math.max(perN, pbrN)}사`;
 			sections.push({
 				key: 'valuationPeer',
 				title: '동종업종 밸류에이션 -- 같은 업종 대비 비싼가 싼가',
 				sourceEngine: 'industry',
 				blocks: [
 					{ type: 'text', text: `${corpName}의 PER·PBR을 같은 업종(${valPeer.industryName}) 분포와 비교한 *좌표*입니다. 높으면 시장이 이익·자산 1원에 더 많이(더 비싸게) 매긴 것이고, 낮으면 더 싸게 매긴 것입니다 — 성장 기대·이익 변동성·사업 위험이 반영된 결과이며 고평가/저평가 단정이나 매수·매도 의견이 아닙니다.` },
-					{ type: 'table', label: `동종업종 밸류에이션 비교 — ${valPeer.industryName} (유효표본 n≈${maxN}사, 적자·결손 제외)`, snapshot: true, data: vdata },
+					{ type: 'table', label: `동종업종 밸류에이션 비교 — ${valPeer.industryName} (유효표본 ${nLabel}, 주체 제외·적자·결손·자본잠식 제외)`, snapshot: true, data: vdata },
 					{ type: 'text', text: `※ 이 표의 PER/PBR은 일 1회 시장 스냅샷(네이버 기준, 최근 4분기 TTM)으로, 위 '밸류에이션 맥락(자기역사)'의 연말가÷연간EPS PER과는 시점·정의가 다릅니다. 적자 기업은 PER이 정의되지 않아 분포·표본에서 제외됩니다(PBR은 자본 기준이라 더 넓게 포함).` }
 				]
 			});
