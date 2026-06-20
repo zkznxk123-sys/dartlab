@@ -169,8 +169,20 @@ export interface AuditFeeYear {
 	nonAuditFee: Num; // 비감사용역 보수 합 (원) — 계약 없으면 0, 미공시 null
 }
 
+// 밸류에이션 스냅샷 행 — dart/scan/valuation.parquet (네이버 per/pbr, 전 종목 1행/종목, snapshotAt 일 1회).
+// 동종업종 밸류에이션 *좌표*용(자기역사 PER 과 정의·시점 분리). null = 적자·미산출(네이버가 결손사 null 처리).
+export interface ValuationRow {
+	per: Num; // 주가수익비율 (TTM 연결 EPS 기준, 네이버 표준)
+	pbr: Num; // 주가순자산비율
+	marketCap: Num; // 시가총액(원)
+}
+// stockCode → ValuationRow. 전 종목 1파일(소형) — 동종 분포·주체 위치를 조회 시점 계산.
+export type ValuationSnapshot = Record<string, ValuationRow>;
+
 export interface ReportPort {
 	workforce(code: string): Promise<WorkforceYear[] | null>;
+	/** 밸류에이션 스냅샷(전 종목 per/pbr/marketCap, dart/scan/valuation.parquet 통파일 직독). 동종 밸류에이션 좌표용. 미존재는 null. */
+	valuationSnapshot(): Promise<ValuationSnapshot | null>;
 	investments(code: string): Promise<InvestmentsBundle | null>;
 	shareholderReturn(code: string): Promise<ShareholderReturnYear[] | null>;
 	ownership(code: string): Promise<OwnershipYear[] | null>;

@@ -26,6 +26,7 @@ import type {
 	ShareholderRow,
 	ShareholdersView,
 	TopExecPay,
+	ValuationSnapshot,
 	WorkforceYear
 } from '@dartlab/ui-contracts';
 import type { DataCore } from '../../../data/fetch/request';
@@ -683,10 +684,30 @@ export function createReportSource(core: DataCore): ReportPort {
 		return out;
 	}
 
+	// 밸류에이션 스냅샷 — dart/scan/valuation.parquet 통파일 직독(소형 ~44KB, 전 종목 1행). 동종 밸류에이션
+	// 좌표(PER/PBR 업종 분포 백분위)용. report/ 하위가 아닌 scan 루트라 read() 헬퍼 대신 직접 통파일 read.
+	async function buildValuationSnapshot(): Promise<ValuationSnapshot | null> {
+		const rows = await core.requestParquetWholeFile<Row>({
+			origin: 'hf',
+			path: 'dart/scan/valuation.parquet',
+			columns: ['stockCode', 'per', 'pbr', 'marketCap'],
+			cacheKey: 'scan.valuation',
+			cache: { scope: 'memory', ttlMs: 6 * 3_600_000, maxEntries: 2 } // 일 1회 파생(snapshotAt) — 6h TTL 충분
+		});
+		if (!rows || !rows.length) return null;
+		const out: ValuationSnapshot = {};
+		for (const r of rows) {
+			const code = str(r.stockCode);
+			if (code) out[code] = { per: num(r.per), pbr: num(r.pbr), marketCap: num(r.marketCap) };
+		}
+		return Object.keys(out).length ? out : null;
+	}
+
 	// ── ReportPort — 각 메서드는 guarded(브라우저 가드 + null 폴백) 로 build 함수를 감싼다.
 	// shareholders 는 shareholderPeriods 의 최신기로 파생(단일 read 공유, 코어가 dedup). ──
 	return {
 		workforce: (code) => guarded(() => buildWorkforce(code.trim())),
+		valuationSnapshot: () => guarded(() => buildValuationSnapshot()),
 		investments: (code) => guarded(() => buildInvestments(code.trim())),
 		shareholderReturn: (code) => guarded(() => buildShareholderReturn(code.trim())),
 		ownership: (code) => guarded(() => buildOwnership(code.trim())),

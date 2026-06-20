@@ -319,6 +319,9 @@ function fakeMacro(): MacroPort {
 
 function fakeReport(): ReportPort {
 	return {
+		async valuationSnapshot() {
+			return null;
+		},
 		async shareholders() {
 			return null;
 		},

@@ -5,6 +5,7 @@ import type {
 	TerminalFinanceBundle,
 	TerminalFinance,
 	IndexRow,
+	ValuationSnapshot,
 	Num
 } from '@dartlab/ui-contracts';
 import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
@@ -148,6 +149,62 @@ function topPctLabel(r: { top: number; tail: boolean }): string {
 	if (r.tail) return r.top <= 6 ? '상위 10% 이내' : '하위 10% 이내';
 	return `상위 ${r.top}%`;
 }
+// 값 목록 → 분포 통계(p10/p25/median/p75/p90/mean/std/n). 빌더 buildIndustryMap.py `_distribution` 미러.
+// 표본 < 3 이면 null(의미 없는 분포 — honest-n 게이트). 동종 밸류에이션 분포를 조회 시점에 계산.
+function distFromValues(vs: Num[]): IndDist | null {
+	const c = vs.filter((v): v is number => v != null && Number.isFinite(v)).sort((a, b) => a - b);
+	const n = c.length;
+	if (n < 3) return null;
+	const q = (p: number): number => {
+		if (n === 1) return c[0];
+		const pos = p * (n - 1);
+		const lo = Math.floor(pos);
+		const hi = Math.min(lo + 1, n - 1);
+		return c[lo] * (1 - (pos - lo)) + c[hi] * (pos - lo);
+	};
+	const mean = c.reduce((s, x) => s + x, 0) / n;
+	const std = Math.sqrt(c.reduce((s, x) => s + (x - mean) ** 2, 0) / n);
+	const r2 = (x: number) => Math.round(x * 100) / 100;
+	return { n, p10: r2(q(0.1)), p25: r2(q(0.25)), median: r2(q(0.5)), p75: r2(q(0.75)), p90: r2(q(0.9)), mean: r2(mean), std: r2(std) };
+}
+// 밸류에이션 위치 — PER/PBR 분포 내 좌표. 높을수록 시장이 '더 비싸게' 매긴 것(고평가/매수 판단 아님).
+// 꼬리(p90↑/p10↓)는 거짓 정밀 회피로 '상위/하위 10% 이내'. 중앙값 위=비싼 쪽, 아래=싼 쪽.
+function valuationPos(v: Num, d: IndDist | null | undefined): { label: string; n: number } | null {
+	if (v == null || !Number.isFinite(v) || !d) return null;
+	const pr = pctRank(v as number, d);
+	if (pr == null) return null;
+	const tail = pr >= 94 || pr <= 6;
+	const expensive = (v as number) >= d.median;
+	const topExp = Math.round(Math.max(1, Math.min(99, 100 - pr)));
+	const botCheap = Math.round(Math.max(1, Math.min(99, pr)));
+	const label = expensive
+		? tail
+			? '업종 상위 10% 이내 (비싼 쪽)'
+			: `업종 상위 ${topExp}% (비싼 쪽)`
+		: tail
+			? '업종 하위 10% 이내 (싼 쪽)'
+			: `업종 하위 ${botCheap}% (싼 쪽)`;
+	return { label, n: d.n };
+}
+// 동종 밸류에이션 컨텍스트 — 주체 PER/PBR + 업종 분포(런타임 산출). market 관점이 소비.
+interface ValPeer {
+	industryName: string;
+	per: { v: Num; dist: IndDist | null };
+	pbr: { v: Num; dist: IndDist | null };
+}
+// valuation 스냅샷(전 종목 per/pbr) + search-index 업종 멤버십 → 주체 per/pbr + 동종 분포(조회 시점).
+// 같은 업종(search-index industry) 종목들의 per/pbr 을 모아 분포화 — peer n<3 또는 분포 둘 다 null 이면 생략.
+function buildValPeer(snap: ValuationSnapshot | null, universe: IndexRow[] | null, code: string, industry: string | undefined, industryName: string | undefined): ValPeer | null {
+	if (!snap || !industry || !universe) return null;
+	const peers = universe.filter((r) => r.industry === industry).map((r) => r.stockCode);
+	if (peers.length < 3) return null;
+	const subj = snap[code] ?? null;
+	const per = { v: subj?.per ?? null, dist: distFromValues(peers.map((c) => snap[c]?.per ?? null)) };
+	const pbr = { v: subj?.pbr ?? null, dist: distFromValues(peers.map((c) => snap[c]?.pbr ?? null)) };
+	if (!per.dist && !pbr.dist) return null;
+	return { industryName: industryName ?? industry, per, pbr };
+}
+
 // 동종업종 비교표 — 지표 × (회사값·업종 중앙값·업종 내 위치). 백분위는 *측정 좌표*이지 투자판단 아님.
 function peerCompareTable(
 	rows: { label: string; value: Num; key: string; goodHigh: boolean; fmt: (v: Num) => string }[],
@@ -1067,9 +1124,9 @@ function buildMarket(
 	candles: Candle[] | null,
 	marketCandles: Candle[] | null,
 	sr: ShareholderReturnYear[] | null,
-	ctx: { corpName: string; benchName: string }
+	ctx: { corpName: string; benchName: string; valPeer: ValPeer | null }
 ): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } | null {
-	const { corpName, benchName } = ctx;
+	const { corpName, benchName, valPeer } = ctx;
 	if (!candles || !candles.length) return null;
 	const ps = priceSummary(candles);
 	if (!ps) return null;
@@ -1195,6 +1252,36 @@ function buildMarket(
 			valBlocks.push({ type: 'text', text: `※ 상단 KPI의 'PER(현재)'는 현재가 기준, 위 표는 각 연도의 *연말가* 기준이라 같은 해라도 값이 다를 수 있습니다. 주식 분할이 있던 회사는 연도 간 PER이 불연속으로 보일 수 있습니다(분할 조정은 원천 데이터 책임).` });
 			sections.push({ key: 'valuation', title: '밸류에이션 맥락 -- 시장은 이익에 얼마를 매겼나', sourceEngine: 'quant', blocks: valBlocks });
 			findings.push({ key: '밸류', finding: `PER ${band ? fmtMult(curPerNum) + ` (자기역사 ${band.band})` : perCells[perCells.length - 1]} · 배당수익률 ${yieldCells[yieldCells.length - 1]}.`, sourceEngine: 'quant' });
+		}
+	}
+
+	// S3.5 동종업종 밸류에이션 위치 — valuation.parquet(네이버 per/pbr) 동종 분포 백분위(런타임 산출). 좌표일 뿐.
+	if (valPeer && (valPeer.per.dist || valPeer.pbr.dist)) {
+		const vrows: { label: string; v: Num; d: IndDist | null }[] = [
+			{ label: 'PER', v: valPeer.per.v, d: valPeer.per.dist },
+			{ label: 'PBR', v: valPeer.pbr.v, d: valPeer.pbr.dist }
+		];
+		const vdata: Record<string, string>[] = [];
+		const vphrases: string[] = [];
+		for (const r of vrows) {
+			if (r.v == null || !Number.isFinite(r.v) || !r.d) continue;
+			const pos = valuationPos(r.v, r.d);
+			vdata.push({ 지표: r.label, 회사값: fmtMult(r.v), '업종 중앙값': fmtMult(r.d.median), '업종 내 위치': pos ? pos.label : '-' });
+			if (pos) vphrases.push(`${r.label} ${fmtMult(r.v)} → 동종 ${pos.label}`);
+		}
+		if (vdata.length) {
+			const maxN = Math.max(valPeer.per.dist?.n ?? 0, valPeer.pbr.dist?.n ?? 0);
+			sections.push({
+				key: 'valuationPeer',
+				title: '동종업종 밸류에이션 -- 같은 업종 대비 비싼가 싼가',
+				sourceEngine: 'industry',
+				blocks: [
+					{ type: 'text', text: `${corpName}의 PER·PBR을 같은 업종(${valPeer.industryName}) 분포와 비교한 *좌표*입니다. 높으면 시장이 이익·자산 1원에 더 많이(더 비싸게) 매긴 것이고, 낮으면 더 싸게 매긴 것입니다 — 성장 기대·이익 변동성·사업 위험이 반영된 결과이며 고평가/저평가 단정이나 매수·매도 의견이 아닙니다.` },
+					{ type: 'table', label: `동종업종 밸류에이션 비교 — ${valPeer.industryName} (유효표본 n≈${maxN}사, 적자·결손 제외)`, snapshot: true, data: vdata },
+					{ type: 'text', text: `※ 이 표의 PER/PBR은 일 1회 시장 스냅샷(네이버 기준, 최근 4분기 TTM)으로, 위 '밸류에이션 맥락(자기역사)'의 연말가÷연간EPS PER과는 시점·정의가 다릅니다. 적자 기업은 PER이 정의되지 않아 분포·표본에서 제외됩니다(PBR은 자본 기준이라 더 넓게 포함).` }
+				]
+			});
+			findings.push({ key: '밸류비교', finding: vphrases.length ? vphrases.join(' · ') + '.' : 'PER·PBR 동종 좌표.', sourceEngine: 'industry' });
 		}
 	}
 
@@ -1540,12 +1627,14 @@ export async function buildReport(
 		const isKosdaq = mkt.startsWith('KOSDAQ');
 		const benchRef = isKosdaq ? KR_INDEX_PRESETS[2] : KR_INDEX_PRESETS[0]; // 코스닥 : 코스피
 		const benchName = isKosdaq ? '코스닥' : '코스피';
-		const [candles, marketCandles, sr] = await Promise.all([
+		const [candles, marketCandles, sr, valSnap] = await Promise.all([
 			rt.price.govCandles(code).catch(() => null),
 			rt.index.series(benchRef).catch(() => null),
-			rt.report.shareholderReturn(code).catch(() => null)
+			rt.report.shareholderReturn(code).catch(() => null),
+			rt.report.valuationSnapshot().catch(() => null)
 		]);
-		built = buildMarket(candles, marketCandles, sr, { corpName, benchName });
+		const valPeer = buildValPeer(valSnap, universe, code, industry, peer?.name);
+		built = buildMarket(candles, marketCandles, sr, { corpName, benchName, valPeer });
 	} else if (persp.key === 'ownership') {
 		const [shareholders, ownership, workforce, execBoard, topExecPay, auditTrail, auditFees, investments] = await Promise.all([
 			rt.report.shareholders(code).catch(() => null),
