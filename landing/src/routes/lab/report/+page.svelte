@@ -133,7 +133,14 @@
   }
 
   function isTimeSeries(cols: string[]): boolean {
-    return cols.length >= 4 && /^\d{4}$/.test(cols[1] ?? '');
+    // 연도(2023) 또는 분기(25Q1) 라벨이 2열 이상이면 시계열 표 → 스파크라인.
+    const ts = (s: string) => /^\d{4}$/.test(s) || /^\d{2}Q[1-4]$/.test(s);
+    return cols.length >= 4 && ts(cols[1] ?? '');
+  }
+  function chunk<T>(arr: T[], n: number): T[][] {
+    const out: T[][] = [];
+    for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
+    return out;
   }
   // 표에 그릴 스파크라인이 하나라도 있나 — 전부 빈 칸이면 추이 컬럼 자체를 숨긴다(휑한 거터 방지).
   function tableHasSpark(data: Record<string, string>[], cols: string[]): boolean {
@@ -270,31 +277,30 @@
 
           <div class="printPerspective">관점: {model.perspectiveLabel} — {PERSPECTIVES.find((p) => p.key === model!.perspectiveKey)?.question}</div>
 
-          {#if model.focusQuestions.length}
-            <div class="focusRow">{#each model.focusQuestions as q}<span class="chip focus">{q}</span>{/each}</div>
-          {/if}
-
-          <!-- ── 핵심 요약 ── -->
+          <!-- ── 요약 (Executive Summary) — 산문 리드 + 요약 지표표 (카드 폐기, 문서형) ── -->
           <section class="block summary">
-            <h2 class="blockTitle">핵심 요약</h2>
-            <div class="conclusion">{clean(model.conclusion)}</div>
+            <h2 class="blockTitle">요약</h2>
+            <p class="leadProse">{clean(model.conclusion)}</p>
+            {#if model.narrativeOverview}<p class="leadSub">{clean(model.narrativeOverview)}</p>{/if}
             {#if model.headlineKpis.length}
-              <div class="kpiBand">
-                {#each model.headlineKpis as k}<div class="kpi"><span class="kLabel">{k.label}</span><span class="kVal {cellTone(k.value)}">{k.value}</span></div>{/each}
-              </div>
+              <table class="summaryTable">
+                <tbody>
+                  {#each chunk(model.headlineKpis, 3) as rowKpis}
+                    <tr>{#each rowKpis as k}<th>{k.label}</th><td class={cellTone(k.value)}>{k.value}</td>{/each}</tr>
+                  {/each}
+                </tbody>
+              </table>
             {/if}
           </section>
 
           {#if model.keyFindings.length}
             <section class="block keyFindings">
-              <h2 class="blockTitle">핵심 발견 <span class="subNote">엔진 측정값 자동 추출{#if allAnalysis} · 출처 {engineLabel.analysis}{/if}</span></h2>
-              {#each model.keyFindings as kf}
-                <div class="kfRow" class:noSrc={allAnalysis}>
-                  <span class="chip kfTag">{kf.key}</span>
-                  <span class="kfText">{clean(kf.finding)}</span>
-                  {#if !allAnalysis}<span class="kfSrc">{engineLabel[kf.sourceEngine] ?? kf.sourceEngine}</span>{/if}
-                </div>
-              {/each}
+              <h2 class="blockTitle">주요 관찰 <span class="subNote">관점별 측정 요지{#if !allAnalysis} · 출처 병기{/if}</span></h2>
+              <ul class="obsList">
+                {#each model.keyFindings as kf}
+                  <li><b class="obsKey">{kf.key}</b> — {clean(kf.finding)}{#if !allAnalysis} <span class="obsSrc">({engineLabel[kf.sourceEngine] ?? kf.sourceEngine})</span>{/if}</li>
+                {/each}
+              </ul>
             </section>
           {/if}
 
@@ -329,7 +335,7 @@
                   {:else if b.type === 'text'}
                     <p class="bText">{clean(b.text)}</p>
                   {:else if b.type === 'metrics'}
-                    <div class="bMetrics">{#each b.metrics as m}<div class="metric"><span class="mLabel">{m.label}</span><span class="mValue {cellTone(m.value)}">{m.value}</span></div>{/each}</div>
+                    <table class="figTable"><tbody>{#each chunk(b.metrics, 3) as mrow}<tr>{#each mrow as m}<th>{m.label}</th><td class={cellTone(m.value)}>{m.value}</td>{/each}</tr>{/each}</tbody></table>
                   {:else if b.type === 'table' && b.data?.length}
                     {@const cols = Object.keys(b.data[0])}
                     {@const ts = isTimeSeries(cols) && tableHasSpark(b.data, cols)}
@@ -538,21 +544,24 @@
   .blockTitle { font-size: 13px; font-weight: 800; letter-spacing: 0.02em; margin: 0 0 12px; padding-bottom: 7px; border-bottom: 1px solid var(--bd2); display: flex; align-items: baseline; gap: 8px; }
   .blockTitle .subNote { font-size: 10.5px; font-weight: 400; color: var(--dim); }
 
-  /* ── 핵심 요약 ── */
-  .conclusion { font-size: 19px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.01em; line-height: 1.45; }
-  .kpiBand { display: grid; grid-template-columns: repeat(6, 1fr); gap: 9px; margin: 4px 0 4px; }
-  /* 라벨 2줄 고정 행 + 값 1행 — 라벨 길이와 무관하게 모든 값이 한 baseline 에 정렬 */
-  .kpi { background: var(--soft); border: 1px solid var(--bd); border-radius: 8px; padding: 10px 13px; display: grid; grid-template-rows: 2.6em 1fr; gap: 2px; min-height: 64px; }
-  .kLabel { font-size: 11px; color: var(--dim); font-weight: 500; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .kVal { font-size: clamp(15px, 1.45vw, 18px); font-weight: 800; font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; align-self: end; }
-  .kVal.neg { color: var(--down); } .kVal.pos { color: var(--up); }
+  /* ── 요약(Executive Summary) — 문서형 산문 리드 + 요약 지표표(카드 폐기) ── */
+  .leadProse { font-size: 15px; font-weight: 600; line-height: 1.68; letter-spacing: -0.005em; margin: 0 0 10px; max-width: 80ch; }
+  .leadSub { font-size: 12.5px; line-height: 1.75; color: var(--dim); margin: 0 0 14px; max-width: 80ch; }
+  .summaryTable { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 6px; border-top: 1px solid var(--bd2); }
+  .summaryTable th { text-align: left; font-weight: 500; color: var(--dim); font-family: var(--sans); padding: 7px 10px 7px 0; border-bottom: 1px solid var(--bd); white-space: nowrap; width: 1%; }
+  .summaryTable td { text-align: left; font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; padding: 7px 28px 7px 0; border-bottom: 1px solid var(--bd); }
+  .summaryTable td.neg { color: var(--down); } .summaryTable td.pos { color: var(--up); }
 
-  /* ── 핵심 발견 ── */
-  .kfRow { display: grid; grid-template-columns: max-content 1fr auto; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bd); align-items: baseline; }
-  .kfRow.noSrc { grid-template-columns: max-content 1fr; }
-  .chip.kfTag { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 28%, transparent); font-weight: 600; padding: 1px 8px; font-size: 11px; justify-self: start; }
-  .kfText { font-size: 12.5px; line-height: 1.55; }
-  .kfSrc { font-size: 10.5px; color: var(--dim); }
+  /* ── 주요 관찰 — 칩 폐기, 문서형 목록 ── */
+  .obsList { margin: 4px 0 0; padding-left: 18px; }
+  .obsList li { font-size: 12.5px; line-height: 1.7; padding: 3px 0; }
+  .obsKey { color: var(--accent); font-weight: 700; }
+  .obsSrc { font-size: 10.5px; color: var(--dim); }
+  /* 본문 figure 표 — 메트릭 칩 대체(라벨|값 인라인 표) */
+  .figTable { border-collapse: collapse; font-size: 12px; margin: 10px 0; }
+  .figTable th { text-align: left; font-weight: 500; color: var(--dim); font-family: var(--sans); padding: 5px 10px 5px 0; white-space: nowrap; }
+  .figTable td { text-align: left; font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; padding: 5px 24px 5px 0; }
+  .figTable td.neg { color: var(--down); } .figTable td.pos { color: var(--up); }
 
   /* ── 목차 ── */
   .toc { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 0 0 30px; padding: 14px 16px; background: var(--soft); border: 1px solid var(--bd); border-radius: 10px; }
@@ -723,14 +732,14 @@
     .reportLayout { display: block; }
     .printPerspective { display: block; font-size: 11px; color: #555; margin-bottom: 12px; font-weight: 600; }
     .sheet { width: 100%; max-width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; }
-    .rptSection, .summary, .keyFindings, .evidenceStrip, .kpiBand, .clRow { break-inside: avoid; }
+    .rptSection, .summary, .keyFindings, .evidenceStrip, .summaryTable, .clRow { break-inside: avoid; }
     .cover, .coverFacts, .focusRow { break-inside: avoid; }
     .cover { break-after: avoid; }
     .bTableWrap { break-inside: avoid; }
     .bTable thead { display: table-header-group; }
     .secHead { break-after: avoid; }
     .spark { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-    .kpi { background: #eef2f6 !important; }
+    .summaryTable th, .figTable th { color: #555a60 !important; }
     .bTable th { border-bottom-color: #161616; }
     .bTable tbody tr:nth-child(even) { background: #eaeff4 !important; }
     .spark polyline { stroke-width: 2px; }
