@@ -463,6 +463,7 @@
           <!-- ── 푸터 / 서명 ── -->
           <footer class="rptFooter">
             {#if model.assumptionsNote}<div class="assump">가정·한계 — {model.assumptionsNote}</div>{/if}
+            <div class="freezeNote">※ 본 출력본(인쇄/PDF)은 <b>데이터 기준 {model.asOf} 시점의 동결 스냅샷</b>입니다. 화면은 조회 시점 리얼타임으로 갱신되므로, 이후 원천 데이터가 갱신되면 동일 보고서라도 수치가 달라질 수 있습니다 — 배포본은 이 동결 시점을 근거로 인용하십시오.</div>
             <div class="footSign">
               <span class="signMain">{model.corpName} 기업분석보고서</span>
               <span class="dot">·</span><span>{model.perspectiveLabel} 관점</span>
@@ -753,6 +754,8 @@
   /* ── 푸터 ── */
   .rptFooter { margin-top: 36px; padding-top: 16px; border-top: 2px solid var(--ink); font-size: 11px; color: var(--dim); }
   .assump { margin-bottom: 10px; color: var(--warn); }
+  .freezeNote { display: none; }
+  @media print { .freezeNote { display: block; margin-bottom: 10px; font-size: 10px; color: #6a4a00; border: 1px solid #b9c1c9; border-radius: 4px; padding: 6px 9px; } }
   .footSign { font-size: 12px; color: var(--ink); display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin-bottom: 8px; }
   .footSign .signMain { font-weight: 700; }
   .footSign .dot, .footLine .dot { opacity: 0.4; }

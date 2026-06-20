@@ -416,7 +416,15 @@ function buildEarningsPower(
 		const dOpm = opmW[opmW.length - 1] - opmW[opmW.length - 2];
 		const dGpm = gpmW[gpmW.length - 1] - gpmW[gpmW.length - 2];
 		const dSga = dGpm - dOpm;
-		if (Math.abs(dOpm) >= 0.3) bridge = ` 직전 ${periodWord} 대비 영업이익률 변화(${fmtPctSigned(dOpm)}p)는 주로 ${Math.abs(dGpm) >= Math.abs(dSga) ? '매출원가율' : '판관비율'} 쪽에서 비롯됐습니다.`;
+		if (Math.abs(dOpm) >= 0.3) {
+			bridge = ` 직전 ${periodWord} 대비 영업이익률 변화(${fmtPctSigned(dOpm)}p)는 주로 ${Math.abs(dGpm) >= Math.abs(dSga) ? '매출원가율' : '판관비율'} 쪽에서 비롯됐습니다.`;
+			// 가격 vs 물량 단서 — 매출 방향과 원가율 방향의 동행/괴리(정밀 분해는 공시 한계로 제한).
+			if (Math.abs(dGpm) >= 0.3 && revYoyLast != null) {
+				const r = revYoyLast as number;
+				const why = r > 2 ? (dGpm > 0 ? '매출이 늘며 원가율이 낮아져 가격·믹스 개선이나 규모의 경제' : '매출은 늘었으나 원가율이 올라 투입가 상승·믹스 악화') : r < -2 ? (dGpm > 0 ? '매출이 줄어도 원가율이 낮아져 비용 절감·믹스 개선' : '매출 감소와 원가율 상승이 겹쳐 부담 가중') : '원가·믹스';
+				bridge += ` 매출이 ${yoyTag} 대비 ${fmtPctSigned(r)}인 가운데 매출총이익률이 ${fmtPctSigned(dGpm)}p 움직인 것은 ${why} 요인일 수 있습니다(가격·물량 정밀 분해는 공시 한계로 제한적).`;
+			}
+		}
 	}
 	const s2text = opmW.length >= 2 ? `영업이익률은 최근 ${opmW.length}개 ${periodWord} ${fmtPct(opmLo)}~${fmtPct(opmHi)} 범위에서 ${opmRead ?? '움직였습니다'}.${bridge} 매출총이익률·판관비율과 함께 보면 마진 변화가 원가에서 왔는지 판관비에서 왔는지 읽을 수 있습니다.` : `영업이익률은 ${fmtPct(opmLast)} 수준입니다.`;
 	const s2: ReportBlock[] = [{ type: 'text', text: s2text }];
@@ -447,10 +455,10 @@ function buildEarningsPower(
 			// 관점 교차 — 마진 위치 vs ROE(자본효율) 위치의 갭(레버리지·자산효율 함의).
 			const cross = opmPh && roePh && Math.abs(opmPh.top - roePh.top) >= 15 ? ` 영업이익률(${topPctLabel(opmPh)})과 ROE(${topPctLabel(roePh)})의 위치 차이는 자산효율·레버리지에서 갈린다는 뜻으로, 곳간과 빚·자본배분과 함께 보십시오.` : '';
 			const lead = opmPh
-				? `${corpName}의 영업이익률(연간 ${opmPh.valFmt})은 ${peer.name} ${peer.count}사 중 ${topPctLabel(opmPh)}로, 업종 중앙값(${opmPh.median}) 대비 ${opmPh.top <= 40 ? '뚜렷이 높은' : opmPh.top <= 60 ? '중간 수준의' : '낮은'} 수익성입니다. 자기 이력만으로는 알 수 없는 *업종 내 위치*를 더한 것으로, 동종업종 분포 대비 백분위일 뿐 목표주가·투자판단이 아닙니다.${cross}`
+				? `${corpName}의 영업이익률(연간 ${opmPh.valFmt})은 ${peer.name} 업종(유효표본 ${opmPh.n}사·결손 제외) 중 ${topPctLabel(opmPh)}로, 업종 중앙값(${opmPh.median}) 대비 ${opmPh.top <= 40 ? '뚜렷이 높은' : opmPh.top <= 60 ? '중간 수준의' : '낮은'} 수익성입니다. 자기 이력만으로는 알 수 없는 *업종 내 위치*를 더한 것으로, 동종업종 분포 대비 백분위일 뿐 목표주가·투자판단이 아닙니다.${cross}`
 				: `아래는 ${peer.name} 분포 대비 위치입니다(연간 기준).`;
 			sections.push({ key: 'peerCompare', title: '동종업종 비교 -- 업종에서 어디 서 있나', sourceEngine: 'industry', blocks: [{ type: 'text', text: lead }, pc.block] });
-			if (opmPh) findings.push({ key: '업종비교', finding: `영업이익률 ${peer.name} ${peer.count}사 중 ${topPctLabel(opmPh)}${roePh ? ` · ROE ${topPctLabel(roePh)}` : ''} (중앙값 ${opmPh.median}).`, sourceEngine: 'industry' });
+			if (opmPh) findings.push({ key: '업종비교', finding: `영업이익률 ${peer.name} 업종(${opmPh.n}사) 중 ${topPctLabel(opmPh)}${roePh ? ` · ROE ${topPctLabel(roePh)}` : ''} (중앙값 ${opmPh.median}).`, sourceEngine: 'industry' });
 		}
 	}
 
@@ -540,16 +548,20 @@ function buildEarningsPower(
 			const aEq = aw.pick(tfA.statements.BS.find((r) => r.key === 'equity')?.values ?? []);
 			const aLiab = aw.pick(tfA.statements.BS.find((r) => r.key === 'liabilities')?.values ?? []);
 			const aCl = aw.pick(tfA.statements.BS.find((r) => r.key === 'currentLiabilities')?.values ?? []);
+			// 투하자본 분모는 평균잔액((기초+기말)/2) — NOPAT(flow)÷IC(stock) 규율을 CCC 와 일치(애널 지적).
+			const avgA = (s: Num[], i: number): number | null => { const c = s[i]; if (c == null || !Number.isFinite(c)) return null; const p = i > 0 ? s[i - 1] : null; return p != null && Number.isFinite(p) ? ((c as number) + (p as number)) / 2 : (c as number); };
 			const aRoic = aw.periods.map((_, i) => {
 				const oi = aOi[i];
-				const eq = aEq[i];
-				if (oi == null || eq == null || !Number.isFinite(oi) || !Number.isFinite(eq)) return null;
+				const eqAvg = avgA(aEq, i);
+				if (oi == null || !Number.isFinite(oi) || eqAvg == null) return null;
 				const ni = aNi[i];
 				const tax = aTax[i];
 				const pretax = ni != null && tax != null ? (ni as number) + (tax as number) : null;
 				const effTax = pretax != null && pretax > 0 && tax != null ? Math.min(0.4, Math.max(0, (tax as number) / pretax)) : 0.22;
 				const nopat = (oi as number) * (1 - effTax);
-				const ic = (eq as number) + (aLiab[i] != null && aCl[i] != null ? Math.max(0, (aLiab[i] as number) - (aCl[i] as number)) : 0);
+				const liabAvg = avgA(aLiab, i);
+				const clAvg = avgA(aCl, i);
+				const ic = eqAvg + (liabAvg != null && clAvg != null ? Math.max(0, liabAvg - clAvg) : 0);
 				return ic > 0 ? +((nopat / ic) * 100).toFixed(1) : null;
 			});
 			const roicL = lastNonNull(aRoic);
@@ -573,7 +585,7 @@ function buildEarningsPower(
 				blocks: [
 					{ type: 'text', text: `분기는 최신 모멘텀을, 연간은 장기 추세를 봅니다. 최근 ${aw.periods.length}년 매출은 연평균 ${fmtPctSigned(aRevCagr)} 성장했고, ROE ${fmtPct(roeAnnual)}·ROIC ${fmtPct(roicL)} 수준입니다. ROIC(투하자본이익률 = 세후영업이익 ÷ 투하자본)는 레버리지에 덜 오염된 *순수 자본효율*로, 자본조달비용(WACC)을 지속 웃돌면 자본배분이 가치를 창출한다고 봅니다(연율화는 연간 기준, 분기 단독 연율화 안 함).` },
 					annTbl,
-					{ type: 'text', text: `※ ROIC = 영업이익×(1−실효세율) ÷ (자기자본+비유동부채). 투하자본은 BS 표준계정에서 근사한 값으로, 정밀 ROIC(영업투하자본·리스 조정 등)와는 차이가 있을 수 있습니다.` }
+					{ type: 'text', text: `※ ROIC = 영업이익×(1−실효세율) ÷ 투하자본(평균잔액 기준 자기자본+비유동부채). 투하자본은 BS 표준계정에서 근사한 값으로, 정밀 ROIC(영업투하자본·리스 조정 등)와는 차이가 있을 수 있습니다.` }
 				]
 			});
 			if (roicL != null) findings.push({ key: '자본효율', finding: `ROIC ${fmtPct(roicL)} · ROE ${fmtPct(roeAnnual)} (ROIC는 레버리지 덜 오염된 자본효율).`, sourceEngine: 'analysis' });
@@ -701,35 +713,37 @@ function buildLiquidity(
 	}
 
 	// ── S2 자본 배분 (연간) — 번 현금을 어디에 쓰나(영업CF→CAPEX→FCF→배당→잔여) ──
-	if (tfA) {
-		const aCf = (k: string): Num[] => tfA.statements.CF.find((r) => r.key === k)?.values ?? [];
-		const li = (s: Num[]): { v: number; p: string } | null => { for (let i = s.length - 1; i >= 0; i--) if (s[i] != null && Number.isFinite(s[i])) return { v: s[i] as number, p: pYear(tfA.periods[i]) }; return null; };
-		const opAnn = li(aCf('cfOperating'));
-		if (opAnn) {
-			const cxAnn = aCf('capex')[tfA.periods.length - (tfA.periods.length - tfA.periods.findIndex((p) => pYear(p) === opAnn.p))] ?? null;
-			// 같은 연도 인덱스에서 capex·배당 추출
-			const yi = tfA.periods.findIndex((p) => pYear(p) === opAnn.p);
-			const cx = yi >= 0 ? (aCf('capex')[yi] ?? null) : null;
-			const dv = yi >= 0 ? (aCf('dividendsPaid')[yi] ?? null) : null;
-			const op = opAnn.v;
-			const fcfA = op - (cx != null ? (cx as number) : 0);
-			const divOut = dv != null ? Math.abs(dv as number) : null;
-			const resid = fcfA - (divOut ?? 0);
-			const allocRows = [
-				{ label: '영업활동현금흐름', value: op, display: fmtAmt1(op) },
-				{ label: '− 설비투자(CAPEX)', value: cx != null ? Math.abs(cx as number) : 0, display: cx != null ? fmtAmt1(-Math.abs(cx as number)) : '-', tone: 'neg' as const },
-				{ label: '= 잉여현금흐름(FCF)', value: Math.abs(fcfA), display: fmtAmt1(fcfA) },
-				...(divOut != null ? [{ label: '− 배당지급', value: divOut, display: fmtAmt1(-divOut), tone: 'neg' as const }] : []),
-				{ label: '= 배당 후 잔여', value: Math.abs(resid), display: fmtAmt1(resid) }
-			];
-			const allocText = `${opAnn.p}년 ${corpName}는 영업으로 ${fmtAmt1(op)}를 벌어 설비투자에 ${cx != null ? fmtAmt1(Math.abs(cx as number)) : '-'}를 쓰고 FCF ${fmtAmt1(fcfA)}를 남겼습니다${divOut != null ? `. 이 중 배당으로 ${fmtAmt1(divOut)}를 지급해 ${resid >= 0 ? `${fmtAmt1(resid)}가 남았습니다(자사주·차입상환·현금 적립으로 배분)` : `${fmtAmt1(-resid)}가 부족해 보유현금·차입으로 메웠습니다`}` : ''}. 자본배분 우선순위(투자 → 주주환원 → 적립/상환)를 한 흐름으로 본 것입니다.`;
-			sections.push({
-				key: 'capitalAllocation',
-				title: '자본 배분 -- 번 현금을 어디에 쓰나 (연간)',
-				sourceEngine: 'analysis',
-				blocks: [{ type: 'text', text: allocText }, { type: 'bars', label: `자본 배분 흐름 · ${opAnn.p} (단위: 조원)`, rows: allocRows }]
-			});
-			findings.push({ key: '자본배분', finding: `${opAnn.p} 영업CF ${fmtAmt1(op)} → CAPEX ${cx != null ? fmtAmt1(Math.abs(cx as number)) : '-'} → FCF ${fmtAmt1(fcfA)}${divOut != null ? ` → 배당 ${fmtAmt1(divOut)}` : ''}.`, sourceEngine: 'analysis' });
+	// 자본배분은 *추세*로 본다(단년 스냅샷은 노이즈, 기관 지적) — 최근 N년 영업CF→CAPEX→FCF→배당→잔여.
+	const aw5 = tfA ? annualWindow(tfA, 5) : null;
+	if (tfA && aw5) {
+		const aCfV = (k: string): Num[] => aw5.pick(tfA.statements.CF.find((r) => r.key === k)?.values ?? []);
+		const opS = aCfV('cfOperating');
+		const cxS = aCfV('capex');
+		const dvS = aCfV('dividendsPaid');
+		if (finite(opS).length >= 2) {
+			const fcfS = opS.map((v, i) => (v != null ? (v as number) - (cxS[i] != null ? (cxS[i] as number) : 0) : null));
+			const residS = fcfS.map((v, i) => (v != null ? (v as number) - (dvS[i] != null ? Math.abs(dvS[i] as number) : 0) : null));
+			const allVals = [...opS, ...fcfS].filter((v): v is number => v != null && Number.isFinite(v));
+			const { unit, scale } = scaleAmt(allVals);
+			const cell = (v: Num, neg = false): string => (v == null || !Number.isFinite(v) ? '-' : fmtScaled(neg ? -Math.abs(v as number) : (v as number), scale));
+			const yrs = aw5.periods;
+			const mkRow = (label: string, vals: Num[], neg = false) => ({ '자본 배분': label, ...Object.fromEntries(yrs.map((y, i) => [y, cell(vals[i], neg)])) });
+			const allocTbl: ReportBlock = {
+				type: 'table',
+				label: `자본 배분 추이 (단위: ${unit} · 음수=유출)`,
+				data: [mkRow('영업활동현금흐름', opS), mkRow('− 설비투자(CAPEX)', cxS, true), mkRow('= 잉여현금흐름(FCF)', fcfS), mkRow('− 배당지급', dvS, true), mkRow('= 배당 후 잔여', residS)]
+			};
+			// 누적 함의 — Σ영업CF 중 CAPEX·배당 비중(투자형 vs 환원형 성향).
+			const sum = (s: Num[]) => finite(s).reduce((a, b) => a + b, 0);
+			const sOp = sum(opS);
+			const sCx = sum(cxS.map((v) => (v != null ? Math.abs(v as number) : null)));
+			const sDv = sum(dvS.map((v) => (v != null ? Math.abs(v as number) : null)));
+			const capexPct = sOp > 0 ? (sCx / sOp) * 100 : null;
+			const divPct = sOp > 0 ? (sDv / sOp) * 100 : null;
+			const tilt = capexPct != null && divPct != null ? (capexPct > divPct * 1.5 ? '투자(CAPEX) 우선형' : divPct > capexPct ? '주주환원 우선형' : '투자·환원 병행형') : null;
+			const allocText = `${corpName}가 최근 ${yrs.length}년 번 영업현금을 어디에 쓰는지 추세로 본 것입니다(단년 스냅샷은 노이즈라 흐름으로 봅니다). 누적 영업현금흐름 ${fmtAmt1(sOp)} 중 설비투자에 ${fmtAmt1(sCx)}(${fmtPct(capexPct)}), 배당에 ${fmtAmt1(sDv)}(${fmtPct(divPct)})를 배분해${tilt ? `, 자본배분은 ${tilt}에 가깝습니다` : ''}. (투자 → 주주환원 → 적립·상환 우선순위의 흐름)`;
+			sections.push({ key: 'capitalAllocation', title: '자본 배분 -- 번 현금을 매년 어디에 쓰나 (연간 추세)', sourceEngine: 'analysis', blocks: [{ type: 'text', text: allocText }, allocTbl] });
+			findings.push({ key: '자본배분', finding: `최근 ${yrs.length}년 누적 영업CF ${fmtAmt1(sOp)} 중 CAPEX ${fmtPct(capexPct)}·배당 ${fmtPct(divPct)}${tilt ? ` (${tilt})` : ''}.`, sourceEngine: 'analysis' });
 		}
 	}
 
@@ -768,10 +782,10 @@ function buildLiquidity(
 		if (pc) {
 			const drPh = pc.phrases.find((p) => p.label === '부채비율');
 			const lead = drPh
-				? `${corpName}의 부채비율(연간 ${drPh.valFmt})은 ${peer.name} ${peer.count}사 중 안정성 ${topPctLabel(drPh)}로, 업종 중앙값(${drPh.median}) 대비 ${drPh.top <= 40 ? '재무가 견고한' : drPh.top <= 60 ? '중간 수준의' : '레버리지가 높은'} 편입니다. 절대 임계치(부채비율 200%)는 업종 무관 일반 기준이라, 자본집약 업종에서는 이 업종 분포 위치가 더 적절한 좌표입니다(목표주가·투자판단 아님).`
+				? `${corpName}의 부채비율(연간 ${drPh.valFmt})은 ${peer.name} 업종(유효표본 ${drPh.n}사·결손 제외) 중 안정성 ${topPctLabel(drPh)}로, 업종 중앙값(${drPh.median}) 대비 ${drPh.top <= 40 ? '재무가 견고한' : drPh.top <= 60 ? '중간 수준의' : '레버리지가 높은'} 편입니다. 절대 임계치(부채비율 200%)는 업종 무관 일반 기준이라, 자본집약 업종에서는 이 업종 분포 위치가 더 적절한 좌표입니다(목표주가·투자판단 아님).`
 				: `아래는 ${peer.name} 분포 대비 안정성 위치입니다(연간 기준).`;
 			sections.push({ key: 'peerSolvency', title: '동종업종 비교 -- 안정성은 업종에서 어디쯤', sourceEngine: 'industry', blocks: [{ type: 'text', text: lead }, pc.block] });
-			if (drPh) findings.push({ key: '업종안정성', finding: `부채비율 ${peer.name} ${peer.count}사 중 안정성 ${topPctLabel(drPh)} (중앙값 ${drPh.median}).`, sourceEngine: 'industry' });
+			if (drPh) findings.push({ key: '업종안정성', finding: `부채비율 ${peer.name} 업종(${drPh.n}사) 중 안정성 ${topPctLabel(drPh)} (중앙값 ${drPh.median}).`, sourceEngine: 'industry' });
 		}
 	}
 
@@ -975,8 +989,13 @@ function buildCapitalReturn(
 		else if (hasBuy || sumCancel > 0) pattern = '자사주 활동이 제한적인';
 		else pattern = '최근 자사주 매입·소각이 거의 없는';
 		const buyRead = ` 이 회사는 최근 ${ys.length}년 누적 소각 ${fmtShares(sumCancel)}, 기말 보유(금고주)는 ${treWord ?? '집계가 제한적'} — ${pattern} 모습입니다.`;
+		// 금고주 잠재희석% — 기말 금고주 ÷ 발행주식수(순이익÷EPS 근사). 재매각 시 희석 폭(기관 지적).
+		const shYear = [...ys].reverse().find((y) => { const ni = niByYear.get(y.year); return ni != null && y.eps != null && Number.isFinite(y.eps as number) && (y.eps as number) > 0; });
+		const sharesEst = shYear ? (niByYear.get(shYear.year)! * 1e12) / (shYear.eps as number) : null;
+		const dilPct = sharesEst != null && sharesEst > 0 && treLast != null && treLast >= 0 ? (treLast / sharesEst) * 100 : null;
+		const dilLine = dilPct != null && dilPct >= 0.05 ? ` 기말 금고주는 발행주식의 약 ${fmtPct(dilPct)}로, 전량 재매각 시 최대 ${fmtPct(dilPct)}만큼 희석될 수 있습니다(발행주식수는 순이익÷EPS로 근사).` : '';
 		const buyBlocks: ReportBlock[] = [
-			{ type: 'text', text: `자사주 매입이 곧 주주환원은 아닙니다. 매입 후 *소각*하면 주식수가 영구히 줄어 주당 가치가 오르지만, *기말 보유(금고주)*로 쌓아 두면 나중에 다시 팔려 희석될 수 있습니다 — 둘을 구분해 봐야 합니다.${buyRead}` },
+			{ type: 'text', text: `자사주 매입이 곧 주주환원은 아닙니다. 매입 후 *소각*하면 주식수가 영구히 줄어 주당 가치가 오르지만, *기말 보유(금고주)*로 쌓아 두면 나중에 다시 팔려 희석될 수 있습니다 — 둘을 구분해 봐야 합니다.${buyRead}${dilLine}` },
 			buyTbl
 		];
 		if (suppressed)
@@ -1087,6 +1106,9 @@ function buildMarket(
 			{ label: '일평균 거래대금', value: avgTv != null ? fmtAmt1(avgTv / 1e12) : '-' }
 		]
 	});
+	// 이례적 수익률 선제 방어 — 분할·기준일 오정렬 의심 가드(데이터 신뢰 트리거).
+	if (ps.ret1y != null && (ps.ret1y > 1.5 || ps.ret1y < -0.6))
+		s1blocks.push({ type: 'text', text: `※ 1년 수익률 ${fmtPctSigned((ps.ret1y as number) * 100)}는 이례적으로 큽니다 — 액면분할·기준일 정렬·데이터 점검이 필요할 수 있습니다(분할 조정은 원천 데이터 책임). 절대 수익률보다 추세·변동성으로 읽으십시오.` });
 	sections.push({ key: 'priceTrack', title: '주가 궤적 -- 시장은 어떻게 움직였나', sourceEngine: 'quant', blocks: s1blocks, emph: true });
 	findings.push({ key: '주가', finding: `현재가 ${won(ps.last)} · 1년 ${ps.ret1y != null ? fmtPctSigned(ps.ret1y * 100) : '-'} · 52주 ${won(ps.lo)}~${won(ps.hi)}.`, sourceEngine: 'quant' });
 
