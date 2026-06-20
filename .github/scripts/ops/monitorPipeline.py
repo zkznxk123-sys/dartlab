@@ -54,6 +54,10 @@ STALE_AFTER_HOURS: dict[str, float] = {
     # 월 cron 드랍 시 화 05:00 KST 감사에서 age ~55h>42h → stale 감지+자동 트리거. 월 05:00 정상치(~31h)는 미탐.
     "Gov Price Sync (Bulk)": 42,
     "Gov Index Sync (Bulk)": 42,
+    # 검색 인덱스 = 매일 04:00 KST 증분(+ source sync workflow_run). 정상 최대 간격 ~24h.
+    # 30h = +6h 여유. cron 드랍(성공기록만 남고 며칠 안 돎)을 staleness 로 감지 — 실패(RED)는
+    # MONITORED_WORKFLOWS 가 이미 잡지만, schedule 드랍은 이 임계 없이는 미탐(2026-06 하루 RED 교훈).
+    "Search Index Build": 30,
 }
 
 # 실패 원인 분류 시그니처 (gh run view 출력 = 잡 목록 + ANNOTATIONS, 소문자 매칭).
