@@ -41,8 +41,8 @@ export const PERSPECTIVES: PerspectiveMeta[] = [
 		key: 'ownership',
 		label: '누구의 회사',
 		question: '주인 · 인력 · 감사의 질',
-		focusQuestions: ['소유 구조', '이사회·감사'],
-		built: false
+		focusQuestions: ['누가 소유했나', '누가 일하고 받나', '회계는 믿을 만한가'],
+		built: true
 	}
 ];
 

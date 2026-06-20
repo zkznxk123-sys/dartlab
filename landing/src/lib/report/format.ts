@@ -69,6 +69,22 @@ export function fmtWon(v: Num): string {
 	return `${Math.round(n).toLocaleString('en-US')}원`;
 }
 
+/** 보수·급여(원) — 억/만원/원. (fmtWon 은 DPS 등 소액에 원 유지가 필요해 별도.) */
+export function fmtPay(v: Num): string {
+	if (v == null || !Number.isFinite(v)) return '-';
+	const n = v as number;
+	const a = Math.abs(n);
+	if (a >= 1e8) return `${(n / 1e8).toFixed(1)}억`;
+	if (a >= 1e4) return `${Math.round(n / 1e4).toLocaleString('en-US')}만원`;
+	return `${Math.round(n).toLocaleString('en-US')}원`;
+}
+
+/** 정수 카운트 + 접미사. */
+export function fmtNum(v: Num, suffix = ''): string {
+	if (v == null || !Number.isFinite(v)) return '-';
+	return `${Math.round(v as number).toLocaleString('en-US')}${suffix}`;
+}
+
 /** lo~hi 범위를 단일 단위로 일관 표기(조 축의 억·조 혼용 방지). */
 export function fmtRange(lo: Num, hi: Num, unit: '%' | '배' | '조'): string {
 	if (lo == null || hi == null || !Number.isFinite(lo) || !Number.isFinite(hi)) return '-';

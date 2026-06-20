@@ -11,9 +11,21 @@ import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import type { ReportBlock, ReportModel, ReportResult, ReportSection } from './model';
 import { lastNonNull } from './model';
 import { findPerspective, type PerspectiveMeta } from './perspectives';
-import type { ShareholderReturnYear, CapitalChangesBundle, Candle } from '@dartlab/ui-contracts';
+import type {
+	ShareholderReturnYear,
+	CapitalChangesBundle,
+	Candle,
+	ShareholdersView,
+	OwnershipYear,
+	WorkforceYear,
+	ExecBoardYear,
+	TopExecPay,
+	AuditYear,
+	AuditFeeYear,
+	InvestmentsBundle
+} from '@dartlab/ui-contracts';
 import { KR_INDEX_PRESETS } from '@dartlab/ui-contracts';
-import { pYear, fmtPct, fmtPctSigned, fmtMult, fmtAmt1, scaleAmt, fmtScaled, fmtRange, fmtShares, fmtWon } from './format';
+import { pYear, fmtPct, fmtPctSigned, fmtMult, fmtAmt1, scaleAmt, fmtScaled, fmtRange, fmtShares, fmtWon, fmtPay, fmtNum } from './format';
 import { calcBeta, yearEndCloses, priceSummary } from './market';
 
 // ── 공통 유틸 ──────────────────────────────────────────────
@@ -663,6 +675,176 @@ function buildMarket(
 	return { sections, findings, closing, kpis, conclusion };
 }
 
+// ── 관점 5: 누구의 회사 (Ownership, People & Governance) ──
+interface OwnershipData {
+	shareholders: ShareholdersView | null;
+	ownership: OwnershipYear[] | null;
+	workforce: WorkforceYear[] | null;
+	execBoard: ExecBoardYear[] | null;
+	topExecPay: TopExecPay | null;
+	auditTrail: AuditYear[] | null;
+	auditFees: AuditFeeYear[] | null;
+	investments: InvestmentsBundle | null;
+}
+
+function buildOwnership(
+	d: OwnershipData,
+	ctx: { corpName: string }
+): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } | null {
+	const { corpName } = ctx;
+	const sections: ReportSection[] = [];
+	const findings: ReportModel['keyFindings'] = [];
+
+	// S1 소유 구조
+	const ow = d.ownership?.slice(-6) ?? [];
+	let majorL: number | null = null;
+	let minorL: number | null = null;
+	if (ow.length) {
+		const owTbl = reportTable(
+			ow.map((y) => y.year),
+			[
+				{ label: '최대주주측 지분', cells: ow.map((y) => fmtPct(y.majorPct)) },
+				{ label: '소액주주 지분', cells: ow.map((y) => fmtPct(y.minorPct)) },
+				{ label: '소액주주 수', cells: ow.map((y) => fmtNum(y.minorCount, '명')) }
+			],
+			'소유 지표',
+			'지분 분포 추이'
+		);
+		majorL = lastNonNull(ow.map((y) => y.majorPct)) as number | null;
+		minorL = lastNonNull(ow.map((y) => y.minorPct)) as number | null;
+		const s1: ReportBlock[] = [
+			{ type: 'text', text: `${corpName}의 소유 구조입니다. 최대주주측 지분이 높으면 경영권은 안정적이나 소액주주 영향력은 작고, 소액주주 지분·주주 수가 많으면 그 반대입니다.` }
+		];
+		if (owTbl) s1.push(owTbl);
+		// control-shift 정직 플래그
+		const first = ow.find((y) => y.majorPct != null)?.majorPct as number | undefined;
+		const lastM = majorL;
+		if (first != null && lastM != null && Math.abs(lastM - first) >= 5)
+			s1.push({ type: 'text', text: `※ 최대주주측 지분이 ${fmtPct(first)} → ${fmtPct(lastM)}로 ${Math.abs(lastM - first).toFixed(1)}%p 변동했습니다 — 지배구조 변화 신호로 함께 보십시오.` });
+		// 최대주주 개별(현재) — 방어 가드: person 분류 행은 실명 미노출(익명집계로만). 개인정보 레드라인.
+		if (d.shareholders?.named?.length) {
+			const top = d.shareholders.named.filter((r) => r.kind !== 'person').slice(0, 6);
+			if (top.length)
+				s1.push({
+					type: 'table',
+					label: `주요 주주 (${d.shareholders.year} 기준)`,
+					data: top.map((r) => ({ 주주: r.name, 관계: r.relate || '-', 지분율: fmtPct(r.ratio) }))
+				});
+			if (d.shareholders.person) s1.push({ type: 'text', text: `특수관계 개인 ${d.shareholders.person.count}인은 개인정보 보호로 익명 집계(합산 지분 ${fmtPct(d.shareholders.person.ratio)})했습니다.` });
+		}
+		sections.push({ key: 'ownershipStruct', title: '소유 구조 -- 누가 이 회사를 가졌나', sourceEngine: 'analysis', blocks: s1, emph: true });
+		findings.push({ key: '소유', finding: `최대주주측 ${fmtPct(majorL)} · 소액주주 ${fmtPct(minorL)}.`, sourceEngine: 'analysis' });
+	}
+
+	// S2 인력
+	const wf = d.workforce?.slice(-6) ?? [];
+	if (wf.length) {
+		const wfTbl = reportTable(
+			wf.map((y) => y.year),
+			[
+				{ label: '총원', cells: wf.map((y) => fmtNum(y.total, '명')) },
+				{ label: '정규직', cells: wf.map((y) => fmtNum(y.regular, '명')) },
+				{ label: '평균 급여', cells: wf.map((y) => fmtPay(y.avgSalary)) },
+				{ label: '평균 근속', cells: wf.map((y) => (y.tenure != null ? `${(y.tenure as number).toFixed(1)}년` : '-')) }
+			],
+			'인력 지표',
+			'인력·보상 추이'
+		);
+		const last = wf[wf.length - 1];
+		if (wfTbl)
+			sections.push({
+				key: 'workforce',
+				title: '인력 -- 누가 일하고 얼마를 받나',
+				sourceEngine: 'analysis',
+				blocks: [{ type: 'text', text: `직원 규모와 보상입니다. 평균 급여는 급여총액을 인원으로 나눈 값으로 직군 구성에 따라 회사 간 단순 비교는 주의가 필요합니다.` }, wfTbl]
+			});
+		if (wfTbl) findings.push({ key: '인력', finding: `총원 ${fmtNum(last.total, '명')} · 평균급여 ${fmtPay(last.avgSalary)} · 근속 ${last.tenure != null ? (last.tenure as number).toFixed(1) + '년' : '-'}.`, sourceEngine: 'analysis' });
+	}
+
+	// S3 이사회·보수
+	const eb = d.execBoard?.slice(-6) ?? [];
+	if (eb.length) {
+		const ebTbl = reportTable(
+			eb.map((y) => y.year),
+			[
+				{ label: '이사회 인원', cells: eb.map((y) => fmtNum(y.directors, '명')) },
+				{ label: '사외이사', cells: eb.map((y) => fmtNum(y.outsideDirectors, '명')) },
+				{ label: '사외이사 비율', cells: eb.map((y) => (y.directors != null && (y.directors as number) > 0 && y.outsideDirectors != null ? fmtPct(((y.outsideDirectors as number) / (y.directors as number)) * 100) : '-')) },
+				{ label: '이사·감사 1인 평균보수', cells: eb.map((y) => fmtPay(y.execAvgPay)) }
+			],
+			'이사회 지표',
+			'이사회 구성·보수 추이'
+		);
+		const s3: ReportBlock[] = [{ type: 'text', text: `이사회 구성과 보수입니다. 사외이사 비율이 높을수록 경영진 견제 장치가 두텁다고 봅니다(과반이 권고 기준).` }];
+		if (ebTbl) s3.push(ebTbl);
+		// 상위 임원 보수(현재)
+		if (d.topExecPay?.rows?.length) {
+			const rows = d.topExecPay.rows.slice(0, 6);
+			s3.push({ type: 'table', label: `상위 임원 보수 (${d.topExecPay.year} 기준)`, data: rows.map((r) => ({ 임원: r.name, 직위: r.title || '-', 보수: fmtPay(r.pay) })) });
+			if (d.topExecPay.avgPay != null) s3.push({ type: 'text', text: `같은 해 이사·감사 1인 평균보수는 ${fmtPay(d.topExecPay.avgPay)}입니다 — 상위 임원과의 격차를 함께 보십시오.` });
+		}
+		if (ebTbl) {
+			sections.push({ key: 'board', title: '이사회·보수 -- 누가 견제하고 얼마를 받나', sourceEngine: 'analysis', blocks: s3 });
+			const lastEb = eb[eb.length - 1];
+			findings.push({ key: '이사회', finding: `이사회 ${fmtNum(lastEb.directors, '명')} · 사외이사 ${fmtNum(lastEb.outsideDirectors, '명')}.`, sourceEngine: 'analysis' });
+		}
+	}
+
+	// S4 감사·외부출자
+	const at = d.auditTrail?.slice(-6) ?? [];
+	const af = d.auditFees?.slice(-1)?.[0] ?? null;
+	if (at.length || af) {
+		const s4: ReportBlock[] = [];
+		if (at.length) {
+			s4.push({ type: 'text', text: `감사 이력입니다. 감사의견이 '적정'이 아니거나 자주 바뀌면 회계 신뢰성을 따져봐야 합니다.` });
+			s4.push({ type: 'table', label: '감사 의견 이력', data: at.map((y) => ({ 사업연도: String(y.year), 감사인: y.auditor || '-', 감사의견: y.opinion || '-' })) });
+			const nonClean = at.filter((y) => y.opinion && y.opinion !== '적정');
+			if (nonClean.length) s4.push({ type: 'text', text: `※ 적정이 아닌 감사의견(${nonClean.map((y) => `${y.year} ${y.opinion}`).join(', ')})이 있습니다 — 회계 신뢰성을 별도로 확인하십시오.` });
+			// 감사인 변경은 중립 사실로만 마킹(한국 주기적 지정감사=의무 로테이션이라 경보 아님).
+			const auditors = [...new Set(at.map((y) => y.auditor).filter(Boolean))];
+			if (auditors.length > 1) s4.push({ type: 'text', text: `감사인 변경: ${auditors.join(' → ')}. 한국은 주기적 지정감사 제도로 감사인 교체가 의무인 경우가 많아, 변경 자체가 부정 신호는 아닙니다.` });
+		}
+		const metrics: { label: string; value: string }[] = [];
+		if (af) {
+			metrics.push({ label: `감사보수 (${af.year})`, value: fmtPay(af.auditFee) });
+			if (af.nonAuditFee != null) metrics.push({ label: '비감사보수', value: fmtPay(af.nonAuditFee) });
+		}
+		if (d.investments?.latest) {
+			metrics.push({ label: `타법인 출자사 (${d.investments.latest.year})`, value: fmtNum(d.investments.latest.rows.length, '개사') });
+			const book = d.investments.latest.rows.reduce((s, r) => s + ((r.bookValue as number) || 0), 0);
+			if (book > 0) metrics.push({ label: '출자 장부가 합계', value: fmtPay(book) });
+		}
+		if (metrics.length) s4.push({ type: 'metrics', metrics });
+		if (s4.length) {
+			sections.push({ key: 'audit', title: '감사·외부출자 -- 회계는 믿을 만한가', sourceEngine: 'analysis', blocks: s4 });
+			const lastAt = at[at.length - 1];
+			if (lastAt) findings.push({ key: '감사', finding: `${lastAt.year} 감사의견 ${lastAt.opinion || '-'} (${lastAt.auditor || '-'}).`, sourceEngine: 'analysis' });
+		}
+	}
+
+	if (!sections.length) return null;
+
+	const lastAt = at[at.length - 1];
+	const wfTotalL = lastNonNull(wf.map((y) => y.total));
+	const wfSalaryL = lastNonNull(wf.map((y) => y.avgSalary));
+	const odL = lastNonNull(eb.map((y) => y.outsideDirectors));
+	const totalStr = wf.length ? fmtNum(wfTotalL, '명') : '-';
+	const odStr = eb.length ? fmtNum(odL, '명') : '-';
+	const kpis: ReportModel['headlineKpis'] = [
+		{ label: '최대주주측 지분', value: fmtPct(majorL) },
+		{ label: '소액주주 지분', value: fmtPct(minorL) },
+		{ label: '총원', value: totalStr },
+		{ label: '평균 급여', value: wf.length ? fmtPay(wfSalaryL) : '-' },
+		{ label: '사외이사', value: odStr },
+		{ label: '감사의견', value: lastAt?.opinion || '-' }
+	];
+	const conclusion = `${corpName} — 최대주주측 지분 ${fmtPct(majorL)}, 총원 ${totalStr}${lastAt ? `, ${lastAt.year} 감사의견 ${lastAt.opinion || '-'}` : ''}.`;
+	const closing: ReportModel['closing'] = [
+		{ label: '재무', engine: 'analysis', line: `최대주주측 ${fmtPct(majorL)} · 총원 ${totalStr} · 사외이사 ${odStr}${lastAt ? ` · 감사의견 ${lastAt.opinion || '-'}` : ''}.` }
+	];
+	return { sections, findings, closing, kpis, conclusion };
+}
+
 // ── 미구현 관점 — 정직 '준비 중' ───────────────────────────
 function pendingModel(
 	code: string,
@@ -745,6 +927,18 @@ export async function buildReport(
 			rt.report.shareholderReturn(code).catch(() => null)
 		]);
 		built = buildMarket(candles, marketCandles, sr, { corpName });
+	} else if (persp.key === 'ownership') {
+		const [shareholders, ownership, workforce, execBoard, topExecPay, auditTrail, auditFees, investments] = await Promise.all([
+			rt.report.shareholders(code).catch(() => null),
+			rt.report.ownership(code).catch(() => null),
+			rt.report.workforce(code).catch(() => null),
+			rt.report.execBoard(code).catch(() => null),
+			rt.report.topExecPay(code).catch(() => null),
+			rt.report.auditTrail(code).catch(() => null),
+			rt.report.auditFees(code).catch(() => null),
+			rt.report.investments(code).catch(() => null)
+		]);
+		built = buildOwnership({ shareholders, ownership, workforce, execBoard, topExecPay, auditTrail, auditFees, investments }, { corpName });
 	} else {
 		built = buildEarningsPower(tf, ctx);
 	}
