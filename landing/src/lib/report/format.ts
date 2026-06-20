@@ -48,6 +48,27 @@ export function fmtScaled(v: Num, scale: number): string {
 	return ((v as number) * scale).toFixed(1);
 }
 
+/** 주식수 — 억주/만주/주 자동. */
+export function fmtShares(v: Num): string {
+	if (v == null || !Number.isFinite(v)) return '-';
+	const n = v as number;
+	const a = Math.abs(n);
+	if (a === 0) return '0';
+	if (a >= 1e8) return `${(n / 1e8).toFixed(2)}억주`;
+	if (a >= 1e4) return `${Math.round(n / 1e4).toLocaleString('en-US')}만주`;
+	return `${Math.round(n).toLocaleString('en-US')}주`;
+}
+
+/** 원 금액 — 큰 값은 조/억, 작은 값(주당 등)은 원. */
+export function fmtWon(v: Num): string {
+	if (v == null || !Number.isFinite(v)) return '-';
+	const n = v as number;
+	const a = Math.abs(n);
+	if (a >= 1e12) return `${(n / 1e12).toFixed(1)}조`;
+	if (a >= 1e8) return `${Math.round(n / 1e8).toLocaleString('en-US')}억`;
+	return `${Math.round(n).toLocaleString('en-US')}원`;
+}
+
 /** lo~hi 범위를 단일 단위로 일관 표기(조 축의 억·조 혼용 방지). */
 export function fmtRange(lo: Num, hi: Num, unit: '%' | '배' | '조'): string {
 	if (lo == null || hi == null || !Number.isFinite(lo) || !Number.isFinite(hi)) return '-';

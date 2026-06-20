@@ -11,7 +11,8 @@ import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import type { ReportBlock, ReportModel, ReportResult, ReportSection } from './model';
 import { lastNonNull } from './model';
 import { findPerspective, type PerspectiveMeta } from './perspectives';
-import { pYear, fmtPct, fmtPctSigned, fmtMult, fmtAmt1, scaleAmt, fmtScaled, fmtRange } from './format';
+import type { ShareholderReturnYear, CapitalChangesBundle } from '@dartlab/ui-contracts';
+import { pYear, fmtPct, fmtPctSigned, fmtMult, fmtAmt1, scaleAmt, fmtScaled, fmtRange, fmtShares, fmtWon } from './format';
 
 // ── 공통 유틸 ──────────────────────────────────────────────
 function annualView(fin: TerminalFinanceBundle): TerminalFinance | null {
@@ -410,6 +411,140 @@ function buildLiquidity(
 	return { sections, findings, closing, kpis, conclusion };
 }
 
+// 연도 키 보고 데이터용 범용 표 — 행마다 이미 포맷된 문자열 셀.
+function reportTable(years: string[], rows: { label: string; cells: string[] }[], labelHeader: string, caption: string): ReportBlock | null {
+	const present = rows.filter((r) => r.cells.some((c) => c && c !== '-'));
+	if (!present.length) return null;
+	const data = present.map((r) => {
+		const rec: Record<string, string> = { [labelHeader]: r.label };
+		years.forEach((y, i) => {
+			rec[y] = r.cells[i] ?? '-';
+		});
+		return rec;
+	});
+	return { type: 'table', label: caption, data };
+}
+
+// ── 관점 3: 주주와의 약속 (Capital Return & Dilution) ──────
+function buildCapitalReturn(
+	sr: ShareholderReturnYear[] | null,
+	cc: CapitalChangesBundle | null,
+	ctx: { corpName: string }
+): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } | null {
+	const { corpName } = ctx;
+	if (!sr || !sr.length) return null;
+	const ys = sr.slice(-6);
+	const yc = ys.map((y) => y.year);
+	const latest = ys[ys.length - 1];
+	// 배당은 주총 확정이 늦어 최신 연도가 비는 경우가 많다 → 배당 데이터가 있는 최근 연도 기준.
+	const divYear = [...ys].reverse().find((y) => y.dps != null && Number.isFinite(y.dps as number)) ?? null;
+	const divAsOf = divYear && divYear.year !== latest.year ? ` (${divYear.year} 기준)` : '';
+
+	const sections: ReportSection[] = [];
+	const findings: ReportModel['keyFindings'] = [];
+
+	// S1 배당 정책
+	const divTbl = reportTable(
+		yc,
+		[
+			{ label: '주당배당금(DPS)', cells: ys.map((y) => fmtWon(y.dps)) },
+			{ label: '배당성향', cells: ys.map((y) => fmtPct(y.payoutPct)) },
+			{ label: '배당수익률', cells: ys.map((y) => fmtPct(y.yieldPct)) },
+			{ label: '총배당금', cells: ys.map((y) => fmtWon(y.totalDividend)) }
+		],
+		'배당 지표',
+		'배당 정책'
+	);
+	if (divTbl) {
+		sections.push({
+			key: 'dividend',
+			title: '배당 정책 -- 주주에게 얼마를 돌려주나',
+			sourceEngine: 'analysis',
+			blocks: [
+				{ type: 'text', text: `${corpName}의 배당입니다. 배당성향은 순이익 중 배당으로 나간 비율, 배당수익률은 주가 대비 배당입니다.${divYear ? ` 가장 최근 확정 배당은 주당 ${fmtWon(divYear.dps)}, 배당성향 ${fmtPct(divYear.payoutPct)}${divAsOf} 입니다.` : ''} 배당성향은 순이익이 급감한 해(분모 효과)나 특별배당이 있던 해에 일시적으로 치솟을 수 있어, 한 해 값보다 추세로 보는 것이 좋습니다.${divAsOf ? ' 최신 회계연도 배당은 주주총회 확정 전이라 표에서 비어 있습니다.' : ''}` },
+				divTbl
+			],
+			emph: true
+		});
+		if (divYear) findings.push({ key: '배당', finding: `DPS ${fmtWon(divYear.dps)} · 배당성향 ${fmtPct(divYear.payoutPct)} · 배당수익률 ${fmtPct(divYear.yieldPct)}${divAsOf}.`, sourceEngine: 'analysis' });
+	}
+
+	// S2 자사주 행동 — ★소각(영구) vs 기말 보유(금고주) 구분.
+	// 자사주 수치는 공시상 양수 카운트(finTabs 계약) — 정정공시 합산으로 음수가 나오면 신뢰불가 → 보류.
+	let suppressed = false;
+	const cnt = (v: Num): string => {
+		if (v != null && Number.isFinite(v) && (v as number) < 0) {
+			suppressed = true;
+			return '-';
+		}
+		return fmtShares(v);
+	};
+	const buyTbl = reportTable(
+		yc,
+		[
+			{ label: '자사주 매입', cells: ys.map((y) => cnt(y.buybackQty)) },
+			{ label: '자사주 처분', cells: ys.map((y) => cnt(y.disposalQty)) },
+			{ label: '자사주 소각', cells: ys.map((y) => cnt(y.buybackCancel)) },
+			{ label: '기말 보유(금고주)', cells: ys.map((y) => cnt(y.treasuryEnd)) }
+		],
+		'자사주(보통주)',
+		'자사주 매입·소각·보유'
+	);
+	if (buyTbl) {
+		const buyBlocks: ReportBlock[] = [
+			{ type: 'text', text: `자사주 매입이 곧 주주환원은 아닙니다. 매입 후 *소각*하면 주식수가 영구히 줄어 주당 가치가 오르지만, *기말 보유(금고주)*로 쌓아 두면 나중에 다시 팔려 희석될 수 있습니다 — 둘을 구분해 봐야 합니다.` },
+			buyTbl
+		];
+		if (suppressed)
+			buyBlocks.push({ type: 'text', text: `※ 자사주 수치는 공시상 양수(주식 수)여야 하나, 정정공시 합산 등으로 순변동이 음수가 된 칸은 신뢰할 수 없어 표면화를 보류(−)했습니다.` });
+		sections.push({ key: 'buyback', title: '자사주 행동 -- 사서 태우나, 쌓아 두나', sourceEngine: 'analysis', blocks: buyBlocks });
+		findings.push({ key: '자사주', finding: `최근 소각 ${cnt(latest.buybackCancel)} · 기말 보유 ${cnt(latest.treasuryEnd)}.`, sourceEngine: 'analysis' });
+	}
+
+	// S3 자본 변동·희석
+	if (cc && cc.years.length) {
+		const cy = cc.years.slice(-6);
+		const cyc = cy.map((y) => String(y.year));
+		const dilTbl = reportTable(
+			cyc,
+			[
+				{ label: '유상증자', cells: cy.map((y) => fmtShares(y.paidIn)) },
+				{ label: '전환권 행사', cells: cy.map((y) => fmtShares(y.conversion)) },
+				{ label: '감자·소각', cells: cy.map((y) => fmtShares(y.reduction)) }
+			],
+			'자본 변동(주)',
+			'발행주식 변동 (희석 ↔ 환원)'
+		);
+		if (dilTbl)
+			sections.push({
+				key: 'dilution',
+				title: '자본 변동·희석 -- 주식 수는 늘었나 줄었나',
+				sourceEngine: 'analysis',
+				blocks: [
+					{ type: 'text', text: `유상증자·전환권 행사는 주식 수를 늘려(희석), 감자·소각은 줄입니다(환원). 아래는 연도별 발행주식 변동입니다(주식 수 기준).` },
+					dilTbl
+				]
+			});
+		if (dilTbl) findings.push({ key: '희석', finding: '발행주식 변동(증자/전환/감자) 시계열 제공.', sourceEngine: 'analysis' });
+	}
+
+	const kpis: ReportModel['headlineKpis'] = [
+		{ label: divYear ? `주당배당금${divAsOf}` : '주당배당금', value: fmtWon(divYear?.dps ?? null) },
+		{ label: '배당성향', value: fmtPct(divYear?.payoutPct ?? null) },
+		{ label: '배당수익률', value: fmtPct(divYear?.yieldPct ?? null) },
+		{ label: '총배당금', value: fmtWon(divYear?.totalDividend ?? null) },
+		{ label: `최근 소각 (${latest.year})`, value: cnt(latest.buybackCancel) },
+		{ label: `기말 자사주 (${latest.year})`, value: cnt(latest.treasuryEnd) }
+	];
+	const conclusion = divYear
+		? `${corpName} — 주당배당금 ${fmtWon(divYear.dps)}, 배당성향 ${fmtPct(divYear.payoutPct)}, 배당수익률 ${fmtPct(divYear.yieldPct)}${divAsOf}.`
+		: `${corpName} — 최근 확정 배당 이력이 없습니다(무배당 또는 미확정). 자사주 정책 중심으로 정리했습니다.`;
+	const closing: ReportModel['closing'] = [
+		{ label: '재무', engine: 'analysis', line: divYear ? `배당성향 ${fmtPct(divYear.payoutPct)} · DPS ${fmtWon(divYear.dps)}${divAsOf} · 최근 자사주 소각 ${fmtShares(latest.buybackCancel)}.` : `배당 없음 · 최근 자사주 소각 ${fmtShares(latest.buybackCancel)}.` }
+	];
+	return { sections, findings, closing, kpis, conclusion };
+}
+
 // ── 미구현 관점 — 정직 '준비 중' ───────────────────────────
 function pendingModel(
 	code: string,
@@ -478,12 +613,18 @@ export async function buildReport(
 	if (persp.key === 'liquidity') {
 		const debt = await rt.report.debtProfile(code).catch(() => null);
 		built = buildLiquidity(tf, ctx, debt);
+	} else if (persp.key === 'capitalReturn') {
+		const [sr, cc] = await Promise.all([
+			rt.report.shareholderReturn(code).catch(() => null),
+			rt.report.capitalChanges(code).catch(() => null)
+		]);
+		built = buildCapitalReturn(sr, cc, { corpName });
 	} else {
 		built = buildEarningsPower(tf, ctx);
 	}
+	if (!built || !built.sections.length)
+		return { skipped: true, stockCode: code, reason: '이 관점에 채울 데이터가 부족합니다(예: 무배당 기업).' };
 	const blockCount = built.sections.reduce((acc, s) => acc + s.blocks.length, 0);
-	if (!built.sections.length)
-		return { skipped: true, stockCode: code, reason: '이 관점에 채울 데이터가 부족합니다.' };
 
 	return {
 		stockCode: code,

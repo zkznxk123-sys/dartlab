@@ -27,8 +27,8 @@ export const PERSPECTIVES: PerspectiveMeta[] = [
 		key: 'capitalReturn',
 		label: '주주환원',
 		question: '무엇을 돌려주고 얼마나 희석하나',
-		focusQuestions: ['배당·자사주 정책', '주식 희석 이력'],
-		built: false
+		focusQuestions: ['배당은 얼마나', '자사주는 태우나 쌓나', '주식 희석 이력'],
+		built: true
 	},
 	{
 		key: 'market',
