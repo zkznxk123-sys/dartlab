@@ -11,8 +11,10 @@ import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import type { ReportBlock, ReportModel, ReportResult, ReportSection } from './model';
 import { lastNonNull } from './model';
 import { findPerspective, type PerspectiveMeta } from './perspectives';
-import type { ShareholderReturnYear, CapitalChangesBundle } from '@dartlab/ui-contracts';
+import type { ShareholderReturnYear, CapitalChangesBundle, Candle } from '@dartlab/ui-contracts';
+import { KR_INDEX_PRESETS } from '@dartlab/ui-contracts';
 import { pYear, fmtPct, fmtPctSigned, fmtMult, fmtAmt1, scaleAmt, fmtScaled, fmtRange, fmtShares, fmtWon } from './format';
+import { calcBeta, yearEndCloses, priceSummary } from './market';
 
 // ── 공통 유틸 ──────────────────────────────────────────────
 function annualView(fin: TerminalFinanceBundle): TerminalFinance | null {
@@ -545,6 +547,122 @@ function buildCapitalReturn(
 	return { sections, findings, closing, kpis, conclusion };
 }
 
+// ── 관점 4: 시장의 평가 (Market & Valuation Context) ──────
+// NEVER-CLAIM 위험 최대 — 목표주가·매수/매도·적정주가 환산 절대 금지. 측정값·맥락만.
+function buildMarket(
+	candles: Candle[] | null,
+	marketCandles: Candle[] | null,
+	sr: ShareholderReturnYear[] | null,
+	ctx: { corpName: string }
+): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } | null {
+	const { corpName } = ctx;
+	if (!candles || !candles.length) return null;
+	const ps = priceSummary(candles);
+	if (!ps) return null;
+	const beta = marketCandles ? calcBeta(candles, marketCandles) : null;
+
+	const sections: ReportSection[] = [];
+	const findings: ReportModel['keyFindings'] = [];
+
+	// S1 주가 궤적
+	const won = (v: number) => `${Math.round(v).toLocaleString('en-US')}원`;
+	sections.push({
+		key: 'priceTrack',
+		title: '주가 궤적 -- 시장은 어떻게 움직였나',
+		sourceEngine: 'quant',
+		blocks: [
+			{ type: 'text', text: `${corpName}의 최근 주가 흐름입니다. 아래는 가격 *사실*이며 매수·매도 의견이 아닙니다.` },
+			{
+				type: 'metrics',
+				metrics: [
+					{ label: '현재가', value: won(ps.last) },
+					{ label: '52주 최고', value: won(ps.hi) },
+					{ label: '52주 최저', value: won(ps.lo) },
+					{ label: '1년 수익률', value: ps.ret1y != null ? fmtPctSigned(ps.ret1y * 100) : '-' },
+					{ label: '최근 거래대금', value: ps.tv != null ? fmtAmt1(ps.tv / 1e12) : '-' }
+				]
+			}
+		],
+		emph: true
+	});
+	findings.push({ key: '주가', finding: `현재가 ${won(ps.last)} · 1년 ${ps.ret1y != null ? fmtPctSigned(ps.ret1y * 100) : '-'} · 52주 ${won(ps.lo)}~${won(ps.hi)}.`, sourceEngine: 'quant' });
+
+	// S2 시장 동행성 (베타) — 코스피 대비 명시
+	if (beta) {
+		const lowR2 = beta.r2 < 0.2;
+		const betaText = `베타는 시장(코스피)이 1% 움직일 때 이 종목이 평균 몇 % 움직였는지를 회귀로 추정한 값입니다. 1보다 크면 시장보다 더 크게, 작으면 덜 움직였다는 *과거 사실*이며 등락 방향을 예측하지 않습니다. (회귀 윈도 ${beta.days}거래일·약 2년 — 위 1년 수익률과 측정 기간이 다릅니다. R² ${beta.r2.toFixed(2)}${lowR2 ? ' — 설명력이 낮아 참고용' : ''})`;
+		sections.push({
+			key: 'beta',
+			title: '시장 동행성 -- 시장과 얼마나 함께 움직이나',
+			sourceEngine: 'quant',
+			blocks: [
+				{ type: 'text', text: betaText },
+				{
+					type: 'metrics',
+					metrics: [
+						{ label: '베타 (코스피 대비)', value: beta.beta.toFixed(2) },
+						{ label: '설명력 (R²)', value: beta.r2.toFixed(2) },
+						{ label: '관측 거래일', value: `${beta.days}일` }
+					]
+				}
+			]
+		});
+		findings.push({ key: '위험', finding: `베타 ${beta.beta.toFixed(2)}(코스피 대비) · 설명력 R² ${beta.r2.toFixed(2)} · 관측 ${beta.days}일.`, sourceEngine: 'quant' });
+	}
+
+	// S3 밸류 맥락 — PER 자기역사(연말가/EPS). 적정주가 환산 금지.
+	if (sr && sr.length) {
+		const yec = yearEndCloses(candles);
+		const ys = sr.slice(-6);
+		const perCells = ys.map((y) => {
+			const px = yec.get(y.year);
+			if (px == null || y.eps == null || !Number.isFinite(y.eps as number) || (y.eps as number) <= 0) return '-';
+			return fmtMult(px / (y.eps as number));
+		});
+		const yieldCells = ys.map((y) => fmtPct(y.yieldPct));
+		const perTbl = reportTable(
+			ys.map((y) => y.year),
+			[
+				{ label: 'PER (연말가÷EPS)', cells: perCells },
+				{ label: '배당수익률', cells: yieldCells }
+			],
+			'밸류 지표',
+			'밸류에이션 맥락 (자기역사)'
+		);
+		if (perTbl) {
+			const perVals = perCells.map((c) => parseFloat(c)).filter((v) => Number.isFinite(v));
+			const perCtx = perVals.length >= 2 ? ` 최근 PER는 자기 ${perVals.length}년 범위 ${Math.min(...perVals).toFixed(1)}~${Math.max(...perVals).toFixed(1)}배 안에서 움직였습니다.` : '';
+			sections.push({
+				key: 'valuation',
+				title: '밸류에이션 맥락 -- 시장은 이익에 얼마를 매겼나',
+				sourceEngine: 'quant',
+				blocks: [
+					{ type: 'text', text: `PER는 주가를 주당순이익(EPS)으로 나눈 배수로, 시장이 1원의 이익에 얼마를 매겼는지 보여줍니다. 여기서는 *적정주가를 환산하지 않고*, 이 회사 자신의 과거 PER 범위와만 비교합니다.${perCtx}` },
+					perTbl,
+					{ type: 'text', text: `※ 상단 KPI의 'PER(현재)'는 현재가 기준, 위 표는 각 연도의 *연말가* 기준이라 같은 해라도 값이 다를 수 있습니다. 주식 분할이 있던 회사는 연도 간 PER이 불연속으로 보일 수 있습니다(분할 조정은 원천 데이터 책임).` }
+				]
+			});
+			findings.push({ key: '밸류', finding: `PER ${perCells[perCells.length - 1]} · 배당수익률 ${yieldCells[yieldCells.length - 1]}.`, sourceEngine: 'quant' });
+		}
+	}
+
+	const lastEps = sr ? [...sr].reverse().find((y) => y.eps != null && Number.isFinite(y.eps as number) && (y.eps as number) > 0) : null;
+	const curPer = lastEps ? fmtMult(ps.last / (lastEps.eps as number)) : '-';
+	const kpis: ReportModel['headlineKpis'] = [
+		{ label: '현재가', value: won(ps.last) },
+		{ label: '1년 수익률', value: ps.ret1y != null ? fmtPctSigned(ps.ret1y * 100) : '-' },
+		{ label: '베타(코스피)', value: beta ? beta.beta.toFixed(2) : '-' },
+		{ label: '설명력(R²)', value: beta ? beta.r2.toFixed(2) : '-' },
+		{ label: 'PER(현재)', value: curPer },
+		{ label: '배당수익률', value: fmtPct(lastEps?.yieldPct ?? (sr ? [...sr].reverse().find((y) => y.yieldPct != null)?.yieldPct ?? null : null)) }
+	];
+	const conclusion = `${corpName} — 현재가 ${won(ps.last)}, 1년 수익률 ${ps.ret1y != null ? fmtPctSigned(ps.ret1y * 100) : '-'}${beta ? `, 베타 ${beta.beta.toFixed(2)}(코스피 대비)` : ''}. (가격 사실 — 매수·매도 의견 아님)`;
+	const closing: ReportModel['closing'] = [
+		{ label: '시장', engine: 'quant', line: `${beta ? `베타 ${beta.beta.toFixed(2)} · ` : ''}1년 수익률 ${ps.ret1y != null ? fmtPctSigned(ps.ret1y * 100) : '-'} · PER ${curPer}. 가격·밸류 맥락이며 투자판단 아님.` }
+	];
+	return { sections, findings, closing, kpis, conclusion };
+}
+
 // ── 미구현 관점 — 정직 '준비 중' ───────────────────────────
 function pendingModel(
 	code: string,
@@ -619,12 +737,36 @@ export async function buildReport(
 			rt.report.capitalChanges(code).catch(() => null)
 		]);
 		built = buildCapitalReturn(sr, cc, { corpName });
+	} else if (persp.key === 'market') {
+		const kospi = KR_INDEX_PRESETS[0]; // 코스피 (시장 메타 부재 → 명시 라벨로 정직)
+		const [candles, marketCandles, sr] = await Promise.all([
+			rt.price.govCandles(code).catch(() => null),
+			rt.index.series(kospi).catch(() => null),
+			rt.report.shareholderReturn(code).catch(() => null)
+		]);
+		built = buildMarket(candles, marketCandles, sr, { corpName });
 	} else {
 		built = buildEarningsPower(tf, ctx);
 	}
 	if (!built || !built.sections.length)
 		return { skipped: true, stockCode: code, reason: '이 관점에 채울 데이터가 부족합니다(예: 무배당 기업).' };
-	const blockCount = built.sections.reduce((acc, s) => acc + s.blocks.length, 0);
+
+	// 출처 = 섹션 sourceEngine 별 정직 집계(재무/시장 혼재 시 각각).
+	const ENG_LABEL: Record<string, string> = {
+		analysis: '재무분석 (브라우저 리얼타임)',
+		quant: '시장·기술 (브라우저 리얼타임)',
+		credit: '신용평가',
+		industry: '산업비교',
+		macro: '거시',
+		story: '종합서사'
+	};
+	const engAgg: Record<string, { label: string; sections: number; blocks: number }> = {};
+	for (const s of built.sections) {
+		const e = s.sourceEngine;
+		if (!engAgg[e]) engAgg[e] = { label: ENG_LABEL[e] ?? e, sections: 0, blocks: 0 };
+		engAgg[e].sections++;
+		engAgg[e].blocks += s.blocks.length;
+	}
 
 	return {
 		stockCode: code,
@@ -641,10 +783,8 @@ export async function buildReport(
 		sections: built.sections,
 		closing: built.closing,
 		provenance: {
-			engines: {
-				analysis: { label: '재무분석 (브라우저 리얼타임)', sections: built.sections.length, blocks: blockCount }
-			},
-			note: '모든 수치는 HuggingFace dart/finance parquet 을 브라우저가 직접 읽어 계산했습니다. 정적 캐시·사전 bake 없음 — 조회 시점 리얼타임.'
+			engines: engAgg,
+			note: '모든 수치는 HuggingFace parquet(재무·주가·정기보고)을 브라우저가 직접 읽어 계산했습니다. 정적 캐시·사전 bake 없음 — 조회 시점 리얼타임.'
 		},
 		assumptionsNote:
 			'연간(사업보고서) 기준 · 분기는 누계 처리 · 표 단위는 자릿수에 따라 조/억 자동 스케일 · 공시 항목이 빈약한 행은 표에서 자동 생략 · 영업외 일회성 손익이 큰 해는 본문에 각주로 표시 · 재무건전성 점검은 브라우저 재무비율 계산(Python 신용등급 dCR 아님). 주주환원·시장의 평가·누구의 회사 관점은 후속 사이클에서 추가됩니다.',

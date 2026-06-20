@@ -34,8 +34,8 @@ export const PERSPECTIVES: PerspectiveMeta[] = [
 		key: 'market',
 		label: '시장의 평가',
 		question: '시장은 어떻게 값매기나',
-		focusQuestions: ['주가 추세', '시장 대비 위험'],
-		built: false
+		focusQuestions: ['주가는 어떻게 움직였나', '시장과 얼마나 동행하나', '이익 대비 얼마에 거래되나'],
+		built: true
 	},
 	{
 		key: 'ownership',
