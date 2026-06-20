@@ -61,7 +61,9 @@ interface SearchStats {
 	stemDict: Record<string, number>;
 	terms: Uint32Array; // stemId 별 (byteStart, gapLen, tfLen, df)
 	docLengths: Uint32Array;
-	metaOffsets: BigUint64Array; // doc 별 meta.bin byte offset (nDocs+1)
+	// doc 별 meta.bin byte offset (nDocs+1·~3.7MB). scoring 엔 불필요(hydration 직전에만) → Promise 로 지연:
+	// 콜드 임계경로서 제외하고 postings range-fetch+BM25 와 다운로드를 겹친다(첫 질의 latency↓·질의당 회귀 0).
+	metaOffsetsP: Promise<BigUint64Array>;
 	nDocs: number;
 	avgDocLength: number;
 	postingsPath: string; // resolve 된 postings.bin 경로(range fetch)
@@ -107,18 +109,22 @@ export function createSearchPort(core: DataCore, opts: FilingSearchOptions = {})
 	async function loadStats(): Promise<SearchStats> {
 		const { resolve } = await loadManifest();
 		const ab = (name: string) => core.request<ArrayBuffer>({ origin: 'hf', path: resolve(name), parse: (r) => r.arrayBuffer() });
-		const [stemDict, termsBuf, dlBuf, moBuf, meta] = await Promise.all([
+		// metaOffsets(~3.7MB)는 hydration(최종 top-k meta fetch) 전까지 불필요 → fetch 만 킥오프하고 콜드
+		// 임계경로(scoring)서 블로킹 안 함. core 가 캐시·dedup. 결과 0(early return) 시 await 안 될 수 있어
+		// unhandledRejection 가드(실 소비처 await 는 정상 throw → queryFilings catch).
+		const metaOffsetsP = ab('main.metaOffsets.bin').then((b) => new BigUint64Array(b));
+		metaOffsetsP.catch(() => {});
+		const [stemDict, termsBuf, dlBuf, meta] = await Promise.all([
 			core.request<Record<string, number>>({ origin: 'hf', path: resolve('main_stems.json'), parse: (r) => r.json() }),
 			ab('main.terms.bin'),
 			ab('main.docLengths.bin'),
-			ab('main.metaOffsets.bin'),
 			core.request<{ nDocs: number; avgDocLength: number }>({ origin: 'hf', path: resolve('main.search_meta.json'), parse: (r) => r.json() })
 		]);
 		return {
 			stemDict,
 			terms: new Uint32Array(termsBuf),
 			docLengths: new Uint32Array(dlBuf),
-			metaOffsets: new BigUint64Array(moBuf),
+			metaOffsetsP,
 			nDocs: meta.nDocs,
 			avgDocLength: Math.max(meta.avgDocLength, 1),
 			postingsPath: resolve('main.postings.bin'),
@@ -172,11 +178,12 @@ export function createSearchPort(core: DataCore, opts: FilingSearchOptions = {})
 
 		const top = [...scores.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
 
-		// top-k doc meta 만 range fetch(doc-keyed meta.bin) → FilingHit.
+		// hydration — metaOffsets 합류(scoring 동안 병렬 다운로드돼 보통 이미 완료). top-k doc meta 만 range fetch.
+		const metaOffsets = await stats.metaOffsetsP;
 		return Promise.all(
 			top.map(async ([docId, score]) => {
-				const o0 = Number(stats.metaOffsets[docId]);
-				const o1 = Number(stats.metaOffsets[docId + 1]);
+				const o0 = Number(metaOffsets[docId]);
+				const o1 = Number(metaOffsets[docId + 1]);
 				const buf = await core.requestBytes({ path: stats.metaPath, start: o0, len: o1 - o0 });
 				const card = JSON.parse(new TextDecoder().decode(buf)) as MetaCard;
 				return {
