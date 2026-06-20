@@ -53,8 +53,8 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 
 | 스크립트 | 역할 | 호출 workflow |
 |---|---|---|
-| [meta/updateKindList.py](meta/updateKindList.py) | KRX KIND 상장법인 목록 크롤 (`corpList.parquet`) | `kindlist.yml` |
-| [meta/updateDartList.py](meta/updateDartList.py) | OpenDART CORPCODE.xml → `dartList.parquet` | `kindlist.yml` |
+| [meta/updateKindList.py](meta/updateKindList.py) | KRX KIND 상장목록 발행 (`corpList.parquet`) — gather SSOT `getKindList` 위임 (별도 크롤 0) | `kindlist.yml` |
+| [meta/updateDartList.py](meta/updateDartList.py) | OpenDART CORPCODE 발행 (`dartList.parquet`) — gather SSOT `loadCorpCodes` 위임 (별도 파싱 0) | `kindlist.yml` |
 | [meta/buildCorpProfile.py](meta/buildCorpProfile.py) | OpenDART companyInfo prefetch → `corpProfile.parquet` (acc_mt SSOT). 매일 incremental, missing 만 호출 | `kindlist.yml` |
 
 ### search/ — search index build

@@ -1,61 +1,25 @@
-"""OpenDART CORPCODE.xml → Parquet 변환.
+"""OpenDART CORPCODE.xml → Parquet 발행 (gather SSOT 위임).
 
-GitHub Actions에서 독립 실행되는 스크립트.
-패키지 import 없이 단독으로 동작한다.
-DART_API_KEY 환경변수 필요.
+GitHub Actions(``kindlist.yml``)에서 실행되는 발행 래퍼. CORPCODE.xml ZIP 다운로드·
+unzip·XML 파싱은 **중복 구현하지 않고** gather 엔진 SSOT(``loadCorpCodes``)를 그대로
+호출한다 — 별도빌드 금지, 공동작업대(gather) 경유. ``loadCorpCodes`` 는 DART client
+``getBytes`` 를 쓰므로 전송계층 일시장애 재시도도 함께 상속한다. 본 스크립트의 책임은 sink
+플러밍(corp_code 정렬 + parquet 쓰기 + 변경 해시 + 업로드 SKIP 신호)뿐이다.
 """
 
 from __future__ import annotations
 
 import hashlib
-import io
-import os
 import sys
-import xml.etree.ElementTree as ET
-import zipfile
 from pathlib import Path
 
 import polars as pl
-import requests
 
-DART_API_URL = "https://opendart.fss.or.kr/api/corpCode.xml"
+from dartlab.gather.dart.client import DartClient
+from dartlab.gather.dart.corpCode import loadCorpCodes
+
 OUTPUT_DIR = Path("dist")
 OUTPUT_FILE = OUTPUT_DIR / "dartList.parquet"
-
-
-def fetchDartList(apiKey: str) -> pl.DataFrame:
-    """OpenDART corpCode.xml ZIP 다운로드 → DataFrame."""
-    r = requests.get(DART_API_URL, params={"crtfc_key": apiKey}, timeout=60)
-    if r.status_code != 200:
-        print(f"OpenDART API 응답 실패: HTTP {r.status_code}")
-        sys.exit(1)
-
-    try:
-        zf = zipfile.ZipFile(io.BytesIO(r.content))
-        xmlData = zf.read("CORPCODE.xml")
-    except (zipfile.BadZipFile, KeyError) as e:
-        print(f"corpCode.xml ZIP 손상: {e}")
-        sys.exit(1)
-
-    try:
-        tree = ET.XML(xmlData)
-    except ET.ParseError as e:
-        print(f"corpCode.xml XML 파싱 실패: {e}")
-        sys.exit(1)
-
-    records = []
-    for item in tree.findall("list"):
-        record = {child.tag: (child.text or "") for child in item}
-        records.append(record)
-
-    if not records:
-        print("corpCode.xml에 데이터가 없음")
-        sys.exit(1)
-
-    df = pl.DataFrame(records)
-    # corp_code: 8자리, corp_name: 회사명, stock_code: 6자리(상장사만), modify_date
-    df = df.sort("corp_code")
-    return df
 
 
 def fileHash(path: Path) -> str:
@@ -63,13 +27,12 @@ def fileHash(path: Path) -> str:
 
 
 if __name__ == "__main__":
-    apiKey = os.environ.get("DART_API_KEY", "")
-    if not apiKey:
-        print("DART_API_KEY 환경변수가 없음")
+    print("OpenDART CORPCODE 목록 — gather SSOT(loadCorpCodes) 호출")
+    client = DartClient()  # DART_API_KEY/DART_API_KEYS env 해소(미설정 시 명확한 ValueError)
+    df = loadCorpCodes(client, refresh=True).sort("corp_code")  # 수집·파싱·재시도 = gather 단일 경로
+    if df.height == 0:
+        print("CORPCODE 수집 실패 — 빈 결과")
         sys.exit(1)
-
-    print("OpenDART CORPCODE.xml 수집 시작")
-    df = fetchDartList(apiKey)
     listed = df.filter(pl.col("stock_code").str.strip_chars() != "")
     print(f"{df.height}개 법인 수집 (상장: {listed.height})")
 
