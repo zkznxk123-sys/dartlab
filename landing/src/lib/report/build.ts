@@ -105,6 +105,62 @@ function cagr(values: Num[]): number | null {
 	return (Math.pow(v[v.length - 1] / v[0], 1 / (v.length - 1)) - 1) * 100;
 }
 
+// ── 동종업종 백분위 (industryStats.json 분포) — peer 좌표(목표가 아님, NEVER-CLAIM 안전) ──
+interface IndDist {
+	n: number;
+	p10: number;
+	p25: number;
+	median: number;
+	p75: number;
+	p90: number;
+	mean: number;
+	std: number;
+}
+interface PeerCtx {
+	name: string; // 업종명(한글)
+	count: number; // 업종 종목 수
+	dist: Record<string, IndDist | null>;
+}
+// 분포 앵커(p10..p90) 선형보간으로 값의 백분위 순위(0~100, 업종 내 *이하* 비율) 추정.
+function pctRank(v: number, d: IndDist | null | undefined): number | null {
+	if (!d) return null;
+	const pts: [number, number][] = ([[10, d.p10], [25, d.p25], [50, d.median], [75, d.p75], [90, d.p90]] as [number, number][]).filter((x) => x[1] != null && Number.isFinite(x[1]));
+	if (pts.length < 2) return null;
+	if (v <= pts[0][1]) return Math.max(1, pts[0][0] / 2);
+	if (v >= pts[pts.length - 1][1]) return Math.min(99, (pts[pts.length - 1][0] + 100) / 2);
+	for (let i = 1; i < pts.length; i++) {
+		const [r0, x0] = pts[i - 1];
+		const [r1, x1] = pts[i];
+		if (v <= x1) return x1 === x0 ? r1 : r0 + ((r1 - r0) * (v - x0)) / (x1 - x0);
+	}
+	return 95;
+}
+// '상위 X%' — goodHigh 면 높을수록 상위, 아니면(부채비율·CCC) 낮을수록 상위.
+function industryTopPct(v: Num, d: IndDist | null | undefined, goodHigh: boolean): { top: number; median: number } | null {
+	if (v == null || !Number.isFinite(v) || !d) return null;
+	const pr = pctRank(v as number, d);
+	if (pr == null) return null;
+	const top = goodHigh ? 100 - pr : pr;
+	return { top: Math.round(Math.max(1, Math.min(99, top))), median: d.median };
+}
+// 동종업종 비교표 — 지표 × (회사값·업종 중앙값·업종 내 위치). 백분위는 *측정 좌표*이지 투자판단 아님.
+function peerCompareTable(
+	rows: { label: string; value: Num; key: string; goodHigh: boolean; fmt: (v: Num) => string }[],
+	peer: PeerCtx
+): { block: ReportBlock; phrases: { label: string; top: number; median: string; goodHigh: boolean; valFmt: string }[] } | null {
+	const data: Record<string, string>[] = [];
+	const phrases: { label: string; top: number; median: string; goodHigh: boolean; valFmt: string }[] = [];
+	for (const r of rows) {
+		if (r.value == null || !Number.isFinite(r.value)) continue;
+		const d = peer.dist[r.key];
+		const rank = industryTopPct(r.value, d, r.goodHigh);
+		data.push({ 지표: r.label, 회사값: r.fmt(r.value), '업종 중앙값': d ? r.fmt(d.median) : '-', '업종 내 위치': rank ? `상위 ${rank.top}%` : '-' });
+		if (rank) phrases.push({ label: r.label, top: rank.top, median: r.fmt(d!.median), goodHigh: r.goodHigh, valFmt: r.fmt(r.value) });
+	}
+	if (!data.length) return null;
+	return { block: { type: 'table', label: `동종업종 비교 — ${peer.name} ${peer.count}사 (연간 기준)`, snapshot: true, data }, phrases };
+}
+
 // 자기역사 위치 — 최신값이 자기 N년 범위의 하단/중단/상단 어디인지(밸류 self-history).
 function selfBand(latest: number, series: number[]): { band: string; lo: number; hi: number } | null {
 	const v = series.filter((x) => Number.isFinite(x));
@@ -270,9 +326,9 @@ function buildEarningsPower(
 	win: QWindow, // 본문 윈도(분기 8개 또는 연간 6개)
 	tfA: TerminalFinance | null, // 연간 보충용
 	kind: '분기' | '연간',
-	ctx: { corpName: string }
+	ctx: { corpName: string; peer: PeerCtx | null }
 ): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } {
-	const { corpName } = ctx;
+	const { corpName, peer } = ctx;
 	const isRow = (k: string): Num[] => tfx.statements.IS.find((r) => r.key === k)?.values ?? [];
 	const cfRow = (k: string): Num[] => tfx.statements.CF.find((r) => r.key === k)?.values ?? [];
 	const bsRow = (k: string): Num[] => tfx.statements.BS.find((r) => r.key === k)?.values ?? [];
@@ -350,6 +406,30 @@ function buildEarningsPower(
 	if (marginTbl) {
 		sections.push({ key: 'marginTrajectory', title: '마진 궤적 -- 남는 돈은 어디서 갈리나', sourceEngine: 'analysis', blocks: s2 });
 		findings.push({ key: '마진', finding: `영업이익률 ${fmtPct(opmLast)} (최근 ${opmW.length}${periodWord} ${fmtPct(opmLo)}~${fmtPct(opmHi)})${bridge ? ' · 변화는 ' + (bridge.includes('원가') ? '원가' : '판관비') + ' 주도' : ''}.`, sourceEngine: 'analysis' });
+	}
+
+	// ── S2.5 동종업종 비교 (연간 — industryStats 분포 대비 백분위) ──
+	if (peer && tfA) {
+		const annOpm = lastNonNull(tfA.ratios.find((r) => r.key === 'opm')?.values ?? []);
+		const annNpm = lastNonNull(tfA.ratios.find((r) => r.key === 'npm')?.values ?? []);
+		const annRoe = lastNonNull(tfA.ratios.find((r) => r.key === 'roe')?.values ?? []);
+		const annGpm = lastNonNull(tfA.ratios.find((r) => r.key === 'gpm')?.values ?? []);
+		const pc = peerCompareTable(
+			[
+				{ label: '영업이익률', value: annOpm, key: 'opMargin', goodHigh: true, fmt: (v) => fmtPct(v) },
+				{ label: '순이익률', value: annNpm, key: 'netMargin', goodHigh: true, fmt: (v) => fmtPct(v) },
+				{ label: 'ROE', value: annRoe, key: 'roe', goodHigh: true, fmt: (v) => fmtPct(v) }
+			],
+			peer
+		);
+		if (pc) {
+			const opmPh = pc.phrases.find((p) => p.label === '영업이익률');
+			const lead = opmPh
+				? `${corpName}의 영업이익률(연간 ${opmPh.valFmt})은 ${peer.name} ${peer.count}사 중 상위 ${opmPh.top}%로, 업종 중앙값(${opmPh.median}) 대비 ${opmPh.top <= 40 ? '뚜렷이 높은' : opmPh.top <= 60 ? '중간 수준의' : '낮은'} 수익성입니다. 자기 이력만으로는 알 수 없는 *업종 내 위치*를 더한 것으로, 동종업종 분포 대비 백분위일 뿐 목표주가·투자판단이 아닙니다.${annGpm != null ? ` (마진 원가구조는 매출총이익률 ${fmtPct(annGpm)}에서 갈립니다.)` : ''}`
+				: `아래는 ${peer.name} ${peer.count}사 분포 대비 위치입니다(연간 기준).`;
+			sections.push({ key: 'peerCompare', title: '동종업종 비교 -- 업종에서 어디 서 있나', sourceEngine: 'industry', blocks: [{ type: 'text', text: lead }, pc.block] });
+			if (opmPh) findings.push({ key: '업종비교', finding: `영업이익률 ${peer.name} ${peer.count}사 중 상위 ${opmPh.top}% (중앙값 ${opmPh.median}).`, sourceEngine: 'industry' });
+		}
 	}
 
 	// ── S3 성장·계절성 (YoY 우선 + 분기는 QoQ 보조) ──
@@ -508,11 +588,11 @@ function buildLiquidity(
 	win: QWindow,
 	kind: '분기' | '연간',
 	tfA: TerminalFinance | null, // 자본배분(연간)·배당충당
-	ctx: { corpName: string },
+	ctx: { corpName: string; peer: PeerCtx | null },
 	debt: { ladder: { buckets: Num[]; shortTerm: Num; year: string } | null } | null,
 	sr: ShareholderReturnYear[] | null
 ): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } {
-	const { corpName } = ctx;
+	const { corpName, peer } = ctx;
 	const isRow = (k: string): Num[] => tfx.statements.IS.find((r) => r.key === k)?.values ?? [];
 	const cfRow = (k: string): Num[] => tfx.statements.CF.find((r) => r.key === k)?.values ?? [];
 	const rRow = (k: string): Num[] => tfx.ratios.find((r) => r.key === k)?.values ?? [];
@@ -619,6 +699,43 @@ function buildLiquidity(
 		sections.push({ key: 'leverage', title: '레버리지·유동성 -- 빚은 감당 가능한가', sourceEngine: 'analysis', blocks: [{ type: 'text', text: s2text }, levTbl] });
 		const drTag = drL != null ? (drL <= 100 ? ' (낮음)' : drL >= 200 ? ' (높음)' : '') : '';
 		findings.push({ key: '안정성', finding: `부채비율 ${fmtPct(drL)}${drTag} · 유동비율 ${fmtPct(crL)} · 자기자본비율 ${fmtPct(erL)}.`, sourceEngine: 'analysis' });
+	}
+
+	// ── S3.5 동종업종 비교 (연간 — 안정성·운전자본 백분위) ──
+	if (peer && tfA) {
+		const annDr = lastNonNull(tfA.ratios.find((r) => r.key === 'debtRatio')?.values ?? []);
+		const annCr = lastNonNull(tfA.ratios.find((r) => r.key === 'currentRatio')?.values ?? []);
+		// 연간 CCC — 같은 연도 인덱스에서 BS·IS 결합(365일).
+		const aIs = (k: string): Num[] => tfA.statements.IS.find((r) => r.key === k)?.values ?? [];
+		const aBs = (k: string): Num[] => tfA.statements.BS.find((r) => r.key === k)?.values ?? [];
+		const aRevArr = aIs('revenue');
+		let ai = -1;
+		for (let i = aRevArr.length - 1; i >= 0; i--) if (aRevArr[i] != null && Number.isFinite(aRevArr[i])) { ai = i; break; }
+		let annCcc: number | null = null;
+		if (ai >= 0) {
+			const rv = aRevArr[ai] as number;
+			const cg = aIs('costOfSales')[ai];
+			const rc = aBs('receivables')[ai];
+			const iv = aBs('inventories')[ai];
+			const py = aBs('payables')[ai];
+			if (rc != null && rv > 0 && py != null && cg != null && (cg as number) > 0) annCcc = +((rc as number) / rv * 365 + (iv != null ? (iv as number) / (cg as number) * 365 : 0) - (py as number) / (cg as number) * 365).toFixed(0);
+		}
+		const pc = peerCompareTable(
+			[
+				{ label: '부채비율', value: annDr, key: 'debtRatio', goodHigh: false, fmt: (v) => fmtPct(v) },
+				{ label: '유동비율', value: annCr, key: 'currentRatio', goodHigh: true, fmt: (v) => fmtPct(v) },
+				{ label: 'CCC(현금전환주기)', value: annCcc, key: 'ccc', goodHigh: false, fmt: (v) => fmtNum(v, '일') }
+			],
+			peer
+		);
+		if (pc) {
+			const drPh = pc.phrases.find((p) => p.label === '부채비율');
+			const lead = drPh
+				? `${corpName}의 부채비율(연간 ${drPh.valFmt})은 ${peer.name} ${peer.count}사 중 안정성 상위 ${drPh.top}%로, 업종 중앙값(${drPh.median}) 대비 ${drPh.top <= 40 ? '재무가 견고한' : drPh.top <= 60 ? '중간 수준의' : '레버리지가 높은'} 편입니다. 절대 임계치(부채비율 200%)는 업종 무관 일반 기준이라, 자본집약 업종에서는 이 업종 분포 위치가 더 적절한 좌표입니다(목표주가·투자판단 아님).`
+				: `아래는 ${peer.name} ${peer.count}사 분포 대비 안정성·운전자본 위치입니다(연간 기준).`;
+			sections.push({ key: 'peerSolvency', title: '동종업종 비교 -- 안정성은 업종에서 어디쯤', sourceEngine: 'industry', blocks: [{ type: 'text', text: lead }, pc.block] });
+			if (drPh) findings.push({ key: '업종안정성', finding: `부채비율 ${peer.name} ${peer.count}사 중 안정성 상위 ${drPh.top}% (중앙값 ${drPh.median}).`, sourceEngine: 'industry' });
+		}
 	}
 
 	// ── S4 재무건전성 점검 (분기말 시점) ──
@@ -1300,13 +1417,16 @@ export async function buildReport(
 ): Promise<ReportResult> {
 	const persp = findPerspective(perspectiveKey);
 	// 회사명·업종 = map/search-index.json (데이터 작업대 loadJson 직독). public search.universe 미배선.
-	const [fin, universe] = await Promise.all([
+	const [fin, universe, indStats] = await Promise.all([
 		rt.finance.bundle(code),
-		loadJson<IndexRow[]>('map/search-index.json', { fetchFn: fetch, preferLocal: true }).catch(() => null)
+		loadJson<IndexRow[]>('map/search-index.json', { fetchFn: fetch, preferLocal: true }).catch(() => null),
+		loadJson<Record<string, { name: string; count: number; distribution: Record<string, IndDist | null> }>>('map/industryStats.json', { fetchFn: fetch, preferLocal: true }).catch(() => null)
 	]);
 	const meta = (universe ?? []).find((r) => r.stockCode === code);
 	const corpName = meta?.corpName ?? code;
 	const industry = meta?.industry || undefined;
+	// 동종업종 백분위 — search-index industry 키 === industryStats 키. 분포 있으면 peer 좌표 제공.
+	const peer: PeerCtx | null = industry && indStats?.[industry] ? { name: indStats[industry].name, count: indStats[industry].count, dist: indStats[industry].distribution } : null;
 
 	if (!fin) return { skipped: true, stockCode: code, reason: '재무 데이터셋이 없습니다(미상장·미공시).' };
 	const tf = annualView(fin); // 연간 — 연 1회 확정 항목(배당·소유·인력·감사) + 장기추세 보충 섹션
@@ -1341,7 +1461,7 @@ export async function buildReport(
 			rt.report.debtProfile(code).catch(() => null),
 			rt.report.shareholderReturn(code).catch(() => null)
 		]);
-		built = buildLiquidity(tfWin, win, winKind, tf, { corpName }, debt, sr);
+		built = buildLiquidity(tfWin, win, winKind, tf, { corpName, peer }, debt, sr);
 	} else if (persp.key === 'capitalReturn') {
 		const [sr, cc] = await Promise.all([
 			rt.report.shareholderReturn(code).catch(() => null),
@@ -1386,7 +1506,7 @@ export async function buildReport(
 	} else {
 		// 수익체력 — 분기 우선 본문 + 연간 보충
 		if (!tfWin || !win) return { skipped: true, stockCode: code, reason: '재무 시계열이 부족합니다.' };
-		built = buildEarningsPower(tfWin, win, tf, winKind, { corpName });
+		built = buildEarningsPower(tfWin, win, tf, winKind, { corpName, peer });
 	}
 	if (!built || !built.sections.length)
 		return { skipped: true, stockCode: code, reason: '이 관점에 채울 데이터가 부족합니다(예: 무배당 기업).' };
