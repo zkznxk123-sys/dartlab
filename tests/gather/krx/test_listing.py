@@ -346,7 +346,10 @@ class TestFetchKind:
 
         from dartlab.gather.krx.listing.registry import _fetchKind
 
-        with patch("dartlab.gather.krx.listing.registry.httpx.post", side_effect=httpx.TimeoutException("timeout")):
+        with (
+            patch("dartlab.gather.krx.listing.registry.httpx.post", side_effect=httpx.TimeoutException("timeout")),
+            patch("dartlab.gather.krx.listing.registry.time.sleep"),
+        ):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             assert df.height == 0
@@ -357,7 +360,10 @@ class TestFetchKind:
 
         from dartlab.gather.krx.listing.registry import _fetchKind
 
-        with patch("dartlab.gather.krx.listing.registry.httpx.post", side_effect=httpx.ConnectError("refused")):
+        with (
+            patch("dartlab.gather.krx.listing.registry.httpx.post", side_effect=httpx.ConnectError("refused")),
+            patch("dartlab.gather.krx.listing.registry.time.sleep"),
+        ):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             assert df.height == 0
@@ -374,6 +380,43 @@ class TestFetchKind:
             assert isinstance(df, pl.DataFrame)
             if df.height > 0:
                 assert "종목코드" in df.columns
+
+    def test_retries_transient_then_succeeds(self):
+        """일시 장애(연결 끊김) 후 재시도가 회복 — KIND 수집 SSOT 의 견고성 회귀 가드.
+
+        이 한 곳이 SSOT 라 런타임·CI 파이프라인이 같은 재시도를 공유(별도빌드 재구현 0).
+        """
+        import httpx
+
+        from dartlab.gather.krx.listing.registry import _fetchKind
+
+        html = "<table><tr><th>회사명</th><th>종목코드</th></tr><tr><td>테스트</td><td>123456</td></tr></table>"
+        ok = MagicMock()
+        ok.content = html.encode("euc-kr")
+        attempts = [httpx.RemoteProtocolError("disconnected"), httpx.ConnectError("refused"), ok]
+
+        with (
+            patch("dartlab.gather.krx.listing.registry.httpx.post", side_effect=attempts) as post,
+            patch("dartlab.gather.krx.listing.registry.time.sleep"),
+        ):
+            df = _fetchKind()
+            assert df.height == 1
+            assert post.call_count == 3  # 2회 실패 후 3회차 성공
+
+    def test_retries_on_no_table_then_empty(self):
+        """비-테이블 응답이 계속되면 재시도 소진 후 graceful 빈 DataFrame(소비자 비크래시)."""
+        from dartlab.gather.krx.listing.registry import _fetchKind
+
+        bad = MagicMock()
+        bad.content = "<html>점검 중</html>".encode("euc-kr")
+
+        with (
+            patch("dartlab.gather.krx.listing.registry.httpx.post", return_value=bad) as post,
+            patch("dartlab.gather.krx.listing.registry.time.sleep"),
+        ):
+            df = _fetchKind()
+            assert df.height == 0
+            assert post.call_count == 3  # 소진까지 재시도
 
 
 # ══════════════════════════════════════

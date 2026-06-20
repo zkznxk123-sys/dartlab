@@ -39,6 +39,16 @@ KIND_DATA = {
     "fiscalYearEnd": "all",
     "location": "all",
 }
+# KRX KIND 는 기본 클라이언트 UA 에 드물게 비-테이블 오류 페이지를 반환한다(WAF/혼잡). 브라우저 UA +
+# 짧은 재시도로 일시 응답을 흡수 — 이 한 곳이 KIND 수집 SSOT 라 런타임(Company/Search/Scan)·CI 파이프라인이
+# 모두 같은 견고성을 공유한다(별도빌드가 각자 재구현하지 않는다).
+_KIND_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+    )
+}
+_KIND_RETRIES = 3
+_KIND_BACKOFF_SEC = 2.0
 
 _memory: pl.DataFrame | None = None
 _memoryTs: float = 0.0
@@ -178,8 +188,8 @@ class _TableParser(HTMLParser):
 def _fetchKind() -> pl.DataFrame:
     """KRX KIND API에서 상장법인 목록 HTML 수집 → DataFrame 변환.
 
-    SPAC·리츠 제외, 6자리 종목코드만 포함.
-    네트워크 실패 시 빈 DataFrame 반환.
+    SPAC·리츠 제외, 6자리 종목코드만 포함. 전송 계층 일시 장애(연결 끊김·타임아웃·비-테이블
+    응답)는 짧게 재시도하고, 소진 시 빈 DataFrame 반환(소비자 비크래시 계약).
 
     Returns
     -------
@@ -192,17 +202,23 @@ def _fetchKind() -> pl.DataFrame:
         결산월 : str — 결산월
         대표자명 : str — 대표자명
     """
-    try:
-        r = httpx.post(KIND_URL, data=KIND_DATA, timeout=30)
-    except (httpx.ConnectError, httpx.TimeoutException):
-        return pl.DataFrame(schema={"종목코드": pl.Utf8, "회사명": pl.Utf8})
-    html = r.content.decode("euc-kr", errors="replace")
-
-    parser = _TableParser()
-    parser.feed(html)
-    rows = parser._rows
+    empty = pl.DataFrame(schema={"종목코드": pl.Utf8, "회사명": pl.Utf8})
+    rows: list[list[str]] = []
+    for attempt in range(_KIND_RETRIES):
+        try:
+            r = httpx.post(KIND_URL, data=KIND_DATA, headers=_KIND_HEADERS, timeout=30)
+            html = r.content.decode("euc-kr", errors="replace")
+            parser = _TableParser()
+            parser.feed(html)
+            if len(parser._rows) >= 2:
+                rows = parser._rows
+                break
+        except (httpx.ConnectError, httpx.TimeoutException, httpx.RemoteProtocolError):
+            pass  # 전송 계층 일시 장애 — 재시도
+        if attempt < _KIND_RETRIES - 1:
+            time.sleep(_KIND_BACKOFF_SEC * (attempt + 1))
     if len(rows) < 2:
-        return pl.DataFrame(schema={"종목코드": pl.Utf8, "회사명": pl.Utf8})
+        return empty  # 재시도 소진 — graceful 빈 DataFrame(소비자 비크래시 계약 유지)
 
     header = rows[0]
     data = rows[1:]

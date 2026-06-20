@@ -25,10 +25,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      # dartlab 설치 — KindList 는 gather SSOT(getKindList) 위임이라 크롤 스텝 전에 필요.
+      # requests = updateDartList(별도빌드, 흡수 백로그), huggingface-hub = 업로드 스텝.
       - name: Install dependencies
-        run: pip install polars requests huggingface-hub
+        run: pip install -e . requests huggingface-hub
 
-      # ── KindList (KRX KIND) ──────────────────────────────
+      # ── KindList (KRX KIND) — gather SSOT 위임 발행 ──────────────────────────────
       - name: Download existing KindList hash
         run: |
           mkdir -p dist
@@ -139,9 +141,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       # ── corpProfile (DART companyInfo prefetch — acc_mt SSOT) ─────────────
-      - name: Install dartlab (for buildCorpProfile)
-        run: pip install -e .
-
+      # dartlab 는 상단 'Install dependencies' 에서 이미 설치됨(gather SSOT 공용).
       - name: Resume corpProfile from HF (incremental)
         run: |
           mkdir -p data/dart/scan
