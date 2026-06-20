@@ -39,7 +39,7 @@ def test_fetch_country_erp_delegates_and_structures(monkeypatch: pytest.MonkeyPa
         "<table><tr><td>Korea</td><td>Aa2</td><td>0.60%</td><td>5.20%</td></tr></table>"
     )
     monkeypatch.setattr(damodaran, "_fetchHtml", lambda *a, **k: html)
-    out = damodaran.fetchDamodaranCountryErp()
+    out = damodaran.getDamodaranCountryErp()
     assert out is not None
     assert out["matureMarketERP"] == 4.60
     assert out["countries"]["Korea"]["rawNumbers"] == [0.60, 5.20]
@@ -47,4 +47,4 @@ def test_fetch_country_erp_delegates_and_structures(monkeypatch: pytest.MonkeyPa
 
 def test_fetch_country_erp_none_on_fetch_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(damodaran, "_fetchHtml", lambda *a, **k: None)
-    assert damodaran.fetchDamodaranCountryErp() is None
+    assert damodaran.getDamodaranCountryErp() is None

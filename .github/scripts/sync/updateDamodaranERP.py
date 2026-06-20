@@ -4,7 +4,7 @@
     uv run python -X utf8 .github/scripts/sync/updateDamodaranERP.py
 
 동작:
-    1. gather SSOT(``fetchDamodaranCountryErp``)로 ctryprem.html fetch+파싱 (외부 fetch=gather)
+    1. gather SSOT(``getDamodaranCountryErp``)로 ctryprem.html fetch+파싱 (외부 fetch=gather)
     2. 국가별 total ERP → ISO2 매핑 + countryRiskPremium 산출 (sink 해석)
     3. src/dartlab/reference/data/damodaranDefaults.json 병합 갱신
     4. 실패 시 기존 스냅샷 보존 (폴백 안전)
@@ -20,7 +20,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from dartlab.gather.sources.damodaran import fetchDamodaranCountryErp
+from dartlab.gather.sources.damodaran import getDamodaranCountryErp
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 _TARGET = _REPO_ROOT / "src" / "dartlab" / "reference" / "data" / "damodaranDefaults.json"
@@ -53,7 +53,7 @@ def _resolveIso2(countryName: str) -> str | None:
 
 def updateDefaults() -> bool:
     """gather fetch → ISO2 매핑 → damodaranDefaults.json 병합. 성공 시 True."""
-    erp = fetchDamodaranCountryErp()
+    erp = getDamodaranCountryErp()
     if not erp:
         return False
 

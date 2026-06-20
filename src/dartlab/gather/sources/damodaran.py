@@ -75,8 +75,14 @@ def _extractCountries(html: str) -> dict[str, dict]:
     return out
 
 
-def fetchDamodaranCountryErp(*, timeout: float = 30.0) -> dict | None:
-    """Damodaran ctryprem.html → 구조화 ERP dict. 외부 fetch=gather SSOT.
+def getDamodaranCountryErp(*, timeout: float = 30.0) -> dict | None:
+    """Damodaran ctryprem.html → 구조화 국가 ERP dict. 외부 fetch=gather SSOT.
+
+    Capabilities: Damodaran 국가 ERP 페이지 다운로드 + mature market ERP·국가별 raw 숫자 파싱 → dict.
+    AIContext: internal source fetch — AI 직접 호출 X. reference/damodaranDefaults.json 갱신 sink 가 소비.
+    Guide: 결과의 컬럼 순서 해석(total ERP·CRP)·ISO2 매핑은 호출자(sink) 책임 — 본 함수는 fetch+파싱만.
+    When: damodaranDefaults.json 월간 갱신(updateDamodaranERP) 등 Damodaran ERP 원천 수집 시.
+    How: _fetchHtml → _extractMatureMarketERP + _extractCountries 조합 → dict 반환.
 
     Args:
         timeout: HTTP 타임아웃(초).
@@ -89,9 +95,16 @@ def fetchDamodaranCountryErp(*, timeout: float = 30.0) -> dict | None:
         없음 — 네트워크/디코드 실패는 None 으로 흡수.
 
     Example:
-        >>> out = fetchDamodaranCountryErp()  # doctest: +SKIP
+        >>> out = getDamodaranCountryErp()  # doctest: +SKIP
         >>> set(out) >= {"matureMarketERP", "countries"}  # doctest: +SKIP
         True
+
+    Requires:
+        네트워크 (``pages.stern.nyu.edu/~adamodar`` ctryprem.html). stdlib(urllib·re) 만.
+
+    SeeAlso:
+        _extractMatureMarketERP · _extractCountries : 파싱 하위 단계.
+        .github/scripts/sync/updateDamodaranERP : 본 fetch 를 위임 호출하는 sink.
     """
     html = _fetchHtml(timeout=timeout)
     if not html:

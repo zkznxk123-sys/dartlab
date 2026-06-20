@@ -451,6 +451,12 @@ def fetchGdeltDoc(
     전 종목(~2800)은 한 job 에 다 못 도므로 ``budgetSec`` 시간예산 초과 시 중단(누적이라 다음 run 이 이어감).
     online fetch=gather SSOT — sync 글루(buildNaverCompanyNews)가 본 함수를 위임 호출한다.
 
+    Capabilities: 회사명 질의 GDELT DOC 2.0 API fanout → naver 호환 뉴스 archive df(+__code) 수집.
+    AIContext: internal source fetch — AI 직접 호출 X. 뉴스 archive 빌더(buildNaverCompanyNews) sink 가 소비.
+    Guide: GKG 벌크(fetchGdeltGkg)와 다른 질의 기반 엔드포인트 — 제목+링크만(스니펫 없음), 한국 커버리지 부분적.
+    When: gdelt 트랙 뉴스 archive 증분/백필(buildNaverCompanyNews) 수집 시.
+    How: nameToCode 순회 × yearList 질의(_docFetchOne) → 행 누적 → url 중복 제거 df.
+
     Args:
         nameToCode: 회사명 → 종목코드. query=회사명, 결과행에 stockCode 동봉(``__code``).
         years: 최근 몇 개 연도를 질의할지 (1=올해만 증분, ≥2=과거 backfill).
@@ -468,6 +474,13 @@ def fetchGdeltDoc(
         >>> import polars as pl
         >>> isinstance(fetchGdeltDoc({}), pl.DataFrame)  # 빈 입력 → 빈 df
         True
+
+    Requires:
+        네트워크 (``api.gdeltproject.org/api/v2/doc``). 키 불필요. stdlib + httpx + polars.
+
+    SeeAlso:
+        fetchGdeltGkg : GKG 벌크(시간슬롯·tone) 자매 트랙.
+        _docFetchOne : 회사×연도 단일 질의 하위 단계.
     """
     if not nameToCode:
         return pl.DataFrame()

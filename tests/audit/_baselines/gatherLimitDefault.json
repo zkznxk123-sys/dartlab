@@ -7,6 +7,7 @@
     "src/dartlab/gather/gov/govApi.py::fetchGovIndex",
     "src/dartlab/gather/gov/govApi.py::fetchGovStock",
     "src/dartlab/gather/imf/catalog.py::listCatalog",
-    "src/dartlab/gather/infra/sdmxClient.py::fetch"
+    "src/dartlab/gather/infra/sdmxClient.py::fetch",
+    "src/dartlab/gather/sources/gdelt.py::fetchGdeltDoc"
   ]
 }
