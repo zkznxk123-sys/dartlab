@@ -88,6 +88,8 @@
   // 비숫자 의미 컬럼(좌측 텍스트, cellTone 미적용) 화이트리스트
   const TXT_COLS = new Set(['최근 범위', '기준']);
 
+  // 스파크라인 — 64×22 면적 채움 microchart. 색은 중립(accent): 같은 색으로 좋고/나쁨을
+  // 주장하지 않게(부채비율↓·매출↑ 모두 같은 색). 좋고 나쁨은 판정 컬럼·본문이 말한다.
   function spark(row: Record<string, string>, yearCols: string[]) {
     const pairs: { yr: number; n: number }[] = [];
     for (const yk of yearCols) {
@@ -116,22 +118,49 @@
     const hasNeg = Math.min(...valid) < 0;
     if (hasNeg) { min = Math.min(min, 0); max = Math.max(max, 0); }
     const range = max - min || 1;
-    const w = 54, h = 15;
+    const w = 64, h = 22, pad = 2;
+    const ih = h - pad * 2;
     const step = w / (nums.length - 1);
-    const xy = plot.map((n, i) => (Number.isFinite(n) ? { x: i * step, y: h - ((n - min) / range) * h, clip: clipped[i] } : null));
+    const xy = plot.map((n, i) => (Number.isFinite(n) ? { x: i * step, y: pad + (ih - ((n - min) / range) * ih), clip: clipped[i] } : null));
     const pts = xy.filter(Boolean) as { x: number; y: number; clip: boolean }[];
+    if (pts.length < 2) return null;
     const points = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const area = `${pts[0].x.toFixed(1)},${h} ` + points + ` ${pts[pts.length - 1].x.toFixed(1)},${h}`;
     const clipMarks = pts.filter((p) => p.clip).map((p) => ({ x: p.x.toFixed(1), y: p.y.toFixed(1) }));
-    const lastP = [...xy].reverse().find(Boolean) as { x: number; y: number } | undefined;
-    const zeroY = min < 0 && max > 0 ? (h - ((0 - min) / range) * h).toFixed(1) : null;
-    const first = valid[0];
-    const lastV = valid[valid.length - 1];
-    const tone = hasNeg ? 'flat' : lastV > first * 1.001 ? 'up' : lastV < first * 0.999 ? 'down' : 'flat';
-    return { points, tone, zeroY, clipMarks, lastX: (lastP?.x ?? 0).toFixed(1), lastY: (lastP?.y ?? 0).toFixed(1) };
+    const lastP = pts[pts.length - 1];
+    const zeroY = min < 0 && max > 0 ? (pad + (ih - ((0 - min) / range) * ih)).toFixed(1) : null;
+    return { points, area, zeroY, clipMarks, lastX: lastP.x.toFixed(1), lastY: lastP.y.toFixed(1) };
   }
 
   function isTimeSeries(cols: string[]): boolean {
     return cols.length >= 4 && /^\d{4}$/.test(cols[1] ?? '');
+  }
+  // 표에 그릴 스파크라인이 하나라도 있나 — 전부 빈 칸이면 추이 컬럼 자체를 숨긴다(휑한 거터 방지).
+  function tableHasSpark(data: Record<string, string>[], cols: string[]): boolean {
+    return data.some((row) => spark(row, cols.slice(1)) != null);
+  }
+
+  // ── 라인 차트(주가 궤적) — series 정규화 + 면적 + 수평 마커 ──
+  function lineGeo(series: number[], markers: { label: string; v: number }[] = []) {
+    const v = series.filter((n) => Number.isFinite(n));
+    if (v.length < 2) return null;
+    const mv = markers.map((m) => m.v).filter((n) => Number.isFinite(n));
+    const min = Math.min(...v, ...mv);
+    const max = Math.max(...v, ...mv);
+    const range = max - min || 1;
+    const w = 100, h = 30;
+    const step = w / (series.length - 1);
+    const Y = (n: number) => (h - ((n - min) / range) * h).toFixed(2);
+    const pts = series.map((n, i) => `${(i * step).toFixed(2)},${Y(n)}`).join(' ');
+    const area = `0,${h} ` + pts + ` ${w},${h}`;
+    const lastX = ((series.length - 1) * step).toFixed(2);
+    const lastY = Y(series[series.length - 1]);
+    const mk = markers.map((m) => ({ label: m.label, y: Y(m.v), top: (m.v - min) / range > 0.5 }));
+    const up = series[series.length - 1] >= series[0];
+    return { pts, area, lastX, lastY, mk, up };
+  }
+  function wonLabel(v: number): string {
+    return `${Math.round(v).toLocaleString('en-US')}원`;
   }
 
   function splitTitle(t: string): { head: string; sub: string } {
@@ -303,20 +332,64 @@
                     <div class="bMetrics">{#each b.metrics as m}<div class="metric"><span class="mLabel">{m.label}</span><span class="mValue {cellTone(m.value)}">{m.value}</span></div>{/each}</div>
                   {:else if b.type === 'table' && b.data?.length}
                     {@const cols = Object.keys(b.data[0])}
-                    {@const ts = isTimeSeries(cols)}
+                    {@const ts = isTimeSeries(cols) && tableHasSpark(b.data, cols)}
                     <div class="bTableWrap">
                       {#if b.label}<div class="tCap">{b.label}</div>{/if}
-                      <table class="bTable">
+                      <table class="bTable" class:snapshot={b.snapshot}>
                         <thead><tr>{#each cols as c, ci}<th class={ci === 0 ? 'lbl' : c === '판정' ? 'verdict-h' : TXT_COLS.has(c) ? 'txt-h' : 'num'}>{c}</th>{/each}{#if ts}<th class="sparkCol">추이</th>{/if}</tr></thead>
                         <tbody>
                           {#each b.data as row}
                             <tr>
-                              {#each cols as c, ci}{#if ci === 0}<td class="lbl">{row[c]}</td>{:else if c === '판정'}{@const vt = verdictTone(row[c])}<td class="verdict {vt}">{#if vt === 'ok'}<span class="vMark ok">●</span>{:else if vt === 'warn'}<span class="vMark warn">▲</span>{/if}{row[c]}</td>{:else if TXT_COLS.has(c)}<td class="txt {c === '기준' ? 'threshold' : ''}">{row[c]}</td>{:else}<td class="num {cellTone(row[c])}">{row[c]}</td>{/if}{/each}
-                              {#if ts}{@const sp = spark(row, cols.slice(1))}<td class="sparkCol">{#if sp}<svg class="spark {sp.tone}" width="54" height="15" viewBox="0 0 54 15">{#if sp.zeroY}<line x1="0" y1={sp.zeroY} x2="54" y2={sp.zeroY} stroke="var(--dim)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.55" />{/if}<polyline points={sp.points} fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" />{#each sp.clipMarks as cm}<circle cx={cm.x} cy={cm.y} r="1.7" fill="none" stroke="currentColor" stroke-width="0.8" />{/each}<circle cx={sp.lastX} cy={sp.lastY} r="1.5" fill="currentColor" /></svg>{/if}</td>{/if}
+                              {#each cols as c, ci}{#if ci === 0}<td class="lbl">{row[c]}</td>{:else if c === '판정'}{@const vt = verdictTone(row[c])}<td class="verdict {vt}"><span class="vPill {vt}">{#if vt === 'ok'}<span class="vMark">●</span>{:else if vt === 'warn'}<span class="vMark">▲</span>{/if}{row[c]}</span></td>{:else if TXT_COLS.has(c)}<td class="txt {c === '기준' ? 'threshold' : ''}">{row[c]}</td>{:else}<td class="num {cellTone(row[c])}" class:dash={String(row[c] ?? '').trim() === '-'}>{row[c]}</td>{/if}{/each}
+                              {#if ts}{@const sp = spark(row, cols.slice(1))}<td class="sparkCol">{#if sp}<svg class="spark" width="64" height="22" viewBox="0 0 64 22" preserveAspectRatio="none">{#if sp.zeroY}<line x1="0" y1={sp.zeroY} x2="64" y2={sp.zeroY} stroke="var(--dim)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.5" />{/if}<polygon points={sp.area} fill="currentColor" opacity="0.10" stroke="none" /><polyline points={sp.points} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />{#each sp.clipMarks as cm}<circle cx={cm.x} cy={cm.y} r="1.8" fill="none" stroke="currentColor" stroke-width="0.9" />{/each}<circle cx={sp.lastX} cy={sp.lastY} r="2" fill="currentColor" /></svg>{:else}<span class="sparkDash">·</span>{/if}</td>{/if}
                             </tr>
                           {/each}
                         </tbody>
                       </table>
+                    </div>
+                  {:else if b.type === 'bars'}
+                    {@const mx = Math.max(...b.rows.map((r) => Math.abs(r.value)), 1e-9)}
+                    <div class="barChart">
+                      {#if b.label}<div class="tCap">{b.label}</div>{/if}
+                      {#each b.rows as r}
+                        <div class="barRow">
+                          <span class="barLbl">{r.label}</span>
+                          <span class="barTrack"><span class="barFill {r.tone ?? ''}" style="width:{Math.max(2, (Math.abs(r.value) / mx) * 100)}%"></span></span>
+                          <span class="barVal {cellTone(r.display)}">{r.display}</span>
+                        </div>
+                      {/each}
+                    </div>
+                  {:else if b.type === 'line'}
+                    {@const g = lineGeo(b.series, b.markers ?? [])}
+                    {#if g}
+                      <div class="lineChart">
+                        {#if b.label}<div class="tCap">{b.label}</div>{/if}
+                        <div class="lineWrap">
+                          <svg class="lineSvg" viewBox="0 0 100 30" preserveAspectRatio="none">
+                            {#each g.mk as m}<line x1="0" y1={m.y} x2="100" y2={m.y} class="lineMarker" />{/each}
+                            <polygon points={g.area} class="lineArea" />
+                            <polyline points={g.pts} class="linePoly" />
+                            <circle cx={g.lastX} cy={g.lastY} r="0.9" class="lineDot" />
+                          </svg>
+                          <span class="lineLast">{b.valueFmt === 'won' ? wonLabel(b.series[b.series.length - 1]) : b.series[b.series.length - 1]}</span>
+                        </div>
+                        <div class="lineAxis">
+                          {#if b.xLabels}<span>{b.xLabels[0]}</span><span>{b.xLabels[1]}</span>{/if}
+                        </div>
+                        {#if b.markers?.length}<div class="lineLegend">{#each b.markers as m}<span class="lmk">{m.label} {b.valueFmt === 'won' ? wonLabel(m.v) : m.v}</span>{/each}</div>{/if}
+                      </div>
+                    {/if}
+                  {:else if b.type === 'share'}
+                    <div class="shareChart">
+                      {#if b.label}<div class="tCap">{b.label}</div>{/if}
+                      {#each b.rows as row}
+                        <div class="shareRow">
+                          <span class="shareYr">{row.year}</span>
+                          <span class="shareBar">{#each row.segs as s}<span class="shareSeg seg-{s.key}" style="width:{Math.max(0, s.pct)}%" title="{s.label} {s.pct.toFixed(1)}%"></span>{/each}</span>
+                          <span class="shareTop">{row.segs[0].pct.toFixed(0)}%</span>
+                        </div>
+                      {/each}
+                      <div class="shareLegend">{#each b.legend as l}<span class="slg seg-{l.key}"><span class="slgDot"></span>{l.label}</span>{/each}</div>
                     </div>
                   {:else if b.type === 'flags'}
                     <ul class="bFlags {b.kind}">{#each b.flags as f}<li>{f}</li>{/each}</ul>
@@ -468,9 +541,10 @@
   /* ── 핵심 요약 ── */
   .conclusion { font-size: 19px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.01em; line-height: 1.45; }
   .kpiBand { display: grid; grid-template-columns: repeat(6, 1fr); gap: 9px; margin: 4px 0 4px; }
-  .kpi { background: var(--soft); border: 1px solid var(--bd); border-radius: 8px; padding: 10px 13px; display: flex; flex-direction: column; justify-content: flex-start; gap: 4px; min-height: 64px; }
-  .kLabel { font-size: 11px; color: var(--dim); font-weight: 500; min-height: 2.4em; line-height: 1.25; }
-  .kVal { font-size: clamp(15px, 1.45vw, 18px); font-weight: 800; font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; margin-top: auto; }
+  /* 라벨 2줄 고정 행 + 값 1행 — 라벨 길이와 무관하게 모든 값이 한 baseline 에 정렬 */
+  .kpi { background: var(--soft); border: 1px solid var(--bd); border-radius: 8px; padding: 10px 13px; display: grid; grid-template-rows: 2.6em 1fr; gap: 2px; min-height: 64px; }
+  .kLabel { font-size: 11px; color: var(--dim); font-weight: 500; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .kVal { font-size: clamp(15px, 1.45vw, 18px); font-weight: 800; font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; align-self: end; }
   .kVal.neg { color: var(--down); } .kVal.pos { color: var(--up); }
 
   /* ── 핵심 발견 ── */
@@ -511,37 +585,90 @@
   .rptSection.emph .secTitle::after { content: '핵심'; font-size: 10px; font-weight: 700; color: var(--emph); border: 1px solid var(--emph); border-radius: 4px; padding: 1px 5px; margin-left: 9px; vertical-align: middle; }
 
   .bHeading { font-size: 13px; font-weight: 700; margin: 16px 0 7px; color: var(--ink); }
-  .bText { font-size: 12.5px; line-height: 1.78; margin: 7px 0; }
+  .bText { font-size: 12.5px; line-height: 1.78; margin: 7px 0; max-width: 74ch; }
 
-  .bMetrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin: 10px 0; }
-  .metric { background: var(--soft); border: 1px solid var(--bd); border-radius: 7px; padding: 8px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .bMetrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 8px; margin: 12px 0; }
+  .metric { background: var(--soft); border: 1px solid var(--bd); border-left: 2.5px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 7px; padding: 9px 13px; display: flex; flex-direction: column; gap: 4px; }
+  .rptSection.src-quant .metric { border-left-color: color-mix(in srgb, var(--e-quant) 60%, transparent); }
   .mLabel { font-size: 10.5px; color: var(--dim); }
-  .mValue { font-size: 15px; font-weight: 700; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .mValue { font-size: 17px; font-weight: 800; font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
   .mValue.neg { color: var(--down); } .mValue.pos { color: var(--up); }
 
   .bTableWrap { margin: 12px 0; overflow-x: auto; }
   .tCap { font-size: 11.5px; color: var(--dim); margin-bottom: 6px; font-weight: 600; }
   .bTable { border-collapse: collapse; font-size: 12px; width: 100%; }
-  .bTable th { padding: 7px 10px; border-bottom: 2px solid var(--bd2); color: var(--dim); font-weight: 700; font-family: var(--mono); }
+  .bTable th { padding: 7px 10px; border-bottom: 1.5px solid var(--ink); color: var(--dim); font-weight: 700; font-family: var(--mono); background: color-mix(in srgb, var(--soft) 70%, transparent); }
   .bTable th.lbl { text-align: left; font-family: var(--sans); }
   .bTable th.num, .bTable th.sparkCol { text-align: right; }
+  /* 라벨열↔연도격자 구분선(첫 데이터열 좌측 경계 — '연구 exhibit' 인상) */
+  .bTable th.num:first-of-type, .bTable td.num:first-of-type,
+  .bTable th.verdict-h:first-of-type, .bTable td.verdict:first-of-type,
+  .bTable th.txt-h:first-of-type, .bTable td.txt:first-of-type { border-left: 1px solid var(--bd); }
   .bTable td { padding: 6px 10px; border-bottom: 1px solid var(--bd); }
   .bTable td.lbl { text-align: left; font-weight: 600; white-space: nowrap; }
   .bTable td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
   .bTable td.num.neg { color: var(--down); } .bTable td.num.pos { color: var(--up); }
+  .bTable td.num.dash { color: var(--bd2); } /* 결측 '-' 은 옅게 — 있는 숫자가 도드라지게 */
   /* 비숫자 의미 컬럼 — 좌측 sans (시계열표 흉내 방지) */
   .bTable td.txt, .bTable th.txt-h { text-align: left; font-family: var(--sans); color: var(--ink); font-weight: 400; }
   .bTable td.txt.threshold { color: var(--dim); font-size: 11px; }
-  /* 판정 — 신호색(양호=녹·주의=황갈·산출불가=중립). 적색은 음수 SSOT라 주의에 안 씀 */
-  .bTable td.verdict, .bTable th.verdict-h { text-align: center; font-family: var(--sans); font-weight: 700; white-space: nowrap; }
-  .bTable td.verdict.ok { color: var(--up); }
-  .bTable td.verdict.warn { color: var(--warn); }
-  .vMark { font-size: 8px; margin-right: 4px; vertical-align: 1px; }
-  .vMark.ok { color: var(--up); } .vMark.warn { color: var(--warn); }
+  /* 판정 — 상태 칩(양호=녹·주의=황갈·산출불가=중립). 적색은 음수 SSOT라 주의에 안 씀 */
+  .bTable td.verdict, .bTable th.verdict-h { text-align: center; font-family: var(--sans); white-space: nowrap; }
+  .vPill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 11px; }
+  .vPill.ok { color: var(--up); background: color-mix(in srgb, var(--up) 13%, transparent); }
+  .vPill.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 15%, transparent); }
+  .vMark { font-size: 8px; vertical-align: 1px; }
   .bTable tbody tr:nth-child(even) { background: var(--soft); }
-  .bTable td.sparkCol { text-align: right; padding-right: 4px; width: 58px; }
-  .spark { vertical-align: middle; color: var(--dim); }
-  .spark.up { color: var(--up); } .spark.down { color: var(--down); } .spark.flat { color: var(--dim); }
+  .bTable tbody tr:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  /* 스냅샷 표(시계열 아님 — 주요주주·임원보수·감사이력) — 인셋처럼 한 단계 축소 */
+  .bTable.snapshot { font-size: 11.5px; }
+  .bTable.snapshot th { background: color-mix(in srgb, var(--soft) 45%, transparent); border-bottom-color: var(--bd2); }
+  .bTable.snapshot td { padding: 5px 10px; }
+  /* 스냅샷 결측은 본문표보다 덜 옅게 — 빈 행이 '깨진 칸'이 아니라 '값 없음'으로 읽히게 */
+  .bTable.snapshot td.num.dash { color: color-mix(in srgb, var(--bd2) 55%, var(--dim)); }
+  .bTable td.sparkCol { text-align: right; padding-right: 2px; width: 74px; }
+  .spark { vertical-align: middle; color: var(--accent); width: 64px; height: 22px; }
+  .sparkDash { color: var(--bd2); font-size: 11px; }
+
+  /* ── 막대 차트(채무 만기 사다리 등) ── */
+  .barChart { margin: 12px 0; }
+  .barRow { display: grid; grid-template-columns: 88px 1fr 80px; align-items: center; gap: 10px; padding: 3px 0; }
+  .barLbl { font-size: 11.5px; color: var(--ink); text-align: right; }
+  .barTrack { height: 15px; background: var(--soft); border-radius: 3px; overflow: hidden; }
+  .barFill { display: block; height: 100%; background: var(--accent); border-radius: 3px; min-width: 2px; }
+  .barFill.neg { background: var(--down); }
+  .barVal { font-size: 11.5px; font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  .barVal.neg { color: var(--down); }
+
+  /* ── 라인 차트(주가 궤적) ── */
+  .lineChart { margin: 14px 0; }
+  .lineWrap { position: relative; }
+  .lineSvg { width: 100%; height: 98px; display: block; overflow: visible; }
+  .linePoly { fill: none; stroke: var(--e-quant); stroke-width: 1.6; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+  .lineArea { fill: var(--e-quant); opacity: 0.1; stroke: none; }
+  .lineMarker { stroke: var(--dim); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.5; vector-effect: non-scaling-stroke; }
+  .lineDot { fill: var(--e-quant); }
+  .lineLast { position: absolute; top: -7px; right: 0; font-size: 11.5px; font-family: var(--mono); font-weight: 800; color: var(--e-quant); }
+  .lineAxis { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); font-family: var(--mono); margin-top: 4px; }
+  .lineLegend { display: flex; gap: 14px; margin-top: 5px; }
+  .lmk { font-size: 10.5px; color: var(--dim); }
+
+  /* ── 누적 점유 막대(소유 집중도) ── */
+  .shareChart { margin: 12px 0; }
+  .shareRow { display: grid; grid-template-columns: 50px 1fr 42px; align-items: center; gap: 10px; padding: 2px 0; }
+  .shareYr { font-size: 11px; color: var(--dim); font-family: var(--mono); text-align: right; }
+  .shareBar { display: flex; height: 16px; border-radius: 3px; overflow: hidden; background: var(--soft); }
+  .shareSeg { height: 100%; }
+  .shareSeg.seg-major { background: var(--accent); }
+  .shareSeg.seg-minor { background: color-mix(in srgb, var(--e-quant) 72%, transparent); }
+  .shareSeg.seg-other { background: var(--bd2); }
+  .shareTop { font-size: 11px; font-family: var(--mono); text-align: right; color: var(--ink); }
+  .shareLegend { display: flex; gap: 14px; margin-top: 7px; padding-left: 60px; }
+  .slg { font-size: 10.5px; color: var(--dim); display: inline-flex; align-items: center; gap: 5px; }
+  .slgDot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .slg.seg-major .slgDot { background: var(--accent); }
+  .slg.seg-minor .slgDot { background: color-mix(in srgb, var(--e-quant) 72%, transparent); }
+  .slg.seg-other .slgDot { background: var(--bd2); }
 
   .bFlags { padding-left: 18px; margin: 9px 0; font-size: 12.5px; line-height: 1.7; }
   .bFlags.warning li { color: var(--warn); } .bFlags.opportunity li { color: var(--up); }

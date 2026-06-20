@@ -6,8 +6,15 @@ export type ReportBlock =
 	| { type: 'heading'; title: string }
 	| { type: 'text'; text: string }
 	| { type: 'metrics'; metrics: { label: string; value: string }[] }
-	| { type: 'table'; label?: string; data: Record<string, string>[] }
-	| { type: 'flags'; kind: 'warning' | 'opportunity'; flags: string[] };
+	| { type: 'table'; label?: string; data: Record<string, string>[]; snapshot?: boolean }
+	| { type: 'flags'; kind: 'warning' | 'opportunity'; flags: string[] }
+	// ── 차트 블록(이미 로드한 데이터의 시각화 — 발명 없음) ──
+	// 수평 막대: 값 크기 비교(채무 만기 사다리 등). value=정렬·스케일용 숫자, display=표시 문자열.
+	| { type: 'bars'; label?: string; rows: { label: string; value: number; display: string; tone?: 'neg' }[] }
+	// 라인: 시계열(주가 궤적 등). series=정규화 전 원값, markers=수평 기준선(52주 고저 등).
+	| { type: 'line'; label?: string; series: number[]; xLabels?: [string, string]; markers?: { label: string; v: number }[]; valueFmt?: 'won' }
+	// 100% 누적 점유: 연도별 구성비(소유 집중도 등). segs 합 100 가정(나머지는 호출부에서 '기타'로).
+	| { type: 'share'; label?: string; rows: { year: string; segs: { label: string; pct: number; key: string }[] }[]; legend: { label: string; key: string }[] };
 
 export type ReportSourceEngine = 'analysis' | 'credit' | 'quant' | 'industry' | 'macro' | 'story';
 
