@@ -61,7 +61,7 @@
 	let discussOpen = $state(false); // 종목 토론 드로어 (giscus)
 	let supportOpen = $state(false); // 후원·기여 센터 다이얼로그
 	let macroLensOpen = $state(false);
-	let macroLensTab = $state<MacroLensTab>('regime');
+	let macroLensTab = $state<MacroLensTab>('dashboard');
 	let macroLensFocus = $state('');
 	let industryOpen = $state(false); // 산업 분석 다이얼로그 (좌측 산업 sweep 행 클릭)
 	let industryId = $state('');
@@ -238,7 +238,7 @@
 		try { localStorage.setItem(LAST_SYM_KEY, code); } catch { /* 시크릿 모드 등 */ }
 		setFlash(code + ' · ' + built.name.kr);
 	}
-	function openMacroLens(tab: MacroLensTab = 'regime', focusId = '') {
+	function openMacroLens(tab: MacroLensTab = 'dashboard', focusId = '') {
 		macroLensTab = tab;
 		macroLensFocus = focusId;
 		macroLensOpen = true;
@@ -277,7 +277,7 @@
 			<div class="bootMark">DartLab <span>terminal</span></div>
 			<div class="bootBar"><div class="bootFill"></div></div>
 			<div class="bootMsg">{lang === 'en' ? 'company not found' : '회사 데이터를 찾을 수 없습니다'}</div>
-			<button class="finFullBtn" onclick={() => openMacroLens('regime', '')}>{lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}</button>
+			<button class="finFullBtn" onclick={() => openMacroLens('dashboard', '')}>{lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}</button>
 		</div>
 	{:else}
 		<header class="topBar">

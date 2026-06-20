@@ -95,7 +95,7 @@
 		{#if menu === 'econ'}
 			<div class="ctMenu ctMenuWide">
 				<div class="ctMenuLbl">{T('경제지표 겹쳐보기 (최대 3 · 자기정규화)', 'Economy overlay (max 3 · self-scaled)')}</div>
-				<div class="ctRow"><button class="mItem" onclick={() => { onMacroLens?.('drivers'); menu = 'none'; }}>{T('매크로 렌즈 열기', 'Open Macro Lens')}</button></div>
+				<div class="ctRow"><button class="mItem" onclick={() => { onMacroLens?.('dashboard'); menu = 'none'; }}>{T('매크로 렌즈 열기', 'Open Macro Lens')}</button></div>
 					{#if marketCoMovers.length}
 						<!-- 국내 시장지수 동행(베타) — 거시 driver 와 분리(지수 상관은 거의 최상위라 섞으면 거시를 가림). ⚠ 인과 아님. -->
 						<div class="ctMenuLbl ctMenuGrp">{T('· 국내 시장 동행 (베타 · 인과 아님)', '· domestic market beta (not causation)')}</div>

@@ -128,7 +128,7 @@
 			{#if pop === 'econ'}
 				<div class="crMenu">
 					<div class="ctMenuLbl">{T('경제지표 (최대 3 · 자기정규화)', 'Economy (max 3 · self-scaled)')}</div>
-					<div class="ctRow"><button class="mItem" onclick={() => { onMacroLens?.('drivers'); pop = 'none'; }}>{T('매크로 렌즈 열기', 'Open Macro Lens')}</button></div>
+					<div class="ctRow"><button class="mItem" onclick={() => { onMacroLens?.('dashboard'); pop = 'none'; }}>{T('매크로 렌즈 열기', 'Open Macro Lens')}</button></div>
 					<div class="ctMenuLbl ctMenuGrp">{T('국내 시장 동행 (베타 · 인과 아님)', 'Domestic market beta (not causation)')}</div>
 					<div class="ctRow ctRowWrap">
 						{#each MARKET_INDEX_REFS as r (r.code)}

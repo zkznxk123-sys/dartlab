@@ -418,7 +418,7 @@
 			{@const on = !!k.id && ctl.econ.includes(k.id)}
 			{@const blocked = !!k.id && !on && ctl.econ.length >= ECON_MAX}
 			{#if k.id}
-				<button class="kpiItem kpiBtn" class:on disabled={blocked} title={blocked ? (lang === 'en' ? 'up to 3 economy series' : '경제지표는 동시 3개까지') : lang === 'en' ? 'open Macro Lens + overlay on chart' : '매크로 렌즈 열기 + 차트에 겹쳐보기'} onclick={() => { if (!k.id) return; ctl.toggleEcon(k.id); onMacroLens?.('drivers', k.id); }}><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></button>
+				<button class="kpiItem kpiBtn" class:on disabled={blocked} title={blocked ? (lang === 'en' ? 'up to 3 economy series' : '경제지표는 동시 3개까지') : lang === 'en' ? 'open Macro Lens + overlay on chart' : '매크로 렌즈 열기 + 차트에 겹쳐보기'} onclick={() => { if (!k.id) return; ctl.toggleEcon(k.id); onMacroLens?.('dashboard', k.id); }}><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></button>
 			{:else}
 				<span class="kpiItem"><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></span>
 			{/if}

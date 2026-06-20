@@ -112,7 +112,7 @@
 {#if macro}
 	<Panel {lang} className="eMacro" prov="real" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : ''), en: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : '') }} flush>
 		{#snippet right()}
-			<button class="finFullBtn" onclick={() => onMacroLens?.('regime', 'KR')} title={lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
+			<button class="finFullBtn" onclick={() => onMacroLens?.('dashboard', 'KR')} title={lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
 		{/snippet}
 		<RegimeQuadrant view={macroGlance.regime} {lang} />
 		<MacroPathRail view={macroGlance.path} {lang} mode="compact" onSector={setSector} />
