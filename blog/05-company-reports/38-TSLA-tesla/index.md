@@ -109,7 +109,7 @@ c.analysis("가치평가")["dcfValuation"]
 
 **둘째, Model 라인업 노후화.** Model S(2012), Model X(2015), Model 3(2017), Model Y(2020). 2025년 기준 주력 모델 Model Y가 출시 5년째. 신차 사이클이 끊겼다. Cybertruck은 2024년 양산 시작했지만 분기 1만 대 수준으로 전체 볼륨에 기여가 미미하다.
 
-**셋째, 브랜드 리스크.** 2024~2025년 Elon Musk의 정치적 입장이 주요 시장에서 수요에 영향을 줬다. 유럽·캘리포니아 등에서 Tesla 보이콧 움직임이 수치로 드러났다([Reuters, 2025](https://www.reuters.com/business/autos-transportation/tesla-european-sales-2025/)). 브랜드 프리미엄으로 유지되던 수요 저변이 흔들렸다.
+**셋째, 가격과 제품 믹스 리스크.** 2026년 1분기 10-Q에서 총매출은 $22.387B, 영업이익은 $0.941B다. 자동차+서비스 매출총이익률은 18.9%까지 회복됐지만 R&D $1.946B와 판관비 $1.833B가 같이 올라 영업이익률은 4.2%에 머물렀다. 공시로 확인되는 것은 브랜드 논쟁이 아니라 가격·물량·비용이 동시에 민감해진 구조다.
 
 ### 자동차 회사의 생애주기
 
@@ -351,7 +351,7 @@ dartlab의 dFV v2 DCF 모델이 계산한 Tesla의 **기업가치는 -$3.7B**다
 
 왜 이런 결과가 나오는가?
 
-1. **초기 성장률 5.19%** — 4년 전(8년 연평균성장률 35%) 대비 급락. 현재의 매출 역성장을 반영한 보수적 추정.
+1. **초기 성장률 5.19%** — 4년 전(8년 연평균성장률 35%) 대비 급락. 현재의 매출 역성장을 반영한 보수적 가정.
 2. **WACC 9.32%** — 자동차 업종 기준 + Tesla의 현재 투하자본수익률(4.27%) 반영.
 3. **잉여현금흐름 3~5년차 마이너스** — 현 추세 연장 시 설비투자가 영업활동현금흐름를 초과.
 4. **영구성장률 3%** — 자동차 산업 평균.
@@ -387,12 +387,12 @@ val["priceTarget"]
 
 시장이 Tesla를 $1T로 평가한다는 것은 DCF에 없는 사업들의 **옵션 가치**가 $500B~$700B 있다고 본다는 뜻이다. 구체적으로:
 
-1. **로보택시.** 완전 자율주행 구현 시 자동차 판매 + 라이드 공유 수수료. 시장 잠재력 수천억 달러 추정.
+1. **로보택시.** 완전 자율주행 구현 시 자동차 판매 + 라이드 공유 수수료가 붙을 수 있지만, 공시 재무제표에는 아직 별도 매출 라인으로 잡히지 않았다.
 2. **FSD(Full Self-Driving) 라이선싱.** 다른 자동차 제조사에 FSD 소프트웨어 판매. Apple이 CarPlay를 파는 것과 유사한 모델.
 3. **Optimus 로봇.** 휴머노이드 로봇 양산 시 산업용·가정용 수요. Musk는 Tesla의 장기 가치 대부분이 Optimus에서 나올 것이라고 발언.
 4. **Dojo + xAI.** AI 인프라와 모델 자체의 가치.
 
-이 네 가지가 모두 실현되면 $1T이 저평가일 수 있다. 하나도 실현되지 않으면 $321B이 적정가일 수 있다. **Tesla는 회사라기보다 네 가지 옵션의 포트폴리오에 가깝다.** Wall Street 애널리스트의 목표주가 분포도 이 옵션별 가중치 차이에서 온다([Morgan Stanley Tesla Price Target Breakdown](https://www.morganstanley.com/ideas/tesla-valuation-auto-ai-energy))—자동차 사업만 보는 하우스는 $200~300/주, 로보택시·Optimus를 전부 반영하는 하우스는 $500+/주를 부른다.
+이 네 가지가 모두 실현되면 $1T이 저평가일 수 있다. 하나도 실현되지 않으면 $321B이 적정가일 수 있다. **Tesla는 회사라기보다 네 가지 옵션의 포트폴리오에 가깝다.** 그래서 이 글은 공시 재무제표와 dartlab DCF를 자동차 사업의 바닥값으로 두고, 로보택시·FSD·Optimus·Dojo는 아직 손익계산서에 찍히지 않은 옵션으로 분리해 읽는다.
 
 ### Beneish M-Score: 분식 위험은 낮다
 
@@ -425,116 +425,57 @@ cr = c.credit("등급")
 
 ---
 
-## 검증표
+## 공시 / Filings
 
-| 본문 수치 | dartlab 호출 | 결과 |
-|---|---|---|
-| 2025 매출 $94.83B | `c.select("IS",["매출액"])` 분기 합산 | 실측 94,827M |
-| 2025 매출 YoY -2.9% | `c.analysis("financial","성장성")["growthTrend"]` | 실측 -2.93% |
-| 2025 영업이익 $4.36B | `c.select("IS",["영업이익"])` 분기 합산 | 실측 4,355M |
-| 2025 영업이익 YoY -38.4% | `c.analysis("financial","성장성")["growthTrend"]` | 실측 -38.45% |
-| 2025 당기순이익 $3.85B | `c.select("IS",["당기순이익"])` 분기 합산 | 실측 3,794M |
-| 2025 매출총이익률 18.0% | `c.analysis("financial","수익성")["marginWaterfall"]` | 실측 18.03% |
-| 2025 영업이익률 4.6% | 같은 출처 | 실측 4.59% |
-| 2022 영업이익률 16.8% | 과거 시계열 | 실측 16.77% |
-| 2025 자본 $82.9B | `c.select("BS",["자본총계"])` Q4 | 실측 82,865M |
-| 자본 YoY +165% | `c.analysis("financial","안정성")["leverageTrend"]` | 실측 +165.11% |
-| 2025 영업활동현금흐름 $14.75B | `c.select("CF",["영업활동현금흐름"])` 분기 합산 | 실측 14,747M |
-| 2025 설비투자 $8.53B | `c.analysis("financial","투자효율")["investmentIntensity"]` | 실측 8,527M |
-| 2025 잉여현금흐름 $6.22B | `c.analysis("financial","현금흐름")["cashFlowOverview"]` | 실측 6,220M |
-| 영업활동현금흐름/NI 389% | `c.analysis("financial","현금흐름")["cashQuality"]` | 실측 388.7% |
-| 2025 EVA -$4.19B | `c.analysis("financial","투자효율")["evaTimeline"]` | 실측 -4,187M |
-| 투하자본수익률 4.27%, WACC 9.89% | 같은 출처 | 실측 4.27 / 9.89 |
-| DCF EV -$3.7B | `c.analysis("가치평가")["dcfValuation"]` | 실측 -3,741M |
-| 가중 타겟 $963B (중앙값 $321B) | `c.analysis("가치평가")["priceTarget"]` | 실측 |
-| 영업레버리지 13.1 | `c.analysis("financial","성장성")["growthQuality"]` | 실측 13.12 |
-| dCR-AA- | `c.credit("등급")["grade"]` | 실측 |
-| 건강점수 90.19 | `c.credit("등급")["healthScore"]` | 실측 |
-| 순차입금 -$8.4B | `c.analysis("financial","안정성")["leverageTrend"]` | 실측 -8,360M |
-| 매출채권 33%p 빠른 성장 | `c.analysis("financial","종합평가")["summaryFlags"]` | 실측 플래그 |
-| 감가상각 $6.6B | 외부: Tesla 10-K 2025 | SEC 공시 |
-| Musk 성과보수 $29B | 외부: Tesla Proxy 2025 | SEC DEF 14A |
+- 최신 분기 공시: [Tesla 2026 Q1 Form 10-Q, quarter ended 2026-03-31](https://www.sec.gov/Archives/edgar/data/1318605/000162828026026673/tsla-20260331.htm)
+- 최신 연간 공시: [Tesla FY2025 Form 10-K, year ended 2025-12-31](https://www.sec.gov/Archives/edgar/data/1318605/000162828026003952/tsla-20251231.htm)
+- 마진 기준: 2026 Q1 10-Q의 automotive, automotive + services and other, energy generation and storage gross margin discussion
 
 ---
 
-<!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
+## 재무제표 — 최근 6개년 (dartlab 연결, $B)
 
+단위는 USD 십억 달러다. dartlab의 분기 데이터를 역년으로 합산한 값이므로, 회사 10-K의 회계연도 표와 반올림·분기 경계가 다를 수 있다.
 
-## 공시 / Filings
+```python
+import dartlab
+c = dartlab.Company("TSLA")
+c.select("IS", ["sales", "operating_profit", "net_income"], freq="Y")
+```
+| 항목 ($B) | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|
+| 매출액 | 31.5 | 53.8 | 81.5 | 96.8 | 97.7 | 94.8 |
+| 영업이익 | 2.0 | 6.5 | 13.7 | 8.9 | 7.1 | 4.4 |
+| 당기순이익 | 0.9 | 5.6 | 12.6 | 15.0 | 7.2 | 3.9 |
 
-| 기간 | 보고서 | 링크 |
-|------|--------|------|
-| 2025Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
-| 2025Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
-| 2025Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
-| 2025 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-K&dateb=&owner=include&count=10) |
-| 2024Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
-| 2024Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
-| 2024Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
-| 2024 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-K&dateb=&owner=include&count=10) |
-| 2023Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
-| 2023Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+```python
+import dartlab
+c = dartlab.Company("TSLA")
+c.select("CF", ["operating_cashflow"], freq="Y")
+```
+| 항목 ($B) | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|
+| 영업활동현금흐름 | 5.9 | 11.5 | 14.7 | 13.3 | 14.9 | 14.7 |
 
-> 전체 공시 목록은 dartlab에서 확인:
-> ```python
-> import dartlab
-> c = dartlab.Company("TSLA")
-> c.filings()
-> ```
+| 보조 비율 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|
+| 영업이익률(OPM) | 6.3% | 12.1% | 16.8% | 9.2% | 7.3% | 4.6% |
+| 순이익률(NPM) | 2.9% | 10.4% | 15.5% | 15.5% | 7.4% | 4.1% |
 
-## 재무제표 — 최근 5개년
+---
 
-> 아래는 최근 5개년 요약입니다. 전체 기간·분기별 데이터는 dartlab에서 직접 확인할 수 있습니다:
-> ```python
-> import dartlab
-> c = dartlab.Company("TSLA")
-> c.panel("IS")              # 손익계산서 (분기)
-> c.panel("IS", freq="Y")    # 손익계산서 (연간)
-> c.panel("BS")              # 재무상태표
-> c.panel("CF")              # 현금흐름표
-> c.panel("SCE")             # 자본변동표
-> c.panel("ratios")          # 재무비율
-> ```
+## 검증표
 
-### 손익계산서 (IS) — 단위 $M
+본문 인용 수치를 dartlab 호출과 공식 공시로 검증한다. 📅 dartlab 실측 2026-06-20 · TSLA 미국 연결(USD)·분기 합산 기준.
 
-<ComboChart data={[{year:"2025Q4",매출액:24901,영업이익:1409,당기순이익:840},{year:"2025Q3",매출액:28095,영업이익:1624,당기순이익:1373},{year:"2025Q2",매출액:22496,영업이익:923,당기순이익:1172},{year:"2025Q1",매출액:19335,영업이익:399,당기순이익:409},{year:"2024Q4",매출액:25707,영업이익:1583,당기순이익:2314}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="$M" />
+| 본문 수치 | 출처 / 호출 | 판정 |
+|---|---|---|
+| 매출 2024 97.7B → 2025 94.8B | `c.select("IS", ["sales"], freq="Y")` | 실측 |
+| 영업이익 2022 13.7B → 2025 4.4B, 영업이익률 16.8% → 4.6% | `c.select("IS", ["operating_profit"], freq="Y")`, 영업이익÷매출 | 실측 |
+| 2025 영업활동현금흐름 14.7B | `c.select("CF", ["operating_cashflow"], freq="Y")` | 실측 |
+| 2026 Q1 총매출 22.387B, 영업이익 0.941B, 순이익 0.477B | [2026 Q1 10-Q](https://www.sec.gov/Archives/edgar/data/1318605/000162828026026673/tsla-20260331.htm) | 공식 공시 |
+| 2026 Q1 automotive+services gross margin 18.9%, energy gross margin 39.5% | 2026 Q1 10-Q gross margin discussion | 공식 공시 |
+| 2026 Q1 R&D 1.946B(+38%), SG&A 1.833B(+47%) | 2026 Q1 10-Q operating expenses discussion | 공식 공시 |
+| 2026 Q1 other expense -0.535B, 외환·비트코인 디지털자산 평가 영향 | 2026 Q1 10-Q other income expense discussion | 공식 공시 |
 
-| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
-|---|---:|---:|---:|---:|---:|
-| 매출액 | 24,901 | 28,095 | 22,496 | 19,335 | 25,707 |
-| 매출원가 | 19,892 | 23,041 | 18,618 | 16,182 | 21,528 |
-| 매출총이익 | 5,009 | 5,054 | 3,878 | 3,153 | 4,179 |
-| 판매비와관리비 | 1,655 | 1,562 | 1,366 | 1,251 | 1,313 |
-| 영업이익 | 1,409 | 1,624 | 923 | 399 | 1,583 |
-| 금융수익 | — | — | — | — | — |
-| 금융비용 | — | — | — | — | — |
-| 당기순이익 | 840 | 1,373 | 1,172 | 409 | 2,314 |
-
-### 재무상태표 (BS) — 단위 $M
-
-<StackBar data={[{year:"2025Q4",segments:[{label:"부채",value:54941,color:"#ef4444"},{label:"자본",value:82865,color:"#22c55e"}]},{year:"2025Q3",segments:[{label:"부채",value:53019,color:"#ef4444"},{label:"자본",value:80716,color:"#22c55e"}]},{year:"2025Q2",segments:[{label:"부채",value:50495,color:"#ef4444"},{label:"자본",value:75417,color:"#22c55e"}]},{year:"2025Q1",segments:[{label:"부채",value:49693,color:"#ef4444"},{label:"자본",value:75418,color:"#22c55e"}]},{year:"2024Q4",segments:[{label:"부채",value:43009,color:"#ef4444"},{label:"자본",value:31257,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="$M" />
-
-| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
-|---|---:|---:|---:|---:|---:|
-| 자산총계 | 137,806 | 133,735 | 128,567 | 125,111 | 106,618 |
-| 유동자산 | 68,642 | 64,653 | 61,133 | 59,389 | 49,616 |
-| 비유동자산 | 45,247 | 44,080 | 43,362 | 41,943 | 34,954 |
-| 부채총계 | 54,941 | 53,019 | 50,495 | 49,693 | 43,009 |
-| 유동부채 | 31,714 | 31,290 | 30,008 | 29,753 | 28,748 |
-| 비유동부채 | — | — | — | — | — |
-| 자본총계 | 82,865 | 80,716 | 75,417 | 75,418 | 31,257 |
-
-### 현금흐름표 (CF) — 단위 $M
-
-<ComboChart data={[{year:"2025Q4",영업CF:3813,투자CF:0,재무CF:710},{year:"2025Q3",영업CF:6238,투자CF:-4355,재무CF:983},{year:"2025Q2",영업CF:2540,투자CF:-2944,재무CF:-222},{year:"2025Q1",영업CF:2156,투자CF:-1651,재무CF:-332},{year:"2024Q4",영업CF:4814,투자CF:0,재무CF:985}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="$M" />
-
-| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
-|---|---:|---:|---:|---:|---:|
-| 영업활동현금흐름 | 3,813 | 6,238 | 2,540 | 2,156 | 4,814 |
-| 투자활동현금흐름 | — | -4,355 | -2,944 | -1,651 | — |
-| 재무활동현금흐름 | 710 | 983 | -222 | -332 | 985 |
-
-*최종 갱신: 2026-04-16 | dartlab 실측 (DART 공시 기준)*
-
-<!-- AUTO:END -->
+분해 한계: 로보택시, FSD 라이선싱, Optimus, Dojo는 공시 재무제표에서 독립 매출·영업이익 라인으로 검증되지 않는다. dartlab DCF는 현재 확인된 자동차·에너지·서비스 현금흐름을 할인하고, 옵션 가치는 본문에서 별도로 분리해 해석한다.
