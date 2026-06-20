@@ -137,7 +137,7 @@ OPM이 6년 밴드 안에 거의 고정(4.3%→4.3%)인 동안, NPM은 2019년 1
 
 **광고가 작은데 왜 자꾸 광고 이야기인가.** 두 사실이 *공존*할 뿐이다.
 
-'광고·멤버십이 빠르게 큰다'는 보도와, 그것이 여전히 전사 매출의 약 0.65% 소형이라는 사실은 서로 어긋나지 않는다 — 둘 다 참이다. 다만 한 가지는 분명히 해 둔다. *'광고가 작다'를 '그래서 영업마진이 얇다'의 증거로 잇지 않는다* — 둘은 각각 참인 별개의 사실이지, 하나가 다른 하나의 인과 증거가 아니다(부문 마진 70~90% vs 소매 3~4% 같은 격차는 회사 공식 공시가 아닌 언론·업계 추정 framing이다).
+'광고·멤버십이 빠르게 큰다'는 보도와, 그것이 여전히 전사 매출의 약 0.65% 소형이라는 사실은 서로 어긋나지 않는다 — 둘 다 참이다. 다만 한 가지는 분명히 해 둔다. *'광고가 작다'를 '그래서 영업마진이 얇다'의 증거로 잇지 않는다* — 둘은 각각 참인 별개의 사실이지, 하나가 다른 하나의 인과 증거가 아니다(부문 마진 70~90% vs 소매 3~4% 같은 격차는 회사 공식 공시가 아닌 공시 밖 프레이밍이다).
 
 정직한 결론은 이렇다. 연결 손익으로 증명된 단 하나의 마진 사실은 *전사 OPM 4.3%*다. 간판 사업의 마진은 6년째 그 자리에 못 박혀 있고, 손익을 움직인 건 영업 바깥(2019 저점의 소멸·정상화)이었다. **6,810억 달러를 굴리는 거인의 영업마진은 6년째 4.3% — 안 변한 것은 간판이고, 움직인 것은 영업 바깥의 순이익뿐이었다.** 같은 초박리라도 입구의 회비로 이익을 정산받는 [코스트코](/blog/COST-costco)와 달리, 월마트는 통합형으로 그 박리를 그대로 떠안는다. 그리고 외형을 키울수록 마진율을 *올린* [애플](/blog/AAPL-apple)의 정반대 자리에 선다 — 같은 시리즈의 두 극단이다. 한국 대형마트의 거울로는 [이마트](/blog/139480-emart)가, 외형은 +40% 컸는데 수익성이 안 따라온 결로는 [펩시코](/blog/PEP-pepsico)가 나란히 놓이고, 간판 사업의 마진 자체가 무너진 [스타벅스](/blog/SBUX-starbucks)와도 '간판=초박리 상수'라는 점에서 갈린다.
 
@@ -196,7 +196,7 @@ Q1 FY2027을 기존 6년 표와 연결하면 결론은 이렇게 정리된다. 2
 
 여기까지 읽으면 자연스러운 반론이 나온다. "광고와 멤버십이 빠르게 자라고 있고, eCommerce도 좋아지고 있는데 왜 아직도 월마트를 초박리 유통회사로 묶느냐"는 반론이다. 이 반론은 중요하다. 월마트를 과거의 오프라인 할인점으로만 읽는 것도 틀리기 때문이다. 회사는 분명히 바뀌고 있다. 매장은 fulfillment node가 되고, 광고는 Walmart Connect로 커지고, marketplace는 제3자 판매자와 데이터 기반 광고를 붙인다. Sam's Club과 Walmart+의 membership economics도 예전보다 중요해졌다. 문제는 변화의 존재가 아니라 변화의 **회계적 크기**다.
 
-플랫폼 전환을 인정하려면 세 가지가 필요하다. 첫째, 플랫폼성 수익원의 절대 매출 또는 순수익이 전사 매출 대비 의미 있는 비중으로 올라와야 한다. 둘째, 그 수익원이 전사 operating income을 얼마나 올리는지 회사가 공시하거나 최소한 합리적으로 추정 가능한 구조가 필요하다. 셋째, 전사 OPM이 4%대에서 구조적으로 이탈해야 한다. 현재 공시로 확실히 말할 수 있는 것은 첫째의 일부와 둘째의 방향성이다. 광고·멤버십·marketplace가 자라는 것은 맞지만, 전사 operating income의 구조적 레벨업은 아직 숫자로 닫히지 않았다.
+플랫폼 전환을 인정하려면 세 가지가 필요하다. 첫째, 플랫폼성 수익원의 절대 매출 또는 순수익이 전사 매출 대비 의미 있는 비중으로 올라와야 한다. 둘째, 그 수익원이 전사 operating income을 얼마나 올리는지 회사가 공시하거나 최소한 공시로 산출 가능한 구조가 필요하다. 셋째, 전사 OPM이 4%대에서 구조적으로 이탈해야 한다. 현재 공시로 확실히 말할 수 있는 것은 첫째의 일부와 둘째의 방향성이다. 광고·멤버십·marketplace가 자라는 것은 맞지만, 전사 operating income의 구조적 레벨업은 아직 숫자로 닫히지 않았다.
 
 반대로 "월마트는 영원히 4%대 회사"라고 단정하는 것도 위험하다. Q1 FY2027에서 Walmart U.S. eCommerce growth 26%, Walmart Connect growth 44%(ex-VIZIO), global membership fee revenue growth 17.4%가 동시에 나왔다. 이 흐름이 몇 년 누적되면 전사 마진 구조를 바꿀 수 있다. 특히 광고는 상품 매출과 달리 incremental margin이 높을 가능성이 있다. marketplace는 inventory risk를 줄이고, 자동화는 fulfillment cost를 낮출 수 있다. 이 모든 것은 장기적으로 OPM을 올릴 수 있는 후보들이다. 그래서 이 글은 플랫폼 전환을 부정하지 않는다. 다만 **아직 연결 손익이 그 전환을 완성된 사실로 보여주지는 않는다**고 말한다.
 
@@ -208,7 +208,7 @@ Q1 FY2027을 기존 6년 표와 연결하면 결론은 이렇게 정리된다. 2
 
 네 번째 반론은 "Q1의 fuel cost 같은 일회성 압박을 빼면 더 좋아 보인다"는 것이다. 맞다. Q1 FY2027 operating income은 higher fuel costs in distribution and fulfillment의 영향을 받았다. 이런 비용이 완화되면 OPM은 개선될 수 있다. 하지만 소매 운영에서는 한 비용이 사라지면 다른 비용이 올라오는 일이 많다. 임금, 헬스케어, depreciation, shrink, transportation, technology investment가 번갈아 손익을 누른다. 그래서 한 분기의 비용 압박을 제거해 normalized margin을 상상하는 것은 가능하지만, 그것을 곧장 구조적 마진으로 쓰면 안 된다.
 
-다섯 번째 반론은 "광고가 net sales 또는 cost of sales 차감으로 기록된다는 footnote는 보수적 회계일 뿐, 실제 경제성은 더 좋다"는 것이다. 이 역시 일부 맞을 수 있다. 투자자는 공시보다 경제적 실질을 보려 한다. 다만 실질을 보려면 추정이 필요하고, 추정은 민감도를 가져야 한다. 광고 매출, 광고 마진, marketplace take-rate, fulfillment cost, membership retention, automation capex를 각각 가정해야 한다. 이 글은 추정 모델을 만들지 않는다. 대신 추정 모델의 입력값 중 회사가 공시한 것과 공시하지 않은 것을 구분한다. 공시가 없는 입력값은 흥미로운 가설이지 본문 핵심 수치가 아니다.
+다섯 번째 반론은 "광고가 net sales 또는 cost of sales 차감으로 기록된다는 footnote는 보수적 회계일 뿐, 실제 경제성은 더 좋다"는 것이다. 이 역시 일부 맞을 수 있다. 투자자는 공시보다 경제적 실질을 보려 한다. 다만 실질을 보려면 별도 가정이 필요하고, 그 가정은 민감도를 가져야 한다. 광고 매출, 광고 마진, marketplace take-rate, fulfillment cost, membership retention, automation capex를 각각 나눠 봐야 한다. 이 글은 가정 모델을 만들지 않는다. 대신 모델의 입력값 중 회사가 공시한 것과 공시하지 않은 것을 구분한다. 공시가 없는 입력값은 흥미로운 가설이지 본문 핵심 수치가 아니다.
 
 결국 월마트에서 인정해야 할 것과 미뤄야 할 것이 나뉜다. 인정해야 할 것: 회사는 빠르게 디지털화되고 있고, 광고·멤버십·marketplace는 성장 중이며, Q1 FY2027에서도 그 방향은 유지됐다. 미뤄야 할 것: 그 수익원이 전사 영업마진을 구조적으로 4%대 밖으로 밀어냈다는 결론. 이 구분을 지키면 월마트는 훨씬 흥미로운 회사가 된다. 완성된 플랫폼 기업도 아니고, 낡은 할인점도 아니다. **$713B 장부를 가진 초박리 유통회사가 고마진 레이어를 실제 장부에 얼마나 두껍게 쌓을 수 있는지 검증받는 회사**다.
 
@@ -257,7 +257,7 @@ Q1 FY2027을 기존 6년 표와 연결하면 결론은 이렇게 정리된다. 2
 1. **OPM이 6년 밴드(3.3~4.5%)를 위로 이탈하는가** — 4.5% 초과 시 '구조적으로 고정'이라는 전제를 재검토.
 2. **OPM–NPM 괴리가 더 좁혀지는가** — 2019 약 3.0%p → 2025 약 1.4%p 추세. 영업선 아래 정상화가 일단락됐는지.
 3. **광고 매출의 단일 정의 확정** — 광고가 net sales 또는 cost of sales 차감으로 기록될 수 있다는 footnote가 남아 있는 한, 성장률을 전사 매출·이익에 단순 합산하지 않는다.
-4. **부문 마진 공식 공시 여부** — 광고·멤버십 마진을 회사가 공시하기 시작하는가(공시 전 70~90% framing은 외부 추정).
+4. **부문 마진 공식 공시 여부** — 광고·멤버십 마진을 회사가 공시하기 시작하는가(공시 전 70~90% framing은 공시 밖 가정).
 5. **Q1 FY2027의 비용 압박이 완화되는가** — fuel·depreciation·healthcare costs가 gross profit mix 개선을 얼마나 흡수하는지. 플랫폼 성장률보다 전사 OPM 레벨이 우선이다.
 
 ![월마트 — 2026년에 봐야 할 다섯 가지](./assets/111-checkpoints.svg)
@@ -290,7 +290,7 @@ Q1 FY2027을 기존 6년 표와 연결하면 결론은 이렇게 정리된다. 2
 
 ## 검증표
 
-본문 인용 수치를 dartlab 호출과 결과로 검증한다. 외부 출처(광고·부문 마진·저점 원인)는 분리 표기. 📅 dartlab 실측 2026-06-20 · Walmart(WMT) 미국 연결(USD)·분기 합산 기준.
+본문 인용 수치를 dartlab 호출과 결과로 검증한다. 공시 밖 항목(광고·부문 마진·저점 원인)은 분리 표기. 📅 dartlab 실측 2026-06-20 · Walmart(WMT) 미국 연결(USD)·분기 합산 기준.
 
 | 본문 수치 | 출처 / 호출 | 결과 |
 |---|---|---|
@@ -303,13 +303,13 @@ Q1 FY2027을 기존 6년 표와 연결하면 결론은 이렇게 정리된다. 2
 | 영업현금흐름 27.8B → 36.4B | `c.select("CF",["영업활동현금흐름"])` | ✓ 실측 |
 | FY2026 net sales 706.413B / membership and other income 6.750B / total revenues 713.163B | [FY2026 Form 10-K](https://www.sec.gov/Archives/edgar/data/104169/000010416926000055/wmt-20260131.htm) | 공식 공시 |
 | FY2026 부문: Walmart U.S. net sales 482.975B·OI 25.158B, International 130.423B·5.103B, Sam's Club U.S. 93.015B·2.442B | FY2026 Form 10-K segment table | 공식 공시 |
-| Q1 FY2027 net sales 175.684B / membership and other income 2.067B / total revenues 177.751B / operating income 7.493B | [Q1 FY2027 earnings release](https://corporate.walmart.com/content/dam/corporate/documents/newsroom/2026/05/21/walmart-releases-q1-fy27-earnings/q1-fy27-earnings-release.pdf) | 공식 IR |
-| Q1 FY2027 OCF 4.738B / capex 6.684B / free cash flow -1.9B | Q1 FY2027 earnings release cash flow table | 공식 IR·FCF는 non-GAAP |
+| Q1 FY2027 net sales 175.684B / membership and other income 2.067B / total revenues 177.751B / operating income 7.493B | [Q1 FY2027 Form 10-Q](https://www.sec.gov/Archives/edgar/data/104169/000010416926000102/wmt-20260430.htm) | 공식 공시 |
+| Q1 FY2027 OCF 4.738B / capex 6.684B / free cash flow -1.9B | [Q1 FY2027 Form 10-Q](https://www.sec.gov/Archives/edgar/data/104169/000010416926000102/wmt-20260430.htm) cash flow table, FCF=OCF-capex | 공식 공시·산식 |
 | Q1 FY2027 global eCommerce +26%, global advertising +37%, Walmart Connect ex-VIZIO +44%, global membership fee revenue +17.4% | Q1 FY2027 earnings release highlights | 공식 IR |
 | Q1 FY2027 Sam's Club U.S. net sales 23.4B vs ex-fuel 20.5B | Q1 FY2027 earnings release segment table | fuel 포함/제외 구분 |
-| 광고(Walmart Connect) 매출 FY2025 약 4.4B = 전사 681B의 약 0.65% | [WMT 10-K (SEC)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=10-K) ÷ 내부 매출 | 외부÷내부 파생 |
-| 2019 순익 저점·2023 OPM 딥 구체 원인 / 광고 '1/5' framing 모순 | [WMT IR](https://stock.walmart.com/) · [Reuters](https://www.reuters.com/) · [CNBC](https://www.cnbc.com/) | 외부 인용·합산 불가 |
-| 부문 마진 70~90% vs 3~4%는 언론·업계 추정(회사 미공시) | 언론·업계 framing | 외부 추정 |
+| 광고(Walmart Connect) 매출 FY2025 약 4.4B = 전사 681B의 약 0.65% | [FY2025 Q4 earnings release](https://www.sec.gov/Archives/edgar/data/104169/000010416925000010/earningsreleasefy25q4.htm) ÷ 내부 매출 | 공식 IR·산식 |
+| 광고 '1/5' framing은 연결 손익의 단독 항목이 아니라 광고·멤버십 설명과 섞인 서사 | [FY2025 Q4 earnings release](https://www.sec.gov/Archives/edgar/data/104169/000010416925000010/earningsreleasefy25q4.htm) · [FY2026 Form 10-K](https://www.sec.gov/Archives/edgar/data/104169/000010416926000055/wmt-20260131.htm) | 합산 불가 |
+| 광고·멤버십 부문 마진율은 회사 미공시 | [FY2026 Form 10-K](https://www.sec.gov/Archives/edgar/data/104169/000010416926000055/wmt-20260131.htm) · [Q1 FY2027 Form 10-Q](https://www.sec.gov/Archives/edgar/data/104169/000010416926000102/wmt-20260430.htm) | 공시 밖 가정 |
 | BS(대차대조표) 매핑 불안정 — 인용 주의 | dartlab 데이터 한계 | 주의/제외 |
 
-본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 광고·멤버십·부문 마진·저점 원인은 dartlab 연결로 증명되지 않으며 외부 인용임을 명시한다 — 연결이 증명하는 것은 'OPM 6년 불변 + NPM은 영업선 아래에서 움직임'까지이고, '광고가 진짜 돈줄'은 외부 가설(매출 0.65% 소형)이다.
+본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 광고·멤버십·부문 마진·저점 원인은 dartlab 연결로 증명되지 않으며 공식 공시 보강 항목과 공시 밖 가정으로 분리한다 — 연결이 증명하는 것은 'OPM 6년 불변 + NPM은 영업선 아래에서 움직임'까지이고, '광고가 진짜 돈줄'은 공시 밖 가설(매출 0.65% 소형)이다.
