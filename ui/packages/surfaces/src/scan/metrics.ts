@@ -4,8 +4,8 @@
  * 기본 ecosystem 지표와 런타임 parquet 지표를 한 곳에서 정의한다.
  */
 
-import { fmtPrice } from './format/krw';
-import { fmtPct, fmtMul } from './format/pct';
+import { fmtPrice } from '@dartlab/ui-format/krw';
+import { fmtPct, fmtMul } from '@dartlab/ui-format/pct';
 import type { MetricDef } from './types';
 import { buildFinanceMetricDefs, type FinanceMetricGroup } from './financeAccounts';
 

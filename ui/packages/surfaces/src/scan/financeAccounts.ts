@@ -1,5 +1,5 @@
 import type { MetricDef } from './types';
-import { fmtPct } from './format/pct';
+import { fmtPct } from '@dartlab/ui-format/pct';
 
 export type FinanceMetricGroup =
 	| 'financeIncome'

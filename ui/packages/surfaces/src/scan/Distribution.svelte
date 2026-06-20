@@ -11,8 +11,8 @@
 	import type { DistributionData } from './binning';
 	import { METRICS_BY_KEY } from './metrics';
 	import type { ScanNode } from './types';
-	import { fmtKrw } from './format/krw';
-	import { fmtPct, fmtMul } from './format/pct';
+	import { fmtKrw } from '@dartlab/ui-format/krw';
+	import { fmtPct, fmtMul } from '@dartlab/ui-format/pct';
 
 	interface Props {
 		nodes: ScanNode[];

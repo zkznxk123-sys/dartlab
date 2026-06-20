@@ -5,8 +5,8 @@
 	import Eyebrow from '$lib/components/ui/Eyebrow.svelte';
 	import MonoNumber from '$lib/components/ui/MonoNumber.svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
-	import { fmtKrwFromEok, fmtPrice } from '$lib/format/krw';
-	import { fmtPct, fmtMul } from '$lib/format/pct';
+	import { fmtKrwFromEok, fmtPrice } from '@dartlab/ui-format/krw';
+	import { fmtPct, fmtMul } from '@dartlab/ui-format/pct';
 
 	// 샘플 데이터 (디자인 검증용)
 	const sampleCompany = {

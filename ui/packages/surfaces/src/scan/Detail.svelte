@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fmtPct } from './format/pct';
+	import { fmtPct } from '@dartlab/ui-format/pct';
 	import type { FilingPort, RegularFiling } from '@dartlab/ui-contracts';
 	import type { DartDb } from './duckSql';
 	import { FINANCE_COMPLETED_YEARS, financeMetricKey } from './financeAccounts';

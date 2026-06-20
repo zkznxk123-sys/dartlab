@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pctTone } from '$lib/format/pct';
+	import { pctTone } from '@dartlab/ui-format/pct';
 
 	/** 숫자 표시 — tabular-nums + 톤별 색 */
 	interface Props {

@@ -7,7 +7,7 @@
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Bar from '$lib/components/ui/Bar.svelte';
-	import { fmtKrwFromEok } from '$lib/format/krw';
+	import { fmtKrwFromEok } from '@dartlab/ui-format/krw';
 	import { loadDartDb, type DartDb } from '$lib/data/duckdb';
 
 	// ── DuckDB-WASM 통합 검증 — Phase A ──

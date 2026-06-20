@@ -1,0 +1,24 @@
+{
+	"name": "@dartlab/ui-format",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./krw": {
+			"types": "./src/krw.ts",
+			"svelte": "./src/krw.ts",
+			"default": "./src/krw.ts"
+		},
+		"./pct": {
+			"types": "./src/pct.ts",
+			"svelte": "./src/pct.ts",
+			"default": "./src/pct.ts"
+		}
+	},
+	"scripts": {
+		"check": "tsc -p tsconfig.json"
+	},
+	"devDependencies": {
+		"typescript": "^6.0.3"
+	}
+}

@@ -52,6 +52,7 @@
 		"@codemirror/view": "^6.43.1",
 		"@cosmograph/cosmos": "^1.6.1",
 		"@dartlab/ui-contracts": "*",
+		"@dartlab/ui-format": "*",
 		"@dartlab/ui-runtime": "*",
 		"@mlc-ai/web-llm": "^0.2.84",
 		"d3-force": "^3.0.0",

@@ -7,7 +7,7 @@
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ToggleGroup from '$lib/components/ui/ToggleGroup.svelte';
-	import { fmtKrwFromEok } from '$lib/format/krw';
+	import { fmtKrwFromEok } from '@dartlab/ui-format/krw';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
