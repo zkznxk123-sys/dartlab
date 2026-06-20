@@ -335,7 +335,7 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 
 ## 검증표
 
-본문 인용 수치를 dartlab 호출과 결과로 검증한다. 외부 출처(세그먼트·부채·RPO·capex·OCI 마진)는 분리 표기. 📅 dartlab 실측 2026-06-14 · Oracle(ORCL) 미국 연결(USD)·분기 역년 정규화 기준.
+본문 인용 수치를 dartlab 호출과 결과로 검증한다. 공식 공시·IR 수치(세그먼트·부채·RPO·capex·OCI 마진)는 연결 실측과 분리 표기. 📅 dartlab 실측 2026-06-20 · Oracle(ORCL) 미국 연결(USD)·분기 역년 정규화 기준.
 
 | 본문 수치 | 출처 / 호출 | 결과 |
 |---|---|---|
@@ -345,7 +345,7 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 | 순이익 2025 12.44B (2019 11.08 상회, 2021 고점 13.75 −1.31B 미달) | `c.select("IS",["당기순이익"])` | ✓ 실측 |
 | 회복구간 한계영업이익률 45.1% (ΔOI 6.75B ÷ ΔREV 14.96B), 7년 평균 OPM 31.3% | 차분 계산 | ✓ 실측 |
 | OCF 20.82B(매출 36.3%), OCF–NI 격차 2.86B→8.41B (약 2.9배) | `c.select("CF",["영업활동현금흐름"])` | ✓ 실측 |
-| Cloud Services & License Support FY25 44.0B(약 77%, +12%), IaaS +52% | [ORCL 10-K (SEC)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001341439&type=10-K) · [Oracle IR](https://investor.oracle.com/) | 외부 인용 |
+| Cloud Services & License Support FY25 44.0B(약 77%, +12%), IaaS +52% | [Oracle FY2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/1341439/000095017025087926/orcl-20250531.htm) · [Oracle IR](https://investor.oracle.com/) | 공식 공시·IR |
 | FY2026 total revenues 67.357B$, GAAP operating income 20.6B$ | [Oracle FY2026 release](https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Record-Q4-and-FY-2026-Results-Driven-by-Cloud-Infrastructure--Cloud-Applications/default.aspx) | 공식 IR |
 | Q4 RPO 638B$(+363%, Q3 대비 +85B$) | [Oracle FY2026 release](https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Record-Q4-and-FY-2026-Results-Driven-by-Cloud-Infrastructure--Cloud-Applications/default.aspx) | 공식 IR |
 | FY2026 OCF 32.0B$, FCF -23.7B$ | [Oracle FY2026 release](https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Record-Q4-and-FY-2026-Results-Driven-by-Cloud-Infrastructure--Cloud-Applications/default.aspx) | 공식 IR |
