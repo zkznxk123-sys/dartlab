@@ -1,6 +1,6 @@
 // scan surface 공개 표면 (§8.1 — 작업면 한 폴더, index.ts 하나가 공개 API).
 // 데이터 탐색기·SQL 노트북·스크리너 — landing /scan 라우트(컴포지션 루트)가 마운트. DuckDB-WASM 은 셸이
-// provideScanDuckDb 로 주입(seam, SvelteKit/Vite 결합 절제). 숫자 포맷은 @dartlab/ui-format 공유패키지 경유(복사 제거 완료). Sparkline 은 아직 surface 자급(복사 — 후속 공유패키지).
+// provideScanDuckDb 로 주입(seam, SvelteKit/Vite 결합 절제). 숫자 포맷은 @dartlab/ui-format 공유패키지 경유(복사 제거 완료). Sparkline 은 scan canonical + ./scan/viz 얇은 subpath 노출(landing 복사 제거 완료).
 // 외부 실소비(routes/scan·companyLive·scanRuntime.worker) import 로 검증된 심볼만 공개.
 
 // ── 컴포넌트 ──

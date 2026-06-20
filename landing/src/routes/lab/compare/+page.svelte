@@ -8,7 +8,7 @@
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import Bar from '$lib/components/ui/Bar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Sparkline from '$lib/components/ui/Sparkline.svelte';
+	import { Sparkline } from '@dartlab/ui-surfaces/scan/viz';
 	import { fmtKrwFromEok } from '@dartlab/ui-format/krw';
 	import { fmtPct } from '@dartlab/ui-format/pct';
 	import type { PageData } from './$types';

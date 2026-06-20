@@ -38,6 +38,11 @@
 			"types": "./src/scan/financeLiteRuntime.ts",
 			"svelte": "./src/scan/financeLiteRuntime.ts",
 			"default": "./src/scan/financeLiteRuntime.ts"
+		},
+		"./scan/viz": {
+			"types": "./src/scan/vizIndex.ts",
+			"svelte": "./src/scan/vizIndex.ts",
+			"default": "./src/scan/vizIndex.ts"
 		}
 	},
 	"scripts": {
