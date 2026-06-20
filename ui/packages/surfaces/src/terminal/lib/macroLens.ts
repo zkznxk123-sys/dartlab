@@ -1,6 +1,6 @@
 import { MACRO_ATTRIBUTION, MACRO_SERIES, type MacroLatest, type MacroSeriesDef } from '@dartlab/ui-contracts';
 import type { CoMover } from './coMovement';
-import type { Company, MacroExposureIndicatorPayload, MacroExposureQualityPayload, MacroFile, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
+import type { Company, MacroExposureIndicatorPayload, MacroExposureQualityPayload, MacroFile, MacroRegimeModel, MacroRegimePayload, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
 import { EDGE_SECTOR_TO_TAILWIND, CURRENT_MACRO_EDGE_SECTOR_KEYS, classifyTailwind, hasNegativeTailwind } from './macroMappings';
 
 export type MacroLensTab = 'dashboard' | 'transmission' | 'sources';
@@ -271,6 +271,8 @@ export interface MacroLensSnapshot {
 	glance?: MacroGlanceView;
 	macroPath?: MacroPathView;
 	marketOnly?: boolean;
+	// 국면 렌즈(Regime Lens·초강화) — 읽기전용 표시 데이터. macro.regime 부재 시 undefined(렌즈 숨김).
+	regime?: MacroRegimeView;
 }
 
 export interface MacroPhaseView {
@@ -318,6 +320,78 @@ export interface RegimeQuadrantView {
 		daysLag: number | null;
 	};
 	lensConflict: boolean;
+}
+
+// ───────────────────────── 국면 렌즈 (Regime Lens · 초강화) ─────────────────────────
+// 읽기전용 view-model. 점수·서수 badge·합산 0 — N 타일 나란히 + 불일치 모델명 텍스트.
+// 각 타일은 자기 호라이즌·시간성·freshness 를 독립 표기(단일 '12M·확률' 프레임 금지).
+export interface RegimeTileView {
+	model: 'probit' | 'sahm' | 'lei' | 'hamilton';
+	modelName: string;
+	zoneLabel: string; // 주역(13px/700) — 상태성 라벨. status-only 면 '표시 보류'.
+	secondary: string | null; // probit ~20% 등 보조. 없으면 null.
+	horizonLabel: string; // 호라이즌 + 시간성 (예: '12M 선행')
+	scaleLabel: string; // 자기 척도 (예: '확률·T10Y3M')
+	asOf: string | null;
+	stale: boolean;
+	staleLabel: string | null;
+	suppressed: boolean; // status-only(게이트 탈락·데이터 부족) → dim 렌더.
+	statusText: string | null; // status-only 모델의 사유 텍스트.
+	note: string; // title/aria — precisionNote·overlapNote·이중계상 노트.
+}
+export interface RegimeYieldCurveView {
+	available: boolean;
+	curveShapeLabel: string;
+	spreadText: string; // 예 '+0.40%p'
+	asOf: string | null;
+	note: string; // '형태=NS·spread=T10Y3M 동일곡선 — probit과 독립 신호 아님'
+}
+export interface RegimeGaRBarView {
+	key: 'gar5' | 'gar25' | 'median' | 'gar75' | 'gar95';
+	label: string; // '5%' / '중위' 등
+	value: number;
+	frac: number; // 0~1 막대 길이(분위 범위 정규화).
+}
+export interface RegimeGaRView {
+	available: boolean;
+	bars: RegimeGaRBarView[];
+	skewness: number | null;
+	tailRiskLabel: string;
+	horizonLabel: string; // '4Q 전향 분포'
+	asOf: string | null;
+	note: string; // 'FCI 조건부 GDP 성장률 분위 [조건부 분포·점추정 아님]'
+}
+export interface RegimeBandView {
+	available: boolean;
+	points: number[]; // 가로 스파크용 0~1 정규화 침체확률.
+	caption: string; // 'Hamilton 수축확률 N분기(회고적·smoothed)'
+	asOf: string | null;
+}
+export interface RegimeQuadrantDirectionView {
+	available: boolean;
+	growthLabel: string; // '성장↑' 등
+	inflationLabel: string;
+	assets: { key: string; label: string; weight: string }[];
+	alignment: string | null; // focusChannelAlignment 결과(서술만). 없으면 null.
+}
+export interface RegimeMarketLensView {
+	market: 'KR' | 'US';
+	// confluence 헤더 — 'N모델 중 M 유효 · 호라이즌·시간성 상이 · 동의: <text>'
+	validCount: number;
+	totalCount: number;
+	agreement: string;
+	tiles: RegimeTileView[];
+	notApplicable: { id: string; label: string; reason: string }[]; // KR 'US 전용'/'단위 parity 미확정' 회색 라벨.
+	yieldCurve: RegimeYieldCurveView | null; // KR 없음(US 전용).
+	gar: RegimeGaRView | null; // KR 없음.
+	band: RegimeBandView | null; // KR 없음.
+	quadrant: RegimeQuadrantDirectionView | null;
+}
+export interface MacroRegimeView {
+	available: boolean; // macro.regime 존재 여부.
+	transitionFraction: { fraction: string; from: string; to: string } | null; // A블록 US 전향 분수.
+	kr: RegimeMarketLensView | null;
+	us: RegimeMarketLensView | null;
 }
 
 export interface MacroPathSectorNode {
@@ -1755,6 +1829,9 @@ export function buildMacroLensSnapshot(args: {
 	const edgeSourceRef = transmission ? 'dartlab://macro/transmission' : 'macro transmission edge template';
 	const evidenceGates = buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef });
 	const financePeriod = co.trendQuarter?.periods.at(-1) ?? co.trendAnnual?.periods.at(-1) ?? null;
+	// 국면 렌즈 sub-view — focusCell(초점 채널)을 view-model 차원에서 계산해 국면↔노출 다리(§6.3) 연결.
+	const regimeFocus = pickFocusCell(buildExposureMatrixRows(drivers, topPressures, edges, MAP_CHANNEL_ORDER));
+	const regime = buildRegimeView(macro, regimeFocus);
 	return {
 		asOf: {
 			macro: macro?.asOf ?? null,
@@ -1800,7 +1877,8 @@ export function buildMacroLensSnapshot(args: {
 		missing,
 		glance: buildMacroGlanceView(macro, sectorTailwinds, { activeIndustryId: co.industry, mode: 'compact', transmission: transmission ?? macro?.transmission ?? null }),
 		macroPath: buildMacroPath(transmission ?? macro?.transmission, sectorTailwinds, { activeIndustryId: co.industry, mode: 'full' }),
-		marketOnly: false
+		marketOnly: false,
+		regime
 	};
 }
 
@@ -1859,6 +1937,9 @@ export function buildMarketMacroLensSnapshot(args: {
 	const missing = buildMissing({ macro, macroLatest, edges, coMovers: [], transmission });
 	const edgeSourceRef = transmission ? 'dartlab://macro/transmission' : 'macro transmission missing';
 	const evidenceGates = buildEvidenceGates({ asOf: macro?.asOf ?? null, drivers, topPressures, edges, exposureQuality, edgeSourceRef });
+	// 국면 렌즈 — market-only 는 회사 초점채널 없음(focusCell blocked/none 시 alignment null·다리 미렌더).
+	const regimeFocus = pickFocusCell(buildExposureMatrixRows(drivers, topPressures, edges, MAP_CHANNEL_ORDER));
+	const regime = buildRegimeView(macro, regimeFocus);
 	const falsifiers = buildFalsifiers([], drivers, macro, exposureQuality);
 	return {
 		asOf: {
@@ -1902,7 +1983,8 @@ export function buildMarketMacroLensSnapshot(args: {
 		missing,
 		glance: buildMacroGlanceView(macro, sectorTailwinds, { mode: 'compact' }),
 		macroPath: buildMacroPath(transmission, sectorTailwinds, { mode: 'full' }),
-		marketOnly: true
+		marketOnly: true,
+		regime
 	};
 }
 
@@ -1956,6 +2038,8 @@ const FOCUS_CONFIDENCE_RANK: Record<MacroTransmissionEdgeView['confidence'], num
 };
 // 채널 우선순위(매출>마진>밸류>차입>현금) — enum 순서 아님(명시 배열).
 const FOCUS_CHANNEL_PRIORITY: MacroChannel[] = ['revenue', 'margin', 'valuation', 'balanceSheet', 'cashFlow'];
+// Exposure Map 채널 열 순서(dialog channels 와 동일·SSOT). 국면↔노출 다리(focusCell) 계산용.
+const MAP_CHANNEL_ORDER: MacroChannel[] = ['revenue', 'margin', 'balanceSheet', 'cashFlow', 'valuation'];
 
 // 초점 전파사슬 셀 선택: evidenceLevel(observed>sectorPrior>template) → confidence(high>medium>low)
 // → 채널 우선순위 배열 → driverId 사전순. change·lag 길이는 의도적으로 미사용(움직임=신호 오독 차단).
@@ -1982,4 +2066,309 @@ export function pickFocusCell(
 		|| (a.edge.driverId < b.edge.driverId ? -1 : a.edge.driverId > b.edge.driverId ? 1 : 0)
 	);
 	return candidates[0];
+}
+
+// ───────────────────────── 국면 렌즈 view-model 헬퍼 (초강화·전부 점수 아님) ─────────────────────────
+
+// A블록 전향 분수 — 백분율 없이 정수 분수만(progress·% 미사용). transition null → null(렌더 0).
+// 재설계가 삭제 예정인 transitionLabel(`${progress}%` 방출)을 재사용하지 않는 신규 전용 함수.
+export function transitionFraction(side?: MacroSide | null): { fraction: string; from: string; to: string } | null {
+	const tr = side?.transition;
+	if (!tr) return null;
+	const triggered = tr.triggered?.length ?? 0;
+	const pending = tr.pending?.length ?? 0;
+	const total = triggered + pending;
+	const from = tr.from || '?';
+	const to = tr.to || '?';
+	return { fraction: `${triggered}/${total} 충족`, from, to };
+}
+
+// 4모델 zone 어휘 → 결정론적 공통 3단계 bucket {확장 0·경계 1·침체 2}. (§3.3 표 SSOT)
+// probit moderate→0 흡수(거짓 divergence 차단). status-only/null → null(유효 아님, 제외).
+// 색 정렬·서수 badge 아님 — agree/diverge 텍스트 파생에만 쓴다.
+export function bucketOf(model: MacroRegimeModel | undefined | null): 0 | 1 | 2 | null {
+	if (!model || model.status) return null;
+	const zone = typeof model.zone === 'string' ? model.zone : null;
+	const signal = typeof model.signal === 'string' ? model.signal : null;
+	const cp = typeof model.contractionProb === 'number' ? model.contractionProb : null;
+	// probit (4단계 zone, moderate 흡수)
+	if (zone === 'low' || zone === 'moderate') return 0;
+	if (zone === 'elevated') return 1;
+	if (zone === 'high') return 2;
+	// sahm (3단계 zone)
+	if (zone === 'normal') return 0;
+	if (zone === 'warning') return 1;
+	if (zone === 'recession') return 2;
+	// lei (범주형 signal)
+	if (signal === 'expansion') return 0;
+	if (signal === 'caution') return 1;
+	if (signal === 'recession_warning') return 2;
+	// hamilton (생 float contractionProb·null 이면 status 동반이라 위에서 컷)
+	if (cp != null) {
+		if (cp < 0.25) return 0;
+		if (cp < 0.5) return 1;
+		return 2;
+	}
+	return null;
+}
+
+const BUCKET_LABEL = ['확장', '경계', '침체'] as const;
+
+// agree/diverge — 점수·서수·badge 0. 불일치 모델명 동반 텍스트만.
+// (a) 유효(게이트 통과·bucket 존재) <2 → '교차 불가 (유효 N개)'.
+// (b) ≥2 → 다수 bucket 방향 + 불일치 모델명 명시. 단 인접 bucket(0-1,1-2)은 동의(2단계 이상만 불일치).
+// probit·yieldCurve 이중계상 가드는 호출부에서 yieldCurve 를 별도 표로 넣지 않음으로 보장(probit 1표).
+export function agreementOf(models: { model: string; bucket: 0 | 1 | 2 | null }[]): string {
+	const valid = models.filter((m) => m.bucket != null) as { model: string; bucket: 0 | 1 | 2 }[];
+	if (valid.length < 2) return `교차 불가 (유효 ${valid.length}개)`;
+	// 다수 bucket(최빈값·동률이면 더 낮은 bucket=덜 비관적).
+	const counts: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
+	for (const v of valid) counts[v.bucket]++;
+	let majority: 0 | 1 | 2 = 0;
+	for (const b of [0, 1, 2] as const) if (counts[b] > counts[majority]) majority = b;
+	// 다수에서 2단계 이상 벌어진 모델만 불일치(인접 동의).
+	const disagreeing = valid.filter((v) => Math.abs(v.bucket - majority) >= 2);
+	if (!disagreeing.length) {
+		return `동의 — ${BUCKET_LABEL[majority]} 방향 ${valid.length}모델 일치(인접 bucket 포함)`;
+	}
+	const names = disagreeing.map((v) => `${v.model} ${BUCKET_LABEL[v.bucket]}`).join(' · ');
+	return `동의 낮음 — 다수 ${BUCKET_LABEL[majority]} vs ${names}`;
+}
+
+// 국면축(quadrant 방향) ↔ 종목 노출축(C블록 초점채널) 다리 — 라벨만(점수·판정·민감도 0).
+// 정합/역방향 *서술*만. '수혜/유리' 확정·민감도 숫자·매수 시사 0. quadrant·focusCell 부재 → null.
+export function focusChannelAlignment(
+	quadrant: { growth?: string; inflation?: string } | undefined | null,
+	focusCell: { channel: MacroChannel; edge: { sign: MacroTransmissionEdgeView['sign'] } } | undefined | null
+): string | null {
+	if (!quadrant || !focusCell) return null;
+	const growth = quadrant.growth;
+	if (growth !== 'rising' && growth !== 'falling') return null;
+	const growthArrow = growth === 'rising' ? '성장↑' : '성장↓';
+	const channelLabel = CHANNEL_LABELS[focusCell.channel]?.kr ?? focusCell.channel;
+	const channelUpper = focusCell.channel.toUpperCase();
+	// edge.sign positive = 국면 성장방향과 같이 움직임, negative = 반대. mixed/unknown → 방향 불명.
+	const sign = focusCell.edge.sign;
+	if (sign === 'positive') {
+		return `초점채널 ${channelUpper}(${channelLabel}) 방향 정합 — 현 국면(${growthArrow})과 같은 방향`;
+	}
+	if (sign === 'negative') {
+		return `초점채널 ${channelUpper}(${channelLabel}) 역방향 — 현 국면(${growthArrow})과 반대`;
+	}
+	return `초점채널 ${channelUpper}(${channelLabel}) 방향 혼재 — 현 국면(${growthArrow}) 정합 불명`;
+}
+
+// ── 국면 렌즈 sub-view 조립 (얇은 매핑·파생 계산 0) ──
+const REGIME_MODEL_NAME: Record<string, string> = { probit: 'probit', sahm: 'Sahm', lei: 'LEI', hamilton: 'Hamilton' };
+const REGIME_SCALE: Record<string, string> = { probit: '확률·T10Y3M', sahm: '%p·UNRATE', lei: '%YoY·CBLEI', hamilton: '확률·GDP' };
+
+function regimeStale(asOf: string | undefined, staleAfterDays: number | undefined): { stale: boolean; label: string | null } {
+	const lag = daysLag((asOf || '').replaceAll('-', ''));
+	if (lag == null || staleAfterDays == null) return { stale: false, label: null };
+	if (lag > staleAfterDays) return { stale: true, label: `STALE ${lag}d` };
+	return { stale: false, label: null };
+}
+
+function buildRegimeTile(id: 'probit' | 'sahm' | 'lei' | 'hamilton', model: MacroRegimeModel | undefined): RegimeTileView {
+	const modelName = REGIME_MODEL_NAME[id] ?? id;
+	const scaleLabel = REGIME_SCALE[id] ?? '';
+	const horizon = typeof model?.horizon === 'string' ? model.horizon : '';
+	const timeKind = typeof model?.timeKind === 'string' ? model.timeKind : '';
+	const horizonLabel = [horizon, timeKind].filter(Boolean).join('·') || '—';
+	const asOf = typeof model?.asOf === 'string' ? model.asOf : null;
+	const fresh = regimeStale(model?.asOf, model?.staleAfterDays);
+	if (!model || model.status) {
+		return {
+			model: id, modelName, zoneLabel: '표시 보류', secondary: null,
+			horizonLabel, scaleLabel, asOf, stale: fresh.stale, staleLabel: fresh.label,
+			suppressed: true, statusText: model?.status ?? '데이터 없음',
+			note: model?.status ?? '표시 보류'
+		};
+	}
+	// 주역 라벨 = 모델별 상태 라벨.
+	const zoneLabel = typeof model.zoneLabel === 'string' ? model.zoneLabel
+		: typeof model.signalLabel === 'string' ? model.signalLabel
+		: typeof model.contractionProb === 'number' ? `수축 ${Math.round(model.contractionProb * 100)}%`
+		: '—';
+	let secondary: string | null = null;
+	let note = '';
+	if (id === 'probit') {
+		const pr = typeof model.probabilityRounded === 'number' ? model.probabilityRounded : null;
+		secondary = pr != null ? `~${Math.round(pr * 100)}%` : null;
+		note = typeof model.precisionNote === 'string' ? model.precisionNote : 'Estrella-Mishkin 고정계수·표준오차 미산출(점추정)';
+	} else if (id === 'lei') {
+		note = typeof model.overlapNote === 'string' ? model.overlapNote : 'term-spread·initial-claims 내포(probit/Sahm 부분 상관)';
+	} else if (id === 'hamilton') {
+		note = '회고적 regime·smoothed';
+	} else if (id === 'sahm') {
+		const v = typeof model.value === 'number' ? model.value : null;
+		secondary = v != null ? `${v.toFixed(2)}%p` : null;
+		note = '실시간 침체 시작 트리거(동행)';
+	}
+	return {
+		model: id, modelName, zoneLabel, secondary,
+		horizonLabel, scaleLabel, asOf, stale: fresh.stale, staleLabel: fresh.label,
+		suppressed: false, statusText: null, note
+	};
+}
+
+function buildGaRView(gar: MacroRegimePayload['gar']): RegimeGaRView | null {
+	if (!gar || gar.status || typeof gar.gar5 !== 'number') return null;
+	const all = [
+		{ key: 'gar5' as const, label: '5%', value: gar.gar5 },
+		{ key: 'gar25' as const, label: '25%', value: gar.gar25 },
+		{ key: 'median' as const, label: '중위', value: gar.median },
+		{ key: 'gar75' as const, label: '75%', value: gar.gar75 },
+		{ key: 'gar95' as const, label: '95%', value: gar.gar95 }
+	];
+	const raw = all.filter((b): b is { key: RegimeGaRBarView['key']; label: string; value: number } => typeof b.value === 'number');
+	const vals = raw.map((b) => b.value);
+	const min = Math.min(...vals, 0);
+	const max = Math.max(...vals, 0);
+	const span = max - min || 1;
+	const bars: RegimeGaRBarView[] = raw.map((b) => ({ ...b, frac: Math.max(0.04, (b.value - min) / span) }));
+	return {
+		available: true,
+		bars,
+		skewness: typeof gar.skewness === 'number' ? gar.skewness : null,
+		tailRiskLabel: typeof gar.tailRiskLabel === 'string' ? gar.tailRiskLabel : (typeof gar.tailRisk === 'string' ? gar.tailRisk : '—'),
+		horizonLabel: `${gar.horizon ?? 4}Q 전향 분포`,
+		asOf: typeof gar.asOf === 'string' ? gar.asOf : null,
+		note: typeof gar.seriesNote === 'string' ? gar.seriesNote : 'FCI 조건부 GDP 성장률 분위(점추정 아닌 조건부 분포)'
+	};
+}
+
+function buildBandView(band: MacroRegimePayload['regimeBand']): RegimeBandView | null {
+	if (!band || band.status || !Array.isArray(band.band) || !band.band.length) return null;
+	const vals = band.band.slice(0, 24);
+	const min = Math.min(...vals);
+	const max = Math.max(...vals);
+	const span = max - min || 1;
+	const points = vals.map((v) => (v - min) / span);
+	return {
+		available: true,
+		points,
+		caption: `Hamilton 수축확률 ${vals.length}분기(회고적·smoothed)`,
+		asOf: typeof band.asOf === 'string' ? band.asOf : null
+	};
+}
+
+function motionArrow(value: string | undefined, kind: '성장' | '물가'): string {
+	if (value === 'rising') return `${kind}↑`;
+	if (value === 'falling') return `${kind}↓`;
+	return `${kind}—`;
+}
+
+const REGIME_ASSET_LABEL: Record<string, string> = {
+	equity: '주식', bond: '채권', commodity: '원자재', gold: '금', tips: 'TIPS', cash: '현금'
+};
+
+function buildQuadrantDirection(
+	side: MacroSide | undefined,
+	alignment: string | null
+): RegimeQuadrantDirectionView | null {
+	const q = side?.quadrant;
+	if (!q) return null;
+	const assets = Object.entries(q.assetImplication ?? {}).map(([key, weight]) => ({
+		key, label: REGIME_ASSET_LABEL[key] ?? key, weight: String(weight)
+	}));
+	return {
+		available: true,
+		growthLabel: motionArrow(q.growth, '성장'),
+		inflationLabel: motionArrow(q.inflation, '물가'),
+		assets,
+		alignment
+	};
+}
+
+// US 국면 렌즈 — confluence 4타일 + 수익률곡선 + GaR + band + quadrant 방향.
+function buildUsLens(payload: MacroRegimePayload, side: MacroSide | undefined, alignment: string | null): RegimeMarketLensView {
+	const models = payload.forecast?.models ?? {};
+	const ids: ('probit' | 'sahm' | 'lei' | 'hamilton')[] = ['probit', 'sahm', 'lei', 'hamilton'];
+	const tiles = ids.map((id) => buildRegimeTile(id, models[id]));
+	// agreement: probit·yieldCurve 이중계상 가드 — yieldCurve 는 별도 표로 넣지 않음(probit 1표).
+	const buckets = ids.map((id) => ({ model: REGIME_MODEL_NAME[id] ?? id, bucket: bucketOf(models[id]) }));
+	const validCount = buckets.filter((b) => b.bucket != null).length;
+	const rates = payload.rates;
+	const yieldCurve: RegimeYieldCurveView | null = rates && !rates.missing?.length && typeof rates.spread10y3m === 'number'
+		? {
+			available: true,
+			curveShapeLabel: rates.curveShapeLabel || rates.curveShape || '—',
+			spreadText: `${rates.sign === '-' ? '' : '+'}${(rates.spread10y3m as number).toFixed(2)}%p`,
+			asOf: typeof rates.asOf === 'string' ? rates.asOf : null,
+			note: '형태=NS·spread=T10Y3M 동일곡선 — probit과 독립 신호 아님'
+		}
+		: null;
+	return {
+		market: 'US',
+		validCount,
+		totalCount: ids.length,
+		agreement: agreementOf(buckets),
+		tiles,
+		notApplicable: [],
+		yieldCurve,
+		gar: buildGaRView(payload.gar),
+		band: buildBandView(payload.regimeBand),
+		quadrant: buildQuadrantDirection(side, alignment)
+	};
+}
+
+// KR 국면 렌즈 — CLI momentum 1타일 + probit/sahm/hamilton 'US 전용'/'단위 parity' 회색 라벨.
+function buildKrLens(payload: MacroRegimePayload, side: MacroSide | undefined, alignment: string | null): RegimeMarketLensView {
+	const lei = payload.forecast?.models?.lei;
+	const tiles: RegimeTileView[] = [];
+	if (lei && !lei.status) {
+		const cliMomentum = typeof lei.cliMomentum === 'number' ? lei.cliMomentum : null;
+		const growthLabel = typeof lei.growthLabel === 'string' ? lei.growthLabel : '—';
+		const fresh = regimeStale(lei.asOf, lei.staleAfterDays);
+		tiles.push({
+			model: 'lei', modelName: 'CLI momentum',
+			zoneLabel: growthLabel,
+			secondary: cliMomentum != null ? `Δ${cliMomentum.toFixed(2)}` : null,
+			horizonLabel: '6-9M 선행', scaleLabel: 'CLI·ECOS',
+			asOf: typeof lei.asOf === 'string' ? lei.asOf : null,
+			stale: fresh.stale, staleLabel: fresh.label,
+			suppressed: false, statusText: null,
+			note: 'OECD CLI momentum (KR forecast 는 CLI composite — US 와 다른 shape)'
+		});
+	}
+	const missing = payload.forecast?.missing ?? [];
+	const naLabel: Record<string, string> = { probit: 'probit', sahm: 'Sahm', hamilton: 'Hamilton', gar: 'GaR' };
+	const notApplicable = missing.map((m) => ({
+		id: m.id,
+		label: naLabel[m.id] ?? m.id,
+		reason: m.status === 'notApplicable' ? (m.reason || 'US 전용') : m.status
+	}));
+	return {
+		market: 'KR',
+		validCount: tiles.length,
+		totalCount: 1,
+		agreement: agreementOf(tiles.map((t) => ({ model: t.modelName, bucket: null }))),
+		tiles,
+		notApplicable,
+		yieldCurve: null, // US 전용.
+		gar: null, // US 중심.
+		band: null,
+		quadrant: buildQuadrantDirection(side, alignment)
+	};
+}
+
+// macro.regime → MacroRegimeView. 부재 시 { available:false } (렌즈 숨김·안전). 전향 분수는 macro.us.transition 라이브.
+export function buildRegimeView(
+	macro: MacroFile | null,
+	focusCell: { channel: MacroChannel; edge: { sign: MacroTransmissionEdgeView['sign'] } } | null | undefined
+): MacroRegimeView {
+	const transition = transitionFraction(macro?.us);
+	const regime = macro?.regime;
+	if (!regime) {
+		return { available: false, transitionFraction: transition, kr: null, us: null };
+	}
+	const usAlignment = focusChannelAlignment(macro?.us?.quadrant, focusCell);
+	const krAlignment = focusChannelAlignment(macro?.kr?.quadrant, focusCell);
+	return {
+		available: true,
+		transitionFraction: transition,
+		kr: regime.kr ? buildKrLens(regime.kr, macro?.kr, krAlignment) : null,
+		us: regime.us ? buildUsLens(regime.us, macro?.us, usAlignment) : null
+	};
 }

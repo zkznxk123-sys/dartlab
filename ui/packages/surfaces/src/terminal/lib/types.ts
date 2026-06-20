@@ -132,6 +132,74 @@ export interface TailwindEntry {
 	us: number;
 	blended: number;
 }
+// ── regime 키 (초강화·prebuild 가 deploy 시 HF macro/regime/{kr,us}.json 에서 조립) ──
+// sync(buildMacroRegime.py)가 동결한 forecast 4모델 + 수익률곡선 + GaR 분포 + Hamilton band.
+// 모델 sub-key 의 필드는 게이트 통과 여부에 따라 가변(통과 시 값·탈락 시 status). view-model 이
+// 옵셔널 접근으로 읽으므로 느슨하게 타이핑 — 모델 dict 는 Record<string, unknown> 로 두되,
+// view-model 이 좁히는 키(zone/signal/contractionProb/status 등)는 인덱스 시그니처로 접근.
+export interface MacroRegimeModel {
+	status?: string;
+	asOf?: string;
+	seriesId?: string;
+	seriesSource?: string;
+	staleAfterDays?: number;
+	horizon?: string;
+	timeKind?: string;
+	[key: string]: unknown;
+}
+export interface MacroRegimeMissing {
+	id: string;
+	status: string;
+	reason?: string;
+}
+export interface MacroRegimePayload {
+	market?: string;
+	computedAt?: string;
+	forecast?: {
+		models?: Record<string, MacroRegimeModel>;
+		missing?: MacroRegimeMissing[];
+	};
+	rates?: {
+		spread10y3m?: number;
+		sign?: string;
+		curveShape?: string;
+		curveShapeLabel?: string;
+		curveSource?: string;
+		asOf?: string;
+		seriesId?: string;
+		staleAfterDays?: number;
+		missing?: MacroRegimeMissing[];
+	};
+	gar?: {
+		gar5?: number;
+		gar25?: number;
+		median?: number;
+		gar75?: number;
+		gar95?: number;
+		skewness?: number;
+		tailRisk?: string;
+		tailRiskLabel?: string;
+		currentFCI?: number;
+		observations?: number;
+		horizon?: number;
+		timeKind?: string;
+		seriesNote?: string;
+		asOf?: string;
+		staleAfterDays?: number;
+		revisionLabel?: string;
+		status?: string;
+	};
+	regimeBand?: {
+		band?: number[];
+		converged?: boolean;
+		separation?: number;
+		timeKind?: string;
+		horizon?: string;
+		asOf?: string;
+		staleAfterDays?: number;
+		status?: string;
+	};
+}
 export interface MacroFile {
 	version?: string;
 	asOf?: string;
@@ -139,6 +207,8 @@ export interface MacroFile {
 	us: MacroSide;
 	sectorTailwind: Record<string, TailwindEntry>;
 	transmission?: MacroTransmissionPayload | null;
+	// 초강화 regime 키 — 옵셔널(현 라이브 macro.json 미보유·prebuild deploy 시 주입).
+	regime?: { kr: MacroRegimePayload; us: MacroRegimePayload };
 }
 
 export interface BlogEntry {

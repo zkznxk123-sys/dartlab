@@ -100,6 +100,19 @@
 	// 채널 열 클러스터: 켜진 채널만 열, 각 driver 칩을 자기 채널 열 아래로 모음(빈 셀 0).
 	const mapColumns = $derived(buildMapColumns(exposureRows));
 	const pulseDrivers = $derived(exposureRows.length ? exposureRows.slice(0, 6).map((r) => r.driver) : snapshot.topPressures.slice(0, 6));
+	// 국면 렌즈(Regime Lens·초강화) — A블록 inline <details>. macro.regime 부재 시 미가용.
+	const regime = $derived(snapshot.regime);
+	const usLens = $derived(regime?.us ?? null);
+	const krLens = $derived(regime?.kr ?? null);
+	const transitionFrac = $derived(regime?.transitionFraction ?? null);
+	// 전이 phase 한국어 라벨 — us.transition.from/to 가 영어 phase 코드라 라벨 매핑.
+	const phaseKo: Record<string, string> = {
+		expansion: '확장', slowdown: '둔화', contraction: '수축', recovery: '회복',
+		stagflation: '스태그', reflation: '리플레', deflation: '디플레', goldilocks: '골디락스'
+	};
+	const phaseLabelKo = (p: string): string => (lang === 'en' ? p : (phaseKo[p] ?? p));
+	const transitionText = $derived(transitionFrac ? `${phaseLabelKo(transitionFrac.from)}→${phaseLabelKo(transitionFrac.to)} ${transitionFrac.fraction}` : null);
+	let regimeOpen = $state(false);
 	// D블록 Gate Strip = evidenceGates 중 quant 제외 4개(데이터·전파·동행·회사).
 	const gateRows = $derived(snapshot.evidenceGates.filter((g) => g.id !== 'quant'));
 	const exposureQualityClass = $derived(snapshot.exposureQuality.status === 'quantCandidate' ? 'ok' : snapshot.exposureQuality.status === 'qualitativeOnly' ? 'watch' : 'blocked');
@@ -154,6 +167,11 @@
 		const max = Math.max(...vals);
 		const span = max - min || 1;
 		return vals.map((v, i) => `${(i / Math.max(1, vals.length - 1)) * 48},${18 - ((v - min) / span) * 16}`).join(' ');
+	}
+	// Hamilton regime band 가로 스파크 — 입력은 이미 0~1 정규화된 침체확률(view-model). 막대 아님·점추정 아님.
+	function bandPoints(vals: number[]): string {
+		if (!vals.length) return '';
+		return vals.map((v, i) => `${(i / Math.max(1, vals.length - 1)) * 100},${16 - Math.max(0, Math.min(1, v)) * 14}`).join(' ');
 	}
 	const cellClass = (edge: MacroTransmissionEdgeView | null) => edge ? edge.evidenceLevel : 'none';
 	const cellTitle = (edge: MacroTransmissionEdgeView, ch: MacroChannel): string => {
@@ -295,12 +313,98 @@
 
 		<div class="mlBody" id={tabPanelId(localTab)} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
 			{#if localTab === 'dashboard'}
-				<!-- 블록 A — Phase Strip -->
-				<section class="mlPhaseStrip" aria-label="Macro phases">
-					<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
-					<div><span>US</span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}</em></div>
-					<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
-				</section>
+				<!-- 블록 A — Phase Strip (클릭 → 국면 렌즈 toggle) -->
+				{#if regime?.available}
+					<details class="mlRegimeFold" bind:open={regimeOpen}>
+						<summary class="mlPhaseStrip" aria-label={T('Macro 국면 — 클릭하면 국면 렌즈', 'Macro phases — click for Regime Lens')}>
+							<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
+							<div><span>US <i class="mlPhaseCaret" aria-hidden="true">{regimeOpen ? '▴' : '▾'}</i></span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
+							<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
+						</summary>
+						<!-- 국면 렌즈 (Regime Lens) — 회고는 phase, 검증은 아래 -->
+						<div class="mlRegimeLens" aria-label={T('국면 렌즈', 'Regime Lens')}>
+							{#if usLens}
+								{@const lens = usLens}
+								<div class="mlRegimeHead">{T('침체 신호', 'Recession signals')} ({lens.totalCount}{T('모델 중', ' models, ')} {lens.validCount} {T('유효 · 호라이즌·시간성 상이 · 동의', 'valid · horizons/timing differ · agreement')}: {lens.agreement})</div>
+								<div class="mlConfluence">
+									{#each lens.tiles as tile (tile.model)}
+										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={tile.note}>
+											<b>{tile.zoneLabel}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
+											<span>{tile.modelName} · {tile.horizonLabel}</span>
+											<em>{tile.scaleLabel}</em>
+											<em class="mlTileMeta">{#if tile.suppressed}{tile.statusText}{:else}{tile.asOf ?? '—'}{#if tile.staleLabel} · {tile.staleLabel}{/if}{/if}</em>
+										</div>
+									{/each}
+								</div>
+								<div class="mlRegimeNote">{T('probit=고정계수·SE미산출(점추정) · LEI=term/claims 내포(부분상관) · Hamilton=동행·회고', 'probit=fixed-coef·no SE (point est) · LEI embeds term/claims (partial corr) · Hamilton=coincident·retrospective')}</div>
+								{#if lens.yieldCurve}
+									<div class="mlRegimeRow" title={lens.yieldCurve.note}>
+										<b>{T('수익률곡선', 'Yield curve')}</b> {lens.yieldCurve.curveShapeLabel} · 10Y-3M {lens.yieldCurve.spreadText}
+										<i class="mlRegimeDim">░{lens.yieldCurve.asOf ?? '—'} · {T('역전≠즉시침체 · 형태=NS·spread=동일곡선', 'inversion≠immediate recession · shape=NS·spread=same curve')}</i>
+									</div>
+								{/if}
+								{#if lens.gar}
+									{@const gar = lens.gar}
+									<div class="mlGaR" title={gar.note}>
+										<div class="mlGaRTop"><b>GaR {gar.horizonLabel}</b><i class="mlRegimeDim">[{T('조건부 분포·점추정 아님', 'conditional dist · not point est')}] · tail {gar.tailRiskLabel}{#if gar.skewness != null} · {T('비대칭', 'skew')} {gar.skewness.toFixed(1)}{/if} · ░{gar.asOf ?? '—'}</i></div>
+										<div class="mlGaRBars">
+											{#each gar.bars as bar (bar.key)}
+												<div class="mlGaRBar"><i style={`height:${Math.round(bar.frac * 100)}%`}></i><span>{bar.label}</span><em>{bar.value.toFixed(1)}</em></div>
+											{/each}
+										</div>
+										<div class="mlRegimeNote">{gar.note}</div>
+									</div>
+								{/if}
+								{#if lens.band}
+									<div class="mlBandRow">
+										<b>{lens.band.caption}</b>
+										<svg class="mlBandSpark" viewBox="0 0 100 18" preserveAspectRatio="none" aria-hidden="true">
+											<polyline points={bandPoints(lens.band.points)} />
+										</svg>
+										<i class="mlRegimeDim">░{lens.band.asOf ?? '—'}</i>
+									</div>
+								{/if}
+								{#if lens.quadrant}
+									{@const q = lens.quadrant}
+									<div class="mlRegimeRow">
+										<b>{T('국면 사분면', 'Regime quadrant')}</b> {q.growthLabel} {q.inflationLabel}
+										{#if q.assets.length}→ {q.assets.filter((a) => a.weight === 'overweight').map((a) => a.label).join('·') || T('중립', 'neutral')} {T('유리', 'favored')}{/if}
+										<i class="mlRegimeDim">[{T('회고', 'retrospective')}]</i>
+										{#if q.alignment}<i class="mlRegimeAlign">· {q.alignment}</i>{/if}
+									</div>
+								{/if}
+							{/if}
+							{#if krLens}
+								{@const lens = krLens}
+								<div class="mlRegimeHeadKr">KR — {T('침체 confluence', 'recession confluence')} ({lens.validCount} {T('유효', 'valid')} · {T('동의', 'agreement')}: {lens.agreement})</div>
+								<div class="mlConfluence">
+									{#each lens.tiles as tile (tile.model)}
+										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={tile.note}>
+											<b>{tile.zoneLabel}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
+											<span>{tile.modelName} · {tile.horizonLabel}</span>
+											<em>{tile.scaleLabel}</em>
+											<em class="mlTileMeta">{tile.asOf ?? '—'}{#if tile.staleLabel} · {tile.staleLabel}{/if}</em>
+										</div>
+									{/each}
+								</div>
+								{#if lens.notApplicable.length}
+									<div class="mlRegimeNote">{#each lens.notApplicable as na (na.id)}<span class="mlNaChip">{na.label}: {na.reason}</span>{/each}</div>
+								{/if}
+								{#if lens.quadrant}
+									{@const q = lens.quadrant}
+									<div class="mlRegimeRow"><b>{T('국면 사분면', 'Regime quadrant')}</b> {q.growthLabel} {q.inflationLabel} <i class="mlRegimeDim">[{T('회고', 'retrospective')}]</i>{#if q.alignment}<i class="mlRegimeAlign">· {q.alignment}</i>{/if}</div>
+								{/if}
+							{/if}
+						</div>
+					</details>
+				{:else}
+					<!-- regime 데이터 준비 전 — 기본 Phase Strip (전향 분수만, 이미 라이브) -->
+					<section class="mlPhaseStrip" aria-label="Macro phases">
+						<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
+						<div><span>US</span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
+						<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
+					</section>
+				{/if}
 
 				<!-- 블록 B — Driver Pulse -->
 				<section class="mlPulseStrip" aria-label="Macro pulse">
@@ -736,7 +840,46 @@
 	.mlPhaseStrip span, .mlGate span, .mlPulse span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	.mlPhaseStrip b, .mlGate b, .mlPulse b { display: block; margin-top: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 	.mlPhaseStrip em, .mlGate em, .mlPulse em { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlPulseStrip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+	/* US 칩 em — 전향 분수 inline 시도. 넘치면 자연 줄바꿈으로 .mlTransFrac 가 2번째 줄(9.5px dim)로 강등(A블록 height 재예산 0). */
+	.mlPhaseStrip div:nth-child(2) em { white-space: normal; overflow: visible; line-height: 1.35; }
+	/* 국면 렌즈 (Regime Lens) — A블록 inline <details>. summary = Phase Strip(클릭 toggle). */
+	.mlRegimeFold { display: block; }
+	.mlRegimeFold > summary { cursor: pointer; list-style: none; }
+	.mlRegimeFold > summary::-webkit-details-marker { display: none; }
+	.mlPhaseCaret { font-style: normal; color: var(--amber); font-size: 9px; }
+	.mlTransFrac { margin-left: 5px; color: var(--dl-ink-muted, #7b8493); font-size: 9.5px; }
+	.mlRegimeLens { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px dashed var(--bd); }
+	.mlRegimeHead, .mlRegimeHeadKr { color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 700; line-height: 1.4; }
+	.mlRegimeHeadKr { margin-top: 4px; border-top: 1px dashed var(--bd); padding-top: 8px; color: var(--amber); }
+	/* confluence — 값+zone 텍스트 타일(막대 아님). 타일 내부 px 위계 §5.5(Pulse 밀도 천장 공유). */
+	.mlConfluence { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+	.mlTile { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 7px; }
+	.mlTile.dim { opacity: .5; }
+	.mlTile b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 700; }
+	.mlTileSec { font-style: normal; font-weight: 600; font-size: 10px; color: var(--dl-ink-dim, #5b6473); }
+	.mlTile span { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlTile em { display: block; margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlTile .mlTileMeta { color: var(--dl-ink-dim, #5b6473); }
+	.mlRegimeNote { color: var(--dl-ink-muted, #7b8493); font-size: 9px; line-height: 1.4; }
+	.mlNaChip { display: inline-block; margin-right: 8px; color: var(--dl-ink-dim, #5b6473); }
+	.mlRegimeRow { color: var(--dl-ink); font-size: 11px; line-height: 1.4; }
+	.mlRegimeRow b { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-right: 5px; }
+	.mlRegimeDim { font-style: normal; color: var(--dl-ink-muted, #7b8493); font-size: 9px; }
+	.mlRegimeAlign { font-style: normal; color: var(--amber); font-size: 10px; }
+	/* GaR 분위 막대 — 진짜 5분위 조건부 분포(probit 점확률 아님·fan 정당). */
+	.mlGaR { border-top: 1px dashed var(--bd); padding-top: 8px; }
+	.mlGaRTop { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; }
+	.mlGaRTop b { font-size: 11px; font-weight: 700; }
+	.mlGaRBars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: end; height: 42px; margin: 6px 0 4px; }
+	.mlGaRBar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+	.mlGaRBar i { display: block; width: 60%; min-height: 2px; background: var(--amber); border-radius: 2px 2px 0 0; opacity: .8; }
+	.mlGaRBar span { margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
+	.mlGaRBar em { color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; font-variant-numeric: tabular-nums; }
+	/* Hamilton regime band — 가로 스파크 1줄(막대/점추정 아님·회고 라벨). */
+	.mlBandRow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+	.mlBandRow b { flex: 0 0 auto; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 700; }
+	.mlBandSpark { flex: 1 1 auto; height: 18px; min-width: 0; }
+	.mlBandSpark polyline { fill: none; stroke: var(--amber); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
 	.mlPulse { color: var(--dl-ink); text-align: left; cursor: pointer; }
 	.mlPulse:hover, .mlPulse.on { border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.045); }
 	.mlPulse:disabled { cursor: not-allowed; opacity: .5; }
@@ -1026,5 +1169,7 @@
 		.mlMapRow { display: flex; flex-direction: column; gap: 6px; }
 		.mlMapCol { width: 100%; }
 		.mlMapCell { width: 100%; }
+		/* 국면 렌즈 — confluence 가로 스와이프(§5.7), GaR 막대는 가로 전폭 유지(5열). */
+		.mlConfluence { grid-auto-flow: column; grid-auto-columns: minmax(118px, 1fr); grid-template-columns: none; overflow-x: auto; }
 	}
 </style>
