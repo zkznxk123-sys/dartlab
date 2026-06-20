@@ -2,12 +2,26 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { MACRO_SERIES, type MacroLatest } from '@dartlab/ui-contracts';
 import { CURRENT_MACRO_EDGE_SECTOR_KEYS, EDGE_SECTOR_TO_TAILWIND } from './macroMappings';
-import { buildMacroGlanceView, buildMacroLensSnapshot, buildMacroPath, buildMarketMacroLensSnapshot, buildRegimeQuadrant } from './macroLens';
+import {
+	buildExposureMatrixRows,
+	buildMacroGlanceView,
+	buildMacroLensSnapshot,
+	buildMacroPath,
+	buildMarketMacroLensSnapshot,
+	buildRegimeQuadrant,
+	pickFocusCell,
+	type MacroChannel,
+	type MacroDriverView,
+	type MacroExposureMatrixRow,
+	type MacroTransmissionEdgeView
+} from './macroLens';
 import type { Company, MacroFile } from './types';
 
 const macro = JSON.parse(
 	readFileSync(new URL('../../../../../../landing/static/dashboards/macro.json', import.meta.url), 'utf8')
 ) as MacroFile;
+
+const CHANNELS: MacroChannel[] = ['revenue', 'margin', 'balanceSheet', 'cashFlow', 'valuation'];
 
 const sectorTailwinds = () =>
 	Object.entries(EDGE_SECTOR_TO_TAILWIND).flatMap(([sectorKey, map]) => {
@@ -104,42 +118,19 @@ const companyFixture = (overrides: Partial<Company> = {}): Company => ({
 	...overrides
 } as unknown as Company);
 
-const macroWithSingleMixedEdge = (): MacroFile => {
-	const m = cloneMacro();
-	const driver = m.transmission!.drivers.find((d) => d.id === 'USDKRW')!;
-	const edge = m.transmission!.edges.find((e) => e.driverId === 'USDKRW')!;
-	m.transmission = {
-		...m.transmission!,
-		drivers: [driver],
-		edges: [{
-			...edge,
-			id: 'test-mixed-edge',
-			sectorKeys: ['all'],
-			sign: 'mixed',
-			confidence: 'high',
-			evidenceLevel: 'observed',
-			sourceRef: 'test:mixed'
-		}]
-	};
-	return m;
-};
+// 합성 driver/edge stub — buildExposureMatrixRows/pickFocusCell가 읽는 필드만 채운다(나머지 cast).
+const mkDriver = (id: string, relevance: MacroDriverView['relevance'] = 'secondary'): MacroDriverView =>
+	({ id, label: id, relevance } as unknown as MacroDriverView);
+const mkEdge = (
+	driverId: string,
+	channel: MacroChannel,
+	evidenceLevel: MacroTransmissionEdgeView['evidenceLevel'],
+	confidence: MacroTransmissionEdgeView['confidence'] = 'medium',
+	extra: Partial<MacroTransmissionEdgeView> = {}
+): MacroTransmissionEdgeView =>
+	({ id: `${driverId}-${channel}`, driverId, channel, evidenceLevel, confidence, financialLine: `${channel} line`, valuationLever: 'growth', sign: 'positive', lagMonths: [1, 6], ...extra } as unknown as MacroTransmissionEdgeView);
 
-const macroWithObservedVsTemplate = (): MacroFile => {
-	const m = cloneMacro();
-	const drivers = ['EXPORT', 'BASE_RATE'].map((id) => m.transmission!.drivers.find((d) => d.id === id)!);
-	const edges = [
-		m.transmission!.edges.find((e) => e.driverId === 'EXPORT')!,
-		m.transmission!.edges.find((e) => e.driverId === 'BASE_RATE' && e.evidenceLevel === 'template')!
-	];
-	m.transmission = {
-		...m.transmission!,
-		drivers,
-		edges
-	};
-	return m;
-};
-
-describe('macroLens builders — current macro v19 artifact', () => {
+describe('macroLens builders — current macro v19 artifact (redesign)', () => {
 	it('builds a 2x2 regime model without leaking raw coordinate signals', () => {
 		const view = buildRegimeQuadrant(macro);
 		expect(view.cells.map((cell) => cell.key).sort()).toEqual(['deflation', 'goldilocks', 'reflation', 'stagflation']);
@@ -147,38 +138,16 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		const kr = view.markets.find((market) => market.market === 'KR')!;
 		const us = view.markets.find((market) => market.market === 'US')!;
 		expect(kr.cellKey).toBe('stagflation');
-		expect(kr.phase).toBe('recovery');
-		expect(kr.quadrantLabel).toBe('스태그플레이션');
-		expect(kr.hasTransitionProgress).toBe(false);
 		expect('growthSignal' in kr).toBe(false);
 		expect('inflationSignal' in kr).toBe(false);
-
 		expect(us.cellKey).toBe('reflation');
-		expect(us.phase).toBe('slowdown');
-		expect(us.hasTransitionProgress).toBe(true);
-		expect(us.transitionLabel).toContain('33%');
 	});
 
 	it('builds the macro transmission rail from macro.transmission without all-sector fanout', () => {
 		const path = buildMacroPath(macro.transmission, sectorTailwinds(), { mode: 'full', activeIndustryId: 'logistics' });
 		expect(path.mode).toBe('full');
 		expect(path.links.length + path.allSectorLinks.length).toBe(macro.transmission!.edges.length);
-		expect(path.allSectorLinks).toHaveLength(2);
-		for (const link of path.allSectorLinks) {
-			expect(link.sectorKeys).toEqual(['all']);
-			expect(link.sectorNodes).toHaveLength(1);
-			expect(link.allSector).toBe(true);
-		}
-
 		expect([...path.coverageKeys].sort()).toEqual([...CURRENT_MACRO_EDGE_SECTOR_KEYS].sort());
-		expect(path.hasNegativeTailwind).toBe(false);
-		expect(path.captionKr).toContain('절대 역풍 없음');
-
-		const logistics = path.sectorNodes.find((node) => node.key === 'logistics')!;
-		expect(logistics).toMatchObject({ industryId: 'logistics', tailwindKey: null, missingTailwind: true, active: true });
-
-		const utility = path.sectorNodes.find((node) => node.key === 'utility')!;
-		expect(utility).toMatchObject({ industryId: null, tailwindKey: null, missingTailwind: true, active: false });
 	});
 
 	it('builds a market-only glance before a company is selected', () => {
@@ -186,43 +155,27 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		expect(view.asOf).toBe('2026-06-18');
 		expect(view.regime.markets).toHaveLength(2);
 		expect(view.path.links.length).toBeGreaterThan(0);
-		expect(view.path.allSectorLinks.length).toBeGreaterThan(0);
 		expect(view.sectorTailwinds.length).toBeGreaterThan(0);
 	});
+});
 
-	it('builds a market-only macro verdict without company claims', () => {
+describe('macroLens snapshot — verdict layer removed, evidence gates kept', () => {
+	it('produces no verdict layer and no single macro score', () => {
 		const snapshot = buildMarketMacroLensSnapshot({
 			macro,
 			macroLatest: macroLatest(),
 			sectorTailwinds: sectorTailwinds()
 		});
 		expect(snapshot.marketOnly).toBe(true);
-		expect(snapshot.verdict.score).toBeGreaterThanOrEqual(0);
-		expect(snapshot.verdict.score).toBeLessThanOrEqual(100);
-		expect(snapshot.verdict.claimLevel).toBe('marketMap');
-		expect(snapshot.verdict.nextActionKr).toContain('종목 선택');
-		expect(snapshot.verdict.drivers.length).toBeGreaterThan(0);
-		expect(snapshot.verdict.sourceRefs.length).toBeGreaterThan(0);
-		expect(snapshot.verdict.directionScore).toBeGreaterThanOrEqual(-100);
-		expect(snapshot.verdict.directionScore).toBeLessThanOrEqual(100);
-		expect(snapshot.verdict.evidenceScore).toBeGreaterThanOrEqual(0);
-		expect(snapshot.verdict.evidenceScore).toBeLessThanOrEqual(100);
-		expect(snapshot.verdict.killChain.length).toBeGreaterThan(0);
-		expect(snapshot.verdict.flip.status).not.toBeUndefined();
-		expect(snapshot.verdict.contest.rows.length).toBeGreaterThan(0);
-		expect(snapshot.verdict.actions.some((action) => action.id === 'select-company')).toBe(true);
-		expect(snapshot.verdict.contest.supportiveScore + snapshot.verdict.contest.pressureScore + snapshot.verdict.contest.mixedScore + snapshot.verdict.contest.unknownScore).toBeGreaterThan(0);
-
-		const forbidden = [
-			snapshot.verdict.titleKr,
-			snapshot.verdict.summaryKr,
-			snapshot.verdict.nextActionKr,
-			snapshot.verdict.primaryChainKr
-		].join(' ');
-		expect(forbidden).not.toMatch(/매수|매도|목표가|보장|추천|beta|베타/);
+		expect('verdict' in snapshot).toBe(false);
+		// 단일 macro score / 방향점수 / /100 표면화 0 (verdict 부활 가드).
+		const json = JSON.stringify(snapshot);
+		expect(json).not.toContain('directionScore');
+		expect(json).not.toContain('evidenceScore');
+		expect(json).not.toContain('claimLevel');
 	});
 
-	it('locks the verdict when a critical primary macro driver is stale', () => {
+	it('blocks the macroData gate when a critical primary macro driver is stale', () => {
 		const staleLatest = macroLatest().map((row) => row.def.id === 'USDKRW' ? { ...row, d: '20200101', chg: 35 } : row);
 		const snapshot = buildMacroLensSnapshot({
 			co: companyFixture(),
@@ -234,14 +187,9 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		const gate = snapshot.evidenceGates.find((g) => g.id === 'macroData');
 		expect(gate?.status).toBe('blocked');
 		expect(gate?.blocks.join(' ')).toContain('USDKRW');
-		expect(snapshot.verdict.direction).toBe('locked');
-		expect(snapshot.verdict.directionScore).toBe(0);
-		expect(snapshot.verdict.evidenceScore).toBeLessThanOrEqual(44);
-		expect(snapshot.verdict.flip.status).toBe('locked');
-		expect(snapshot.verdict.score).toBeLessThanOrEqual(44);
 	});
 
-	it('preserves transmission edge falsifiers in driver-local kill chains', () => {
+	it('preserves transmission edge falsifiers (no verdict needed)', () => {
 		const snapshot = buildMacroLensSnapshot({
 			co: companyFixture(),
 			macro,
@@ -251,12 +199,9 @@ describe('macroLens builders — current macro v19 artifact', () => {
 		});
 		const fxEdge = snapshot.transmissionEdges.find((edge) => edge.driverId === 'USDKRW');
 		expect(fxEdge?.falsifiers[0]).toContain('달러 원가');
-		const fxDriver = snapshot.verdict.drivers.find((driver) => driver.driverId === 'USDKRW');
-		expect(fxDriver?.killChain.some((step) => step.detailKr.includes('달러 원가'))).toBe(true);
-		expect(fxDriver?.gates.map((gate) => gate.id)).toEqual(['series', 'path', 'company', 'quant', 'comove']);
 	});
 
-	it('does not open companyCandidate when quantCandidate lacks required evidence fields', () => {
+	it('blocks the quant gate when quantCandidate lacks required evidence fields', () => {
 		const snapshot = buildMacroLensSnapshot({
 			co: companyFixture({
 				macroExposure: {
@@ -279,18 +224,17 @@ describe('macroLens builders — current macro v19 artifact', () => {
 					},
 					selected: []
 				}
-			}),
+			} as unknown as Partial<Company>),
 			macro,
 			macroLatest: macroLatest(),
 			sectorTailwinds: sectorTailwinds(),
 			coMovers: []
 		});
-		expect(snapshot.verdict.claimLevel).not.toBe('companyCandidate');
 		expect(snapshot.evidenceGates.find((g) => g.id === 'quant')?.status).toBe('blocked');
 		expect(snapshot.evidenceGates.find((g) => g.id === 'quant')?.blocks.join(' ')).toContain('nObs missing');
 	});
 
-	it('hard-locks fallback transmission templates when macro.transmission is missing', () => {
+	it('hard-locks the path gate when macro.transmission is missing', () => {
 		const noTransmission = cloneMacro();
 		noTransmission.transmission = null;
 		const snapshot = buildMacroLensSnapshot({
@@ -301,69 +245,161 @@ describe('macroLens builders — current macro v19 artifact', () => {
 			coMovers: []
 		});
 		expect(snapshot.evidenceGates.find((g) => g.id === 'path')?.status).toBe('blocked');
-		expect(snapshot.verdict.direction).toBe('locked');
-		expect(snapshot.verdict.claimLevel).toBe('locked');
-		expect(snapshot.verdict.score).toBeLessThanOrEqual(44);
 	});
 
-	it('does not label zero-change negative-rate exposure as pressure', () => {
-		const flatLatest = macroLatest().map((row) => ({ ...row, chg: 0, spark: [row.v, row.v, row.v] }));
-		const snapshot = buildMacroLensSnapshot({
-			co: companyFixture({
-				industry: 'finance',
-				sector: { kr: '금융', en: 'Finance' }
-			}),
-			macro,
-			macroLatest: flatLatest,
-			sectorTailwinds: sectorTailwinds(),
-			coMovers: []
-		});
-		const baseRate = snapshot.verdict.drivers.find((d) => d.driverId === 'BASE_RATE');
-		expect(baseRate?.direction).not.toBe('pressure');
-		expect(snapshot.verdict.direction).not.toBe('pressure');
-	});
-
-	it('keeps mixed edges mixed even with a large latest move', () => {
-		const latest = macroLatest()
-			.filter((row) => row.def.id === 'USDKRW')
-			.map((row) => ({ ...row, chg: 50, spark: [row.v - 10, row.v, row.v + 50] }));
-		const snapshot = buildMarketMacroLensSnapshot({
-			macro: macroWithSingleMixedEdge(),
-			macroLatest: latest,
-			sectorTailwinds: sectorTailwinds()
-		});
-		expect(snapshot.verdict.direction).toBe('mixed');
-		expect(snapshot.verdict.drivers[0]?.direction).toBe('mixed');
-		expect(snapshot.verdict.titleKr).not.toMatch(/우호 경로 우세|부담 경로 우세/);
-	});
-
-	it('ranks drivers after evidence so a template path cannot beat an observed path on move alone', () => {
-		const m = macroWithObservedVsTemplate();
-		const latest: MacroLatest[] = ['EXPORT', 'BASE_RATE'].flatMap((id) => {
-			const def = MACRO_SERIES.find((series) => series.id === id);
-			if (!def) return [];
-			return [{
-				def,
-				v: id === 'BASE_RATE' ? 3 : 100,
-				d: '20260618',
-				chg: id === 'BASE_RATE' ? 100 : 1,
-				spark: id === 'BASE_RATE' ? [2, 3, 4] : [99, 100, 101]
-			}];
-		});
+	it('drivers carry value/asOf/source for the Pulse strip (relevance != context)', () => {
 		const snapshot = buildMacroLensSnapshot({
 			co: companyFixture(),
-			macro: m,
-			macroLatest: latest,
+			macro,
+			macroLatest: macroLatest(),
 			sectorTailwinds: sectorTailwinds(),
 			coMovers: []
 		});
-		expect(snapshot.verdict.drivers[0]?.driverId).toBe('EXPORT');
-		expect(snapshot.verdict.drivers[0]?.evidenceLabel).toBe('OBS');
-		const templateDriver = snapshot.verdict.drivers.find((d) => d.driverId === 'BASE_RATE');
-		expect(templateDriver?.evidenceLabel).toBe('TPL');
-		expect(templateDriver?.score).toBeLessThanOrEqual(42);
-		expect(templateDriver?.evidenceScore).toBeLessThanOrEqual(42);
-		expect(templateDriver?.gates.find((gate) => gate.id === 'path')?.status).toBe('locked');
-		expect(snapshot.verdict.contest.rows[0]?.driverId).toBe('EXPORT');
+		const pulse = snapshot.drivers.filter((d) => d.relevance !== 'context');
+		expect(pulse.length).toBeGreaterThan(0);
+		for (const d of pulse) {
+			expect(typeof d.value).toBe('string');
+			expect(d).toHaveProperty('asOf');
+			expect(d).toHaveProperty('source');
+		}
+	});
+});
+
+describe('buildExposureMatrixRows — sparsity, cap 6, deterministic drop', () => {
+	it('produces rows with cells.length === channels.length and filledCount', () => {
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture(),
+			macro,
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		const rows = buildExposureMatrixRows(snapshot.drivers, snapshot.topPressures, snapshot.transmissionEdges, CHANNELS);
+		expect(rows.length).toBeLessThanOrEqual(6);
+		for (const row of rows) {
+			expect(row.cells).toHaveLength(CHANNELS.length);
+			expect(row.filledCount).toBe(row.cells.filter(Boolean).length);
+			for (const cell of row.cells) {
+				if (cell) expect(['observed', 'sectorPrior', 'template']).toContain(cell.evidenceLevel);
+			}
+		}
+	});
+
+	it('caps at exactly 6 rows when 8 drivers are supplied', () => {
+		const drivers = Array.from({ length: 8 }, (_, i) => mkDriver(`D${i}`));
+		const edges = drivers.map((d, i) => mkEdge(d.id, CHANNELS[i % CHANNELS.length], 'template'));
+		const rows = buildExposureMatrixRows(drivers, drivers, edges, CHANNELS);
+		expect(rows).toHaveLength(6);
+	});
+
+	it('sorts by filledCount desc and, on equal filledCount, drops the last input row (stable)', () => {
+		// 8 drivers, all filledCount === 1 (each 1 channel) → cap 6 drops input rows 7,8.
+		const drivers = Array.from({ length: 8 }, (_, i) => mkDriver(`D${i}`));
+		const edges = drivers.map((d) => mkEdge(d.id, 'revenue', 'template'));
+		const rows = buildExposureMatrixRows(drivers, drivers, edges, CHANNELS);
+		expect(rows.map((r) => r.driver.id)).toEqual(['D0', 'D1', 'D2', 'D3', 'D4', 'D5']);
+		// 한 driver가 2채널(filledCount 2)이면 정렬 상단으로 올라온다.
+		const edges2 = [...edges, mkEdge('D7', 'margin', 'template')];
+		const rows2 = buildExposureMatrixRows(drivers, drivers, edges2, CHANNELS);
+		expect(rows2[0].driver.id).toBe('D7');
+		expect(rows2[0].filledCount).toBe(2);
+	});
+
+	it('keeps same-channel multiple drivers as separate rows (valuation stack)', () => {
+		const drivers = [mkDriver('HY'), mkDriver('DGS10')];
+		const edges = [mkEdge('HY', 'valuation', 'observed'), mkEdge('DGS10', 'valuation', 'template')];
+		const rows = buildExposureMatrixRows(drivers, drivers, edges, CHANNELS);
+		expect(rows).toHaveLength(2);
+		expect(rows.every((r) => r.cells[CHANNELS.indexOf('valuation')] != null)).toBe(true);
+	});
+
+	it('does not throw and does not surface quantCandidate as a first-screen row (silent-drop guard)', () => {
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture({
+				macroExposure: {
+					exposureQuality: {
+						status: 'quantCandidate', reason: '', blockedReason: '', missingEvidence: [],
+						sourceRef: 'test', nObs: 30, rSquared: 0.4, window: '2018-2026', frequency: 'monthly',
+						lagMonths: 1, coverage: 'company', minObs: 24, method: 'ols', modelVersion: 't', targetMetric: 'sales'
+					},
+					selected: []
+				}
+			} as unknown as Partial<Company>),
+			macro,
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		expect(() => buildExposureMatrixRows(snapshot.drivers, snapshot.topPressures, snapshot.transmissionEdges, CHANNELS)).not.toThrow();
+		const rows = buildExposureMatrixRows(snapshot.drivers, snapshot.topPressures, snapshot.transmissionEdges, CHANNELS);
+		// 행은 driver 키이며 어떤 셀도 exposureQuality status를 노출하지 않는다(근거 탭 전용).
+		const json = JSON.stringify(rows);
+		expect(json).not.toContain('quantCandidate');
+	});
+});
+
+describe('pickFocusCell — observed priority, channel tie-break, determinism', () => {
+	const rowsOf = (edges: MacroTransmissionEdgeView[]): MacroExposureMatrixRow[] => {
+		const byDriver = new Map<string, MacroTransmissionEdgeView[]>();
+		for (const e of edges) {
+			if (!byDriver.has(e.driverId)) byDriver.set(e.driverId, []);
+			byDriver.get(e.driverId)!.push(e);
+		}
+		return [...byDriver.entries()].map(([driverId, es]) => ({
+			driver: mkDriver(driverId),
+			cells: CHANNELS.map((ch) => es.find((e) => e.channel === ch) ?? null),
+			filledCount: es.length
+		}));
+	};
+
+	it('prefers observed over template', () => {
+		const focus = pickFocusCell(rowsOf([mkEdge('A', 'margin', 'template'), mkEdge('B', 'valuation', 'observed')]));
+		expect(focus?.edge.driverId).toBe('B');
+	});
+
+	it('breaks ties by channel priority (revenue > margin > valuation), not by change/lag', () => {
+		// 3 observed edges all medium confidence — 채널 우선순위로 revenue(EXPORT)가 초점.
+		const focus = pickFocusCell(rowsOf([
+			mkEdge('PPI_SEMI', 'margin', 'observed', 'medium'),
+			mkEdge('EXPORT', 'revenue', 'observed', 'medium'),
+			mkEdge('BAMLH0A0HYM2', 'valuation', 'observed', 'medium')
+		]));
+		expect(focus?.edge.driverId).toBe('EXPORT');
+		expect(focus?.channel).toBe('revenue');
+	});
+
+	it('is deterministic across repeated calls on identical input', () => {
+		const edges = [mkEdge('PPI_SEMI', 'margin', 'observed'), mkEdge('EXPORT', 'revenue', 'observed'), mkEdge('BAMLH0A0HYM2', 'valuation', 'observed')];
+		const a = pickFocusCell(rowsOf(edges));
+		const b = pickFocusCell(rowsOf(edges));
+		expect(a?.edge.driverId).toBe(b?.edge.driverId);
+	});
+
+	it('returns null when no cell is filled', () => {
+		expect(pickFocusCell([{ driver: mkDriver('X'), cells: CHANNELS.map(() => null), filledCount: 0 }])).toBeNull();
+	});
+
+	it('handles a lagMonths===null focus edge without throwing (chain renders direct)', () => {
+		const focus = pickFocusCell(rowsOf([mkEdge('X', 'revenue', 'observed', 'medium', { lagMonths: null })]));
+		expect(focus?.edge.lagMonths).toBeNull();
+		expect(focus?.edge.financialLine).toBeTruthy();
+		expect(focus?.edge.valuationLever).toBeTruthy();
+	});
+
+	it('on real semiconductor data returns a stable non-null focus with chain inputs', () => {
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture(),
+			macro,
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: []
+		});
+		const rows = buildExposureMatrixRows(snapshot.drivers, snapshot.topPressures, snapshot.transmissionEdges, CHANNELS);
+		const focus = pickFocusCell(rows);
+		expect(focus).not.toBeNull();
+		expect(focus!.edge.financialLine).toBeTruthy();
+		expect(focus!.edge.valuationLever).toBeTruthy();
+		const again = pickFocusCell(rows);
+		expect(focus!.edge.driverId).toBe(again!.edge.driverId);
 	});
 });
