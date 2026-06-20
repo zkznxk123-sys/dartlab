@@ -189,6 +189,7 @@ def test_monitored_covers_core_scheduled_pipelines():
     mod = _loadMonitor()
     required = {
         "Original SSOT Sync",
+        "AllFilings Backfill",
         "Data Sync",
         "EDGAR Data Sync (Bulk)",
         "Gov Price Sync (Bulk)",
