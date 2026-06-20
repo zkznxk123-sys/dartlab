@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { GitBranch, LineChart, ShieldAlert, X } from 'lucide-svelte';
 	import type { Lang } from '../lib/types';
-	import type { MacroChannel, MacroDriverView, MacroLensSnapshot, MacroLensTab, MacroTransmissionEdgeView } from '../lib/macroLens';
+	import type { MacroChannel, MacroDriverView, MacroExposureMatrixRow, MacroLensSnapshot, MacroLensTab, MacroTransmissionEdgeView } from '../lib/macroLens';
+	import { buildExposureMatrixRows, pickFocusCell } from '../lib/macroLens';
 	import { ECON_MAX } from '../charts/chartState.svelte';
 	import MacroPathRail from './MacroPathRail.svelte';
 
@@ -18,14 +19,12 @@
 	}
 	let { snapshot, lang, tab, focusId = '', activeEcon = [], onTab, onClose, onToggleEcon, onSector }: Props = $props();
 	let localFocus = $state('');
-	let localTab = $state<MacroLensTab>('regime');
+	let localTab = $state<MacroLensTab>('dashboard');
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const tabs: { k: MacroLensTab; kr: string; en: string }[] = [
-		{ k: 'regime', kr: '판정', en: 'Verdict' },
-		{ k: 'drivers', kr: '지표', en: 'Drivers' },
-		{ k: 'transmission', kr: '전파', en: 'Map' },
-		{ k: 'scenario', kr: '시나리오', en: 'Scenario' },
-		{ k: 'sources', kr: '출처', en: 'Sources' }
+		{ k: 'dashboard', kr: '계기판', en: 'Dashboard' },
+		{ k: 'transmission', kr: '경로', en: 'Path' },
+		{ k: 'sources', kr: '근거', en: 'Sources' }
 	];
 	const tabButtonId = (k: MacroLensTab) => `macro-lens-tab-${k}`;
 	const tabPanelId = (k: MacroLensTab) => `macro-lens-panel-${k}`;
@@ -53,15 +52,23 @@
 	const readinessText: Record<string, string> = { ready: 'READY', needsEvidence: 'EVIDENCE', blocked: 'BLOCK' };
 	const exposureQualityText: Record<string, string> = { quantCandidate: 'OPEN', qualitativeOnly: 'QUAL', blocked: 'LOCK' };
 	const componentStatusText: Record<string, string> = { ok: 'OPEN', watch: 'WATCH', blocked: 'LOCK' };
-	const compareComponentIds = ['move', 'path', 'company', 'comove'] as const;
+	// 증거 상태 → CSS 도형 칩 클래스 (색=증거 상태 단일 축, 방향 아님). blocked edge=LOCK.
+	const chipState = (edge: MacroTransmissionEdgeView): 'OBS' | 'PRIOR' | 'TPL' | 'LOCK' =>
+		edge.confidence === 'blocked' ? 'LOCK' : edge.evidenceLevel === 'observed' ? 'OBS' : edge.evidenceLevel === 'sectorPrior' ? 'PRIOR' : 'TPL';
+	const evidenceMicroLabel: Record<'OBS' | 'PRIOR' | 'TPL' | 'LOCK', { kr: string; en: string }> = {
+		OBS: { kr: '관측', en: 'obs' },
+		PRIOR: { kr: 'prior', en: 'prior' },
+		TPL: { kr: '템플', en: 'tpl' },
+		LOCK: { kr: '잠금', en: 'lock' }
+	};
+	const lagText = (edge: MacroTransmissionEdgeView): string => edge.lagMonths ? `${edge.lagMonths[0]}~${edge.lagMonths[1]}M` : '';
+	const channelLabel = (ch: MacroChannel): string => {
+		const c = channels.find((x) => x.k === ch);
+		return c ? T(c.kr, c.en) : ch;
+	};
 	const relevantDrivers = $derived(snapshot.drivers.filter((d) => d.relevance !== 'context').slice(0, 16));
 	const contextDrivers = $derived(snapshot.drivers.filter((d) => d.relevance === 'context').slice(0, 18));
 	const visibleDrivers = $derived([...relevantDrivers, ...contextDrivers]);
-	const verdict = $derived(snapshot.verdict);
-	const verdictDrivers = $derived(snapshot.verdict.drivers.slice(0, 3));
-	const verdictActions = $derived(snapshot.verdict.actions.slice(0, 2));
-	const topVerdictDriver = $derived(verdictDrivers[0]);
-	const topKillStep = $derived(verdict.killChain.find((step) => step.status === 'locked') ?? verdict.killChain.find((step) => step.status === 'watch') ?? verdict.killChain[0]);
 	const focusableIds = $derived(new Set([
 		...snapshot.drivers.map((d) => d.id),
 		...snapshot.transmissionEdges.map((e) => e.driverId),
@@ -78,8 +85,6 @@
 		?? ''
 	);
 	const activeFocusId = $derived(localFocus && focusableIds.has(localFocus) ? localFocus : defaultFocusId);
-	const verdictFocusId = $derived(topVerdictDriver?.driverId ?? activeFocusId);
-	const topVerdictRelease = $derived(verdictFocusId ? snapshot.releaseRail.find((r) => r.driverId === verdictFocusId) : null);
 	const focusDriver = $derived(activeFocusId ? snapshot.drivers.find((d) => d.id === activeFocusId) : null);
 	const focusEdge = $derived(activeFocusId ? snapshot.transmissionEdges.find((e) => e.driverId === activeFocusId || e.sectorKey === activeFocusId) : null);
 	const focusIndicator = $derived(activeFocusId ? snapshot.exposureIndicators.find((x) => x.seriesId === activeFocusId || x.sourceRefs.includes(activeFocusId)) : null);
@@ -88,9 +93,28 @@
 	const focusSource = $derived(activeFocusId ? snapshot.sourcePackets.find((p) => p.driverId === activeFocusId || p.seriesId === activeFocusId) : snapshot.sourcePackets[0]);
 	const focusContribution = $derived(activeFocusId ? snapshot.contributionStacks.find((c) => c.driverId === activeFocusId) : snapshot.contributionStacks[0]);
 	const focusCoMove = $derived(activeFocusId ? snapshot.coMoveGates.find((c) => c.driverId === activeFocusId) : snapshot.coMoveGates[0]);
-	const exposureRows = $derived(buildExposureRows());
-	const gateRows = $derived(snapshot.evidenceGates);
+	// Exposure Map 행 (view-model 이관 헬퍼). filledCount 내림차순·cap 6.
+	const exposureRows = $derived(buildExposureMatrixRows(snapshot.drivers, snapshot.topPressures, snapshot.transmissionEdges, channels.map((c) => c.k)));
+	// 초점 전파사슬 셀 (읽기 1차). 결정성 select. 셀 0개면 null → 폴백 카드.
+	const focusCell = $derived(pickFocusCell(exposureRows));
+	// 채널 열 클러스터: 켜진 채널만 열, 각 driver 칩을 자기 채널 열 아래로 모음(빈 셀 0).
+	const mapColumns = $derived(buildMapColumns(exposureRows));
+	const pulseDrivers = $derived(exposureRows.length ? exposureRows.slice(0, 6).map((r) => r.driver) : snapshot.topPressures.slice(0, 6));
+	// D블록 Gate Strip = evidenceGates 중 quant 제외 4개(데이터·전파·동행·회사).
+	const gateRows = $derived(snapshot.evidenceGates.filter((g) => g.id !== 'quant'));
 	const exposureQualityClass = $derived(snapshot.exposureQuality.status === 'quantCandidate' ? 'ok' : snapshot.exposureQuality.status === 'qualitativeOnly' ? 'watch' : 'blocked');
+	// 정량 LOCK 2케이스 정직 분기 (근거 탭). status로 직접 분기 — UI 추론 0. "분기 누적 시 OPEN" 약속 금지.
+	const quantBlocks = $derived(snapshot.exposureQuality.status === 'quantCandidate'
+		? [snapshot.exposureQuality.reason]
+		: (snapshot.exposureQuality.blockedReason ? [snapshot.exposureQuality.blockedReason] : [snapshot.exposureQuality.reason]).filter(Boolean));
+	const quantStatusLabel = $derived(
+		snapshot.exposureQuality.status === 'blocked'
+			? T('정량 LOCK · 회사 회귀 부재', 'Quant LOCK · company regression absent')
+			: snapshot.exposureQuality.status === 'qualitativeOnly'
+				? T('정량 QUAL · 정성 경로만', 'Quant QUAL · qualitative path only')
+				: T('정량 OPEN', 'Quant OPEN')
+	);
+	const quantAltValue = $derived(T('대신 → 경로 탭 동행(co-move) 반증·업종 prior 경로로 확인', 'Instead → verify via Path tab co-move falsifier / sector prior path'));
 	const modelMetricRows = $derived([
 		{ label: 'nObs', value: snapshot.exposureQuality.nObs != null ? String(snapshot.exposureQuality.nObs) : '—', status: snapshot.exposureQuality.nObs != null ? 'ok' : 'blocked' },
 		{ label: 'R²', value: fmtR2(snapshot.exposureQuality.rSquared), status: snapshot.exposureQuality.rSquared != null ? 'ok' : 'blocked' },
@@ -105,44 +129,24 @@
 		{ label: 'target', value: snapshot.exposureQuality.targetMetric ?? '—', status: snapshot.exposureQuality.targetMetric ? 'ok' : 'blocked' },
 		{ label: 'minObs', value: snapshot.exposureQuality.minObs != null ? String(snapshot.exposureQuality.minObs) : '—', status: snapshot.exposureQuality.minObs != null ? 'ok' : 'blocked' }
 	]);
-	const modelClaimRows = $derived([
-		{
-			label: T('경로 설명', 'Path narrative'),
-			status: snapshot.transmissionEdges.some((e) => e.confidence !== 'blocked') ? 'ok' : 'blocked',
-			value: snapshot.transmissionEdges.some((e) => e.confidence !== 'blocked') ? 'EDGE' : 'LOCK',
-			detail: snapshot.transmissionEdges.find((e) => e.confidence !== 'blocked')?.sourceRefs[0] ?? 'macro.transmission'
-		},
-		{
-			label: T('동행 후보', 'Co-move candidate'),
-			status: snapshot.coMoveGates.some((c) => c.status === 'candidate') ? 'watch' : 'blocked',
-			value: snapshot.coMoveGates.find((c) => c.status === 'candidate')?.n != null ? `n ${snapshot.coMoveGates.find((c) => c.status === 'candidate')?.n}` : 'LOCK',
-			detail: T('인과 아님', 'not causal')
-		},
-		{
-			label: T('정량 민감도', 'Quant sensitivity'),
-			status: exposureQualityClass,
-			value: exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status,
-			detail: snapshot.exposureQuality.blockedReason || snapshot.exposureQuality.reason
-		}
-	]);
 	const econBlocked = (id: string) => !activeEcon.includes(id) && activeEcon.length >= ECON_MAX;
 	let dialogEl = $state<HTMLDivElement | null>(null);
 	function fmtR2(value: number | null | undefined): string {
 		if (value == null) return '—';
 		return value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
 	}
-	function buildExposureRows(): { driver: MacroDriverView; cells: (MacroTransmissionEdgeView | null)[] }[] {
-		const seen = new Set<string>();
-		const drivers: MacroDriverView[] = [];
-		for (const d of [...snapshot.topPressures, ...snapshot.drivers.filter((x) => x.relevance === 'secondary')]) {
-			if (seen.has(d.id)) continue;
-			seen.add(d.id);
-			drivers.push(d);
-		}
-		return drivers.slice(0, 8).map((driver) => ({
-			driver,
-			cells: channels.map((ch) => snapshot.transmissionEdges.find((e) => e.driverId === driver.id && e.channel === ch.k) ?? null)
-		}));
+	// 채널 열 클러스터 빌드: 켜진 채널만 열로, 각 열 아래 닿는 driver 칩(빈 셀 미렌더).
+	function buildMapColumns(rows: MacroExposureMatrixRow[]): { channel: MacroChannel; cells: { driver: MacroDriverView; edge: MacroTransmissionEdgeView }[] }[] {
+		const out: { channel: MacroChannel; cells: { driver: MacroDriverView; edge: MacroTransmissionEdgeView }[] }[] = [];
+		channels.forEach((ch, i) => {
+			const cells: { driver: MacroDriverView; edge: MacroTransmissionEdgeView }[] = [];
+			for (const row of rows) {
+				const edge = row.cells[i];
+				if (edge) cells.push({ driver: row.driver, edge });
+			}
+			if (cells.length) out.push({ channel: ch.k, cells });
+		});
+		return out;
 	}
 	function sparkPoints(vals: number[]): string {
 		if (!vals.length) return '';
@@ -151,14 +155,28 @@
 		const span = max - min || 1;
 		return vals.map((v, i) => `${(i / Math.max(1, vals.length - 1)) * 48},${18 - ((v - min) / span) * 16}`).join(' ');
 	}
-	const cellClass = (edge: MacroTransmissionEdgeView | null) => edge ? edge.confidence : 'none';
-	const cellLabel = (edge: MacroTransmissionEdgeView) => edge.confidence === 'blocked' ? 'LOCK' : evidenceText[edge.evidenceLevel];
-	const cellTitle = (edge: MacroTransmissionEdgeView | null, label: string) => edge ? `${label}: ${edge.financialLine} · ${edge.confidence} · ${edge.evidenceLevel}` : `${label}: 노출 경로 없음`;
+	const cellClass = (edge: MacroTransmissionEdgeView | null) => edge ? edge.evidenceLevel : 'none';
+	const cellTitle = (edge: MacroTransmissionEdgeView, ch: MacroChannel): string => {
+		const ev = chipState(edge);
+		const evLabel = ev === 'OBS' ? T('섹터 관측(edge OBS·회사 회귀 아님)', 'sector observed (edge OBS · not company regression)')
+			: ev === 'PRIOR' ? T('업종 추정(prior)', 'sector prior')
+			: ev === 'LOCK' ? T('정량 잠금', 'quant lock')
+			: T('표준 템플릿', 'standard template');
+		const lag = edge.lagMonths ? `${T('지연', 'lag')} ${lagText(edge)}` : T('지연 직결', 'direct');
+		return `${edge.driverLabel} → ${channelLabel(ch)} · ${evLabel} · ${T('부호', 'sign')} ${signText[edge.sign]} · ${lag}`;
+	};
+	const chipAria = (edge: MacroTransmissionEdgeView, ch: MacroChannel): string => {
+		const ev = chipState(edge);
+		const evLabel = ev === 'OBS' ? T('섹터 관측(edge OBS·회사 회귀 아님)', 'sector observed (edge OBS, not company regression)')
+			: ev === 'PRIOR' ? T('업종 추정', 'sector prior')
+			: ev === 'LOCK' ? T('정량 잠금', 'quant lock')
+			: T('표준 템플릿', 'standard template');
+		const lag = edge.lagMonths ? `${T('지연', 'lag')} ${lagText(edge)}` : T('지연 직결', 'direct');
+		return `${edge.driverLabel}→${channelLabel(ch)}, ${evLabel}, ${T('부호', 'sign')} ${signText[edge.sign]}, ${lag}`;
+	};
 	const gateLabel = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.labelKr, g.labelEn);
 	const gateDetail = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.detailKr, g.detailEn);
 	const pct = (v: number) => `${Math.max(4, Math.min(100, Math.round(v * 100)))}%`;
-	const signedScore = (v: number) => `${v > 0 ? '+' : ''}${v}`;
-	const killStatus = (status: string) => status === 'open' ? 'OPEN' : status === 'watch' ? 'WATCH' : 'LOCK';
 	const corrLeft = (corr: number | null) => `${Math.max(0, Math.min(100, ((corr ?? 0) + 1) * 50))}%`;
 	function motionLabel(value: string | null | undefined): string {
 		const raw = value ?? '—';
@@ -170,24 +188,6 @@
 		localFocus = id || activeFocusId;
 		localTab = tabName;
 		onTab(tabName);
-	}
-	function showVerdictOnChart() {
-		if (!verdictFocusId || econBlocked(verdictFocusId)) return;
-		localFocus = verdictFocusId;
-		onToggleEcon?.(verdictFocusId);
-	}
-	function inspectVerdictPath() {
-		goto('transmission', verdictFocusId);
-	}
-	function inspectVerdictSources() {
-		goto('sources', verdictFocusId);
-	}
-	function inspectEvidenceGate(id: MacroLensSnapshot['evidenceGates'][number]['id']) {
-		const target: MacroLensTab = id === 'macroData' ? 'drivers' : id === 'path' ? 'transmission' : 'sources';
-		goto(target, verdictFocusId);
-	}
-	function runVerdictAction(action: MacroLensSnapshot['verdict']['actions'][number]) {
-		goto(action.tab, action.driverId ?? verdictFocusId);
 	}
 	function selectTab(tabName: MacroLensTab) {
 		localTab = tabName;
@@ -294,283 +294,86 @@
 		</div>
 
 		<div class="mlBody" id={tabPanelId(localTab)} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
-			{#if localTab === 'regime'}
-				<section class={'mlVerdictHero ' + verdict.tone} aria-label="Macro verdict">
-					<div class="mlVerdictDial">
-						<span>{T('판정 강도', 'Verdict')}</span>
-						<b>{verdict.score}</b>
-						<em>/100</em>
-						<i>{T(verdict.evidenceLabelKr, verdict.evidenceLabelEn)}</i>
-						<div class="mlScoreSplit" aria-label="Direction and evidence score">
-							<span><i>DIR</i><b>{signedScore(verdict.directionScore)}</b></span>
-							<span><i>EVD</i><b>{verdict.evidenceScore}</b></span>
-						</div>
-					</div>
-					<div class="mlVerdictMain">
-						<span class="mlBlockK">{T(verdict.qualityLabelKr, verdict.qualityLabelEn)} · {verdict.claimLevel}</span>
-						<h3>{T(verdict.titleKr, verdict.titleEn)}</h3>
-						<p>{T(verdict.summaryKr, verdict.summaryEn)}</p>
-						<div class="mlVerdictChain" title={T(verdict.primaryChainKr, verdict.primaryChainEn)}>
-							<span>{T('핵심 경로', 'Main path')}</span>
-							<b>{T(verdict.primaryChainKr, verdict.primaryChainEn)}</b>
-						</div>
-						<button class={'mlFalsifierSwitch ' + (topKillStep?.status ?? 'watch')} onclick={inspectVerdictSources} title={T(topKillStep?.detailKr ?? verdict.falsifierKr, topKillStep?.detailEn ?? verdict.falsifierEn)}>
-							<span>{topKillStep ? T(topKillStep.labelKr, topKillStep.labelEn) : T('반증', 'Kill switch')}</span>
-							<b>{T(topKillStep?.detailKr ?? verdict.falsifierKr, topKillStep?.detailEn ?? verdict.falsifierEn)}</b>
-						</button>
-					</div>
-					<div class="mlBattleBoard" aria-label="Macro direction meter">
-						<div class="mlBattleHead">
-							<span>{T('방향 대결', 'Direction')}</span>
-							<b>{T(verdict.contest.leaderKr, verdict.contest.leaderEn)}</b>
-							<em>{T(verdict.contest.confidenceKr, verdict.contest.confidenceEn)}</em>
-						</div>
-						<div class="mlBattleMeter">
-							<i class="supportive" style={`width:${pct(verdict.contest.supportiveScore / 100)}`}></i>
-							<i class="pressure" style={`width:${pct(verdict.contest.pressureScore / 100)}`}></i>
-							<i class="mixed" style={`width:${pct((verdict.contest.mixedScore + verdict.contest.unknownScore) / 100)}`}></i>
-						</div>
-						<div class="mlBattleScores">
-							<span>{T('순풍', 'Support')} <b>{verdict.contest.supportiveScore}</b></span>
-							<span>{T('역풍', 'Pressure')} <b>{verdict.contest.pressureScore}</b></span>
-							<span>{T('혼합', 'Mixed')} <b>{verdict.contest.mixedScore + verdict.contest.unknownScore}</b></span>
-						</div>
-						<div class="mlBattlePivot">
-							<span>{T(verdict.flip.labelKr, verdict.flip.labelEn)}</span>
-							<b>{T(verdict.flip.neededKr, verdict.flip.neededEn)}</b>
-							<em>{T(verdict.flip.detailKr, verdict.flip.detailEn)}</em>
-						</div>
-					</div>
-					<div class="mlVerdictAction">
-						<span>{T('다음 행동', 'Next action')}</span>
-						<b>{T(verdict.nextActionKr, verdict.nextActionEn)}</b>
-						<em>{T(verdict.stanceKr, verdict.stanceEn)}</em>
-						<div class="mlActionQueue" aria-label="Verdict action queue">
-							{#each verdictActions as action (action.id)}
-								<button class={'mlActionItem ' + action.severity} onclick={() => runVerdictAction(action)} title={`${T(action.detailKr, action.detailEn)} · ${action.sourceRef}`}>
-									<span>{action.severity.toUpperCase()}</span>
-									<b>{T(action.labelKr, action.labelEn)}</b>
-								</button>
-							{/each}
-						</div>
-						<div class="mlCommandBar" aria-label={T('판정 조작 버튼', 'Verdict command buttons')}>
-							<button
-								onclick={showVerdictOnChart}
-								disabled={!verdictFocusId || !onToggleEcon || econBlocked(verdictFocusId)}
-								class:on={!!verdictFocusId && activeEcon.includes(verdictFocusId)}
-								title={econBlocked(verdictFocusId) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : T('핵심 지표를 가격 차트에 올립니다', 'overlay the key driver on the price chart')}
-							><LineChart size={13} />{T('차트', 'Chart')}</button>
-							<button onclick={inspectVerdictPath} disabled={!verdictFocusId} title={T('전파 경로 탭에서 근거를 확인합니다', 'inspect the transmission path')}>
-								<GitBranch size={13} />{T('경로', 'Path')}
-							</button>
-							<button onclick={inspectVerdictSources} disabled={!verdictFocusId} title={T('출처와 반증 조건을 확인합니다', 'inspect sources and falsifiers')}>
-								<ShieldAlert size={13} />{T('반증', 'Test')}
-							</button>
-						</div>
-					</div>
-				</section>
-
-				<section class="mlKillChainPanel" aria-label="Driver-local falsifier kill chain">
-					<div class="mlKillChainHead">
-						<div>
-							<span class="mlBlockK">{T('반증 체인', 'Kill-chain')}</span>
-							<b>{topVerdictDriver ? topVerdictDriver.label : T('경로 없음', 'No path')}</b>
-						</div>
-						<em>{T('관측값 → 전파 → 회사증거 → 반증 → 재확인', 'Observation → path → company → falsifier → recheck')}</em>
-					</div>
-					<div class="mlKillChainSteps">
-						{#each verdict.killChain as step (step.id)}
-							<button class={'mlKillStep ' + step.status} onclick={() => goto(step.tab, step.driverId ?? verdictFocusId)} title={`${T(step.detailKr, step.detailEn)} · ${step.sourceRef}`}>
-								<span>{killStatus(step.status)}</span>
-								<b>{T(step.labelKr, step.labelEn)}</b>
-								<em>{T(step.detailKr, step.detailEn)}</em>
-							</button>
-						{/each}
-					</div>
-				</section>
-
-				<details class="mlVerdictAuditFold">
-					<summary>{T('상세 검산 열기', 'Open detailed audit')}</summary>
-				<section class={'mlContestPanel ' + verdict.contest.leaderSide} aria-label="Macro direction contest">
-					<div class="mlContestHead">
-						<div>
-							<span class="mlBlockK">{T('경로 대결판', 'Path contest')}</span>
-							<b>{T('상위 경로 3개를 같은 판정축으로 비교', 'Top three paths on the same decision axis')}</b>
-						</div>
-						<em>{T(verdict.contest.leaderKr, verdict.contest.leaderEn)} · spread {verdict.contest.spread}</em>
-					</div>
-					<div class="mlContestRows">
-						{#each verdict.contest.rows as row (row.driverId)}
-							<button class={'mlContestRow ' + row.side} onclick={() => goto('transmission', row.driverId)} title={row.sourceRef}>
-								<span>{T(row.labelKr, row.labelEn)}</span>
-								<b>{row.driverLabel}</b>
-								<em>{T(row.detailKr, row.detailEn)}</em>
-								<i>{row.share}</i>
-							</button>
-						{/each}
-					</div>
-				</section>
-
-				<section class="mlCompareTray" aria-label="Top driver comparison tray">
-					<div class="mlCompareTitle">
-						<span class="mlBlockK">{T('A/B 비교', 'A/B compare')}</span>
-						<b>{T('1순위 경로가 왜 이기는지 같은 축으로 검산', 'Audit why the lead path wins on the same axes')}</b>
-					</div>
-					<div class="mlCompareCards">
-						{#each verdictDrivers as d (d.driverId)}
-							<button class={'mlCompareCard ' + d.direction} onclick={() => goto('transmission', d.driverId)} title={d.sourceRef}>
-								<div class="mlCompareTop">
-									<span>{d.directionLabelKr}</span>
-									<b>{d.label}</b>
-									<em>{d.score}</em>
-								</div>
-								<div class="mlCompareFacts">
-									<span><i>chg</i><b>{d.change}</b></span>
-									<span><i>lag</i><b>{d.lagLabel}</b></span>
-									<span><i>path</i><b>{d.evidenceLabel}/{d.confidenceLabel}</b></span>
-								</div>
-								<div class="mlCompareAxis">
-									{#each compareComponentIds as cid (cid)}
-										{@const c = d.components.find((x) => x.id === cid)}
-										<div class={'mlCompareAxisItem ' + (c?.status ?? 'blocked')} title={c?.detail ?? cid}>
-											<span>{c ? T(c.labelKr, c.labelEn) : cid}</span>
-											<b>{c?.score ?? '—'}</b>
-										</div>
-									{/each}
-								</div>
-							</button>
-						{/each}
-					</div>
-				</section>
-
-				{#if topVerdictDriver}
-					<section class="mlMechanismPanel" aria-label="Macro verdict engine">
-						<div class="mlMechanismTitle">
-							<div>
-								<span class="mlBlockK">{T('판정 엔진', 'Verdict engine')}</span>
-								<b>{topVerdictDriver.label}</b>
-							</div>
-							<em>{topVerdictDriver.directionLabelKr} · {topVerdictDriver.evidenceLabel}/{topVerdictDriver.confidenceLabel}</em>
-						</div>
-						<div class="mlMechanismRail">
-							{#each topVerdictDriver.components as c (c.id)}
-								<div class={'mlMechanismStep ' + c.status} title={c.detail}>
-									<span>{T(c.labelKr, c.labelEn)}</span>
-									<b>{c.score}</b>
-									<em>{c.detail}</em>
-									<i style={`height:${Math.max(7, c.score)}%`}></i>
-								</div>
-							{/each}
-						</div>
-					</section>
-				{/if}
-
-				<section class="mlDecisionGrid" aria-label="Macro decision checks">
-					<div class="mlDecisionCard falsifier">
-						<span class="mlBlockK">{T('반증', 'Falsifier')}</span>
-						<b>{T('이 조건이면 결론을 접음', 'This breaks the claim')}</b>
-						<p>{T(verdict.falsifierKr, verdict.falsifierEn)}</p>
-					</div>
-					<div class="mlDecisionCard">
-						<span class="mlBlockK">{T('잠금', 'Locks')}</span>
-						<b>{verdict.blockers.length ? `${verdict.blockers.length} LOCK` : 'OPEN'}</b>
-						<p>{verdict.blockers.slice(0, 2).join(' · ') || T('표시 가능한 hard blocker 없음', 'No visible hard blocker')}</p>
-					</div>
-					<div class="mlDecisionCard">
-						<span class="mlBlockK">{T('근거 수준', 'Claim level')}</span>
-						<b>{T(verdict.qualityLabelKr, verdict.qualityLabelEn)}</b>
-						<p>{T('추천·목표가가 아니라 매크로 노출 판정이다.', 'Macro exposure verdict, not a recommendation or price target.')}</p>
-					</div>
-				</section>
-
-				<section class="mlEvidenceCockpit" aria-label="Evidence cockpit">
-					<div class="mlCockpitHead">
-						<span class="mlBlockK">{T('근거 조종판', 'Evidence cockpit')}</span>
-						<b>{verdict.blockers.length ? verdict.blockers[0] : T('하드락 없음', 'No hard lock')}</b>
-					</div>
-					<div class="mlCockpitGates">
-						{#each gateRows as g (g.id)}
-							<button class={'mlCockpitGate ' + g.status} onclick={() => inspectEvidenceGate(g.id)} title={`${gateDetail(g)} · ${g.sourceRef}`}>
-								<span>{gateLabel(g)}</span>
-								<b>{g.value}</b>
-							</button>
-						{/each}
-					</div>
-					<button class={'mlCockpitRelease ' + (topVerdictRelease?.status ?? 'unknown')} onclick={() => goto('sources', verdictFocusId)} title={topVerdictRelease?.sourceRef ?? T('릴리즈 레일 없음', 'release rail missing')}>
-						<span>Release</span>
-						<b>{topVerdictRelease ? `${topVerdictRelease.label} · ${topVerdictRelease.status.toUpperCase()}` : '—'}</b>
-						<em>{topVerdictRelease ? `${topVerdictRelease.lastObservation} · next ${topVerdictRelease.nextCheck}` : T('재확인 기준 없음', 'recheck point missing')}</em>
-					</button>
-				</section>
-
-				<section class="mlVerdictDrivers" aria-label="Top macro verdict drivers">
-					{#each verdictDrivers as d (d.driverId)}
-						<button class={'mlVerdictDriver ' + d.direction} onclick={() => goto('transmission', d.driverId)} title={d.sourceRef}>
-							<span>{d.directionLabelKr} · {d.evidenceLabel}/{d.confidenceLabel}</span>
-							<b>{d.label}</b>
-							<em>{d.value} · {d.change} · {d.lagLabel}</em>
-							<div class="mlVerdictBars">
-								{#each d.components.slice(0, 4) as c (c.id)}
-									<i class={c.status} style={`height:${Math.max(8, c.score)}%`} title={`${T(c.labelKr, c.labelEn)} ${c.score}/100 · ${c.detail}`}></i>
-								{/each}
-							</div>
-						</button>
-					{/each}
-				</section>
-
+			{#if localTab === 'dashboard'}
+				<!-- 블록 A — Phase Strip -->
 				<section class="mlPhaseStrip" aria-label="Macro phases">
 					<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
 					<div><span>US</span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}</em></div>
-					<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : '—'}</em></div>
+					<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
 				</section>
+
+				<!-- 블록 B — Driver Pulse -->
 				<section class="mlPulseStrip" aria-label="Macro pulse">
-					{#each exposureRows.slice(0, 6) as row (row.driver.id)}
-						<button class={'mlPulse ' + row.driver.pressureLevel} class:on={activeEcon.includes(row.driver.id) || activeFocusId === row.driver.id} disabled={econBlocked(row.driver.id)} onclick={() => { localFocus = row.driver.id; onToggleEcon?.(row.driver.id); }} title={econBlocked(row.driver.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle ECON overlay')}>
-							<span>{row.driver.label}</span>
-							<b>{row.driver.value}</b>
-							<em>{row.driver.change}</em>
+					{#each pulseDrivers as d (d.id)}
+						<button class={'mlPulse ' + d.pressureLevel} class:on={activeEcon.includes(d.id) || activeFocusId === d.id} disabled={econBlocked(d.id)} onclick={() => { localFocus = d.id; onToggleEcon?.(d.id); }} title={econBlocked(d.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : `${d.value} · ${d.asOf} · ${d.source}`}>
+							<span>{d.label}</span>
+							<b>{d.value}</b>
+							<em>{d.change} · {d.asOf || d.freshness.label}</em>
 							<svg viewBox="0 0 48 20" preserveAspectRatio="none" aria-hidden="true">
-								<polyline points={sparkPoints(row.driver.spark)} />
+								<polyline points={sparkPoints(d.spark)} />
 							</svg>
 						</button>
 					{/each}
 				</section>
-				</details>
-				<details class="mlEvidenceFold">
-					<summary>{T('증거 매트릭스와 릴리즈 레일', 'Evidence matrix and release rail')}</summary>
-					<section class="mlMatrix" aria-label="Macro exposure matrix">
-						<div class="mlMatrixHead">
-							<span>{T('변수', 'Driver')}</span>
-							{#each channels as ch (ch.k)}<span>{T(ch.kr, ch.en)}</span>{/each}
+
+				<!-- 블록 C — Exposure Map (단일 테두리 주역) -->
+				<section class="mlMap" aria-label={T('노출 지도', 'Exposure Map')}>
+					{#if focusCell}
+						<!-- 읽기 1차 — 초점 전파사슬 -->
+						<div class="mlMapFocus">
+							<div class="mlMapChain">
+								<b>{focusCell.edge.driverLabel}</b>
+								{#if focusCell.edge.lagMonths}<i class="mlChainLag">{lagText(focusCell.edge)}</i>{/if}
+								<i class="mlChainArrow" aria-hidden="true">▶</i>
+								<b>{focusCell.edge.financialLine}</b>
+								<i class="mlChainLever">{focusCell.edge.valuationLever}</i>
+								<i class="mlChainArrow" aria-hidden="true">▶</i>
+								<b>{channelLabel(focusCell.channel)}</b>
+							</div>
+							<div class="mlMapEvidence">
+								<span class={'mlMapChip ' + chipState(focusCell.edge)} aria-hidden="true"></span>
+								<em>{T('증거', 'evidence')}: {chipState(focusCell.edge) === 'OBS' ? T('섹터 관측(edge OBS·회사 회귀 아님)', 'sector observed (edge OBS · not company regression)') : chipState(focusCell.edge) === 'PRIOR' ? T('업종 추정(prior)', 'sector prior') : chipState(focusCell.edge) === 'LOCK' ? T('정량 잠금', 'quant lock') : T('표준 템플릿', 'standard template')}</em>
+								<i class="mlMapSign">{signText[focusCell.edge.sign]}</i>
+								<i class="mlMapMeta">{focusCell.driver.value} · {focusCell.driver.change} · {focusCell.driver.asOf} · {focusCell.driver.source}</i>
+							</div>
+							<button class="mlMapDrill" onclick={() => goto('transmission', focusCell.driver.id)}>{T('셀 클릭 → 경로 드릴다운(전파·품질·기여·동행·출처)', 'cell → Path drilldown (chain · quality · contribution · co-move · source)')}</button>
 						</div>
-						{#each exposureRows as row (row.driver.id)}
-							<div class="mlMatrixRow">
-								<button class="mlMatrixDriver" onclick={() => goto('drivers', row.driver.id)} title={row.driver.sourceLineage}>
-									<b>{row.driver.label}</b>
-									<em>{row.driver.value} · {row.driver.asOf}</em>
-								</button>
-								{#each row.cells as edge, i (`${row.driver.id}-${channels[i].k}`)}
-									<button class={'mlXCell ' + cellClass(edge)} onclick={() => edge && goto('transmission', edge.driverId)} title={cellTitle(edge, T(channels[i].kr, channels[i].en))}>
-										{#if edge}
-											<b>{signText[edge.sign]}</b><em>{cellLabel(edge)}</em>
-										{:else}
-											<span>·</span>
-										{/if}
-									</button>
+					{:else}
+						<div class="mlMapFocus">
+							<div class="mlMapChain"><b>{T('표준 전파 경로 없음 — 경로 탭에서 확인', 'No mapped transmission path — see Path tab')}</b></div>
+						</div>
+					{/if}
+
+					<!-- 읽기 2차 — 닷그리드 (채널 열 클러스터, opacity .82) -->
+					<div class="mlMapGrid" aria-label={T('채널 닷그리드', 'channel dot grid')}>
+						{#if mapColumns.length}
+							<div class="mlMapHead">
+								{#each mapColumns as col (col.channel)}<span>{channelLabel(col.channel)}</span>{/each}
+							</div>
+							<div class="mlMapRow">
+								{#each mapColumns as col (col.channel)}
+									<div class="mlMapCol">
+										{#each col.cells as cell (`${cell.driver.id}-${col.channel}`)}
+											<button class={'mlMapCell ' + cellClass(cell.edge)} onclick={() => goto('transmission', cell.edge.driverId)} title={cellTitle(cell.edge, col.channel)} aria-label={chipAria(cell.edge, col.channel)}>
+												<span class={'mlMapChip ' + chipState(cell.edge)} aria-hidden="true"></span>
+												<b>{cell.driver.label}</b>
+												<i class="mlMapSign">{signText[cell.edge.sign]}</i>
+												<em>{T(evidenceMicroLabel[chipState(cell.edge)].kr, evidenceMicroLabel[chipState(cell.edge)].en)}</em>
+											</button>
+										{/each}
+									</div>
 								{/each}
 							</div>
-						{/each}
-					</section>
-					<section class="mlMobileDrillRail" aria-label="Mobile macro drilldown">
-						{#each exposureRows.slice(0, 6) as row (row.driver.id)}
-							<button class:focused={activeFocusId === row.driver.id} onclick={() => goto('transmission', row.driver.id)} title={row.driver.pressureReason}>
-								<span>{row.driver.label}</span>
-								<b>{row.driver.coMovement?.status === 'candidate' ? 'Co-move' : row.driver.pressureLevel.toUpperCase()}</b>
-								<em>{row.driver.coMovement ? `corr ${row.driver.coMovement.corr > 0 ? '+' : ''}${row.driver.coMovement.corr.toFixed(2)}` : row.driver.freshness.label}</em>
-							</button>
-						{/each}
-					</section>
-					<section class="mlGateStrip" aria-label="Evidence gates">
+							<div class="mlMapNote">{T('색=증거 상태(방향 아님) · 닿는 채널만 표시(빈 열 생략)', 'Color = evidence state (not direction) · only mapped channels shown (empty columns omitted)')}</div>
+						{:else}
+							<div class="mlMapNote">{T('표시 가능한 전파 채널 없음 — 경로 탭 확인', 'No mappable transmission channel — see Path tab')}</div>
+						{/if}
+					</div>
+				</section>
+
+				<!-- 블록 D — Evidence Gate(quant 제외 4) + Release Rail -->
+				<section class="mlDashGate" aria-label={T('증거 게이트와 릴리즈 레일', 'Evidence gates and release rail')}>
+					<div class="mlGateStrip">
 						{#each gateRows as g (g.id)}
 							<div class={'mlGate ' + g.status}>
 								<span>{gateLabel(g)}</span>
@@ -578,8 +381,8 @@
 								<em title={g.sourceRef}>{gateDetail(g)}</em>
 							</div>
 						{/each}
-					</section>
-					<section class="mlReleaseRail" aria-label="Release rail">
+					</div>
+					<div class="mlReleaseRail">
 						<div class="mlRailTitle"><span class="mlBlockK">Release Rail</span><b>{T('값을 다시 확인할 시점', 'When to re-check')}</b></div>
 						<div class="mlRailRows">
 							{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
@@ -591,50 +394,9 @@
 								</button>
 							{/each}
 						</div>
-					</section>
-					<section class="mlLegend" aria-label="Legend">
-						<span class="medium">MED/HIGH = {T('업종 경로 존재', 'sector path')}</span>
-						<span class="low">LOW = {T('공통 매크로 맥락', 'context')}</span>
-						<span class="blocked">BLOCK = {T('시계열 또는 회사 증거 부족', 'missing series/evidence')}</span>
-						<span class="none">· = {T('표준 경로 없음', 'no mapped path')}</span>
-					</section>
-				</details>
-			{:else if localTab === 'drivers'}
-				{#if focusDriver}
-					<section class="mlFocus">
-						<LineChart class="mlFocusIcon" size={15} />
-						<div><b>{focusDriver.label}</b><span>{focusDriver.directionSemantics}</span></div>
-					</section>
-				{/if}
-				<section class="mlGrid pressureGrid" aria-label="Priority Macro Paths">
-					{#each snapshot.topPressures as d (d.id)}
-						<div class={'mlPressure ' + d.pressureLevel}>
-							<div class="mlPressureTop"><span class="mlBlockK">{T('우선 경로', 'Priority path')}</span><b>{d.label}</b><em>{pressureText[d.pressureLevel]}</em></div>
-							<p>{d.pressureReason}</p>
-							<div class="mlMiniList"><span>{d.qualityHint}</span></div>
-						</div>
-					{/each}
-				</section>
-				<div class="mlDriverTable">
-					<div class="mlDriverHead">
-						<span>{T('Driver', 'Driver')}</span><span>{T('품질', 'Quality')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
 					</div>
-					{#each visibleDrivers as d (d.id)}
-						<div class={'mlDriverRow ' + d.relevance} class:focused={activeFocusId === d.id}>
-							<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
-							<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText[d.pressureLevel]}</b><em>{d.qualityHint}</em></span>
-							<span class="mono">{d.value}</span>
-							<span class="mono">{d.change}</span>
-							<span class="mlDriverLine">{d.sourceLineage}{#if d.coMovement}<em>{d.coMovement.label}</em><small>{T('동행상관 · 인과 아님', 'co-movement · not causal')}</small>{/if}</span>
-							<span>
-								<button class="mlIconBtn" class:on={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => onToggleEcon?.(d.id)} title={econBlocked(d.id) ? T('동시 3개까지 표시됩니다', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle chart ECON overlay')}>
-									<LineChart size={12} />{activeEcon.includes(d.id) ? 'ON' : econBlocked(d.id) ? 'MAX' : 'ECON'}
-								</button>
-							</span>
-						</div>
-					{/each}
-				</div>
-				<div class="mlNote">{T('Driver는 최신값만 보지 않고 방향성 의미·lag·섹터 전파 가능성을 같이 본다.', 'Drivers are read with direction semantics, lag and sector transmission, not just latest values.')}</div>
+				</section>
+				<div class="mlMapNote mlAlwaysNote inline">{T('정량 게이트는 근거 탭. 첫 화면 정량 행 없음.', 'Quant gate is on the Sources tab. No quant row on the first screen.')}</div>
 			{:else if localTab === 'transmission'}
 				{#if snapshot.macroPath}
 					<MacroPathRail view={snapshot.macroPath} {lang} mode="full" onSector={onSector} />
@@ -703,7 +465,7 @@
 									<div class={'mlEvidenceStep ' + c.status} title={`${c.detail} · ${c.sourceRef}`}>
 										<i style={`height:${pct(c.value)}`}></i>
 										<span>{c.label}</span>
-										<b>{Math.round(c.value * 100)}/100</b>
+										<b>{Math.round(c.value * 100)}%</b>
 										<em>{componentStatusText[c.status] ?? c.status.toUpperCase()}</em>
 										<small>{c.detail}</small>
 										<code>{c.sourceRef}</code>
@@ -777,6 +539,48 @@
 						{/each}
 					</section>
 				</details>
+				<details class="mlEdgeDetails">
+					<summary>{T('심화 (시나리오 · 상세 지표)', 'Advanced (scenarios · detailed drivers)')}</summary>
+					<section class="mlGrid scenarioGrid">
+						{#each snapshot.scenarios as s (s.id)}
+							<div class={'mlScenario ' + s.readiness.status}>
+								<div class="mlBlockTop"><span class="mlBlockK">{s.shock}</span><em>{readinessText[s.readiness.status]}</em></div>
+								<b>{s.label}</b>
+								<p>{T('먼저 흔들리는 곳', 'First break')}: {s.firstBreak}</p>
+								<p>{T('예상 방향', 'Expected direction')}: {s.expectedDirection}</p>
+								<div class="mlMiniList">
+									<span>{s.impactedFinancialLine}</span>
+									<span>{s.valuationLever}</span>
+								</div>
+								<div class="mlEvidence">
+									{#each s.requiredEvidence as x (x)}<span>{x}</span>{/each}
+								</div>
+								<p>{T('반증', 'Falsifier')}: {s.falsifier}</p>
+								<div class="mlSrc warn">{s.readiness.reason}</div>
+								<em>{s.nextSurface}</em>
+							</div>
+						{/each}
+					</section>
+					<div class="mlDriverTable">
+						<div class="mlDriverHead">
+							<span>{T('Driver', 'Driver')}</span><span>{T('품질', 'Quality')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
+						</div>
+						{#each visibleDrivers as d (d.id)}
+							<div class={'mlDriverRow ' + d.relevance} class:focused={activeFocusId === d.id}>
+								<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
+								<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText[d.pressureLevel]}</b><em>{d.qualityHint}</em></span>
+								<span class="mono">{d.value}</span>
+								<span class="mono">{d.change}</span>
+								<span class="mlDriverLine">{d.sourceLineage}{#if d.coMovement}<em>{d.coMovement.label}</em><small>{T('동행상관 · 인과 아님', 'co-movement · not causal')}</small>{/if}</span>
+								<span>
+									<button class="mlIconBtn" class:on={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => onToggleEcon?.(d.id)} title={econBlocked(d.id) ? T('동시 3개까지 표시됩니다', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle chart ECON overlay')}>
+										<LineChart size={12} />{activeEcon.includes(d.id) ? 'ON' : econBlocked(d.id) ? 'MAX' : 'ECON'}
+									</button>
+								</span>
+							</div>
+						{/each}
+					</div>
+				</details>
 				<section class="mlGrid two">
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('회사 checkpoint', 'Company checkpoints')}</span><b>{T('정량화 전 확인할 재무 위치', 'Financial checkpoints before quant claim')}</b></div>
@@ -796,28 +600,6 @@
 						{/each}
 					</div>
 				</section>
-			{:else if localTab === 'scenario'}
-				<section class="mlGrid scenarioGrid">
-					{#each snapshot.scenarios as s (s.id)}
-						<div class={'mlScenario ' + s.readiness.status}>
-							<div class="mlPressureTop"><span class="mlBlockK">{s.shock}</span><em>{readinessText[s.readiness.status]}</em></div>
-							<b>{s.label}</b>
-							<p>{T('먼저 흔들리는 곳', 'First break')}: {s.firstBreak}</p>
-							<p>{T('예상 방향', 'Expected direction')}: {s.expectedDirection}</p>
-							<div class="mlMiniList">
-								<span>{s.impactedFinancialLine}</span>
-								<span>{s.valuationLever}</span>
-							</div>
-							<div class="mlEvidence">
-								{#each s.requiredEvidence as x (x)}<span>{x}</span>{/each}
-							</div>
-							<p>{T('반증', 'Falsifier')}: {s.falsifier}</p>
-							<div class="mlSrc warn">{s.readiness.reason}</div>
-							<em>{s.nextSurface}</em>
-						</div>
-					{/each}
-				</section>
-				<div class="mlNote">{T('시나리오는 명시 가정이다. 예측·추천·가격 산출이 아니며 회사 손익 정량화는 별도 시뮬레이터 영역이다.', 'Scenarios are explicit assumptions, not forecasts, recommendations or price outputs.')}</div>
 			{:else}
 				<section class="mlGrid two">
 					<div class="mlBlock">
@@ -834,7 +616,17 @@
 						{#each snapshot.sourceRefs as s, i (`${s}-${i}`)}<div class="mlSrc">{s}</div>{/each}
 					</div>
 					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('한계', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
+						<div class="mlBlockTop"><span class="mlBlockK">{T('한계·결손', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
+						<div class={'mlQuantCard ' + exposureQualityClass} aria-label="Quant gate status">
+							<div class="mlQuantTop">
+								<span class="mlBlockK">{T('정량 게이트', 'Quant gate')}</span>
+								<b>{quantStatusLabel}</b>
+							</div>
+							{#each quantBlocks as b (b)}<p>{b}</p>{/each}
+							{#if snapshot.exposureQuality.status !== 'quantCandidate'}
+								<div class="mlQuantAlt">{quantAltValue}</div>
+							{/if}
+						</div>
 						<div class={'mlQualityCard ' + exposureQualityClass} aria-label="Quality gate model card">
 							<div class="mlQualityTop">
 								<span class="mlBlockK">Quality Gate</span>
@@ -855,15 +647,6 @@
 									<div class={'mlModelMetric ' + r.status}>
 										<span>{r.label}</span>
 										<b>{r.value}</b>
-									</div>
-								{/each}
-							</div>
-							<div class="mlClaimRail" aria-label="Allowed macro claims">
-								{#each modelClaimRows as r (r.label)}
-									<div class={'mlClaimChip ' + r.status}>
-										<span>{r.label}</span>
-										<b>{r.value}</b>
-										<em>{r.detail}</em>
 									</div>
 								{/each}
 							</div>
@@ -925,7 +708,7 @@
 </div>
 
 <style>
-	.mlModal { width: min(1040px, 96vw); height: min(760px, 90vh); }
+	.mlModal { width: min(960px, 96vw); height: 88vh; }
 	.mlHead { flex-wrap: wrap; }
 	.mlTitle { display: flex; align-items: center; gap: 8px; min-width: 0; }
 	.mlTitle b { font-size: 14px; }
@@ -940,221 +723,14 @@
 	.mlTabs button:hover { color: var(--amber); }
 	.mlTabs button.active { color: var(--dl-ink); border-color: var(--dl-line, #1b2130); background: var(--dl-bg-raised, #0e141f); box-shadow: inset 0 2px 0 var(--amber); }
 	.mlAlwaysNote { padding: 6px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); color: var(--dl-ink-dim, #5b6473); background: rgba(251,146,60,.035); font-size: 10.5px; line-height: 1.4; }
-	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+	.mlAlwaysNote.inline { border-bottom: 0; border-radius: 5px; background: transparent; padding: 0 2px; }
+	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 	.mlGrid { display: grid; gap: 10px; }
 	.mlGrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.edgeGrid { grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); }
 	.scenarioGrid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-	.pressureGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-	.mlVerdictHero { display: grid; grid-template-columns: 118px minmax(0, 1.35fr) minmax(190px, .82fr) minmax(190px, .78fr); gap: 8px; align-items: stretch; border: 1px solid var(--dl-line, #1b2130); border-radius: 7px; background: rgba(255,255,255,.018); padding: 9px; }
-	.mlVerdictHero.good { border-color: rgba(52,211,153,.42); background: rgba(52,211,153,.038); }
-	.mlVerdictHero.warn { border-color: rgba(251,146,60,.44); background: rgba(251,146,60,.04); }
-	.mlVerdictHero.down { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.035); }
-	.mlVerdictHero.neutral { border-color: rgba(148,163,184,.28); }
-	.mlVerdictDial { display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 0; border: 1px solid rgba(255,255,255,.06); border-radius: 6px; background: rgba(0,0,0,.16); }
-	.mlVerdictDial span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-	.mlVerdictDial b { margin-top: 4px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 32px; line-height: 1; }
-	.mlVerdictDial em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; }
-	.mlVerdictDial i { margin-top: 7px; max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(255,255,255,.07); border-radius: 999px; color: var(--amber); background: rgba(251,146,60,.045); padding: 2px 7px; font-style: normal; font-family: var(--dl-font-mono); font-size: 8px; }
-	.mlScoreSplit { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; width: calc(100% - 14px); margin-top: 7px; }
-	.mlScoreSplit span { min-width: 0; border: 1px solid rgba(255,255,255,.055); border-radius: 4px; background: rgba(255,255,255,.012); padding: 4px 3px; text-align: center; }
-	.mlScoreSplit i, .mlScoreSplit b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlScoreSplit i { margin: 0; max-width: none; border: 0; border-radius: 0; background: transparent; color: var(--dl-ink-muted, #7b8493); padding: 0; font-size: 7.5px; }
-	.mlScoreSplit b { margin-top: 2px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; line-height: 1; }
-	.mlVerdictMain, .mlVerdictAction, .mlBattleBoard { min-width: 0; }
-	.mlVerdictMain h3 { margin: 4px 0 0; color: var(--dl-ink); font-size: 20px; line-height: 1.05; letter-spacing: 0; }
-	.mlVerdictMain p, .mlVerdictAction b, .mlVerdictAction em { min-width: 0; overflow-wrap: anywhere; }
-	.mlVerdictMain p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 11.5px; line-height: 1.38; }
-	.mlVerdictChain { display: grid; grid-template-columns: 68px minmax(0, 1fr); gap: 7px; align-items: center; margin-top: 8px; border: 1px solid rgba(255,255,255,.055); border-radius: 5px; padding: 6px 7px; background: rgba(0,0,0,.12); }
-	.mlVerdictChain span, .mlVerdictAction span { color: var(--amber); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-	.mlVerdictChain b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11px; }
-	.mlFalsifierSwitch { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 7px; align-items: center; width: 100%; min-width: 0; margin-top: 7px; border: 1px solid rgba(251,146,60,.32); border-radius: 5px; background: rgba(251,146,60,.035); color: var(--dl-ink); padding: 6px 7px; text-align: left; cursor: pointer; }
-	.mlFalsifierSwitch.open { border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.025); }
-	.mlFalsifierSwitch.locked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.026); }
-	.mlFalsifierSwitch:hover { border-color: rgba(251,146,60,.62); background: rgba(251,146,60,.06); }
-	.mlFalsifierSwitch span { color: var(--amber); font-size: 8.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-	.mlFalsifierSwitch b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
-	.mlBattleBoard { display: flex; flex-direction: column; justify-content: center; gap: 7px; border: 1px solid rgba(255,255,255,.06); border-radius: 6px; background: rgba(0,0,0,.13); padding: 8px; }
-	.mlBattleHead span, .mlBattleHead b, .mlBattleHead em, .mlBattlePivot span, .mlBattlePivot b, .mlBattlePivot em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlBattleHead span, .mlBattlePivot span { color: var(--amber); font-size: 8.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-	.mlBattleHead b { margin-top: 4px; color: var(--dl-ink); font-size: 13px; }
-	.mlBattleHead em { margin-top: 2px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
-	.mlBattleMeter { position: relative; display: grid; grid-template-columns: 1fr; gap: 4px; min-height: 32px; }
-	.mlBattleMeter i { display: block; height: 8px; min-width: 4%; border-radius: 999px; }
-	.mlBattleMeter .supportive { background: rgba(52,211,153,.72); }
-	.mlBattleMeter .pressure { background: rgba(251,146,60,.8); }
-	.mlBattleMeter .mixed { background: rgba(148,163,184,.55); }
-	.mlBattleScores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
-	.mlBattleScores span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(255,255,255,.055); border-radius: 4px; background: rgba(255,255,255,.012); color: var(--dl-ink-dim, #5b6473); padding: 4px 5px; font-size: 8.5px; }
-	.mlBattleScores b { float: right; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
-	.mlBattlePivot { border-top: 1px solid rgba(255,255,255,.06); padding-top: 6px; }
-	.mlBattlePivot b { margin-top: 3px; color: var(--dl-ink); font-size: 10px; }
-	.mlBattlePivot em { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
-	.mlVerdictAction { display: flex; flex-direction: column; justify-content: center; gap: 6px; border-left: 1px solid rgba(255,255,255,.06); padding-left: 8px; }
-	.mlVerdictAction b { color: var(--dl-ink); font-size: 12px; line-height: 1.25; }
-	.mlVerdictAction em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; }
-	.mlCommandBar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
-	.mlCommandBar button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 28px; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; background: rgba(0,0,0,.18); color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 800; cursor: pointer; }
-	.mlCommandBar button:hover, .mlCommandBar button.on { color: var(--amber); border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.055); }
-	.mlCommandBar button:disabled { cursor: not-allowed; opacity: .45; color: var(--dl-ink-muted, #7b8493); border-color: var(--dl-line, #1b2130); background: rgba(255,255,255,.012); }
-	.mlContestPanel { display: grid; grid-template-columns: minmax(190px, .72fr) minmax(0, 1.6fr); gap: 8px; align-items: stretch; border: 1px solid rgba(148,163,184,.2); border-radius: 6px; background: rgba(255,255,255,.012); padding: 8px; }
-	.mlContestPanel.supportive { border-color: rgba(52,211,153,.32); background: rgba(52,211,153,.02); }
-	.mlContestPanel.pressure { border-color: rgba(251,146,60,.36); background: rgba(251,146,60,.025); }
-	.mlContestPanel.mixed, .mlContestPanel.watch { border-color: rgba(148,163,184,.28); }
-	.mlContestPanel.locked { border-color: rgba(248,113,113,.34); background: rgba(248,113,113,.025); }
-	.mlContestHead, .mlContestBars, .mlContestRows, .mlActionQueue { min-width: 0; }
-	.mlContestHead { display: flex; flex-direction: column; justify-content: center; gap: 7px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.12); padding: 8px; }
-	.mlContestHead b, .mlContestHead em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlContestHead b { margin-top: 4px; color: var(--dl-ink); font-size: 12px; }
-	.mlContestHead em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
-	.mlContestBars { display: grid; grid-template-rows: repeat(3, 1fr); gap: 5px; }
-	.mlContestBars div { position: relative; min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.12); padding: 6px 34px 6px 7px; overflow: hidden; }
-	.mlContestBars span, .mlContestBars b { position: relative; z-index: 1; display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlContestBars span { color: var(--dl-ink-dim, #5b6473); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-	.mlContestBars b { position: absolute; top: 50%; right: 7px; transform: translateY(-50%); color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 11px; }
-	.mlContestBars i { position: absolute; left: 0; bottom: 0; height: 3px; min-width: 4%; background: rgba(148,163,184,.45); }
-	.mlContestBars .supportive i { background: rgba(52,211,153,.72); }
-	.mlContestBars .pressure i { background: rgba(251,146,60,.76); }
-	.mlContestBars .mixed i { background: rgba(148,163,184,.58); }
-	.mlContestRows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
-	.mlContestRow { position: relative; min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.1); color: var(--dl-ink); text-align: left; padding: 7px 30px 7px 7px; cursor: pointer; }
-	.mlContestRow.supportive { border-color: rgba(52,211,153,.32); }
-	.mlContestRow.pressure { border-color: rgba(251,146,60,.38); }
-	.mlContestRow.mixed { border-color: rgba(148,163,184,.34); }
-	.mlContestRow:hover { border-color: rgba(251,146,60,.6); background: rgba(251,146,60,.04); }
-	.mlContestRow span, .mlContestRow b, .mlContestRow em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlContestRow span { color: var(--amber); font-family: var(--dl-font-mono); font-size: 8.5px; font-weight: 800; text-transform: uppercase; }
-	.mlContestRow b { margin-top: 5px; font-size: 11px; }
-	.mlContestRow em { margin-top: 4px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
-	.mlContestRow i { position: absolute; right: 7px; top: 8px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; }
-	.mlActionQueue { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
-	.mlActionItem { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.12); color: var(--dl-ink); padding: 6px; text-align: left; cursor: pointer; }
-	.mlActionItem.blocker { border-color: rgba(248,113,113,.44); }
-	.mlActionItem.watch { border-color: rgba(251,146,60,.42); }
-	.mlActionItem.info { border-color: rgba(52,211,153,.28); }
-	.mlActionItem:hover { border-color: rgba(251,146,60,.62); background: rgba(251,146,60,.045); }
-	.mlActionItem span, .mlActionItem b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlActionItem span { color: var(--dl-ink-dim, #5b6473); font-family: var(--dl-font-mono); font-size: 8px; font-weight: 800; }
-	.mlActionItem b { margin-top: 4px; font-size: 10px; }
-	.mlKillChainPanel { display: grid; grid-template-columns: minmax(190px, .42fr) minmax(0, 1.58fr); gap: 8px; border: 1px solid rgba(251,146,60,.28); border-radius: 6px; background: rgba(251,146,60,.018); padding: 8px; }
-	.mlKillChainHead, .mlKillStep { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.13); padding: 8px; }
-	.mlKillChainHead { display: flex; flex-direction: column; justify-content: center; gap: 5px; }
-	.mlKillChainHead b, .mlKillChainHead em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlKillChainHead b { color: var(--dl-ink); font-size: 12px; }
-	.mlKillChainHead em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
-	.mlKillChainSteps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; min-width: 0; }
-	.mlKillStep { color: var(--dl-ink); text-align: left; cursor: pointer; }
-	.mlKillStep.open { border-color: rgba(52,211,153,.3); }
-	.mlKillStep.watch { border-color: rgba(251,146,60,.38); }
-	.mlKillStep.locked { border-color: rgba(248,113,113,.42); }
-	.mlKillStep:hover { border-color: rgba(251,146,60,.62); background: rgba(251,146,60,.04); }
-	.mlKillStep span, .mlKillStep b, .mlKillStep em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlKillStep span { color: var(--amber); font-family: var(--dl-font-mono); font-size: 8px; font-weight: 800; }
-	.mlKillStep b { margin-top: 5px; color: var(--dl-ink); font-size: 10.5px; }
-	.mlKillStep em { margin-top: 4px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
-	.mlVerdictAuditFold { border: 1px solid rgba(148,163,184,.16); border-radius: 6px; background: rgba(255,255,255,.01); }
-	.mlVerdictAuditFold summary { min-height: 32px; cursor: pointer; color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 9px 10px; }
-	.mlVerdictAuditFold:not([open]) > :not(summary) { display: none !important; }
-	.mlVerdictAuditFold[open] { padding: 0 8px 8px; }
-	.mlVerdictAuditFold[open] summary { margin: 0 -8px 8px; border-bottom: 1px solid rgba(255,255,255,.055); color: var(--amber); }
-	.mlVerdictAuditFold > section { margin-top: 8px; }
-	.mlCompareTray { border: 1px solid rgba(148,163,184,.18); border-radius: 6px; background: rgba(255,255,255,.012); padding: 8px; }
-	.mlCompareTitle { display: flex; align-items: center; gap: 8px; min-width: 0; margin-bottom: 7px; }
-	.mlCompareTitle b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11.5px; }
-	.mlCompareCards { display: grid; gap: 5px; }
-	.mlCompareCard { display: grid; grid-template-columns: minmax(150px, .75fr) repeat(3, minmax(70px, .42fr)) minmax(220px, 1.1fr); gap: 5px; align-items: stretch; min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.12); color: var(--dl-ink); text-align: left; padding: 6px; cursor: pointer; }
-	.mlCompareCard.supportive { border-color: rgba(52,211,153,.32); }
-	.mlCompareCard.pressure { border-color: rgba(251,146,60,.38); }
-	.mlCompareCard.mixed { border-color: rgba(148,163,184,.34); }
-	.mlCompareCard:hover { border-color: rgba(251,146,60,.62); background: rgba(251,146,60,.04); }
-	.mlCompareTop { display: grid; grid-template-columns: 48px minmax(0, 1fr) 30px; gap: 5px; align-items: center; min-width: 0; border-right: 1px solid rgba(255,255,255,.055); padding-right: 6px; }
-	.mlCompareTop span, .mlCompareTop b, .mlCompareTop em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlCompareTop span { color: var(--amber); font-family: var(--dl-font-mono); font-size: 8.5px; font-weight: 800; text-transform: uppercase; }
-	.mlCompareTop b { font-size: 11.5px; }
-	.mlCompareTop em { color: var(--dl-ink); font-style: normal; font-family: var(--dl-font-mono); font-size: 12px; text-align: right; }
-	.mlCompareFacts { display: contents; }
-	.mlCompareFacts span, .mlCompareAxisItem { min-width: 0; border: 1px solid rgba(255,255,255,.055); border-radius: 4px; background: rgba(255,255,255,.012); padding: 5px; }
-	.mlCompareFacts i, .mlCompareFacts b, .mlCompareAxisItem span, .mlCompareAxisItem b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlCompareFacts i, .mlCompareAxisItem span { color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 8px; text-transform: uppercase; }
-	.mlCompareFacts b { margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; }
-	.mlCompareAxis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; min-width: 0; }
-	.mlCompareAxisItem.ok { border-color: rgba(52,211,153,.3); }
-	.mlCompareAxisItem.watch { border-color: rgba(251,146,60,.36); }
-	.mlCompareAxisItem.blocked { border-color: rgba(248,113,113,.36); }
-	.mlCompareAxisItem b { margin-top: 3px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
-	.mlDecisionGrid { display: grid; grid-template-columns: 1.3fr .85fr .85fr; gap: 8px; }
-	.mlDecisionCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
-	.mlDecisionCard.falsifier { border-color: rgba(251,146,60,.36); background: rgba(251,146,60,.03); }
-	.mlDecisionCard b, .mlDecisionCard p { display: block; min-width: 0; }
-	.mlDecisionCard b { margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11.5px; }
-	.mlDecisionCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
-	.mlEvidenceCockpit { display: grid; grid-template-columns: minmax(150px, .72fr) minmax(0, 1.38fr) minmax(190px, .9fr); gap: 8px; align-items: stretch; border: 1px solid rgba(251,146,60,.24); border-radius: 6px; background: rgba(251,146,60,.02); padding: 8px; }
-	.mlCockpitHead, .mlCockpitRelease, .mlCockpitGate { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.12); padding: 7px; }
-	.mlCockpitHead b, .mlCockpitRelease b, .mlCockpitRelease em, .mlCockpitGate span, .mlCockpitGate b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlCockpitHead b { margin-top: 5px; color: var(--dl-ink); font-size: 11px; line-height: 1.25; white-space: normal; overflow-wrap: anywhere; }
-	.mlCockpitGates { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; min-width: 0; }
-	.mlCockpitGate, .mlCockpitRelease { color: var(--dl-ink); text-align: left; cursor: pointer; }
-	.mlCockpitGate span, .mlCockpitRelease span { color: var(--dl-ink-dim, #5b6473); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-	.mlCockpitGate b { margin-top: 5px; font-family: var(--dl-font-mono); font-size: 11px; }
-	.mlCockpitGate.ok { border-color: rgba(52,211,153,.38); }
-	.mlCockpitGate.watch { border-color: rgba(251,146,60,.42); }
-	.mlCockpitGate.blocked { border-color: rgba(248,113,113,.42); }
-	.mlCockpitGate.ok b { color: var(--good); }
-	.mlCockpitGate.watch b { color: var(--warn); }
-	.mlCockpitGate.blocked b { color: var(--dn); }
-	.mlCockpitGate:hover, .mlCockpitRelease:hover { border-color: rgba(251,146,60,.6); background: rgba(251,146,60,.045); }
-	.mlCockpitRelease.fresh { border-color: rgba(52,211,153,.32); }
-	.mlCockpitRelease.watch, .mlCockpitRelease.unknown { border-color: rgba(251,146,60,.38); }
-	.mlCockpitRelease.stale { border-color: rgba(248,113,113,.42); }
-	.mlCockpitRelease b { margin-top: 5px; color: var(--dl-ink); font-size: 11px; }
-	.mlCockpitRelease em { margin-top: 4px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
-	.mlMechanismPanel { border: 1px solid rgba(251,146,60,.22); border-radius: 6px; background: rgba(251,146,60,.022); padding: 9px; }
-	.mlMechanismTitle { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
-	.mlMechanismTitle div { min-width: 0; }
-	.mlMechanismTitle b, .mlMechanismTitle em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlMechanismTitle b { margin-top: 3px; color: var(--dl-ink); font-size: 12px; }
-	.mlMechanismTitle em { flex: 0 0 auto; border: 1px solid rgba(251,146,60,.28); border-radius: 999px; color: var(--amber); background: rgba(251,146,60,.045); padding: 3px 8px; font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
-	.mlMechanismRail { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
-	.mlMechanismStep { position: relative; min-width: 0; min-height: 78px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(0,0,0,.13); padding: 7px; overflow: hidden; }
-	.mlMechanismStep.ok { border-color: rgba(52,211,153,.34); }
-	.mlMechanismStep.watch { border-color: rgba(251,146,60,.38); }
-	.mlMechanismStep.blocked { border-color: rgba(248,113,113,.38); }
-	.mlMechanismStep span, .mlMechanismStep b, .mlMechanismStep em { position: relative; z-index: 1; display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlMechanismStep span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; }
-	.mlMechanismStep b { margin-top: 5px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 18px; line-height: 1; }
-	.mlMechanismStep em { margin-top: 6px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
-	.mlMechanismStep i { position: absolute; left: 0; right: 0; bottom: 0; min-height: 4px; background: rgba(91,100,115,.34); pointer-events: none; }
-	.mlMechanismStep.ok i { background: rgba(52,211,153,.34); }
-	.mlMechanismStep.watch i { background: rgba(251,146,60,.34); }
-	.mlMechanismStep.blocked i { background: rgba(248,113,113,.32); }
-	.mlVerdictDrivers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-	.mlVerdictDriver { position: relative; min-width: 0; min-height: 96px; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.015); color: var(--dl-ink); text-align: left; padding: 9px 56px 9px 9px; cursor: pointer; overflow: hidden; }
-	.mlVerdictDriver.supportive { border-color: rgba(52,211,153,.34); }
-	.mlVerdictDriver.pressure { border-color: rgba(251,146,60,.4); }
-	.mlVerdictDriver.mixed { border-color: rgba(148,163,184,.32); }
-	.mlVerdictDriver:hover { border-color: rgba(251,146,60,.62); background: rgba(251,146,60,.035); }
-	.mlVerdictDriver span, .mlVerdictDriver b, .mlVerdictDriver em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlVerdictDriver span { color: var(--amber); font-family: var(--dl-font-mono); font-size: 8.5px; font-weight: 800; text-transform: uppercase; }
-	.mlVerdictDriver b { margin-top: 7px; font-size: 12px; }
-	.mlVerdictDriver em { margin-top: 5px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; }
-	.mlVerdictBars { position: absolute; right: 8px; top: 9px; bottom: 9px; display: flex; align-items: flex-end; gap: 3px; width: 38px; }
-	.mlVerdictBars i { flex: 1 1 0; min-height: 6px; border-radius: 3px 3px 0 0; background: var(--dl-ink-dim, #5b6473); opacity: .8; }
-	.mlVerdictBars i.ok { background: rgba(52,211,153,.78); }
-	.mlVerdictBars i.watch { background: rgba(251,146,60,.78); }
-	.mlVerdictBars i.blocked { background: rgba(248,113,113,.7); }
-	.mlEvidenceFold { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.012); padding: 0; overflow: hidden; }
-	.mlEvidenceFold summary { cursor: pointer; list-style: none; padding: 8px 10px; color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-	.mlEvidenceFold summary::-webkit-details-marker { display: none; }
-	.mlEvidenceFold summary:hover { color: var(--amber); }
-	.mlEvidenceFold[open] { padding: 0 10px 10px; }
-	.mlEvidenceFold[open] summary { margin: 0 -10px 10px; border-bottom: 1px solid rgba(255,255,255,.045); }
-	.mlBlock, .mlEdge, .mlScenario, .mlFocus { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 10px; min-width: 0; }
-	.mlDrill { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.25fr; gap: 8px; }
-	.mlDrillCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(251,146,60,.035); padding: 9px; }
-	.mlDrillCard b { display: block; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-	.mlDrillCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
-	.mlDrillCard em { display: block; margin-top: 5px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9.5px; line-height: 1.3; overflow-wrap: anywhere; }
-	.mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend { display: grid; gap: 8px; }
+	/* 블록 A·B·D 스트립 (테두리 없음) */
+	.mlPhaseStrip, .mlPulseStrip, .mlGateStrip { display: grid; gap: 8px; }
 	.mlPhaseStrip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.mlPhaseStrip div, .mlGate, .mlPulse { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
 	.mlPhaseStrip span, .mlGate span, .mlPulse span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
@@ -1164,41 +740,58 @@
 	.mlPulse { color: var(--dl-ink); text-align: left; cursor: pointer; }
 	.mlPulse:hover, .mlPulse.on { border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.045); }
 	.mlPulse:disabled { cursor: not-allowed; opacity: .5; }
+	.mlPulse b { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
 	.mlPulse svg { width: 100%; height: 20px; margin-top: 5px; overflow: visible; }
 	.mlPulse polyline { fill: none; stroke: var(--amber); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-	.mlMatrix { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; overflow: hidden; }
-	.mlMatrixHead, .mlMatrixRow { display: grid; grid-template-columns: minmax(170px, 1.35fr) repeat(5, minmax(68px, .65fr)); gap: 0; align-items: stretch; }
-	.mlMatrixHead { background: rgba(255,255,255,.025); color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-	.mlMatrixHead span, .mlMatrixDriver, .mlXCell { min-width: 0; border: 0; border-left: 1px solid rgba(255,255,255,.045); border-top: 1px solid rgba(255,255,255,.045); background: transparent; color: var(--dl-ink); padding: 7px 8px; }
-	.mlMatrixHead span:first-child, .mlMatrixDriver { border-left: 0; }
-	.mlMatrixHead span { border-top: 0; }
-	.mlMatrixDriver { text-align: left; cursor: pointer; }
-	.mlMatrixDriver:hover { background: rgba(251,146,60,.04); }
-	.mlMatrixDriver b, .mlMatrixDriver em { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlMatrixDriver b { font-size: 11px; }
-	.mlMatrixDriver em { margin-top: 2px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
-	.mlXCell { display: flex; align-items: center; justify-content: space-between; gap: 5px; min-height: 42px; cursor: pointer; }
-	.mlXCell.none { cursor: default; color: var(--dl-ink-dim, #5b6473); }
-	.mlXCell.high { background: rgba(52,211,153,.055); }
-	.mlXCell.medium { background: rgba(251,146,60,.055); }
-	.mlXCell.low { background: rgba(91,100,115,.13); }
-	.mlXCell.blocked { background: rgba(248,113,113,.055); }
-	.mlXCell:hover:not(.none) { box-shadow: inset 0 0 0 1px rgba(251,146,60,.45); }
-	.mlXCell b { color: var(--amber); font-size: 13px; }
-	.mlXCell em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlMobileDrillRail { display: none; }
-	.mlGateStrip { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+	/* 블록 C — Exposure Map (단일 테두리 주역) */
+	.mlMap { border: 1px solid var(--bd); background: var(--panel); border-radius: 8px; padding: 8px; animation: mlFade .15s ease-out; }
+	@keyframes mlFade { from { opacity: 0; } to { opacity: 1; } }
+	/* 읽기 1차 — 초점 사슬 (중립 강조 + amber 좌측선, opacity 1 고정) */
+	.mlMapFocus { opacity: 1; border-left: 2px solid var(--amber); background: color-mix(in srgb, var(--dim) 7%, var(--panel)); border-radius: 0 6px 6px 0; padding: 8px 10px; }
+	.mlMapChain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+	.mlMapChain b { font-size: 14px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--txt); }
+	.mlMapChain i { font-style: normal; }
+	.mlChainArrow { color: var(--amber); font-size: 12px; }
+	.mlChainLag, .mlChainLever { border: 1px solid var(--bd); border-radius: 999px; padding: 1px 7px; color: var(--dl-ink-dim, #5b6473); font-family: var(--dl-font-mono); font-size: 9px; }
+	.mlMapEvidence { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 7px; }
+	.mlMapEvidence em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9.5px; opacity: 1; }
+	.mlMapEvidence .mlMapSign { font-weight: 700; color: var(--txt); }
+	.mlMapMeta { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9.5px; opacity: 1; }
+	.mlMapDrill { margin-top: 6px; border: 0; background: transparent; color: var(--amber); font-size: 9.5px; font-weight: 700; cursor: pointer; padding: 0; text-align: left; }
+	.mlMapDrill:hover { text-decoration: underline; }
+	/* 읽기 2차 — 닷그리드 (채널 열 클러스터, 후퇴 opacity .82) */
+	.mlMapGrid { opacity: 0.82; border-top: 1px solid var(--bd); margin-top: 8px; padding-top: 8px; }
+	.mlMapHead, .mlMapRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+	.mlMapHead span { font-size: 11px; font-weight: 600; color: var(--dl-ink-dim, #5b6473); }
+	.mlMapRow { margin-top: 6px; align-items: start; }
+	.mlMapCol { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+	.mlMapCell { display: flex; align-items: center; gap: 5px; min-height: 28px; min-width: 40px; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.012); color: var(--txt); padding: 3px 7px; cursor: pointer; text-align: left; }
+	.mlMapCell:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber) 45%, transparent); }
+	.mlMapCell b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+	.mlMapCell .mlMapSign { font-weight: 700; font-size: 11px; color: var(--txt); }
+	.mlMapCell em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 8px; }
+	.mlMapNote { margin-top: 8px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.3; }
+	/* CSS 도형 칩 — ::before 16×16, 색=증거 상태(방향 아님), 글리프 폰트 의존 0 */
+	.mlMapChip { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; }
+	.mlMapChip::before { content: ""; display: block; width: 16px; height: 16px; box-sizing: border-box; }
+	.mlMapChip.OBS::before { border-radius: 50%; background: var(--up); border: 1.5px solid var(--up); }
+	.mlMapChip.PRIOR::before { border-radius: 50%; border: 1.5px solid var(--amber); background: transparent; box-shadow: inset 8px 0 0 0 var(--amber); }
+	.mlMapChip.TPL::before { border-radius: 50%; background: transparent; border: 1.5px dashed var(--bd); }
+	.mlMapChip.LOCK::before { border-radius: 3px; border: 1px solid var(--dn); background: repeating-linear-gradient(45deg, transparent 0 2px, color-mix(in srgb, var(--dn) 30%, transparent) 2px 4px); }
+	/* 블록 D */
+	.mlDashGate { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr); gap: 10px; align-items: start; }
+	.mlGateStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.mlGate.ok { border-color: rgba(52,211,153,.42); }
 	.mlGate.watch { border-color: rgba(251,146,60,.42); }
 	.mlGate.blocked { border-color: rgba(248,113,113,.42); }
-	.mlGate.ok b { color: var(--good); }
+	.mlGate.ok b { color: var(--up); }
 	.mlGate.watch b { color: var(--warn); }
 	.mlGate.blocked b { color: var(--dn); }
 	.mlReleaseRail { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
 	.mlRailTitle { display: flex; align-items: center; gap: 8px; min-width: 0; }
 	.mlRailTitle b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 	.mlRailTitle em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
-	.mlRailRows { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+	.mlRailRows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
 	.mlRailItem { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.015); color: var(--dl-ink); text-align: left; padding: 7px; cursor: pointer; }
 	.mlRailItem:hover, .mlRailItem.focused { border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.04); }
 	.mlRailItem.fresh { border-color: rgba(52,211,153,.28); }
@@ -1208,6 +801,13 @@
 	.mlRailItem span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .04em; }
 	.mlRailItem b { margin-top: 4px; font-family: var(--dl-font-mono); font-size: 11px; }
 	.mlRailItem em, .mlRailItem i { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
+	/* 경로 탭 drilldown */
+	.mlBlock, .mlEdge, .mlScenario, .mlFocus { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 10px; min-width: 0; }
+	.mlDrill { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.25fr; gap: 8px; }
+	.mlDrillCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(251,146,60,.035); padding: 9px; }
+	.mlDrillCard b { display: block; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+	.mlDrillCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
+	.mlDrillCard em { display: block; margin-top: 5px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9.5px; line-height: 1.3; overflow-wrap: anywhere; }
 	.mlStackList { display: flex; flex-direction: column; gap: 5px; margin-top: 7px; }
 	.mlStackRow { display: grid; grid-template-columns: 58px 1fr 26px; gap: 6px; align-items: center; min-width: 0; font-size: 9.5px; color: var(--dl-ink-dim, #5b6473); }
 	.mlStackRow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1260,23 +860,9 @@
 	.mlCoLimits { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
 	.mlCoLimits span { border: 1px solid rgba(251,146,60,.22); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); background: rgba(251,146,60,.025); padding: 2px 7px; font-size: 9px; line-height: 1.25; }
 	.mlCoMovePanel p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10px; line-height: 1.35; }
-	.mlLegend { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-	.mlLegend span { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; padding: 4px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlLegend .medium { border-color: rgba(251,146,60,.35); }
-	.mlLegend .blocked { border-color: rgba(248,113,113,.35); }
-	.mlPressure { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; min-width: 0; text-align: left; color: var(--dl-ink); cursor: pointer; }
-	.mlPressure.high { border-color: rgba(52,211,153,.42); background: rgba(52,211,153,.045); }
-	.mlPressure.medium { border-color: rgba(251,146,60,.36); background: rgba(251,146,60,.04); }
-	.mlPressure.low { border-color: rgba(91,100,115,.55); }
-	.mlPressure.blocked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.04); }
-	.mlPressureTop { display: flex; align-items: center; gap: 6px; min-width: 0; }
-	.mlPressureTop b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlPressureTop em { font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; color: var(--amber); }
-	.mlPressure p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.38; }
 	.mlBlockTop, .mlEdgeTop { display: flex; align-items: center; gap: 7px; min-width: 0; }
 	.mlBlockK { font-size: 9px; font-weight: 800; color: var(--amber); letter-spacing: .06em; text-transform: uppercase; }
-	.mlBig { margin-top: 8px; font-size: 20px; font-weight: 800; }
-	.mlKV, .mlMiniList { display: flex; flex-wrap: wrap; gap: 8px; font-size: 10px; color: var(--dl-ink-dim, #5b6473); margin-top: 6px; }
+	.mlMiniList { display: flex; flex-wrap: wrap; gap: 8px; font-size: 10px; color: var(--dl-ink-dim, #5b6473); margin-top: 6px; }
 	.mlBlock p, .mlEdge p, .mlScenario p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 11px; line-height: 1.45; }
 	.mlEvidence { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 	.mlEvidence.compact { margin-top: 6px; }
@@ -1290,7 +876,7 @@
 	.mlFocusIcon { color: var(--amber); flex: 0 0 auto; margin-top: 1px; }
 	.mlFocus div { display: flex; flex-direction: column; gap: 2px; }
 	.mlFocus span { color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
-	.mlDriverTable { display: flex; flex-direction: column; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; overflow: hidden; }
+	.mlDriverTable { display: flex; flex-direction: column; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; overflow: hidden; margin-top: 8px; }
 	.mlDriverHead, .mlDriverRow { display: grid; grid-template-columns: minmax(190px, 1.7fr) 72px .7fr .6fr minmax(160px, 1.1fr) 86px; gap: 8px; align-items: center; padding: 6px 8px; }
 	.mlDriverHead { font-size: 9px; font-weight: 800; color: var(--dl-ink-dim, #5b6473); background: rgba(255,255,255,.025); letter-spacing: .05em; }
 	.mlDriverRow { font-size: 11px; border-top: 1px solid rgba(255,255,255,.045); }
@@ -1302,7 +888,7 @@
 	.mlDriverScore { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
 	.mlDriverScore em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 8.5px; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlScore { display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 18px; border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; font-family: var(--dl-font-mono); font-size: 10px; padding: 0 4px; }
-	.mlScore.high { color: var(--good); border-color: rgba(52,211,153,.45); }
+	.mlScore.high { color: var(--up); border-color: rgba(52,211,153,.45); }
 	.mlScore.medium { color: var(--amber); border-color: rgba(251,146,60,.45); }
 	.mlScore.low { color: var(--dl-ink-dim, #5b6473); }
 	.mlScore.blocked { color: var(--dn); border-color: rgba(248,113,113,.45); }
@@ -1317,7 +903,7 @@
 	.mlEdgeDetails summary::-webkit-details-marker { display: none; }
 	.mlEdgeDetails summary:hover { color: var(--amber); }
 	.mlEdgeDetails[open] { padding-bottom: 10px; }
-	.mlEdgeDetails[open] .edgeGrid { padding: 0 10px; }
+	.mlEdgeDetails[open] .edgeGrid, .mlEdgeDetails[open] .scenarioGrid, .mlEdgeDetails[open] .mlDriverTable { margin: 0 10px; }
 	.mlEdgeTop b { flex: 1 1 auto; min-width: 0; }
 	.mlSign { width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--dl-line, #1b2130); display: inline-flex; align-items: center; justify-content: center; color: var(--amber); font-weight: 800; }
 	.mlEdgeTop em { font-style: normal; color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
@@ -1336,12 +922,21 @@
 	.mlFalse div { display: flex; flex-direction: column; gap: 2px; }
 	.mlFalse span { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; }
 	.mlScenario b { display: block; margin-top: 5px; }
+	.mlScenario .mlBlockTop em { font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; color: var(--amber); }
 	.mlScenario.needsEvidence { border-color: rgba(251,146,60,.36); }
 	.mlScenario.blocked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.035); }
 	.mlScenario em { display: block; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; margin-top: 8px; }
 	.mlSrc { padding: 6px 0; border-top: 1px solid rgba(255,255,255,.045); color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
 	.mlSrc b { color: var(--warn); font-family: var(--dl-font-mono); font-size: 10px; margin-right: 5px; text-transform: uppercase; }
 	.mlSrc em { display: block; margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; overflow-wrap: anywhere; }
+	.mlQuantCard { margin-top: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.016); padding: 9px; }
+	.mlQuantCard.ok { border-color: rgba(52,211,153,.42); }
+	.mlQuantCard.watch { border-color: rgba(251,146,60,.42); }
+	.mlQuantCard.blocked { border-color: rgba(248,113,113,.42); }
+	.mlQuantTop { display: flex; align-items: center; gap: 8px; min-width: 0; }
+	.mlQuantTop b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11px; }
+	.mlQuantCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
+	.mlQuantAlt { margin-top: 7px; border: 1px solid rgba(251,146,60,.28); border-radius: 5px; background: rgba(251,146,60,.03); color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.35; padding: 6px 8px; }
 	.mlQualityCard { margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.016); padding: 9px; }
 	.mlQualityCard.ok { border-color: rgba(52,211,153,.42); background: rgba(52,211,153,.035); }
 	.mlQualityCard.watch { border-color: rgba(251,146,60,.42); background: rgba(251,146,60,.035); }
@@ -1349,7 +944,7 @@
 	.mlQualityTop { display: grid; grid-template-columns: 82px 60px minmax(0, 1fr); gap: 7px; align-items: center; min-width: 0; }
 	.mlQualityTop b { color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 13px; }
 	.mlQualityTop em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9.5px; text-align: right; }
-	.mlQualityCard.ok .mlQualityTop b { color: var(--good); }
+	.mlQualityCard.ok .mlQualityTop b { color: var(--up); }
 	.mlQualityCard.watch .mlQualityTop b { color: var(--warn); }
 	.mlQualityCard.blocked .mlQualityTop b { color: var(--dn); }
 	.mlQualityCard p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
@@ -1368,15 +963,6 @@
 	.mlModelMetric span, .mlModelMetric b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlModelMetric span { color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 	.mlModelMetric b { margin-top: 3px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10.5px; }
-	.mlClaimRail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 7px; }
-	.mlClaimChip { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.012); padding: 6px; }
-	.mlClaimChip.ok { border-color: rgba(52,211,153,.3); }
-	.mlClaimChip.watch { border-color: rgba(251,146,60,.34); }
-	.mlClaimChip.blocked { border-color: rgba(248,113,113,.36); }
-	.mlClaimChip span, .mlClaimChip b, .mlClaimChip em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlClaimChip span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; }
-	.mlClaimChip b { margin-top: 3px; font-family: var(--dl-font-mono); font-size: 10px; color: var(--amber); }
-	.mlClaimChip em { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 8.5px; }
 	.mlModelSource { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 7px; align-items: center; margin-top: 7px; color: var(--dl-ink-muted, #7b8493); font-size: 9px; }
 	.mlModelSource span { font-family: var(--dl-font-mono); text-transform: uppercase; }
 	.mlModelSource b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink-dim, #5b6473); font-family: var(--dl-font-mono); font-size: 9px; }
@@ -1422,54 +1008,23 @@
 	.mlSrcPacket.missing { border-left: 2px solid rgba(248,113,113,.75); padding-left: 6px; }
 	.mlSrcSep { height: 8px; border-top: 1px dashed rgba(255,255,255,.08); }
 	.mlLimitSub { margin-top: 8px; color: var(--amber); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-	.mlNote { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.45; border: 1px dashed var(--dl-line, #1b2130); border-radius: 5px; padding: 8px 10px; }
 	@media (max-width: 760px) {
-		.mlModal { height: min(780px, 94vh); }
-		.mlGrid.two, .pressureGrid, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlLegend, .mlDrill, .mlRailRows, .mlVerdictHero, .mlKillChainPanel, .mlContestPanel, .mlDecisionGrid, .mlVerdictDrivers, .mlEvidenceCockpit { grid-template-columns: 1fr; }
+		.mlModal { height: 92vh; }
+		.mlGrid.two, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlDrill, .mlRailRows, .mlDashGate { grid-template-columns: 1fr; }
 		.mlTabs { min-height: 38px; padding-left: 8px; padding-right: 8px; }
 		.mlTabs button { min-width: 50px; min-height: 30px; padding: 8px 9px; text-align: center; }
-		.mlVerdictHero { grid-template-columns: 92px minmax(0, 1fr); gap: 8px; }
-		.mlVerdictDial { min-height: 0; }
-		.mlVerdictDial b { font-size: 28px; }
-		.mlScoreSplit b { font-size: 10px; }
-		.mlBattleBoard, .mlVerdictAction, .mlContestPanel, .mlCompareTray, .mlMechanismPanel, .mlDecisionGrid { grid-column: 1 / -1; }
-		.mlVerdictMain h3 { font-size: 18px; }
-		.mlVerdictChain { grid-template-columns: 58px minmax(0, 1fr); }
-		.mlVerdictChain b { white-space: normal; line-height: 1.25; }
-		.mlVerdictAction { border-left: 0; border-top: 1px solid rgba(255,255,255,.06); padding: 9px 0 0; }
-		.mlCommandBar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-		.mlContestRows, .mlActionQueue { grid-template-columns: 1fr; }
-		.mlVerdictAction .mlActionQueue { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-		.mlKillChainSteps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-		.mlKillStep:last-child { grid-column: 1 / -1; }
-		.mlCompareCards { grid-template-columns: 1fr; }
-		.mlCompareCard { grid-template-columns: 1fr; }
-		.mlCompareTop { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.055); padding-right: 0; padding-bottom: 5px; }
-		.mlCompareFacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
-		.mlCompareTitle { align-items: flex-start; flex-direction: column; gap: 4px; }
-		.mlCompareTitle b { white-space: normal; line-height: 1.25; }
-		.mlEvidenceCockpit { gap: 6px; padding: 7px; }
-		.mlCockpitGates { grid-template-columns: repeat(5, minmax(66px, 1fr)); overflow-x: auto; padding-bottom: 1px; }
-		.mlMechanismTitle { align-items: flex-start; flex-direction: column; gap: 6px; }
-		.mlMechanismRail { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; padding-bottom: 0; }
-		.mlMechanismStep { min-height: 56px; padding: 6px; }
-		.mlMechanismStep em { display: none; }
-		.mlMechanismStep b { font-size: 16px; }
-		.mlDecisionCard b { white-space: normal; line-height: 1.3; }
-		.mlVerdictDriver { min-height: 84px; }
-		.mlMatrix { overflow-x: auto; }
-		.mlMatrixHead, .mlMatrixRow { min-width: 640px; }
-		.mlMobileDrillRail { display: grid; grid-template-columns: 1fr; gap: 6px; }
-		.mlMobileDrillRail button { display: grid; grid-template-columns: minmax(0, 1fr) 68px 82px; gap: 7px; align-items: center; min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); color: var(--dl-ink); padding: 8px; text-align: left; }
-		.mlMobileDrillRail button.focused { border-color: rgba(251,146,60,.58); background: rgba(251,146,60,.045); }
-		.mlMobileDrillRail span, .mlMobileDrillRail b, .mlMobileDrillRail em { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-		.mlMobileDrillRail span { font-size: 11px; font-weight: 800; }
-		.mlMobileDrillRail b { color: var(--amber); font-family: var(--dl-font-mono); font-size: 9.5px; text-align: right; }
-		.mlMobileDrillRail em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; text-align: right; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
 		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
-		.mlQualityTop, .mlModelSpec, .mlClaimRail, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
+		.mlQualityTop, .mlModelSpec, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
 		.mlQualityTop em { text-align: left; }
 		.mlModelMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	}
+	@media (max-width: 560px) {
+		.mlPulseStrip { grid-auto-flow: column; grid-auto-columns: minmax(104px, 1fr); grid-template-columns: none; overflow-x: auto; }
+		/* Map 닷그리드 → driver별 카드 리스트 (채워진 칩만, 빈 채널 생략) */
+		.mlMapHead { display: none; }
+		.mlMapRow { display: flex; flex-direction: column; gap: 6px; }
+		.mlMapCol { width: 100%; }
+		.mlMapCell { width: 100%; }
 	}
 </style>
