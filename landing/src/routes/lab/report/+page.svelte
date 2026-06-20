@@ -3,8 +3,8 @@
   import { base } from '$app/paths';
   import { setStaticBase } from '@dartlab/ui-runtime/data/dartlabData';
   import { getPublicRuntime } from '$lib/runtime/publicRuntime';
-  import { buildReport } from '$lib/report/build';
-  import { isSkipped, type ReportModel } from '$lib/report/model';
+  import { buildReport, buildOverview } from '$lib/report/build';
+  import { isSkipped, type ReportModel, type OverviewModel } from '$lib/report/model';
   import { PERSPECTIVES } from '$lib/report/perspectives';
 
   let { data }: { data: PageData } = $props();
@@ -59,6 +59,18 @@
     perspectiveKey = key;
     if (typeof document !== 'undefined') document.querySelector('.main')?.scrollTo({ top: 0 });
   }
+
+  // ── 5관점 통합 리드 — 종목당 1회 빌드(관점과 독립). 5관점을 교차한 thesis. ──
+  let overview = $state<OverviewModel | null>(null);
+  let ovTok = 0;
+  $effect(() => {
+    const code = data.sym;
+    const tk = ++ovTok;
+    overview = null;
+    buildOverview(rt, code)
+      .then((o) => { if (tk === ovTok) overview = o; })
+      .catch(() => {});
+  });
 
   // ── 렌더 헬퍼 (기존 렌더러 재사용) ──
   function clean(t: unknown): string {
@@ -261,6 +273,22 @@
       {:else if model}
         {@const allAnalysis = model.sections.every((s) => s.sourceEngine === 'analysis')}
         <article class="sheet">
+          <!-- ── 통합 리드 (5관점 한 몸) ── -->
+          {#if overview && overview.takes.length > 1}
+            <section class="overviewLead">
+              <div class="ovKicker">기업분석보고서 · 5관점 통합 요지</div>
+              <p class="ovThesis">{clean(overview.thesis)}</p>
+              <ol class="ovTakes">
+                {#each overview.takes as t}
+                  <li class:on={t.key === perspectiveKey}>
+                    <button class="ovTake" onclick={() => selectPerspective(t.key)} title="이 관점 펼치기">
+                      <span class="ovLabel src-{t.engine}">{t.label}</span><span class="ovLine">{clean(t.line)}</span>
+                    </button>
+                  </li>
+                {/each}
+              </ol>
+            </section>
+          {/if}
           <!-- ── 표지 ── -->
           <header class="cover">
             <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> {model.perspectiveLabel}</div>
@@ -531,6 +559,21 @@
   .coverFacts dt { font-size: 10px; color: var(--dim); letter-spacing: 0.05em; text-transform: uppercase; }
   .coverFacts dd { font-size: 13px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
   .coverIntro { font-size: 13px; line-height: 1.75; color: var(--dim); margin: 18px 0 0; max-width: 70ch; }
+
+  /* ── 통합 리드 (5관점 한 몸 — 보고서 첫 페이지 executive overview) ── */
+  .overviewLead { border: 1px solid var(--bd2); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--soft); padding: 16px 18px; margin-bottom: 26px; }
+  .ovKicker { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 9px; }
+  .ovThesis { font-size: 13.5px; line-height: 1.72; font-weight: 600; margin: 0 0 12px; max-width: 82ch; }
+  .ovTakes { margin: 0; padding: 0; list-style: none; counter-reset: ov; }
+  .ovTakes li { counter-increment: ov; border-top: 1px solid var(--bd); }
+  .ovTake { display: block; width: 100%; text-align: left; background: transparent; border: 0; padding: 7px 0 7px 28px; cursor: pointer; font-family: var(--sans); position: relative; }
+  .ovTake::before { content: counter(ov, decimal-leading-zero); position: absolute; left: 0; top: 8px; font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--accent); }
+  .ovTakes li.on .ovTake { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .ovTake:hover { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+  .ovLabel { font-size: 12.5px; font-weight: 800; margin-right: 8px; color: var(--ink); white-space: nowrap; }
+  .ovLabel.src-quant { color: var(--e-quant); }
+  .ovLabel.src-industry { color: var(--e-industry); }
+  .ovLine { font-size: 12px; color: var(--dim); line-height: 1.5; }
 
   /* ── 칩 ── */
   .chip { font-size: 11.5px; border-radius: 6px; padding: 3px 9px; border: 1px solid var(--bd2); color: var(--ink); white-space: nowrap; }

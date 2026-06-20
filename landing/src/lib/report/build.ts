@@ -8,9 +8,9 @@ import type {
 	Num
 } from '@dartlab/ui-contracts';
 import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
-import type { ReportBlock, ReportModel, ReportResult, ReportSection } from './model';
-import { lastNonNull } from './model';
-import { findPerspective, type PerspectiveMeta } from './perspectives';
+import type { ReportBlock, ReportModel, ReportResult, ReportSection, OverviewModel, OverviewTake } from './model';
+import { lastNonNull, isSkipped } from './model';
+import { findPerspective, PERSPECTIVES, type PerspectiveMeta } from './perspectives';
 import type {
 	ShareholderReturnYear,
 	CapitalChangesBundle,
@@ -135,30 +135,36 @@ function pctRank(v: number, d: IndDist | null | undefined): number | null {
 	}
 	return 95;
 }
-// '상위 X%' — goodHigh 면 높을수록 상위, 아니면(부채비율·CCC) 낮을수록 상위.
-function industryTopPct(v: Num, d: IndDist | null | undefined, goodHigh: boolean): { top: number; median: number } | null {
+// '상위 X%' — goodHigh 면 높을수록 상위, 아니면(부채비율 등) 낮을수록 상위. tail = 분포 꼬리(정밀 순위 추정불가).
+function industryTopPct(v: Num, d: IndDist | null | undefined, goodHigh: boolean): { top: number; median: number; tail: boolean; n: number } | null {
 	if (v == null || !Number.isFinite(v) || !d) return null;
 	const pr = pctRank(v as number, d);
 	if (pr == null) return null;
-	const top = goodHigh ? 100 - pr : pr;
-	return { top: Math.round(Math.max(1, Math.min(99, top))), median: d.median };
+	const top = Math.round(Math.max(1, Math.min(99, goodHigh ? 100 - pr : pr)));
+	return { top, median: d.median, tail: top <= 6 || top >= 94, n: d.n };
+}
+// 꼬리 정직 라벨 — p90 초과/p10 미만은 "상위 10% 이내"로(거짓 정밀 회피, 기관 지적).
+function topPctLabel(r: { top: number; tail: boolean }): string {
+	if (r.tail) return r.top <= 6 ? '상위 10% 이내' : '하위 10% 이내';
+	return `상위 ${r.top}%`;
 }
 // 동종업종 비교표 — 지표 × (회사값·업종 중앙값·업종 내 위치). 백분위는 *측정 좌표*이지 투자판단 아님.
 function peerCompareTable(
 	rows: { label: string; value: Num; key: string; goodHigh: boolean; fmt: (v: Num) => string }[],
 	peer: PeerCtx
-): { block: ReportBlock; phrases: { label: string; top: number; median: string; goodHigh: boolean; valFmt: string }[] } | null {
+): { block: ReportBlock; phrases: { label: string; top: number; tail: boolean; median: string; goodHigh: boolean; valFmt: string; n: number }[] } | null {
 	const data: Record<string, string>[] = [];
-	const phrases: { label: string; top: number; median: string; goodHigh: boolean; valFmt: string }[] = [];
+	const phrases: { label: string; top: number; tail: boolean; median: string; goodHigh: boolean; valFmt: string; n: number }[] = [];
+	let maxN = 0;
 	for (const r of rows) {
 		if (r.value == null || !Number.isFinite(r.value)) continue;
 		const d = peer.dist[r.key];
 		const rank = industryTopPct(r.value, d, r.goodHigh);
-		data.push({ 지표: r.label, 회사값: r.fmt(r.value), '업종 중앙값': d ? r.fmt(d.median) : '-', '업종 내 위치': rank ? `상위 ${rank.top}%` : '-' });
-		if (rank) phrases.push({ label: r.label, top: rank.top, median: r.fmt(d!.median), goodHigh: r.goodHigh, valFmt: r.fmt(r.value) });
+		data.push({ 지표: r.label, 회사값: r.fmt(r.value), '업종 중앙값': d ? r.fmt(d.median) : '-', '업종 내 위치': rank ? topPctLabel(rank) : '-' });
+		if (rank) { phrases.push({ label: r.label, top: rank.top, tail: rank.tail, median: r.fmt(d!.median), goodHigh: r.goodHigh, valFmt: r.fmt(r.value), n: rank.n }); maxN = Math.max(maxN, rank.n); }
 	}
 	if (!data.length) return null;
-	return { block: { type: 'table', label: `동종업종 비교 — ${peer.name} ${peer.count}사 (연간 기준)`, snapshot: true, data }, phrases };
+	return { block: { type: 'table', label: `동종업종 비교 — ${peer.name} (지표별 유효 표본 n≈${maxN}사, 연간·결손 제외)`, snapshot: true, data }, phrases };
 }
 
 // 자기역사 위치 — 최신값이 자기 N년 범위의 하단/중단/상단 어디인지(밸류 self-history).
@@ -427,7 +433,6 @@ function buildEarningsPower(
 		const annOpm = lastNonNull(tfA.ratios.find((r) => r.key === 'opm')?.values ?? []);
 		const annNpm = lastNonNull(tfA.ratios.find((r) => r.key === 'npm')?.values ?? []);
 		const annRoe = lastNonNull(tfA.ratios.find((r) => r.key === 'roe')?.values ?? []);
-		const annGpm = lastNonNull(tfA.ratios.find((r) => r.key === 'gpm')?.values ?? []);
 		const pc = peerCompareTable(
 			[
 				{ label: '영업이익률', value: annOpm, key: 'opMargin', goodHigh: true, fmt: (v) => fmtPct(v) },
@@ -438,11 +443,14 @@ function buildEarningsPower(
 		);
 		if (pc) {
 			const opmPh = pc.phrases.find((p) => p.label === '영업이익률');
+			const roePh = pc.phrases.find((p) => p.label === 'ROE');
+			// 관점 교차 — 마진 위치 vs ROE(자본효율) 위치의 갭(레버리지·자산효율 함의).
+			const cross = opmPh && roePh && Math.abs(opmPh.top - roePh.top) >= 15 ? ` 영업이익률(${topPctLabel(opmPh)})과 ROE(${topPctLabel(roePh)})의 위치 차이는 자산효율·레버리지에서 갈린다는 뜻으로, 곳간과 빚·자본배분과 함께 보십시오.` : '';
 			const lead = opmPh
-				? `${corpName}의 영업이익률(연간 ${opmPh.valFmt})은 ${peer.name} ${peer.count}사 중 상위 ${opmPh.top}%로, 업종 중앙값(${opmPh.median}) 대비 ${opmPh.top <= 40 ? '뚜렷이 높은' : opmPh.top <= 60 ? '중간 수준의' : '낮은'} 수익성입니다. 자기 이력만으로는 알 수 없는 *업종 내 위치*를 더한 것으로, 동종업종 분포 대비 백분위일 뿐 목표주가·투자판단이 아닙니다.${annGpm != null ? ` (마진 원가구조는 매출총이익률 ${fmtPct(annGpm)}에서 갈립니다.)` : ''}`
-				: `아래는 ${peer.name} ${peer.count}사 분포 대비 위치입니다(연간 기준).`;
+				? `${corpName}의 영업이익률(연간 ${opmPh.valFmt})은 ${peer.name} ${peer.count}사 중 ${topPctLabel(opmPh)}로, 업종 중앙값(${opmPh.median}) 대비 ${opmPh.top <= 40 ? '뚜렷이 높은' : opmPh.top <= 60 ? '중간 수준의' : '낮은'} 수익성입니다. 자기 이력만으로는 알 수 없는 *업종 내 위치*를 더한 것으로, 동종업종 분포 대비 백분위일 뿐 목표주가·투자판단이 아닙니다.${cross}`
+				: `아래는 ${peer.name} 분포 대비 위치입니다(연간 기준).`;
 			sections.push({ key: 'peerCompare', title: '동종업종 비교 -- 업종에서 어디 서 있나', sourceEngine: 'industry', blocks: [{ type: 'text', text: lead }, pc.block] });
-			if (opmPh) findings.push({ key: '업종비교', finding: `영업이익률 ${peer.name} ${peer.count}사 중 상위 ${opmPh.top}% (중앙값 ${opmPh.median}).`, sourceEngine: 'industry' });
+			if (opmPh) findings.push({ key: '업종비교', finding: `영업이익률 ${peer.name} ${peer.count}사 중 ${topPctLabel(opmPh)}${roePh ? ` · ROE ${topPctLabel(roePh)}` : ''} (중앙값 ${opmPh.median}).`, sourceEngine: 'industry' });
 		}
 	}
 
@@ -725,36 +733,22 @@ function buildLiquidity(
 	if (peer && tfA) {
 		const annDr = lastNonNull(tfA.ratios.find((r) => r.key === 'debtRatio')?.values ?? []);
 		const annCr = lastNonNull(tfA.ratios.find((r) => r.key === 'currentRatio')?.values ?? []);
-		// 연간 CCC — 같은 연도 인덱스에서 BS·IS 결합(365일).
-		const aIs = (k: string): Num[] => tfA.statements.IS.find((r) => r.key === k)?.values ?? [];
-		const aBs = (k: string): Num[] => tfA.statements.BS.find((r) => r.key === k)?.values ?? [];
-		const aRevArr = aIs('revenue');
-		let ai = -1;
-		for (let i = aRevArr.length - 1; i >= 0; i--) if (aRevArr[i] != null && Number.isFinite(aRevArr[i])) { ai = i; break; }
-		let annCcc: number | null = null;
-		if (ai >= 0) {
-			const rv = aRevArr[ai] as number;
-			const cg = aIs('costOfSales')[ai];
-			const rc = aBs('receivables')[ai];
-			const iv = aBs('inventories')[ai];
-			const py = aBs('payables')[ai];
-			if (rc != null && rv > 0 && py != null && cg != null && (cg as number) > 0) annCcc = +((rc as number) / rv * 365 + (iv != null ? (iv as number) / (cg as number) * 365 : 0) - (py as number) / (cg as number) * 365).toFixed(0);
-		}
+		// CCC 는 peer 비교에서 제외 — 회사값은 평균잔액, industryStats CCC 빌드 정의 미확인이라
+		// 사과-오렌지 비교 위험(기관 무결성 지적). 부채비율·유동비율(정의 명확)만 업종 좌표화.
 		const pc = peerCompareTable(
 			[
 				{ label: '부채비율', value: annDr, key: 'debtRatio', goodHigh: false, fmt: (v) => fmtPct(v) },
-				{ label: '유동비율', value: annCr, key: 'currentRatio', goodHigh: true, fmt: (v) => fmtPct(v) },
-				{ label: 'CCC(현금전환주기)', value: annCcc, key: 'ccc', goodHigh: false, fmt: (v) => fmtNum(v, '일') }
+				{ label: '유동비율', value: annCr, key: 'currentRatio', goodHigh: true, fmt: (v) => fmtPct(v) }
 			],
 			peer
 		);
 		if (pc) {
 			const drPh = pc.phrases.find((p) => p.label === '부채비율');
 			const lead = drPh
-				? `${corpName}의 부채비율(연간 ${drPh.valFmt})은 ${peer.name} ${peer.count}사 중 안정성 상위 ${drPh.top}%로, 업종 중앙값(${drPh.median}) 대비 ${drPh.top <= 40 ? '재무가 견고한' : drPh.top <= 60 ? '중간 수준의' : '레버리지가 높은'} 편입니다. 절대 임계치(부채비율 200%)는 업종 무관 일반 기준이라, 자본집약 업종에서는 이 업종 분포 위치가 더 적절한 좌표입니다(목표주가·투자판단 아님).`
-				: `아래는 ${peer.name} ${peer.count}사 분포 대비 안정성·운전자본 위치입니다(연간 기준).`;
+				? `${corpName}의 부채비율(연간 ${drPh.valFmt})은 ${peer.name} ${peer.count}사 중 안정성 ${topPctLabel(drPh)}로, 업종 중앙값(${drPh.median}) 대비 ${drPh.top <= 40 ? '재무가 견고한' : drPh.top <= 60 ? '중간 수준의' : '레버리지가 높은'} 편입니다. 절대 임계치(부채비율 200%)는 업종 무관 일반 기준이라, 자본집약 업종에서는 이 업종 분포 위치가 더 적절한 좌표입니다(목표주가·투자판단 아님).`
+				: `아래는 ${peer.name} 분포 대비 안정성 위치입니다(연간 기준).`;
 			sections.push({ key: 'peerSolvency', title: '동종업종 비교 -- 안정성은 업종에서 어디쯤', sourceEngine: 'industry', blocks: [{ type: 'text', text: lead }, pc.block] });
-			if (drPh) findings.push({ key: '업종안정성', finding: `부채비율 ${peer.name} ${peer.count}사 중 안정성 상위 ${drPh.top}% (중앙값 ${drPh.median}).`, sourceEngine: 'industry' });
+			if (drPh) findings.push({ key: '업종안정성', finding: `부채비율 ${peer.name} ${peer.count}사 중 안정성 ${topPctLabel(drPh)} (중앙값 ${drPh.median}).`, sourceEngine: 'industry' });
 		}
 	}
 
@@ -1568,8 +1562,52 @@ export async function buildReport(
 			note: `모든 수치는 HuggingFace parquet(재무·주가·정기보고)을 브라우저가 직접 읽어 ${scope}재무제표 기준으로 계산했습니다. 정적 캐시·사전 bake 없음 — 조회 시점 리얼타임.`
 		},
 		assumptionsNote:
-			`${scopeNote} · 손익·현금흐름은 ${qw ? '단일분기(누계 YTD는 차분 정규화)·전년동기(YoY) 비교' : '연간'} · 재무상태표는 기말 시점값 · 수익성 비율의 연율화는 연간 기준(분기 단독 연율화 안 함) · 운전자본 회전일은 ${qw ? '분기 매출·매출원가(91일)' : '연간(365일)'} 기준이라 계절성 영향 · 표 단위는 자릿수에 따라 조/억 자동 스케일 · 공시 항목이 빈약한 행은 자동 생략 · 일회성 손익이 큰 기간은 각주 표시 · 재무건전성 점검은 브라우저 재무비율(Python 신용등급 dCR 아님)${qw && qw.excluded.length ? ` · ⚠ 최신 ${qw.excluded.map((e) => e.period).join('·')}는 영업이익률이 본업 범위를 크게 벗어나(데이터 정합성 의심) 분석 윈도에서 제외` : ''}.`,
+			`${scopeNote} · 손익·현금흐름은 ${qw ? '단일분기(누계 YTD는 차분 정규화)·전년동기(YoY) 비교·TTM(직전 4분기 합) 병기' : '연간'} · 재무상태표는 기말 시점값 · 수익성 비율의 연율화는 연간 기준(분기 단독 연율화 안 함) · 운전자본 회전일은 평균잔액·${qw ? '분기(91일)' : '연간(365일)'} 기준이라 계절성 영향 · 동종업종 백분위는 industryStats 분포(연간) 대비 좌표(목표주가 아님) · 사업부문(세그먼트) 분해는 공시 주석 인코딩 의존으로 이 버전에서는 제공하지 않습니다(추정 대신 비표기) · 표 단위는 자릿수에 따라 조/억 자동 스케일 · 공시 항목이 빈약한 행은 자동 생략 · 일회성 손익이 큰 기간은 각주 표시 · 재무건전성 점검은 브라우저 재무비율(Python 신용등급 dCR 아님)${qw && qw.excluded.length ? ` · ⚠ 최신 ${qw.excluded.map((e) => e.period).join('·')}는 영업이익률이 본업 범위를 크게 벗어나(데이터 정합성 의심) 분석 윈도에서 제외` : ''}.`,
 		qualityLabel: built.sections.length >= 3 ? 'verified' : 'conditional',
 		focusQuestions: persp.focusQuestions
 	};
+}
+
+// ── 5관점 통합 리드 (Executive Overview) — 보고서를 한 몸으로 묶는 thesis + 관점별 한 줄 ──
+// 5관점을 모두 빌드(fetch 는 런타임 캐시 공유)해 관점을 *교차*한 긴장 서술을 만든다.
+// 종합점수·매수의견 아님 — 사실의 교차(마진 위치 vs 환원 강도 vs 밸류 위치)일 뿐.
+export async function buildOverview(rt: DartLabRuntime, code: string): Promise<OverviewModel | null> {
+	const results = await Promise.all(
+		PERSPECTIVES.map((p) =>
+			buildReport(rt, code, p.key)
+				.then((r) => (isSkipped(r) ? null : r))
+				.catch(() => null)
+		)
+	);
+	const built = results.filter((r): r is ReportModel => r != null);
+	if (!built.length) return null;
+	const first = built[0];
+	const takes: OverviewTake[] = built.map((r) => ({ key: r.perspectiveKey, label: r.perspectiveLabel, line: r.conclusion, engine: r.sections[0]?.sourceEngine ?? 'analysis' }));
+
+	// 관점 교차 thesis — 내가 만드는 finding 포맷에서 앵커 추출(안전 폴백).
+	const m = (k: string) => built.find((r) => r.perspectiveKey === k);
+	const findOf = (r: ReportModel | undefined, k: string): string => r?.keyFindings.find((f) => f.key === k)?.finding ?? '';
+	const ep = m('earningsPower');
+	const li = m('liquidity');
+	const cr = m('capitalReturn');
+	const mk = m('market');
+	const marginTop = /영업이익률[^상하]*((?:상|하)위[^·.]+)/.exec(findOf(ep, '업종비교'))?.[1]?.trim() ?? null;
+	const drTop = /안정성\s*((?:상|하)위[^(]+)/.exec(findOf(li, '업종안정성'))?.[1]?.trim() ?? null;
+	const payout = /배당성향\s*([\d.]+%)/.exec(findOf(cr, '배당'))?.[1] ?? null;
+	const payoutNum = payout ? parseFloat(payout) : null;
+	const valBand = /자기역사\s*(하단|중단|상단)/.exec(findOf(mk, '밸류'))?.[1] ?? null;
+
+	const parts: string[] = [`${first.corpName}를 수익체력·곳간과 빚·주주환원·시장의 평가·누구의 회사 다섯 관점으로 봤습니다.`];
+	const clauses: string[] = [];
+	if (marginTop) clauses.push(`수익력은 동종업종 ${marginTop}로 업종 상위권`);
+	if (drTop) clauses.push(`재무 안정성은 ${drTop}`);
+	if (clauses.length) parts.push(clauses.join('이고, ') + '입니다.');
+	const tail: string[] = [];
+	if (payoutNum != null) tail.push(`다만 주주환원은 배당성향 ${payout}로 ${payoutNum < 30 ? '이익체력 대비 보수적' : payoutNum > 60 ? '적극적' : '중간 수준'}`);
+	if (valBand) tail.push(`시장은 이를 자기 PER ${valBand}에 반영`);
+	if (tail.length) parts.push(tail.join('이고, ') + '하고 있습니다.');
+	parts.push('아래 관점별 한 줄 요지를 먼저 보고, 좌측에서 관심 관점을 펼치십시오. (관점을 교차한 사실 서술이며 종합점수·매수의견이 아닙니다.)');
+	const thesis = parts.join(' ');
+
+	return { corpName: first.corpName, stockCode: code, asOf: first.asOf, dataBasis: first.dataBasis, industry: first.industry, thesis, takes };
 }

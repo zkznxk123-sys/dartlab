@@ -66,6 +66,23 @@ export interface ReportModel {
 	pending?: boolean; // 미구현 관점(다음 사이클) — 정직 표기
 }
 
+// 5관점 통합 리드 — 보고서를 한 몸으로 묶는 thesis + 관점별 한 줄 요지(권장 읽기 순서).
+export interface OverviewTake {
+	key: string;
+	label: string;
+	line: string;
+	engine: ReportSourceEngine;
+}
+export interface OverviewModel {
+	corpName: string;
+	stockCode: string;
+	asOf: string;
+	dataBasis: string;
+	industry?: string;
+	thesis: string; // 관점을 교차해 꿴 한 문단(긴장의 서술 — 종합점수·매수의견 아님)
+	takes: OverviewTake[];
+}
+
 export interface ReportSkipped {
 	skipped: true;
 	stockCode: string;
