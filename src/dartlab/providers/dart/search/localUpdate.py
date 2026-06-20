@@ -482,16 +482,32 @@ def _canaryErrors(indexDir: Path, rawQueries: Any) -> list[str]:
 
 
 def injectSourceRefResolution(rows: Any, idx: Any, meta: Any) -> list[dict[str, Any]]:
-    """canary rows 에 결정론 ``_refResolved``(인용 무결성)를 주입 — publish selfcheck·CI canary
-    audit 공용 SSOT.
+    """canary rows 에 결정론 무결성 신호(``_refResolved``·``_sourceResolved``)를 주입 — publish
+    selfcheck·CI canary audit 공용 SSOT.
 
-    인용 무결성(exact-ref)은 "이 ref 의 doc 이 색인에 존재+적재됐나"이지 "BM25 랭킹 top-K 에 뜨나"가
+    인용/소스 무결성은 "이 ref/source 의 doc 이 색인에 존재+적재됐나"이지 "BM25 랭킹 top-K 에 뜨나"가
     아니다. tokenizeContent 가 한국어 bigram 이라 보일러플레이트 공시는 자기 본문 쿼리로도 top-K
     self-retrieval 이 구조적으로 불가능 → 랭킹 멤버십을 무결성 proxy 로 쓰면 매일 거짓 RED 가 난다.
-    여기선 인덱스 아티팩트(meta·docLengths)를 직독해 ``ref ∈ meta(sourceRef or rcept_no) AND 그 docId
-    의 docLengths>0`` 를 결정론 검증한다. canary ref 는 빌드 meta 에서 추출된 값이라 정상 빌드면 항상
-    참, ref 드리프트·doc 누락·source 유실이면 거짓(부패 RED). 랭킹 품질은 별 트랙(gold/qualityGate)
-    책임. 정규화는 canaryPack._sourceRef 와 동일 규칙(sourceRef or rcept_no) — byte-parity 필수.
+    여기선 인덱스 아티팩트(meta·docLengths)를 직독해 ``ref ∈ meta(sourceRef or rcept_no) AND docId
+    의 docLengths>0`` · ``expectedSource ∈ 색인된 source 집합`` 을 결정론 검증한다. 정규화는
+    canaryPack._sourceRef 와 동일 규칙(sourceRef or rcept_no) — byte-parity 필수. 랭킹 품질은 별
+    트랙(gold/qualityGate) 책임이고 무결성 게이트는 색인 적재 사실만 본다.
+
+    Args:
+        rows: sourceCanaryPack canary 행들 (각 query·expectedSource·expectedSourceRef 등).
+        idx: ``loadSegment`` 가 반환한 인덱스 dict (``docLengths`` 키 사용).
+        meta: 세그먼트 meta DataFrame (``sourceRef``·``rcept_no``·``source`` 컬럼).
+
+    Returns:
+        list[dict[str, Any]]: 입력 행 사본에 ``_refResolved``(expectedSourceRef 보유 시)·
+        ``_sourceResolved``(expectedSource 보유 시) 결정론 신호를 채운 리스트.
+
+    Raises:
+        None.
+
+    Example:
+        >>> callable(injectSourceRefResolution)
+        True
     """
     from dartlab.providers.dart.search.canaryPack import _expectedSourceRefs
 
