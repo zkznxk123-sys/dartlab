@@ -163,7 +163,7 @@
 	>
 		<div class="scrHead">
 			<span class="scrTitle">{lang === 'en' ? 'FILING SEARCH' : '공시 검색'}</span>
-			<span class="fsSub">{lang === 'en' ? 'global full-text · BM25' : '전역 본문 · BM25'}{#if builtAt}<span class="fsAsOf">{' · '}{lang === 'en' ? 'index ' : '인덱스 '}~{builtAt.slice(0, 10)}</span>{/if}</span>
+			<span class="fsSub">{lang === 'en' ? 'all companies · full text' : '전 종목 공시 본문'}{#if builtAt}<span class="fsAsOf">{lang === 'en' ? ` · as of ${builtAt.slice(0, 10)}` : ` · ~${builtAt.slice(0, 10)} 기준`}</span>{/if}</span>
 			<span class="fsKbd">⌘⇧F</span>
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>
@@ -197,7 +197,7 @@
 				<div class="fsState">
 					<span class="fsSpin">◴</span>
 					{#if coldFirst}
-						{lang === 'en' ? 'Preparing the filing index (first time only, ~10MB)…' : '공시 색인 준비 중(최초 1회, ~10MB)…'}
+						{lang === 'en' ? 'Preparing search (first time only)…' : '공시 검색 준비 중(최초 1회)…'}
 					{:else}
 						{lang === 'en' ? 'Searching…' : '검색 중…'}
 					{/if}
@@ -215,7 +215,7 @@
 						class={'fsRow' + (i === selIdx ? ' sel' : '') + (hit.stockCode ? '' : ' noJump')}
 						onclick={() => jump(hit)}
 						onmouseenter={() => (selIdx = i)}
-						title={hit.stockCode ? (lang === 'en' ? 'Enter → company' : 'Enter → 회사로 점프') : (lang === 'en' ? 'no company key (news)' : '회사키 없음(뉴스)')}
+						title={hit.stockCode ? (lang === 'en' ? 'Enter → company' : 'Enter → 회사로 점프') : (lang === 'en' ? 'no linked company (news)' : '회사 연결 없음(뉴스)')}
 					>
 						<span class="fsCorp">
 							<b>{hit.corpName || '—'}</b>

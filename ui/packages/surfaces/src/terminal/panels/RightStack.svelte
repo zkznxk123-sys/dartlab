@@ -532,7 +532,7 @@
 	{:else if factsState === 'loading'}
 		<div class="storyEmpty">{lang === 'en' ? 'loading report facts …' : '정기보고서 팩트 불러오는 중 …'}</div>
 	{:else}
-		<div class="storyEmpty">{lang === 'en' ? 'No report-parquet facts for this company.' : '해당 회사 정기보고서 팩트 없음.'}</div>
+		<div class="storyEmpty">{lang === 'en' ? 'No periodic-report facts for this company.' : '해당 회사 정기보고서 팩트 없음.'}</div>
 	{/if}
 </Panel>
 
