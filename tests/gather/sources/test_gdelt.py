@@ -262,3 +262,54 @@ def test_fetch_gdelt_404_returns_empty(monkeypatch: pytest.MonkeyPatch) -> None:
     assert df.height == 0
     assert "sentiment_score" in df.columns
     assert "description" in df.columns  # canonical 17컬럼 통일
+
+
+# ── GDELT DOC 2.0 (질의 기반 뉴스) — sync 별도빌드에서 gather 로 환원 ────────────────
+
+
+def test_fetch_gdelt_doc_empty_input() -> None:
+    out = gdelt.fetchGdeltDoc({})
+    assert isinstance(out, pl.DataFrame)
+    assert out.height == 0
+
+
+def test_fetch_gdelt_doc_parses_articles(monkeypatch: pytest.MonkeyPatch) -> None:
+    """DOC API 응답 → naver 호환 archive df(+__code). online fetch=gather SSOT 회귀 가드."""
+    import httpx as _httpx
+
+    article = {
+        "url": "https://news.example.com/a",
+        "title": "삼성전자 신제품 발표",
+        "seendate": "20260115T120000Z",
+        "domain": "news.example.com",
+    }
+
+    class _Resp:
+        status_code = 200
+
+        def json(self):
+            return {"articles": [article]}
+
+    class _Client:
+        def __init__(self, *a, **k): ...
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def get(self, *a, **k):
+            return _Resp()
+
+    monkeypatch.setattr(_httpx, "Client", _Client)
+    monkeypatch.setattr(gdelt.time, "sleep", lambda *_a, **_k: None)  # perQuery sleep 즉시
+
+    df = gdelt.fetchGdeltDoc({"삼성전자": "005930"}, years=1)
+    assert df.height == 1
+    row = df.row(0, named=True)
+    assert row["title"] == "삼성전자 신제품 발표"
+    assert row["__code"] == "005930"
+    assert row["market"] == "KR"
+    assert row["query"] == "삼성전자"
+    assert row["description"] == ""  # DOC 트랙은 스니펫 없음

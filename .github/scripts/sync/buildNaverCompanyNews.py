@@ -3,7 +3,7 @@
 두 트랙 머지 (좌우 분리 표시):
     - **naver (최근, 스니펫 O)**: 네이버 검색 API archive(`syncNaverNews`, forward-only). 일자별
       ``news/private/naver/KR/{YYYY-MM-DD}.parquet`` → recent.parquet 누적.
-    - **gdelt (과거, 제목+링크)**: GDELT DOC 2.0 API(`gdeltDocNews`, 질의 기반·무료·~2017). 회사명
+    - **gdelt (과거, 제목+링크)**: GDELT DOC 2.0 API(`gather.sources.gdelt.fetchGdeltDoc`, 질의 기반·무료·~2017). 회사명
       질의 → gdeltArchive.parquet 누적. 스니펫 없음, 한국 커버리지 부분적.
 
 private 데이터셋이라 브라우저 직독 불가(토큰 필요) → 종목코드별 작은 JSON 으로 묶어 push 하면 CF
@@ -35,10 +35,8 @@ import polars as pl
 
 import dartlab.config as _cfg
 from dartlab.core.dataConfig import repoFor
+from dartlab.gather.sources.gdelt import fetchGdeltDoc  # GDELT DOC online fetch = gather SSOT (별도빌드 환원)
 from dartlab.gather.sources.newsSchema import NEWS_BASE_COLS
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # 동일 dir gdeltDocNews import
-from gdeltDocNews import fetchGdeltDoc  # noqa: E402
 
 _CATEGORY = "newsNaver"
 _DIR = "news/private/naver"  # newsSources.naver.dir 과 일치 (drift 차단)
