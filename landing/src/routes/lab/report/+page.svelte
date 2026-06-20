@@ -356,6 +356,7 @@
                     {#if t.sub}<div class="secSub">{t.sub}</div>{/if}
                   </div>
                   {#if !allAnalysis}<span class="chip srcBadge src-{sec.sourceEngine}">{engineLabel[sec.sourceEngine] ?? sec.sourceEngine}</span>{/if}
+                  <a class="secSrc" href={`${base}/viewer/company/${model.stockCode}`} target="_blank" rel="noopener" title="이 수치의 원천 — 공시뷰어에서 원본 사업·분기보고서 확인">원공시↗</a>
                 </div>
                 {#each sec.blocks as b}
                   {#if b.type === 'heading'}
@@ -456,6 +457,7 @@
               {/each}
             </div>
             <div class="evNote">{model.provenance.note}</div>
+            <a class="evSource" href={`${base}/viewer/company/${model.stockCode}`} target="_blank" rel="noopener">원본 공시 직접 확인 — {model.corpName} 공시뷰어에서 사업·분기보고서 원문 열기 ↗</a>
           </section>
 
           <!-- ── 푸터 / 서명 ── -->
@@ -742,6 +744,11 @@
   .evLabel { font-size: 12.5px; font-weight: 600; }
   .evMeta { font-size: 11px; color: var(--dim); font-family: var(--mono); }
   .evNote { font-size: 10.5px; color: var(--dim); margin-top: 10px; font-style: italic; }
+  .evSource { display: inline-block; margin-top: 11px; font-size: 11.5px; color: var(--accent); text-decoration: none; font-weight: 600; }
+  .evSource:hover { text-decoration: underline; }
+  /* 섹션 헤더 원공시 딥링크 — 신뢰 last mile(숫자→원본 공시) */
+  .secSrc { font-size: 10px; color: var(--dim); text-decoration: none; border: 1px solid var(--bd2); border-radius: 5px; padding: 2px 7px; white-space: nowrap; align-self: center; }
+  .secSrc:hover { color: var(--accent); border-color: var(--accent); }
 
   /* ── 푸터 ── */
   .rptFooter { margin-top: 36px; padding-top: 16px; border-top: 2px solid var(--ink); font-size: 11px; color: var(--dim); }
@@ -771,7 +778,7 @@
       background: #fff; font-size: 10.2pt;
       print-color-adjust: exact; -webkit-print-color-adjust: exact;
     }
-    .toolbar, .rail, .toc { display: none !important; }
+    .toolbar, .rail, .toc, .secSrc { display: none !important; }
     .reportLayout { display: block; }
     .printPerspective { display: block; font-size: 11px; color: #555; margin-bottom: 12px; font-weight: 600; }
     .sheet { width: 100%; max-width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; }

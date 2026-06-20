@@ -533,6 +533,26 @@ function buildEarningsPower(
 			const aOpm = aw.pick(tfA.ratios.find((r) => r.key === 'opm')?.values ?? []);
 			const aNpm = aw.pick(tfA.ratios.find((r) => r.key === 'npm')?.values ?? []);
 			const aRoe = aw.pick(tfA.ratios.find((r) => r.key === 'roe')?.values ?? []);
+			// ROIC — NOPAT(영업이익×(1−실효세율)) ÷ 투하자본(자기자본+비유동부채). ROE와 달리 레버리지 덜 오염.
+			const aOi = aw.pick(tfA.statements.IS.find((r) => r.key === 'operatingIncome')?.values ?? []);
+			const aNi = aw.pick(tfA.statements.IS.find((r) => r.key === 'netIncome')?.values ?? []);
+			const aTax = aw.pick(tfA.statements.IS.find((r) => r.key === 'incomeTax')?.values ?? []);
+			const aEq = aw.pick(tfA.statements.BS.find((r) => r.key === 'equity')?.values ?? []);
+			const aLiab = aw.pick(tfA.statements.BS.find((r) => r.key === 'liabilities')?.values ?? []);
+			const aCl = aw.pick(tfA.statements.BS.find((r) => r.key === 'currentLiabilities')?.values ?? []);
+			const aRoic = aw.periods.map((_, i) => {
+				const oi = aOi[i];
+				const eq = aEq[i];
+				if (oi == null || eq == null || !Number.isFinite(oi) || !Number.isFinite(eq)) return null;
+				const ni = aNi[i];
+				const tax = aTax[i];
+				const pretax = ni != null && tax != null ? (ni as number) + (tax as number) : null;
+				const effTax = pretax != null && pretax > 0 && tax != null ? Math.min(0.4, Math.max(0, (tax as number) / pretax)) : 0.22;
+				const nopat = (oi as number) * (1 - effTax);
+				const ic = (eq as number) + (aLiab[i] != null && aCl[i] != null ? Math.max(0, (aLiab[i] as number) - (aCl[i] as number)) : 0);
+				return ic > 0 ? +((nopat / ic) * 100).toFixed(1) : null;
+			});
+			const roicL = lastNonNull(aRoic);
 			const { scale } = scaleAmt(aRev);
 			const annTbl: ReportBlock = {
 				type: 'table',
@@ -541,7 +561,8 @@ function buildEarningsPower(
 					{ '연간 지표': '매출액(조)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtScaled(aRev[i], scale)])) },
 					{ '연간 지표': '영업이익률(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aOpm[i])])) },
 					{ '연간 지표': '순이익률(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aNpm[i])])) },
-					{ '연간 지표': 'ROE(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aRoe[i])])) }
+					{ '연간 지표': 'ROE(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aRoe[i])])) },
+					{ '연간 지표': 'ROIC(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aRoic[i])])) }
 				]
 			};
 			const aRevCagr = cagr(aw.pick(tfA.statements.IS.find((r) => r.key === 'revenue')?.values ?? []));
@@ -550,10 +571,12 @@ function buildEarningsPower(
 				title: '연간 추세 -- 장기 그림 (보충)',
 				sourceEngine: 'analysis',
 				blocks: [
-					{ type: 'text', text: `분기는 최신 모멘텀을, 연간은 장기 추세를 봅니다. 최근 ${aw.periods.length}년 매출은 연평균 ${fmtPctSigned(aRevCagr)} 성장했고, ROE는 ${fmtPct(roeAnnual)} 수준입니다(연간 ROE = 연간 순이익 ÷ 평균 자기자본 — 분기 단독 연율화는 하지 않습니다).` },
-					annTbl
+					{ type: 'text', text: `분기는 최신 모멘텀을, 연간은 장기 추세를 봅니다. 최근 ${aw.periods.length}년 매출은 연평균 ${fmtPctSigned(aRevCagr)} 성장했고, ROE ${fmtPct(roeAnnual)}·ROIC ${fmtPct(roicL)} 수준입니다. ROIC(투하자본이익률 = 세후영업이익 ÷ 투하자본)는 레버리지에 덜 오염된 *순수 자본효율*로, 자본조달비용(WACC)을 지속 웃돌면 자본배분이 가치를 창출한다고 봅니다(연율화는 연간 기준, 분기 단독 연율화 안 함).` },
+					annTbl,
+					{ type: 'text', text: `※ ROIC = 영업이익×(1−실효세율) ÷ (자기자본+비유동부채). 투하자본은 BS 표준계정에서 근사한 값으로, 정밀 ROIC(영업투하자본·리스 조정 등)와는 차이가 있을 수 있습니다.` }
 				]
 			});
+			if (roicL != null) findings.push({ key: '자본효율', finding: `ROIC ${fmtPct(roicL)} · ROE ${fmtPct(roeAnnual)} (ROIC는 레버리지 덜 오염된 자본효율).`, sourceEngine: 'analysis' });
 		}
 	}
 
