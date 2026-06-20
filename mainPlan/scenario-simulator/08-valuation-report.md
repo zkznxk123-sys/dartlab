@@ -1,6 +1,6 @@
 # 08. Valuation Report — 시뮬레이터 = 가치평가 엔진, 프로급 보고서 발간 계약
 
-상태: PRD v0.4 (2026-06-13 다모다란 융합 + 자산 감사 + 적대 검증 / 2026-06-14 구현 정합: dcf 노드=proforma-FCFF[§1 ⑤·§2.3]·RNG=random.Random[§8]·금지어 lint 신설·CI배선 완료[§2.2·09 §10.1] / 2026-06-20 9인 패널 보강: Bridge Waterfall 시각 문법 SSOT[§3.4]·CRP+ERP_KR provenance[§2.3]·닻 2.5차원+세그먼트 닻 defer[§2.1]·ReportDock 거처 포인터[§5])
+상태: PRD v0.4 (2026-06-13 다모다란 융합 + 자산 감사 + 적대 검증 / 2026-06-14 구현 정합: dcf 노드=proforma-FCFF[§1 ⑤·§2.3]·RNG=random.Random[§8]·금지어 lint 신설·CI배선 완료[§2.2·09 §10.1] / 2026-06-20 9인 패널 보강: Bridge Waterfall 시각 문법 SSOT[§3.4]·CRP+ERP_KR provenance[§2.3]·닻 2.5차원+세그먼트 닻 defer[§2.1] / 2026-06-20 16인 교차분야 천장 보강: 닻 시간축 expectations-revision[§2.1, vintage 반복평가]·닻 implied CAP↔01 §6.3(d) 봉합[§2.1]·기준선 앵커링 대칭 가드[§2.1, 03 §6.3(c) 재사용]·signal 라벨 2층화[§2.2]·규제 관할 표 KR primary→US secondary[§7]·필수고지 키 4종 존재 어서션[§7 ③]·ReportDock 거처 포인터[§5])
 **지위: 발간 *계약* 문서 — 발간 모드는 `simulate/` 코어 졸업 *후*에 착수(§11 게이팅).** ★결정론 코어는 이미 졸업(4노드 DAG·공개 verb, 01 §5a) — 그러나 발간이 의존하는 **gate.py·reportDock·14키 ref 치환·렌더러 2개는 미구현**(금지어 lint 은 신설·CI배선 완료, 09 §10.1; 아래 ⚠ 표기). 코어 졸업 ≠ 발간 가동.
 
 ---
@@ -42,11 +42,19 @@
 
 > **★닻을 2.5차원으로(1차원 g 닻 확장):** 현 `reverseImpliedGrowth` 발간은 *implied 매출성장 g* 단일 좌표(1차원)다 — "시장이 박은 g 가 plausible?"는 강하나, 같은 가격이 *어떤 마진·자본효율 조합*을 요구하는지는 닫혀 있다. 2.5차원 = g 닻 위에 **required-operating-margin·required-ROIC 를 *최소 고정-입력* 형태로 동반 표시**한다(완전한 2D iso-value surface 아님 — '0.5차원'). 표기 = "현재가는 (g=X% 고정 시) 영업마진 m≥Y% *또는* ROIC r≥Z% 를 요구"처럼 한 변수 고정·나머지 1변수 함의를 짝으로 노출(`computeGap` 의 required-* 출력은 03 §6.2 Reverse DCF Gate 가 이미 required revenue growth/operating margin/ROC/reinvestment 를 명세 — 그 값을 발간 *전면*으로 끌어올림, 새 계산 0). **iso-value frontier**(g·m·r 자유조합이 같은 현재가를 만드는 *연속 곡면*, "여러 점이 같은 값" 시각화)는 후속 단계로 **defer 명시** — 곡면 샘플링·등가선 렌더는 닻 전면 승격(현 단계) 이후의 별도 작업(잠정 우선순위, 졸업 후 재검). 2.5차원은 required-* 짝-표기까지가 현 범위, frontier 곡면은 design.
 
+> **★닻 시간축 — expectations revision 좌표(C, 새 계산 0 — vintage 반복평가):** 현 닻은 *한 asOf 시점* 의 정태 단면(현재가가 *지금* 요구하는 g/m/r)이다. 시뮬레이터는 이미 **vintage/asOf 스냅샷 기계**를 보유하므로(05 vintage 3축·`SimulationResult` asOf), `reverseImpliedGrowth`+`computeGap` 를 *마지막 N개 asOf 스냅샷*에 반복평가하면 새 계산 없이 **implied g·m·r 의 수정 궤적**(시장이 박은 기대가 분기마다 어떻게 옮겨갔는가)을 얻는다 — 닻에 **시간축(C 좌표)** 1행 추가. 라벨은 **2층화**한다:
+> - **정태 라벨**(§2.2 리네임 후): `consistent / optimistic / pessimistic`(현재가 함의 vs 회사 과거범위 정합성).
+> - **동태 라벨**(궤적 방향만, *중립*): `expectation-rising / falling / stable` — implied-g(또는 m/r) 가 N스냅샷에 걸쳐 오르는/내리는/평탄한 **방향 정보만**. over/under-reaction(과잉·과소반응)은 *인과 단정*이라 **금지** — "시장이 과잉반응했다"는 행동재무 판정을 발간하지 않는다. 대신 **정합성 갭**으로만 노출: "닻 implied-g 수정폭이 동기간 *펀더멘털 수정폭*(실현 매출·마진 revision)을 초과/미달" 이라는 *두 수정폭의 비교*(scenario≠forecast — 어느 쪽이 옳은지 단정 0, 갭을 DisagreementLedger 행으로). ⚠ **N-스냅샷 닻은 vintage fixture 가 닿는 종목부터** 실재 — vintage 스냅샷 미닿는 종목은 **정태 닻 단일**(궤적 행 부재)로 **defer 명시**(미구현을 구현으로 위장 금지, 02 세그먼트 census defer 와 동형). 잠정 — N(스냅샷 수)·수정폭 tol 은 졸업 데모서 재보정.
+
+> **★닻 implied CAP 좌표(새 계산 0 — `computeGap` implied ROIC 의 fade 역산):** required-margin·required-ROIC 짝(2.5차원) 옆에 **implied CAP**(competitive advantage period — 현재가가 요구하는 *초과수익 지속연수*) 1좌표를 추가한다. 현재가가 함의하는 TV 에서 `ROIC → WACC` 로 fade 시킬 때 *얼마나 오래* 초과수익(`ROIC > WACC`)이 지속되어야 현재가가 정당화되는지를 역산해 **"현재가는 약 N년의 moat 지속을 가정"** 으로 노출(새 leaf 0 — `computeGap` 의 implied ROIC + terminal fade 산수). 이 implied-N 을 **01 §6.3(d) `checkValuationCoherence`(영구 초과수익 moat 라벨 강제)의 명시 moat/fade 가정과 cross-check** 한다 — 닻 implied-CAP(시장이 박은 지속연수) ≫ 명시 moat 가정(분석가가 박은 fade)이면 `SimulationResult.warnings 'market_implies_longer_moat_than_assumed'`(시장이 우리 가정보다 *더 긴* 해자를 priced-in). plausibility 는 **라벨만**(N 을 예측이 아니라 "*시장이 박은 가정의 해부*"로 — Mauboussin Expectations Investing 와 동축). ⟹ 닻(§2.1)과 01 §6.3(d) 를 **하나의 ROIC-spread 서사**로 봉합: (d)는 *우리* proforma 의 영구 초과수익 모순을 잡고, 본 implied-CAP 는 *시장가* 가 요구하는 초과수익 지속을 해부 — 같은 `ROIC−WACC spread` 의 공급·수요 양면. 잠정 — fade 곡선형·spread_tol 은 (d)와 공유, 졸업서 재보정. (⚠ 코드 정정: 01 §6.3(d)는 literal `capYears` 필드가 아니라 terminal `ROIC−WACC > spread_tol` + fade/convergence·명시 moat 라벨 기계강제 — implied-CAP 는 그 명시 가정을 *시장 함의 N년* 과 대조하는 것이지 별도 `capYears` 입력이 아님.)
+
+> **★기준선 앵커링 대칭 가드(행동재무 — 닻을 재는 *자(尺)* 자체의 편향, 새 leaf 0):** §2.1 닻 plausibility 판정의 *기준선*(=회사 historical range·peer 범위)은 닻을 재는 자(尺)인데, **이 자 자체가 분석가 측 앵커링/recency 편향**을 품을 수 있다 — trailing-realized historical range 는 *과거가 미래의 닻* 이라는 가정이라, **구조 변곡**(신사업·세그먼트 진입·사이클 전환·peer lifecycle 사분위 전환)이 일어난 회사에서는 historical range 가 미래를 못 담아 시장 함의를 **"비현실적" 으로 오판**(market_implies_longer_moat 의 역방향 — 시장이 옳고 *우리 기준선*이 stale). 대칭 가드 = **닻이 historical 을 벗어남 = ① 비현실(시장 과열) *또는* ② 구조 변곡(기준선 stale), 둘을 단정 않고 *DisagreementLedger 행*으로** 남긴다(어느 쪽인지 발간이 정하지 않음, scenario≠forecast). 트리거 = peer lifecycle 사분위 전환·신세그먼트 존재 시 historical 비교를 **낮은신뢰 강등**(03 §6.2 Reverse DCF Gate 질문목록에 "기준선(historical range) 자체가 구조변곡 못담는 trailing anchor 인가" 1행 추가 — 03 소유, 본 절은 그 추가의 소비자). lifecycle 사분위 전환 판정은 **03 §6.3(c) lifecycle 불일치 게이트(`stage-mismatch`)** 의 사분위 비교 기계를 재사용(새 분기 0 — peer/target revenue CAGR·ROIC 사분위 동일 자료). (⚠ 코드 정정: 직전 라운드 백로그가 가리킨 "00 §6.4 R23 lifecycle dispatch" 는 실제로 00 §6.4 의 *ScreenerModal→PriceChart soft-swap 드릴다운*(R23)이고 lifecycle dispatch 가 아니다 — 진짜 lifecycle 사분위 dispatch 의 정본은 **03 §6.3(c) stage-mismatch** 다. 본 가드는 그 정본을 참조.)
+
 > **★닻 분해 한계(시그니처 정밀화 — 전사 닻 실재, 세그먼트 닻 design):** 현 reverseDCF 닻은 **전사(consolidated) 단일 닻**이다 — "전사 현재가가 요구하는 g/m/r 가 회사 전체 historical range·peer 범위에서 plausible?"까지가 *실재*하고, 이 plausibility 판정은 지금 강제 가능하다. 그러나 다사업부 기업의 *진짜* 질문 — "*어느 세그먼트*의 implied 기대가 비현실적인가"(예: 전사 닻은 plausible 해 보여도 한 세그먼트에 비현실적 성장이 priced-in) — 은 **세그먼트 SOTP 닻**(부문별 sum-of-the-parts 역DCF)을 요구하며, 이는 세그먼트 분해 데이터(02 세그먼트 census 절이 census 하는 `NT_D871100` 세그먼트 셀, 메모리 segmentRnd coverage 2/10 = 데이터-부재 천장)가 **라이브된 *후*의 후속 단계로 defer**한다. ⟹ 시그니처 주장 정밀화 = **'전사 닻 실재(plausibility 강제 가능), 세그먼트 닻 design(세그먼트 census 라이브 후)'** — 둘을 하나로 뭉뚱그려 "닻이 세그먼트별 비현실성을 짚는다"고 쓰면 미구현을 구현으로 위장(확신오정렬, horizonMeaning 교훈). 세그먼트 닻은 잠정 후속, 졸업 AC 아님.
 
 ### 2.2 단일점·rating 차단 (적대검증 B-1·B-2 — 규제선 실제 구멍)
 
-- **`signal` 필드 차단/리네임(B-1):** `reverseImpliedGrowth`의 `PriceImpliedRevenue.signal`이 `underpriced|overpriced|fair`(`priceImplied.py:23,222`)를 반환 — 이건 사실상 매수/매도 rating이다("underpriced"=한국어 "사라"로 직역). **발간 표면에서 `signal` 노출 금지**, "현재가 함의 vs 회사 과거범위 정합성(consistent/optimistic/pessimistic)"으로 리네임. 단 lint 은 *발간 표면 마크다운*만 스캔 — `priceImplied.py` 의 `signal` enum(leaf 정의)은 정당 사용이라 미스캔(§2.3·아래 §2.2 박스).
+- **`signal` 필드 차단/리네임(B-1):** `reverseImpliedGrowth`의 `PriceImpliedRevenue.signal`이 `underpriced|overpriced|fair`(`priceImplied.py:23,222`)를 반환 — 이건 사실상 매수/매도 rating이다("underpriced"=한국어 "사라"로 직역). **발간 표면에서 `signal` 노출 금지**, "현재가 함의 vs 회사 과거범위 정합성(consistent/optimistic/pessimistic)"으로 리네임. 단 lint 은 *발간 표면 마크다운*만 스캔 — `priceImplied.py` 의 `signal` enum(leaf 정의)은 정당 사용이라 미스캔(§2.3·아래 §2.2 박스). **★라벨 2층화(정태+동태, §2.1 시간축 박스 동행):** 위 리네임은 **정태 라벨**(`consistent/optimistic/pessimistic` — 한 asOf 의 닻 vs 과거범위)이고, N-스냅샷 vintage 닻이 닿는 종목에는 **동태 라벨**(`expectation-rising/falling/stable` — 방향만, 중립)을 *짝으로* 노출한다(SSOT = §2.1 "★닻 시간축" 박스). 동태도 over/under-reaction 인과 단정 금지 — *정합성 갭*(닻 수정폭 vs 펀더멘털 수정폭)으로만. vintage 미닿는 종목은 정태 단일(동태 행 defer).
 - **★`computePriceTarget` rating·단일목표가 차단(B-1', 평가 P0):** `pricetarget.py`의 `weighted_target`(단일 목표가)+`signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644`)도 동일 금지 출력 — **§2.3 어댑터가 두 필드를 drop**하고 P10~P90 분포+reverseDCF 닻만 발간. 금지어 lint = **발간 표면(frontmatter `reportType: simulation` 마크다운) 한정** — leaf src 3파일(`priceImplied`/`_valuationOther`/`pricetarget`)은 `_isSimulationReport()` 가 `.py` 를 영원히 False 로 막아 미스캔(=leaf 의 정당한 `signal`/`weighted_target` 안 잡음, CI red 0). 그 3파일 값의 발간 누출은 §2.3 어댑터(weighted_target/signal drop)가, 마크다운에 쓴 매수/목표가 어휘는 lint 가 차단 — 책임 다른 두 메커니즘. 09 P12.
   > **★구현 정합(2026-06-14):** 발간 표면 한정 금지어 lint = `tests/audit/valuationPublishLint.py`(+companion `test_valuationPublishLint.py`) **신설·CI배선 완료**(`tests/run.py:140` fast 게이트 `--strict`, green no-op·6 unit PASS 실측). 스캔 대상이 발간 표면(frontmatter `reportType: simulation` 마크다운)뿐이라 leaf src `.py` 는 영원히 미스캔(=leaf 의 정당한 `signal`/`weighted_target` 사용 안 잡음, CI red 0). 발간 표면 0파일이라 현재 green no-op — 표면 ship 시 자동 발화. 정본 명세=09 §10.1 T1. **잔여=T2 발간 표면 신설(Phase 6).**
 - **priceP50 단독 금지(B-2):** `PriceSimulationResult.priceP50`/`perShare`(02 §2.8-9) 단독 표시는 목표가로 읽힌다. **발간 게이트 기계 규칙: perShare/P50 단독 출력 시 build fail — 항상 P10·P90 + reverseDCF 닻 동반.** 무료 공개 발간이 더 위험(불특정 다수).
@@ -164,7 +172,17 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 
 ## 7. 정직·법적 불가침선 (가드 — 문구·UI·테스트)
 
-**한 줄:** dartlab은 *impersonal·일반·재현·반증가능 분석 도구*(Publisher's Exclusion, Lowe v. SEC)로 남는다. 개별 재무상황 *적응*·점 추천 *발행*·자금 *운용* 순간 Advisers Act/FINRA 본체로 넘어간다.
+> **★규제 관할 표(발간표면 → primary 법역 → secondary 법역, 새 파일 0):** 현 §7 한 줄은 *US 권위*(Lowe v. SEC·Advisers Act·FINRA)로만 안전을 정당화하는데, **현 발간표면은 한국어·한국기업·GH Pages** 라 1차 관할은 **한국 자본시장법**이다 — US 권위로만 정당화하면 *확신오정렬*(엉뚱한 법역으로 안전 선언). 관할을 명시:
+>
+> | 발간표면 | primary 법역 (현재) | secondary 법역 (영문/EDGAR 해금 시 *추가*) |
+> |---|---|---|
+> | 한국어 · 한국기업 · GH Pages | **자본시장법 · 유사투자자문업** — 불특정·비개별 일반분석물(impersonal)은 *미신고 허용경계* | (영문/EDGAR 해금 시) **SEC Marketing Rule · FINRA 2210/2241** |
+>
+> 핵심 = **한국 유사투자자문업의 "비개별성"(불특정 다수 대상·개별 자문 아님) 요건과 US Publisher's Exclusion 의 "impersonal" 요건은 *동일 축*** 이다 — 한 가드(개별화·점추천·운용 금지)가 양 법역을 동시에 충족. 따라서 아래 안전/위험 4행은 **양 법역 공통요건**으로 읽는다(어느 한쪽 권위에 종속 아님). ⚠ 데이터락 정정: 영문/EDGAR 발간은 시뮬레이터에서 *데이터 해금* 사안(EDGAR 본문은 §4 viewer 에서 외부 untrusted 데이터로만 소비, 발간표면은 KR 한정)이며, **영문 발간이 열리는 순간 규제표면은 KR→US 가 *추가*(둘 다 적용, KR 대체 아님)** 된다. (직전 백로그가 "09 ④ US lock 옆"이라 했으나 09 ④는 실제로 *BC 위임 별도 commit* 외과 단위이고 별도 "US lock §④"는 09 에 부재 — 본 표가 관할 정본, 09 는 데이터 청산만 소유.)
+
+**한 줄:** dartlab은 *impersonal·일반·재현·반증가능 분석 도구*(Publisher's Exclusion, Lowe v. SEC; **한국 유사투자자문업 비개별성 동일축**)로 남는다. 개별 재무상황 *적응*·점 추천 *발행*·자금 *운용* 순간 Advisers Act/FINRA(US) 및 유사투자자문 신고의무(KR) 본체로 넘어간다.
+
+**안전/위험 4행 = 양 법역(KR 비개별성 · US impersonal) 공통요건** — 한 가드가 둘을 동시 충족:
 
 | 안전 | 위험(가드 차단) |
 |---|---|
@@ -173,7 +191,18 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 | reverseDCF 함의 노출 | 단일 target + Buy/Hold/Sell rating, `signal` 노출 |
 | 확률가중 bear/base/bull | "예상 수익률 N%" 약속 |
 
-가드 구현(테스트 강제): ① **금지어 lint(`valuationPublishLint.py`, 신설·CI배선 완료, 발간 표면 마크다운 한정 — `_BANNED` 6패턴 실측)**(매수의견/매도의견·적극매수·비중확대/축소, strong buy/sell·buy/sell rating, underpriced/overpriced, 목표주가 점추정(NNNNN원), 예상수익률 약속(NN%), 개인화 어휘("귀하의 포트폴리오/상황"·회원님) → 발간 마크다운에서 차단; leaf src 는 미스캔. ⚠"추천"·"검증된전략"·bare Buy/Hold/Sell 단독 어휘는 현 6패턴 미포함 — 위 RISK 표(line 110~113)는 규제 *의도*, lint 은 이 6패턴만 실제 강제) ② 대체 어휘 강제("조건부 perShare 범위"/"현재가 함의"/"시나리오 분석"/"반증 조건") ③ 면책 자동삽입 확장(`publisher.py:169` 기존 "투자 권유 아님"에 "hypothetical scenario analysis, not a forecast" + criteria·assumptions·falsifier 명시 = SEC Marketing Rule·FINRA 2210 hypothetical performance 충족) ④ FINRA 2241 형식 차용(rating 미발행이라 본체 비적용, 형식만: reasonable basis=panel ref+ledger / valuation method 명시=어느 leaf / risks=falsifierLedger). 네 규제가 *모두* 같은 것(criteria/assumptions 노출+risk 명시+reasonable basis)을 요구 → 가정-노출이 곧 규제 안전 + 전문가급.
+가드 구현(테스트 강제): ① **금지어 lint(`valuationPublishLint.py`, 신설·CI배선 완료, 발간 표면 마크다운 한정 — `_BANNED` 6패턴 실측)**(매수의견/매도의견·적극매수·비중확대/축소, strong buy/sell·buy/sell rating, underpriced/overpriced, 목표주가 점추정(NNNNN원), 예상수익률 약속(NN%), 개인화 어휘("귀하의 포트폴리오/상황"·회원님) → 발간 마크다운에서 차단; leaf src 는 미스캔. ⚠"추천"·"검증된전략"·bare Buy/Hold/Sell 단독 어휘는 현 6패턴 미포함 — 위 RISK 표(line 110~113)는 규제 *의도*, lint 은 이 6패턴만 실제 강제) ② 대체 어휘 강제("조건부 perShare 범위"/"현재가 함의"/"시나리오 분석"/"반증 조건") ③ **필수고지 *존재* 기계강제(필수고지 키 4종 표 — 산문 대신 박제, 아래)** ④ FINRA 2241 형식 차용(rating 미발행이라 본체 비적용, 형식만: reasonable basis=panel ref+ledger / valuation method 명시=어느 leaf / risks=falsifierLedger). 네 규제가 *모두* 같은 것(criteria/assumptions 노출+risk 명시+reasonable basis)을 요구 → 가정-노출이 곧 규제 안전 + 전문가급.
+
+> **★③ 면책 산문 → 필수고지 키 4종 표 + *존재* 어서션(규제 red 차단, 새 파일 0 — 기존 가드 확장):** 현 `valuationPublishLint.py` 는 *금지어 negative-scan* 만 한다(`_BANNED` 6패턴 — *없어야 할 것*). 그러나 **있어야 할 고지가 누락**되면 금지어 0건이라 lint green 이어도 *규제 red*(SEC Marketing Rule·FINRA 2210 은 hypothetical 한정고지·가정노출·반증·산정방법을 *요구*) — negative-only lint 의 false-green 구멍. ⟹ 같은 guard 에 **고지-*존재* 어서션**을 additive 로 추가한다(새 파일 0 — `valuationPublishLint.py` 확장): `reportType: simulation` 발간표면에 아래 4키가 *모두 present* 아니면 `--strict` red.
+>
+> | 필수고지 키 | 내용 | 규제 근거 | 현 상태 |
+> |---|---|---|---|
+> | (a) `hypothetical` | hypothetical/scenario 한정고지 — "scenario analysis, *not a forecast*" | SEC Marketing Rule·FINRA 2210 hypothetical performance | ⚠ 신설(현 lint 미검사) |
+> | (b) `asOf+ledger` | asOf 기준시점 + assumptions ledger 링크 노출 | criteria·assumptions 노출 요건 | ⚠ 신설 |
+> | (c) `falsifier` | falsifier(반증 조건) 노출 — `thesisKillChain` ledger 링크 | risks 명시(FINRA 2241 risks) | ⚠ 신설 |
+> | (d) `valuationMethod` | 산정방법 라벨 — 어느 leaf(어느 DCF/닻)로 산정했는지 | reasonable basis·valuation method 명시 | ⚠ 신설 |
+>
+> 구현 = `valuationPublishLint.py` 에 `_REQUIRED_DISCLOSURE` 4키 정규식 + `_assertPresence(md)` (4키 중 하나라도 미매치 시 `[FAIL] 필수고지 누락` → `--strict` exit 1). **`publisher.py:169` 면책 emit 구조 = 4키 명세** — 현 `disclaimer` 단일 산문(line 169, generic "투자 권유 아님" + "자동 생성"[⚠ 별건: 주체중립 위반, 본 백로그 범위 밖])을 `reportType: simulation` 발간 시 **4키를 모두 emit** 하는 구조로 명세(a hypothetical 한정 + b asOf·ledger 링크 + c falsifier 링크 + d valuationMethod 라벨). T1↔T2 자동발화 계약(09 §10.1 FIX-2)과 동형 — publisher emit 키 ↔ lint 매치 키 바이트 동일. ⚠ **현재 미구현(design + 졸업 AC)** — 현 `valuationPublishLint.py` 는 금지어 6패턴만 실측, 존재 어서션·`publisher.py` 4키 emit 은 T2 발간표면 신설(Phase 6) 동행 신설. 졸업 AC = **"reportType:simulation 발간표면에 4키 고지 누락 0(금지어 0 + 고지 4/4 동시)"**. 잠정 — 4키 정규식·publisher emit 형식은 T2 표면 ship 시 실측 확정.
 
 ---
 
