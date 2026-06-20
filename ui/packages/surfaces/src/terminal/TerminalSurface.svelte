@@ -372,7 +372,7 @@
 					<!-- 백테스트 모드 — 좌패널 전체가 조작 패널(스코프·프리셋버튼·커스텀·검증). LeftRail(매크로·스크리너) 교체. -->
 					<StrategyDock ctl={chartCtl} {lang} code={co.code} name={co.name.kr} fill onClose={() => { chartCtl.clearBtAll(); chartCtl.btReportMode = false; chartCtl.btDockOpen = false; }} />
 				{:else}
-					<LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} {sectorFilter} {bottomTab} onSectorFilter={handleSectorFilter} onBottomTab={(tab) => (bottomTab = tab)} />
+					<LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} onFilingSearch={() => (filingSearchOpen = true)} {sectorFilter} {bottomTab} onSectorFilter={handleSectorFilter} onBottomTab={(tab) => (bottomTab = tab)} />
 				{/if}
 			</div>
 			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} onMacroLens={openMacroLens} onCoMovers={(rows) => (macroCoMovers = rows)} /></div>
@@ -381,9 +381,6 @@
 
 		<footer class="statusBar">
 			<span class="sbItem"><b class="tAmber">⌘K</b> {lang === 'en' ? 'JUMP' : '종목점프'}</span>
-			<button class="sbItem sbSrcBtn" onclick={() => (filingSearchOpen = true)} title={lang === 'en' ? 'global filing full-text search' : '전역 공시 본문 검색'}>
-				<b class="tAmber">⌘⇧F</b> {lang === 'en' ? 'FILINGS' : '공시검색'}
-			</button>
 			<span class="sbItem"><b class="tAmber">/</b> {lang === 'en' ? 'FOCUS' : '검색창'}</span>
 			<button class="sbItem sbSrcBtn" onclick={() => (sourcesOpen = true)} title={lang === 'en' ? 'data sources & licenses' : '데이터 출처·라이선스'}>
 				<b class="tAmber">ⓘ</b> {lang === 'en' ? 'SOURCES' : '데이터 출처'}

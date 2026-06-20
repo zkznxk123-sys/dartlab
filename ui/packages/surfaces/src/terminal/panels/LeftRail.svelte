@@ -24,12 +24,13 @@
 		onPick: (code: string) => void;
 		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 		onIndustry?: (id: string) => void; // 산업 sweep 행 클릭 → IndustryDialog
+		onFilingSearch?: () => void; // 공시 본문 검색(⌘⇧F) 다이얼로그 열기 — 시장공시 피드 위 트리거
 		sectorFilter: string;
 		bottomTab: 'screener' | 'watch';
 		onSectorFilter: (id: string) => void;
 		onBottomTab: (tab: 'screener' | 'watch') => void;
 	}
-	let { eng, lang, active, onPick, onMacroLens, onIndustry, sectorFilter, bottomTab, onSectorFilter, onBottomTab }: Props = $props();
+	let { eng, lang, active, onPick, onMacroLens, onIndustry, onFilingSearch, sectorFilter, bottomTab, onSectorFilter, onBottomTab }: Props = $props();
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
@@ -133,6 +134,14 @@
 		<span class="swNote" title={lang === 'en' ? 'x = margin · y = growth · ring = current · equal-weight · not KRX' : '가로=수익 · 세로=성장 · ◯=현재 산업 · 상장 동일가중 · KRX 아님'}>{lang === 'en' ? 'x margin · y growth ⓘ' : '가로 수익·세로 성장 ⓘ'}</span>
 	</div>
 </Panel>
+
+<!-- 공시 본문 검색 트리거 — 시장공시 피드 바로 위(읽기↔찾기 한 쌍). 클릭=⌘⇧F 다이얼로그(FilingSearchDialog
+     재사용·새 표면 0). 종목 점프는 상단 cmdBar(헤더) 담당, 여긴 *시장 전체 공시 본문* BM25. -->
+<button class="feedSearchBar" onclick={() => onFilingSearch?.()} title={lang === 'en' ? 'global filing full-text search (⌘⇧F)' : '전역 공시 본문 검색 (⌘⇧F)'}>
+	<span class="feedSearchIcon">⌕</span>
+	<span class="feedSearchPh">{lang === 'en' ? 'Search filing text' : '공시 본문 검색'}</span>
+	<kbd class="feedSearchKbd">⌘⇧F</kbd>
+</button>
 
 <!-- 시장 공시 피드 — 산업 아래 *전상장사* 최근 3개월 수시공시. 우측 단일기업/좌측 워치(내 종목)와 다른
      시장 전체 멘탈모델. 고정높이 섹션(내부 스크롤) — fillCol 은 아래 eQuant(스크리너) 단독 유지. -->

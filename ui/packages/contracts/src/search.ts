@@ -46,4 +46,6 @@ export interface SearchPort {
 	query(input: SearchQuery): Promise<SearchResultPage>;
 	/** 전역 공시 본문 검색 — 질의어 postings + top-k meta 만 HTTP range fetch(서버리스·exact BM25). */
 	queryFilings(input: FilingSearchQuery): Promise<FilingHit[]>;
+	/** 검색 인덱스 빌드시점(ISO) — as-of 정직 라벨용. manifest 만 읽어 콜드 stats 강제 안 함. 미존재는 null. */
+	indexBuiltAt(): Promise<string | null>;
 }

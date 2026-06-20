@@ -57,6 +57,6 @@ describe('loadMarketFeed', () => {
 			])
 		);
 		expect(out.map((f) => f.rceptNo)).toEqual(['A', 'D']); // 입력(bake rcept_dt desc) 순서 보존, 재정렬 없음
-		expect(out[0].reportNm).toBe('최대주주변경'); // keep-first
+		expect(out[0]?.reportNm).toBe('최대주주변경'); // keep-first
 	});
 });

@@ -79,26 +79,33 @@ export function createSearchPort(core: DataCore, opts: FilingSearchOptions = {})
 	const prefix = tier === 'full' ? 'dart/contentIndex' : `dart/contentIndex/${tier}`;
 	const manifestPath = `${prefix}/manifest.json`;
 	let statsP: Promise<SearchStats> | null = null;
+	let manifestP: Promise<{ resolve: (name: string) => string; builtAt: string | null }> | null = null;
 
-	// flat `manifest.json`(pointer)을 1회 읽어 fileSources(파일명→staging 경로)로 resolve. 부재 시 flat fallback.
-	async function resolveFile(): Promise<(name: string) => string> {
-		let fileSources: Record<string, string> = {};
-		try {
-			const manifest = await core.request<{ fileSources?: Record<string, string> }>({
-				origin: 'hf',
-				path: manifestPath,
-				parse: (r) => r.json()
-			});
-			if (manifest && typeof manifest.fileSources === 'object' && manifest.fileSources) fileSources = manifest.fileSources;
-		} catch {
-			// manifest 부재(404)·파싱 실패 → flat fallback(전환기/직접배포 호환). 파일 fetch 가 정직히 실패한다.
-		}
-		return (name: string) => fileSources[name] ?? `${prefix}/${name}`;
+	// flat `manifest.json`(pointer)을 *1회* 읽어 fileSources(파일명→staging 경로) resolve + builtAt(인덱스
+	// 빌드시점, as-of 라벨용) 캐시. 부재 시 flat fallback. core.request 가 캐시하므로 stats(~10MB)와 무관하게
+	// 경량(manifest 만)으로 builtAt 만 떼올 수 있다 — indexBuiltAt 는 콜드 stats 로드를 강제하지 않는다.
+	function loadManifest(): Promise<{ resolve: (name: string) => string; builtAt: string | null }> {
+		return (manifestP ??= (async () => {
+			let fileSources: Record<string, string> = {};
+			let builtAt: string | null = null;
+			try {
+				const manifest = await core.request<{ fileSources?: Record<string, string>; builtAt?: string }>({
+					origin: 'hf',
+					path: manifestPath,
+					parse: (r) => r.json()
+				});
+				if (manifest && typeof manifest.fileSources === 'object' && manifest.fileSources) fileSources = manifest.fileSources;
+				if (manifest && typeof manifest.builtAt === 'string') builtAt = manifest.builtAt;
+			} catch {
+				// manifest 부재(404)·파싱 실패 → flat fallback(전환기/직접배포 호환). 파일 fetch 가 정직히 실패한다.
+			}
+			return { resolve: (name: string) => fileSources[name] ?? `${prefix}/${name}`, builtAt };
+		})());
 	}
 
 	// 단일 main 세그먼트(compact-only — delta 폐기). stats blob = 콜드 1회 캐시. 통파일 hf(프록시), 조각 hfRange.
 	async function loadStats(): Promise<SearchStats> {
-		const resolve = await resolveFile();
+		const { resolve } = await loadManifest();
 		const ab = (name: string) => core.request<ArrayBuffer>({ origin: 'hf', path: resolve(name), parse: (r) => r.arrayBuffer() });
 		const [stemDict, termsBuf, dlBuf, moBuf, meta] = await Promise.all([
 			core.request<Record<string, number>>({ origin: 'hf', path: resolve('main_stems.json'), parse: (r) => r.json() }),
@@ -187,8 +194,13 @@ export function createSearchPort(core: DataCore, opts: FilingSearchOptions = {})
 		);
 	}
 
+	// 인덱스 빌드시점(as-of 라벨) — manifest 만 읽어 builtAt 반환(콜드 stats ~10MB 강제 안 함). 부재 시 null.
+	async function indexBuiltAt(): Promise<string | null> {
+		return (await loadManifest()).builtAt;
+	}
+
 	const companyIndexUnwired = (): never => {
 		throw new Error('[search] universe/query(회사 인덱스)는 별도 feature(census A-11) — 이 경로는 미배선. queryFilings(공시 본문)만 구현됨.');
 	};
-	return { universe: companyIndexUnwired, query: companyIndexUnwired, queryFilings };
+	return { universe: companyIndexUnwired, query: companyIndexUnwired, queryFilings, indexBuiltAt };
 }

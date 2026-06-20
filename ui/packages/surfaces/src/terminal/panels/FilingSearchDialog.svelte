@@ -28,6 +28,7 @@
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 	const recent = $state<string[]>(readRecent());
+	let builtAt = $state<string | null>(null); // 인덱스 빌드시점(as-of) — manifest 만 읽어 콜드 stats 무관
 
 	function readRecent(): string[] {
 		if (typeof localStorage === 'undefined') return [];
@@ -140,6 +141,14 @@
 	$effect(() => {
 		inputEl?.focus();
 	});
+
+	// 인덱스 as-of 라벨 — 다이얼로그 열릴 때 manifest builtAt 만 경량 조회(콜드 stats ~10MB 강제 안 함).
+	$effect(() => {
+		rt.search
+			.indexBuiltAt()
+			.then((b) => (builtAt = b))
+			.catch(() => {});
+	});
 </script>
 
 <div class="scrimWrap" role="presentation" onclick={onClose}>
@@ -154,7 +163,7 @@
 	>
 		<div class="scrHead">
 			<span class="scrTitle">{lang === 'en' ? 'FILING SEARCH' : '공시 검색'}</span>
-			<span class="fsSub">{lang === 'en' ? 'global full-text · BM25' : '전역 본문 · BM25'}</span>
+			<span class="fsSub">{lang === 'en' ? 'global full-text · BM25' : '전역 본문 · BM25'}{#if builtAt}<span class="fsAsOf">{' · '}{lang === 'en' ? 'index ' : '인덱스 '}~{builtAt.slice(0, 10)}</span>{/if}</span>
 			<span class="fsKbd">⌘⇧F</span>
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>

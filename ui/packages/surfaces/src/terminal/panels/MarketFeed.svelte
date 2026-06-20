@@ -44,6 +44,9 @@
 		classified.filter((x) => (cat === 'all' || x.cat === cat) && (!(instOnly && showInstChip) || x.inst))
 	);
 	const shown = $derived(filtered.slice(0, CAP));
+	// 데이터 as-of — bake 가 rcept_dt 내림차순이라 rows[0] 이 최신. 90일 rolling 인데 데이터가 며칠
+	// stale 일 수 있어 '기준일'을 정직 표면화(데이터 max ≠ today 가능). 재정렬 0(rows[0] O(1)).
+	const asOf = $derived(rows.length ? rows[0].rceptDate : '');
 
 	$effect(() => {
 		let cancelled = false;
@@ -72,7 +75,10 @@
 	className="eMarketFeed"
 	prov="real"
 	title={{ kr: '시장 공시', en: 'MARKET FILINGS' }}
-	sub={{ kr: '전상장사 · 최근 3개월', en: 'all listed · 3mo' }}
+	sub={{
+		kr: asOf ? `전상장사 · ~${asOf} 기준` : '전상장사 · 최근 3개월',
+		en: asOf ? `all listed · as-of ${asOf}` : 'all listed · 3mo'
+	}}
 	flush
 >
 	<!-- 카테고리 칩 스트립 — 가로 스크롤. 활성 칩 amber underline + 전수 카운트 배지 -->
