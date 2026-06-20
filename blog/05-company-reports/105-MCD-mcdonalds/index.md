@@ -21,7 +21,7 @@ ai:
   strengths: ["연결 OPM 약 46% — 식당 직영업이 낼 수 없는, 임대·로열티 모델의 지문", "가맹 약 95% + 임대료>로열티(2024 10.0B>5.6B) — 더 큰 다리가 부동산(10-K 외부)", "2020 골에서 2021 사상 최고 영업이익(10.36B)으로 V자 회복", "영업현금흐름 10.55B > 순이익 8.56B — 계약성 현금의 두께"]
   weaknesses: ["진짜 업(임대인)이 연결 손익 한 줄에 안 나옴 — franchised vs company-operated 분해는 10-K 외부", "'불황 무풍 임대인' 클리셰는 거짓 — 2020 영업이익 -19.3%로 매출보다 더 빠짐", "고마진은 가맹점에 비용·리스크를 떠넘긴 구조 — 가맹점 수익성이 본사 줄기의 전제", "지역 세그먼트·부동산 포트폴리오 규모는 연결로 증명 불가(외부)"]
   keyMetrics: {revenue: 26.9, opm: 46, roe: 0, fcf: 7}
-  dataAsOf: "2026-06-13"
+  dataAsOf: "2026-06-20"
 ---
 
 <script>
@@ -29,7 +29,7 @@ import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
-> **데이터 기준**: 2026-06-13 dartlab 실측 — McDonald's(MCD) **미국 연결(USD)** 기준, 분기 데이터를 연간으로 합산. 가맹 비중·임대료/로열티 분해·부동산 포트폴리오는 연결 손익에 별도로 안 나오므로 **10-K(외부 인용)**로 표기. ※대차대조표 항목은 매핑이 불안정해 인용에 주의.
+> **데이터 기준**: 2026-06-20 dartlab 실측 + McDonald's FY2025 Form 10-K + Q1 2026 Form 10-Q — McDonald's(MCD) **미국 연결(USD)** 기준, 분기 데이터를 연간으로 합산. 가맹 비중·임대료/로열티 분해·부동산 포트폴리오는 연결 손익에 별도로 안 나오므로 **10-K·10-Q 공식 공시 보강**으로 표기. ※대차대조표 항목은 매핑이 불안정해 인용에 주의.
 >
 > **핵심 숫자**: 매출 **$26.9B** · 영업이익 **$12.4B** (영업이익률 **약 46%**) · 당기순이익 **$8.6B** · 영업현금흐름 **$10.6B** · 연결 OPM 2019 **43.0%** → 2025 **46.1%** (2020 코로나 38.1% 골)
 >
@@ -195,7 +195,7 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 
 ## 검증표
 
-본문 인용 수치를 dartlab 호출과 결과로 검증한다. 외부 출처(10-K 가맹·임대료/로열티)는 분리 표기. 📅 dartlab 실측 2026-06-13 · McDonald's(MCD) 미국 연결(USD)·분기 합산 기준.
+본문 인용 수치를 dartlab 호출과 결과로 검증한다. 공시 보강 항목(10-K·10-Q 가맹·임대료/로열티)은 분리 표기. 📅 dartlab 실측 2026-06-20 · McDonald's(MCD) 미국 연결(USD)·분기 합산 기준.
 
 | 본문 수치 | 출처 / 호출 | 결과 |
 |---|---|---|
@@ -204,11 +204,14 @@ c.select("CF", ["영업활동현금흐름"], freq="Q")
 | 2020 매출 -8.9% vs 영업이익 -19.3% (이익이 더 빠짐) | `c.select("IS",[...])` 2019→2020 | ✓ 실측 |
 | 2021 영업이익 10.36B = 사상 최고(2019 9.07B 상회), 골 대비 +42% | `c.select("IS",["영업이익"])` | ✓ 실측 |
 | 영업현금흐름 2025 10.55B = 순이익 8.56B의 1.23배 | `c.select("CF",["영업활동현금흐름"])` | ✓ 실측 |
-| 매장 약 95% franchised | [MCD 10-K (SEC)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000063908&type=10-K) | 외부 인용 |
-| 2024 가맹수익 15.7B 중 임대료 10.0B > 로열티 5.6B | [MCD 10-K (SEC)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000063908&type=10-K) | 외부 인용 |
-| 2020 가맹점 임대료 유예·로열티 감면 | [MCD IR](https://corporate.mcdonalds.com/corpmcd/investors.html) · 회사 공시 | 외부 인용 |
-| 가맹 모델 구조(franchising) | [MCD 프랜차이즈](https://www.mcdonalds.com/us/en-us/about-us/franchising.html) · [Reuters](https://www.reuters.com/) · [CNBC](https://www.cnbc.com/) | 외부 인용 |
+| 매장 약 95% franchised: 2025년 43,317 / 45,356개 = 95.5% | [McDonald's FY2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/mcd-20251231.htm) | 공식 공시 |
+| 2025 가맹수익 16.548B 중 임대료 10.442B > 로열티 6.018B | [McDonald's FY2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/mcd-20251231.htm) | 공식 공시 |
+| Q1 2026 가맹수익 4.007B 중 임대료 2.505B > 로열티 1.483B | [McDonald's 2026 Q1 Form 10-Q](https://www.sec.gov/Archives/edgar/data/63908/000006390826000051/mcd-20260331.htm) | 공식 공시 |
+| Q1 2026 총매출 6.517B / 영업이익 2.953B / 순이익 1.983B | [McDonald's 2026 Q1 Form 10-Q](https://www.sec.gov/Archives/edgar/data/63908/000006390826000051/mcd-20260331.htm) | 공식 공시 |
+| Q1 2026 매장 45,699개 중 franchised 43,672개 = 95.6% | [McDonald's 2026 Q1 Form 10-Q](https://www.sec.gov/Archives/edgar/data/63908/000006390826000051/mcd-20260331.htm) | 공식 공시 |
+| 2020 가맹점 임대료 유예·로열티 감면 | [McDonald's FY2020 Form 10-K](https://www.sec.gov/Archives/edgar/data/63908/000006390821000013/mcd-20201231.htm) | 공식 공시 |
+| 가맹 모델 구조(franchising): rent and royalties based on sales, minimum rent payments | [McDonald's FY2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/mcd-20251231.htm) | 공식 공시 |
 | 1955 '부동산=목줄' 통제 가설 | 일화/해석 (관찰 불가 동기) | 컬러/주의 |
 | BS(대차대조표) 매핑 불안정 — 인용 주의 | dartlab 데이터 한계 | 주의/제외 |
 
-본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 가맹 비중·임대료/로열티 분해·부동산 포트폴리오는 dartlab 연결로 증명되지 않으며 10-K 외부 인용임을 명시한다.
+본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 가맹 비중·임대료/로열티 분해·부동산 포트폴리오는 dartlab 연결로 증명되지 않으며 10-K·10-Q 공식 공시 보강 항목임을 명시한다.
