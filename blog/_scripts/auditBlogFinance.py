@@ -44,6 +44,10 @@ def normalize(actual: float | None, unit: str) -> float | None:
     """실측값(원) → 표시 단위로 정규화."""
     if actual is None:
         return None
+    if unit == "$B":
+        return actual / 1e9
+    if unit == "$M":
+        return actual / 1e6
     if unit == "조":
         return actual / 1e12
     if unit == "억":
@@ -55,6 +59,10 @@ def normalize(actual: float | None, unit: str) -> float | None:
 
 def detectUnit(text: str) -> str:
     """표 단위 텍스트에서 추출. 우선순위: 가장 가까운 단위 키워드."""
+    if "$B" in text or "USD B" in text or "billion" in text.lower():
+        return "$B"
+    if "$M" in text or "USD M" in text or "million" in text.lower():
+        return "$M"
     # 가장 가까운 단위 (text 끝쪽 = 표에 가까움)
     last_eok = max(text.rfind("억원"), text.rfind("(억"))
     last_jo = max(text.rfind("조원"), text.rfind("(조"))
@@ -130,6 +138,21 @@ def findFinanceTables(text: str):
     return out
 
 
+def annualValues(row: dict) -> dict[str, float]:
+    annual = {k: v for k, v in row.items() if k.isdigit() and len(k) == 4}
+    if annual:
+        return annual
+
+    grouped: dict[str, float] = {}
+    for key, value in row.items():
+        m = re.fullmatch(r"(20\d{2})Q[1-4]", str(key))
+        if not m or value is None:
+            continue
+        year = m.group(1)
+        grouped[year] = grouped.get(year, 0.0) + float(value)
+    return grouped
+
+
 def auditPost(code: str, path: str):
     text = Path(path).read_text(encoding="utf-8")
     tables = findFinanceTables(text)
@@ -163,7 +186,7 @@ def auditPost(code: str, path: str):
         actual = {}
         for r in df.to_dicts():
             lbl = r.get(labelCol)
-            actual[lbl] = {k: v for k, v in r.items() if k.isdigit() and len(k) == 4}
+            actual[lbl] = annualValues(r)
 
         for label, year_values in rows:
             if label not in actual:
