@@ -200,20 +200,25 @@ function quarterWindow(tfQ: TerminalFinance, want = 8): QWindow | null {
 	if (n < 2) return null;
 	const opmFull = tfQ.ratios.find((r) => r.key === 'opm')?.values ?? [];
 	const revFull = tfQ.statements.IS.find((r) => r.key === 'revenue')?.values ?? [];
-	// 기준 범위 = 후행 2분기를 제외한 몸통의 영업이익률·매출 범위
+	// 기준 범위 = 후행 2분기를 제외한 몸통의 영업이익률·매출 범위. 허용 버퍼는 *몸통 변동성(MAD)*
+	// 기반 — 저마진 업종은 빡빡하게, 변동 큰 업종은 느슨하게(고정 ±12%p 매직넘버 제거, 종목 무관 규율).
 	const bodyEnd = Math.max(1, n - 2);
 	const bodyOpm = finite(opmFull.slice(0, bodyEnd));
 	const bodyRev = finite(revFull.slice(0, bodyEnd));
 	const opmMax = bodyOpm.length ? Math.max(...bodyOpm) : Infinity;
 	const opmMin = bodyOpm.length ? Math.min(...bodyOpm) : -Infinity;
 	const revMax = bodyRev.length ? Math.max(...bodyRev) : Infinity;
+	const medOf = (a: number[]): number => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor((s.length - 1) / 2)] : 0; };
+	const opmMed = bodyOpm.length ? medOf(bodyOpm) : 0;
+	const opmMad = bodyOpm.length ? medOf(bodyOpm.map((x) => Math.abs(x - opmMed))) : 0;
+	const buf = Math.min(25, Math.max(8, 3 * opmMad)); // %p — 몸통 범위 밖 추가 허용폭
 	const excluded: { period: string; opm: Num }[] = [];
 	let end = n; // exclusive 상한
 	for (let i = n - 1; i >= Math.max(1, n - 2); i--) {
 		if (end !== i + 1) break; // 연속 후행만
 		const o = opmFull[i];
 		const r = revFull[i];
-		const badOpm = o != null && Number.isFinite(o) && ((o as number) > opmMax + 12 || (o as number) < opmMin - 12);
+		const badOpm = o != null && Number.isFinite(o) && ((o as number) > opmMax + buf || (o as number) < opmMin - buf);
 		const badRev = r != null && Number.isFinite(r) && (r as number) > revMax * 1.4;
 		if (badOpm || badRev) {
 			excluded.unshift({ period: P[i], opm: o });
@@ -251,9 +256,10 @@ function annualWindow(tfA: TerminalFinance, want = 6): QWindow | null {
 	return { idx, periods: idx.map((i) => P[i]), pick, yoy: (s) => pick(yoyFull(s)), qoq: (s) => pick(yoyFull(s)), excluded: [] };
 }
 
-// 흐름표 — 계정 × 기간 + YoY 열. 금액(조) 자동 스케일. flow 계정 전용. 분기/연간 공용.
+// 흐름표 — 계정 × 기간 + YoY 열 (+ 선택 TTM 열). 금액(조) 자동 스케일. flow 계정 전용. 분기/연간 공용.
+// ttm: 윈도 마지막 *정상* 분기에 정렬된 TTM(직전 4분기 합) 값 — 제외된 오염분기를 포함하지 않게 호출부에서 정렬.
 function quarterFlowTable(
-	rows: { label: string; values: Num[]; yoyOf?: Num[] }[],
+	rows: { label: string; values: Num[]; yoyOf?: Num[]; ttm?: Num }[],
 	qw: QWindow,
 	labelHeader: string,
 	caption: string,
@@ -261,7 +267,8 @@ function quarterFlowTable(
 ): ReportBlock | null {
 	const present = rows.filter((r) => coverage(qw.pick(r.values)) >= 2);
 	if (!present.length) return null;
-	const allVals = present.flatMap((r) => qw.pick(r.values));
+	const hasTtm = present.some((r) => r.ttm != null && Number.isFinite(r.ttm));
+	const allVals = present.flatMap((r) => qw.pick(r.values)).concat(hasTtm ? present.map((r) => r.ttm ?? null) : []);
 	const { unit, scale } = scaleAmt(allVals);
 	const data = present.map((r) => {
 		const rec: Record<string, string> = { [labelHeader]: r.label };
@@ -269,13 +276,14 @@ function quarterFlowTable(
 		qw.periods.forEach((p, i) => {
 			rec[p] = fmtScaled(w[i] ?? null, scale);
 		});
+		if (hasTtm) rec['TTM'] = r.ttm != null && Number.isFinite(r.ttm) ? fmtScaled(r.ttm, scale) : '-';
 		// YoY = 최신 분기 전년동기 대비(열 하나로 압축 — 표 폭 관리)
 		const yseries = qw.yoy(r.yoyOf ?? r.values);
 		const lastY = lastNonNull(yseries);
 		rec['YoY'] = lastY != null ? fmtPctSigned(lastY) : '-';
 		return rec;
 	});
-	return { type: 'table', label: `${caption} (단위: ${unit} · YoY=${yoyLabel})`, data };
+	return { type: 'table', label: `${caption} (단위: ${unit}${hasTtm ? ' · TTM=직전 4분기 합(최신 정상분기 정렬)' : ''} · YoY=${yoyLabel})`, data };
 }
 
 function amtTable(
@@ -325,11 +333,14 @@ function buildEarningsPower(
 	tfx: TerminalFinance, // 본문 시간축 뷰(분기 우선)
 	win: QWindow, // 본문 윈도(분기 8개 또는 연간 6개)
 	tfA: TerminalFinance | null, // 연간 보충용
+	tfT: TerminalFinance | null, // TTM(직전 4분기 합) — 계절성 평탄화 절대수준
 	kind: '분기' | '연간',
 	ctx: { corpName: string; peer: PeerCtx | null }
 ): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } {
 	const { corpName, peer } = ctx;
 	const isRow = (k: string): Num[] => tfx.statements.IS.find((r) => r.key === k)?.values ?? [];
+	// TTM 값을 윈도 마지막 *정상* 분기에 정렬(제외된 오염분기 포함 방지).
+	const ttmAt = (k: string): Num => { if (!tfT) return null; const idx = tfT.periods.indexOf(win.periods[win.periods.length - 1]); if (idx < 0) return null; const s = tfT.statements.IS.find((r) => r.key === k)?.values ?? []; return s[idx] ?? null; };
 	const cfRow = (k: string): Num[] => tfx.statements.CF.find((r) => r.key === k)?.values ?? [];
 	const bsRow = (k: string): Num[] => tfx.statements.BS.find((r) => r.key === k)?.values ?? [];
 	const rRow = (k: string): Num[] => tfx.ratios.find((r) => r.key === k)?.values ?? [];
@@ -351,26 +362,29 @@ function buildEarningsPower(
 	const sections: ReportSection[] = [];
 	const findings: ReportModel['keyFindings'] = [];
 
-	// ── S1 분기 손익 추이 (간판) ──
+	// ── S1 분기 손익 추이 (간판) — 분기 + TTM(직전 4분기 합, 계절성 평탄화) ──
 	const isTbl = quarterFlowTable(
 		[
-			{ label: '매출액', values: isRow('revenue') },
-			{ label: '매출원가', values: isRow('costOfSales') },
-			{ label: '매출총이익', values: isRow('grossProfit') },
-			{ label: '판매관리비', values: isRow('sga') },
-			{ label: '영업이익', values: isRow('operatingIncome') },
-			{ label: '당기순이익', values: isRow('netIncome') }
+			{ label: '매출액', values: isRow('revenue'), ttm: ttmAt('revenue') },
+			{ label: '매출원가', values: isRow('costOfSales'), ttm: ttmAt('costOfSales') },
+			{ label: '매출총이익', values: isRow('grossProfit'), ttm: ttmAt('grossProfit') },
+			{ label: '판매관리비', values: isRow('sga'), ttm: ttmAt('sga') },
+			{ label: '영업이익', values: isRow('operatingIncome'), ttm: ttmAt('operatingIncome') },
+			{ label: '당기순이익', values: isRow('netIncome'), ttm: ttmAt('netIncome') }
 		],
 		win,
 		'손익 항목',
 		`${kind} 손익 추이`,
 		`최신 ${yoyTag}比`
 	);
+	const ttmRev = ttmAt('revenue');
+	const ttmOp = ttmAt('operatingIncome');
 	const opmRead = readTrend(win.pick(rRow('opm')), true);
 	const opmW = finite(win.pick(rRow('opm')));
 	const opmLo = opmW.length ? Math.min(...opmW) : null;
 	const opmHi = opmW.length ? Math.max(...opmW) : null;
-	const s1lead = `${corpName}의 최근 ${kind}(${lastP}) 매출은 ${fmtAmt1(revLast)}로 ${yoyTag} 대비 ${fmtPctSigned(revYoyLast)}, 영업이익률 ${fmtPct(opmLast)}·순이익률 ${fmtPct(npmLast)}입니다. 아래 표는 매출에서 영업이익·순이익으로 이어지는 손익 구조를 ${kind}별로 보여줍니다(YoY는 ${yoyTag} 대비, 계절성을 걷어낸 비교).`;
+	const ttmClause = ttmRev != null ? ` 직전 4분기 합(TTM)으로는 매출 ${fmtAmt1(ttmRev)}·영업이익 ${fmtAmt1(ttmOp)}로, 계절성을 평탄화한 연환산 체력은 이 수준입니다.` : '';
+	const s1lead = `${corpName}의 최근 ${kind}(${lastP}) 매출은 ${fmtAmt1(revLast)}로 ${yoyTag} 대비 ${fmtPctSigned(revYoyLast)}, 영업이익률 ${fmtPct(opmLast)}·순이익률 ${fmtPct(npmLast)}입니다.${ttmClause} 아래 표는 매출에서 영업이익·순이익으로 이어지는 손익 구조를 ${kind}별로 보여줍니다(TTM 열은 계절성 평탄화 절대수준, YoY는 ${yoyTag} 대비).`;
 	const s1: ReportBlock[] = [{ type: 'text', text: s1lead }];
 	if (isTbl) s1.push(isTbl);
 	sections.push({ key: 'incomeStructure', title: `${kind} 손익 추이 -- 무엇으로 얼마를 버는가`, sourceEngine: 'analysis', blocks: s1, emph: true });
@@ -475,10 +489,12 @@ function buildEarningsPower(
 		const pay = win.pick(bsRow('payables'));
 		const revW = win.pick(isRow('revenue'));
 		const cogsW = win.pick(isRow('costOfSales'));
+		// 평균잔액((기초+기말)/2) — BS 시점값을 flow 분모에 맞춰 평균(DuPont avgDen 규율과 일관, 기관 지적).
+		const avgBal = (s: Num[], i: number): Num => { const c = s[i]; if (c == null || !Number.isFinite(c)) return null; const p = i > 0 ? s[i - 1] : null; return p != null && Number.isFinite(p) ? ((c as number) + (p as number)) / 2 : (c as number); };
 		const dayR = (nv: Num, dv: Num): Num => (nv != null && dv != null && (dv as number) > 0 ? +(((nv as number) / (dv as number)) * days).toFixed(0) : null);
-		const dso = revW.map((_, i) => dayR(rcv[i], revW[i]));
-		const dio = cogsW.map((_, i) => dayR(inv[i], cogsW[i]));
-		const dpo = cogsW.map((_, i) => dayR(pay[i], cogsW[i]));
+		const dso = revW.map((_, i) => dayR(avgBal(rcv, i), revW[i]));
+		const dio = cogsW.map((_, i) => dayR(avgBal(inv, i), cogsW[i]));
+		const dpo = cogsW.map((_, i) => dayR(avgBal(pay, i), cogsW[i]));
 		const cccS = dso.map((_, i) => (dso[i] != null && dpo[i] != null ? +((dso[i] as number) + ((dio[i] as number) ?? 0) - (dpo[i] as number)).toFixed(0) : null));
 		const cccTbl = reportTable(
 			P,
@@ -588,6 +604,7 @@ function buildLiquidity(
 	win: QWindow,
 	kind: '분기' | '연간',
 	tfA: TerminalFinance | null, // 자본배분(연간)·배당충당
+	tfT: TerminalFinance | null, // TTM(직전 4분기 합)
 	ctx: { corpName: string; peer: PeerCtx | null },
 	debt: { ladder: { buckets: Num[]; shortTerm: Num; year: string } | null } | null,
 	sr: ShareholderReturnYear[] | null
@@ -595,6 +612,9 @@ function buildLiquidity(
 	const { corpName, peer } = ctx;
 	const isRow = (k: string): Num[] => tfx.statements.IS.find((r) => r.key === k)?.values ?? [];
 	const cfRow = (k: string): Num[] => tfx.statements.CF.find((r) => r.key === k)?.values ?? [];
+	// TTM 값 — 윈도 마지막 정상 분기 정렬(제외된 오염분기 미포함).
+	const ttmCfAt = (k: string): Num => { if (!tfT) return null; const idx = tfT.periods.indexOf(win.periods[win.periods.length - 1]); if (idx < 0) return null; const s = tfT.statements.CF.find((r) => r.key === k)?.values ?? []; return s[idx] ?? null; };
+	const ttmFcfV = ((): Num => { if (!tfT) return null; const idx = tfT.periods.indexOf(win.periods[win.periods.length - 1]); if (idx < 0) return null; const op = tfT.statements.CF.find((r) => r.key === 'cfOperating')?.values?.[idx]; const cx = tfT.statements.CF.find((r) => r.key === 'capex')?.values?.[idx]; return op != null ? (op as number) - (cx != null ? (cx as number) : 0) : null; })();
 	const rRow = (k: string): Num[] => tfx.ratios.find((r) => r.key === k)?.values ?? [];
 	const cardSeries = (k: string): Num[] => tfx.cards.find((c) => c.key === k)?.series?.[0]?.data ?? [];
 	const P = win.periods;
@@ -621,10 +641,10 @@ function buildLiquidity(
 	// ── S1 현금 창출·배분 (분기) + capex 강도 ──
 	const cfTbl = quarterFlowTable(
 		[
-			{ label: '영업활동현금흐름', values: cfRow('cfOperating') },
-			{ label: '투자활동현금흐름', values: cfRow('cfInvesting') },
-			{ label: '재무활동현금흐름', values: cfRow('cfFinancing') },
-			{ label: '잉여현금흐름(FCF)', values: cardSeries('fcfTrend') }
+			{ label: '영업활동현금흐름', values: cfRow('cfOperating'), ttm: ttmCfAt('cfOperating') },
+			{ label: '투자활동현금흐름', values: cfRow('cfInvesting'), ttm: ttmCfAt('cfInvesting') },
+			{ label: '재무활동현금흐름', values: cfRow('cfFinancing'), ttm: ttmCfAt('cfFinancing') },
+			{ label: '잉여현금흐름(FCF)', values: cardSeries('fcfTrend'), ttm: ttmFcfV }
 		],
 		win,
 		'현금흐름',
@@ -1431,6 +1451,7 @@ export async function buildReport(
 	if (!fin) return { skipped: true, stockCode: code, reason: '재무 데이터셋이 없습니다(미상장·미공시).' };
 	const tf = annualView(fin); // 연간 — 연 1회 확정 항목(배당·소유·인력·감사) + 장기추세 보충 섹션
 	const tfQ = fin.views.quarter ?? null; // 분기 — 손익·현금·효율 본문의 주(主) 시간축
+	const tfT = fin.views.ttm ?? null; // TTM — 직전 4분기 합(계절성 평탄화 절대수준)
 	if ((!tf || !tf.periods.length) && (!tfQ || !tfQ.periods.length))
 		return { skipped: true, stockCode: code, reason: '재무 데이터가 없습니다.' };
 
@@ -1461,7 +1482,7 @@ export async function buildReport(
 			rt.report.debtProfile(code).catch(() => null),
 			rt.report.shareholderReturn(code).catch(() => null)
 		]);
-		built = buildLiquidity(tfWin, win, winKind, tf, { corpName, peer }, debt, sr);
+		built = buildLiquidity(tfWin, win, winKind, tf, winKind === '분기' ? tfT : null, { corpName, peer }, debt, sr);
 	} else if (persp.key === 'capitalReturn') {
 		const [sr, cc] = await Promise.all([
 			rt.report.shareholderReturn(code).catch(() => null),
@@ -1506,7 +1527,7 @@ export async function buildReport(
 	} else {
 		// 수익체력 — 분기 우선 본문 + 연간 보충
 		if (!tfWin || !win) return { skipped: true, stockCode: code, reason: '재무 시계열이 부족합니다.' };
-		built = buildEarningsPower(tfWin, win, tf, winKind, { corpName, peer });
+		built = buildEarningsPower(tfWin, win, tf, winKind === '분기' ? tfT : null, winKind, { corpName, peer });
 	}
 	if (!built || !built.sections.length)
 		return { skipped: true, stockCode: code, reason: '이 관점에 채울 데이터가 부족합니다(예: 무배당 기업).' };
