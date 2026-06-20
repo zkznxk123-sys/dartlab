@@ -1,7 +1,27 @@
 # 04. Progress Ledger
 
-상태: PRD v0.3 (2026-06-13 12-에이전트 워크플로 심화 — 지수 차트 완전 명세 + 시뮬 backbone/데이터배선 코드-그라운드 재설계 + 적대검증 반영)
+상태: PRD v0.3 (2026-06-13 12-에이전트 워크플로 심화 — 지수 차트 완전 명세 + 시뮬 backbone/데이터배선 코드-그라운드 재설계 + 적대검증 반영) + ★2026-06-20 9인 전문가 패널 uplift(아래 §0)
 범위: 현재 확정 결정, 미작성/정정 갭, NEXT 시퀀스, 구현 전 체크리스트
+
+---
+
+## 0. ★2026-06-20 9인 전문가 패널 uplift — 세 축 planScore 95 도달
+
+**목표**: 각 분야 전문가 + UI/UX 전문가 관점으로 플랜을 *시각화 직관성·분석 전문성·예측 전문성* 95점까지 개선(운영자 지시). **결과: 세 축 모두 planScore 95 도달 확정**(설계 완전성 — 04 §4 #11 systemScore[빌드]와 분리, 코드부재≠감점).
+
+| 축 | 시작 | 최종 | 핵심 닫힘 |
+|---|---|---|---|
+| 시각화직관성 | 66 | **95** | 시각 인코딩 SSOT(05 §10, 기존 HonestyFooter 3단·AuditStrip 1:1 확장)·레이아웃 와이어프레임(05 §0.5, TerminalSurface:370-376 colL 교체 코드근거)·ReportDock 거처(05 §8.1=StrategyDock fill 일반화)·Bridge Waterfall 시각 문법(08 §3.4)·초보 학습성 3종(05 §11·§12: 상태 카피·온보딩 ladder·TermGloss·disclosure-level) |
+| 분석전문성 | 79 | **95** | Driver Coverage Census(02 §2C, 11-driver 실측 coverage% 정직 정량)·회계품질 leaf-binding(09 §0 7~8행+03 §5 producer 매트릭스+01 §5b quality.baseline)·base margin 정규화/COGS tier(02 §3.8)·checkValuationCoherence(01 §6.3, terminal-g·value-destructive·(d)영구초과수익 moat)·PeerSelection 회귀-조정+DoF 가드(03 §6.3)·라이프사이클 dispatch(01 §5b) |
+| 예측전문성 | 82 | **95** | G16 Calibration 게이트(03 §4.4: coverage[over/under 대칭]·PIT·CRPS·skill+baseline 명명+pooled-only)·mc.distribution 측정 비모수 분포(01 §5b: regime-σ·empirical-quantile·cone 검증)·forensic→fan σ 하방 비대칭 전파(02 §3.7 FQ2)·DSR/PBO admission(09 §10.3)·driver 공분산 fan(02 §3.11)·coverage drift 2채널 decay(02 §2B.2)·look-ahead 3표면 assert(02 §2B.11) |
+
+**과정**: 진단(9인 패널: 시각/분석/예측 각 3인)→23항 우선순위 백로그(3-Wave: A 문구즉시·B 사양게이트·C write-end 의존)→구현(6 문서-소유 에이전트 병렬, 569 insertions·충돌 0)→적대 재평가(94·95·94)→잔여 설계 갭 7건 외과 보강→확정 재평가(95·95·95).
+
+**규율**: 전 개선 **honestySafe=true**(정직 척추 강화 또는 중립)·**새 파일 0**(기존 9문서 내 절/소절/표 행 신설만)·**새 패널/슬라이더/색 0**(기존 자산·토큰 재사용 = "깎아서 강함")·**코드 정본**(에이전트가 백로그 오류 코드 대비 정정: `cfoToNi`→`cfToNi`·`EnvironmentSnapshot` macroRegime 부재·`listing()` asOf 부재). 미구현부는 전부 design/졸업 AC/write-end 라이브 후 active 정직 라벨.
+
+**잔여(=systemScore 빌드, planScore 갭 아님)**: 95 도달은 *설계*다 — 실제 구현(렌더러 2개·gate.py·ReportDock·mc.distribution·quality.baseline 노드·recordForecast write-end)은 09 §10 빌드티켓·_attempts 졸업 게이트 경유. write-end 라이브+held-out 데모(acceptance threshold) 후 design→proven 전환.
+
+---
 
 > ⚠ v0.1 폐기 박제: 이전 04는 "초기 아키텍처 = story 동격 L3 `scenarioWorkbench`, 공개 verb `dartlab.scenario`(미결)"을 현재 결정으로 들고 있었다. **01 §3이 이를 코드로 기각**했다(story=순수 렌더러라 동거 불가, `scenario` 명사형은 `macro.scenarios`/`ScenarioOverlay` 충돌). 본 v0.2가 정본.
 

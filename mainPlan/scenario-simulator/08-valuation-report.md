@@ -1,6 +1,6 @@
 # 08. Valuation Report — 시뮬레이터 = 가치평가 엔진, 프로급 보고서 발간 계약
 
-상태: PRD v0.4 (2026-06-13 다모다란 융합 + 자산 감사 + 적대 검증 / 2026-06-14 구현 정합: dcf 노드=proforma-FCFF[§1 ⑤·§2.3]·RNG=random.Random[§8]·금지어 lint 신설·CI배선 완료[§2.2·09 §10.1])
+상태: PRD v0.4 (2026-06-13 다모다란 융합 + 자산 감사 + 적대 검증 / 2026-06-14 구현 정합: dcf 노드=proforma-FCFF[§1 ⑤·§2.3]·RNG=random.Random[§8]·금지어 lint 신설·CI배선 완료[§2.2·09 §10.1] / 2026-06-20 9인 패널 보강: Bridge Waterfall 시각 문법 SSOT[§3.4]·CRP+ERP_KR provenance[§2.3]·닻 2.5차원+세그먼트 닻 defer[§2.1]·ReportDock 거처 포인터[§5])
 **지위: 발간 *계약* 문서 — 발간 모드는 `simulate/` 코어 졸업 *후*에 착수(§11 게이팅).** ★결정론 코어는 이미 졸업(4노드 DAG·공개 verb, 01 §5a) — 그러나 발간이 의존하는 **gate.py·reportDock·14키 ref 치환·렌더러 2개는 미구현**(금지어 lint 은 신설·CI배선 완료, 09 §10.1; 아래 ⚠ 표기). 코어 졸업 ≠ 발간 가동.
 
 ---
@@ -40,6 +40,10 @@
 
 질문 전환: "미래 성장률이 얼마?"(추측·환각)→"시장이 박은 성장률이 plausible?"(판정·검증). **컨센서스 부재를 강점으로 뒤집는** 메커니즘. dartlab `reverseImpliedGrowth`(`priceImplied.py:27`)+`computeGap`(`:167`) 이미 실재, story `reverseImplied` 블록 이미 배선(`registry.py:854,890,914`) — 갭은 "보고서 *전면*으로 승격"이지 배선 아님.
 
+> **★닻을 2.5차원으로(1차원 g 닻 확장):** 현 `reverseImpliedGrowth` 발간은 *implied 매출성장 g* 단일 좌표(1차원)다 — "시장이 박은 g 가 plausible?"는 강하나, 같은 가격이 *어떤 마진·자본효율 조합*을 요구하는지는 닫혀 있다. 2.5차원 = g 닻 위에 **required-operating-margin·required-ROIC 를 *최소 고정-입력* 형태로 동반 표시**한다(완전한 2D iso-value surface 아님 — '0.5차원'). 표기 = "현재가는 (g=X% 고정 시) 영업마진 m≥Y% *또는* ROIC r≥Z% 를 요구"처럼 한 변수 고정·나머지 1변수 함의를 짝으로 노출(`computeGap` 의 required-* 출력은 03 §6.2 Reverse DCF Gate 가 이미 required revenue growth/operating margin/ROC/reinvestment 를 명세 — 그 값을 발간 *전면*으로 끌어올림, 새 계산 0). **iso-value frontier**(g·m·r 자유조합이 같은 현재가를 만드는 *연속 곡면*, "여러 점이 같은 값" 시각화)는 후속 단계로 **defer 명시** — 곡면 샘플링·등가선 렌더는 닻 전면 승격(현 단계) 이후의 별도 작업(잠정 우선순위, 졸업 후 재검). 2.5차원은 required-* 짝-표기까지가 현 범위, frontier 곡면은 design.
+
+> **★닻 분해 한계(시그니처 정밀화 — 전사 닻 실재, 세그먼트 닻 design):** 현 reverseDCF 닻은 **전사(consolidated) 단일 닻**이다 — "전사 현재가가 요구하는 g/m/r 가 회사 전체 historical range·peer 범위에서 plausible?"까지가 *실재*하고, 이 plausibility 판정은 지금 강제 가능하다. 그러나 다사업부 기업의 *진짜* 질문 — "*어느 세그먼트*의 implied 기대가 비현실적인가"(예: 전사 닻은 plausible 해 보여도 한 세그먼트에 비현실적 성장이 priced-in) — 은 **세그먼트 SOTP 닻**(부문별 sum-of-the-parts 역DCF)을 요구하며, 이는 세그먼트 분해 데이터(02 세그먼트 census 절이 census 하는 `NT_D871100` 세그먼트 셀, 메모리 segmentRnd coverage 2/10 = 데이터-부재 천장)가 **라이브된 *후*의 후속 단계로 defer**한다. ⟹ 시그니처 주장 정밀화 = **'전사 닻 실재(plausibility 강제 가능), 세그먼트 닻 design(세그먼트 census 라이브 후)'** — 둘을 하나로 뭉뚱그려 "닻이 세그먼트별 비현실성을 짚는다"고 쓰면 미구현을 구현으로 위장(확신오정렬, horizonMeaning 교훈). 세그먼트 닻은 잠정 후속, 졸업 AC 아님.
+
 ### 2.2 단일점·rating 차단 (적대검증 B-1·B-2 — 규제선 실제 구멍)
 
 - **`signal` 필드 차단/리네임(B-1):** `reverseImpliedGrowth`의 `PriceImpliedRevenue.signal`이 `underpriced|overpriced|fair`(`priceImplied.py:23,222`)를 반환 — 이건 사실상 매수/매도 rating이다("underpriced"=한국어 "사라"로 직역). **발간 표면에서 `signal` 노출 금지**, "현재가 함의 vs 회사 과거범위 정합성(consistent/optimistic/pessimistic)"으로 리네임. 단 lint 은 *발간 표면 마크다운*만 스캔 — `priceImplied.py` 의 `signal` enum(leaf 정의)은 정당 사용이라 미스캔(§2.3·아래 §2.2 박스).
@@ -51,6 +55,10 @@
 ### 2.3 leaf (전부 실재 — 단 ★computePriceTarget rating 정면충돌, 어댑터 필수)
 
 범위(A): `calcDFV`(`dFV.py:56`, 4엔진 통합 quality-WACC)·`computePriceTarget`(`pricetarget.py:460`, 5시나리오×proforma×DCF + `_monteCarloPriceDistribution` P10~P90). 닻(B): `reverseImpliedGrowth`+`computeGap`. WACC: `computeCompanyWacc`(`_proformaCore.py:145`)+`calcQualityWACC`. **한국기업 CRP 토글**을 DriverCard로(지정학 악화→CRP +1.5pp).
+
+> **★평가 정정 — `+1.5pp` CRP 매직상수 provenance 라벨(자기-적발 비대칭 해소):** §2B 가 `SECTOR_ELASTICITY`(35키 inline·seed/CI 0)·`WACC×0.5`(`transfer.py:111-127`)를 `elasticity_prior_unvalidated`·`default:no-wacc` 접두로 정직-적발하면서, 같은 종류의 무출처 손튜닝 상수인 `+1.5pp CRP`는 본 절이 라벨 없이 통과시키는 비대칭이 있었다. 정정 — **CRP DriverCard 도 `elasticity_prior_unvalidated`(또는 `crp_prior_unvalidated`) provenance + `SimulationResult.warnings`에 `country risk premium defaulted — geopolitical stress assumption(honest-gap)`** 강제(§2B.3 A2 흡수 ⓐⓑ 접두 규율과 동형). `+1.5pp`는 검증된 추정이 아니라 **'지정학 stress 시나리오 가정'으로만** 라벨(scenario≠forecast). 잠정값(졸업 데모서 재보정) — held-out 검증 0이라 proven 아님.
+>
+> **★ERP_KR 합성식 명세(매직상수→해체 가능 구조):** 단일 `+1.5pp` 손튜닝 대신 ERP 를 분해 가능 형태로 박는다(Damodaran country-risk 방법): `ERP_KR = ERP_mature + CRP_KR`, 여기서 `CRP_KR = sovereignDefaultSpread_KR × (σ_equity / σ_bond)`(default-spread × 상대 주식 변동성, Damodaran 합성). `ERP_mature`(US 성숙시장 기준 base ERP)·`sovereignDefaultSpread_KR`(KR 국가 신용 default spread)·`σ_equity/σ_bond`(KR 주식/국채 상대 변동성)는 각각 ref 동반 입력 — 셋 다 무출처면 카드 `warnings=["erp_components_unsourced"]`. **`+1.5pp` 는 이 합성식의 *지정학 stress 가산항*(stress 시 CRP_KR 위에 얹는 시나리오 토글)으로만 잔존**하고, base ERP_KR 자체는 합성식이 산출(매직상수 1개 → 출처-추적 3입력). 합성식 *형* 은 지금 박고, 컴포넌트 값/캘리브레이션은 졸업 데모서 ref 확정(잠정 — 현재 ERP_mature·spread·σ 비율 모두 placeholder).
 
 > **★평가 P0 정정 — computePriceTarget는 "거의 선구현"이 아니라 금지 출력 반환체다:** `computePriceTarget`은 P10~P90 분포 외에 **`weighted_target: float`(단일 목표가) + `signal: strong_buy/buy/hold/sell/strong_sell`(`_classifySignal:644` = 매수/매도 rating)**을 함께 반환한다 — 00·§2가 가장 강하게 금지한 바로 그것. §2.2 금지어 lint 은 *어느 `.py` 도 안 잡는다*(발간 표면 마크다운 한정) — `weighted_target`/`signal` 의 발간 누출 차단은 lint 이 아니라 발간 어댑터의 *필드 drop* 책임이다. ⟹ 발간에 그대로 쓰면 안 되고, **발간 어댑터(P10/P50/P90 분포 + reverseDCF 닻만 추출, `weighted_target`·`signal` 필드 drop)**를 거친다. 졸업 AC = "calc 직접호출 0"과 **동급으로 "rating/단일목표가 필드 누출 0"** 명문화. (~80% 재사용 자평은 실재하나 *그대로는 못 씀* — 어댑터가 추가 작업.)
 > **★구현 정합(2026-06-14):** deterministic core의 dcf 노드(`registry._fnDcf`)는 **proforma-FCFF**를 쓰고 `calcDFV`를 의도적으로 회피(외부 proforma 무시→scenario-coherence 깨짐, 09 P3). 발간 ⑤ Numbers→value도 *시나리오 일관성*을 위해 simulate dcf 노드(proforma-FCFF) 결과를 ref로 받아야지 calcDFV/computePriceTarget을 재호출하면 SSOT 분열(§1 ⑤ 표는 정적 가치평가용 calcDFV — scenario 발간과 구분).
@@ -67,11 +75,62 @@
 
 1. Thesis/Narrative (ScenarioSpec+assumptionLedger) 2. Environment Snapshot (02 §5.1) 3. **DriverGraph→Profit Bridge waterfall (★신규 렌더러 2개)** 4. Proforma IS/BS/CF (`buildProforma`) 5. DCF range (`dFV`/`priceTarget` 블록) 6. Relative (`valuationSynthesis` 블록) 7. **Reverse 닻 (`reverseImplied` 블록 — 상단 승격)** 8. Sensitivity (`sensitivityGrid`) 9. Robustness (walk-forward, replay 모드) 10. Falsifier (`thesisKillChain`) 11. Assumptions ledger (각 행 status+falsifier+ref) 12. Provenance (셀 ref+sourceRef+latestAsOf, 결손 0대체 금지).
 
-신규 렌더러 단 2개: `businessDriverBridgeBlock`(02 §5.3)·`profitBridgeBlock`(02 §5.4) — builders.py 확장(새 모듈 0). story type 11→12(`type="simulation"`).
+신규 렌더러 단 2개: `businessDriverBridgeBlock`(02 §5.3)·`profitBridgeBlock`(02 §5.4) — builders.py 확장(새 모듈 0). story type 11→12(`type="simulation"`). **이 두 렌더러의 bridge waterfall 시각 문법(시작/부유/착지 바·점선 근사·빗금 missing·4단 캐스케이드·부호색 중립)은 §3.4 가 SSOT.**
 
 ### 3.3 역할분리 + 14키 ref 치환 매트릭스 (적대검증 D-3 = 졸업 AC)
 
 story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,...)`를 *직접 호출*(`:897`)하는데, 융합 후 **valuation 14키(`_CORE_KEYS`, registry `:848-863`) 전수를 `SimulationResult` ref 읽기로 치환**(키→필드 매트릭스 명시). 일부만 치환하면 story가 계산 트리거를 유지 → 헌법 회색지대. **졸업 AC = "simulation type 보고서에 calc 직접호출 잔존 0".**
+
+### 3.4 Bridge Waterfall 시각 문법 (블록3 = `businessDriverBridgeBlock`·`profitBridgeBlock` 렌더러 명세)
+
+블록3(§3.2 #3)의 두 신규 렌더러가 출력하는 **bridge waterfall** 의 시각 문법을 박는다(개념=다모다란 story→drivers→numbers, propagation 을 *눈에 보이는 폭포*로). 새 차트 라이브러리 0 — `builders.py` 확장이 SVG/CSS 도형(AuditStrip RUN_COLORS·HonestyFooter 정직 컴포넌트 *확장*, 재발명 금지)으로 그린다. **이 절이 시각 문법 SSOT, 00 §6.3(Bridge Waterfall 화면 구성)은 본 명세를 포인터 참조.**
+
+**(1) 폭포 골격 — 시작 바 → 부유 driver 바 → 착지 바.** 한 bridge(예: 매출→영업이익)는 좌→우로:
+- **시작 바**(전기 매출, 바닥 anchor): x축 baseline 에서 올라온 *전체 높이* 회색 기준 바(`--dl-line-strong #2a3142` fill, muted). "어디서 출발했는가"의 고정 닻.
+- **부유(floating) driver 바**: 각 driver 효과를 *떠 있는* 바로 — 직전 누적 top 에서 시작해 +상승(위로)·−하강(아래로). 바닥에 붙지 않음(앞 바의 끝이 다음 바의 시작 = waterfall 불변).
+- **착지 바**(당기 영업이익): 마지막 driver 누적 후 다시 baseline 까지 내린 *전체 높이* 회색 결과 바. 시작 바와 같은 muted 톤(둘 다 *수준값*, 가운데는 *변화값*).
+
+**(2) 각 부유 바 = driver 라벨 + delta 숫자 + ref 점 + ledger 클릭.** 바 위/아래에 `{driver명}` + `{+/−delta}`(단위·기간 동반, 02 §2.5 단위강제), 바 모서리에 **ref 점**(작은 채워진 원 = valueRef/tableRef 존재 표식, 결손이면 점 없음). **클릭 → AssumptionLedger 해당 행 하이라이트**(05 cross-panel highlight bus 재사용, 05 근거 인벤토리 cross-link — 새 배선 0, 기존 highlight bus 에 bridge-bar→ledgerRow id 매핑만 추가).
+
+**(3) 정직 규율 — 점선 '근사' + 빗금 'missing'(0대체 시각화 금지).** 05 시각 인코딩 SSOT(실선=검증 fan / 점선=미검증 prior fan)와 *일관*:
+- **미검증 elasticity 유래 효과 바**(provenance `elasticity_prior_unvalidated`·`crp_prior_unvalidated`·`default:no-sector`, §2.3·§2B.3): **점선 테두리 + '근사' 배지**(amber `#fb923c` 11px, HonestyFooter Tier3 active-경고 톤). 검증된 pooled-OOS transfer 유래 바만 실선.
+- **결손 driver**(데이터 부재): **0 높이 바가 아니라 'missing' 빗금(hatch) 바** — baseline 폭만큼 자리는 차지하되 사선 빗금 패턴 + `missing`/`blocked`/`partial` 라벨(`--dl-line #1b2130` 빗금). **0 으로 그려 "효과 없음"으로 위장 금지**(missing≠0 불변, 05 fan band None 끊김과 동형 — 결손을 0 추정으로 위장하지 않는 시각화).
+
+**(4) 4단 캐스케이드 — 매출→이익→FCF→가치 세로 연결.** 4 bridge(매출 / 영업이익 / FCF / 가치)를 *세로로 쌓고*, 각 bridge 의 착지 바 → 다음 bridge 의 시작 바를 **세로 연결선**(faint `--dl-line`)으로 잇는다(한 폭포의 결과가 다음 폭포의 입력 = propagation 가시화). reference path = 03 §8 Premortem propagation 예시(원재료→COGS→마진→OI→FCFF→DCF→가격)와 1:1 — 그 텍스트 화살표 체인을 그대로 세로 폭포로 시각화한 것. 캐스케이드 어느 단이라도 missing 빗금/근사 점선이 끼면 *하류 전 단이 그 라벨을 상속*(불확실 전파 정직).
+
+> **★부호색 중립(인과 단정 가드 — 호재/악재 금지):** 시나리오 투영/bridge delta 의 부유 바는 **증가=시안 계열(`#22d3ee`)·감소=중립 회색(`--dl-line-strong`/`#8b94a3`)** 으로 *부호만* 표기 — 녹/적('좋다/나쁘다')으로 칠하지 않는다. 시나리오는 forecast 가 아니고 "마진 하락 = 악재"는 인과 단정이라(00 §3·§7 추천 금지), 부호는 방향 정보지 가치 판정이 아니다. (실현·과거 수익 표면은 기존 `--up #34d399`/`--dn #f0616f` 관례 유지 가능 — 단 투영 폭포에는 적용 금지. 시작/착지 *수준* 바는 muted 회색.)
+
+**색·바 방향·연결선·라벨 위치 명세(고정):**
+
+| 요소 | fill/테두리 | 방향·위치 | 라벨 |
+|---|---|---|---|
+| 시작 바(전기 수준) | `--dl-line-strong #2a3142` muted, 실선 | baseline→전체높이, 좌단 | "전기 {지표}" + 값+ref점 |
+| 착지 바(당기 수준) | `--dl-line-strong #2a3142` muted, 실선 | baseline→전체높이, 우단 | "당기 {지표}" + 값+ref점 |
+| 부유 바 +증가(검증) | 시안 `#22d3ee`, 실선 | 직전 top→위로 floating | driver명+`+delta`+ref점, 바 위 |
+| 부유 바 −감소(검증) | 중립 회색 `#8b94a3`, 실선 | 직전 top→아래로 floating | driver명+`−delta`+ref점, 바 아래 |
+| 부유 바(미검증 prior) | 동상(시안/회색), **점선 테두리** | 동상 floating | + '근사' amber `#fb923c` 11px 배지 |
+| 부유 바(결손 driver) | **빗금 hatch** `--dl-line #1b2130` | baseline 폭 자리만(0높이 금지) | "missing/blocked/partial" 라벨 |
+| waterfall 연결선(바간) | faint `--dl-line #1b2130` 점선 | 앞 바 끝→다음 바 시작 수평 | — |
+| 캐스케이드 연결선(bridge간) | faint `--dl-line` | 착지 바→다음 시작 바 세로 | — |
+| ref 점 | 채워진 작은 원(focus 시 `#22d3ee`) | 바 모서리 | 결손=점 없음 |
+
+**ASCII 와이어프레임(매출→영업이익 bridge 1단, 부호색 중립):**
+
+```text
+값
+│  ┌────┐                                              ┌────┐
+│  │전기│  ┌╌╌╌┐                                       │당기│
+│  │매출│  ┊+물량┊(시안)  ┌────┐                       │영업│
+│  │수준│  └╌╌╌┘ ▲       │−원가│(회색)  ▒▒▒▒▒          │이익│
+│  │muted        │       │  ▼  │       ▒물류▒(missing) │muted
+│  │(회색)│ ●ref  └╌╌╌╌╌╌╌┘ ●ref  ▒빗금▒ (라벨)  ●ref  │(회색)
+│  └────┘                          └ 0높이 아님          └────┘
+└──────────────────────────────────────────────────────────── 기간
+   ▲시작 바      ▲점선=근사(미검증)   ▲빗금=결손      ▲착지 바
+   (●=ref 점, 클릭→ledger 행 하이라이트 / 점선 테두리=elasticity_prior_unvalidated)
+```
+
+세로 4단 캐스케이드는 위 1단 폭포를 **매출 / 영업이익 / FCF / 가치** 4개 세로로 쌓고 착지→시작 세로 연결선으로 이은 형태(03 §8 propagation chain = 세로축). 잠정 — 바 폭·간격·애니메이션 타이밍(Play 시간순 갱신 시 05 §3 #4 ReportDock bridge 동기)은 졸업 데모서 눈검수 재보정.
 
 ---
 
@@ -85,6 +144,8 @@ story는 렌더만(헌법 "자체 계산 0"). 현 registry가 `calcDcf(company,.
 ---
 
 ## 5. ReportDock — 단일 valuation 모드로 시작 (적대검증 C-2·B-3)
+
+> **★거처 SSOT 포인터:** ReportDock 거처·셸 결정(좌패널 교체 패턴·셸 토폴로지·StrategyDock 선례 흡수)은 **05 ReportDock SSOT(StrategyDock 패턴) 준수** — 08 은 ReportDock 의 *valuation 모드 콘텐츠 계약*만 소유하고, 셸·거처 본문 결정은 05 가 소유한다(SSOT 분열 차단). 본 절은 05 가 정한 셸 위에 얹히는 valuation 단면 명세다.
 
 세 보고서(가치평가·백테스트·시뮬)는 같은 정직 골격 공유(RunSpec·provenance·assumption ledger·quality gate·면책·look-ahead 차단). 그러나 **백테스트·시뮬 모드는 둘 다 미존재 → 2-mode 추상화 선투자는 YAGNI.** ReportDock은 **valuation 단일 모드로 시작**, backtest/sim 모드는 그 엔진 졸업 시 추가. ReportDock은 landing 측 *셸*(렌더만, 계산기 아님). 백테스팅 PRD([[project_terminal_backtesting_prd]])와 교차참조.
 
@@ -155,4 +216,5 @@ leaf=L2 SSOT 불변(`analysis/valuation/*`·`analysis/financial/calc*`·`buildPr
 - 01 §4 외과추출: 신설 builders 2개 행 추가.
 - 03 §9: "발간 게이트"(금지어 lint·면책 확장·FINRA 2241 형식·priceP50 build-fail).
 - 00 §5: "Valuation Report = simulate 발간 단면" 1줄.
+- 00 §6.3(Bridge Waterfall 화면): bridge waterfall *시각 문법 SSOT = 08 §3.4* 포인터 1줄(시작/부유/착지 바·점선 근사·빗금 missing·4단 캐스케이드·부호색 중립 — 00 은 화면 배치, 08 §3.4 는 시각 문법).
 - README: 문서지도에 08 추가.

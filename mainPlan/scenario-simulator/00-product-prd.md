@@ -151,6 +151,8 @@ driver가 손익계산서로 전파되는 표다.
 - one-off와 recurring 분리.
 - working capital 압력.
 
+> **★시각 문법 포인터(R8, 2026-06-20):** 시각 인코딩·바 문법(waterfall 바 누적·증감 색·결손 구간 끊김) = 08 §3.2 Bridge Waterfall 시각 명세(businessDriverBridgeBlock·profitBridgeBlock 렌더러) + 05 시각 인코딩 SSOT(미래 구간 점선·fan band σ provenance 실선/점선 가르기, 05 §3 정직 가드) 준수. 본 절은 *내용 표면*, 시각 규율은 그 두 SSOT 가 정본(중복 정의 금지).
+
 ### 5.5 Valuation Bridge
 
 손익과 현금흐름이 가치평가로 전파되는 표다.
@@ -180,7 +182,7 @@ driver가 손익계산서로 전파되는 표다.
 
 ## 6. 화면 구성
 
-> **★v0.4 화면 토폴로지 정정** — 아래 6.1~6.5 는 v0.1 비전 레이아웃이다(별도 워크벤치 화면 신설 0). 확정 거처 = **기존 터미널**(`ui/packages/surfaces/src/terminal/`). 각 pane 은 신설이 아니라 기존 표면 흡수: §6.1 Scenario Tree·§6.2 Assumption Ledger → 차트-스코프 인셋 + `if` 토글(05 §4); §6.3 Bridge Waterfall·§6.5 AI Expert Panel → ReportDock 탭(08 §3.2·§5, valuation 단일 모드로 시작); §6.4 Replay → PriceChart sim/Play 모드(05 §1·§8); Backtest → ReportDock backtest 모드(10, 엔진 졸업 시 추가 = 08 §5 deferred). **별도 셸·라우트·둘째 차트 인스턴스 0.** 정본 = 06 §0·§5 / 05 §8 / 08 §5. 06·05 의 "새 패널·차트 인스턴스 0" 규율이 본 절 레이아웃보다 우선.
+> **★v0.4 화면 토폴로지 정정** — 아래 6.1~6.5 는 v0.1 비전 레이아웃이다(별도 워크벤치 화면 신설 0). 확정 거처 = **기존 터미널**(`ui/packages/surfaces/src/terminal/`). 각 pane 은 신설이 아니라 기존 표면 흡수: §6.1 Scenario Tree·§6.2 Assumption Ledger → 차트-스코프 인셋 + `if` 토글(05 §4); §6.3 Bridge Waterfall·§6.5 AI Expert Panel → ReportDock 탭(08 §3.2·§5, valuation 단일 모드로 시작); §6.4 Replay → PriceChart sim/Play 모드(05 §1·§8); Backtest → ReportDock backtest 모드(10, 엔진 졸업 시 추가 = 08 §5 deferred). **별도 셸·라우트·둘째 차트 인스턴스 0.** 정본 = 06 §0·§5 / 05 §8 / 08 §5. 06·05 의 "새 패널·차트 인스턴스 0" 규율이 본 절 레이아웃보다 우선. **★레이아웃 와이어프레임 포인터(R4, 2026-06-20):** 본 절 6.1~6.5 의 ASCII/프로즈 배치는 *비전 스케치*다 — 실재 컴포넌트 1:1 ASCII 와이어프레임의 정본은 **05 레이아웃 와이어프레임 SSOT**(Play 미래 리플레이의 실재 PriceChart·ReportDock·차트-스코프 인셋 토폴로지 = `ui/packages/surfaces/src/terminal/` 실제 컴포넌트 매핑)다. 본 절과 어긋나면 05 가 정본(코드-그라운드 토폴로지 우선).
 
 ### 6.1 Scenario Tree
 
@@ -225,6 +227,8 @@ branch는 중첩 가능하지만 각 branch는 독립 가정과 공통 가정을
 
 각 bridge는 "전 단계 값", "driver 변화", "효과", "근거", "flag"를 보여준다.
 
+> **★시각 문법 포인터(R8, 2026-06-20):** 시각 인코딩·바 문법 = 08 §3.2 Bridge Waterfall 시각 명세 + 05 시각 인코딩 SSOT 준수(§5.4 동일 — waterfall 바·증감 색·결손 끊김·미래 점선의 단일 정의처는 그 두 문서). 본 절은 배치만 기술.
+
 ### 6.4 Backtest and Replay Panel
 
 과거 검증 탭은 다음을 보여준다.
@@ -238,6 +242,8 @@ branch는 중첩 가능하지만 각 branch는 독립 가정과 공통 가정을
 - realized revenue/profit/price.
 - factor attribution.
 - data snooping 경고.
+
+**★ScreenerModal → PriceChart 드릴다운 동선(R23, 2026-06-20 — "경량 근사(스크린) → 정밀(딥다이브)" 단방향).** 통합 스크리너(ScreenerModal)의 *노출-스코어* 컬럼에는 행마다 **mini fan-spark**(해당 종목의 분기별 P25/P75 sparkline = 경량 근사 시나리오 범위, 단일점 금지·범위 인라인)를 둔다. **행 클릭 = 모달 닫힘 + PriceChart 가 simulate 모드를 *유지*한 채 해당 종목으로 soft-swap**(회사전환 선례 = `project_viewer_cag_infeasible` 의 panel soft-swap·`176b58c96`, 차트 인스턴스 신설 0). 이때 현재 켜둔 **scenario 토글 상태(baseline/adverse/severe·if 토글)는 carry-over**(전환 후 같은 가정으로 정밀 DAG 재계산) + "경량 근사(스크린)→정밀(딥다이브)" toast 1회(스크린 fan-spark 는 분위 근사, 딥다이브는 전 DAG = 두 숫자가 미세히 다를 수 있음을 정직 고지, "수정됨" 아님). 새 패널·라우트·둘째 차트 0(§6 정정 박스 무중단 규율 불변 — soft-swap 은 기존 PriceChart 의 종목 바인딩 교체일 뿐).
 
 ### 6.5 AI Expert Panel
 

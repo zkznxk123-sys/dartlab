@@ -47,6 +47,11 @@
 | G13 | Falsifier | 반증 조건과 tripwire 존재 | usableWithGaps 이하 |
 | G14 | AI Review | lens별 support/counter/missing/tripwire 존재 | usableWithGaps |
 | G15 | Output Safety | 추천/단정 표현 없음 | rejected |
+| G16 | Calibration | fan band coverage·PIT 균등성·skill>0 vs baseline (§4.4) | usableWithGaps / blocked |
+
+> **★카피 SSOT 포인터(R14):** 위 표는 *게이트 판정 로직*(통과 조건·상태 enum)의 SSOT다. **각 실패 행이 사용자에게 어떻게 보이는가(상태 라벨 문구·색·점선·워터마크 카피)는 본 표가 소유하지 않는다 — 실패 상태→초보 평어 카피·복구 안내의 SSOT = `05 §11 상태 카피 매트릭스`, 시각 채널(점선·색·해치·워터마크) = `05 §3.1 fan σ provenance` + `05 §10 시각 인코딩 SSOT` 를 준수한다.** 03 = 무엇이 막히나(gate semantics), 05 = 막힌 것을 어떻게 정직하게 표시하나(copy/visual semantics). 한 게이트 상태 문구를 03·05 양쪽에 복제하지 않는다(SSOT 분열 차단, `feedback_always_check_clutter`). G16(Calibration)의 미검증 라벨 채널은 §4.4 가 σ 점선 규율(05 §3.1·01 §5b A6 흡수)을 *동일 채널*로 재사용한다 — 새 시각 토큰 0.
+
+> **★G16 상태 정직(planScore 직결, design):** G16 의 통과 조건(§4.4)은 *지금* 박지만, 게이트 자체는 `recordForecast` write-end 라이브 + N≥8분기 누적 후에야 **active** 다(§4.4). 그 전까지 G16 은 항상 `미검증`(캘리브레이션 표본 부재)을 emit 하고 모든 fan 에 '캘리브레이션 미검증' 라벨을 강제한다 — 게이트가 *없는* 것이 아니라 *대기* 상태다(02 §2B.3 DriverCard dormant 상한과 동형). 게이트 공식은 코드 빌드 전이라 *설계*이며, planScore(설계 완전성)에 직결하되 systemScore(빌드)에는 미반영.
 
 ---
 
@@ -169,6 +174,8 @@ signal at t close -> earliest tradable at t+1 open
 7. parameter selection log를 남긴다.
 8. 표본 수가 부족하면 결론을 제한한다.
 
+> **★#5·#7 코드 강제 격상(R18-G3, design — 산문→assert):** #5(universe membership as-of)와 #7(parameter selection log)은 *산문 점검*이면 강제되지 않는다. 둘은 02 §2B.11 look-ahead 코드 강제(`buildSnapshot` asOf 전파 + replay 진입 시 `availableAt <= decisionAt` assert)와 **결선**해 다음 두 가드로 격상한다(졸업 AC, write-end 라이브 후 활성). ⓐ **survivorship 가드(#5·#6)** = replay/walk-forward 유니버스를 *decisionAt 시점 상장 종목*으로 고정하되 **상장폐지사를 폐지 시점까지 포함**(생존자만 남긴 유니버스 = look-ahead 의 변종, 사후 생존 정보 누설). pooled-panel 적합·peer 풀 구성 양쪽에 동일 적용. ⓑ **post-selection peeking 차단 assert(#7)** = parameter selection 이 test-window 데이터를 *보지 않았다*를 코드로 단언 — full-sample parameter selection 금지(§4.3·§4.4 PIT/skill 채점이 학습창에 오염되면 무의미). selection log 는 `RunSpec.parameterSelectionLog` 에 trial·창·선택근거를 persist(02 §2B.0 nTrials ledger 와 동일 forking-paths 차단 원리). **현재 `entry.py`/`registry.py` 는 asOf 라벨만 들고 두 assert 모두 부재**(02 §2B.11 실측) → 본 격상은 admission/buildSnapshot 신설 시 박는 *설계*다.
+
 ### 4.3 과최적화 경고
 
 다음이면 성과 해석을 제한한다.
@@ -181,9 +188,60 @@ signal at t close -> earliest tradable at t+1 open
 - 반복 탐색 후 최선 결과만 선택.
 - PBO/DSR 또는 대체 지표가 weak.
 
+### 4.4 Forecast Calibration (연속 fan chart 전용 — design)
+
+> **★범위 분리(혼동 차단):** 본 절은 **연속 fan chart**(rev/OI/FCF·가격 밴드 — `P5..P95`)의 *분포 캘리브레이션* 전용이다. **Brier score 는 이진(또는 다항) 사건 확률에만 정의되는 별개 채점**으로(예: "tripwire 발화 여부", "특정 이벤트 발생 여부"), 본 절의 연속 분포 채점과 **명시 분리**한다 — 09 §10·01 §6.3 의 Brier 규율(det-vs-ai 노드별 사후채점)은 이진 사건 표면에, 본 §4.4 는 연속 fan 표면에 적용한다. 둘을 한 지표로 섞지 않는다.
+
+연속 fan 이 "정직한 fan"이려면 *벌어진 폭이 실제 불확실성을 맞혀야* 한다 — cosmetic 가우시안 폭(통계적 연극, 01 §5b A6)을 walk-forward held-out 으로 반증한다. 모든 채점은 **purged + embargoed walk-forward**(§4.2 #3·§2B.2 G1, look-ahead 차단)에서만 산출한다.
+
+**(a) Coverage(밴드 적중률).** 명목 90% 밴드(P5~P95)면 held-out 실현치가 밴드 안에 떨어진 *경험 비율*이 0.85~0.95(=|empirical−nominal|≤tol, tol≈0.05 *잠정값·졸업 데모서 재보정*). 밴드가 너무 좁으면 적중률<0.85(과신), 너무 넓으면>0.97(과소확신·무용).
+
+**(b) PIT 균등성(probability integral transform).** 각 held-out 시점 t 에서 `u_t = F_t(actual_t)`(예측 CDF 에 실현치를 통과) → 캘리브레이션이 완벽하면 `{u_t}` 가 **Uniform[0,1]**. KS 또는 χ²(bin=5) 균등성 검정 `p>0.1`(*잠정 임계·재보정*). 비균일 패턴 = 진단: U 모양=과신(꼬리 과소), ∩ 모양=과소확신, 한쪽 쏠림=편향. **10-bin PIT 히스토그램**을 진단 산출로 emit(숫자 1개로 숨기지 않음).
+
+**(c) CRPS / pinball(분포 전체 채점).** 단일 점이 아니라 *분포 전체*를 채점 — CRPS(continuous ranked probability score) 또는 분위별 pinball/quantile loss 를 P5..P95 전 분위에서 평균. 점추정 금지 척추와 정합(단일 점 채점 거부, 분포 채점).
+
+**(d) Skill score(baseline 대비).** `skill = 1 − CRPS_model / CRPS_baseline`(또는 pinball 비). `skill ≤ 0` = 모델이 단순 baseline 을 *못 이김* = **예측력 없음**. baseline 정의(§4.4-baseline 아래).
+
+**실패 판정(과신·과소확신 *대칭*).** 90% 밴드 coverage<0.70(체계적 과신 — 밴드가 현실의 30%+ 를 놓침, 너무 좁음) = **blocked** + `calibState='under-dispersed'`. **coverage>0.97**(과소확신 — 밴드가 너무 넓어 정보가치 0, *밴드를 무한히 넓혀 coverage 를 채우는 회피*) = **usableWithGaps** + `calibState='over-dispersed'` + fan '밴드 과대·정보가치 낮음' 라벨. 그 외 mild miscalibration(coverage 0.70~0.85·PIT p<0.1·skill 미미)은 **usableWithGaps** + fan 에 '캘리브레이션 부분미달' 라벨. ★under-dispersion(좁음=과신)만 막고 over-dispersion(넓음=무용)을 안 막으면 "밴드를 키워 coverage 통과" 라는 §2B.2 silent 확대 회피가 캘리브레이션 게이트로 새므로 *대칭 enum* 으로 양방향 강등.
+
+**표본 가드(folk-stat 회피, horizonMeaning 교훈).** **회사 단위 캘리브레이션 금지**(T<40 — held-out 분기가 한 자릿수면 coverage/PIT 가 잡음). **pooled-panel 섹터 횡단면**으로 채점(섹터 내 회사×분기 풀) + **bootstrap CI**(점추정 metric 금지·CI 동반) + **seed 고정**(재현). seed/CI=0 인 "3점 성공"은 §10 #11 으로 차단(horizonMeaning §8 정정 교훈).
+
+**게이트 활성 조건(design·정직 라벨).** G16 은 `recordForecast` write-end 가 라이브(02 §2B.5 dead chain — `recordForecast` src 부재, grep 0건) + **N≥8분기 누적** 후에야 **active**. 그 전까지 게이트는 모든 fan 에 **'캘리브레이션 미검증' 라벨을 강제**하고 — σ 점선·회색 근사 fan(05 §3.1·§4.4 위 동일 채널)으로 그려 검증된 실선 fan 과 정직하게 가른다. 게이트 공식·임계는 코드 빌드 *전 지금* 박는다(planScore 직결, systemScore 미반영).
+
+**메커니즘(design).** `recordForecast` 저장분 = `{asOf, projected, p5, p25, p50, p75, p95}`(예측 시점·분위 frozen) → N분기 후 실현 `actual` 을 asOf 키로 join → 위 (a)~(d) 를 산출해 `calibScore`(coverage·pitP·crps·skill 묶음) emit. recordForecast 자체가 부재라 본 join·채점 파이프는 write-end 라이브 후 졸업 AC.
+
+#### §4.4-baseline. 명시 baseline 정의 (skill 채점·R-skill SSOT)
+
+skill score(§4.4-d)·§10 #11 이 비교하는 **명시 baseline**을 박는다(권위 환각 차단 — "baseline 보다 낫다"는 baseline 을 명명해야 검증 가능).
+
+| 표면 | baseline | 정의 |
+|---|---|---|
+| 가격 fan | random-walk(drift 0) | `price_{t+h} ~ price_t`(마틴게일), 분산은 historical vol scaling |
+| 가격 fan(보조) | analyst consensus target | 외부 컨센서스 목표가(있으면)를 점앵커로, 밴드는 추정치 분산 |
+| 펀더멘털 fan(rev/OI/FCF) | persistence | `x_{t+h} ~ x_t`(직전 분기 유지) |
+| 펀더멘털 fan(보조) | AR(1) | `x_{t+h} = c + ρ·x_t + ε`(1차 자기회귀, in-sample 적합 후 OOS) |
+| 펀더멘털 fan(보조) | consensus estimate | 외부 컨센서스 추정치(있으면) |
+
+baseline 도 동일 walk-forward held-out 에서 같은 분위로 채점한다(불공정 비교 차단). consensus baseline 은 데이터 부재 시 `missing`(0 대체 금지) — random-walk·persistence·AR(1) 가 항상 가용한 floor baseline.
+
+**자료구조 핀(design):** `ScenarioFan`(02 §3.12 산출물)에 `baselineSkill: float | None` 필드 추가 — §4.4-d 의 skill score 를 fan 단위로 persist(None=캘리브레이션 미검증 또는 baseline 데이터 부재). **`skill ≤ 0` 노드는 `NodeAudit.status = "no_skill_vs_baseline"`**(현 ok/partial 에 추가) + 시각은 **점선·회색**(σ provenance 미검증 fan 과 동일 시각 채널, 05 §3.1 — 새 토큰 0) → "baseline 못 이긴 fan"을 신뢰 결론으로 위장 금지. 이 필드·enum 은 fan 표면 ship(05 Play) 시 기계 강제 표면이며, 그 전엔 *설계*다.
+
 ---
 
 ## 5. 회계와 손익 품질 검증
+
+> **★신호→producer leaf 매트릭스(R3, design — 점검 리스트의 leaf 바인딩):** 아래 5.1~5.3 의 점검·경고 항목은 *산문 리스트*면 어느 엔진이 그 숫자를 만드는지 추적 불가다. 각 품질 신호를 **producer leaf**(그 신호를 산출하는 L2 SSOT 함수)에 바인딩해 — simulate quality 노드가 그 leaf 를 *호출*만 하고 자체 계산 0 임을 강제한다(09 §1 앵커 원리 동형). 이 표는 09 §0 simulate↔leaf 결합 표면 전수표의 **7번째 행 후보**(quality 노드 합류 시 `_EXPECTED_BINDINGS` 추가)이며, 01 §5b 후속 노드(quality 노드가 simulate DAG 에 합류할 때)와 결선한다. **현재 simulate 코어 4노드에 quality 노드는 미포함**(01 §5b) → 본 바인딩은 *설계*이며, 합류 시 leaf 호출+포장으로만 와이어링한다(점검 항목 정보는 5.1~5.3 에 보존).
+
+| 품질 신호 | producer leaf (L2 SSOT) | 실측 위치 | 게이트 연결 |
+|---|---|---|---|
+| CFO/NI (현금전환) | scan `quality` 빌더 → `cfToNi` | `scan/builders/edgar/scan.py:189 _scanQuality`(필드명 실측 = `cfToNi`, 백로그 표기 `cfoToNi` 정정) | G8 Cash Quality |
+| accrual ratio (Sloan 발생액) | scan `quality` → `accrualRatio` + crossStatement | `scan.py:211`·`analysis/financial/crossStatement.py:339`·`_earningsQualityCalcs.py:229` | G8 |
+| 매출채권성장 − 매출성장 | `buildEvidenceForensicsMemo._revenueCashBridge` | `synth/evidenceForensics.py:350` → `receivableGrowthMinusRevenueGrowth`(`:370`) | G8·§5.1 경고 |
+| earnings quality(quintile) | `_earningsQualityCalcs` (Sloan quintile) | `analysis/financial/_earningsQualityCalcs.py:229` | G8 |
+| 매출-OCF bridge(분기별) | `buildEvidenceForensicsMemo` cashBridge | `synth/evidenceForensics.py:140 cash_rows` | G7 Profit·§5.3 |
+| margin 신호(원가율·판관비율) | proforma/financial leaf | `analysis/financial/` (proforma 경유, 09 §0 #1 `buildProforma`) | G7·§5.2 |
+
+> 바인딩 규율: quality 노드는 위 leaf 의 **반환을 읽기만** 하고 발생액·CFO/NI 식을 `simulate/` 안에 재정의하지 않는다(`test_simulate_leaf_ssot` 동형 가드, 09 §6). 신호가 결손이면 `NodeAudit.status=partial` + None(0 대체 금지). 합류 시 09 §0 표 7행으로 baseline 박제 + 01 §5b 표에 quality 노드 행 추가(둘 다 *설계*, quality 노드 빌드티켓 09 §10 동반).
 
 ### 5.1 Revenue Quality
 
@@ -298,6 +356,22 @@ signal at t close -> earliest tradable at t+1 open
 - peer multiple을 단순 평균으로만 사용.
 - 다른 산업 stage를 같은 peer로 사용.
 - 손익 일회성 조정 없이 multiple 적용.
+
+#### PeerSelection 방법론 (R11, design — "단순 평균 금지"의 회귀-조정 강제)
+
+위 경고("단순 평균으로만 사용"·"다른 stage")를 *산문 금지*가 아니라 **명세된 절차**로 강제한다. peer 비교가 정직하려면 peer 가 *비교 가능*해야 하고(성장·마진·ROIC·레버리지 통제), 통제 안 한 단순 평균은 stage-mismatch 를 숨긴다.
+
+**(a) 후보 풀.** 동일 `IndustryGroup`(sub-sector)에서 1차 선정 — `_resolveSectorKey`(`analysis/valuation/_valuationHelpers.py`, OQ2 §2B.11 pooled 풀 경계와 **동일 2층 재사용**, 새 코드 0)를 그대로 쓴다. peer 수 부족(예: <5) 시 부모 **WICS-11 Sector**로 승격(pooled-N 폴백과 동형). 풀 구성은 **decisionAt 시점 멤버십**(§4.2 #5 survivorship 가드 — 상폐사 폐지 시점까지 포함).
+
+**(b) 회귀-조정(핵심 — 단순 평균 금지를 회귀로 인코딩).** 각 peer multiple(EV/EBIT·P/E·EV/Sales)을 `multiple ~ f(revenue growth, margin, ROIC, leverage)` **cross-sectional 회귀**로 적합(`crossRegression.fitPanel` 실재, `_crossRegressionFit.py:136`) → 회귀로 조정된 multiple(target 의 펀더멘털을 회귀식에 대입한 fitted multiple)만 비교에 쓴다. **단순 산술평균·중앙값 단독 금지** — peer 가 평균보다 빠르게 성장하거나 마진이 높으면 그 프리미엄을 회귀가 흡수한다. **★자유도 가드(folk-stat 차단 — 02 §2B.9 firm-level df≤0 가드와 동형):** `peer N − 회귀변수수(4) < floor`(잠정값 ≥8 여유)면 **회귀-조정 금지** → (e) fitted multiple 대신 통제 안 한 peer P25/P50/P75 분포 + `'regression-adjustment skipped — insufficient peer DoF'` 라벨 폴백. (a)의 'peer<5 → WICS-11 승격'은 *풀 크기*만 보고 회귀 *자유도*를 안 보므로, 승격 후에도 DoF 부족하면 fitted multiple 을 발간하지 않는다(자유도 0 근방 회귀는 spurious 과적합 — `_quickOLS` df≤0 folk-stat 재현). 졸업 AC: **'peer DoF 부족 시 fitted multiple 발간 0건'**.
+
+**(c) lifecycle 불일치 게이트.** peer 와 target 의 revenue CAGR·ROIC 가 **다른 사분위**면 `stage-mismatch` 라벨 + 해당 peer 가중 하향(또는 풀 제외). 성장기 peer multiple 을 성숙기 target 에 적용하는 confound 차단(§5.1 lifecycle 차이 점검의 정량화).
+
+**(d) normalize.** accounting scope(연결/별도) 정렬 + multiple 분모(EBIT·매출·이익)에서 **일회성 항목 제거**(§5.2 일회성 조정과 결선) — 분모가 일회성으로 부풀면 multiple 이 거짓 저평가로 읽힘.
+
+**(e) 출력.** peer **조정 multiple 의 P25/P50/P75**(단일 점 금지·분포 — 점추정 척추 정합) + **target percentile**(조정 후 분포 내 위치) + **DCF range cross-check**. relative valuation 의 함축가치가 §6.1 DCF range 와 **어긋나면 `DisagreementLedger` 행**(§7.3) 추가 — 두 가치평가 경로의 불일치를 숨기지 않는다(usableWithGaps, 단정 금지).
+
+> **상태(정직):** PeerSelection 절차는 `crossRegression.fitPanel`·`_resolveSectorKey` 실재 leaf 를 호출하는 *설계*다. relative valuation 노드는 simulate 코어 4노드에 미포함(01 §5b reverseDcf 와 같은 후속) → 합류 시 leaf 호출+포장으로 와이어링하고 회귀·정렬을 `simulate/` 안에 재정의하지 않는다(09 §6 앵커 가드).
 
 ---
 
@@ -444,4 +518,5 @@ Propagation 예:
 8. 비용, slippage, benchmark 없는 backtest 성과를 강조함.
 9. 가정 반증 조건이 없음.
 10. 출력이 매수·매도 추천으로 읽힘.
+11. 명시 baseline(가격=random-walk·펀더멘털=persistence/AR(1)·analyst-consensus, §4.4-baseline) 대비 `skill ≤ 0`(예측력 없음)인 예측을 신뢰 결론으로 표시함 — baseline 못 이긴 fan 은 `NodeAudit.status="no_skill_vs_baseline"`(§4.4-d)·점선 회색 시각 강제. seed/CI 0 인 "3점 성공"을 캘리브레이션 통과로 표시하는 것도 동일 위반(folk-stat, horizonMeaning §8 교훈).
 

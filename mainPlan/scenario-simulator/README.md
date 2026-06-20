@@ -1,6 +1,6 @@
 # Simulate — 미래 리플레이 시뮬레이터 PRD Index
 
-상태: 비전 PRD v0.4 (스위트 버전 — 2026-06-14 구현 정합 정정: simulate/ 결정론 코어 졸업[4노드 DAG·random.Random·proforma-FCFF·공개 verb] 반영 + 문서↔코드 발산 정합)
+상태: 비전 PRD v0.5 (스위트 버전 — 2026-06-20 9인 전문가 패널 uplift: 시각 인코딩 SSOT·Driver Coverage Census·G16 Calibration·valuation coherence·라이프사이클 dispatch·초보 학습성 3종 *가산* 적용, **새 파일 추가 0 = 기존 문서 내 절/소절/표 행 신설만**, 정직 척추 절은 불변 / 직전 v0.4 2026-06-14 구현 정합 정정: simulate/ 결정론 코어 졸업[4노드 DAG·random.Random·proforma-FCFF·공개 verb] 반영 + 문서↔코드 발산 정합)
 범위: 과거 근거 → 미래 시뮬레이션. 거시·지수·뉴스·공시·재무를 미래로 투영하고, if(가정)를 켜고/끄며, **재생버튼으로 미래가 시간순으로 펼쳐지는 퍼포먼스**를 결과물로 내는 DartLab의 정점 기능.
 
 ---
@@ -53,7 +53,7 @@
 
 문서별 버전이 어긋나 혼란을 막기 위한 단일 규칙:
 
-- **스위트 버전 = `v0.4`**(2026-06-14). 개별 문서 헤더는 그 문서가 마지막으로 *내용 개정*된 시점의 minor를 단다(README/01/02/04/06/08 = v0.4 수준, 03/05/09 = v0.3, 00 = v0.1 본문 + v0.2/v0.4 정정 헤더). 스위트 버전이 정본 — 개별 헤더는 *그 문서가 어디까지 따라왔나*의 표식이다.
+- **스위트 버전 = `v0.5`**(2026-06-20 — 9인 전문가 패널 uplift). 직전 v0.4(2026-06-14, 결정론 코어 졸업 정합)에 9인 전문가 패널의 개선 백로그를 *가산 적용*(새 파일 추가 0 = 기존 문서 내 절/소절/표 행 신설만): 시각 인코딩 SSOT 단일화(00 R8/R4 시각 문법·와이어프레임 포인터, 08 §3.2·05 정본)·Driver Coverage Census(회계품질 leaf 2종을 앵커 binding 게이트 안으로, 09 §0 표 7~8행 R3)·G16 Calibration(walk-forward DSR/PBO 과최적화 정직 게이트, 09 §10.3 R10)·valuation coherence(`_fnDcf` WACC-floor 0.5→dcf.py SSOT 1.0 통일, 09 §6 R16)·라이프사이클 dispatch(ScreenerModal→PriceChart 드릴다운 soft-swap, 00 §6.4 R23)·초보 학습성("경량 근사→정밀 딥다이브" toast·mini fan-spark 분위 sparkline, 00 §6.4). **개별 문서 헤더는 그 문서가 마지막으로 *내용 개정*된 시점의 minor를 단다**(README/00/09 = v0.5 수준 본 uplift 반영, 01/02/04/06/08 = v0.4 수준, 03/05 = v0.3 — uplift 가 닿은 절만 v0.5 라벨). 스위트 버전이 정본 — 개별 헤더는 *그 문서가 어디까지 따라왔나*의 표식이다.
 - **minor 범프(0.x→0.x+1)** = 코드-그라운드 사실 정정 또는 새 결정이 한 문서 이상에 반영될 때. **patch(문구·오타)** = 헤더 갱신 없이 본문만 수정. **major(1.0)** = 본진 `simulate/` 졸업 + 발간 게이트가 *기계 강제*로 검증된 뒤(현 미충족 → 09 §10 fatal①~④: 발간표면 투자권유 lint[★T1 빌드·배선 완료]·forward-test write 끝단·gate/ledger/admission/lens·US 해금) **+ ⑤ simulate↔leaf 계약 drift 자동인식(`test_simulate_leaf_binding`, 앵커 순방향, 09 §6·P16)** — 엔진 변환 시 simulate silent 깨짐 0 의 5번째 conformance 표면.
 - **2층 헤더(v0.1 본문 + v0.2 정정)** = 정정 헤더가 본문보다 우선(00·03). 정정 헤더가 정본, 본문은 미개정 잔재로 읽는다.
 - **구현 정합 = 코드가 정본.** 문서 주장이 `src/dartlab/simulate/` 구현과 어긋나면 코드를 정본으로 문서를 고친다(반대 아님). "구현 완료"는 헤더 오버레이가 아니라 본문 텍스트까지 코드와 일치할 때만 ✅.
