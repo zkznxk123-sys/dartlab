@@ -100,6 +100,10 @@ def transferMacroToFundamentals(
         AntiPatterns:
             - Quoting `adjustedRevenue` as a prediction rather than a scenario transform.
             - Forgetting that FX shock is relative to `BASELINE_FX`, not absolute.
+            - Assuming inflation flows through: cpi/inflation has NO transfer channel here. The
+              preset (`MacroScenario.cpi`, a 3-year list) carries an inflation path but this edge
+              reads only gdp/rate/fx -> revenue/margin/wacc has 0 effect from cpi (nominal-real
+              undecomposed). Treat a cpi-sensitive question as out-of-channel, not transmitted.
         OutputSchema: ``tuple[float, float, float]`` = (revenue, margin %, wacc %).
         Prerequisites: numeric base metrics + a `SectorElasticity`.
         Freshness: inherits the freshness of the base metrics and the macro path supplied.
