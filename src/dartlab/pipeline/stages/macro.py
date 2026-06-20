@@ -1,7 +1,9 @@
-"""Macro stage — FRED/ECOS 거시 + cycle. buildMacroData + buildMacroCycle 동형(자체 push).
+"""Macro stage — FRED/ECOS 거시 + cycle + regime. 세 스크립트 동형(자체 push).
 
 워크플로 충실 재현: ``buildMacroData.py --source <source> --push`` + ``buildMacroCycle.py
---push``. source 는 env MACRO_SOURCE(기본 all, 워크플로 github.event.inputs.source).
+--push`` + ``buildMacroRegime.py --push``. source 는 env MACRO_SOURCE(기본 all, 워크플로
+github.event.inputs.source). cycle(rc2)·regime(rc3)은 서로 독립이며 둘 다 data(rc1) 성공에만
+의존한다(buildMacroData 가 채운 FRED bulk 캐시 공유). cycle 실패가 regime 빌드를 막지 않는다.
 """
 
 from __future__ import annotations
@@ -37,10 +39,11 @@ def runMacro(
     source = os.environ.get("MACRO_SOURCE", "all")
     rc1 = runScript(".github/scripts/sync/buildMacroData.py", "--source", source, "--push")
     rc2 = runScript(".github/scripts/sync/buildMacroCycle.py", "--push") if rc1 == 0 else 1
+    rc3 = runScript(".github/scripts/sync/buildMacroRegime.py", "--push") if rc1 == 0 else 1
     res = StageResult(category="macro")
-    if rc1 != 0 or rc2 != 0:
+    if rc1 != 0 or rc2 != 0 or rc3 != 0:
         res.report.err = 1
-        res.report.failures.append(f"macro rc=data:{rc1}/cycle:{rc2}")
+        res.report.failures.append(f"macro rc=data:{rc1}/cycle:{rc2}/regime:{rc3}")
     else:
         res.report.ok = 1
     return res

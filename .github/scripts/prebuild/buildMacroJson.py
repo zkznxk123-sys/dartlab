@@ -1,12 +1,12 @@
 """macro.cycle → landing/static/dashboards/macro.json
 
-대시보드 v19 신규 Tier — 단일 파일 (회사 종속 X).
-현재 경기 국면 + 섹터별 순풍/역풍 가중치.
+대시보드 v20 신규 Tier — 단일 파일 (회사 종속 X).
+현재 경기 국면 + 섹터별 순풍/역풍 가중치 + regime(전향 축).
 
 출력 shape::
 
     {
-      "version": "v19",
+      "version": "v20",
       "asOf": "2026-04-22",
       "kr": { phase, phaseLabel, confidence, indicators: {...}, signals: [...], sectorStrategy: "..." },
       "us": { 동일 },
@@ -14,7 +14,8 @@
       "sectorTailwind": {
         "semiconductor": { "kr": +0.4, "us": +0.2 },
         ...
-      }
+      },
+      "regime": { "kr": {...}, "us": {...} }   # sync buildMacroRegime.py 산출(forecast/rates/gar/regimeBand)
     }
 
 실행::
@@ -145,6 +146,53 @@ def _analyze_market(market: str) -> dict:
         return _fallback(market)
 
 
+def _load_regime(market: str) -> dict:
+    """sync(buildMacroRegime.py)가 산출한 regime payload 를 읽는다 — offline.
+
+    forecast 4모델 + 수익률곡선 + GaR 분포 + Hamilton regime band 는 FRED/ECOS fetch
+    의존이라 sync 단계가 ``macro/regime/{market}.json`` 으로 publish 한다. 본 함수는 그것을
+    로컬 cache → HF 다운로드 → missing payload 순으로 읽기만 한다(외부 API 0). transmission
+    패턴처럼 freshness 재계산 0 — sync 시점 asOf 를 동결 전달한다(거짓 신선도 방지).
+    """
+    lower = market.lower()
+
+    localPath = ROOT / "data" / "macro" / "regime" / f"{lower}.json"
+    if localPath.exists():
+        try:
+            return json.loads(localPath.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"  ⚠ {market} regime local cache load 실패: {e}", flush=True)
+
+    try:
+        from huggingface_hub import hf_hub_download
+
+        path = hf_hub_download(
+            repo_id="eddmpython/dartlab-data",
+            repo_type="dataset",
+            filename=f"macro/regime/{lower}.json",
+        )
+        result = json.loads(Path(path).read_text(encoding="utf-8"))
+        localPath.parent.mkdir(parents=True, exist_ok=True)
+        localPath.write_text(json.dumps(result, ensure_ascii=False, indent=0), encoding="utf-8")
+        return result
+    except Exception as e:
+        print(f"  ⚠ {market} HF regime JSON 미가용 ({type(e).__name__}): missing payload", flush=True)
+        return {
+            "market": market.upper(),
+            "forecast": {
+                "models": {},
+                "missing": [
+                    {
+                        "id": "regime",
+                        "status": "missing",
+                        "reason": f"regime payload unavailable: {type(e).__name__}",
+                    }
+                ],
+            },
+            "rates": {"missing": [{"id": "yieldCurve", "status": "missing", "reason": "regime payload unavailable"}]},
+        }
+
+
 def _build_transmission() -> dict:
     """Macro Lens용 시장·섹터 전파 payload 를 macro.json 에 싣는다.
 
@@ -215,14 +263,17 @@ def main() -> int:
         for s in sorted(sectors)
     }
     transmission = _build_transmission()
+    kr_regime = _load_regime("KR")
+    us_regime = _load_regime("US")
 
     output = {
-        "version": "v19",
+        "version": "v20",
         "asOf": date.today().isoformat(),
         "kr": kr,
         "us": us,
         "transmission": transmission,
         "sectorTailwind": sector_tailwind,
+        "regime": {"kr": kr_regime, "us": us_regime},
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

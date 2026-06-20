@@ -35,8 +35,10 @@ _FORBIDDEN_IMPORTS: tuple[str, ...] = (
     "dartlab.providers.dart.openapi",
     "dartlab.providers.edgar.openapi",
     "dartlab.providers.edinet.openapi",
-    "dartlab.macro.cycles.cycle",  # analyzeCycle → FRED/ECOS API
-    "dartlab.macro.seriesFetch",  # fetchLatest/Yoy/ChangePct → API
+    "dartlab.macro.cycles.cycle",  # analyzeCycle → seriesFetch 경유 FRED/ECOS online 호출
+    "dartlab.macro.seriesFetch",  # fetchLatest/Yoy/ChangePct → FRED/ECOS online 호출
+    "dartlab.macro.forecast.forecast",  # analyzeForecast → seriesFetch 경유 online (sync 단계 책임)
+    "dartlab.macro.rates.rates",  # analyzeRates → seriesFetch 경유 online (sync 단계 책임)
 )
 
 # requests / aiohttp 직접 import 금지 (HF 는 huggingface_hub 통해서만).
