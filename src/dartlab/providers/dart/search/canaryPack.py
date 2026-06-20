@@ -102,7 +102,15 @@ def evaluateCanaryPackRows(
                     rowFailures.append("sourceMiss")
             if expectedRefs:
                 refChecked += 1
-                if any(_sourceRef(result) in expectedRefs for result in matchedResults):
+                # 인용 무결성 = "이 ref 의 doc 이 색인에 존재+적재됐나"(랭킹 아님). 호출자가 인덱스
+                # 아티팩트를 직독해 결정론 신호(_refResolved)를 실으면 그것을 신뢰한다. bigram
+                # 토크나이저에선 보일러플레이트 doc 이 자기 본문 BM25 로 top-K 에 못 떠 랭킹 멤버십은
+                # flaky — 신호 부재 시(gold/qualityGate 경로)만 기존 랭킹 멤버십으로 폴백.
+                if "_refResolved" in row:
+                    refResolved = bool(row.get("_refResolved"))
+                else:
+                    refResolved = any(_sourceRef(result) in expectedRefs for result in matchedResults)
+                if refResolved:
                     refHits += 1
                 else:
                     rowFailures.append("sourceRefMiss")
@@ -276,7 +284,7 @@ def _policyCandidate(failure: str) -> str:
         "falseAccept": "negativeAnswerabilityPolicy",
         "missingAnswerable": "sourceFreshnessOrCoveragePolicy",
         "sourceMiss": "sourceIntentPolicy",
-        "sourceRefMiss": "rankingOrCitationPolicy",
+        "sourceRefMiss": "citationIntegrityPolicy",
     }.get(failure, "policyReview")
 
 

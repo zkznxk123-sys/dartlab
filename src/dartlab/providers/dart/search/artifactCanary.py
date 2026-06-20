@@ -107,4 +107,7 @@ def _targetForSource(source: str) -> str:
 
 
 def _canUseRowSourceRef(source: str) -> bool:
+    # allFilings 는 rcept_no 단위 doc 이 명확한 인용 단위라 expectedSourceRef 를 싣는다. 이 ref 는
+    # publish selfcheck 가 *결정론 라운드트립*(meta 존재 + docLengths>0)으로 인용 무결성을 검증하는
+    # 대상이며 BM25 랭킹 top-K 도달을 요구하지 않는다(localUpdate._sourceCanaryPackErrors 참조).
     return source in {"allFilings"}

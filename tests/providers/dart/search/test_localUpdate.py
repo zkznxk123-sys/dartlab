@@ -262,6 +262,94 @@ def test_activate_staged_index_rejects_source_canary_pack_miss(tmp_path):
     assert resolveActiveIndexDir(base) is None
 
 
+def _writeTwoDocSegment(outDir):
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndexRebuild import saveSegmentWithSidecar
+
+    rows = [
+        {
+            "section_content": "유상증자 자금조달",
+            "rcept_no": "AAA00000001",
+            "section_order": 0,
+            "corp_code": "00126380",
+            "corp_name": "삼성전자",
+            "stock_code": "005930",
+            "rcept_dt": "20260615",
+            "report_nm": "주요사항보고서",
+            "section_title": "",
+            "source": "allFilings",
+        },
+        {
+            "section_content": "현금배당 결정",
+            "rcept_no": "BBB00000002",
+            "section_order": 0,
+            "corp_code": "00164742",
+            "corp_name": "현대차",
+            "stock_code": "005380",
+            "rcept_dt": "20260616",
+            "report_nm": "현금ㆍ현물배당결정",
+            "section_title": "",
+            "source": "allFilings",
+        },
+    ]
+    idx, meta = buildContentSegment(rows, showProgress=False)
+    saveSegmentWithSidecar(idx, meta, "main", outDir)
+
+
+def test_source_canary_ref_is_deterministic_not_ranking(tmp_path):
+    # 인용 무결성은 BM25 랭킹이 아니라 meta 직독 라운드트립(존재+docLengths>0)으로 본다.
+    # 질의 '유상증자' 는 doc0(AAA)만 매치 → source-lane(allFilings) 충족하나, 기대 ref 는 doc1(BBB):
+    # 옛 랭킹 멤버십이면 BBB 가 top-K 에 없어 sourceRefMiss(거짓 RED)였다. 결정론 검증은 BBB 가 meta 에
+    # 존재+색인이므로 PASS — bigram 토크나이저서 보일러플레이트 self-retrieval 불가가 게이트를 막지 않음.
+    from dartlab.providers.dart.search.localUpdate import activateStagedIndex, resolveActiveIndexDir
+
+    base = tmp_path / "contentIndex"
+    staged = base / "_staging" / "run1"
+    staged.mkdir(parents=True)
+    _writeTwoDocSegment(staged)
+    _writeManifestWithSourceCanary(
+        staged,
+        [
+            {
+                "query": "유상증자",
+                "target": "filing",
+                "expectedSource": "allFilings",
+                "expectedSourceRef": "BBB00000002",
+                "topK": 1,
+            }
+        ],
+    )
+    result = activateStagedIndex(staged, baseDir=base)
+    assert result["activated"] is True
+    assert resolveActiveIndexDir(base) == staged
+
+
+def test_source_canary_ref_absent_still_rejected(tmp_path):
+    # 결정론 검증이 무결성을 hollow 하게 만들지 않음 — ref 가 meta 에 아예 없으면(드리프트·doc 누락) RED.
+    from dartlab.providers.dart.search.localUpdate import activateStagedIndex, resolveActiveIndexDir
+
+    base = tmp_path / "contentIndex"
+    staged = base / "_staging" / "run1"
+    staged.mkdir(parents=True)
+    _writeTwoDocSegment(staged)
+    _writeManifestWithSourceCanary(
+        staged,
+        [
+            {
+                "query": "유상증자",
+                "target": "filing",
+                "expectedSource": "allFilings",
+                "expectedSourceRef": "ZZZ00000099",
+                "topK": 1,
+            }
+        ],
+    )
+    result = activateStagedIndex(staged, baseDir=base)
+    assert result["activated"] is False
+    assert "sourceCanary:유상증자:sourceRefMiss" in result["errors"]
+    assert resolveActiveIndexDir(base) is None
+
+
 def test_download_and_activate_preserves_active_on_missing_file(tmp_path):
     from dartlab.providers.dart.search.localUpdate import (
         activateStagedIndex,

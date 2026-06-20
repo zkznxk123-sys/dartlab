@@ -487,7 +487,7 @@ def _sourceCanaryPackErrors(indexDir: Path, rawRows: Any) -> list[str]:
     if not isinstance(rawRows, list):
         return ["invalid:sourceCanaryPack"]
     try:
-        from dartlab.providers.dart.search.canaryPack import evaluateCanaryPackRows
+        from dartlab.providers.dart.search.canaryPack import _expectedSourceRefs, evaluateCanaryPackRows
         from dartlab.providers.dart.search.fieldIndex import _scoreBM25, loadSegment, tokenizeContent
 
         loaded = loadSegment("main", indexDir)
@@ -496,7 +496,31 @@ def _sourceCanaryPackErrors(indexDir: Path, rawRows: Any) -> list[str]:
         idx, meta = loaded
     except Exception:  # noqa: BLE001 — corrupt artifacts must not activate.
         return ["sourceCanary:mainLoad"]
+    # 인용 무결성(exact-ref)은 BM25 랭킹이 아니라 인덱스 아티팩트 직독으로 결정론 검증한다.
+    # canary 의 expectedSourceRef 는 빌드가 막 쓴 meta 에서 추출된 값이므로 정상 빌드면 정의상
+    # meta 에 존재 + 그 doc 이 색인(docLengths>0)됐다. ref 드리프트·doc 누락·source 라벨 유실이면
+    # 부재로 RED. bigram 토크나이저에선 보일러플레이트 doc 이 자기 본문 BM25 로 top-K self-retrieval
+    # 이 구조적으로 불가능해(랭킹은 코퍼스 의존·flaky) 랭킹 멤버십을 무결성 proxy 로 쓰면 매일 거짓
+    # RED 가 난다 — 랭킹 품질은 별 트랙(gold/qualityGate)의 책임이고 publish 게이트는 무결성만 본다.
+    # 정규화는 canaryPack._sourceRef 와 동일 규칙(sourceRef or rcept_no) — byte-parity 필수.
+    docLengths = idx.get("docLengths")
+    refs = meta["sourceRef"].to_list() if "sourceRef" in meta.columns else [None] * meta.height
+    rcepts = meta["rcept_no"].to_list() if "rcept_no" in meta.columns else [None] * meta.height
+    refToDoc: dict[str, int] = {}
+    for docId, (sref, rno) in enumerate(zip(refs, rcepts)):
+        key = str(sref or rno or "")
+        if key and key not in refToDoc:
+            refToDoc[key] = docId
+
+    def _refResolved(expectedRefs: set[str]) -> bool:
+        for ref in expectedRefs:
+            docId = refToDoc.get(ref)
+            if docId is not None and (docLengths is None or int(docLengths[docId]) > 0):
+                return True
+        return False
+
     resultsByQuery: dict[str, list[dict[str, Any]]] = {}
+    enriched: list[dict[str, Any]] = []
     for row in rawRows:
         if not isinstance(row, dict):
             return ["invalid:sourceCanaryPackRow"]
@@ -519,7 +543,13 @@ def _sourceCanaryPackErrors(indexDir: Path, rawRows: Any) -> list[str]:
                     }
                 )
         resultsByQuery[query] = ranked
-    report = evaluateCanaryPackRows(rawRows, resultsByQuery)
+        # source-lane·answerable·no-answer trap 은 BM25 경로 유지(flaky 아님), exact-ref 만 결정론 신호.
+        expectedRefs = _expectedSourceRefs(row)
+        enrichedRow = dict(row)
+        if expectedRefs:
+            enrichedRow["_refResolved"] = _refResolved(expectedRefs)
+        enriched.append(enrichedRow)
+    report = evaluateCanaryPackRows(enriched, resultsByQuery)
     return [f"sourceCanary:{failure['query']}:{failure['failureType']}" for failure in report["failures"]]
 
 
