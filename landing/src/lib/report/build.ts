@@ -741,7 +741,10 @@ function buildLiquidity(
 			const capexPct = sOp > 0 ? (sCx / sOp) * 100 : null;
 			const divPct = sOp > 0 ? (sDv / sOp) * 100 : null;
 			const tilt = capexPct != null && divPct != null ? (capexPct > divPct * 1.5 ? '투자(CAPEX) 우선형' : divPct > capexPct ? '주주환원 우선형' : '투자·환원 병행형') : null;
-			const allocText = `${corpName}가 최근 ${yrs.length}년 번 영업현금을 어디에 쓰는지 추세로 본 것입니다(단년 스냅샷은 노이즈라 흐름으로 봅니다). 누적 영업현금흐름 ${fmtAmt1(sOp)} 중 설비투자에 ${fmtAmt1(sCx)}(${fmtPct(capexPct)}), 배당에 ${fmtAmt1(sDv)}(${fmtPct(divPct)})를 배분해${tilt ? `, 자본배분은 ${tilt}에 가깝습니다` : ''}. (투자 → 주주환원 → 적립·상환 우선순위의 흐름)`;
+			// 펀딩 갭 — 배당 후 잔여가 음수인 해(투자·배당이 영업CF 초과)는 어떻게 메웠나(지속가능성).
+			const deficitYrs = yrs.filter((_, i) => residS[i] != null && (residS[i] as number) < 0);
+			const gapNote = deficitYrs.length ? ` ${deficitYrs.join('·')}년은 투자·배당이 영업현금흐름을 초과해(배당 후 잔여 음수) 보유현금 소진이나 차입으로 메웠습니다 — 투자 우선형의 지속가능성은 곳간(현금·차입 여력)과 함께 봐야 합니다.` : '';
+			const allocText = `${corpName}가 최근 ${yrs.length}년 번 영업현금을 어디에 쓰는지 추세로 본 것입니다(단년 스냅샷은 노이즈라 흐름으로 봅니다). 누적 영업현금흐름 ${fmtAmt1(sOp)} 중 설비투자에 ${fmtAmt1(sCx)}(${fmtPct(capexPct)}), 배당에 ${fmtAmt1(sDv)}(${fmtPct(divPct)})를 배분해${tilt ? `, 자본배분은 ${tilt}에 가깝습니다` : ''}.${gapNote} (투자 → 주주환원 → 적립·상환 우선순위의 흐름)`;
 			sections.push({ key: 'capitalAllocation', title: '자본 배분 -- 번 현금을 매년 어디에 쓰나 (연간 추세)', sourceEngine: 'analysis', blocks: [{ type: 'text', text: allocText }, allocTbl] });
 			findings.push({ key: '자본배분', finding: `최근 ${yrs.length}년 누적 영업CF ${fmtAmt1(sOp)} 중 CAPEX ${fmtPct(capexPct)}·배당 ${fmtPct(divPct)}${tilt ? ` (${tilt})` : ''}.`, sourceEngine: 'analysis' });
 		}
@@ -993,7 +996,9 @@ function buildCapitalReturn(
 		const shYear = [...ys].reverse().find((y) => { const ni = niByYear.get(y.year); return ni != null && y.eps != null && Number.isFinite(y.eps as number) && (y.eps as number) > 0; });
 		const sharesEst = shYear ? (niByYear.get(shYear.year)! * 1e12) / (shYear.eps as number) : null;
 		const dilPct = sharesEst != null && sharesEst > 0 && treLast != null && treLast >= 0 ? (treLast / sharesEst) * 100 : null;
-		const dilLine = dilPct != null && dilPct >= 0.05 ? ` 기말 금고주는 발행주식의 약 ${fmtPct(dilPct)}로, 전량 재매각 시 최대 ${fmtPct(dilPct)}만큼 희석될 수 있습니다(발행주식수는 순이익÷EPS로 근사).` : '';
+		// 실현 희석(이미 처분된 자사주) vs 잠재 희석(기말 금고주) 구분 — 과거·미래 희석을 한 줄에 닫음.
+		const sumDisp = finite(ys.map((y) => y.disposalQty)).filter((v) => v >= 0).reduce((a, b) => a + b, 0);
+		const dilLine = dilPct != null && dilPct >= 0.05 ? ` 기말 금고주는 발행주식의 약 ${fmtPct(dilPct)}로, 전량 재매각 시 최대 ${fmtPct(dilPct)}만큼 희석될 수 있습니다(발행주식수는 순이익÷EPS로 근사).${sumDisp > 0 ? ` 한편 최근 ${ys.length}년 처분된 자사주 ${fmtShares(sumDisp)}는 이미 시장에 풀린 *실현* 희석이고, 기말 금고주는 향후 처분 시의 *잠재* 희석으로 구분해 봅니다.` : ''}` : '';
 		const buyBlocks: ReportBlock[] = [
 			{ type: 'text', text: `자사주 매입이 곧 주주환원은 아닙니다. 매입 후 *소각*하면 주식수가 영구히 줄어 주당 가치가 오르지만, *기말 보유(금고주)*로 쌓아 두면 나중에 다시 팔려 희석될 수 있습니다 — 둘을 구분해 봐야 합니다.${buyRead}${dilLine}` },
 			buyTbl
