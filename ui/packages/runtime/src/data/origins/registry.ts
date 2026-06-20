@@ -16,8 +16,10 @@ const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefi
 const NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const NAVER_PROXY = ((viteEnv?.VITE_DARTLAB_NAVER_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const naverDev = Boolean(viteEnv?.DEV);
+// gov 주가 dev 라이브 fill 게이트(naverDev 동형) — dev 만 /__gov 미들웨어 존재, 프로덕션은 읽기 전용.
+const govDev = Boolean(viteEnv?.DEV);
 
-export type OriginId = 'hf' | 'hfRange' | 'localApi' | 'newsWorker' | 'naverWorker' | 'duckdbHf';
+export type OriginId = 'hf' | 'hfRange' | 'localApi' | 'newsWorker' | 'naverWorker' | 'duckdbHf' | 'govDev';
 
 /** 캐시 정책 — 오리진별 차등(정직 TTL, 04 §정직 TTL). scope='none' = 무캐시.
  *  ('persist' 는 선언만 하고 미구현이던 죽은 scope라 제거 — 영속 캐시는 JSON arm(dartlabData.loadJson)이
@@ -58,6 +60,13 @@ const ORIGINS: Partial<Record<OriginId, OriginDef>> = {
 		resolve: naverWorkerUrl,
 		defaultCache: { scope: 'memory', ttlMs: 10 * MIN, maxEntries: 64 },
 		configured: () => naverDev || Boolean(NAVER_PROXY) // dev=미들웨어 / 프로덕션=프록시 설정 시
+	},
+	// dev 전용 gov 주가 라이브 fill — Vite /__gov 미들웨어가 data.go.kr 호출→정규화→HF 업로드 후 GovCandleFile 반환.
+	// path=종목코드. naverWorker(/__naver) 동형. 무캐시(즉시 HF 반영 — 다음 read 가 HF 캐시). 프로덕션 미동작(읽기 전용).
+	govDev: {
+		resolve: (code) => `/__gov?code=${encodeURIComponent(code)}`,
+		defaultCache: { scope: 'none', ttlMs: 0 },
+		configured: () => govDev
 	}
 };
 

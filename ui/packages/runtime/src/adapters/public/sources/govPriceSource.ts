@@ -8,10 +8,9 @@
 // 출처표시 의무(공공누리): gov 데이터 표시 시 contracts 의 GOV_ATTRIBUTION 노출.
 import type { Candle } from '@dartlab/ui-contracts';
 import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
+import { originConfigured } from '../../../data/origins/registry';
 
 const browser = typeof window !== 'undefined';
-// vite 환경 캐스트 — 런타임 패키지 tsc 는 vite/client 타입 무의존 (origin.ts 동일 패턴)
-const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefined> }).env;
 
 export interface GovCandleFile {
 	source: string;
@@ -69,12 +68,18 @@ async function readHf(core: DataCore, code: string): Promise<Candle[] | null> {
 	}
 }
 
-async function fillViaDev(code: string): Promise<Candle[] | null> {
-	if (!viteEnv?.DEV) return null; // 프로덕션: 토큰 없음 → 읽기 전용
+async function fillViaDev(core: DataCore, code: string): Promise<Candle[] | null> {
+	if (!originConfigured('govDev')) return null; // 프로덕션: 미들웨어 없음 → 읽기 전용
 	try {
-		const res = await fetch(`/__gov?code=${encodeURIComponent(code)}`);
-		if (!res.ok) return null;
-		return pick(await res.json());
+		// 작업대 경유(코어 request) — origin 'govDev' = Vite /__gov 미들웨어. dev fill 무캐시(즉시 HF 반영),
+		// 코어가 동일 코드 동시호출 dedup(중복 data.go.kr 호출 차단). 옛 raw fetch 폐기(data-wiring SSOT).
+		const j = await core.request<unknown>({
+			origin: 'govDev',
+			path: code,
+			parse: (res) => (res.ok ? res.json() : Promise.resolve(null)),
+			cacheKey: `gov.dev:${code}`
+		});
+		return pick(j);
 	} catch {
 		return null;
 	}
@@ -118,6 +123,6 @@ export function loadGovCandles(code: string, core?: DataCore): Promise<Candle[] 
 	const dc = govCore(core);
 	return (async () => {
 		const candles = await readHf(dc, c);
-		return candles ?? (await fillViaDev(c));
+		return candles ?? (await fillViaDev(dc, c));
 	})();
 }
