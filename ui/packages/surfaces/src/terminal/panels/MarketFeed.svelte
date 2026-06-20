@@ -16,12 +16,15 @@
 	let { lang, active, onPick }: Props = $props();
 	const rt = useDartLabRuntime();
 
-	const CAP = 200; // 표시 상한 — 전수는 칩 카운트로 표면화(top-N 침묵 절단 아님)
+	const STEP = 200; // 무한스크롤 윈도우 증가 단위 — 스크롤 끝마다 +200. 데이터(38k)는 이미 메모리라 재fetch 0.
 	type FeedState = 'loading' | 'ready' | 'empty' | 'error';
 	let feedState = $state<FeedState>('loading');
 	let rows = $state<MarketFiling[]>([]);
 	let cat = $state('all');
 	let instOnly = $state(false);
+	let cap = $state(STEP); // 현재 렌더 윈도우 — 가상화 라이브러리 금지(IntersectionObserver DOM 직접)
+	let listEl = $state<HTMLDivElement | null>(null);
+	let sentinel = $state<HTMLDivElement | null>(null);
 
 	// 분류는 1회 계산(파생 메모이즈) — 탭 전환마다 재분류 금지. bake 가 이미 rcept_dt 내림차순.
 	// 기관 표식 — 제출자명이 기관 시그널 AND 제출자≠회사(자기보고 제외). 증권사가 *자기* 발행실적보고서를
@@ -43,7 +46,7 @@
 	const filtered = $derived(
 		classified.filter((x) => (cat === 'all' || x.cat === cat) && (!(instOnly && showInstChip) || x.inst))
 	);
-	const shown = $derived(filtered.slice(0, CAP));
+	const shown = $derived(filtered.slice(0, cap));
 	// 데이터 as-of — bake 가 rcept_dt 내림차순이라 rows[0] 이 최신. 90일 rolling 인데 데이터가 며칠
 	// stale 일 수 있어 '기준일'을 정직 표면화(데이터 max ≠ today 가능). 재정렬 0(rows[0] O(1)).
 	const asOf = $derived(rows.length ? rows[0].rceptDate : '');
@@ -64,6 +67,27 @@
 		return () => {
 			cancelled = true;
 		};
+	});
+
+	// 탭/필터 전환 시 윈도우 리셋(과스크롤 방지). cat·instOnly 만 의존(classified/filtered 재계산과 분리).
+	$effect(() => {
+		cat;
+		instOnly;
+		cap = STEP;
+	});
+
+	// 무한스크롤 — sentinel(리스트 끝)이 뷰포트에 닿으면 cap 점증. 데이터는 이미 메모리(재fetch 0·재분류 0).
+	// 효과 본문은 sentinel/listEl 만 읽음(cap·filtered 는 콜백에서만 읽어 IO 재생성 방지).
+	$effect(() => {
+		if (!sentinel || !listEl) return;
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting && cap < filtered.length) cap += STEP;
+			},
+			{ root: listEl, rootMargin: '300px' }
+		);
+		io.observe(sentinel);
+		return () => io.disconnect();
 	});
 
 	const mmdd = (d: string) => (d.length >= 10 ? d.slice(5).replace('-', '') : d); // YYYY-MM-DD → MMDD
@@ -106,7 +130,7 @@
 	{/if}
 
 	{#if feedState === 'ready'}
-		<div class="filingList feedList">
+		<div class="filingList feedList" bind:this={listEl}>
 			{#each shown as x (x.r.rceptNo)}
 				<div
 					class={'filingRow feedRow' + (active === x.r.stockCode ? ' on' : '')}
@@ -124,8 +148,10 @@
 					<a class="flArrow" href={x.r.url} target="_blank" rel="noopener" onclick={(e) => e.stopPropagation()}>↗</a>
 				</div>
 			{/each}
-			{#if filtered.length > CAP}
-				<div class="feedCap">{t(`최근순 ${CAP}건 표시 · 전체 ${filtered.length.toLocaleString()}건`, `${CAP} of ${filtered.length.toLocaleString()}`)}</div>
+			{#if cap < filtered.length}
+				<div class="feedCap" bind:this={sentinel}>{t(`${cap.toLocaleString()} / ${filtered.length.toLocaleString()}건 · 스크롤하면 더 보기`, `${cap.toLocaleString()} / ${filtered.length.toLocaleString()} · scroll for more`)}</div>
+			{:else if filtered.length > STEP}
+				<div class="feedCap">{t(`전체 ${filtered.length.toLocaleString()}건`, `all ${filtered.length.toLocaleString()}`)}</div>
 			{/if}
 		</div>
 	{:else if feedState === 'loading'}
