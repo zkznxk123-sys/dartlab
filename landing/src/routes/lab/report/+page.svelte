@@ -78,6 +78,16 @@
     return '';
   }
 
+  // 판정 어휘 신호색 — 신용/건전성 점검표의 '양호/주의' 전용(적색=음수 SSOT와 분리해 주의=황갈).
+  function verdictTone(v: unknown): string {
+    const s = String(v ?? '').trim();
+    if (s.startsWith('양호') || s === '안정' || s === '충족') return 'ok';
+    if (s.startsWith('주의') || s === '경계' || s === '미달') return 'warn';
+    return ''; // '산출 불가' 등 → 중립
+  }
+  // 비숫자 의미 컬럼(좌측 텍스트, cellTone 미적용) 화이트리스트
+  const TXT_COLS = new Set(['최근 범위', '기준']);
+
   function spark(row: Record<string, string>, yearCols: string[]) {
     const pairs: { yr: number; n: number }[] = [];
     for (const yk of yearCols) {
@@ -297,11 +307,11 @@
                     <div class="bTableWrap">
                       {#if b.label}<div class="tCap">{b.label}</div>{/if}
                       <table class="bTable">
-                        <thead><tr>{#each cols as c, ci}<th class={ci === 0 ? 'lbl' : 'num'}>{c}</th>{/each}{#if ts}<th class="sparkCol">추이</th>{/if}</tr></thead>
+                        <thead><tr>{#each cols as c, ci}<th class={ci === 0 ? 'lbl' : c === '판정' ? 'verdict-h' : TXT_COLS.has(c) ? 'txt-h' : 'num'}>{c}</th>{/each}{#if ts}<th class="sparkCol">추이</th>{/if}</tr></thead>
                         <tbody>
                           {#each b.data as row}
                             <tr>
-                              {#each cols as c, ci}<td class={ci === 0 ? 'lbl' : 'num ' + cellTone(row[c])}>{row[c]}</td>{/each}
+                              {#each cols as c, ci}{#if ci === 0}<td class="lbl">{row[c]}</td>{:else if c === '판정'}{@const vt = verdictTone(row[c])}<td class="verdict {vt}">{#if vt === 'ok'}<span class="vMark ok">●</span>{:else if vt === 'warn'}<span class="vMark warn">▲</span>{/if}{row[c]}</td>{:else if TXT_COLS.has(c)}<td class="txt {c === '기준' ? 'threshold' : ''}">{row[c]}</td>{:else}<td class="num {cellTone(row[c])}">{row[c]}</td>{/if}{/each}
                               {#if ts}{@const sp = spark(row, cols.slice(1))}<td class="sparkCol">{#if sp}<svg class="spark {sp.tone}" width="54" height="15" viewBox="0 0 54 15">{#if sp.zeroY}<line x1="0" y1={sp.zeroY} x2="54" y2={sp.zeroY} stroke="var(--dim)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.55" />{/if}<polyline points={sp.points} fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" />{#each sp.clipMarks as cm}<circle cx={cm.x} cy={cm.y} r="1.7" fill="none" stroke="currentColor" stroke-width="0.8" />{/each}<circle cx={sp.lastX} cy={sp.lastY} r="1.5" fill="currentColor" /></svg>{/if}</td>{/if}
                             </tr>
                           {/each}
@@ -519,6 +529,15 @@
   .bTable td.lbl { text-align: left; font-weight: 600; white-space: nowrap; }
   .bTable td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
   .bTable td.num.neg { color: var(--down); } .bTable td.num.pos { color: var(--up); }
+  /* 비숫자 의미 컬럼 — 좌측 sans (시계열표 흉내 방지) */
+  .bTable td.txt, .bTable th.txt-h { text-align: left; font-family: var(--sans); color: var(--ink); font-weight: 400; }
+  .bTable td.txt.threshold { color: var(--dim); font-size: 11px; }
+  /* 판정 — 신호색(양호=녹·주의=황갈·산출불가=중립). 적색은 음수 SSOT라 주의에 안 씀 */
+  .bTable td.verdict, .bTable th.verdict-h { text-align: center; font-family: var(--sans); font-weight: 700; white-space: nowrap; }
+  .bTable td.verdict.ok { color: var(--up); }
+  .bTable td.verdict.warn { color: var(--warn); }
+  .vMark { font-size: 8px; margin-right: 4px; vertical-align: 1px; }
+  .vMark.ok { color: var(--up); } .vMark.warn { color: var(--warn); }
   .bTable tbody tr:nth-child(even) { background: var(--soft); }
   .bTable td.sparkCol { text-align: right; padding-right: 4px; width: 58px; }
   .spark { vertical-align: middle; color: var(--dim); }

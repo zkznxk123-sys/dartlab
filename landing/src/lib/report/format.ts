@@ -47,3 +47,14 @@ export function fmtScaled(v: Num, scale: number): string {
 	if (v == null || !Number.isFinite(v)) return '-';
 	return ((v as number) * scale).toFixed(1);
 }
+
+/** lo~hi 범위를 단일 단위로 일관 표기(조 축의 억·조 혼용 방지). */
+export function fmtRange(lo: Num, hi: Num, unit: '%' | '배' | '조'): string {
+	if (lo == null || hi == null || !Number.isFinite(lo) || !Number.isFinite(hi)) return '-';
+	if (unit === '%') return `${fmtPct(lo)} ~ ${fmtPct(hi)}`;
+	if (unit === '배') return `${fmtMult(lo)} ~ ${fmtMult(hi)}`;
+	// 조 — 두 값을 같은 단위로(둘 중 큰 절대값 기준)
+	const maxAbs = Math.max(Math.abs(lo as number), Math.abs(hi as number));
+	if (maxAbs >= 1) return `${(lo as number).toFixed(1)}조 ~ ${(hi as number).toFixed(1)}조`;
+	return `${Math.round((lo as number) * 10000).toLocaleString('en-US')}억 ~ ${Math.round((hi as number) * 10000).toLocaleString('en-US')}억`;
+}

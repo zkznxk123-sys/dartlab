@@ -20,8 +20,8 @@ export const PERSPECTIVES: PerspectiveMeta[] = [
 		key: 'liquidity',
 		label: '곳간과 빚',
 		question: '버틸 수 있는가 · 현금이 도는가',
-		focusQuestions: ['현금은 어떻게 도나', '빚을 갚을 여력은'],
-		built: false
+		focusQuestions: ['현금은 어떻게 도나', '빚을 갚을 여력은', '재무건전성은 견고한가'],
+		built: true
 	},
 	{
 		key: 'capitalReturn',

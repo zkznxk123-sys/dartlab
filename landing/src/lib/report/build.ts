@@ -11,7 +11,7 @@ import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
 import type { ReportBlock, ReportModel, ReportResult, ReportSection } from './model';
 import { lastNonNull } from './model';
 import { findPerspective, type PerspectiveMeta } from './perspectives';
-import { pYear, fmtPct, fmtPctSigned, fmtMult, fmtAmt1, scaleAmt, fmtScaled } from './format';
+import { pYear, fmtPct, fmtPctSigned, fmtMult, fmtAmt1, scaleAmt, fmtScaled, fmtRange } from './format';
 
 // ── 공통 유틸 ──────────────────────────────────────────────
 function annualView(fin: TerminalFinanceBundle): TerminalFinance | null {
@@ -247,6 +247,169 @@ function buildEarningsPower(
 	return { sections, findings, closing, kpis, conclusion };
 }
 
+// 재무건전성 점검(브라우저 — Python dCR 7축 아님). 측정값 *나란히*, 종합점수·등급 금지.
+// 판정에 자기이력 편입(과거 미달 연수) + 전구간 결측 축은 honest-skip 행으로 명시.
+function healthTable(
+	axes: { name: string; series: Num[]; unit: '%' | '배' | '조'; good: 'high' | 'low'; threshold: number; thLabel: string }[]
+): ReportBlock | null {
+	const fmtOf = (u: '%' | '배' | '조') => (u === '%' ? fmtPct : u === '배' ? fmtMult : fmtAmt1);
+	const rows = axes.map((a) => {
+		const vals = a.series.filter((v): v is number => v != null && Number.isFinite(v));
+		const fmt = fmtOf(a.unit);
+		if (!vals.length) {
+			// honest-skip — 축이 조용히 사라지지 않게 '산출 불가' 행 명시(예: 무차입사 이자보상배율).
+			return { 지표: a.name, 최근값: '-', '최근 범위': '-', 기준: a.thLabel, 판정: '산출 불가' } as Record<string, string>;
+		}
+		const latest = vals[vals.length - 1];
+		const lo = Math.min(...vals);
+		const hi = Math.max(...vals);
+		const isPass = (v: number) => (a.good === 'high' ? v >= a.threshold : v <= a.threshold);
+		const breaches = vals.filter((v) => !isPass(v)).length;
+		let verdict: string;
+		if (!isPass(latest)) verdict = '주의';
+		else if (breaches > 0) verdict = `양호 (과거 ${breaches}년 미달)`;
+		else verdict = '양호';
+		return {
+			지표: a.name,
+			최근값: fmt(latest),
+			'최근 범위': fmtRange(lo, hi, a.unit),
+			기준: a.thLabel,
+			판정: verdict
+		} as Record<string, string>;
+	});
+	if (!rows.length) return null;
+	return { type: 'table', label: '재무건전성 점검 · 4축 측정값 (각 축 독립 — 종합점수 없음, Python 신용등급 아님)', data: rows };
+}
+
+// ── 관점 2: 곳간과 빚 (Liquidity & Solvency) ───────────────
+function buildLiquidity(
+	tf: TerminalFinance,
+	ctx: { corpName: string; yearCols: string[]; pick: (v: Num[]) => Num[] },
+	debt: { ladder: { buckets: Num[]; shortTerm: Num; year: string } | null } | null
+): { sections: ReportSection[]; findings: ReportModel['keyFindings']; closing: ReportModel['closing']; kpis: ReportModel['headlineKpis']; conclusion: string } {
+	const { corpName, yearCols, pick } = ctx;
+	const isRow = (k: string): Num[] => tf.statements.IS.find((r) => r.key === k)?.values ?? [];
+	const cfRow = (k: string): Num[] => tf.statements.CF.find((r) => r.key === k)?.values ?? [];
+	const rRow = (k: string): Num[] => tf.ratios.find((r) => r.key === k)?.values ?? [];
+	const cardSeries = (k: string): Num[] => tf.cards.find((c) => c.key === k)?.series?.[0]?.data ?? [];
+
+	// 파생 시계열
+	const oiAll = pick(isRow('operatingIncome'));
+	const fcAll = pick(isRow('financeCosts'));
+	const icr = oiAll.map((v, i) => (v != null && fcAll[i] != null && (fcAll[i] as number) !== 0 ? (v as number) / (fcAll[i] as number) : null));
+	const fcf = pick(cardSeries('fcfTrend'));
+
+	const drL = lastNonNull(rRow('debtRatio'));
+	const crL = lastNonNull(rRow('currentRatio'));
+	const erL = lastNonNull(rRow('equityRatio'));
+	const icrL = lastNonNull(icr);
+	const fcfL = lastNonNull(fcf);
+	const cfoL = lastNonNull(pick(cfRow('cfOperating')));
+
+	const sections: ReportSection[] = [];
+	const findings: ReportModel['keyFindings'] = [];
+
+	// S1 현금 창출·배분
+	const cfTbl = amtTable(
+		[
+			{ label: '영업활동현금흐름', values: pick(cfRow('cfOperating')) },
+			{ label: '투자활동현금흐름', values: pick(cfRow('cfInvesting')) },
+			{ label: '재무활동현금흐름', values: pick(cfRow('cfFinancing')) },
+			{ label: '잉여현금흐름(FCF)', values: fcf }
+		],
+		yearCols,
+		'현금흐름',
+		'현금 창출·배분'
+	);
+	const s1: ReportBlock[] = [
+		{
+			type: 'text',
+			text: `${corpName}의 현금은 영업에서 벌어 투자·재무로 흘러갑니다. 영업현금흐름이 꾸준히 (+)이고 잉여현금흐름(FCF = 영업현금 − 설비투자)이 (+)이면, 외부 차입 없이 자체 현금으로 굴러간다는 뜻입니다. 투자활동현금흐름이 (−)인 것은 설비·지분 투자 집행을 뜻하며 통상적인 모습입니다(붉은색은 음수 부호 표기일 뿐 부정적 신호가 아닙니다).`
+		}
+	];
+	if (cfTbl) s1.push(cfTbl);
+	if (cfTbl) {
+		sections.push({ key: 'cashFlow', title: '현금 창출·배분 -- 현금은 어떻게 도는가', sourceEngine: 'analysis', blocks: s1, emph: true });
+		findings.push({ key: '현금흐름', finding: `최근 영업CF ${fmtAmt1(cfoL)} · FCF ${fmtAmt1(fcfL)}.`, sourceEngine: 'analysis' });
+	}
+
+	// S2 레버리지·유동성
+	const levTbl = pctTable(
+		[
+			{ label: '부채비율', values: pick(rRow('debtRatio')) },
+			{ label: '자기자본비율', values: pick(rRow('equityRatio')) },
+			{ label: '유동비율', values: pick(rRow('currentRatio')) }
+		],
+		yearCols,
+		'안정성 지표',
+		'레버리지·유동성 비율'
+	);
+	if (levTbl) {
+		const s2text = `부채비율 ${fmtPct(drL)} · 유동비율 ${fmtPct(crL)} 입니다. 부채비율은 자본 대비 부채(낮을수록 안정), 유동비율은 1년 내 갚을 빚 대비 1년 내 현금화 자산(100% 이상이면 단기 상환 여력)입니다.`;
+		sections.push({ key: 'leverage', title: '레버리지·유동성 -- 빚은 감당 가능한가', sourceEngine: 'analysis', blocks: [{ type: 'text', text: s2text }, levTbl] });
+		findings.push({ key: '안정성', finding: `부채비율 ${fmtPct(drL)} · 유동비율 ${fmtPct(crL)} · 자기자본비율 ${fmtPct(erL)}.`, sourceEngine: 'analysis' });
+	}
+
+	// S3 재무건전성 점검 (브라우저 측정 — dCR 아님). 부채비율↔자기자본비율 항등 중복이라
+	// 자기자본비율은 제외(레버리지 표에 이미 있음). 레버리지·유동성·이자감당·현금창출 4축.
+	const hTbl = healthTable([
+		{ name: '부채비율', series: pick(rRow('debtRatio')), unit: '%', good: 'low', threshold: 200, thLabel: '200% 이하' },
+		{ name: '유동비율', series: pick(rRow('currentRatio')), unit: '%', good: 'high', threshold: 100, thLabel: '100% 이상' },
+		{ name: '이자보상배율', series: icr, unit: '배', good: 'high', threshold: 1, thLabel: '1배 이상' },
+		{ name: '잉여현금흐름(FCF)', series: fcf, unit: '조', good: 'high', threshold: 0, thLabel: '0 이상' }
+	]);
+	if (hTbl) {
+		const s3: ReportBlock[] = [
+			{
+				type: 'text',
+				text: `아래는 재무 안정성을 레버리지·유동성·이자감당·현금창출 4개 축으로 *나란히* 본 것입니다. 각 축은 독립이며 하나의 종합점수로 합치지 않습니다 — 이 표는 dartlab 의 정밀 신용등급(Python 7축 dCR)이 아니라 브라우저에서 재무비율로 계산한 점검표입니다. 판정은 최신값 기준이며, 과거 미달 이력이 있으면 함께 표기합니다.`
+			},
+			hTbl
+		];
+		sections.push({ key: 'financialHealth', title: '재무건전성 점검 -- 어느 축이 견고하고 어느 축이 약한가', sourceEngine: 'analysis', blocks: s3 });
+		findings.push({ key: '재무건전성', finding: `이자보상배율 ${fmtMult(icrL)} · 부채비율 ${fmtPct(drL)} · FCF ${fmtAmt1(fcfL)}.`, sourceEngine: 'analysis' });
+	}
+
+	// S4 채무 만기 사다리 (report.debtProfile — 데이터 있을 때만)
+	const ladder = debt?.ladder ?? null;
+	if (ladder && ladder.buckets.some((v) => v != null && (v as number) > 0)) {
+		const W = 1e12; // 원 → 조
+		const names = ['1년 이하', '1~2년', '2~3년', '3~4년', '4~5년', '5~10년', '10년 초과'];
+		// 꼬리 빈 구간 절단 — 마지막 유효 만기 이후 연속 빈 행 제거(삼성처럼 단기 2칸만인 경우 휑한 표 방지).
+		let lastFilled = 0;
+		ladder.buckets.forEach((v, i) => { if (v != null && (v as number) > 0) lastFilled = i; });
+		const rows: Record<string, string>[] = ladder.buckets.slice(0, lastFilled + 1).map((v, i) => ({
+			만기구간: names[i] ?? `구간${i + 1}`,
+			금액: v != null ? fmtAmt1((v as number) / W) : '-'
+		}));
+		const stb = ladder.shortTerm != null ? fmtAmt1((ladder.shortTerm as number) / W) : '-';
+		sections.push({
+			key: 'debtLadder',
+			title: '채무 만기 사다리 -- 언제 얼마를 갚아야 하나',
+			sourceEngine: 'analysis',
+			blocks: [
+				{ type: 'text', text: `사채 만기를 잔존기간별로 나눈 것입니다(${ladder.year} 기준). 단기(1년 이하)에 몰려 있으면 차환 부담이 큽니다. 전자단기사채·CP 등 단기성 채무 합계는 ${stb} 입니다.` },
+				{ type: 'table', label: '사채 잔존만기 분포', data: rows }
+			]
+		});
+		findings.push({ key: '채무만기', finding: `단기성 채무 ${stb} · 1년 이하 만기 ${fmtAmt1((ladder.buckets[0] as number) / W)}.`, sourceEngine: 'analysis' });
+	}
+
+	const kpis: ReportModel['headlineKpis'] = [
+		{ label: '부채비율', value: fmtPct(drL) },
+		{ label: '자기자본비율', value: fmtPct(erL) },
+		{ label: '유동비율', value: fmtPct(crL) },
+		{ label: '이자보상배율', value: fmtMult(icrL) },
+		{ label: '잉여현금흐름', value: fmtAmt1(fcfL) },
+		{ label: '영업현금흐름', value: fmtAmt1(cfoL) }
+	];
+	const conclusion = `${corpName} — 부채비율 ${fmtPct(drL)}, 유동비율 ${fmtPct(crL)}, 이자보상배율 ${fmtMult(icrL)}${fcfL != null ? ` · FCF ${fmtAmt1(fcfL)}` : ''}.`;
+	const closing: ReportModel['closing'] = [
+		{ label: '재무', engine: 'analysis', line: `부채비율 ${fmtPct(drL)} · 유동비율 ${fmtPct(crL)} · 이자보상배율 ${fmtMult(icrL)} · FCF ${fmtAmt1(fcfL)}.` }
+	];
+	return { sections, findings, closing, kpis, conclusion };
+}
+
 // ── 미구현 관점 — 정직 '준비 중' ───────────────────────────
 function pendingModel(
 	code: string,
@@ -310,8 +473,17 @@ export async function buildReport(
 	const yearCols = idx.map((i) => pYear(tf.periods[i]));
 	const pick = (values: Num[]): Num[] => idx.map((i) => values[i] ?? null);
 
-	const built = buildEarningsPower(tf, { corpName, yearCols, pick });
+	const ctx = { corpName, yearCols, pick };
+	let built;
+	if (persp.key === 'liquidity') {
+		const debt = await rt.report.debtProfile(code).catch(() => null);
+		built = buildLiquidity(tf, ctx, debt);
+	} else {
+		built = buildEarningsPower(tf, ctx);
+	}
 	const blockCount = built.sections.reduce((acc, s) => acc + s.blocks.length, 0);
+	if (!built.sections.length)
+		return { skipped: true, stockCode: code, reason: '이 관점에 채울 데이터가 부족합니다.' };
 
 	return {
 		stockCode: code,
@@ -323,7 +495,7 @@ export async function buildReport(
 		perspectiveLabel: persp.label,
 		conclusion: built.conclusion,
 		headlineKpis: built.kpis,
-		narrativeOverview: `이 보고서는 ${corpName}의 손익·마진·성장·이익품질을 연간 공시 기준으로 정리했습니다. 모든 수치는 데이터 작업대에서 조회 시점에 계산되며, 사전 bake·정적 캐시는 사용하지 않습니다.`,
+		narrativeOverview: `이 보고서는 ${corpName}의 ${persp.label} — ${persp.question} — 를 연간 공시 기준으로 정리했습니다. 모든 수치는 데이터 작업대에서 조회 시점에 계산되며, 사전 bake·정적 캐시는 사용하지 않습니다.`,
 		keyFindings: built.findings,
 		sections: built.sections,
 		closing: built.closing,
@@ -334,7 +506,7 @@ export async function buildReport(
 			note: '모든 수치는 HuggingFace dart/finance parquet 을 브라우저가 직접 읽어 계산했습니다. 정적 캐시·사전 bake 없음 — 조회 시점 리얼타임.'
 		},
 		assumptionsNote:
-			'연간(사업보고서) 기준 · 분기는 누계 처리 · 표 단위는 자릿수에 따라 조/억 자동 스케일 · 공시 항목이 빈약한 행(예: 일부 기업의 매출원가)은 표에서 자동 생략 · 영업외 일회성 손익이 큰 해는 본문에 각주로 표시. 신용·산업·시장·주주환원 관점은 후속 사이클에서 추가됩니다.',
+			'연간(사업보고서) 기준 · 분기는 누계 처리 · 표 단위는 자릿수에 따라 조/억 자동 스케일 · 공시 항목이 빈약한 행은 표에서 자동 생략 · 영업외 일회성 손익이 큰 해는 본문에 각주로 표시 · 재무건전성 점검은 브라우저 재무비율 계산(Python 신용등급 dCR 아님). 주주환원·시장의 평가·누구의 회사 관점은 후속 사이클에서 추가됩니다.',
 		qualityLabel: built.sections.length >= 3 ? 'verified' : 'conditional',
 		focusQuestions: persp.focusQuestions
 	};
