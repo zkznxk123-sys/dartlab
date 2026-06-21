@@ -19,7 +19,7 @@ ogImage: /thumbnails/35-treasury-stock-third-party-allotment-and-major-sharehold
 - 얼마에 들어오고 어떤 조건이 붙는가
 - 그 결과로 누가 더 유리해지는가
 
-이 글은 자기주식 취득·처분, 제3자배정 유상증자, 최대주주 변경을 `상대방 -> 가격 -> 소각/희석 -> 지배력 변화 -> 후속 실행` 순서로 묶어 읽는 방법을 정리한다. 주주환원 관점은 [주주환원 정책은 말과 숫자 중 무엇을 봐야 하나](/blog/shareholder-return-what-matters), 일반 유상증자는 [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change), 희석형 조달은 [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)과 같이 보면 더 잘 이어진다.
+이 글은 자기주식 취득·처분, 제3자배정 유상증자, 최대주주 변경을 `상대방 -> 가격 -> 소각/희석 -> 지배력 변화 -> 후속 실행` 순서로 묶어 읽는 방법을 정리한다. 주주환원 관점은 [주주환원 정책은 말과 숫자 중 무엇을 봐야 하나](/blog/shareholder-return-what-matters), 일반 유상증자는 유상증자 공시 읽는 법, 희석형 조달은 전환사채와 BW 공시 읽는 법과 같이 보면 더 잘 이어진다.
 
 ![자기주식, 제3자배정, 최대주주 변경을 어떤 순서로 해석해야 하는지 정리한 구조도](./assets/037-reading-flow.svg)
 
@@ -176,8 +176,8 @@ ogImage: /thumbnails/35-treasury-stock-third-party-allotment-and-major-sharehold
 ## 조건 분석에 참고할 글
 
 - [주주환원 정책은 말과 숫자 중 무엇을 봐야 하나](/blog/shareholder-return-what-matters)
-- [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
-- [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
+- 유상증자 공시 읽는 법
+- 전환사채와 BW 공시 읽는 법
 - [주주총회소집공고에서 꼭 봐야 할 것은 무엇인가](/blog/how-to-read-agm-notice)
 
 ## 관련 공시 출처

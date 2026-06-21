@@ -226,7 +226,7 @@ c = dartlab.Company("005930")
 print(c.panel("ratios"))  # 수익성, 안정성, 성장성 등 50개 비율
 ```
 
-자기자본수익률(자기자본이익률), 부채비율, 영업이익률 같은 투자 지표가 자동으로 계산된다. [자세히 보기 →](/blog/dartlab-easy-start)
+자기자본수익률(자기자본이익률), 부채비율, 영업이익률 같은 투자 지표가 자동으로 계산된다. 자세히 보기 →
 
 ### 공시 변화 감지
 
@@ -267,7 +267,7 @@ uv run dartlab setup openai
 uv run dartlab ask "삼성전자 재무건전성 분석해줘"
 ```
 
-[dartlab 인사이트](/blog/dartlab-easy-start), [dartlab ask](/blog/dartlab-easy-start) 글에서 자세히 다룬다.
+dartlab 인사이트, dartlab ask 글에서 자세히 다룬다.
 
 ---
 
@@ -332,13 +332,13 @@ uv run python main.py
 
 dartlab이 설치됐다면 아래 글에서 각 기능을 더 깊이 파볼 수 있다.
 
-- [dartlab 재무제표](/blog/dartlab-easy-start) — 한 줄로 재무제표 꺼내고 50개 비율까지 자동 계산
+- dartlab 재무제표 — 한 줄로 재무제표 꺼내고 50개 비율까지 자동 계산
 - [이 회사는 무엇으로 돈을 버는가 — 수익 구조 읽기](/blog/revenue-structure-how-to-read) — 재무제표 숫자를 어떻게 해석하는지
 
 실험적 기능도 있다 (아직 개발 중이라 동작이 바뀔 수 있다):
 
-- [dartlab 인사이트](/blog/dartlab-easy-start) — 7영역 등급으로 기업 건강 체크
-- [dartlab ask](/blog/dartlab-easy-start) — GPT 하나로 전자공시 AI 분석
-- [dartlab MCP](/blog/dartlab-easy-start) — Claude Desktop에서 전자공시 바로 조회
-- [dartlab 스크리닝](/blog/dartlab-easy-start) — 2,700개 종목 스크리닝
-- [dartlab network](/blog/dartlab-easy-start) — 상장사 전체 관계망 시각화
+- dartlab 인사이트 — 7영역 등급으로 기업 건강 체크
+- dartlab ask — GPT 하나로 전자공시 AI 분석
+- dartlab MCP — Claude Desktop에서 전자공시 바로 조회
+- dartlab 스크리닝 — 2,700개 종목 스크리닝
+- dartlab network — 상장사 전체 관계망 시각화

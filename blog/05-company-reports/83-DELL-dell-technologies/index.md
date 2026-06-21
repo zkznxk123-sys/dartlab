@@ -536,7 +536,7 @@ print(capital["dividendPolicy"]["history"][0])
 
 이 코드를 돌리면 블로그의 핵심 숫자가 재현된다. FY2026 매출 $113.5B, 영업이익률 7.18%, gross margin 20.0%, 영업CF $11.19B, FCF $8.55B, OCF/NI 188%, 배당성향 24.6%. 여기에 SEC 10-K의 제품·서비스 분해와 ISG 제품군 분해를 붙이면 글의 뼈대가 완성된다.
 
-이 순서를 독자가 익히면 DELL 하나만 읽는 게 아니라 다른 EDGAR 기업도 읽을 수 있다. [MSTR](/blog/MSTR-strategy)은 손익계산서보다 공정가치 회계 주석을 먼저 봐야 했다. [DELL](/blog/DELL-dell-technologies)은 손익계산서 다음에 제품·서비스 gross margin과 세그먼트 주석을 봐야 한다. [LMT](/blog/LMT-lockheed-martin)은 매출보다 계약 구조와 프로그램 손실을 봐야 한다. EDGAR 글의 목적은 바로 이 순서 감각을 쌓는 것이다.
+이 순서를 독자가 익히면 DELL 하나만 읽는 게 아니라 다른 EDGAR 기업도 읽을 수 있다. [MSTR](/blog/MSTR-strategy)은 손익계산서보다 공정가치 회계 주석을 먼저 봐야 했다. DELL은 손익계산서 다음에 제품·서비스 gross margin과 세그먼트 주석을 봐야 한다. [LMT](/blog/LMT-lockheed-martin)은 매출보다 계약 구조와 프로그램 손실을 봐야 한다. EDGAR 글의 목적은 바로 이 순서 감각을 쌓는 것이다.
 
 ---
 
