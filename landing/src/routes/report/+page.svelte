@@ -10,7 +10,7 @@
   import { DARTLAB_BRAND_LINKS, SupportDialog, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
   import { buildReport, buildOverview } from '$lib/report/build';
   import { isSkipped, type ReportModel, type OverviewModel } from '$lib/report/model';
-  import { PERSPECTIVES } from '$lib/report/perspectives';
+  import { PERSPECTIVES, findPerspective } from '$lib/report/perspectives';
 
   let { data }: { data: PageData } = $props();
 
@@ -34,8 +34,7 @@
   $effect(() => {
     if (data.perspective) perspectiveKey = data.perspective;
   });
-  // 활성 관점 메타(표지 제목 옆 ! 툴팁용) — PERSPECTIVES SSOT. 클릭=토글, 다음 클릭/관점전환=닫힘.
-  const persp = $derived(PERSPECTIVES.find((p) => p.key === perspectiveKey) ?? null);
+  // 표지 제목 옆 ! 툴팁(활성 관점 한정) — 클릭=토글, 다음 클릭/관점전환=닫힘. 관점 메타는 렌더에서 findPerspective.
   let perspTipOpen = $state(false);
   $effect(() => {
     if (!perspTipOpen) return;
@@ -102,26 +101,28 @@
   // 후원·기여 — 터미널 상단과 동일 SupportDialog(♥).
   let supportOpen = $state(false);
 
-  // ── 리얼타임 빌드 (종목·관점 변경 시 동시성 토큰 가드) ──
-  let model = $state<ReportModel | null>(null);
+  // ── 빌드 — 종목 1개당 5관점 전부 조립(종목 변경 시 동시성 토큰 가드). 화면은 활성 관점만, 인쇄는 전부
+  //    이어붙인다(탭은 인쇄 못 하므로 연속 문서). 관점 전환은 재빌드 없이 즉시(이미 빌드된 models 에서 선택). ──
+  let models = $state<ReportModel[]>([]);
   let status = $state<'loading' | 'ready' | 'skipped' | 'error'>('loading');
   let skipReason = $state<string>('');
   let buildTok = 0;
   $effect(() => {
     const code = data.sym;
-    const view = perspectiveKey;
     const tk = ++buildTok;
     status = 'loading';
-    model = null;
+    models = [];
     skipReason = '';
-    buildReport(rt, code, view)
+    Promise.all(PERSPECTIVES.filter((p) => p.built).map((p) => buildReport(rt, code, p.key).catch(() => null)))
       .then((res) => {
         if (tk !== buildTok) return;
-        if (isSkipped(res)) {
+        const built = res.filter((r): r is ReportModel => !!r && !isSkipped(r));
+        if (!built.length) {
+          const firstSkip = res.find((r) => r && isSkipped(r));
           status = 'skipped';
-          skipReason = res.reason;
+          skipReason = firstSkip && isSkipped(firstSkip) ? firstSkip.reason : '재무 데이터가 없습니다(미상장·미공시).';
         } else {
-          model = res;
+          models = built; // PERSPECTIVES 순서 보존(Promise.all 순서 → filter 안정)
           status = 'ready';
         }
       })
@@ -131,6 +132,8 @@
         skipReason = String(e?.message ?? e);
       });
   });
+  // 활성 관점(헤더 탭·검색 view·표지 등) — 빌드된 models 에서 선택. 없으면 첫 관점.
+  const model = $derived(models.find((m) => m.perspectiveKey === perspectiveKey) ?? models[0] ?? null);
 
   function selectPerspective(key: string) {
     perspectiveKey = key;
@@ -396,21 +399,23 @@
           <p class="muted">현재 사이클 = <b>수익성</b> 관점. 관점을 하나씩 추가하고 있습니다.</p>
         </div>
       </article>
-    {:else if model}
-      {@const allAnalysis = model.sections.every((s) => s.sourceEngine === 'analysis')}
-      <article class="sheet">
-        <!-- ── 표지 (보고서를 리드 — 인쇄 1쪽도 표지로 시작) ── -->
+    {:else if models.length}
+      {#each models as m (m.perspectiveKey)}
+      {@const mPersp = findPerspective(m.perspectiveKey)}
+      {@const allAnalysis = m.sections.every((s) => s.sourceEngine === 'analysis')}
+      <article class="sheet perspSheet" class:screenActive={m.perspectiveKey === perspectiveKey}>
+        <!-- ── 표지 (관점마다 표지로 시작 — 인쇄 시 관점별 섹션 구분) ── -->
         <header class="cover">
-          <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> {model.perspectiveLabel}{#if persp}<span class="perspInfoWrap"><button class="perspInfo" onclick={(e) => { e.stopPropagation(); perspTipOpen = !perspTipOpen; }} aria-label="이 관점이 답하는 질문" title="관점 설명">!</button>{#if perspTipOpen}<span class="perspTip" role="tooltip"><b>{persp.label}</b> — {persp.question}{#if persp.focusQuestions.length}<span class="perspTipQs">{#each persp.focusQuestions as fq}<span>{fq}</span>{/each}</span>{/if}</span>{/if}</span>{/if}</div>
-          <h1 class="coverTitle">{model.corpName}<span class="code">{model.stockCode}</span></h1>
+          <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> {m.perspectiveLabel}{#if m.perspectiveKey === perspectiveKey}<span class="perspInfoWrap"><button class="perspInfo" onclick={(e) => { e.stopPropagation(); perspTipOpen = !perspTipOpen; }} aria-label="이 관점이 답하는 질문" title="관점 설명">!</button>{#if perspTipOpen}<span class="perspTip" role="tooltip"><b>{mPersp.label}</b> — {mPersp.question}{#if mPersp.focusQuestions.length}<span class="perspTipQs">{#each mPersp.focusQuestions as fq}<span>{fq}</span>{/each}</span>{/if}</span>{/if}</span>{/if}</div>
+          <h1 class="coverTitle">{m.corpName}<span class="code">{m.stockCode}</span></h1>
           <dl class="coverFacts">
-            {#if model.industry}<div class="fact"><dt>업종</dt><dd>{model.industry}</dd></div>{/if}
-            <div class="fact"><dt>데이터 기준</dt><dd>{model.dataBasis}</dd></div>
-            <div class="fact"><dt>최근 접수</dt><dd>{model.asOf}</dd></div>
-            <div class="fact"><dt>분석범위</dt><dd>{model.sections.length}개 섹션 · 최대 6개년</dd></div>
+            {#if m.industry}<div class="fact"><dt>업종</dt><dd>{m.industry}</dd></div>{/if}
+            <div class="fact"><dt>데이터 기준</dt><dd>{m.dataBasis}</dd></div>
+            <div class="fact"><dt>최근 접수</dt><dd>{m.asOf}</dd></div>
+            <div class="fact"><dt>분석범위</dt><dd>{m.sections.length}개 섹션 · 최대 6개년</dd></div>
             <div class="fact"><dt>작성</dt><dd>dartlab 분석엔진</dd></div>
           </dl>
-          {#if model.narrativeOverview}<p class="coverIntro">{clean(model.narrativeOverview)}</p>{/if}
+          {#if m.narrativeOverview}<p class="coverIntro">{clean(m.narrativeOverview)}</p>{/if}
         </header>
 
         <!-- ── 5관점 요약 (표지 다음 = executive summary) ── -->
@@ -430,17 +435,17 @@
           </section>
         {/if}
 
-        <div class="printPerspective">관점: {model.perspectiveLabel} — {PERSPECTIVES.find((p) => p.key === model!.perspectiveKey)?.question}</div>
+        <div class="printPerspective">관점: {m.perspectiveLabel} — {mPersp.question}</div>
 
         <!-- ── 요약 (Executive Summary) — 산문 리드 + 요약 지표표 (카드 폐기, 문서형) ── -->
         <section class="block summary">
           <h2 class="blockTitle">요약</h2>
-          <p class="leadProse">{clean(model.conclusion)}</p>
-          {#if model.narrativeOverview}<p class="leadSub">{clean(model.narrativeOverview)}</p>{/if}
-          {#if model.headlineKpis.length}
+          <p class="leadProse">{clean(m.conclusion)}</p>
+          {#if m.narrativeOverview}<p class="leadSub">{clean(m.narrativeOverview)}</p>{/if}
+          {#if m.headlineKpis.length}
             <table class="summaryTable">
               <tbody>
-                {#each chunk(model.headlineKpis, 3) as rowKpis}
+                {#each chunk(m.headlineKpis, 3) as rowKpis}
                   <tr>{#each rowKpis as k}<th>{k.label}</th><td class={cellTone(k.value)}>{k.value}</td>{/each}</tr>
                 {/each}
               </tbody>
@@ -448,11 +453,11 @@
           {/if}
         </section>
 
-        {#if model.keyFindings.length}
+        {#if m.keyFindings.length}
           <section class="block keyFindings">
             <h2 class="blockTitle">주요 관찰 <span class="subNote">관점별 측정 요지{#if !allAnalysis} · 출처 병기{/if}</span></h2>
             <ul class="obsList">
-              {#each model.keyFindings as kf}
+              {#each m.keyFindings as kf}
                 <li><b class="obsKey">{kf.key}</b> — {clean(kf.finding)}{#if !allAnalysis} <span class="obsSrc">({engineLabel[kf.sourceEngine] ?? kf.sourceEngine})</span>{/if}</li>
               {/each}
             </ul>
@@ -460,11 +465,11 @@
         {/if}
 
         <!-- ── 목차 ── -->
-        {#if model.sections.length > 1}
+        {#if m.sections.length > 1}
           <nav class="toc">
             <span class="tocLabel">목차</span>
-            {#each model.sections as sec, i (sec.key)}
-              <button class="tocItem" onclick={() => scrollSec(sec.key)}>
+            {#each m.sections as sec, i (sec.key)}
+              <button class="tocItem" onclick={() => scrollSec(`${m.perspectiveKey}-${sec.key}`)}>
                 <span class="tocNo">{String(i + 1).padStart(2, '0')}</span>{splitTitle(sec.title).head}
               </button>
             {/each}
@@ -473,9 +478,9 @@
 
         <!-- ── 본문 섹션 ── -->
         <div class="sections">
-          {#each model.sections as sec, i (sec.key)}
+          {#each m.sections as sec, i (sec.key)}
             {@const t = splitTitle(sec.title)}
-            <section class="rptSection src-{sec.sourceEngine}" class:emph={sec.emph} id={`sec-${sec.key}`}>
+            <section class="rptSection src-{sec.sourceEngine}" class:emph={sec.emph} id={`sec-${m.perspectiveKey}-${sec.key}`}>
               <div class="secHead">
                 <span class="secNo">{String(i + 1).padStart(2, '0')}</span>
                 <div class="secTitleWrap">
@@ -483,7 +488,7 @@
                   {#if t.sub}<div class="secSub">{t.sub}</div>{/if}
                 </div>
                 {#if !allAnalysis}<span class="chip srcBadge src-{sec.sourceEngine}">{engineLabel[sec.sourceEngine] ?? sec.sourceEngine}</span>{/if}
-                <a class="secSrc" href={`${base}/viewer/company/${model.stockCode}`} target="_blank" rel="noopener" title="이 수치의 원천 — 공시뷰어에서 원본 사업·분기보고서 확인">원공시↗</a>
+                <a class="secSrc" href={`${base}/viewer/company/${m.stockCode}`} target="_blank" rel="noopener" title="이 수치의 원천 — 공시뷰어에서 원본 사업·분기보고서 확인">원공시↗</a>
               </div>
               {#each sec.blocks as b}
                 {#if b.type === 'heading'}
@@ -562,10 +567,10 @@
         </div>
 
         <!-- ── 종합 의견 ── -->
-        {#if model.closing.length}
+        {#if m.closing.length}
           <section class="block closing">
-            <h2 class="blockTitle">종합 의견 <span class="subNote">{model.perspectiveLabel} 관점 요약 (투자판단 아님)</span></h2>
-            {#each model.closing as cl}
+            <h2 class="blockTitle">종합 의견 <span class="subNote">{m.perspectiveLabel} 관점 요약 (투자판단 아님)</span></h2>
+            {#each m.closing as cl}
               <div class="clRow src-{cl.engine}">
                 <span class="clLabel">{cl.label}</span>
                 <span class="clLine">{clean(cl.line)}</span>
@@ -579,31 +584,32 @@
         <section class="block evidenceStrip">
           <h2 class="blockTitle">근거·출처 <span class="subNote">이 보고서를 계산한 dartlab 엔진</span></h2>
           <div class="evEngines">
-            {#each Object.entries(model.provenance.engines) as [eng, info]}
+            {#each Object.entries(m.provenance.engines) as [eng, info]}
               <div class="evEngine"><span class="evDot"></span><span class="evLabel">{info.label ?? engineLabel[eng] ?? eng}</span><span class="evMeta">{info.sections}섹션 · {info.blocks}블록</span></div>
             {/each}
           </div>
-          <div class="evNote">{model.provenance.note}</div>
-          <a class="evSource" href={`${base}/viewer/company/${model.stockCode}`} target="_blank" rel="noopener">원본 공시 직접 확인 — {model.corpName} 공시뷰어에서 사업·분기보고서 원문 열기 ↗</a>
+          <div class="evNote">{m.provenance.note}</div>
+          <a class="evSource" href={`${base}/viewer/company/${m.stockCode}`} target="_blank" rel="noopener">원본 공시 직접 확인 — {m.corpName} 공시뷰어에서 사업·분기보고서 원문 열기 ↗</a>
         </section>
 
         <!-- ── 푸터 / 서명 ── -->
         <footer class="rptFooter">
-          {#if model.assumptionsNote}<div class="assump">가정·한계 — {model.assumptionsNote}</div>{/if}
-          <div class="freezeNote">※ 본 출력본(인쇄/PDF)은 <b>데이터 기준 {model.asOf} 시점의 스냅샷</b>입니다. 이후 원천 데이터가 갱신되면 동일 보고서라도 수치가 달라질 수 있습니다.</div>
+          {#if m.assumptionsNote}<div class="assump">가정·한계 — {m.assumptionsNote}</div>{/if}
+          <div class="freezeNote">※ 본 출력본(인쇄/PDF)은 <b>데이터 기준 {m.asOf} 시점의 스냅샷</b>입니다. 이후 원천 데이터가 갱신되면 동일 보고서라도 수치가 달라질 수 있습니다.</div>
           <div class="footSign">
-            <span class="signMain">{model.corpName} 기업분석보고서</span>
-            <span class="dot">·</span><span>{model.perspectiveLabel} 관점</span>
-            <span class="dot">·</span><span>데이터 기준 {model.asOf}</span>
+            <span class="signMain">{m.corpName} 기업분석보고서</span>
+            <span class="dot">·</span><span>{m.perspectiveLabel} 관점</span>
+            <span class="dot">·</span><span>데이터 기준 {m.asOf}</span>
             <span class="dot">·</span><span>작성 dartlab 분석엔진</span>
           </div>
           <div class="footLine">
-            모든 수치 = dartlab 엔진({Object.values(model.provenance.engines).map((e) => e.label).join('·')}) 산출
+            모든 수치 = dartlab 엔진({Object.values(m.provenance.engines).map((e) => e.label).join('·')}) 산출
             <span class="dot">·</span> sourceEngine = 계산 엔진(원천 DART 공시 줄 아님)
             <span class="dot">·</span> 본 보고서는 투자 권유가 아니며, 투자 판단의 책임은 이용자에게 있습니다.
           </div>
         </footer>
       </article>
+      {/each}
     {/if}
   </div>
 
@@ -661,6 +667,9 @@
     background: var(--sheet); border: 1px solid var(--bd); border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 12px 40px rgba(0, 0, 0, 0.10);
   }
+  /* 5관점은 항상 빌드돼 DOM 에 있다 — 화면은 활성 관점만, 인쇄는 전부(@media print). 탭 전환=재빌드 없이 즉시. */
+  .perspSheet { display: none; }
+  .perspSheet.screenActive { display: block; }
   .skip, .pending { text-align: center; padding-top: 70px; padding-bottom: 70px; }
   .skip h1 { font-size: 22px; } .skipReason { font-family: var(--mono); color: var(--warn); }
   .retryBtn { margin-top: 16px; background: var(--accent); color: #fff; border: 0; padding: 7px 16px; border-radius: 7px; cursor: pointer; font-weight: 700; }
@@ -914,10 +923,14 @@
     .rptHeader, .toc, .secSrc { display: none !important; }
     .printPerspective { display: block; font-size: 11px; color: #555; margin-bottom: 12px; font-weight: 600; }
     .sheet { width: 100%; max-width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; }
-    .rptSection, .summary, .keyFindings, .evidenceStrip, .summaryTable, .clRow { break-inside: avoid; }
-    .cover, .coverFacts, .focusRow { break-inside: avoid; }
+    /* 인쇄 = 5관점 전부 이어붙임(탭은 못 찍으니 연속 문서). 관점마다 새 페이지·"5관점 요약"은 첫 관점에만. */
+    .perspSheet { display: block !important; }
+    .perspSheet + .perspSheet { break-before: page; }
+    .perspSheet:not(:first-of-type) .overviewLead { display: none; }
+    /* break-inside:avoid 는 *작은 원자 단위*에만 — 한 페이지보다 큰 섹션 컨테이너에 걸면 Chrome 이
+       클리핑/빈 페이지를 낸다. 섹션은 하위 블록(.bTableWrap·.secHead) 경계에서 깔끔히 쪼개지게 둔다. */
+    .clRow, .summaryTable, .coverFacts, .focusRow, .bTableWrap { break-inside: avoid; }
     .cover { break-after: avoid; }
-    .bTableWrap { break-inside: avoid; }
     .bTable thead { display: table-header-group; }
     .secHead { break-after: avoid; }
     .spark { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
