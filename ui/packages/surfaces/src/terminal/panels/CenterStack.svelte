@@ -39,8 +39,6 @@
 	const rt = useDartLabRuntime();
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
-	// 기업분석보고서(본진 /report) — 현재 보는 회사 코드를 그대로 넘긴다(삼성 보면 삼성 보고서).
-	const reportHref = $derived(`${rt.env.basePath}/report?sym=${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 	let gradeOpen = $state(false); // 스캔등급 설명 다이얼로그
 	// 차트 상태 — TerminalSurface 가 주입하면 Macro Lens 와 ECON 토글을 공유한다. 단독 사용 시 기본 인스턴스 생성.
@@ -434,7 +432,6 @@
 		<div class="symTop">
 			<button class={'symWatch' + (watchlist.has(co.code) ? ' on' : '')} onclick={() => watchlist.toggle(co.code)} aria-pressed={watchlist.has(co.code)} title={watchlist.has(co.code) ? (lang === 'en' ? 'remove from disclosure watch' : '공시 워치에서 제거') : (lang === 'en' ? 'add to disclosure watch' : '공시 워치에 추가')}>{watchlist.has(co.code) ? '★' : '☆'}</button>
 			<span class="symName">{co.name.kr}</span>
-			<a class="symReport" href={reportHref} target="_blank" rel="noopener" title={lang === 'en' ? 'Corporate analysis report — printable (PDF)' : '기업분석보고서 — 인쇄 가능 (PDF)'}>{lang === 'en' ? 'Report ↗' : '보고서 ↗'}</a>
 		</div>
 		<div class="symCodeRow"><span class="symBadge kr">{co.marketLabel}</span><span class="symCode">{co.code}</span></div>
 		<div class="symMeta">{tx(co.sector, lang)}{co.stage ? ' · ' + co.stage : ''}{co.role ? ' · ' + co.role : ''} · DART</div>
