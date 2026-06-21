@@ -320,7 +320,7 @@
 				<span class="connDot"><span class="dot"></span>HF</span>
 				<div class="hdrLinks">
 					{#if co}
-						<a class="hdrLink hdrReport" href="{base}/lab/report?sym={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'Corporate analysis report — printable (PDF)' : '기업분석보고서 — 인쇄 가능 (PDF)'}>{lang === 'en' ? 'Report' : '보고서'}</a>
+						<a class="hdrLink hdrReport" href="{base}/report?sym={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'Corporate analysis report — printable (PDF)' : '기업분석보고서 — 인쇄 가능 (PDF)'}>{lang === 'en' ? 'Report' : '보고서'}</a>
 					{/if}
 					{#if allowTerminalAsk}
 						<button class="hdrLink hdrAsk" onclick={() => co && runtime.navigation.toAsk({ code: co.code })} title="AI에게 직접 질문 — 로컬 LLM 질의(/ask)" aria-label="AI" style="display:inline-flex;align-items:center;gap:4px">
