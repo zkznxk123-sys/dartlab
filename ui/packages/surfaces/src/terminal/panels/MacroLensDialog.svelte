@@ -131,12 +131,6 @@
 		{ label: 'lag', value: snapshot.exposureQuality.lagMonths != null ? `${snapshot.exposureQuality.lagMonths}M` : '—', status: snapshot.exposureQuality.lagMonths != null ? 'ok' : 'blocked' },
 		{ label: 'coverage', value: snapshot.exposureQuality.coverage, status: snapshot.exposureQuality.coverage === 'company' ? 'ok' : snapshot.exposureQuality.coverage === 'sectorOnly' ? 'watch' : 'blocked' }
 	]);
-	const modelSpecRows = $derived([
-		{ label: 'method', value: snapshot.exposureQuality.method ?? '—', status: snapshot.exposureQuality.method ? 'ok' : 'blocked' },
-		{ label: 'version', value: snapshot.exposureQuality.modelVersion ?? '—', status: snapshot.exposureQuality.modelVersion ? 'ok' : 'blocked' },
-		{ label: 'target', value: snapshot.exposureQuality.targetMetric ?? '—', status: snapshot.exposureQuality.targetMetric ? 'ok' : 'blocked' },
-		{ label: 'minObs', value: snapshot.exposureQuality.minObs != null ? String(snapshot.exposureQuality.minObs) : '—', status: snapshot.exposureQuality.minObs != null ? 'ok' : 'blocked' }
-	]);
 	const econBlocked = (id: string) => !activeEcon.includes(id) && activeEcon.length >= ECON_MAX;
 	let dialogEl = $state<HTMLDivElement | null>(null);
 	function fmtR2(value: number | null | undefined): string {
@@ -275,11 +269,6 @@
 				<span class="mono">{snapshot.company.code}</span>
 				<span>{T(snapshot.company.sector.kr, snapshot.company.sector.en)}</span>
 			</div>
-			<div class="mlAsOf">
-				<span>macro <b>{snapshot.asOf.macro ?? '—'}</b></span>
-				<span>price <b>{snapshot.asOf.price ?? '—'}</b></span>
-				<span>fin <b>{snapshot.asOf.finance ?? '—'}</b></span>
-			</div>
 			<button class="scrClose" onclick={onClose} aria-label="close"><X size={14} /></button>
 		</div>
 
@@ -296,10 +285,6 @@
 				>{T(t.kr, t.en)}</button>
 			{/each}
 		</div>
-		<div class="mlAlwaysNote">
-			{T('노출 점검표입니다. 정량 민감도·투자 결론·가격 산출은 표시하지 않습니다.', 'Exposure checklist only. No quantitative sensitivity, investment call, or price output.')}
-		</div>
-
 		<div class="mlBody" class:mlVoid={localTab === 'dashboard' && !focusCell} id={tabPanelId} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
 			{#if localTab === 'dashboard'}
 				<!-- 블록 A — Regime Plane (GIP 4사분면 hero · 라이브 marketPhase, 배포 불요) -->
@@ -427,7 +412,7 @@
 								<i class="mlMapSign">{signText[focusCell.edge.sign]}</i>
 								<i class="mlMapMeta">{focusCell.driver.value} · {focusCell.driver.change} · {focusCell.driver.asOf} · {focusCell.driver.source}</i>
 							</div>
-							<button class="mlMapDrill" onclick={() => goto('transmission', focusCell.driver.id)}>{T('셀 클릭 → 경로 드릴다운(전파·품질·기여·동행·출처)', 'cell → Path drilldown (chain · quality · contribution · co-move · source)')}</button>
+							<button class="mlMapDrill" onclick={() => goto('transmission', focusCell.driver.id)}>{T('경로 상세 →', 'Path detail →')}</button>
 						</div>
 					{:else}
 						<div class="mlMapFocus">
@@ -480,7 +465,7 @@
 						{/each}
 					</div>
 					<div class="mlReleaseRail">
-						<div class="mlRailTitle"><span class="mlBlockK">Release Rail</span><b>{T('값을 다시 확인할 시점', 'When to re-check')}</b></div>
+						<div class="mlRailTitle"><span class="mlBlockK">{T('갱신 시점', 'Release rail')}</span><b>{T('값을 다시 확인할 시점', 'When to re-check')}</b></div>
 						<div class="mlRailRows">
 							{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
 								<button class={'mlRailItem ' + r.status} class:focused={activeFocusId === r.driverId} onclick={() => goto('transmission', r.driverId)} title={r.sourceRef}>
@@ -493,7 +478,6 @@
 						</div>
 					</div>
 				</section>
-				<div class="mlMapNote mlAlwaysNote inline">{T('정량 게이트는 근거 탭. 첫 화면 정량 행 없음.', 'Quant gate is on the Sources tab. No quant row on the first screen.')}</div>
 			{:else if localTab === 'transmission'}
 				{#if snapshot.macroPath}
 					<MacroPathRail view={snapshot.macroPath} {lang} mode="full" onSector={onSector} />
@@ -507,7 +491,7 @@
 				{#if focusDriver || focusEdge || focusIndicator}
 					<section class="mlDrill">
 						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('전파 chain', 'Transmission chain')}</span>
+							<span class="mlBlockK">{T('전파 경로', 'Transmission chain')}</span>
 							<b>{(focusDriver?.label ?? focusEdge?.driverLabel ?? activeFocusId) || '—'}</b>
 							<p>{focusEdge ? `${focusEdge.sectorLabel} → ${focusEdge.financialLine} → ${focusEdge.valuationLever}` : T('선택 driver의 표준 전파 경로가 아직 없습니다.', 'No mapped transmission chain for the selected driver yet.')}</p>
 							<em>{focusEdge ? `${focusEdge.evidenceLevel} · ${focusEdge.confidence} · lag ${focusEdge.lagMonths ? `${focusEdge.lagMonths[0]}-${focusEdge.lagMonths[1]}M` : '—'}` : focusDriver?.sourceLineage ?? '—'}</em>
@@ -517,13 +501,13 @@
 							</div>
 						</div>
 						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('품질 gate', 'Quality gate')}</span>
+							<span class="mlBlockK">{T('품질 게이트', 'Quality gate')}</span>
 							<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
 							<p>{focusIndicator ? `${focusIndicator.label} · R² ${focusIndicator.rSquared ?? '—'} · nObs ${focusIndicator.nObs ?? '—'}` : snapshot.exposureQuality.reason}</p>
 							<em>{focusIndicator?.window ?? snapshot.exposureQuality.window ?? T('window 없음', 'window missing')}</em>
 						</div>
 						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('contribution', 'contribution')}</span>
+							<span class="mlBlockK">{T('기여', 'Contribution')}</span>
 							<b>{focusContribution?.summary ?? '—'}</b>
 							<div class="mlStackList">
 								{#each focusContribution?.components ?? [] as c (c.id)}
@@ -536,7 +520,7 @@
 							</div>
 						</div>
 						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('source packet', 'source packet')}</span>
+							<span class="mlBlockK">{T('출처', 'Source')}</span>
 							<b>{focusSource?.seriesId ?? focusIndicator?.seriesId ?? focusDriver?.seriesId ?? focusEdge?.driverId ?? '—'}</b>
 							<div class="mlPacketGrid">
 								<span>source</span><b>{focusSource?.source ?? '—'}</b>
@@ -553,7 +537,7 @@
 					{#if focusContribution}
 						<section class="mlContributionPanel" aria-label={T('증거 기여 분해', 'Evidence contribution breakdown')}>
 							<div class="mlRailTitle">
-								<span class="mlBlockK">Evidence Contribution</span>
+								<span class="mlBlockK">{T('증거 기여', 'Evidence contribution')}</span>
 								<b>{focusContribution.label}</b>
 								<em>{T('재무 기여도 아님 · 합산 금지', 'not financial contribution · not additive')}</em>
 							</div>
@@ -577,7 +561,7 @@
 					{/if}
 					{#if focusCoMove}
 						<section class={'mlCoMovePanel ' + focusCoMove.status}>
-							<div class="mlRailTitle"><span class="mlBlockK">Co-movement Gate</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
+							<div class="mlRailTitle"><span class="mlBlockK">{T('동행성', 'Co-movement')}</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
 							{#if focusCoMove.points.length}
 								<div class="mlScatterPlot" aria-label={T('월별 동행 산점도', 'Monthly co-movement scatter')}>
 									<i class="mlZeroX" style={`left:${focusCoMove.xZero}%`}></i>
@@ -680,7 +664,7 @@
 				</details>
 				<section class="mlGrid two">
 					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('회사 checkpoint', 'Company checkpoints')}</span><b>{T('정량화 전 확인할 재무 위치', 'Financial checkpoints before quant claim')}</b></div>
+						<div class="mlBlockTop"><span class="mlBlockK">{T('회사 체크포인트', 'Company checkpoints')}</span></div>
 						{#each snapshot.companyCheckpoints as c (c.id)}
 							<div class="mlCheck">
 								<span>{c.label}</span><b class={c.tone}>{c.value}</b><em>{c.reason}</em>
@@ -688,7 +672,7 @@
 						{/each}
 					</div>
 					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('반증 조건', 'Falsifiers')}</span><b>{T('강한 연결만 남기기', 'Keep only defensible links')}</b></div>
+						<div class="mlBlockTop"><span class="mlBlockK">{T('반증 조건', 'Falsifiers')}</span></div>
 						{#each snapshot.falsifiers as f (f.id)}
 							<div class={'mlFalse ' + severityCls[f.severity]}>
 								<ShieldAlert class={'mlFalseIcon ' + severityCls[f.severity]} size={13} />
@@ -700,7 +684,7 @@
 			{:else}
 				<section class="mlGrid two">
 					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('출처', 'Sources')}</span><b>{T('source/date/value lineage', 'source/date/value lineage')}</b></div>
+						<div class="mlBlockTop"><span class="mlBlockK">{T('출처', 'Sources')}</span></div>
 						{#each snapshot.sourcePackets.slice(0, 8) as p (p.driverId)}
 							<button class={'mlSrcPacket ' + p.status} class:focused={activeFocusId === p.driverId} onclick={() => { localFocus = p.driverId; }} title={p.sourceRef}>
 								<b>{p.seriesId}</b>
@@ -710,10 +694,10 @@
 							</button>
 						{/each}
 						<div class="mlSrcSep"></div>
-						{#each snapshot.sourceRefs as s, i (`${s}-${i}`)}<div class="mlSrc">{s}</div>{/each}
+						{#each snapshot.sourceRefs.filter((s) => !s.includes('/')) as s, i (`${s}-${i}`)}<div class="mlSrc">{s}</div>{/each}
 					</div>
 					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('한계·결손', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
+						<div class="mlBlockTop"><span class="mlBlockK">{T('한계·결손', 'Limits')}</span></div>
 						<div class={'mlQuantCard ' + exposureQualityClass} aria-label={T('정량 게이트 상태', 'Quant gate status')}>
 							<div class="mlQuantTop">
 								<span class="mlBlockK">{T('정량 게이트', 'Quant gate')}</span>
@@ -726,19 +710,10 @@
 						</div>
 						<div class={'mlQualityCard ' + exposureQualityClass} aria-label={T('품질 게이트 모델 카드', 'Quality gate model card')}>
 							<div class="mlQualityTop">
-								<span class="mlBlockK">Quality Gate</span>
+								<span class="mlBlockK">{T('품질 게이트', 'Quality gate')}</span>
 								<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
-								<em>{T('정량 claim gate · 추천/목표가 아님', 'quant claim gate · no recommendation')}</em>
 							</div>
 							<p>{snapshot.exposureQuality.reason}</p>
-							<div class="mlModelSpec" aria-label={T('거시 노출 모델 사양', 'Macro exposure model specification')}>
-								{#each modelSpecRows as r (r.label)}
-									<div class={'mlModelSpecItem ' + r.status} title={r.value}>
-										<span>{r.label}</span>
-										<b>{r.value}</b>
-									</div>
-								{/each}
-							</div>
 							<div class="mlModelMetrics">
 								{#each modelMetricRows as r (r.label)}
 									<div class={'mlModelMetric ' + r.status}>
@@ -747,9 +722,8 @@
 									</div>
 								{/each}
 							</div>
-							<div class="mlModelSource"><span>sourceRef</span><b>{snapshot.exposureQuality.sourceRef}</b></div>
 						</div>
-						<div class="mlLimitSub">Model Card</div>
+						<div class="mlLimitSub">{T('회사 지표', 'Company indicators')}</div>
 						<div class="mlIndicatorGrid" aria-label={T('선택 회사 거시 지표', 'Selected company macro indicators')}>
 							{#each snapshot.exposureIndicators.slice(0, 4) as x, i (`${x.seriesId}-${x.axis}-${i}`)}
 								<div class={'mlIndicatorCard ' + (x.coverage === 'company' ? 'ok' : x.coverage === 'sectorOnly' ? 'watch' : 'blocked')}>
@@ -760,35 +734,32 @@
 										<span>R² {fmtR2(x.rSquared)}</span>
 										<span>{x.targetMetric ?? x.window ?? '—'}</span>
 									</div>
-									<small title={x.sourceRefs.join(' · ')}>{x.sourceRef}</small>
 								</div>
 							{:else}
 								<div class="mlIndicatorCard blocked">
-									<div><span>indicator</span><b>LOCK</b></div>
-									<em>{T('선택된 회사별 macroExposure 지표 없음', 'No selected company macroExposure indicator')}</em>
-									<small>{snapshot.exposureQuality.sourceRef}</small>
+									<div><span>{T('지표', 'indicator')}</span><b>LOCK</b></div>
+									<em>{T('선택된 회사별 거시 노출 지표 없음', 'No company-level macro exposure indicator')}</em>
 								</div>
 							{/each}
 						</div>
-						<div class="mlLimitSub">Missing Ledger</div>
+						<div class="mlLimitSub">{T('결손 항목', 'Missing items')}</div>
 						<div class="mlMissingLedger" aria-label={T('결손 증거 원장', 'Missing evidence ledger')}>
 							{#each snapshot.exposureQuality.missingEvidence as x (x)}
-								<div class="mlMissingItem blocked"><b>required</b><span>{x}</span><em>{snapshot.exposureQuality.sourceRef}</em></div>
+								<div class="mlMissingItem blocked"><b>{T('필요', 'required')}</b><span>{x}</span></div>
 							{/each}
 							{#each snapshot.missing as m (m.id)}
-								<div class={'mlMissingItem ' + (m.status === 'partial' || m.status === 'staleRisk' ? 'watch' : 'blocked')}><b>{m.status}</b><span>{m.reason}</span><em>{m.sourceRef}</em></div>
+								<div class={'mlMissingItem ' + (m.status === 'partial' || m.status === 'staleRisk' ? 'watch' : 'blocked')}><b>{T('한계', 'note')}</b><span>{m.reason}</span></div>
 							{/each}
 							{#if !snapshot.exposureQuality.missingEvidence.length && !snapshot.missing.length}
-								<div class="mlMissingItem ok"><b>OK</b><span>{T('표시 가능한 결손 없음', 'No visible missing item')}</span><em>{snapshot.exposureQuality.sourceRef}</em></div>
+								<div class="mlMissingItem ok"><b>OK</b><span>{T('표시 가능한 결손 없음', 'No visible missing item')}</span></div>
 							{/if}
 						</div>
-						<div class="mlLimitSub">Falsifier Strip</div>
+						<div class="mlLimitSub">{T('반증', 'Falsifiers')}</div>
 						<div class="mlFalsifierStrip" aria-label={T('거시 반증', 'Macro falsifiers')}>
 							{#each snapshot.falsifiers.slice(0, 4) as f (f.id)}
 								<div class={'mlFalsifierToken ' + severityCls[f.severity]}>
 									<b>{f.label}</b>
 									<span>{f.detail}</span>
-									<em>{f.sourceRef ?? 'macroLens'}</em>
 								</div>
 							{/each}
 						</div>
@@ -818,9 +789,7 @@
 	.mlTabs::-webkit-scrollbar { display: none; }
 	.mlTabs button { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-height: 28px; line-height: 1; white-space: nowrap; box-sizing: border-box; border: 1px solid transparent; border-bottom: 0; background: rgba(255,255,255,.012); color: var(--dl-ink-muted, #7b8493); font-size: 11px; font-weight: 800; padding: 7px 11px; cursor: pointer; border-radius: 5px 5px 0 0; }
 	.mlTabs button:hover { color: var(--amber); }
-	.mlTabs button.active { color: var(--dl-ink); border-color: var(--dl-line, #1b2130); background: var(--dl-bg-raised, #0e141f); box-shadow: inset 0 2px 0 var(--amber); }
-	.mlAlwaysNote { padding: 6px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); color: var(--dl-ink-dim, #5b6473); background: rgba(var(--amber-rgb),.035); font-size: 10.5px; line-height: 1.4; }
-	.mlAlwaysNote.inline { border-bottom: 0; border-radius: 5px; background: transparent; padding: 0 2px; }
+	.mlTabs button.active { color: var(--amber); border-color: var(--dl-line, #1b2130); background: var(--dl-bg-raised, #0e141f); }
 	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 	.mlGrid { display: grid; gap: 10px; }
 	.mlGrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -902,8 +871,8 @@
 	.mlMapEvidence em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9.5px; opacity: 1; }
 	.mlMapEvidence .mlMapSign { font-weight: 700; color: var(--txt); }
 	.mlMapMeta { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9.5px; opacity: 1; }
-	.mlMapDrill { margin-top: 6px; border: 0; background: transparent; color: var(--amber); font-size: 9.5px; font-weight: 700; cursor: pointer; padding: 0; text-align: left; }
-	.mlMapDrill:hover { text-decoration: underline; }
+	.mlMapDrill { margin-top: 6px; border: 0; background: transparent; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 700; cursor: pointer; padding: 0; text-align: left; }
+	.mlMapDrill:hover { color: var(--amber); }
 	/* 읽기 2차 — 닷그리드 (채널 열 클러스터, 후퇴 opacity .82) */
 	.mlMapGrid { opacity: 0.82; border-top: 1px solid var(--bd); margin-top: 8px; padding-top: 8px; }
 	.mlMapHead, .mlMapRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
@@ -1098,13 +1067,6 @@
 	.mlQualityCard.watch .mlQualityTop b { color: var(--warn); }
 	.mlQualityCard.blocked .mlQualityTop b { color: var(--dn); }
 	.mlQualityCard p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
-	.mlModelSpec { display: grid; grid-template-columns: 1.35fr .85fr 1fr .62fr; gap: 5px; margin-top: 8px; }
-	.mlModelSpecItem { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 6px; }
-	.mlModelSpecItem.ok { border-color: rgba(52,211,153,.28); }
-	.mlModelSpecItem.blocked { border-color: rgba(248,113,113,.36); }
-	.mlModelSpecItem span, .mlModelSpecItem b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlModelSpecItem span { color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-	.mlModelSpecItem b { margin-top: 3px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
 	.mlModelMetrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
 	.mlModelMetric { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 6px; }
 	.mlModelMetric.ok { border-color: rgba(52,211,153,.28); }
@@ -1113,9 +1075,6 @@
 	.mlModelMetric span, .mlModelMetric b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlModelMetric span { color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 	.mlModelMetric b { margin-top: 3px; color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10.5px; }
-	.mlModelSource { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 7px; align-items: center; margin-top: 7px; color: var(--dl-ink-muted, #7b8493); font-size: 9px; }
-	.mlModelSource span { font-family: var(--dl-font-mono); text-transform: uppercase; }
-	.mlModelSource b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink-dim, #5b6473); font-family: var(--dl-font-mono); font-size: 9px; }
 	.mlIndicatorGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
 	.mlIndicatorCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.014); padding: 7px; }
 	.mlIndicatorCard.ok { border-color: rgba(52,211,153,.28); }
@@ -1165,7 +1124,7 @@
 		.mlTabs button { min-width: 50px; min-height: 30px; padding: 8px 9px; text-align: center; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
 		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
-		.mlQualityTop, .mlModelSpec, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
+		.mlQualityTop, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
 		.mlQualityTop em { text-align: left; }
 		.mlModelMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	}
