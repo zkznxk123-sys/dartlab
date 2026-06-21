@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 540" font-family="-apple-system, 'Segoe UI', sans-serif">
   <title>증발은 영업이익 '아래'에서 — 매출원가·판관비(상각 자리) 위가 아니다</title>
-  <desc>2025년 손익 폭포: 매출 61.16B에서 영업이익 15.07B(밝게 유지)까지 내려온 뒤, 영업이익 아래 구간에서 약 10.84B가 증발해 순이익 4.23B에 도달. OPM이 회복했으므로 증발은 영업선 위(매출원가·판관비)가 아니라 아래(이자·세금·IPR&D·손상)에서 일어났다.</desc>
+  <desc>2025년 손익 폭포: 매출 61.16B에서 영업이익 15.07B(밝게 유지)까지 내려온 뒤, 영업이익 아래 구간에서 약 10.84B가 증발해 순이익 4.23B에 도달. OPM이 회복했으므로 증발은 영업선 위(매출원가·판관비)가 아니라 아래(이자·세금·IPR&amp;D·손상)에서 일어났다.</desc>
   <rect width="1080" height="540" fill="#0a0e1a"/>
   <text x="540" y="46" fill="#f1f5f9" font-size="25" font-weight="700" text-anchor="middle">2025 손익 폭포 — 어디서 빠졌나</text>
   <text x="540" y="78" fill="#64748b" font-size="15" text-anchor="middle">매출 → 영업이익 → 순이익 ($B) — dartlab 연결</text>
@@ -10,7 +10,7 @@
   <rect x="120" y="110" width="200" height="320" fill="#22c55e" opacity="0.85"/>
   <text x="220" y="100" fill="#22c55e" font-size="17" font-weight="700" text-anchor="middle">매출 61.16</text>
 
-  <!-- COGS+SG&A (above operating line) drop -->
+  <!-- COGS+SG&amp;A (above operating line) drop -->
   <rect x="360" y="110" width="200" height="240" fill="#334155" opacity="0.6"/>
   <text x="460" y="100" fill="#94a3b8" font-size="13" text-anchor="middle">매출원가+판관비</text>
   <text x="460" y="235" fill="#cbd5e1" font-size="12" text-anchor="middle">(상각 자리 — OPM</text>
@@ -27,7 +27,7 @@
   <rect x="700" y="350" width="20" height="58" fill="#ef4444" opacity="0.4"/>
   <text x="820" y="345" fill="#fca5a5" font-size="15" font-weight="700" text-anchor="middle">↓ 약 10.84B 증발</text>
   <text x="820" y="368" fill="#fca5a5" font-size="12" text-anchor="middle">영업이익 '아래'</text>
-  <text x="820" y="386" fill="#94a3b8" font-size="11" text-anchor="middle">이자·세금·IPR&D·손상 [외부]</text>
+  <text x="820" y="386" fill="#94a3b8" font-size="11" text-anchor="middle">이자·세금·IPR&amp;D·손상 [외부]</text>
 
   <!-- net income -->
   <rect x="850" y="408" width="180" height="22" fill="#f59e0b"/>

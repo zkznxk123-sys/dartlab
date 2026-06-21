@@ -10,7 +10,7 @@
   <text x="60" y="175" fill="#f1f5f9" font-size="13">파운드리 적자 $10.3B</text>
   <text x="60" y="200" fill="#f1f5f9" font-size="13">FCF -$15.7B (3년 연속 적자)</text>
   <text x="60" y="225" fill="#f1f5f9" font-size="13">배당 중단 (36년 기록 종료)</text>
-  <text x="60" y="250" fill="#f1f5f9" font-size="13">R&D = 매출총이익의 95%</text>
+  <text x="60" y="250" fill="#f1f5f9" font-size="13">R&amp;D = 매출총이익의 95%</text>
 
   <!-- 오른쪽: 희망 -->
   <rect x="420" y="70" width="340" height="200" rx="8" fill="#1e1b2e" stroke="#22c55e" stroke-width="1"/>

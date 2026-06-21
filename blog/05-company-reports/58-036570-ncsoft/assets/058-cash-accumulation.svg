@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
-  <title>엔씨소프트 2020~2022 현금 축적과 판교 R&D 센터 5조 투자</title>
+  <title>엔씨소프트 2020~2022 현금 축적과 판교 R&amp;D 센터 5조 투자</title>
   <desc>리니지W 피크에서 번 돈이 판교 사옥·자사주·현금으로 흘러간 경로</desc>
   <rect width="1200" height="720" fill="#0a0e1a"/>
   <text x="60" y="62" font-family="-apple-system, sans-serif" font-size="34" font-weight="700" fill="#f1f5f9">쌓아둔 3조 — 돈은 어디로 갔는가</text>
@@ -53,7 +53,7 @@
     <path d="M 475 525 L 465 535 L 480 545 Z" fill="#fbbf24"/>
   </g>
 
-  <!-- Destination 1: 판교 R&D 센터 -->
+  <!-- Destination 1: 판교 R&amp;D 센터 -->
   <g transform="translate(500, 140)">
     <rect x="0" y="0" width="340" height="175" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5" rx="12"/>
     <text x="20" y="35" font-family="-apple-system, sans-serif" font-size="20" font-weight="700" fill="#fde68a">① 판교 R&amp;D 센터</text>

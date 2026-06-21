@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" font-family="-apple-system, 'Segoe UI', sans-serif">
   <title>FY24 organic +4%는 전량 가격 — 가격을 올려도 물량이 안 빠졌다 (외부 인용)</title>
-  <desc>P&G의 organic 매출 성장 분해(외부 인용). FY2024는 +4%가 전량 가격이고 물량·믹스는 0이었으며, FY2025는 +2%로 물량 +1·가격 +1로 재균형됐다. 가격 일변도는 인플레 국면의 한시적 특성이었다.</desc>
+  <desc>P&amp;G의 organic 매출 성장 분해(외부 인용). FY2024는 +4%가 전량 가격이고 물량·믹스는 0이었으며, FY2025는 +2%로 물량 +1·가격 +1로 재균형됐다. 가격 일변도는 인플레 국면의 한시적 특성이었다.</desc>
   <rect width="1080" height="560" fill="#0a0e1a"/>
   <text x="540" y="50" fill="#f1f5f9" font-size="27" font-weight="700" text-anchor="middle">가격을 올려도 물량이 안 빠졌다</text>
-  <text x="540" y="84" fill="#64748b" font-size="15" text-anchor="middle">organic 매출 성장의 가격 vs 물량 분해 (외부 인용: P&G IR)</text>
+  <text x="540" y="84" fill="#64748b" font-size="15" text-anchor="middle">organic 매출 성장의 가격 vs 물량 분해 (외부 인용: P&amp;G IR)</text>
 
   <!-- FY24 -->
   <text x="330" y="160" fill="#94a3b8" font-size="18" text-anchor="middle">FY2024 · organic +4%</text>

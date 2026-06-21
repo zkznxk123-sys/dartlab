@@ -39,7 +39,7 @@
     <text x="40" y="472" fill="#ef4444" font-size="22" font-weight="700" text-anchor="middle">5</text>
     <text x="85" y="458" fill="#f1f5f9" font-size="18" font-weight="700">신용등급 하방 리스크 (BBB+ → BBB)</text>
     <text x="85" y="482" fill="#e2e8f0" font-size="14">자본 $6.7B 더 줄어들거나 이자보상 5배 이하 하락 시 신용등급 하향 → 차입 비용 상승</text>
-    <text x="85" y="502" fill="#fbbf24" font-size="12">→ 무디스/S&P 정기 신용평가 + dartlab dCR 등급 추적</text>
+    <text x="85" y="502" fill="#fbbf24" font-size="12">→ 무디스/S&amp;P 정기 신용평가 + dartlab dCR 등급 추적</text>
   </g>
 
   <g transform="translate(60, 690)">

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 540" font-family="-apple-system, 'Segoe UI', sans-serif">
   <title>캐터필러 — 2026년에 봐야 할 다섯 가지</title>
-  <desc>2026 추적점: OPM 방향, OCF/영업이익 1.0 유지, OPM·NPM 격차, 2026 관세 비용(외부), Power&Energy 데이터센터 수주잔고(외부).</desc>
+  <desc>2026 추적점: OPM 방향, OCF/영업이익 1.0 유지, OPM·NPM 격차, 2026 관세 비용(외부), Power&amp;Energy 데이터센터 수주잔고(외부).</desc>
   <rect width="1080" height="540" fill="#0a0e1a"/>
   <text x="540" y="52" fill="#f1f5f9" font-size="26" font-weight="700" text-anchor="middle">2026년에 봐야 할 다섯 가지</text>
   <text x="540" y="84" fill="#64748b" font-size="15" text-anchor="middle">CAT — 매출이 아니라 마진의 방향과 현금전환</text>
@@ -28,7 +28,7 @@
 
     <rect x="90" y="408" width="900" height="62" rx="8" fill="#11161f" stroke="#475569" stroke-width="1.2"/>
     <text x="116" y="436" fill="#fbbf24" font-size="20" font-weight="700">5</text>
-    <text x="150" y="434" fill="#e2e8f0" font-weight="700">Power & Energy 수주잔고의 지속성 (외부)</text>
+    <text x="150" y="434" fill="#e2e8f0" font-weight="700">Power &amp; Energy 수주잔고의 지속성 (외부)</text>
     <text x="150" y="458" fill="#94a3b8" font-size="14">2025말 51.2B(2024말 30.0B). 데이터센터 발전 수요가 매출 둔화를 늦추는지</text>
   </g>
   <text x="540" y="505" fill="#475569" font-size="13" text-anchor="middle">[내부] = dartlab 연결로 검증 가능 · (외부) = 10-K·IR 인용</text>

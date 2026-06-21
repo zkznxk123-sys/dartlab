@@ -78,7 +78,7 @@
   <text x="420" y="535" fill="#f1f5f9" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="14">매출총이익률 (GPM) — 원가 빼고 남는 비율</text>
 
   <circle cx="400" cy="565" r="8" fill="#fbbf24"/>
-  <text x="420" y="570" fill="#f1f5f9" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="14">영업이익률 (OPM) — R&D, 판관비까지 빼고 남는 비율</text>
+  <text x="420" y="570" fill="#f1f5f9" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="14">영업이익률 (OPM) — R&amp;D, 판관비까지 빼고 남는 비율</text>
 
-  <text x="600" y="600" text-anchor="middle" fill="#64748b" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13">GPM-OPM 갭 축소 = 고정비(R&D/판관비)가 매출 대비 작아지는 효과</text>
+  <text x="600" y="600" text-anchor="middle" fill="#64748b" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13">GPM-OPM 갭 축소 = 고정비(R&amp;D/판관비)가 매출 대비 작아지는 효과</text>
 </svg>

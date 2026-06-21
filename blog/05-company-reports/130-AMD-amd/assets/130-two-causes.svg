@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" font-family="-apple-system, 'Segoe UI', sans-serif">
-  <title>2022년 영업이익 하락은 Xilinx 상각, 2023년 추가 하락은 약한 Client·높은 R&D</title>
-  <desc>GAAP 영업이익은 2021년 3.65B에서 2022년 1.26B, 2023년 0.40B로 두 해 연속 내려앉았지만 원인은 다르다. 2022년은 인수 무형자산 상각이 눌렀고, 2023년은 상각이 오히려 줄어든 가운데 약한 PC(Client) 수요와 높아진 R&D가 눌렀다.</desc>
+  <title>2022년 영업이익 하락은 Xilinx 상각, 2023년 추가 하락은 약한 Client·높은 R&amp;D</title>
+  <desc>GAAP 영업이익은 2021년 3.65B에서 2022년 1.26B, 2023년 0.40B로 두 해 연속 내려앉았지만 원인은 다르다. 2022년은 인수 무형자산 상각이 눌렀고, 2023년은 상각이 오히려 줄어든 가운데 약한 PC(Client) 수요와 높아진 R&amp;D가 눌렀다.</desc>
   <rect width="1000" height="520" fill="#0a0e1a"/>
   <text x="500" y="46" fill="#f1f5f9" font-size="25" font-weight="700" text-anchor="middle">같은 붕괴, 다른 원인</text>
   <text x="500" y="78" fill="#64748b" font-size="15" text-anchor="middle">GAAP 영업이익 3.65B → 1.26B → 0.40B, 그러나 범인은 해마다 다르다</text>
@@ -26,7 +26,7 @@
   <text x="500" y="451" fill="#fbbf24" font-size="13" font-weight="700" text-anchor="middle">2022 ↓ : Xilinx 인수 무형자산 상각 (10-K)</text>
 
   <rect x="650" y="475" width="320" height="36" rx="8" fill="#11161f" stroke="#ef4444" stroke-width="1.2"/>
-  <text x="810" y="498" fill="#f87171" font-size="13" font-weight="700" text-anchor="middle">2023 ↓ : 약한 Client + 높은 R&D (상각은 ↓)</text>
+  <text x="810" y="498" fill="#f87171" font-size="13" font-weight="700" text-anchor="middle">2023 ↓ : 약한 Client + 높은 R&amp;D (상각은 ↓)</text>
 
   <text x="120" y="498" fill="#94a3b8" font-size="13">'상각이 둘 다 무너뜨렸다'는</text>
   <text x="120" y="475" fill="#94a3b8" font-size="13" font-weight="700">인과 비약 — 두 해를 갈라 읽는다</text>

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" style="background:#0a0e1a;font-family:-apple-system,'Segoe UI',sans-serif">
   <title>제약 빅3 완성편 — 유한양행 · 한미약품 · 셀트리온</title>
-  <desc>같은 제약업 안에서 완전히 다른 수익 모델. 유한은 관계사+라이선스, 한미는 자체 R&D, 셀트리온은 바이오시밀러 공장.</desc>
+  <desc>같은 제약업 안에서 완전히 다른 수익 모델. 유한은 관계사+라이선스, 한미는 자체 R&amp;D, 셀트리온은 바이오시밀러 공장.</desc>
 
   <text x="60" y="70" fill="#f1f5f9" font-size="30" font-weight="700">제약 빅3 — 같은 업종, 정반대 수익 모델</text>
   <text x="60" y="105" fill="#94a3b8" font-size="17">유한양행(#71) · 한미약품(#57) · 셀트리온(#06) 수익 구조 완성편</text>
@@ -11,7 +11,7 @@
     <text x="320" y="32" fill="#e2e8f0" font-size="16" font-weight="700" text-anchor="middle">매출 (조)</text>
     <text x="470" y="32" fill="#e2e8f0" font-size="16" font-weight="700" text-anchor="middle">GPM (%)</text>
     <text x="610" y="32" fill="#e2e8f0" font-size="16" font-weight="700" text-anchor="middle">OPM (%)</text>
-    <text x="740" y="32" fill="#e2e8f0" font-size="16" font-weight="700" text-anchor="middle">R&D/매출 (%)</text>
+    <text x="740" y="32" fill="#e2e8f0" font-size="16" font-weight="700" text-anchor="middle">R&amp;D/매출 (%)</text>
     <text x="900" y="32" fill="#e2e8f0" font-size="16" font-weight="700" text-anchor="middle">부채비율</text>
     <text x="1030" y="32" fill="#e2e8f0" font-size="16" font-weight="700" text-anchor="middle">dCR</text>
 
@@ -62,21 +62,21 @@
     <text x="20" y="105" fill="#e2e8f0" font-size="13">• 유통 + OTC + 도입품 중심</text>
     <text x="20" y="130" fill="#e2e8f0" font-size="13">• 유한킴벌리 30% 지분법</text>
     <text x="20" y="155" fill="#e2e8f0" font-size="13">• 렉라자 얀센 라이선스</text>
-    <text x="20" y="180" fill="#e2e8f0" font-size="13">• R&D 비용 낮음 (10%)</text>
+    <text x="20" y="180" fill="#e2e8f0" font-size="13">• R&amp;D 비용 낮음 (10%)</text>
     <text x="20" y="210" fill="#fbbf24" font-size="13" font-weight="700">→ 본업 낮은 마진을</text>
     <text x="20" y="230" fill="#fbbf24" font-size="13" font-weight="700">→ 영업외로 보완</text>
     <text x="20" y="255" fill="#94a3b8" font-size="12">99년 된 최장수 제약사</text>
 
     <rect x="370" y="0" width="340" height="270" fill="#1e293b" stroke="#22c55e" stroke-width="2" rx="10"/>
     <text x="540" y="40" fill="#22c55e" font-size="17" font-weight="700" text-anchor="middle">한미약품</text>
-    <text x="540" y="65" fill="#94a3b8" font-size="13" text-anchor="middle">자체 R&D 자력 모델</text>
+    <text x="540" y="65" fill="#94a3b8" font-size="13" text-anchor="middle">자체 R&amp;D 자력 모델</text>
     <text x="390" y="105" fill="#e2e8f0" font-size="13">• 자체 신약 개발 중심</text>
-    <text x="390" y="130" fill="#e2e8f0" font-size="13">• R&D 34% 매출 투자</text>
+    <text x="390" y="130" fill="#e2e8f0" font-size="13">• R&amp;D 34% 매출 투자</text>
     <text x="390" y="155" fill="#e2e8f0" font-size="13">• GPM 57%·OPM 17%</text>
     <text x="390" y="180" fill="#e2e8f0" font-size="13">• 기술수출 반환 리스크</text>
     <text x="390" y="210" fill="#22c55e" font-size="13" font-weight="700">→ 본업 자체 마진 높음</text>
     <text x="390" y="230" fill="#22c55e" font-size="13" font-weight="700">→ 영업외 의존 낮음</text>
-    <text x="390" y="255" fill="#94a3b8" font-size="12">R&D 자본 집약형</text>
+    <text x="390" y="255" fill="#94a3b8" font-size="12">R&amp;D 자본 집약형</text>
 
     <rect x="740" y="0" width="340" height="270" fill="#1e293b" stroke="#3b82f6" stroke-width="2" rx="10"/>
     <text x="910" y="40" fill="#3b82f6" font-size="17" font-weight="700" text-anchor="middle">셀트리온</text>

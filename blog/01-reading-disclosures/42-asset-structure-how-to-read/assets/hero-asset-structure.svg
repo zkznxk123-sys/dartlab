@@ -15,7 +15,7 @@
     <rect width="155" height="140" rx="10" fill="#1e3a5f" stroke="#38bdf8" stroke-width="1.5"/>
     <text x="78" y="28" text-anchor="middle" fill="#38bdf8" font-size="13" font-weight="700">1. 재분류</text>
     <text x="78" y="52" text-anchor="middle" fill="#e2e8f0" font-size="11">유동/비유동</text>
-    <text x="78" y="68" text-anchor="middle" fill="#64748b" font-size="18">--></text>
+    <text x="78" y="68" text-anchor="middle" fill="#64748b" font-size="18">--&gt;</text>
     <text x="78" y="88" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="600">영업/비영업</text>
     <text x="78" y="108" text-anchor="middle" fill="#94a3b8" font-size="10">사업에 쓰이는 자산 vs</text>
     <text x="78" y="122" text-anchor="middle" fill="#94a3b8" font-size="10">사업 밖 자산 분리</text>
@@ -38,9 +38,9 @@
     <text x="78" y="52" text-anchor="middle" fill="#e2e8f0" font-size="11">투자 패턴 판단</text>
     <line x1="20" y1="64" x2="136" y2="64" stroke="#334155" stroke-width="1"/>
     <text x="78" y="82" text-anchor="middle" fill="#94a3b8" font-size="10">CAPEX / 감가상각비</text>
-    <text x="78" y="100" text-anchor="middle" fill="#34d399" font-size="10">> 1.5 성장투자</text>
+    <text x="78" y="100" text-anchor="middle" fill="#34d399" font-size="10">&gt; 1.5 성장투자</text>
     <text x="78" y="114" text-anchor="middle" fill="#fbbf24" font-size="10">1.0~1.5 적정</text>
-    <text x="78" y="128" text-anchor="middle" fill="#f87171" font-size="10">< 1.0 유지투자</text>
+    <text x="78" y="128" text-anchor="middle" fill="#f87171" font-size="10">&lt; 1.0 유지투자</text>
   </g>
 
   <g transform="translate(580,95)">

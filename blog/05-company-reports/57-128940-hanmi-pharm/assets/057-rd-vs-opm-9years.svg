@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
-  <title>한미약품 R&D 3,724억 피크와 영업이익 2,578억 회복의 9년 파동</title>
-  <desc>2017~2025 연간 연구개발비와 영업이익 병렬 막대 — R&D 태운 뒤 5년 뒤 회수의 흐름</desc>
+  <title>한미약품 R&amp;D 3,724억 피크와 영업이익 2,578억 회복의 9년 파동</title>
+  <desc>2017~2025 연간 연구개발비와 영업이익 병렬 막대 — R&amp;D 태운 뒤 5년 뒤 회수의 흐름</desc>
   <rect width="1200" height="720" fill="#0a0e1a"/>
   <text x="60" y="64" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="34" font-weight="700" fill="#f1f5f9">R&amp;D 3,724억 태우고 5년 뒤 영업이익 2,578억</text>
   <text x="60" y="100" font-family="-apple-system, sans-serif" font-size="18" fill="#64748b">2017~2025 연구개발비(보라) vs 영업이익(노랑) — 태운 뒤 돌아오는 패턴</text>
@@ -9,7 +9,7 @@
   <line x1="100" y1="560" x2="1140" y2="560" stroke="#334155" stroke-width="1.5"/>
   <line x1="100" y1="160" x2="100" y2="560" stroke="#334155" stroke-width="1.5"/>
 
-  <!-- Y-axis labels (R&D scale, max 4000억) -->
+  <!-- Y-axis labels (R&amp;D scale, max 4000억) -->
   <g font-family="-apple-system, sans-serif" font-size="12" fill="#94a3b8">
     <text x="90" y="165" text-anchor="end">4,000</text>
     <text x="90" y="265" text-anchor="end">3,000</text>
@@ -26,8 +26,8 @@
     <line x1="100" y1="465" x2="1140" y2="465"/>
   </g>
 
-  <!-- Bars per year — R&D purple, OP yellow -->
-  <!-- 2017: R&D 2600, OP 822 -->
+  <!-- Bars per year — R&amp;D purple, OP yellow -->
+  <!-- 2017: R&amp;D 2600, OP 822 -->
   <g>
     <rect x="130" y="300" width="32" height="260" fill="#8b5cf6" rx="3"/>
     <text x="146" y="294" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">2,600</text>
@@ -36,7 +36,7 @@
     <text x="165" y="585" font-family="-apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2017</text>
   </g>
 
-  <!-- 2018: R&D 2860, OP 836 -->
+  <!-- 2018: R&amp;D 2860, OP 836 -->
   <g>
     <rect x="244" y="274" width="32" height="286" fill="#8b5cf6" rx="3"/>
     <text x="260" y="268" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">2,860</text>
@@ -45,7 +45,7 @@
     <text x="279" y="585" font-family="-apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2018</text>
   </g>
 
-  <!-- 2019: R&D 3153, OP 1039 -->
+  <!-- 2019: R&amp;D 3153, OP 1039 -->
   <g>
     <rect x="358" y="245" width="32" height="315" fill="#8b5cf6" rx="3"/>
     <text x="374" y="239" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">3,153</text>
@@ -54,7 +54,7 @@
     <text x="393" y="585" font-family="-apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2019</text>
   </g>
 
-  <!-- 2020: R&D 3724 (PEAK), OP 490 (BOTTOM) -->
+  <!-- 2020: R&amp;D 3724 (PEAK), OP 490 (BOTTOM) -->
   <g>
     <rect x="472" y="188" width="32" height="372" fill="#a855f7" stroke="#fde68a" stroke-width="2" rx="3"/>
     <text x="488" y="180" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#fbbf24" text-anchor="middle">3,724 ★</text>
@@ -63,7 +63,7 @@
     <text x="507" y="585" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#fbbf24" text-anchor="middle">2020</text>
   </g>
 
-  <!-- 2021: R&D 2282, OP 1254 -->
+  <!-- 2021: R&amp;D 2282, OP 1254 -->
   <g>
     <rect x="586" y="332" width="32" height="228" fill="#8b5cf6" rx="3"/>
     <text x="602" y="326" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">2,282</text>
@@ -72,7 +72,7 @@
     <text x="621" y="585" font-family="-apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2021</text>
   </g>
 
-  <!-- 2022: R&D 2667, OP 1581 -->
+  <!-- 2022: R&amp;D 2667, OP 1581 -->
   <g>
     <rect x="700" y="293" width="32" height="267" fill="#8b5cf6" rx="3"/>
     <text x="716" y="287" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">2,667</text>
@@ -81,7 +81,7 @@
     <text x="735" y="585" font-family="-apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2022</text>
   </g>
 
-  <!-- 2023: R&D 1818, OP 2207 -->
+  <!-- 2023: R&amp;D 1818, OP 2207 -->
   <g>
     <rect x="814" y="378" width="32" height="182" fill="#8b5cf6" rx="3"/>
     <text x="830" y="372" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">1,818</text>
@@ -90,7 +90,7 @@
     <text x="849" y="585" font-family="-apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2023</text>
   </g>
 
-  <!-- 2024: R&D 1340 (LOW), OP 2162 -->
+  <!-- 2024: R&amp;D 1340 (LOW), OP 2162 -->
   <g>
     <rect x="928" y="426" width="32" height="134" fill="#8b5cf6" rx="3"/>
     <text x="944" y="420" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">1,340</text>
@@ -99,7 +99,7 @@
     <text x="963" y="585" font-family="-apple-system, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2024</text>
   </g>
 
-  <!-- 2025: R&D 1958, OP 2578 (MAX) -->
+  <!-- 2025: R&amp;D 1958, OP 2578 (MAX) -->
   <g>
     <rect x="1042" y="364" width="32" height="196" fill="#8b5cf6" rx="3"/>
     <text x="1058" y="358" font-family="-apple-system, sans-serif" font-size="11" fill="#c4b5fd" text-anchor="middle">1,958</text>

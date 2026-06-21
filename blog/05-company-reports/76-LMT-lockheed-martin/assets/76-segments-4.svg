@@ -52,7 +52,7 @@
     <text x="890" y="195" fill="#e2e8f0" font-size="13">• Orion (NASA Artemis)</text>
     <text x="890" y="220" fill="#e2e8f0" font-size="13">• GPS III/IIIF</text>
     <text x="890" y="245" fill="#e2e8f0" font-size="13">• AEHF · SBIRS</text>
-    <text x="890" y="270" fill="#ef4444" font-size="12" font-weight="700">→ R&D·개발 부담</text>
+    <text x="890" y="270" fill="#ef4444" font-size="12" font-weight="700">→ R&amp;D·개발 부담</text>
   </g>
 
   <!-- 가중평균 해석 -->

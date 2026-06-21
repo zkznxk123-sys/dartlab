@@ -12,7 +12,7 @@
     <text x="40" y="52" fill="#fbbf24" font-size="22" font-weight="700" text-anchor="middle">1</text>
     <text x="85" y="38" fill="#f1f5f9" font-size="18" font-weight="700">렉라자 글로벌 매출 (얀센 분기 보고)</text>
     <text x="85" y="62" fill="#e2e8f0" font-size="14">2026 분기 $100M 돌파 → 연 $400M+ 안정 → 3년차 $600M+ 세 단계 순차 확인</text>
-    <text x="85" y="82" fill="#fbbf24" font-size="12">→ J&J 분기 10-Q · Lazcluze segment</text>
+    <text x="85" y="82" fill="#fbbf24" font-size="12">→ J&amp;J 분기 10-Q · Lazcluze segment</text>
 
     <!-- 2 -->
     <rect x="0" y="105" width="960" height="90" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8"/>

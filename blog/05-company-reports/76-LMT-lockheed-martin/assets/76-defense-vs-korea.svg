@@ -64,7 +64,7 @@
 
     <text x="30" y="75" fill="#e2e8f0" font-size="14">① <tspan fill="#22c55e" font-weight="700">계약 구조</tspan>: LMT cost-plus 50~60% (마진 캡 8~12%) vs 한국 방산 fixed-price 글로벌 수출 비중 큼</text>
     <text x="30" y="100" fill="#e2e8f0" font-size="14">② <tspan fill="#22c55e" font-weight="700">가격 자유도</tspan>: 한국 방산은 폴란드 K9·K2 같은 글로벌 입찰에서 단가 자유 책정. 단가 1.3배 책정 가능</text>
-    <text x="30" y="125" fill="#e2e8f0" font-size="14">③ <tspan fill="#22c55e" font-weight="700">R&D 부담</tspan>: 한국 방산은 방위사업청 정부 R&D 지원, LMT는 자체 R&D $1.5~2B/년 부담</text>
+    <text x="30" y="125" fill="#e2e8f0" font-size="14">③ <tspan fill="#22c55e" font-weight="700">R&amp;D 부담</tspan>: 한국 방산은 방위사업청 정부 R&amp;D 지원, LMT는 자체 R&amp;D $1.5~2B/년 부담</text>
 
     <text x="30" y="155" fill="#94a3b8" font-size="12">→ 다만 LMT는 매출 8배·수주잔고 $176B 절대 안정성으로 다른 차원에서 작동</text>
   </g>

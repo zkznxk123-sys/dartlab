@@ -46,7 +46,7 @@
   <!-- Three causes -->
   <rect x="60" y="450" width="360" height="110" rx="10" fill="#1a1f2b" stroke="#f59e0b" stroke-width="1"/>
   <text x="80" y="480" fill="#f59e0b" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="700">1. 신인 비중 과다</text>
-  <text x="80" y="505" fill="#f1f5f9" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12">투어스, 아일릿, &TEAM</text>
+  <text x="80" y="505" fill="#f1f5f9" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12">투어스, 아일릿, &amp;TEAM</text>
   <text x="80" y="525" fill="#f1f5f9" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12">동시 초기 투자 단계</text>
   <text x="80" y="548" fill="#94a3b8" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11">BTS 되풀이 수익 0</text>
 

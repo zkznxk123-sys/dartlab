@@ -39,9 +39,9 @@
     <text x="540" y="277" fill="#fbbf24" font-size="20" font-weight="700" text-anchor="middle">18.40%</text>
     <text x="900" y="277" fill="#22c55e" font-size="20" font-weight="700" text-anchor="middle">약 25%</text>
 
-    <!-- R&D -->
+    <!-- R&amp;D -->
     <rect x="0" y="300" width="1080" height="60" fill="#0f172a"/>
-    <text x="30" y="337" fill="#e2e8f0" font-size="15" font-weight="700">R&D / 매출</text>
+    <text x="30" y="337" fill="#e2e8f0" font-size="15" font-weight="700">R&amp;D / 매출</text>
     <text x="540" y="337" fill="#94a3b8" font-size="18" text-anchor="middle">거의 없음</text>
     <text x="900" y="337" fill="#94a3b8" font-size="18" text-anchor="middle">약 5~8%</text>
 

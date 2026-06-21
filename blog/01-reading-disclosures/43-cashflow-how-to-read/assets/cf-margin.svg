@@ -43,7 +43,7 @@
     <!-- Warning zone -->
     <rect width="175" height="80" rx="8" fill="#451a03" stroke="#f87171" stroke-width="1"/>
     <text x="88" y="22" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">10% 미만 경고</text>
-    <text x="88" y="45" text-anchor="middle" fill="#f87171" font-size="18" font-weight="700">< 10%</text>
+    <text x="88" y="45" text-anchor="middle" fill="#f87171" font-size="18" font-weight="700">&lt; 10%</text>
     <text x="88" y="65" text-anchor="middle" fill="#94a3b8" font-size="9">현금 창출력 약화</text>
   </g>
 

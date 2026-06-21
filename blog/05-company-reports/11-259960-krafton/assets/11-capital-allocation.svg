@@ -35,7 +35,7 @@
 
   <!-- Destination 3: 운영 비용 -->
   <rect x="440" y="350" width="300" height="70" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
-  <text x="590" y="375" text-anchor="middle" fill="#94a3b8" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600">인건비 + R&D 확대</text>
+  <text x="590" y="375" text-anchor="middle" fill="#94a3b8" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600">인건비 + R&amp;D 확대</text>
   <text x="590" y="400" text-anchor="middle" fill="#f1f5f9" font-family="'JetBrains Mono', monospace" font-size="14">인건비 2,840억/년 + RSU 300억+</text>
 
   <!-- 2026 전환 -->

@@ -15,7 +15,7 @@
 
   <!-- SGA box -->
   <rect x="520" y="170" width="180" height="45" fill="#1e293b" rx="6" stroke="#ef4444" stroke-width="1.5"/>
-  <text x="610" y="190" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">SG&A $8.4B (27.7%)</text>
+  <text x="610" y="190" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">SG&amp;A $8.4B (27.7%)</text>
   <text x="610" y="207" text-anchor="middle" fill="#64748b" font-size="10">물류 인프라 비용</text>
 
   <!-- Arrow to OP -->

@@ -55,7 +55,7 @@
     <rect x="0" y="0" width="1080" height="170" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
     <text x="30" y="35" fill="#ef4444" font-size="16" font-weight="700">2024 CAPEX 6.27조 분해 (공시 기반 추정)</text>
 
-    <text x="30" y="65" fill="#f1f5f9" font-size="13">• 한국 천안·수원: 약 1.2조 (전고체 파일럿 + R&D)</text>
+    <text x="30" y="65" fill="#f1f5f9" font-size="13">• 한국 천안·수원: 약 1.2조 (전고체 파일럿 + R&amp;D)</text>
     <text x="30" y="88" fill="#f1f5f9" font-size="13">• 헝가리 괴드 2공장 증설: 약 1.8조 (BMW·Stellantis·VW)</text>
     <text x="30" y="111" fill="#f1f5f9" font-size="13">• 말레이시아 스렘반: 약 1.3조 (21700 원통형 확장)</text>
     <text x="30" y="134" fill="#f1f5f9" font-size="13">• 미국 애리조나 Stellantis JV (Starplus Energy): 약 1.5조 — 2026 가동 목표 23→15GWh 하향</text>

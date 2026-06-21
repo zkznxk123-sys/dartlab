@@ -31,10 +31,10 @@
   <!-- Row 2: 건전성 -->
   <text x="60" y="200" font-family="Pretendard, Inter, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">건전성</text>
   <rect x="60" y="208" width="330" height="40" rx="6" fill="rgba(52,211,153,0.04)" stroke="#34d399" stroke-width="0.5"/>
-  <text x="225" y="228" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#94a3b8">NPL < 1%, coverage > 150%</text>
+  <text x="225" y="228" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#94a3b8">NPL &lt; 1%, coverage &gt; 150%</text>
   <text x="225" y="242" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">충당금 넉넉, 포트폴리오 분산</text>
   <rect x="410" y="208" width="330" height="40" rx="6" fill="rgba(248,113,113,0.04)" stroke="#f87171" stroke-width="0.5"/>
-  <text x="575" y="228" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#94a3b8">NPL > 2%, coverage < 100%</text>
+  <text x="575" y="228" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#94a3b8">NPL &gt; 2%, coverage &lt; 100%</text>
   <text x="575" y="242" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">충당금 환입 이익 보정, 업종 편중</text>
 
   <!-- Row 3: 자본 -->
@@ -58,7 +58,7 @@
   <!-- Row 5: 유동성 -->
   <text x="60" y="410" font-family="Pretendard, Inter, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">유동성</text>
   <rect x="60" y="418" width="330" height="40" rx="6" fill="rgba(52,211,153,0.04)" stroke="#34d399" stroke-width="0.5"/>
-  <text x="225" y="438" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#94a3b8">LCR > 120%, 예대율 < 100%</text>
+  <text x="225" y="438" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#94a3b8">LCR &gt; 120%, 예대율 &lt; 100%</text>
   <text x="225" y="452" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">안정 조달, 만기 분산</text>
   <rect x="410" y="418" width="330" height="40" rx="6" fill="rgba(248,113,113,0.04)" stroke="#f87171" stroke-width="0.5"/>
   <text x="575" y="438" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#94a3b8">LCR ≈ 100%, 단기 조달 의존</text>
