@@ -107,16 +107,18 @@ export function gradeTone(metricKey: string, value: unknown): Tone {
 	}
 }
 
+// 신호색 SSOT — tokens.css(--dl-good/warn/bad/ink-mute) 참조. 전부 CSS 컨텍스트(style:color·color-mix·
+// style:--cg)에서만 소비되므로 var() 사용 가능(canvas 0 확인). 한 곳(tokens.css)에서 전 surface 신호색 제어.
 /** qualGrade 기준 행 배경 톤 (CSS color-mix 인풋). */
 export function rowTintColor(qualGrade: unknown): string {
 	const tone = gradeTone('qualGrade', qualGrade);
 	switch (tone) {
 		case 'good':
-			return '#22c55e';
+			return 'var(--dl-good)';
 		case 'warn':
-			return '#f59e0b';
+			return 'var(--dl-warn)';
 		case 'bad':
-			return '#ef4444';
+			return 'var(--dl-bad)';
 		case 'neutral':
 		default:
 			return 'transparent';
@@ -127,13 +129,13 @@ export function rowTintColor(qualGrade: unknown): string {
 export function toneColor(tone: Tone): string {
 	switch (tone) {
 		case 'good':
-			return '#22c55e';
+			return 'var(--dl-good)';
 		case 'warn':
-			return '#f59e0b';
+			return 'var(--dl-warn)';
 		case 'bad':
-			return '#ef4444';
+			return 'var(--dl-bad)';
 		case 'neutral':
 		default:
-			return '#94a3b8';
+			return 'var(--dl-ink-mute)';
 	}
 }
