@@ -2,7 +2,38 @@
 // 타입 import 는 erased(런타임 circular 무해) — 값 의존은 companyLive→reportFacts 단방향.
 import type { LiveCompanyReportFact } from './companyLive';
 
-export function toDividendFact(row: any): LiveCompanyReportFact | null {
+// 정기보고서 parquet row 의 부분 스키마(DART 필드코드) — 매퍼가 읽는 필드만 선언.
+// 값은 문자열 셀로 다룬다(value/detail 가 string). readReportFactRows 가 any[] 를 주므로 caller 무영향(경계 격리).
+export interface PeriodicReportRow {
+	year?: string | null;
+	// 배당
+	thstrm?: string | null;
+	se?: string | null;
+	stlm_dt?: string | null;
+	// 자사주
+	trmend_qy?: string | null;
+	stock_knd?: string | null;
+	change_qy_acqs?: string | null;
+	// 임원
+	nm?: string | null;
+	ofcps?: string | null;
+	// 감사
+	adt_opinion?: string | null;
+	adtor?: string | null;
+	emphs_matter?: string | null;
+	core_adt_matter?: string | null;
+	// 주요주주
+	mxmm_shrholdr_nm?: string | null;
+	qota_rt?: string | null;
+	change_cause?: string | null;
+	// 회사채
+	facvalu_totamt?: string | null;
+	scrits_knd_nm?: string | null;
+	intrt?: string | null;
+	evl_grad_instt?: string | null;
+}
+
+export function toDividendFact(row: PeriodicReportRow | null | undefined): LiveCompanyReportFact | null {
 	if (!row) return null;
 	return {
 		key: 'dividend',
@@ -13,7 +44,7 @@ export function toDividendFact(row: any): LiveCompanyReportFact | null {
 	};
 }
 
-export function toTreasuryFact(row: any): LiveCompanyReportFact | null {
+export function toTreasuryFact(row: PeriodicReportRow | null | undefined): LiveCompanyReportFact | null {
 	if (!row) return null;
 	return {
 		key: 'treasuryStock',
@@ -26,7 +57,7 @@ export function toTreasuryFact(row: any): LiveCompanyReportFact | null {
 	};
 }
 
-export function toExecutiveFact(rows: any[]): LiveCompanyReportFact | null {
+export function toExecutiveFact(rows: PeriodicReportRow[]): LiveCompanyReportFact | null {
 	if (!rows.length) return null;
 	return {
 		key: 'executive',
@@ -37,7 +68,7 @@ export function toExecutiveFact(rows: any[]): LiveCompanyReportFact | null {
 	};
 }
 
-export function toAuditFact(row: any): LiveCompanyReportFact | null {
+export function toAuditFact(row: PeriodicReportRow | null | undefined): LiveCompanyReportFact | null {
 	if (!row) return null;
 	return {
 		key: 'auditOpinion',
@@ -48,7 +79,7 @@ export function toAuditFact(row: any): LiveCompanyReportFact | null {
 	};
 }
 
-export function toMajorHolderFact(row: any): LiveCompanyReportFact | null {
+export function toMajorHolderFact(row: PeriodicReportRow | null | undefined): LiveCompanyReportFact | null {
 	if (!row) return null;
 	return {
 		key: 'majorHolder',
@@ -59,7 +90,7 @@ export function toMajorHolderFact(row: any): LiveCompanyReportFact | null {
 	};
 }
 
-export function toCorporateBondFact(row: any): LiveCompanyReportFact | null {
+export function toCorporateBondFact(row: PeriodicReportRow | null | undefined): LiveCompanyReportFact | null {
 	if (!row) return null;
 	return {
 		key: 'corporateBond',
