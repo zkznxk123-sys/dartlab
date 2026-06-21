@@ -283,7 +283,9 @@ export default defineConfig({
 		}
 	},
 	ssr: {
-		noExternal: [/^d3-/]
+		// 워크스페이스 @dartlab/* 는 src .ts 를 그대로 export(빌드 dist 없음) → Node ESM 가 확장자 없는
+		// barrel(`export * from './runtime'`)을 못 풀어 SSR 500. vite 가 변환하도록 noExternal 강제.
+		noExternal: [/^d3-/, /^@dartlab\//]
 	},
 	optimizeDeps: {
 		// d3 + 뷰어가 *동적 import* 하는 무거운 deps 를 시작 시 미리 최적화. 안 넣으면 뷰어 로드 중 뒤늦게 최적화되며
