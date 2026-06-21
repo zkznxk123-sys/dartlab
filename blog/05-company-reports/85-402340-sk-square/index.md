@@ -37,9 +37,8 @@ ai:
 ---
 
 <script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
 > **지주회사** | SK하이닉스 · 지분법이익 · AI 메모리 · NAV 할인 | 2026-04-29 dartlab 실측
@@ -461,84 +460,4 @@ print(bs_df.loc[["자산총계", "부채총계", "자본총계"]].tail())
 
 ---
 
-<!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
-
-
-## 공시 자료
-
-| 기간 | 보고서 | 링크 |
-|------|--------|------|
-| 2025 | 사업보고서 (2025.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260317000830) |
-| 2025 | 분기보고서 (2025.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251113000629) |
-| 2025 | 반기보고서 (2025.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814002335) |
-| 2025 | 분기보고서 (2025.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250515001434) |
-| 2024 | 사업보고서 (2024.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250319001044) |
-| 2024 | 분기보고서 (2024.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241114002200) |
-| 2024 | [기재정정]반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814002073) |
-| 2024 | 반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240813001060) |
-| 2024 | 분기보고서 (2024.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240516001564) |
-| 2023 | [기재정정]사업보고서 (2023.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240419000675) |
-
-> 전체 공시 목록은 dartlab에서 확인:
-> ```python
-> import dartlab
-> c = dartlab.Company("402340")
-> c.filings()
-> ```
-
-## 재무제표 — 최근 5개년
-
-> 아래는 최근 5개년 요약입니다. 전체 기간·분기별 데이터는 dartlab에서 직접 확인할 수 있습니다:
-> ```python
-> import dartlab
-> c = dartlab.Company("402340")
-> c.panel("IS")              # 손익계산서 (분기)
-> c.panel("IS", freq="Y")    # 손익계산서 (연간)
-> c.panel("BS")              # 재무상태표
-> c.panel("CF")              # 현금흐름표
-> c.panel("SCE")             # 자본변동표
-> c.panel("ratios")          # 재무비율
-> ```
-
-### 손익계산서 (IS) — 단위 억원
-
-<ComboChart data={[{year:"2025",매출액:14115,영업이익:87974,당기순이익:32769},{year:"2024",매출액:19066,영업이익:39126,당기순이익:25213},{year:"2023",매출액:23927,영업이익:-9662,당기순이익:-5345}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 |
-|---|---:|---:|---:|
-| 매출액 | 14,115 | 19,066 | 23,927 |
-| 매출원가 | — | — | — |
-| 매출총이익 | — | — | — |
-| 판매비와관리비 | — | — | — |
-| 영업이익 | 87,974 | 39,126 | -9,662 |
-| 금융수익 | — | — | — |
-| 금융비용 | 1,406 | 1,870 | 3,074 |
-| 당기순이익 | 32,769 | 25,213 | -5,345 |
-
-### 재무상태표 (BS) — 단위 억원
-
-<StackBar data={[{year:"2025",segments:[{label:"부채",value:25214,color:"#ef4444"},{label:"자본",value:279832,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:23356,color:"#ef4444"},{label:"자본",value:195854,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:21535,color:"#ef4444"},{label:"자본",value:158165,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 |
-|---|---:|---:|---:|
-| 자산총계 | 305,045 | 219,211 | 179,700 |
-| 유동자산 | 22,555 | 27,028 | 22,885 |
-| 비유동자산 | 282,491 | 192,183 | 156,815 |
-| 부채총계 | 25,214 | 23,356 | 21,535 |
-| 유동부채 | 9,746 | 13,963 | 13,806 |
-| 비유동부채 | 15,467 | 9,393 | 7,729 |
-| 자본총계 | 279,832 | 195,854 | 158,165 |
-
-### 현금흐름표 (CF) — 단위 억원
-
-<ComboChart data={[{year:"2025",영업CF:3872,투자CF:296,재무CF:-4193},{year:"2024",영업CF:1900,투자CF:897,재무CF:-2007},{year:"2023",영업CF:642,투자CF:-189,재무CF:-877}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 |
-|---|---:|---:|---:|
-| 영업활동현금흐름 | 3,872 | 1,900 | 642 |
-| 투자활동현금흐름 | 296 | 897 | -189 |
-| 재무활동현금흐름 | -4,193 | -2,007 | -877 |
-
-*최종 갱신: 2026-04-29 | dartlab 실측 (DART 공시 기준)*
-
-<!-- AUTO:END -->
+<CompanyFinancials code="402340" />

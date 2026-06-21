@@ -37,9 +37,8 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
   import YouTube from '$lib/components/YouTube.svelte';
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
 > **지주** | 건강관리/제약과바이오 | 2026-04-23 dartlab 실측
@@ -570,84 +569,4 @@ print(c.credit("등급"))                                                       
 
 ---
 
-<!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
-
-
-## 공시 / Filings
-
-| 기간 | 보고서 | 링크 |
-|------|--------|------|
-| 2025 | 사업보고서 (2025.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260320001158) |
-| 2025 | 분기보고서 (2025.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251114002136) |
-| 2025 | 반기보고서 (2025.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003909) |
-| 2025 | 분기보고서 (2025.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250515001888) |
-| 2024 | 사업보고서 (2024.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250318001281) |
-| 2024 | 분기보고서 (2024.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241114001438) |
-| 2024 | 반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814004124) |
-| 2024 | 분기보고서 (2024.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240516002046) |
-| 2023 | [기재정정]사업보고서 (2023.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240328001634) |
-| 2023 | 사업보고서 (2023.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240320001563) |
-
-> 전체 공시 목록은 dartlab에서 확인:
-> ```python
-> import dartlab
-> c = dartlab.Company("008930")
-> c.filings()
-> ```
-
-## 재무제표 — 최근 5개년
-
-> 아래는 최근 5개년 요약입니다. 전체 기간·분기별 데이터는 dartlab에서 직접 확인할 수 있습니다:
-> ```python
-> import dartlab
-> c = dartlab.Company("008930")
-> c.panel("IS")              # 손익계산서 (분기)
-> c.panel("IS", freq="Y")    # 손익계산서 (연간)
-> c.panel("BS")              # 재무상태표
-> c.panel("CF")              # 현금흐름표
-> c.panel("SCE")             # 자본변동표
-> c.panel("ratios")          # 재무비율
-> ```
-
-### 손익계산서 (IS) — 단위 억원
-
-<ComboChart data={[{year:"2025",매출액:13570,영업이익:1387,당기순이익:1177},{year:"2024",매출액:12834,영업이익:989,당기순이익:567},{year:"2023",매출액:12479,영업이익:1245,당기순이익:1151},{year:"2022",매출액:10461,영업이익:676,당기순이익:690},{year:"2021",매출액:9502,영업이익:589,당기순이익:429}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 매출액 | 13,570 | 12,834 | 12,479 | 10,461 | 9,502 |
-| 매출원가 | — | — | — | 4,333 | 3,793 |
-| 매출총이익 | — | — | — | — | — |
-| 판매비와관리비 | — | — | — | — | — |
-| 영업이익 | 1,387 | 989 | 1,245 | 676 | 589 |
-| 금융수익 | — | — | — | — | — |
-| 금융비용 | 124 | 117 | 102 | 37 | 19 |
-| 당기순이익 | 1,177 | 567 | 1,151 | 690 | 429 |
-
-### 재무상태표 (BS) — 단위 억원
-
-<StackBar data={[{year:"2025",segments:[{label:"부채",value:5299,color:"#ef4444"},{label:"자본",value:9592,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:5104,color:"#ef4444"},{label:"자본",value:8387,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:4387,color:"#ef4444"},{label:"자본",value:7875,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:3849,color:"#ef4444"},{label:"자본",value:7247,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:2596,color:"#ef4444"},{label:"자본",value:6903,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 자산총계 | 14,890 | 13,491 | 12,262 | 11,097 | 9,499 |
-| 유동자산 | 4,258 | 3,280 | 2,739 | 2,453 | 2,226 |
-| 비유동자산 | 10,633 | 10,211 | 9,523 | 8,643 | 7,273 |
-| 부채총계 | 5,299 | 5,104 | 4,387 | 3,849 | 2,596 |
-| 유동부채 | 4,835 | 4,688 | 3,952 | 3,477 | 2,210 |
-| 비유동부채 | 463 | 415 | 435 | 372 | 386 |
-| 자본총계 | 9,592 | 8,387 | 7,875 | 7,247 | 6,903 |
-
-### 현금흐름표 (CF) — 단위 억원
-
-<ComboChart data={[{year:"2025",영업CF:477,투자CF:122,재무CF:-171},{year:"2024",영업CF:830,투자CF:-69,재무CF:7},{year:"2023",영업CF:352,투자CF:-187,재무CF:-102},{year:"2022",영업CF:95,투자CF:-21,재무CF:-11},{year:"2021",영업CF:137,투자CF:-22,재무CF:-110}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 영업활동현금흐름 | 477 | 830 | 352 | 95 | 137 |
-| 투자활동현금흐름 | 122 | -69 | -187 | -21 | -22 |
-| 재무활동현금흐름 | -171 | 7 | -102 | -11 | -110 |
-
-*최종 갱신: 2026-04-24 | dartlab 실측 (DART 공시 기준)*
-
-<!-- AUTO:END -->
+<CompanyFinancials code="008930" />

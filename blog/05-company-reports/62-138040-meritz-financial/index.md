@@ -25,8 +25,7 @@ ai:
 ---
 
 <script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 </script>
 
 > **데이터 기준**: 2026-04-21 dartlab 실측 — 연결 재무제표(CFS) 기준. 2022년 11월 메리츠화재·메리츠증권 완전자회사화 완료 후 2023년부터 온전한 연결.
@@ -532,77 +531,4 @@ c.select("ratios", ["영업이익률 (%)"])
 
 ---
 
-<!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
-
-
-## 공시 / Filings
-
-| 기간 | 보고서 | 링크 |
-|------|--------|------|
-| 2025 | [기재정정]사업보고서 (2025.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260331004089) |
-| 2025 | [기재정정]사업보고서 (2025.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260331004202) |
-| 2025 | 사업보고서 (2025.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318001419) |
-
-> 전체 공시 목록은 dartlab에서 확인:
-> ```python
-> import dartlab
-> c = dartlab.Company("138040")
-> c.filings()
-> ```
-
-## 재무제표 — 최근 5개년
-
-> 아래는 최근 5개년 요약입니다. 전체 기간·분기별 데이터는 dartlab에서 직접 확인할 수 있습니다:
-> ```python
-> import dartlab
-> c = dartlab.Company("138040")
-> c.panel("IS")              # 손익계산서 (분기)
-> c.panel("IS", freq="Y")    # 손익계산서 (연간)
-> c.panel("BS")              # 재무상태표
-> c.panel("CF")              # 현금흐름표
-> c.panel("SCE")             # 자본변동표
-> c.panel("ratios")          # 재무비율
-> ```
-
-### 손익계산서 (IS) — 단위 억원
-
-<ComboChart data={[{year:"2025",매출액:249522,영업이익:25338,당기순이익:23501},{year:"2024",매출액:465745,영업이익:31889,당기순이익:23334},{year:"2023",매출액:279507,영업이익:13667,당기순이익:9451}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 |
-|---|---:|---:|---:|
-| 매출액 | 249,522 | 465,745 | 279,507 |
-| 매출원가 | — | — | — |
-| 매출총이익 | — | — | — |
-| 판매비와관리비 | 6,885 | 7,429 | -2,466 |
-| 영업이익 | 25,338 | 31,889 | 13,667 |
-| 금융수익 | — | — | — |
-| 금융비용 | -20,362 | 19,773 | 27,789 |
-| 당기순이익 | 23,501 | 23,334 | 9,451 |
-
-### 재무상태표 (BS) — 단위 억원
-
-<StackBar data={[{year:"2025",segments:[{label:"부채",value:1241968,color:"#ef4444"},{label:"자본",value:112612,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:1046482,color:"#ef4444"},{label:"자본",value:109300,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:921387,color:"#ef4444"},{label:"자본",value:100972,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 |
-|---|---:|---:|---:|
-| 자산총계 | 1,354,580 | 1,155,782 | 1,022,358 |
-| 유동자산 | — | — | — |
-| 비유동자산 | — | — | — |
-| 부채총계 | 1,241,968 | 1,046,482 | 921,387 |
-| 유동부채 | — | — | — |
-| 비유동부채 | — | — | — |
-| 자본총계 | 112,612 | 109,300 | 100,972 |
-
-### 현금흐름표 (CF) — 단위 억원
-
-<ComboChart data={[{year:"2025",영업CF:0,투자CF:0,재무CF:0},{year:"2024",영업CF:0,투자CF:0,재무CF:0},{year:"2023",영업CF:0,투자CF:0,재무CF:0}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="억원" />
-
-| 항목 | 2025 | 2024 | 2023 |
-|---|---:|---:|---:|
-| 영업활동현금흐름 | — | — | — |
-| 투자활동현금흐름 | — | — | — |
-| 재무활동현금흐름 | — | — | — |
-
-*최종 갱신: 2026-04-21 | dartlab 실측 (DART 공시 기준)*
-
-<!-- AUTO:END -->
+<CompanyFinancials code="138040" />
