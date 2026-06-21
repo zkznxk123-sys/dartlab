@@ -917,6 +917,15 @@
       "limitations": []
     },
     {
+      "id": "operation.terminal",
+      "title": "터미널 사상 — 전문가 분석 계기판 (instrument, not document)",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.testing",
       "title": "dartlab 테스트 · CI 운영 규칙",
       "category": "operation",

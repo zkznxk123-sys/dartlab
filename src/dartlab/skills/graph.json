@@ -1084,7 +1084,7 @@
       "title": "대시보드 배치·설계 원칙 (bento·정사각·위계·Playwright loop)",
       "category": "operation",
       "purpose": "dashboard 페이지의 카드 배치 규칙 · sub 분류 원칙 · 시각 위계 · 인터랙션 표준 · Playwright visual loop 의 SSOT. 외부 표준 (Apple WWDC25 / PatternFly / Geckoboard / Koyfin / Bloomberg) 합성. P-DASH-V1 통합.",
-      "inDegree": 1,
+      "inDegree": 2,
       "outDegree": 2,
       "cluster": "operation",
       "isEntry": false,
@@ -1253,7 +1253,7 @@
       "title": "Philosophy — dartlab 사상 SSOT",
       "category": "operation",
       "purpose": "dartlab 의 존재 이유와 설계 원칙을 한 문서에 묶는 사상 정점 SSOT. 4 가지 비교 가능성 · 6 막 인과 · Company 편의성 3 원칙 · simple > complex · SSOT · 사람↔엔진↔AI 환류 흐름.",
-      "inDegree": 5,
+      "inDegree": 6,
       "outDegree": 5,
       "cluster": "operation",
       "isEntry": false,
@@ -1344,6 +1344,19 @@
       "audiences": []
     },
     {
+      "id": "operation.terminal",
+      "title": "터미널 사상 — 전문가 분석 계기판 (instrument, not document)",
+      "category": "operation",
+      "purpose": "DartLab 터미널(퍼블릭·로컬)의 기본 개념과 설계 사상 SSOT. 터미널은 전문가가 한눈에 읽는 살아있는 분석 계기판이며, 문서·리포트·뉴스판이 아니다. 터미널 surface 를 만들거나 평가할 때 기준으로 쓴다.",
+      "inDegree": 0,
+      "outDegree": 3,
+      "cluster": "operation",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": true,
+      "audiences": []
+    },
+    {
       "id": "operation.testing",
       "title": "dartlab 테스트 · CI 운영 규칙",
       "category": "operation",
@@ -1361,7 +1374,7 @@
       "title": "UI 엔진 (L4 표현 계층)",
       "category": "operation",
       "purpose": "UI 엔진 (L4 표현 계층) 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
-      "inDegree": 1,
+      "inDegree": 2,
       "outDegree": 3,
       "cluster": "operation",
       "isEntry": false,
@@ -5688,6 +5701,21 @@
       "kind": "knowledge"
     },
     {
+      "src": "operation.terminal",
+      "dst": "operation.philosophy",
+      "kind": "knowledge"
+    },
+    {
+      "src": "operation.terminal",
+      "dst": "operation.ui",
+      "kind": "knowledge"
+    },
+    {
+      "src": "operation.terminal",
+      "dst": "operation.dashboardDesign",
+      "kind": "knowledge"
+    },
+    {
       "src": "operation.testing",
       "dst": "start.dartlabSkillOs",
       "kind": "knowledge"
@@ -9710,6 +9738,7 @@
     "operation.sixActsAnalysis",
     "operation.skillMarket",
     "operation.stability",
+    "operation.terminal",
     "recipes.fundamental.credit.creditRatingMigration",
     "recipes.fundamental.credit.krCorporateSpreadWidening",
     "recipes.fundamental.credit.usHighYieldSpread",
@@ -9880,6 +9909,7 @@
     "operation.sixActsAnalysis",
     "operation.skillMarket",
     "operation.stability",
+    "operation.terminal",
     "operation.testing",
     "operation.ui",
     "recipes.fundamental.credit.creditRatingMigration",

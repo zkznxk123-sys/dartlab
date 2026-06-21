@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 294,
+    "skillCount": 295,
     "categories": [
       {
         "id": "start",
@@ -20,7 +20,7 @@
         "id": "operation",
         "title": "Operation",
         "description": "ops 원문을 skill 절차로 묶어 테스트, 문서, 릴리즈, 확장 규칙을 찾는 운영 지도.",
-        "count": 32
+        "count": 33
       },
       {
         "id": "engines",
@@ -2010,6 +2010,23 @@
       ],
       "nextSkills": [],
       "bodyPreview": "dartlab 은 현재 **DART core 가 stable**. 본 문서는 변경 시 적용할 tier 와 호환성 정책이다.\n\n## Tier 분류\n\n### Tier 1: Stable\n\n변경 시 deprecation 기간 + 마이그레이션 가이드 동반.\n\n| API | 설명 |\n|---|---|\n| `dartlab.Company(code)` | Company 객체 생성 facade |\n| `Company.panel(topic)` | topic payload 조회 (source-aware) |\n| `Company.trace()` | source provenance 조회 |\n| `Company.diff()` | 기간 간 텍스트 변화 감지 |\n| `Company.topics` | 사용 가능 topic 리스트 |\n| `dartlab.listing()` | 전체 상장사 디렉터리 |\n| `Company.panel(\"BS\"|\"IS\"|\"CF\"|\"CIS\")` | 재무제표 조회 |\n| `Company.panel(\"ratios\")` | 재무비율 조회 |\n| `Company.select(topic, accounts)` | topic 의 행/열 선택 |\n| `Company.index` "
+    },
+    {
+      "id": "operation.terminal",
+      "title": "터미널 사상 — 전문가 분석 계기판 (instrument, not document)",
+      "category": "operation",
+      "purpose": "DartLab 터미널(퍼블릭·로컬)의 기본 개념과 설계 사상 SSOT. 터미널은 전문가가 한눈에 읽는 살아있는 분석 계기판이며, 문서·리포트·뉴스판이 아니다. 터미널 surface 를 만들거나 평가할 때 기준으로 쓴다.",
+      "whenToUse": [
+        "터미널",
+        "terminal",
+        "퍼블릭 터미널 / 로컬 터미널",
+        "매크로 렌즈 / 대시보드 / 패널 시각 설계",
+        "instrument vs document",
+        "화면이 분석 계기판인지 판단",
+        "시각화 채택 여부"
+      ],
+      "nextSkills": [],
+      "bodyPreview": "## 터미널이란 — 계기판이지 문서가 아니다\n\nDartLab 터미널은 전문가가 하루 종일 들여다보는 *살아있는 분석 계기판(instrument)* 이다. 블룸버그·아이코 같은 금융 터미널의 본질은 *읽고 덮는 리포트* 가 아니라, 분석을 시각 원시형(차트·곡선·플롯·게이지)으로 압축해 몇 초 안에 위치를 읽게 하는 계기판이다. 따라서 터미널 surface 의 정답은 긴 텍스트가 아니다. 표와 산문은 계기를 받치는 비계(scaffold)이지 제품의 본체가 아니다.\n\n실패형은 명확하다 — 텍스트 카드의 나열 + 축도 기간도 없는 장식 스파크라인으로 채운 \"정렬된 문서\". 이것은 매크로 뉴스판이지 분석 계기판이 아니다.\n\n## 5 원칙\n\n1. **계기판 ≠ 문서.** 각 패널은 *읽는* 차트·곡선·플롯이지 *해석할* 문단이 아니다. 분석을 시각으로 압축한다.\n2. **밀도 + 속도 (전문가용).** 한눈에 위치를 읽는다. 정보 밀도는 높되 시각 *위계* 로 정렬한다(균일 카드 금지). 초보 온보딩이 아니라 반복 전문 사용 기준으로 설계한다.\n3. **정직은 시각으로 구현한다.** 판정·점수·매수/매도를 내지 않는 원칙은, 곡선·국면·분포·증거상태를 *그려서 보여주"
     },
     {
       "id": "operation.testing",
