@@ -1,4 +1,5 @@
 import type { EntryGenerator } from './$types';
+import type { CompanyAnnualFinance } from '@dartlab/ui-runtime/data/finance/annual';
 
 const modules = import.meta.glob('@blog/**/index.md', { eager: true }) as Record<
 	string,
@@ -28,11 +29,14 @@ export const entries: EntryGenerator = () => {
 
 export const prerender = true;
 
-export function load({ params }: { params: { slug: string } }) {
+// server load(+page.server.ts)의 companyFinance 를 universal 반환에 forward — 둘 다 있을 때 page `data` 는
+// universal 반환이 권위라 명시 병합 필요(블로그 회사글 재무 = 빌드타임 SSOT 직독, +page.server.ts 참조).
+export function load({ params, data }: { params: { slug: string }; data: { companyFinance?: CompanyAnnualFinance | null } }) {
 	const entry = slugMap.get(params.slug);
+	const companyFinance = data?.companyFinance ?? null;
 
 	if (!entry) {
-		return { status: 404 };
+		return { status: 404, companyFinance };
 	}
 
 	return {
@@ -40,6 +44,7 @@ export function load({ params }: { params: { slug: string } }) {
 		metadata: entry.metadata ?? {},
 		rawMarkdown: entry.rawMarkdown,
 		slug: params.slug,
-		currentCategory: entry.metadata?.category ?? null
+		currentCategory: entry.metadata?.category ?? null,
+		companyFinance
 	};
 }

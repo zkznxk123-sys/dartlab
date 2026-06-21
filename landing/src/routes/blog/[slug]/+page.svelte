@@ -4,9 +4,12 @@
 	import { findPrevNext, findSeriesPrevNext, getCategoryPath, getPost, getRelatedPostsByCategory, getSeriesPath } from '$lib/blog/posts';
 	import { buildAbsoluteUrl, buildArticleJsonLd, buildBreadcrumbJsonLd, buildFaqJsonLd, parseFaqFromMarkdown } from '$lib/seo';
 	import { Calendar, ChevronLeft, ChevronRight } from 'lucide-svelte';
-	import { onMount, tick } from 'svelte';
+	import { onMount, setContext, tick } from 'svelte';
 
 	let { data } = $props();
+
+	// 회사글 재무(빌드타임 SSOT) 를 마크다운 내 <CompanyFinancials> 에 context 로 전달 — getter 라 client 네비게이션에도 반응.
+	setContext('blogCompanyFinance', () => data.companyFinance);
 
 	interface TocItem {
 		id: string;
