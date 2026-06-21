@@ -14,13 +14,14 @@
 
 ---
 
-## 작업 산출 (4문서)
+## 작업 산출 (5문서)
 
 | 파일 | 내용 |
 |---|---|
-| [00-product-prd.md](00-product-prd.md) | **완전 PRD**(자기충족) — 무게중심·현상진단·조합 Tier(STRONG/MEDIUM/REJECT, file:line)·데이터 파이프라인(customs 거푸집+3비대칭+고볼륨 전략+KOGL P0 게이트+k-익명)·분석 배선 3지점·UI(RealEstateLensDialog 격리)·cannotClaimList·Phase·영향파일·테스트·롤백·열린결정·정직성 자기진단·이중평가 |
+| [00-product-prd.md](00-product-prd.md) | **완전 PRD**(자기충족) — 무게중심·현상진단·조합 Tier(STRONG B1/B2·MEDIUM·REJECT, file:line)·데이터 파이프라인(customs 거푸집+3비대칭+고볼륨 전략+KOGL P0 게이트+k-익명)·분석 배선 3지점·UI(RealEstateLensDialog 격리)·cannotClaimList(16)·Phase·영향파일·테스트·롤백·열린결정·정직성 자기진단·이중평가 |
 | [01-current-state-audit.md](01-current-state-audit.md) | 현상 진단 — 재사용 자산·국토부 API 실호출 확정(엔드포인트·10,000콜/일·KOGL 제한없음·자동승인·개인정보)·조합 결합점·코드 검증 정정(APT_PRICE 이미배선·PF 노트셀 실재) |
-| [02-debate-and-verification.md](02-debate-and-verification.md) | 토론 정본 — 7설계+7검증+평가패널 3라운드 점수 이력(min 88→86→91→89)·95 미달 원인(인용 정밀도)·세션 코드 ground-truth 교정 표 |
+| [02-debate-and-verification.md](02-debate-and-verification.md) | 토론 정본 — 7설계+7검증+평가패널 3라운드 점수 이력(min 88→86→91→89→96)·95 미달 원인(인용 정밀도)·세션 코드 ground-truth 교정 표 |
+| **[04-discovery.md](04-discovery.md)** | **비자명 연결 발굴 정본** — 6렌즈 25후보 + 4관문 적대검증(`wf_bee9c40e-dc8`, 32 agents). 즉시가능 0·진짜생존 1(B1 거래량-가격 divergence→`_crisisKrHousingStress`)·약한조건부 5·KILL 5(확신오정렬 박제). ★최고가치=B1 |
 | [03-progress-ledger.md](03-progress-ledger.md) | 진행 원장 + 재개 NEXT |
 
 ---
@@ -28,7 +29,7 @@
 ## 한눈 결정 (TL;DR)
 
 - **net-new = 거래량 수집 파이프라인 1개.** 가격(APT_PRICE)·crisis apt_yoy·industry 17곳 외생은 *이미 배선*. 거래량만 직교 신규.
-- **STRONG 거처 = `_signalsMacroSensitivity.py:489-506` firm-level 매출민감도 customs arm** (macro regime 외생슬롯 부재). P1 walk-forward 3중 kill-criterion(lagged>동기 ≥3%p·채택률·turning-point) 통과 후에만 STRONG, 통과 전 `observed-candidate`. 라벨은 `meta.p1Status` 구동(하드코딩 금지).
+- **STRONG 거처 — ★발굴 정정: B1(최강) = `macro/crisis/_crisisDetectors.py:348 _crisisKrHousingStress`에 거래량-가격 divergence arm 추가** (이미 살아있는 2-arm detector·전국 거시라 공간조인·OOM 함정 무관·cmRisk medium). B2(약한 upside) = `_signalsMacroSensitivity.py:489-506` firm OLS arm(cmRisk high — 세션 반례: 가격조차 건설사 회귀 탈락). 둘 다 P1 walk-forward(lagged>동기 ≥3%p·채택률·turning-point) 통과 후에만 STRONG, `meta.p1Status` 구동. 상세 [04-discovery.md](04-discovery.md).
 - **데이터층 = 집계 인덱스 bake + raw 온디맨드.** 전수 raw bake = REJECT(OOM/콜한도). customs 거푸집 + 3비대칭(pageNo for-loop·count/median·parsing P0 실측). k-익명 생성단계 마스킹. forward+reconciliation.
 - **P0 게이트 = ★세션 실호출로 해소**: 엔드포인트 `apis.data.go.kr/1613000/...AptTradeDev` 확정·KOGL **"제한 없음"**(공개 양립)·콜한도 **10,000/일**(개발계정)·활용신청 **자동승인**. 잔여 = 운영자 활용신청 1클릭 + 1콜 totalCount 캡처(trivial).
 - **UI = RealEstateLensDialog 완전 격리**(MacroLensDialog 픽셀 불가침). 첫화면 TrendChart+정직푸터·`<details>` top-N 막대(choropleth REJECT·geo 0건). 건설 dashboard 병치칩. 호악재 색 금지.

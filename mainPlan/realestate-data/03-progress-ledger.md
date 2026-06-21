@@ -31,6 +31,20 @@
 
 ---
 
+## 발굴 트랙 — ✅ 완료 (2026-06-21, 비자명 연결 발굴 + 적대검증)
+
+운영자 goal: *"사람들이 생각 못 한 데이터·연관정보 연결을 전문에이전트 토론으로 발굴해 PRD에 녹여라."*
+
+- ✅ 실데이터 실측 선행(`tests/_attempts/realestate/`): T1 가격 이미흐름(APT_PRICE 317 obs)·T2 거래량 net-new(ecos 53개 중 부동산=가격지수 2개·거래량 0)·**T3 production 회귀 반례**(가격조차 현대건설[후보無]·한일시멘트[greedy 탈락] firm 회귀 미채택) → P1 게이트가 형식 아닌 실제 kill 장치임을 데이터로 실증.
+- ✅ 공간 가설 검증: `listing()` **`지역` 컬럼 2665종목 전부 존재**(시도)·지역 charter 실재(도시가스·BNK/JB/제주은행·대구백화점/광주신세계). 단 일반기업 본사≠매출지역.
+- ✅ 발굴 워크플로 `wf_bee9c40e-dc8`(6렌즈 25후보 + 4관문 적대검증, 32 agents·2.7M tokens). **결과: 즉시가능(KEEP) 0·진짜생존 1(B1)·약한조건부 5·KILL 5.** 정직(KILL 다수가 산출).
+- ✅ load-bearing 코드 세션 검증(B1 거처 실재: `_crisisDetectors.py:348`·`_detectorsMinsky.py:398` 빈 다리).
+- ✅ PRD 반영: [04-discovery.md](04-discovery.md) 신설 + 00-PRD §2.1(B1/B2 분기)·§2.3 REJECT 2행·§6 cannotClaim 14~16·§11 openDecisions 8 갱신.
+
+**핵심 산출:** 부동산↔분석의 즉시 가능한 비자명 연결은 **0개**. net-new=거래량 1축 불변, 단 *최강 거처가 firm OLS arm→이미 살아있는 crisis divergence arm(B1)으로 정정*. 비자명 연결 대부분은 비자명하기 때문에 더 잘 틀린다(KILL 5 = 확신오정렬 박제).
+
+---
+
 ## NEXT (재개 포인터)
 
 1. **보정 평가:** 교정된 00-PRD를 평가패널(데이터아키·거시·산업·신용·UI/UX·정직성·PM)로 재채점. 각 ≥95 정직 확인 또는 잔여 갭 명시.
