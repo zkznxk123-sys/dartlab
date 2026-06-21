@@ -42,7 +42,7 @@ import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 > **턴어라운드** | 선박엔진 · 발전엔진 | 2026-04-29 dartlab 실측  
-> 같은 시리즈: [한화오션](/blog/hanwha-ocean) · [HD한국조선해양](/blog/hd-ksoe) · [HD현대일렉트릭](/blog/hd-hyundai-electric) · [전력기기 4사 비교](/blog/power-equipment-supercycle)
+> 같은 시리즈: [한화오션](/blog/042660-hanwha-ocean) · [HD한국조선해양](/blog/009540-hd-ksoe) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [전력기기 4사 비교](/blog/power-equipment-supercycle)
 
 <HFDataLink code="082740" />
 

@@ -343,7 +343,7 @@ print(quality["earningsVolatility"])
 
 dartlab을 쓸 때도 같은 순서가 좋다. 먼저 `현금흐름`으로 실제 현금의 방향을 보고, `안정성`으로 만기와 차입 구조를 보고, `이익품질`로 순이익이 현금인지 공정가치인지 분리한다. `수익성`만 먼저 보면 소프트웨어 회사의 마진을 보게 되고, 이 회사의 본질을 놓친다.
 
-MSTR은 EDGAR 학습용으로 좋은 사례다. [쿠팡(CPNG)](/blog/coupang)은 영업현금흐름의 전환이 핵심이고, [Nike(NKE)](/blog/nike)는 재고와 브랜드 마진이 핵심이고, [Intel(INTC)](/blog/intel)은 제조투자와 파운드리 손실이 핵심이다. MSTR은 다르다. 여기서는 **회계 기준 변경 자체가 주인공**이다. [Oklo(OKLO)](/blog/oklo)처럼 아직 매출보다 미래 인허가가 큰 회사도 있지만, MSTR처럼 이미 거대한 장부자산이 손익을 지배하는 경우는 별도 문법이 필요하다.
+MSTR은 EDGAR 학습용으로 좋은 사례다. [쿠팡(CPNG)](/blog/CPNG-coupang)은 영업현금흐름의 전환이 핵심이고, [Nike(NKE)](/blog/NKE-nike)는 재고와 브랜드 마진이 핵심이고, [Intel(INTC)](/blog/INTC-intel)은 제조투자와 파운드리 손실이 핵심이다. MSTR은 다르다. 여기서는 **회계 기준 변경 자체가 주인공**이다. [Oklo(OKLO)](/blog/OKLO-oklo)처럼 아직 매출보다 미래 인허가가 큰 회사도 있지만, MSTR처럼 이미 거대한 장부자산이 손익을 지배하는 경우는 별도 문법이 필요하다.
 
 ---
 
@@ -379,17 +379,17 @@ Strategy의 BTC 축적 전략은 MSTR이 순자산가치보다 높은 평가를 
 
 MSTR의 특이성은 다른 EDGAR 기업들과 나란히 놓으면 더 잘 보인다.
 
-[NVIDIA(NVDA)](/blog/nvidia)는 AI 데이터센터 수요가 매출과 매출총이익률로 바로 들어온다. 좋은 회사인지 보려면 매출 성장, 매출총이익률, 재고, 고객 집중, CAPEX 수요를 보면 된다. 손익계산서와 사업 실체가 대체로 같은 방향으로 움직인다.
+[NVIDIA(NVDA)](/blog/NVDA-nvidia)는 AI 데이터센터 수요가 매출과 매출총이익률로 바로 들어온다. 좋은 회사인지 보려면 매출 성장, 매출총이익률, 재고, 고객 집중, CAPEX 수요를 보면 된다. 손익계산서와 사업 실체가 대체로 같은 방향으로 움직인다.
 
-[Palantir(PLTR)](/blog/palantir)은 SBC와 영업레버리지가 핵심이다. 매출 성장과 주식보상비용을 같이 봐야 하지만, 그래도 분석의 중심은 소프트웨어 매출과 비용 구조다.
+[Palantir(PLTR)](/blog/PLTR-palantir)은 SBC와 영업레버리지가 핵심이다. 매출 성장과 주식보상비용을 같이 봐야 하지만, 그래도 분석의 중심은 소프트웨어 매출과 비용 구조다.
 
-[Rocket Lab(RKLB)](/blog/rocket-lab)은 우주 발사와 제조 CAPEX, 적자 현금흐름, 미래 수주가 핵심이다. 손익계산서보다 수주잔고와 현금 runway가 중요하지만, 회계 기준 하나가 순손익을 $10B 단위로 흔들지는 않는다.
+[Rocket Lab(RKLB)](/blog/RKLB-rocket-lab)은 우주 발사와 제조 CAPEX, 적자 현금흐름, 미래 수주가 핵심이다. 손익계산서보다 수주잔고와 현금 runway가 중요하지만, 회계 기준 하나가 순손익을 $10B 단위로 흔들지는 않는다.
 
-[Lockheed Martin(LMT)](/blog/lockheed-martin)은 cost-plus 계약과 방산 프로그램 손실이 핵심이다. Sentinel 손실처럼 큰 항목이 있지만, 그래도 매출 $75B 사업의 원가 구조 안에서 벌어진다.
+[Lockheed Martin(LMT)](/blog/LMT-lockheed-martin)은 cost-plus 계약과 방산 프로그램 손실이 핵심이다. Sentinel 손실처럼 큰 항목이 있지만, 그래도 매출 $75B 사업의 원가 구조 안에서 벌어진다.
 
 MSTR은 이들과 다르다. 소프트웨어 매출 $477M 회사인데, 손익의 중심 항목은 $50B 넘는 비트코인 장부다. 사업의 물리적 규모와 손익의 회계적 규모가 분리돼 있다. 그래서 MSTR은 EDGAR 독해 훈련에서 "사업 설명"보다 "회계 정책과 주석"이 먼저 나오는 사례다.
 
-한국 기업 글과 비교해도 차이가 선명하다. [SK온](/blog/sk-on)은 합작공장 종료와 손상·지분법·배터리 투자 부담을 읽는 글이고, [한화엔진](/blog/082740-hanwha-engine)은 데이터센터 전력원이라는 산업 수요가 엔진 수주로 연결되는 글이다. 둘 다 산업과 재무가 이어진다. MSTR은 산업보다 자본구조가 먼저다.
+한국 기업 글과 비교해도 차이가 선명하다. [SK온](/blog/096770-sk-on)은 합작공장 종료와 손상·지분법·배터리 투자 부담을 읽는 글이고, [한화엔진](/blog/082740-hanwha-engine)은 데이터센터 전력원이라는 산업 수요가 엔진 수주로 연결되는 글이다. 둘 다 산업과 재무가 이어진다. MSTR은 산업보다 자본구조가 먼저다.
 
 ---
 
@@ -511,7 +511,7 @@ Strategy(MSTR)의 2025년은 한 문장으로 요약된다.
 
 ## 같은 시리즈에서 이어 읽기
 
-- [Intel (INTC) — 파운드리 적자가 손익계산서를 어떻게 바꾸는가](/blog/intel)
-- [NVIDIA (NVDA) — AI 인프라가 매출총이익률을 어떻게 끌어올렸나](/blog/nvidia)
-- [Palantir (PLTR) — SBC와 영업레버리지의 경계](/blog/palantir)
-- [Monster Beverage (MNST) — 현금부자 프랜차이즈의 재무제표](/blog/monster-beverage)
+- [Intel (INTC) — 파운드리 적자가 손익계산서를 어떻게 바꾸는가](/blog/INTC-intel)
+- [NVIDIA (NVDA) — AI 인프라가 매출총이익률을 어떻게 끌어올렸나](/blog/NVDA-nvidia)
+- [Palantir (PLTR) — SBC와 영업레버리지의 경계](/blog/PLTR-palantir)
+- [Monster Beverage (MNST) — 현금부자 프랜차이즈의 재무제표](/blog/MNST-monster-beverage)

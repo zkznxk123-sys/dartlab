@@ -43,7 +43,7 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
 > **지주회사** | SK하이닉스 · 지분법이익 · AI 메모리 · NAV 할인 | 2026-04-29 dartlab 실측
-> 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [SK텔레콤](/blog/017670-skt) · [NAVER](/blog/naver) · [카카오](/blog/kakao) · [메리츠금융지주](/blog/138040-meritz-financial)
+> 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [SK텔레콤](/blog/017670-skt) · [NAVER](/blog/035420-naver) · [카카오](/blog/035720-kakao) · [메리츠금융지주](/blog/138040-meritz-financial)
 
 <HFDataLink code="402340" />
 
@@ -455,8 +455,8 @@ print(bs_df.loc[["자산총계", "부채총계", "자본총계"]].tail())
 
 - [SK하이닉스 — 한국 반도체 30년의 미스터리](/blog/000660-skhynix)
 - [SK텔레콤 — 해킹 한 번이 OPM 10%를 6%로 만들었다](/blog/017670-skt)
-- [NAVER — 별도 75%, 연결 18%의 차이](/blog/naver)
-- [카카오 — 3,000만 DAU가 있어도 마진이 낮은 이유](/blog/kakao)
+- [NAVER — 별도 75%, 연결 18%의 차이](/blog/035420-naver)
+- [카카오 — 3,000만 DAU가 있어도 마진이 낮은 이유](/blog/035720-kakao)
 - [메리츠금융지주 — PBR 0.5에서 1.8배까지](/blog/138040-meritz-financial)
 
 ---

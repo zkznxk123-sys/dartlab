@@ -587,7 +587,7 @@ for kw in ["Bucheon", "SiC", "restructuring", "impairment"]:
 
 ## 관련 글
 
-> **같은 시리즈 — 사이클 / 자본배분 / 반도체**: [엔비디아](/blog/nvidia) · [인텔](/blog/intel) · [ARM](/blog/arm-holdings) · [LG 전자](/blog/lg-electronics) · [한미반도체](/blog/hanmi-semi) · [효성화학](/blog/hyosung-chemical) · [테슬라](/blog/tesla)
+> **같은 시리즈 — 사이클 / 자본배분 / 반도체**: [엔비디아](/blog/NVDA-nvidia) · [인텔](/blog/INTC-intel) · [ARM](/blog/ARM-arm-holdings) · [LG 전자](/blog/066570-lg-electronics) · [한미반도체](/blog/042700-hanmi-semi) · [효성화학](/blog/298000-hyosung-chemical) · [테슬라](/blog/TSLA-tesla)
 
 각 글은 ON 의 관통선과 다른 결의 답을 보여준다. 엔비디아 (#50) 와 ARM (#60) 은 AI 사이클의 PEAK 직전 모양, 인텔 (#33) 은 사이클 회사의 자본배분 모순, LG 전자 (#34) 는 차량전장 컨버전의 한국 입장, 한미반도체 (#63) 는 AI 반도체 한국 공급망의 SiC 와 다른 흐름, 효성화학 (#56) 은 자본집약 사이클 추락의 이전 사례, 테슬라 (#38) 는 EV 사이클의 본체 — 모두 ON 의 "다음 사이클을 기다리는가, 떠나는가" 라는 질문의 다른 측면이다.
 

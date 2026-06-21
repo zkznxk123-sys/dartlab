@@ -48,7 +48,7 @@ import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 > **사이클** | 소재 > 이차전지 | 2026-04-22 dartlab 실측
-> 같은 시리즈: [에코프로](/blog/ecopro) · [HD한국조선해양](/blog/hd-ksoe) · [한화에어로스페이스](/blog/hanwha-aerospace) · [알테오젠](/blog/alteogen) · [기업이야기 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [에코프로](/blog/086520-ecopro) · [HD한국조선해양](/blog/009540-hd-ksoe) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [알테오젠](/blog/196170-alteogen) · [기업이야기 시리즈 전체](/blog/series/company-reports)
 
 <HFDataLink code="006400" />
 

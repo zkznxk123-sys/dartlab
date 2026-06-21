@@ -674,7 +674,7 @@ for kw in ["붉은사막", "검은사막", "CCP", "EVE", "도깨비"]:
 
 ## 관련 글
 
-> **같은 시리즈 — 단일 IP / K-게임 / 신작 사이클**: [엔씨소프트](/blog/ncsoft) · [크래프톤](/blog/krafton) · [SM 엔터테인먼트](/blog/sm-entertainment) · [하이브](/blog/hybe) · [한미반도체](/blog/hanmi-semi) · [효성화학](/blog/hyosung-chemical) · [ON 세미컨덕터](/blog/onsemi)
+> **같은 시리즈 — 단일 IP / K-게임 / 신작 사이클**: [엔씨소프트](/blog/036570-ncsoft) · [크래프톤](/blog/259960-krafton) · [SM 엔터테인먼트](/blog/041510-sm-entertainment) · [하이브](/blog/352820-hybe) · [한미반도체](/blog/042700-hanmi-semi) · [효성화학](/blog/298000-hyosung-chemical) · [ON 세미컨덕터](/blog/ON-onsemi-sic-cycle-bill)
 
 각 글은 펄어비스의 관통선과 다른 결의 답을 보여준다. 엔씨소프트 (#58) 는 같은 K-게임 적자, 리니지 라인 약화의 같은 시기. 크래프톤 (#11) 은 같은 단일 IP 인데 OPM 43.6% 의 정반대. SM 엔터테인먼트 (#53) 는 단일 IP (NCT/aespa) 의 콘텐츠 사이클 + 카카오 인수 후. 하이브 (#39) 는 IP 다변화 + 단일 그룹 분리. 한미반도체 (#63) 는 AI 공급망의 단일 고객 의존. 효성화학 (#56) 은 자본집약 사이클 추락의 한국 화학 사례. 직전 글 ON 세미컨덕터 (#87) 는 미국 반도체 자본집약 + 자사주 환원 모순. 모두 펄어비스의 "9 년 단일 IP 사이클의 끝과 새 IP 사이클의 시작" 이라는 질문의 다른 측면이다.
 

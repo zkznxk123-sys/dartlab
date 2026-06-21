@@ -31,7 +31,7 @@ import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 > **지주** | 커뮤니케이션 > 인터넷 플랫폼 | 2026-04-18 dartlab 실측
-> 같은 시리즈: [한화에어로스페이스](/blog/hanwha-aerospace) · [삼성바이오로직스](/blog/samsung-biologics) · [현대로템](/blog/hyundai-rotem) · [크래프톤](/blog/krafton) · [기업이야기 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [삼성바이오로직스](/blog/207940-samsung-biologics) · [현대로템](/blog/064350-hyundai-rotem) · [크래프톤](/blog/259960-krafton) · [기업이야기 시리즈 전체](/blog/series/company-reports)
 
 <HFDataLink code="035720" />
 
@@ -246,7 +246,7 @@ cr = c.credit("등급")
 # grade: dCR-AA, healthScore: 84
 ```
 
-dartlab 신용등급 dCR-AA, 건강점수 84. [삼성바이오로직스](/blog/samsung-biologics)(dCR-AA+)보다 낮고 [현대로템](/blog/hyundai-rotem)(dCR-AA, health 88)보다도 낮다. 영업이익률이 한 자릿수이고 순차입금이 있기 때문이다. 위험한 수준은 아니지만, 플랫폼 독점자치고는 여유가 없는 재무 구조다.
+dartlab 신용등급 dCR-AA, 건강점수 84. [삼성바이오로직스](/blog/207940-samsung-biologics)(dCR-AA+)보다 낮고 [현대로템](/blog/064350-hyundai-rotem)(dCR-AA, health 88)보다도 낮다. 영업이익률이 한 자릿수이고 순차입금이 있기 때문이다. 위험한 수준은 아니지만, 플랫폼 독점자치고는 여유가 없는 재무 구조다.
 
 ### 산업 패턴 — 인터넷 플랫폼의 자회사 모델은 반복되는 딜레마
 
@@ -277,7 +277,7 @@ prof = c.analysis("financial", "수익성")
 prof["penmanDecomposition"]["history"]
 ```
 
-자기자본수익률(자기자본수익률, 주주 돈 대비 벌어들인 이익 비율) 3.4%. 자본 15.2조를 굴려서 순이익 0.52조. 은행 예금 금리와 비슷한 수준이다. [크래프톤](/blog/krafton)(자기자본수익률 약 15%)과 비교하면 같은 인터넷/콘텐츠 기업이라도 자본 효율이 현저히 낮다.
+자기자본수익률(자기자본수익률, 주주 돈 대비 벌어들인 이익 비율) 3.4%. 자본 15.2조를 굴려서 순이익 0.52조. 은행 예금 금리와 비슷한 수준이다. [크래프톤](/blog/259960-krafton)(자기자본수익률 약 15%)과 비교하면 같은 인터넷/콘텐츠 기업이라도 자본 효율이 현저히 낮다.
 
 ### "선택과 집중"이 답인가 — 네이버 모델로 전환 가능성
 

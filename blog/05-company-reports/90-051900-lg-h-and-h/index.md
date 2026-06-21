@@ -44,7 +44,7 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
 > **사이클** | K-뷰티 럭셔리 · 4사업부 지주 · 차석용 21년 후 | 2026-05-07 dartlab 실측
-> 같은 시리즈: [한국콜마](/blog/161890-kolmar) · [실리콘투](/blog/silicon2) · [달바글로벌](/blog/dalba-global) · [에이피알](/blog/apr) · [농심](/blog/004370-nongshim) · [오뚜기](/blog/007310-ottogi)
+> 같은 시리즈: [한국콜마](/blog/161890-kolmar) · [실리콘투](/blog/257720-silicon2) · [달바글로벌](/blog/483650-dalba-global) · [에이피알](/blog/278470-apr) · [농심](/blog/004370-nongshim) · [오뚜기](/blog/007310-ottogi)
 
 <HFDataLink code="051900" />
 

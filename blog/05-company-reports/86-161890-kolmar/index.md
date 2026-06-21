@@ -43,7 +43,7 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
 > **사이클** | K-뷰티 ODM · 인수 회계 · 영업외 흡수 | 2026-05-06 dartlab 실측
-> 같은 시리즈: [실리콘투](/blog/silicon2) · [달바글로벌](/blog/dalba-global) · [에이피알](/blog/apr) · [한미사이언스](/blog/008930-hanmi-science) · [메리츠금융지주](/blog/138040-meritz-financial)
+> 같은 시리즈: [실리콘투](/blog/257720-silicon2) · [달바글로벌](/blog/483650-dalba-global) · [에이피알](/blog/278470-apr) · [한미사이언스](/blog/008930-hanmi-science) · [메리츠금융지주](/blog/138040-meritz-financial)
 
 <HFDataLink code="161890" />
 

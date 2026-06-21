@@ -743,7 +743,7 @@ for kw in ["하이니켈", "삼성SDI", "에코프로이엠", "헝가리", "CAM7
 
 ## 관련 글
 
-> **같은 시리즈 — 양극재 / 자본집약 사이클 / EV 캐즘**: [에코프로](/blog/ecopro) · [포스코퓨처엠](/blog/posco-future-m) · [LG 에너지솔루션](/blog/lg-energy-solution) · [삼성SDI](/blog/samsung-sdi) · [SK 온](/blog/sk-on) · [효성화학](/blog/hyosung-chemical) · [ON 세미컨덕터](/blog/onsemi)
+> **같은 시리즈 — 양극재 / 자본집약 사이클 / EV 캐즘**: [에코프로](/blog/086520-ecopro) · [포스코퓨처엠](/blog/003670-posco-future-m) · [LG 에너지솔루션](/blog/373220-lg-energy-solution) · [삼성SDI](/blog/006400-samsung-sdi) · [SK 온](/blog/096770-sk-on) · [효성화학](/blog/298000-hyosung-chemical) · [ON 세미컨덕터](/blog/ON-onsemi-sic-cycle-bill)
 
 각 글은 에코프로비엠의 관통선과 다른 결의 답을 보여준다. 모회사 에코프로 (#26) 는 지주사 시총 78 조의 해체. 포스코퓨처엠 (#84) 은 같은 양극재의 그룹 BS 안전망 차이. LG 에너지솔루션 (#69) 은 셀 -24% 의 위치값. 삼성SDI (#68) 는 BM 의 단일 고객 64% 의 거울. SK 온 (#80) 은 EV 캐즘의 셀 측 풀버전. 효성화학 (#56) 은 자본집약 사이클 추락의 한국 화학 사례. ON 세미컨덕터 (#87) 는 미국 반도체 자본집약 + 자사주 환원 모순. 모두 "한 회사가 흑자·부실·1 위·적자를 동시에 가질 수 있다" 의 다른 측면이다.
 
