@@ -868,7 +868,7 @@
 		0%,
 		55% {
 			background: rgba(91, 155, 240, 0.28);
-			box-shadow: inset 2px 0 0 var(--amber, #fb923c);
+			box-shadow: inset 2px 0 0 var(--amber, var(--amber));
 		}
 		100% {
 			background: transparent;
@@ -900,7 +900,7 @@
 		padding: 9px 12px;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 		font: 700 11px/1 var(--dl-font-mono, ui-monospace, monospace);
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.hostFallbackBar button {
 		border: 0;

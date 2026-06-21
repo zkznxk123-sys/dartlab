@@ -95,7 +95,7 @@
 		}
 		return d;
 	}
-	const BUCKET_COLOR = ['#34d399', '#a3e635', '#fbbf24', '#fb923c', '#f0616f']; // 상위(녹)→하위(적), 중립
+	const BUCKET_COLOR = ['#34d399', '#a3e635', '#fbbf24', '#ec4899', '#f0616f']; // 상위(녹)→하위(적), 중립
 	const fmt = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(0);
 	const pct = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
 </script>
@@ -202,7 +202,7 @@
 	.ubLab.ew { fill: #8b94a3; }
 	.ubHeadline { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 	.ubBig { font-size: 17px; font-weight: 700; font-family: var(--dl-font-mono, monospace); }
-	.ubBand { font-size: 12px; color: var(--amber, #fb923c); }
+	.ubBand { font-size: 12px; color: var(--amber, var(--amber)); }
 	.ubBandSm { font-size: 11px; color: #8b94a3; }
 	.ubChip { font-size: 11px; color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 10px; padding: 1px 8px; }
 	.ubHonesty { margin-top: 8px; font-size: 11px; color: #8b94a3; line-height: 1.55; }

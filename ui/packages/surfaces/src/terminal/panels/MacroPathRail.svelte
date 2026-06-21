@@ -23,28 +23,23 @@
 		}
 	}
 	const compactSectors = $derived(view.sectorNodes.filter((s) => s.key !== 'all').slice(0, 6));
-	const allLinks = $derived(view.allSectorLinks.slice(0, 2));
 	const fullLinks = $derived([...view.links, ...view.allSectorLinks]);
 </script>
 
 <section class={'mpr ' + mode} aria-label={T('거시 전파 레일', 'Macro path rail')}>
-	<div class="mprHead">
-		<span>{T('전파', 'Path')}</span>
-		<b>{T('동행≠인과', 'co-move≠causation')}</b>
+	<div class="mprHead" title={T('동행≠인과 · 업종 blended 순풍/역풍', 'co-move≠causation · sector blended tailwind/headwind')}>
+		<span>{mode === 'compact' ? T('섹터 순풍', 'Sector tailwind') : T('전파', 'Path')}</span>
+		{#if mode !== 'compact'}<b>{T('동행≠인과', 'co-move≠causation')}</b>{/if}
 		<em>{view.asOf ?? '—'}</em>
 	</div>
 	{#if mode === 'compact'}
 		<div class="mprChips">
 			{#each compactSectors as s (s.key)}
 				<button class={'mprChip ' + s.tone} class:on={s.active} disabled={!isClickable(s)} onclick={() => activate(s)} onkeydown={(e) => onKey(e, s)} title={`${sectorLabel(s)} · ${T(s.tailwindLabelKr, s.tailwindLabelEn)} · ${label(s)}`}>
-					<span>{sectorLabel(s)}</span><em>{label(s)}</em>
+					<span>{sectorLabel(s)}</span>
 				</button>
 			{/each}
-			{#each allLinks as link (link.id)}
-				<span class={'mprChip all ' + link.styleClass} title={link.note}><span>{T('전 섹터', 'All')}</span><em>{link.evidenceLabel}</em></span>
-			{/each}
 		</div>
-		<div class="mprCaption">{T(view.captionKr, view.captionEn)}</div>
 	{:else}
 		<div class="mprLegend">
 			<span class="observed">OBS</span><span class="prior">PRIOR</span><span class="template">TPL</span><span class="blocked">LOCK</span>
@@ -85,7 +80,7 @@
 	.mprChip.good, .mprChip.up { border-color: rgba(52,211,153,.32); color: var(--up); }
 	.mprChip.down { border-color: rgba(240,97,111,.34); color: var(--dn); }
 	.mprChip.neutral { color: var(--dim); }
-	.mprChip.all { cursor: default; color: var(--amber); border-color: rgba(251,146,60,.32); }
+	.mprChip.all { cursor: default; color: var(--amber); border-color: rgba(var(--amber-rgb),.32); }
 	.mprChip.on { outline: 1px solid var(--amber); outline-offset: -1px; }
 	.mprChip:disabled { cursor: default; opacity: .72; }
 	.mprCaption { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dim); font-size: 9px; }
@@ -93,7 +88,7 @@
 	.mprLegend { display: flex; flex-wrap: wrap; gap: 5px; }
 	.mprLegend span { border: 1px solid var(--bd); border-radius: 999px; padding: 2px 7px; color: var(--dim); font-family: var(--mono); font-size: 8.5px; }
 	.mprLegend .observed { color: var(--up); border-color: rgba(52,211,153,.4); }
-	.mprLegend .prior { color: var(--amber); border-color: rgba(251,146,60,.4); }
+	.mprLegend .prior { color: var(--amber); border-color: rgba(var(--amber-rgb),.4); }
 	.mprLegend .template { border-style: dashed; }
 	.mprLegend .blocked { color: var(--dn); border-style: dotted; }
 	.mprRows { display: grid; gap: 6px; min-width: 0; }

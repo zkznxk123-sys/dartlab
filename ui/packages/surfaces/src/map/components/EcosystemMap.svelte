@@ -604,7 +604,7 @@
 		border-radius: 4px;
 	}
 	.hover-chip .revenue {
-		color: #fb923c;
+		color: var(--amber);
 		font-weight: 600;
 	}
 	.zoom-indicator {

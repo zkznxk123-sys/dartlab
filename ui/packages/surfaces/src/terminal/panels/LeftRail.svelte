@@ -14,7 +14,6 @@
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { buildMacroGlanceView } from '../lib/macroLens';
 	import RegimeQuadrant from './RegimeQuadrant.svelte';
-	import MacroPathRail from './MacroPathRail.svelte';
 	import { chgClass, sign, sparkPts } from '../ui/helpers';
 
 	interface Props {
@@ -110,12 +109,11 @@
 
 <!-- 경제 — 최상단 고정 (탭 토글 폐지, 항상 노출) -->
 {#if macro}
-	<Panel {lang} className="eMacro" prov="real" title={{ kr: '마켓 펄스 · 매크로', en: 'MARKET PULSE' }} sub={{ kr: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : ''), en: 'dartlab.macro' + (macroAsOf ? ' · ' + macroAsOf : '') }} flush>
+	<Panel {lang} className="eMacro" title={{ kr: '마켓 펄스', en: 'MARKET PULSE' }} flush>
 		{#snippet right()}
 			<button class="finFullBtn" onclick={() => onMacroLens?.('dashboard', 'KR')} title={lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
 		{/snippet}
 		<RegimeQuadrant view={macroGlance.regime} {lang} />
-		<MacroPathRail view={macroGlance.path} {lang} mode="compact" onSector={setSector} />
 	</Panel>
 {/if}
 
@@ -127,11 +125,6 @@
 	{/snippet}
 	<div class="swMap">
 		<ScatterMap pts={industryPts} compact compactH={104} highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
-	</div>
-	<!-- 푸터 1줄 — 상세 버튼 + 축 범례(2줄→1줄로 ~16px 절감, 산점도 viewBox 불변. 전체 범례는 툴팁). -->
-	<div class="swFoot">
-		<button class="swMore" onclick={() => onIndustry?.('')}>{lang === 'en' ? `detail · ${industryPts.length} ind →` : `상세 · ${industryPts.length}산업 →`}</button>
-		<span class="swNote" title={lang === 'en' ? 'x = margin · y = growth · ring = current · equal-weight · not KRX' : '가로=수익 · 세로=성장 · ◯=현재 산업 · 상장 동일가중 · KRX 아님'}>{lang === 'en' ? 'x margin · y growth ⓘ' : '가로 수익·세로 성장 ⓘ'}</span>
 	</div>
 </Panel>
 

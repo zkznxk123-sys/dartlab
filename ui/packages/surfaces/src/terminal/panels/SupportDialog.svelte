@@ -166,7 +166,7 @@
 	.scrimWrap { position: fixed; inset: 0; z-index: 200; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
 	.scrModal { width: min(960px, 96vw); max-height: 88vh; display: flex; flex-direction: column; background: var(--dl-bg-raised, #0e141f); border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); overflow: hidden; font-family: var(--dl-font-ui, 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif); color: var(--dl-ink, #e2e8f0); }
 	.scrHead { display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); }
-	.scrTitle { font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-weight: 700; font-size: 12px; letter-spacing: 0.14em; color: var(--amber, #fb923c); text-transform: uppercase; }
+	.scrTitle { font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-weight: 700; font-size: 12px; letter-spacing: 0.14em; color: var(--amber, var(--amber)); text-transform: uppercase; }
 	.scrClose { margin-left: auto; background: none; border: none; color: var(--dl-ink-dim, #5b6473); font-size: 14px; line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 3px; }
 	.scrClose:hover { color: var(--dl-ink, #e2e8f0); background: rgba(255, 255, 255, 0.06); }
 
@@ -192,10 +192,10 @@
 	.supMono { display: flex; align-items: center; justify-content: center; font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 13px; font-weight: 700; color: #0a0e16; background: linear-gradient(135deg, #fdba74, #fb7185); }
 	.supHandle { font-size: 12.5px; display: inline-flex; align-items: center; gap: 4px; }
 	.supRole { font-size: 11px; line-height: 1; }
-	.supRoleInsp { color: var(--amber, #fb923c); }
+	.supRoleInsp { color: var(--amber, var(--amber)); }
 	.supRoleSupport { color: #fb7185; }
 	.supRoleContrib { color: #4ade80; }
-	.supPostLink { display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; font-size: 11px; color: var(--amber, #fb923c); text-decoration: none; opacity: 0.9; }
+	.supPostLink { display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; font-size: 11px; color: var(--amber, var(--amber)); text-decoration: none; opacity: 0.9; }
 	.supPostLink:hover { text-decoration: underline; }
 
 	.supDonor { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; font-size: 12px; color: var(--dl-ink, #e2e8f0); text-decoration: none; }
@@ -213,7 +213,7 @@
 	.supCoffee :global(svg:first-child) { color: #ffdd00; }
 	.supSponsor :global(svg:first-child) { color: #fb7185; }
 	.supAccount { cursor: default; }
-	.supAccount :global(svg:first-child) { color: var(--amber, #fb923c); }
+	.supAccount :global(svg:first-child) { color: var(--amber, var(--amber)); }
 	.supAcct { display: inline-flex; align-items: baseline; gap: 7px; flex-wrap: wrap; font-weight: 400; }
 	.supAcct .mono { font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 	.supAcctHolder { color: var(--dl-ink-mute, #8a93a3); font-size: 11.5px; }

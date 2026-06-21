@@ -18,7 +18,7 @@ export interface FsTab {
 	note?: string; // 탭 하단 정직성 캡션
 }
 
-const C = { rev: '#5b9bf0', op: '#fb923c', net: '#34d399', good: '#34d399', warn: '#fbbf24', purple: '#a78bfa', red: '#f0616f', blue: '#60a5fa', cyan: '#22d3ee', dim: '#64748b' };
+const C = { rev: '#5b9bf0', op: '#ec4899', net: '#34d399', good: '#34d399', warn: '#fbbf24', purple: '#a78bfa', red: '#f0616f', blue: '#60a5fa', cyan: '#22d3ee', dim: '#64748b' };
 
 const fyLabel = (year: string) => 'FY' + year.slice(2);
 // 시리즈 전부 null 인 카드는 버린다 (빈 카드 노출 금지 — 신규 탭 공통 규칙)

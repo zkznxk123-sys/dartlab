@@ -400,8 +400,8 @@
 	/* 좌패널 전체 차지 모드 — 컬럼 폭 100%(글로벌 좌측 레일 대체). */
 	.stratDock.fill { width: 100%; flex: 1 1 auto; border-right: none; }
 	/* 헤더 sticky */
-	.sdHeader { flex: none; display: flex; align-items: center; gap: 7px; padding: 6px 8px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); background: rgba(251, 146, 60, 0.05); }
-	.sdMark { width: 4px; height: 22px; border-radius: 2px; background: var(--amber, #fb923c); flex: none; }
+	.sdHeader { flex: none; display: flex; align-items: center; gap: 7px; padding: 6px 8px; border-bottom: 1px solid var(--dl-line-strong, #2a3142); background: rgba(var(--amber-rgb), 0.05); }
+	.sdMark { width: 4px; height: 22px; border-radius: 2px; background: var(--amber, var(--amber)); flex: none; }
 	.sdTtlWrap { display: flex; flex-direction: column; gap: 1px; flex: 1 1 auto; min-width: 0; }
 	.sdTtl { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--dl-ink, #c8cfdb); }
 	.sdSub { font-size: 10px; color: var(--dim, #8b94a3); }
@@ -413,7 +413,7 @@
 	.sdCtxMeta { color: var(--dim, #8b94a3); }
 	.sdSubLbl { font-size: 10.5px; color: var(--dim, #8b94a3); margin-top: 5px; }
 	/* 검증 구간 = 백테스트 창. 박스+헤더로 '차트 기간' 오인 차단(UIUX 그룹핑). 11px floor 준수. */
-	.sdWindow { display: flex; flex-direction: column; gap: 5px; margin: 2px 0 6px; padding: 6px 7px; border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 5px; background: rgba(251, 146, 60, 0.03); }
+	.sdWindow { display: flex; flex-direction: column; gap: 5px; margin: 2px 0 6px; padding: 6px 7px; border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 5px; background: rgba(var(--amber-rgb), 0.03); }
 	.sdWinHd { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
 	.sdWinLbl { font-size: 11px; font-weight: 600; color: #aeb6c2; letter-spacing: 0.02em; flex: none; }
 	.sdWinHint { font-size: 11px; color: var(--dim, #8b94a3); text-align: left; }
@@ -421,7 +421,7 @@
 	.sdWinBtn { flex: 1 1 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: none; border-left: 1px solid var(--dl-line, #1b2130); padding: 3px 0; cursor: pointer; font-family: inherit; font-variant-numeric: tabular-nums; }
 	.sdWinBtn:first-child { border-left: none; }
 	.sdWinBtn:hover { color: var(--dl-ink, #c8cfdb); background: rgba(255, 255, 255, 0.04); }
-	.sdWinBtn.on { background: var(--amber, #fb923c); color: #1a1206; font-weight: 700; }
+	.sdWinBtn.on { background: var(--amber, var(--amber)); color: #1a1206; font-weight: 700; }
 	.sdWinBtn.cust { flex: 0 0 26px; font-size: 13px; line-height: 1; }
 	/* 사용자 지정 구간 — 시작/종료 입력 + 국면 프리셋 + 체리피킹 정직 노트. */
 	.sdCustWin { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
@@ -430,17 +430,17 @@
 	.sdCustTo { color: var(--dim, #8b94a3); font-size: 12px; flex: none; }
 	.sdPhaseRow { display: flex; flex-wrap: wrap; gap: 4px; }
 	.sdPhase { font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 3px 9px; cursor: pointer; font-family: inherit; }
-	.sdPhase:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
+	.sdPhase:hover { border-color: var(--amber, var(--amber)); color: var(--amber, var(--amber)); }
 	.sdPhase.clr { color: var(--dim, #8b94a3); border-style: dashed; margin-left: auto; }
 	.sdCustNote { font-size: 11px; color: var(--dim, #8b94a3); line-height: 1.5; }
 	.btSection { margin-top: 4px; }
 	/* 리사이즈 핸들 */
 	.sdResize { position: absolute; top: 0; right: -3px; width: 6px; height: 100%; cursor: col-resize; z-index: 2; }
-	.sdResize:hover { background: rgba(251, 146, 60, 0.25); }
+	.sdResize:hover { background: rgba(var(--amber-rgb), 0.25); }
 	/* 접힘 스파인 */
 	.sdSpine { flex: none; width: 28px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: 10px 0; background: var(--dl-bg-base, #0a0e15); border-right: 1px solid var(--dl-line-strong, #2a3142); cursor: pointer; }
-	.sdSpine:hover { background: rgba(251, 146, 60, 0.06); }
-	.sdSpineTtl { writing-mode: vertical-rl; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--amber, #fb923c); }
+	.sdSpine:hover { background: rgba(var(--amber-rgb), 0.06); }
+	.sdSpineTtl { writing-mode: vertical-rl; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--amber, var(--amber)); }
 	.sdSpineRet { writing-mode: vertical-rl; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 	/* ── 흡수: BtConfig 빌더 스타일(11px floor 유지) ── */
@@ -449,7 +449,7 @@
 	.ctRowWrap { flex-wrap: wrap; }
 	.mItem { font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 2px 8px; cursor: pointer; font-family: inherit; }
 	.mItem:hover { color: var(--dl-ink, #c8cfdb); border-color: #3a4456; }
-	.mItem.on { background: var(--amber, #fb923c); color: #1a1206; border-color: var(--amber, #fb923c); font-weight: 600; }
+	.mItem.on { background: var(--amber, var(--amber)); color: #1a1206; border-color: var(--amber, var(--amber)); font-weight: 600; }
 	.btSlot { border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; padding: 5px 6px; margin-bottom: 4px; }
 	.btSlot.on { border-color: #2a3142; background: rgba(255, 255, 255, 0.02); }
 	.btSlotHd { display: flex; align-items: center; gap: 5px; }
@@ -465,18 +465,18 @@
 	.btParamLbl { font-size: 11px; color: #8b94a3; }
 	.btParamVal { font-size: 12px; min-width: 30px; text-align: center; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
 	.btDesc { font-size: 10.5px; color: var(--dim, #8b94a3); line-height: 1.5; margin-top: 3px; }
-	.btDesc.warn { color: var(--amber, #fb923c); }
+	.btDesc.warn { color: var(--amber, var(--amber)); }
 	/* 정직 고지 띠 — sdBody 밖 sticky 하단(flex:none). 스크롤 내용과 무관하게 항상 보임. */
 		.sdHonestBar { flex: none; padding: 5px 8px 6px; border-top: 1px solid var(--dl-line-strong, #2a3142); background: var(--dl-bg-base, #0a0e15); }
 		.btBench { font-size: 10.5px; color: var(--dim, #8b94a3); }
 		/* 전략 추가 토글 — 프리셋 그리드 접힘(전략 >=1). 빈 상태는 그리드 직접 노출. */
 		.btAddToggle { width: 100%; margin-top: 4px; font-size: 11px; background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--dl-line-strong, #2a3142); color: #aeb6c2; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
-		.btAddToggle:hover { border-color: var(--amber, #fb923c); color: var(--amber, #fb923c); }
+		.btAddToggle:hover { border-color: var(--amber, var(--amber)); color: var(--amber, var(--amber)); }
 		.btAddCaret { color: var(--dimmer, #5b6573); }
 	.btModelNote { font-size: 10px; color: var(--dimmer, #5b6573); line-height: 1.5; margin-top: 2px; }
-	.btTfNote { font-size: 11px; color: #fcc98a; background: rgba(251, 146, 60, 0.14); border: 1px solid rgba(251, 146, 60, 0.5); border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; line-height: 1.5; }
-	.btTfSwitch { font-size: 10.5px; font-weight: 700; background: var(--amber, #fb923c); border: 1px solid var(--amber, #fb923c); color: #1a1206; border-radius: 3px; padding: 2px 9px; cursor: pointer; font-family: inherit; margin-left: 3px; white-space: nowrap; }
-	.btTfSwitch:hover { background: rgba(251, 146, 60, 0.26); }
+	.btTfNote { font-size: 11px; color: #fcc98a; background: rgba(var(--amber-rgb), 0.14); border: 1px solid rgba(var(--amber-rgb), 0.5); border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; line-height: 1.5; }
+	.btTfSwitch { font-size: 10.5px; font-weight: 700; background: var(--amber, var(--amber)); border: 1px solid var(--amber, var(--amber)); color: #1a1206; border-radius: 3px; padding: 2px 9px; cursor: pointer; font-family: inherit; margin-left: 3px; white-space: nowrap; }
+	.btTfSwitch:hover { background: rgba(var(--amber-rgb), 0.26); }
 	.btEmpty { padding: 10px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--dl-line-strong, #2a3142); border-radius: 5px; margin-bottom: 4px; }
 	.btEmptyDesc { font-size: 11px; color: #aeb6c2; line-height: 1.6; }
 	.condBlk { margin-top: 5px; padding: 5px; border: 1px solid rgba(27, 33, 48, 0.7); border-radius: 4px; }
@@ -497,18 +497,18 @@
 	.condAdd:hover { color: var(--dl-ink, #c8cfdb); }
 		.sdScope { display: flex; gap: 3px; margin-bottom: 4px; }
 	.sdScopeBtn { flex: 1 1 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 4px 0; cursor: pointer; font-family: inherit; }
-	.sdScopeBtn.on { background: var(--amber, #fb923c); color: #1a1206; border-color: var(--amber, #fb923c); font-weight: 700; }
+	.sdScopeBtn.on { background: var(--amber, var(--amber)); color: #1a1206; border-color: var(--amber, var(--amber)); font-weight: 700; }
 	.sdScopeNote { font-size: 10.5px; color: var(--dim, #8b94a3); line-height: 1.5; margin-bottom: 5px; }
-	.sdScopeNote.callout { color: #d7c4a8; background: rgba(251, 146, 60, 0.07); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 4px; padding: 5px 7px; }
+	.sdScopeNote.callout { color: #d7c4a8; background: rgba(var(--amber-rgb), 0.07); border: 1px solid rgba(var(--amber-rgb), 0.3); border-radius: 4px; padding: 5px 7px; }
 	/* 프리셋 picker — 4패밀리 카테고리 + 작은 칩(라벨+설명) + 스크롤 + 검색. '약하다'=발견성 0 해소(깎기). */
 	.ptPicker { margin-top: 2px; }
 	.ptSearch { width: 100%; box-sizing: border-box; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 4px 7px; margin-bottom: 4px; font-family: inherit; }
 	.ptSearch::placeholder { color: var(--dimmer, #5b6573); }
 	.ptScroll { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 2px; }
-	.ptFamHd { position: sticky; top: 0; background: var(--dl-bg-base, #0a0e15); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--amber, #fb923c); padding: 4px 2px 2px; display: flex; align-items: center; gap: 5px; z-index: 1; }
+	.ptFamHd { position: sticky; top: 0; background: var(--dl-bg-base, #0a0e15); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--amber, var(--amber)); padding: 4px 2px 2px; display: flex; align-items: center; gap: 5px; z-index: 1; }
 	.ptFamN { font-size: 9.5px; color: var(--dimmer, #5b6573); font-weight: 400; border: 1px solid var(--dl-line, #1b2130); border-radius: 7px; padding: 0 5px; }
 	.ptChip { display: flex; flex-direction: column; gap: 1px; text-align: left; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 4px 7px; cursor: pointer; font-family: inherit; }
-	.ptChip:hover { border-color: var(--amber, #fb923c); background: rgba(251, 146, 60, 0.05); }
+	.ptChip:hover { border-color: var(--amber, var(--amber)); background: rgba(var(--amber-rgb), 0.05); }
 	.ptChip.rule { border-left: 2px dashed rgba(167, 139, 250, 0.5); }
 	.ptChipName { font-size: 11.5px; color: var(--dl-ink, #c8cfdb); font-weight: 600; display: flex; align-items: center; gap: 5px; }
 	.ptRuleTag { font-style: normal; font-size: 9px; color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 3px; padding: 0 3px; }

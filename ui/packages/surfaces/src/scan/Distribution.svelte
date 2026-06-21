@@ -362,9 +362,9 @@
 		cursor: pointer;
 	}
 	.scale-toggle.active {
-		background: rgba(251, 146, 60, 0.1);
-		border-color: rgba(251, 146, 60, 0.4);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.1);
+		border-color: rgba(var(--amber-rgb), 0.4);
+		color: var(--amber);
 	}
 
 	.dist-empty {
@@ -419,7 +419,7 @@
 		transition: fill 0.1s;
 	}
 	.bar.highlighted {
-		fill: #fb923c;
+		fill: var(--amber);
 	}
 	.hit {
 		fill: transparent;
@@ -430,12 +430,12 @@
 		cursor: crosshair;
 	}
 	.mean-line {
-		stroke: #fb923c;
+		stroke: var(--amber);
 		stroke-width: 1.5;
 		stroke-dasharray: 2 2;
 	}
 	.mean-label {
-		fill: #fb923c;
+		fill: var(--amber);
 		font-size: 8px;
 		font-family: monospace;
 	}
@@ -481,7 +481,7 @@
 		font-weight: 500;
 	}
 	.stat.highlight .s-val {
-		color: #fb923c;
+		color: var(--amber);
 	}
 
 	.range {
@@ -535,7 +535,7 @@
 		width: 100%;
 	}
 	.ranked-item:hover {
-		background: rgba(251, 146, 60, 0.08);
+		background: rgba(var(--amber-rgb), 0.08);
 	}
 	.ranked-item.top:hover {
 		background: rgba(34, 197, 94, 0.06);

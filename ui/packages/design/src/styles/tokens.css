@@ -38,6 +38,19 @@
 	--dl-orange: #fb923c;
 	--dl-orange-soft: rgba(251, 146, 60, 0.12);
 	--dl-grad-heat: linear-gradient(135deg, #ea4647 0%, #fb923c 100%);
+
+	/* ── Accent · 시그니처 강조색 (캐러셀 핑크) ──
+	 * 터미널·report·전 surface 강조색 단일 제어점 (SSOT). 여기만 바꾸면 전체 강조색이 바뀐다.
+	 * --dl-accent-rgb 는 알파 변형용: rgba(var(--dl-accent-rgb), 0.3). 돋보기 로고 붉은톤과 통일.
+	 */
+	--dl-accent: #ec4899;
+	--dl-accent-rgb: 236, 72, 153;
+	--dl-accent-dim: #be185d;
+	--dl-accent-soft: rgba(236, 72, 153, 0.12);
+	/* surfaces 레거시 alias 전역 fallback — scan/map/viewer 등 .dlTerm 밖에서도 강조색 var 이 항상 해석되게(accent 로 위임). */
+	--amber: var(--dl-accent);
+	--amber-rgb: var(--dl-accent-rgb);
+	--amberDim: var(--dl-accent-dim);
 	--dl-grad-bleed: radial-gradient(
 		ellipse 1200px 600px at top,
 		rgba(234, 70, 71, 0.05),

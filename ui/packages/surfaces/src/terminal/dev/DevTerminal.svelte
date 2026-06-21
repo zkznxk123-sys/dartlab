@@ -23,9 +23,9 @@
 		position: sticky;
 		top: 0;
 		z-index: 60;
-		background: rgba(251, 146, 60, 0.12);
-		color: #fb923c;
-		border-bottom: 1px solid rgba(251, 146, 60, 0.4);
+		background: rgba(var(--amber-rgb), 0.12);
+		color: var(--amber);
+		border-bottom: 1px solid rgba(var(--amber-rgb), 0.4);
 		font-size: 11px;
 		padding: 3px 12px;
 		letter-spacing: 0.3px;

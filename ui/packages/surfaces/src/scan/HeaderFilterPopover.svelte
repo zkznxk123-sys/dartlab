@@ -238,9 +238,9 @@
 	}
 	.filter-btn:hover,
 	.filter-btn.active {
-		color: #fb923c;
-		border-color: rgba(251, 146, 60, 0.45);
-		background: rgba(251, 146, 60, 0.08);
+		color: var(--amber);
+		border-color: rgba(var(--amber-rgb), 0.45);
+		background: rgba(var(--amber-rgb), 0.08);
 	}
 	.popover {
 		position: absolute;
@@ -309,7 +309,7 @@
 		outline: none;
 	}
 	input:focus {
-		border-color: rgba(251, 146, 60, 0.6);
+		border-color: rgba(var(--amber-rgb), 0.6);
 	}
 	.text-field {
 		margin-bottom: 8px;
@@ -326,7 +326,7 @@
 		width: 13px;
 		height: 13px;
 		padding: 0;
-		accent-color: #fb923c;
+		accent-color: var(--amber);
 	}
 	.enum-list {
 		max-height: 180px;
@@ -363,8 +363,8 @@
 		cursor: default;
 	}
 	.apply {
-		border: 1px solid rgba(251, 146, 60, 0.65);
-		background: rgba(251, 146, 60, 0.14);
-		color: #fb923c;
+		border: 1px solid rgba(var(--amber-rgb), 0.65);
+		background: rgba(var(--amber-rgb), 0.14);
+		color: var(--amber);
 	}
 </style>

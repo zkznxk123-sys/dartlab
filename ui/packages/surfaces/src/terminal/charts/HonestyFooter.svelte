@@ -107,8 +107,8 @@
 	.btRet { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
 	.btVs { color: var(--dimmer); font-size: 10px; }
 	.btExcess { font-size: 12px; font-weight: 700; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--dl-line, #1b2130); font-variant-numeric: tabular-nums; }
-	.btMore { margin-left: auto; background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.45); color: var(--amber, #fb923c); font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 3px; cursor: pointer; font-family: inherit; }
-	.btMore:hover { background: rgba(251, 146, 60, 0.2); }
+	.btMore { margin-left: auto; background: rgba(var(--amber-rgb), 0.1); border: 1px solid rgba(var(--amber-rgb), 0.45); color: var(--amber, var(--amber)); font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 3px; cursor: pointer; font-family: inherit; }
+	.btMore:hover { background: rgba(var(--amber-rgb), 0.2); }
 	.btChips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 	.btChip { display: inline-flex; align-items: center; gap: 5px; background: none; border: 1px solid var(--dl-line, #1b2130); border-radius: 12px; padding: 1px 8px 1px 5px; cursor: pointer; font-family: inherit; font-size: 11px; color: #aeb6c2; }
 	.btChip:hover { border-color: #3a4456; }
@@ -118,7 +118,7 @@
 	.btChip b { font-size: 11px; font-variant-numeric: tabular-nums; }
 	.btTier { margin-top: 4px; line-height: 1.5; font-size: 11px; }
 	.btTierFlags { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-	.btWarnChip { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 6px; }
+	.btWarnChip { font-size: 11px; color: var(--amber, var(--amber)); border: 1px solid rgba(var(--amber-rgb), 0.35); border-radius: 3px; padding: 0 6px; }
 	.btFlagChip { font-size: 11px; color: #8b94a3; background: none; border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 1px 7px; cursor: pointer; font-family: inherit; }
 	.btFlagChip:hover { color: #aeb6c2; border-color: #3a4456; }
 	.btDiv { font-weight: 600; font-style: normal; color: #aeb6c2; }

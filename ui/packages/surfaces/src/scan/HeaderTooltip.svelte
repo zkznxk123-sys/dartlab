@@ -98,7 +98,7 @@
 	}
 	.hdr:hover .hdr-label,
 	.hdr:focus .hdr-label {
-		color: #fb923c;
+		color: var(--amber);
 	}
 
 	.bubble {

@@ -118,6 +118,6 @@
 		background: #0c1424;
 	}
 	tbody tr:hover td {
-		background: rgba(251, 146, 60, 0.05);
+		background: rgba(var(--amber-rgb), 0.05);
 	}
 </style>

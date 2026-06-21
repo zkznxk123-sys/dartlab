@@ -112,7 +112,7 @@
 
 <aside class="export-drawer">
 	<header class="ed-head">
-		<FileSpreadsheet size={17} color="#fb923c" />
+		<FileSpreadsheet size={17} color="#ec4899" />
 		<strong>표 내보내기</strong>
 		<span class="ed-count">{list.length}개</span>
 		<button type="button" class="ed-x" onclick={onclose} aria-label="닫기"><X size={15} /></button>
@@ -284,8 +284,8 @@
 		cursor: pointer;
 	}
 	.ed-x:hover {
-		border-color: rgba(251, 146, 60, 0.5);
-		color: #fb923c;
+		border-color: rgba(var(--amber-rgb), 0.5);
+		color: var(--amber);
 	}
 
 	.ed-scroll {
@@ -344,7 +344,7 @@
 	}
 	.sheet.dragging {
 		opacity: 0.5;
-		border-color: rgba(251, 146, 60, 0.5);
+		border-color: rgba(var(--amber-rgb), 0.5);
 	}
 	.sh-row1 {
 		display: flex;
@@ -377,7 +377,7 @@
 		outline: none;
 	}
 	.sh-name:focus {
-		border-color: #fb923c;
+		border-color: var(--amber);
 	}
 	.sh-name.warn {
 		border-color: rgba(248, 113, 113, 0.6);
@@ -437,8 +437,8 @@
 		color: #cbd5e1;
 	}
 	.mode-opt.on {
-		background: rgba(251, 146, 60, 0.14);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.14);
+		color: var(--amber);
 		font-weight: 600;
 	}
 	.period-chip {
@@ -500,7 +500,7 @@
 		padding: 9px 16px;
 		border: none;
 		border-radius: 8px;
-		background: #fb923c;
+		background: var(--amber);
 		color: #1a1206;
 		font: inherit;
 		font-size: 13px;
@@ -530,7 +530,7 @@
 		line-height: 1.5;
 	}
 	.ed-install {
-		color: #fb923c;
+		color: var(--amber);
 		text-decoration: none;
 		font-weight: 600;
 		white-space: nowrap;

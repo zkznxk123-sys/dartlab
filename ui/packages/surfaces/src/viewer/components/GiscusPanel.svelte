@@ -143,8 +143,8 @@
 		cursor: pointer;
 	}
 	.dh-close:hover {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 	}
 	.dbody {
 		flex: 1 1 auto;
@@ -159,7 +159,7 @@
 		color: #64748b;
 	}
 	.dhint a {
-		color: #fb923c;
+		color: var(--amber);
 		text-decoration: none;
 		white-space: nowrap;
 	}

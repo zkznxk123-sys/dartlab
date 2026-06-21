@@ -86,7 +86,7 @@
 				<line x1={xAt(0)} y1={AX.t} x2={xAt(0)} y2={AX.t + plotH} stroke="rgba(139,145,158,0.4)" stroke-width="1" />
 			{/if}
 			<!-- 평균 점선 -->
-			<line x1={xAt(mean)} y1={AX.t} x2={xAt(mean)} y2={AX.t + plotH} stroke="var(--amber, #fb923c)" stroke-width="1" stroke-dasharray="3 3" />
+			<line x1={xAt(mean)} y1={AX.t} x2={xAt(mean)} y2={AX.t + plotH} stroke="var(--amber, var(--amber))" stroke-width="1" stroke-dasharray="3 3" />
 			<text class="rhMean" x={xAt(mean)} y={AX.t - 2} text-anchor="middle">{T('평균', 'mean')} {sgn(mean)}%</text>
 			<!-- x 라벨 -->
 			{#each binLabelTicks as tick (tick)}
@@ -127,7 +127,7 @@
 	.rhMean {
 		font-family: var(--dl-font-mono, monospace);
 		font-size: 10px;
-		fill: var(--amber, #fb923c);
+		fill: var(--amber, var(--amber));
 	}
 	.rhBar {
 		cursor: default;

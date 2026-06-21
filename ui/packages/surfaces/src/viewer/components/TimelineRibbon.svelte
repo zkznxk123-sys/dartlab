@@ -74,8 +74,8 @@
 		cursor: pointer;
 	}
 	.chev:hover:not(:disabled) {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 	}
 	.chev:disabled {
 		opacity: 0.3;
@@ -107,22 +107,22 @@
 		transition: background 0.12s, color 0.12s;
 	}
 	.chip:hover {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 		color: #cbd5e1;
 	}
 	.chip.in-window {
-		background: rgba(251, 146, 60, 0.12);
-		border-color: rgba(251, 146, 60, 0.4);
+		background: rgba(var(--amber-rgb), 0.12);
+		border-color: rgba(var(--amber-rgb), 0.4);
 		color: #f1f5f9;
 	}
 	.chip.start {
 		border-top-left-radius: 5px;
 		border-bottom-left-radius: 5px;
-		border-left-color: rgba(251, 146, 60, 0.4);
+		border-left-color: rgba(var(--amber-rgb), 0.4);
 	}
 	.chip.end {
 		border-top-right-radius: 5px;
 		border-bottom-right-radius: 5px;
-		border-right-color: rgba(251, 146, 60, 0.4);
+		border-right-color: rgba(var(--amber-rgb), 0.4);
 	}
 </style>

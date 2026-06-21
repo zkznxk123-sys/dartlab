@@ -173,6 +173,6 @@ export const PRESETS_BY_ID = new Map(PRESETS.map((p) => [p.id, p]));
 export const PRESET_CATEGORIES: { key: Preset['category']; label: string; color: string }[] = [
 	{ key: 'theme', label: '테마', color: '#ea4647' },
 	{ key: 'safety', label: '안전', color: '#22c55e' },
-	{ key: 'leader', label: '리더', color: '#fb923c' },
+	{ key: 'leader', label: '리더', color: '#ec4899' },
 	{ key: 'risk', label: '위험', color: '#a78bfa' }
 ];

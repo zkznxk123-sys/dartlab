@@ -62,7 +62,7 @@ export function registerVolumeProfile(kc: { registerIndicator: (t: unknown) => v
 				ctx.fillRect(x0 + upW, y, w - upW, h);
 			}
 			const pocY = yAxis.convertToPixel(lo + ((pocI + 0.5) / BINS) * (hi - lo));
-			ctx.strokeStyle = 'rgba(251,146,60,0.85)';
+			ctx.strokeStyle = 'rgba(236, 72, 153,0.85)';
 			ctx.lineWidth = 1;
 			ctx.setLineDash([2, 2]);
 			ctx.beginPath();

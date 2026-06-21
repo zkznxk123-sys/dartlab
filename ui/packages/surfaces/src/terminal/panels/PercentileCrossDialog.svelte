@@ -274,7 +274,7 @@
 		line-height: 1.25;
 	}
 	.pcxColH.anchor {
-		color: var(--amber, #fb923c);
+		color: var(--amber, var(--amber));
 	}
 	.pcxColH i {
 		font-style: normal;

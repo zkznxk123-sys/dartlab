@@ -408,15 +408,15 @@ ORDER BY avg_roe DESC`
 	.nb-btn {
 		padding: 5px 10px;
 		font-size: 11px;
-		background: rgba(251, 146, 60, 0.08);
-		border: 1px solid rgba(251, 146, 60, 0.3);
+		background: rgba(var(--amber-rgb), 0.08);
+		border: 1px solid rgba(var(--amber-rgb), 0.3);
 		border-radius: 3px;
-		color: #fb923c;
+		color: var(--amber);
 		cursor: pointer;
 		font-family: inherit;
 	}
 	.nb-btn:hover {
-		background: rgba(251, 146, 60, 0.16);
+		background: rgba(var(--amber-rgb), 0.16);
 	}
 
 	.nb-menu-wrap {
@@ -442,16 +442,16 @@ ORDER BY avg_roe DESC`
 	.nb-menu-new {
 		padding: 6px 10px;
 		font-size: 11px;
-		background: rgba(251, 146, 60, 0.08);
-		border: 1px solid rgba(251, 146, 60, 0.3);
+		background: rgba(var(--amber-rgb), 0.08);
+		border: 1px solid rgba(var(--amber-rgb), 0.3);
 		border-radius: 3px;
-		color: #fb923c;
+		color: var(--amber);
 		cursor: pointer;
 		font-family: inherit;
 		text-align: left;
 	}
 	.nb-menu-new:hover {
-		background: rgba(251, 146, 60, 0.16);
+		background: rgba(var(--amber-rgb), 0.16);
 	}
 	.nb-menu-empty {
 		padding: 12px 10px;
@@ -472,7 +472,7 @@ ORDER BY avg_roe DESC`
 		border-radius: 3px;
 	}
 	.nb-menu-row.active {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 	}
 	.nb-menu-load {
 		flex: 1;
@@ -510,7 +510,7 @@ ORDER BY avg_roe DESC`
 		font-size: 11px;
 	}
 	.nb-menu-icon:hover {
-		color: #fb923c;
+		color: var(--amber);
 	}
 
 	.nb-toast {
@@ -518,7 +518,7 @@ ORDER BY avg_roe DESC`
 		top: 50px;
 		right: 14px;
 		padding: 6px 12px;
-		background: #fb923c;
+		background: var(--amber);
 		color: #0a0e18;
 		border-radius: 4px;
 		font-size: 11px;
@@ -557,7 +557,7 @@ ORDER BY avg_roe DESC`
 		font-size: 9px;
 	}
 	.cc-btn:hover:not(:disabled) {
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.cc-btn:disabled {
 		opacity: 0.3;
@@ -589,8 +589,8 @@ ORDER BY avg_roe DESC`
 		font-family: inherit;
 	}
 	.add-here:hover {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 		border-style: solid;
 	}
 
@@ -601,16 +601,16 @@ ORDER BY avg_roe DESC`
 	}
 	.empty-btn {
 		padding: 12px 24px;
-		background: rgba(251, 146, 60, 0.1);
-		border: 1px solid rgba(251, 146, 60, 0.4);
+		background: rgba(var(--amber-rgb), 0.1);
+		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 6px;
-		color: #fb923c;
+		color: var(--amber);
 		cursor: pointer;
 		font-family: inherit;
 		font-size: 13px;
 		font-weight: 600;
 	}
 	.empty-btn:hover {
-		background: rgba(251, 146, 60, 0.18);
+		background: rgba(var(--amber-rgb), 0.18);
 	}
 </style>

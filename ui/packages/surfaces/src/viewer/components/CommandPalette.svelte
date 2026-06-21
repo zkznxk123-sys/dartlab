@@ -1,7 +1,7 @@
 <script lang="ts">
 	// ⌘K 커맨드 팔레트 — 공시뷰어 *화면내검색* 전용 (본문검색 + 섹션점프). 회사전환은 헤더 종목검색 버튼이 담당(분리).
 	// 본문검색은 searchIndex(gridBySection BM25) 결과를 그대로 격자로 데려간다(pickSection+pickPeriod+glow).
-	// scan 검색 디자인 언어(다크 #050811 · 오렌지 #fb923c).
+	// scan 검색 디자인 언어(다크 #050811 · 오렌지 var(--amber)).
 	import { onMount } from 'svelte';
 	import { Search } from 'lucide-svelte';
 	import { search, type SearchIndex, type SearchHit } from '../lib/searchIndex';
@@ -195,8 +195,8 @@
 		cursor: pointer;
 	}
 	.kbd-hint:hover {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 	}
 	.kbd-hint kbd {
 		font-family: monospace;
@@ -261,9 +261,9 @@
 		cursor: pointer;
 	}
 	.exp-toggle.on {
-		border-color: rgba(251, 146, 60, 0.5);
-		background: rgba(251, 146, 60, 0.12);
-		color: #fb923c;
+		border-color: rgba(var(--amber-rgb), 0.5);
+		background: rgba(var(--amber-rgb), 0.12);
+		color: var(--amber);
 	}
 	.chips {
 		display: flex;
@@ -306,7 +306,7 @@
 		cursor: pointer;
 	}
 	.row.sel {
-		background: rgba(251, 146, 60, 0.12);
+		background: rgba(var(--amber-rgb), 0.12);
 	}
 	.row-main {
 		display: flex;
@@ -323,7 +323,7 @@
 		white-space: nowrap;
 	}
 	.row.sel .row-label {
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.row-period {
 		flex-shrink: 0;

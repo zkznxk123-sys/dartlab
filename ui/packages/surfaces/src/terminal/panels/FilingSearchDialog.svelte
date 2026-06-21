@@ -250,11 +250,11 @@
 	.fsSearchRow { display: flex; align-items: center; gap: 7px; padding: 10px 14px 6px; }
 	.fsIcon { font-size: 13px; opacity: 0.7; }
 	.fsInput { flex: 1 1 auto; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--dl-line, #2a3142); border-radius: 4px; color: var(--dl-ink, #c8cfdb); font-size: 13px; font-family: inherit; padding: 6px 10px; outline: none; }
-	.fsInput:focus { border-color: var(--amber, #fb923c); }
+	.fsInput:focus { border-color: var(--amber, var(--amber)); }
 	.fsRecent { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 0 14px 8px; }
 	.fsRecentLbl { font-size: 9px; color: #c2cad6; text-transform: uppercase; }
 	.fsChip { font-size: 10px; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.03); color: #c2cad6; cursor: pointer; }
-	.fsChip:hover { color: var(--dl-ink, #c8cfdb); border-color: var(--amber, #fb923c); }
+	.fsChip:hover { color: var(--dl-ink, #c8cfdb); border-color: var(--amber, var(--amber)); }
 	.fsBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; border-top: 1px solid var(--dl-line, #1b2130); }
 	.fsState { padding: 22px 14px; font-size: 12px; color: #c2cad6; text-align: center; }
 	.fsErr { color: var(--dn, #f85149); }
@@ -271,7 +271,7 @@
 		border-bottom: 1px solid var(--dl-line, #1b2130);
 		cursor: pointer;
 	}
-	.fsRow.sel { border-left-color: var(--amber, #fb923c); background: rgba(251, 146, 60, 0.1); }
+	.fsRow.sel { border-left-color: var(--amber, var(--amber)); background: rgba(var(--amber-rgb), 0.1); }
 	.fsRow.noJump { cursor: default; opacity: 0.82; }
 	.fsCorp { grid-area: corp; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 	.fsCorp b { color: var(--dl-ink, #c8cfdb); font-weight: 600; }
@@ -283,9 +283,9 @@
 	.bEdgar { color: #d2a8ff; background: rgba(210, 168, 255, 0.12); }
 	.bNews { color: #d29922; background: rgba(210, 153, 34, 0.12); }
 	.fsSnippet { grid-area: snip; font-size: 10px; color: #8b93a0; line-height: 1.4; max-height: 2.8em; overflow: hidden; }
-	.fsExt { grid-area: ext; font-size: 9.5px; color: var(--amber, #fb923c); text-decoration: none; text-align: right; white-space: nowrap; }
+	.fsExt { grid-area: ext; font-size: 9.5px; color: var(--amber, var(--amber)); text-decoration: none; text-align: right; white-space: nowrap; }
 	.fsExt:hover { text-decoration: underline; }
 	.fsFoot { display: flex; gap: 14px; align-items: center; padding: 6px 14px; border-top: 1px solid var(--dl-line, #1b2130); font-size: 10px; color: #c2cad6; }
-	.fsFoot .tAmber { color: var(--amber, #fb923c); }
+	.fsFoot .tAmber { color: var(--amber, var(--amber)); }
 	.fsCount { margin-left: auto; font-variant-numeric: tabular-nums; }
 </style>

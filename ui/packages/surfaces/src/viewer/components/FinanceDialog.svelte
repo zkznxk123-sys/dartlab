@@ -103,8 +103,8 @@
 		cursor: pointer;
 	}
 	.mh-close:hover {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 	}
 	.body {
 		flex: 1 1 auto;

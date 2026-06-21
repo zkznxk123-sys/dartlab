@@ -17,7 +17,7 @@
 		stratColor?: string; // 포커스 전략 색(STRAT_COLORS) — strip·캔버스 레전드와 색 일치
 		lang: Lang;
 	}
-	let { eq, bhq, dd, ts, splitFrac, eqRange, ddMin, stratColor = '#fb923c', lang }: Props = $props();
+	let { eq, bhq, dd, ts, splitFrac, eqRange, ddMin, stratColor = '#ec4899', lang }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
 	let cw = $state(0);

@@ -767,7 +767,7 @@
 		pointer-events: none;
 	}
 	.hdNodeLab.hl {
-		fill: var(--amber, #fb923c);
+		fill: var(--amber, var(--amber));
 		font-weight: 700;
 	}
 	.hdNodeSub {
@@ -871,8 +871,8 @@
 	}
 	.hdIntent {
 		font-size: 8px;
-		color: var(--amber, #fb923c);
-		border: 1px solid rgba(251, 146, 60, 0.4);
+		color: var(--amber, var(--amber));
+		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 2px;
 		padding: 0 3px;
 		margin-left: 5px;
@@ -891,7 +891,7 @@
 		border-top: 1px solid var(--bd);
 	}
 	.hdTable tbody tr.hlRow {
-		background: rgba(251, 146, 60, 0.13);
+		background: rgba(var(--amber-rgb), 0.13);
 	}
 	.hdTip {
 		position: fixed;

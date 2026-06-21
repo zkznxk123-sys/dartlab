@@ -192,7 +192,7 @@
 		text-align: right;
 	}
 	.wfHot {
-		color: var(--amber, #fb923c);
+		color: var(--amber, var(--amber));
 		font-weight: 700;
 	}
 	.wfWarm {

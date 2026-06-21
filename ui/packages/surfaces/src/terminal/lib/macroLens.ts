@@ -306,6 +306,11 @@ export interface RegimeMarketView {
 	lensConflict: boolean;
 	transitionLabel: string;
 	hasTransitionProgress: boolean;
+	// 구조화 전이 — 평면 계기가 양언어로 직접 렌더(전이신호 from→to·진행률·신호 충족수). null=미산출.
+	transition: {
+		fromKr: string; fromEn: string; toKr: string; toEn: string;
+		progressPct: number | null; triggered: number; total: number;
+	} | null;
 	assets: { key: string; labelKr: string; labelEn: string; weight: string; tone: 'ow' | 'uw' | 'nu' }[];
 	description: string;
 }
@@ -745,8 +750,12 @@ function fmtLatest(m: MacroLatest): string {
 
 function fmtChange(m: MacroLatest): string {
 	if (m.chg == null) return '—';
-	const v = Math.abs(m.chg).toLocaleString('en-US', { maximumFractionDigits: m.def.digits ?? 2 });
-	return `${m.chg > 0 ? '+' : m.chg < 0 ? '-' : ''}${v}${m.def.unit === 'pt' || m.def.unit === '원' ? '' : m.def.unit}`;
+	const digits = m.def.digits ?? 2;
+	// 부호는 표시 정밀도로 반올림한 값 기준 — raw 가 -0.3·digits 0 이면 "0"인데 raw 부호로 "-0" 나오던 버그.
+	const rounded = Number(m.chg.toFixed(digits));
+	const v = Math.abs(rounded).toLocaleString('en-US', { maximumFractionDigits: digits });
+	const sign = rounded > 0 ? '+' : rounded < 0 ? '-' : '';
+	return `${sign}${v}${m.def.unit === 'pt' || m.def.unit === '원' ? '' : m.def.unit}`;
 }
 
 function parseYmd(d?: string | null): number | null {
@@ -983,6 +992,32 @@ function cellFromSide(side?: MacroSide): RegimeQuadrantCellView['key'] | null {
 	return null;
 }
 
+// phase enum → 양언어 라벨 (전이 from/to·사이클 표기 공용). 미등록은 원문 유지(날조 금지).
+const PHASE_LABEL: Record<string, { kr: string; en: string }> = {
+	expansion: { kr: '확장', en: 'Expansion' },
+	slowdown: { kr: '둔화', en: 'Slowdown' },
+	contraction: { kr: '수축', en: 'Contraction' },
+	recovery: { kr: '회복', en: 'Recovery' },
+	stagflation: { kr: '스태그플레이션', en: 'Stagflation' },
+	reflation: { kr: '리플레이션', en: 'Reflation' },
+	deflation: { kr: '디플레이션', en: 'Deflation' },
+	goldilocks: { kr: '골디락스', en: 'Goldilocks' }
+};
+
+function buildTransition(side?: MacroSide): RegimeMarketView['transition'] {
+	const tr = side?.transition;
+	if (!tr || !tr.from || !tr.to) return null;
+	const from = PHASE_LABEL[tr.from] ?? { kr: tr.from, en: tr.from };
+	const to = PHASE_LABEL[tr.to] ?? { kr: tr.to, en: tr.to };
+	const triggered = tr.triggered?.length ?? 0;
+	const pending = tr.pending?.length ?? 0;
+	return {
+		fromKr: from.kr, fromEn: from.en, toKr: to.kr, toEn: to.en,
+		progressPct: typeof tr.progress === 'number' ? Math.round(tr.progress) : null,
+		triggered, total: triggered + pending
+	};
+}
+
 function transitionLabel(side?: MacroSide): { label: string; hasProgress: boolean } {
 	const tr = side?.transition;
 	if (!tr) return { label: '전이신호 미산출', hasProgress: false };
@@ -1022,6 +1057,7 @@ function buildRegimeMarket(market: 'KR' | 'US', side?: MacroSide): RegimeMarketV
 		lensConflict: !!q && phase !== q.quadrant,
 		transitionLabel: tr.label,
 		hasTransitionProgress: tr.hasProgress,
+		transition: buildTransition(side),
 		assets: ASSET_ROWS.map((asset) => ({
 			...asset,
 			weight: q?.assetImplication?.[asset.key] ?? 'neutral',

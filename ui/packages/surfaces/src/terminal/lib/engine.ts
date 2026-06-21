@@ -94,7 +94,7 @@ export const COMPOSITE_AXES: CompositeAxis[] = [
 // dartlab scan group colors — dartlab 토큰 계열로 정렬
 const GROUP_COLOR: Record<string, string> = {
 	identity: '#a3a8b3', income: '#60a5fa', health: '#34d399', governance: '#a78bfa',
-	quality: '#fbbf24', workforce: '#f472b6', changes: '#fb923c', price: '#ea4647',
+	quality: '#fbbf24', workforce: '#f472b6', changes: '#ec4899', price: '#ea4647',
 	valuation: '#34d399', disclosure: '#c084fc'
 };
 const MARKET_LABEL: Record<string, string> = { 유가증권: 'KOSPI', 코스닥: 'KOSDAQ', 코넥스: 'KONEX' };
@@ -632,7 +632,7 @@ export function createEngine(raw: RawData): Engine {
 			{ kr: '현금', v: at('cash'), color: '#60a5fa' },
 			{ kr: '매출채권', v: at('recv'), color: '#34d399' },
 			{ kr: '재고', v: at('inv'), color: '#fbbf24' },
-			{ kr: '유형자산', v: at('tang'), color: '#fb923c' },
+			{ kr: '유형자산', v: at('tang'), color: '#ec4899' },
 			{ kr: '무형자산', v: at('intan'), color: '#a78bfa' },
 			{ kr: '기타', v: Math.max(0, +(totAssetL - sumBuckets).toFixed(2)), color: '#475569' }
 		].filter((s) => s.v > 0);

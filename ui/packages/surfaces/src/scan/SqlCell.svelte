@@ -206,15 +206,15 @@
 		padding: 4px 12px;
 		font-size: 11px;
 		font-weight: 600;
-		background: rgba(251, 146, 60, 0.1);
-		border: 1px solid rgba(251, 146, 60, 0.4);
+		background: rgba(var(--amber-rgb), 0.1);
+		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 4px;
-		color: #fb923c;
+		color: var(--amber);
 		cursor: pointer;
 		font-family: inherit;
 	}
 	.cell-run:hover:not(:disabled) {
-		background: rgba(251, 146, 60, 0.18);
+		background: rgba(var(--amber-rgb), 0.18);
 	}
 	.cell-run:disabled {
 		opacity: 0.5;

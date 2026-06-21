@@ -130,8 +130,8 @@
 		font-family: inherit;
 	}
 	.rj-btn:hover {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 	}
 	.rj-close {
 		background: transparent;
@@ -142,7 +142,7 @@
 		padding: 4px 6px;
 	}
 	.rj-close:hover {
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.rj-body {
 		flex: 1;

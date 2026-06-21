@@ -187,8 +187,8 @@
 		white-space: nowrap;
 	}
 	.src-link:hover {
-		border-color: rgba(251, 146, 60, 0.6);
-		color: #fb923c;
+		border-color: rgba(var(--amber-rgb), 0.6);
+		color: var(--amber);
 	}
 	.body-cell {
 		position: relative; /* pick-box 오버레이 앵커 (체크박스 absolute, 레이아웃 시프트 0). */
@@ -196,13 +196,13 @@
 	}
 	/* steady 강조 + 펄스 — 스크롤 도착 시점에 확실히 보이게(옛 t0 fade 레이스 제거). 수명은 JS(glowKey)가 제어. */
 	.body-cell.glow {
-		box-shadow: inset 0 0 0 2px #fb923c;
+		box-shadow: inset 0 0 0 2px var(--amber);
 		animation: cellglow 1.1s ease-in-out infinite;
 	}
 	/* table-export 선택 — steady 보더(펄스 없음, glow 와 구분). 선택 유지 상시. */
 	.body-cell.picked {
-		box-shadow: inset 0 0 0 2px #fb923c;
-		background: rgba(251, 146, 60, 0.08);
+		box-shadow: inset 0 0 0 2px var(--amber);
+		background: rgba(var(--amber-rgb), 0.08);
 	}
 	/* 셀 좌상단 체크박스 — fade-in, position:absolute(격자 레이아웃 시프트 0). */
 	.pick-box {
@@ -218,7 +218,7 @@
 		border: 1px solid #475569;
 		border-radius: 4px;
 		background: rgba(5, 8, 17, 0.82);
-		color: #fb923c;
+		color: var(--amber);
 		font-size: 12px;
 		font-weight: 700;
 		line-height: 1;
@@ -226,11 +226,11 @@
 		animation: pickfade 0.16s ease-out;
 	}
 	.pick-box:hover {
-		border-color: #fb923c;
+		border-color: var(--amber);
 	}
 	.pick-box.on {
-		border-color: #fb923c;
-		background: rgba(251, 146, 60, 0.9);
+		border-color: var(--amber);
+		background: rgba(var(--amber-rgb), 0.9);
 		color: #1a1206;
 	}
 	@keyframes pickfade {
@@ -246,10 +246,10 @@
 	@keyframes cellglow {
 		0%,
 		100% {
-			background: rgba(251, 146, 60, 0.1);
+			background: rgba(var(--amber-rgb), 0.1);
 		}
 		50% {
-			background: rgba(251, 146, 60, 0.24);
+			background: rgba(var(--amber-rgb), 0.24);
 		}
 	}
 

@@ -96,10 +96,10 @@
 	.oc-vs { font-size: 10px; color: var(--dimmer, #5b6573); }
 	.oc-bh { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 	.oc-xs { font-size: 12px; font-weight: 700; padding: 0 6px; border-radius: 8px; border: 1px solid var(--dl-line, #1b2130); font-variant-numeric: tabular-nums; }
-	.oc-warn { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 5px; }
+	.oc-warn { font-size: 11px; color: var(--amber, var(--amber)); border: 1px solid rgba(var(--amber-rgb), 0.35); border-radius: 3px; padding: 0 5px; }
 	/* 일화 태그 — 증거 약함(봉<60 또는 거래<5). 수익 중립색과 함께 "한 경로의 운"을 명시(NEVER-CLAIM). */
 	.oc-anec { font-size: 10.5px; color: var(--dim, #8b94a3); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 0 5px; }
-	.oc-more { font-size: 11px; color: var(--amber, #fb923c); font-weight: 600; }
+	.oc-more { font-size: 11px; color: var(--amber, var(--amber)); font-weight: 600; }
 	.tUp { color: var(--up, #34d399); }
 	.tDn { color: var(--dn, #f0616f); }
 	.tNeu { color: #aeb6c2; }

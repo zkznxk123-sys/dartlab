@@ -238,7 +238,7 @@
 		padding: 1px 5px;
 		background: #1e2433;
 		border-radius: 3px;
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.md-rendered :global(pre) {
 		background: #0a0e18;

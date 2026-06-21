@@ -120,7 +120,7 @@
 	}
 	.search-input:focus {
 		outline: none;
-		border-color: #fb923c;
+		border-color: var(--amber);
 	}
 	.search-input:disabled {
 		opacity: 0.7;
@@ -133,8 +133,8 @@
 		width: 13px;
 		height: 13px;
 		margin-top: -7px;
-		border: 2px solid rgba(251, 146, 60, 0.3);
-		border-top-color: #fb923c;
+		border: 2px solid rgba(var(--amber-rgb), 0.3);
+		border-top-color: var(--amber);
 		border-radius: 50%;
 		animation: cs-spin 0.6s linear infinite;
 		pointer-events: none;
@@ -176,7 +176,7 @@
 	}
 	.opt.active,
 	.opt:hover {
-		background: rgba(251, 146, 60, 0.1);
+		background: rgba(var(--amber-rgb), 0.1);
 		color: #f8fafc;
 	}
 	.opt-code {
@@ -187,6 +187,6 @@
 	}
 	.opt.active .opt-code,
 	.opt:hover .opt-code {
-		color: #fb923c;
+		color: var(--amber);
 	}
 </style>

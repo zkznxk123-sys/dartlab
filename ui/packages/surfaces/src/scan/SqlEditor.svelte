@@ -474,15 +474,15 @@ LIMIT 50`
 		padding: 6px 14px;
 		font-size: 12px;
 		font-weight: 600;
-		color: #fb923c;
-		background: rgba(251, 146, 60, 0.1);
-		border: 1px solid rgba(251, 146, 60, 0.4);
+		color: var(--amber);
+		background: rgba(var(--amber-rgb), 0.1);
+		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 4px;
 		cursor: pointer;
 		font-family: inherit;
 	}
 	.se-run:hover:not(:disabled) {
-		background: rgba(251, 146, 60, 0.18);
+		background: rgba(var(--amber-rgb), 0.18);
 	}
 	.se-run:disabled {
 		opacity: 0.5;
@@ -548,7 +548,7 @@ LIMIT 50`
 	.t-name {
 		font-family: monospace;
 		font-size: 11px;
-		color: #fb923c;
+		color: var(--amber);
 		font-weight: 600;
 	}
 	.t-count {
@@ -580,7 +580,7 @@ LIMIT 50`
 		font-family: inherit;
 	}
 	.col-btn:hover {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 	}
 	.c-name {
 		font-family: monospace;
@@ -613,9 +613,9 @@ LIMIT 50`
 		line-height: 1.4;
 	}
 	.preset-btn:hover {
-		background: rgba(251, 146, 60, 0.06);
-		border-color: rgba(251, 146, 60, 0.4);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.06);
+		border-color: rgba(var(--amber-rgb), 0.4);
+		color: var(--amber);
 	}
 
 	.se-help .kb {

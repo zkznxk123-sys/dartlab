@@ -418,7 +418,7 @@
 		font-size: 10px;
 		background: transparent;
 		border: none;
-		color: #fb923c;
+		color: var(--amber);
 		cursor: pointer;
 		font-family: inherit;
 		padding: 0;
@@ -458,7 +458,7 @@
 		width: 100%;
 	}
 	.r-row:hover {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 	}
 	.r-dot {
 		width: 5px;

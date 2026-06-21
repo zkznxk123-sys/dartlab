@@ -84,8 +84,8 @@
 		white-space: nowrap;
 	}
 	.fs-btn:hover {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 	}
 
 	/* 데이터 다운로드 — 버튼 hover 시 팝오버(다운로드 링크 + 정책) */
@@ -130,9 +130,9 @@
 		text-decoration: none;
 	}
 	.dp-link:hover {
-		border-color: #fb923c;
-		color: #fb923c;
-		background: rgba(251, 146, 60, 0.06);
+		border-color: var(--amber);
+		color: var(--amber);
+		background: rgba(var(--amber-rgb), 0.06);
 	}
 	.dp-sub {
 		margin-top: 4px;
@@ -147,8 +147,8 @@
 		font-size: 12px;
 		cursor: pointer;
 		text-align: left;
-		background: rgba(251, 146, 60, 0.08);
-		border-color: rgba(251, 146, 60, 0.4);
+		background: rgba(var(--amber-rgb), 0.08);
+		border-color: rgba(var(--amber-rgb), 0.4);
 		color: #f1f5f9;
 	}
 	.dp-btn:disabled {
@@ -185,7 +185,7 @@
 	}
 	.dp-terms {
 		align-self: flex-start;
-		color: #fb923c;
+		color: var(--amber);
 		text-decoration: none;
 	}
 	.dp-terms:hover {

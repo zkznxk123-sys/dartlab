@@ -741,8 +741,8 @@
 		color: #34d399;
 	}
 	.badge.role {
-		background: rgba(251, 146, 60, 0.12);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.12);
+		color: var(--amber);
 	}
 	.badge.stream {
 		background: rgba(167, 139, 250, 0.15);
@@ -760,7 +760,7 @@
 	.t1-summary {
 		margin-top: 12px;
 		padding: 12px 14px;
-		background: linear-gradient(135deg, rgba(234, 70, 71, 0.06), rgba(251, 146, 60, 0.04));
+		background: linear-gradient(135deg, rgba(234, 70, 71, 0.06), rgba(var(--amber-rgb), 0.04));
 		border: 1px solid rgba(234, 70, 71, 0.15);
 		border-radius: 8px;
 	}
@@ -1134,8 +1134,8 @@
 		font-weight: 600;
 	}
 	.edge-kind.sup {
-		background: rgba(251, 146, 60, 0.15);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.15);
+		color: var(--amber);
 	}
 	.edge-kind.cus {
 		background: rgba(96, 165, 250, 0.15);

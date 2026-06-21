@@ -8,7 +8,7 @@ import type { MacroPoint, MacroSeriesDef } from '@dartlab/ui-contracts';
 import type { Lang } from '../lib/types';
 
 export const ECON_INDICATOR = 'ECON';
-// 캔들 상승 #34d399 / 하락 #f0616f / 마커 amber #fb923c 와 충돌하지 않는 고정 팔레트.
+// 캔들 상승 #34d399 / 하락 #f0616f / 마커 amber #ec4899 와 충돌하지 않는 고정 팔레트.
 export const ECON_COLORS: Record<string, string> = {
 	// 한국 (ECOS)
 	USDKRW: '#60a5fa',
@@ -57,7 +57,7 @@ export const ECON_COLORS: Record<string, string> = {
 	PCOPPUSDM: '#facc15',
 	// 국내 시장지수(베타 오버레이) — marketIndex.ts MARKET_INDEX_COLORS 와 일치(amber/orange 시장 톤)
 	'idx:KOSPI/코스피': '#fbbf24',
-	'idx:KOSDAQ/코스닥': '#fb923c'
+	'idx:KOSDAQ/코스닥': '#ec4899'
 };
 
 export interface EconExtend {

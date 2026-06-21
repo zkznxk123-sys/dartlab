@@ -93,12 +93,12 @@
 		transition: background 0.12s, color 0.12s, border-color 0.12s;
 	}
 	.section:hover {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 		color: #cbd5e1;
 	}
 	.section.active {
-		background: rgba(251, 146, 60, 0.1);
-		border-color: rgba(251, 146, 60, 0.5);
+		background: rgba(var(--amber-rgb), 0.1);
+		border-color: rgba(var(--amber-rgb), 0.5);
 		color: #f8fafc;
 		font-weight: 600;
 	}
@@ -146,12 +146,12 @@
 		transition: background 0.12s, color 0.12s, border-color 0.12s;
 	}
 	.block:hover {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 		color: #cbd5e1;
 	}
 	.block.active {
-		background: rgba(251, 146, 60, 0.12);
-		border-color: rgba(251, 146, 60, 0.45);
+		background: rgba(var(--amber-rgb), 0.12);
+		border-color: rgba(var(--amber-rgb), 0.45);
 		color: #f8fafc;
 		font-weight: 600;
 	}

@@ -247,10 +247,10 @@
 	}
 	.ss-save-btn {
 		padding: 5px 10px;
-		background: rgba(251, 146, 60, 0.1);
-		border: 1px solid rgba(251, 146, 60, 0.4);
+		background: rgba(var(--amber-rgb), 0.1);
+		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 3px;
-		color: #fb923c;
+		color: var(--amber);
 		font-size: 11px;
 		font-weight: 500;
 		cursor: pointer;
@@ -274,7 +274,7 @@
 	}
 	.ss-share:hover {
 		border-color: #334155;
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.ss-divider {
 		height: 1px;
@@ -311,7 +311,7 @@
 		font-family: inherit;
 	}
 	.ss-load:hover {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 	}
 	.ss-name {
 		font-weight: 500;
@@ -332,7 +332,7 @@
 		font-size: 11px;
 	}
 	.ss-icon:hover {
-		color: #fb923c;
+		color: var(--amber);
 	}
 
 	.ss-toast {
@@ -340,7 +340,7 @@
 		bottom: -32px;
 		right: 0;
 		padding: 6px 12px;
-		background: #fb923c;
+		background: var(--amber);
 		color: #0a0e18;
 		border-radius: 4px;
 		font-size: 11px;

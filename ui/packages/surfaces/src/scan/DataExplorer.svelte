@@ -275,7 +275,7 @@
 		padding: 4px 8px;
 	}
 	.de-close:hover {
-		color: #fb923c;
+		color: var(--amber);
 	}
 
 	.de-body {
@@ -313,9 +313,9 @@
 		border-color: #1e2433;
 	}
 	.de-tab.active {
-		background: rgba(251, 146, 60, 0.1);
-		border-color: rgba(251, 146, 60, 0.4);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.1);
+		border-color: rgba(var(--amber-rgb), 0.4);
+		color: var(--amber);
 		font-weight: 600;
 	}
 	.de-tab-icon {
@@ -325,7 +325,7 @@
 		color: #94a3b8;
 	}
 	.de-tab.active .de-tab-icon {
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.de-tab-label {
 		flex: 1;
@@ -342,7 +342,7 @@
 		animation: pulse 1.4s ease-in-out infinite;
 	}
 	.de-tab.active .de-tab-count {
-		color: #fb923c;
+		color: var(--amber);
 	}
 
 	.de-main {

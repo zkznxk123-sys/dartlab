@@ -328,7 +328,7 @@
 						y1={sy}
 						x2={tx}
 						y2={ty}
-						stroke={l.amount ? '#fbbf24' : '#fb923c'}
+						stroke={l.amount ? '#fbbf24' : '#ec4899'}
 						stroke-width={edgeWidth(l)}
 						stroke-linecap="round"
 						opacity={edgeConnected(l) ? (hovered ? 0.95 : 0.55) : 0.08}

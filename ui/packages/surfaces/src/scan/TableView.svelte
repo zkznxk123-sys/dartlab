@@ -307,7 +307,7 @@
 		color: #64748b;
 	}
 	.tv-search-wrap:focus-within {
-		border-color: #fb923c;
+		border-color: var(--amber);
 	}
 	.tv-search {
 		width: 160px;
@@ -332,8 +332,8 @@
 		font-family: inherit;
 	}
 	.tv-btn:hover:not(:disabled) {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--amber);
+		color: var(--amber);
 	}
 	.tv-btn:disabled {
 		opacity: 0.4;
@@ -365,10 +365,10 @@
 		gap: 5px;
 		padding: 5px 8px;
 		font-size: 10px;
-		background: rgba(251, 146, 60, 0.08);
-		border: 1px solid rgba(251, 146, 60, 0.3);
+		background: rgba(var(--amber-rgb), 0.08);
+		border: 1px solid rgba(var(--amber-rgb), 0.3);
 		border-radius: 3px;
-		color: #fb923c;
+		color: var(--amber);
 		cursor: pointer;
 		font-family: inherit;
 		margin-bottom: 4px;
@@ -387,7 +387,7 @@
 		background: rgba(255, 255, 255, 0.04);
 	}
 	.tv-cols-item input {
-		accent-color: #fb923c;
+		accent-color: var(--amber);
 	}
 
 	.tv-body {
@@ -460,11 +460,11 @@
 		justify-content: flex-end;
 	}
 	.th-btn:hover .th-name {
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.th-arr {
 		font-size: 9px;
-		color: #fb923c;
+		color: var(--amber);
 	}
 
 	tbody td {
@@ -487,7 +487,7 @@
 		background: rgba(255, 255, 255, 0.02);
 	}
 	tbody tr:focus-visible {
-		outline: 1px solid #fb923c;
+		outline: 1px solid var(--amber);
 		outline-offset: -1px;
 	}
 </style>

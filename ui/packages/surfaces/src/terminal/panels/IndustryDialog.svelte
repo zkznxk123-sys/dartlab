@@ -242,7 +242,7 @@
 <style>
 	.indModal { width: min(660px, 92vw); max-height: 86vh; }
 	.indBack { background: none; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; color: #c2cad6; font-size: 10px; padding: 1px 7px; cursor: pointer; }
-	.indBack:hover { color: var(--dl-ink, #c8cfdb); border-color: var(--amber, #fb923c); }
+	.indBack:hover { color: var(--dl-ink, #c8cfdb); border-color: var(--amber, var(--amber)); }
 	.indWho { font-size: 12px; font-weight: 700; color: var(--dl-ink, #c8cfdb); }
 	.indWho i { font-style: normal; font-weight: 400; margin-left: 7px; font-size: 10px; color: #c2cad6; }
 	.indLens { font-size: 10px; color: #c2cad6; font-style: italic; }
@@ -271,7 +271,7 @@
 	.indMemHd > span { font-size: 9px; color: #c2cad6; }
 	.indMemSort { background: none; border: 0; color: #c2cad6; cursor: pointer; font-size: 9px; text-align: right; padding: 0; font-family: inherit; }
 	.indMemSort:hover { color: var(--dl-ink, #c8cfdb); }
-	.indMemSort.on { color: var(--amber, #fb923c); }
+	.indMemSort.on { color: var(--amber, var(--amber)); }
 	.indMemSort i { font-style: normal; }
 	.indMGrHd { text-align: center; }
 	.indMemRow { background: none; border: 0; border-bottom: 1px solid var(--dl-line, #1b2130); cursor: pointer; }
@@ -284,14 +284,14 @@
 	.indMGr.up { color: #3fb950; } .indMGr.good { color: #6fbf73; } .indMGr.neutral { color: #8b93a0; } .indMGr.warn { color: #d29922; } .indMGr.down { color: #f85149; }
 	/* 뷰 토글 + 순위표(보조) */
 	.indLensRow { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; align-items: center; }
-	.indViewTog { display: inline-flex; border: 1px solid var(--amber, #fb923c); border-radius: 4px; overflow: hidden; margin-right: 4px; }
+	.indViewTog { display: inline-flex; border: 1px solid var(--amber, var(--amber)); border-radius: 4px; overflow: hidden; margin-right: 4px; }
 	.indVBtn { font-size: 10px; padding: 3px 11px; border: 0; border-left: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.05); color: #aab2bf; cursor: pointer; transition: background 0.12s, color 0.12s; }
 	.indVBtn:first-child { border-left: 0; }
 	.indVBtn:hover { color: var(--dl-ink, #c8cfdb); background: rgba(255, 255, 255, 0.1); }
-	.indVBtn.on { color: var(--amber, #fb923c); background: color-mix(in srgb, var(--amber, #fb923c) 22%, transparent); font-weight: 700; }
+	.indVBtn.on { color: var(--amber, var(--amber)); background: color-mix(in srgb, var(--amber, var(--amber)) 22%, transparent); font-weight: 700; }
 	.indLensBtn { font-size: 10px; padding: 2px 9px; border-radius: 3px; border: 1px solid var(--dl-line, #2a3142); background: rgba(255, 255, 255, 0.02); color: #c2cad6; cursor: pointer; }
 	.indLensBtn:hover { color: var(--dl-ink, #c8cfdb); }
-	.indLensBtn.on { color: var(--amber, #fb923c); border-color: color-mix(in srgb, var(--amber, #fb923c) 55%, transparent); background: color-mix(in srgb, var(--amber, #fb923c) 12%, transparent); }
+	.indLensBtn.on { color: var(--amber, var(--amber)); border-color: color-mix(in srgb, var(--amber, var(--amber)) 55%, transparent); background: color-mix(in srgb, var(--amber, var(--amber)) 12%, transparent); }
 	.indLand { display: flex; flex-direction: column; margin-bottom: 10px; max-height: 56vh; overflow-y: auto; }
 	.indLandRow { display: grid; grid-template-columns: 18px 96px 1fr 56px 26px; align-items: center; gap: 9px; padding: 2px 4px; background: none; border: 0; border-bottom: 1px solid var(--dl-line, #1b2130); cursor: pointer; text-align: left; }
 	.indLandRow:hover { background: var(--dl-bg-overlay, rgba(255, 255, 255, 0.04)); }

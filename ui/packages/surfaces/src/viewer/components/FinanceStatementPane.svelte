@@ -335,9 +335,9 @@
 		color: #cbd5e1;
 	}
 	.tab.active {
-		background: rgba(251, 146, 60, 0.12);
-		border-color: rgba(251, 146, 60, 0.5);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.12);
+		border-color: rgba(var(--amber-rgb), 0.5);
+		color: var(--amber);
 		font-weight: 600;
 	}
 	.seg {
@@ -361,8 +361,8 @@
 		color: #cbd5e1;
 	}
 	.seg-btn.active {
-		background: rgba(251, 146, 60, 0.14);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.14);
+		color: var(--amber);
 		font-weight: 600;
 	}
 	.body {
@@ -388,7 +388,7 @@
 		width: 26px;
 		height: 26px;
 		border: 2px solid var(--fin-bd, #1e2433);
-		border-top-color: #fb923c;
+		border-top-color: var(--amber);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}

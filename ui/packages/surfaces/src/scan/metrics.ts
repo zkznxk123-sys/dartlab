@@ -29,7 +29,7 @@ export const GROUP_META: Record<MetricGroup, { label: string; color: string }> =
 	governance: { label: '거버넌스', color: '#a78bfa' },
 	quality: { label: '이익질', color: '#fbbf24' },
 	workforce: { label: '인적', color: '#f472b6' },
-	changes: { label: '변화', color: '#fb923c' },
+	changes: { label: '변화', color: '#ec4899' },
 	financeIncome: { label: '손익계산서', color: '#38bdf8' },
 	financeBalance: { label: '재무상태표', color: '#22d3ee' },
 	financeCashflow: { label: '현금흐름', color: '#34d399' },

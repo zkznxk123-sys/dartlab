@@ -149,7 +149,7 @@
 					h,
 					color: shockMap.size > 0
 						? (shockMap.has(leaf.data.id)
-							? (shockMap.get(leaf.data.id)! > 0.5 ? '#ef4444' : shockMap.get(leaf.data.id)! > 0.1 ? '#fb923c' : '#fbbf24')
+							? (shockMap.get(leaf.data.id)! > 0.5 ? '#ef4444' : shockMap.get(leaf.data.id)! > 0.1 ? '#ec4899' : '#fbbf24')
 							: '#1e293b')
 						: colorMetric === 'industry'
 							? leaf.data._node.color  // 산업 팔레트는 타임라인 모드에서도 원본 유지

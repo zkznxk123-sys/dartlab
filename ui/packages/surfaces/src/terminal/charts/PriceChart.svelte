@@ -301,8 +301,8 @@
 		indicator: { tooltip: { text: { color: '#8b919e', size: 10, family: CHART_FONT } } },
 		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
 		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
-		separator: { color: '#222b3a', fill: true, activeBackgroundColor: 'rgba(251,146,60,0.1)' },
-		crosshair: { horizontal: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } }, vertical: { line: { color: 'rgba(251,146,60,0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } } }
+		separator: { color: '#222b3a', fill: true, activeBackgroundColor: 'rgba(var(--amber-rgb),0.1)' },
+		crosshair: { horizontal: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } }, vertical: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } } }
 	});
 
 	// 보조 페인 높이 — 컨테이너 비례(16%) 적응. 전체화면 진입 시 78px 고정 납작 페인 방지.
@@ -776,9 +776,9 @@
 			// 공시 시점 = dartlab 고유 강점. 비정기 material 공시(disclosure)는 cyan, 실적·증자(report·capital)는 orange.
 			// url 보유 마커는 클릭 시 해당 DART 공시를 새 탭으로 — 가격차트가 곧 네비게이션 가능한 공시 타임라인.
 			const disc = ev.kind === 'disclosure';
-			const fg = disc ? '#22d3ee' : '#fb923c';
-			const bg = disc ? 'rgba(34,211,238,0.12)' : 'rgba(251,146,60,0.12)';
-			const bd = disc ? 'rgba(34,211,238,0.5)' : 'rgba(251,146,60,0.5)';
+			const fg = disc ? '#22d3ee' : '#ec4899';
+			const bg = disc ? 'rgba(34,211,238,0.12)' : 'rgba(var(--amber-rgb),0.12)';
+			const bd = disc ? 'rgba(34,211,238,0.5)' : 'rgba(var(--amber-rgb),0.5)';
 			const evUrl = ev.url;
 			const id = c.createOverlay({
 				name: 'simpleAnnotation',
@@ -1415,7 +1415,7 @@
 	}
 	/* 정기보고서(사업/반기/분기) 포함 날짜 — 한눈에 찾도록 amber 링 (캔들 실적 마커와 같은 계열색) */
 	.discDot.hasReg {
-		box-shadow: 0 0 0 1.5px rgba(251, 146, 60, 0.7);
+		box-shadow: 0 0 0 1.5px rgba(var(--amber-rgb), 0.7);
 	}
 	/* 뉴스 포함 날짜 — teal 배경(공시 회색과 구분). hasReg 와 조합 시 amber 링 + teal 점(공시·뉴스 공존 표시). */
 	.discDot.hasNews {
@@ -1464,8 +1464,8 @@
 	.discTipTag {
 		display: inline-block;
 		font-size: 8px;
-		color: #fb923c;
-		border: 1px solid rgba(251, 146, 60, 0.5);
+		color: var(--amber);
+		border: 1px solid rgba(var(--amber-rgb), 0.5);
 		border-radius: 2px;
 		padding: 0 3px;
 		margin-right: 4px;

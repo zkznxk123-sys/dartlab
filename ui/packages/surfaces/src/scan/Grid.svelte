@@ -535,7 +535,7 @@
 	}
 	.sort-arr {
 		font-size: 9px;
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.sort-rank {
 		display: inline-flex;
@@ -543,9 +543,9 @@
 		justify-content: center;
 		width: 14px;
 		height: 14px;
-		border: 1px solid rgba(251, 146, 60, 0.5);
+		border: 1px solid rgba(var(--amber-rgb), 0.5);
 		border-radius: 50%;
-		color: #fb923c;
+		color: var(--amber);
 		font-size: 9px;
 		font-weight: 700;
 	}
@@ -573,10 +573,10 @@
 		background: color-mix(in srgb, var(--row-tint, #94a3b8) 10%, rgba(255, 255, 255, 0.02));
 	}
 	.row.selected {
-		background: color-mix(in srgb, var(--row-tint, #fb923c) 14%, rgba(251, 146, 60, 0.06));
+		background: color-mix(in srgb, var(--row-tint, var(--amber)) 14%, rgba(var(--amber-rgb), 0.06));
 	}
 	.row:focus-visible {
-		outline: 1px solid #fb923c;
+		outline: 1px solid var(--amber);
 		outline-offset: -1px;
 	}
 
@@ -667,7 +667,7 @@
 		text-align: left;
 	}
 	.company-link:hover .company-name {
-		color: #fb923c;
+		color: var(--amber);
 		text-decoration: underline;
 	}
 	.market-tag {

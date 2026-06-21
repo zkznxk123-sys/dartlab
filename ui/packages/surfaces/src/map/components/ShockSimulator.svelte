@@ -136,7 +136,7 @@
 
 	<div class="shock-legend">
 		<span class="dot" style="background:#ef4444"></span> 중심
-		<span class="dot" style="background:#fb923c"></span> 1홉
+		<span class="dot" style="background:var(--amber)"></span> 1홉
 		<span class="dot" style="background:#fbbf24"></span> 2홉
 		<span class="dot" style="background:var(--color-dl-text-dim)"></span> 무관
 	</div>
@@ -263,8 +263,8 @@
 		color: var(--color-dl-text-dim);
 	}
 	.shock-hop.hop1 {
-		background: rgba(251, 146, 60, 0.15);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.15);
+		color: var(--amber);
 	}
 	.shock-hop.hop2 {
 		background: rgba(251, 191, 36, 0.15);

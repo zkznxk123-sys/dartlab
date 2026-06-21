@@ -234,7 +234,7 @@
 		transition: background 0.1s;
 	}
 	.item.active {
-		background: rgba(251, 146, 60, 0.08);
+		background: rgba(var(--amber-rgb), 0.08);
 	}
 	.cat-bar {
 		width: 3px;
@@ -254,7 +254,7 @@
 		color: #f1f5f9;
 	}
 	.item.active .item-title {
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.item-sub {
 		font-size: 10px;

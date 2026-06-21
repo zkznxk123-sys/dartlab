@@ -295,7 +295,7 @@
 								<text x={x(i, isData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="9">{d.label}</text>
 							{/each}
 							{#if isOpPath}<path d={isOpPath} fill="none" stroke="#22c55e" stroke-width="2.2" />{/if}
-							{#if isNetPath}<path d={isNetPath} fill="none" stroke="#fb923c" stroke-width="2" stroke-dasharray="4 3" />{/if}
+							{#if isNetPath}<path d={isNetPath} fill="none" stroke="#ec4899" stroke-width="2" stroke-dasharray="4 3" />{/if}
 							{#each isData as d, i}
 								{#if typeof d.op === 'number'}
 									<circle
@@ -319,7 +319,7 @@
 										cx={x(i, isData.length)}
 										cy={ySigned(d.net, profitMax)}
 										r="2.7"
-										fill="#fb923c"
+										fill="#ec4899"
 										onmouseenter={(e) =>
 											showHover(e, `IS ${d.label}`, [
 												`매출 ${fmtAmount(numAt(d, 'sales'))}`,
@@ -577,16 +577,16 @@
 	.viewer-btn {
 		flex-shrink: 0;
 		font-size: 10px;
-		color: #fb923c;
-		border: 1px solid rgba(251, 146, 60, 0.4);
+		color: var(--amber);
+		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 4px;
 		padding: 2px 7px;
 		text-decoration: none;
 		white-space: nowrap;
 	}
 	.viewer-btn:hover {
-		background: rgba(251, 146, 60, 0.12);
-		border-color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.12);
+		border-color: var(--amber);
 	}
 	.mini-chart {
 		min-width: 0;
@@ -626,7 +626,7 @@
 	}
 	.b { background: #2563eb; }
 	.g { background: #22c55e; }
-	.o { background: #fb923c; }
+	.o { background: var(--amber); }
 	.r { background: #ef4444; }
 	.p { background: #a78bfa; }
 	.t { background: #14b8a6; }
@@ -726,7 +726,7 @@
 		text-decoration: none;
 	}
 	.filing-row:hover {
-		background: rgba(251, 146, 60, 0.06);
+		background: rgba(var(--amber-rgb), 0.06);
 	}
 	.filing-title {
 		color: #f1f5f9;

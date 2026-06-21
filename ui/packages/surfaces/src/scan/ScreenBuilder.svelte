@@ -376,10 +376,10 @@
 	}
 	.sb-apply, .preset-row button, .add-row {
 		height: 28px;
-		border: 1px solid rgba(251, 146, 60, 0.45);
+		border: 1px solid rgba(var(--amber-rgb), 0.45);
 		border-radius: 4px;
-		background: rgba(251, 146, 60, 0.08);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.08);
+		color: var(--amber);
 		font-size: 11px;
 		font-family: inherit;
 		cursor: pointer;

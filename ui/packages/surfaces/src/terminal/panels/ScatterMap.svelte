@@ -158,13 +158,13 @@
 	.sm-mini .smSvg { max-height: none; }
 	.smAx { stroke: var(--dl-line, #2a3142); stroke-width: 1; }
 	.smZero { stroke: color-mix(in srgb, var(--dl-ink, #c8cfdb) 20%, transparent); stroke-width: 1; stroke-dasharray: 1 3; }
-	.smCross { stroke: color-mix(in srgb, var(--amber, #fb923c) 24%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
+	.smCross { stroke: color-mix(in srgb, var(--amber, var(--amber)) 24%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
 	.smDot { cursor: pointer; outline: none; }
 	.smC { stroke-width: 1; transition: fill 0.12s; }
 	.smC.faint { opacity: 0.4; }
 	.smDot.on .smC { fill-opacity: 0.95 !important; }
-	.smHiRing { fill: none; stroke: var(--amber, #fb923c); stroke-width: 1.3; }
-	.smDot:focus-visible .smC { stroke: var(--amber, #fb923c); stroke-width: 2; }
+	.smHiRing { fill: none; stroke: var(--amber, var(--amber)); stroke-width: 1.3; }
+	.smDot:focus-visible .smC { stroke: var(--amber, var(--amber)); stroke-width: 2; }
 	.smCtop { fill: none; stroke-width: 2; }
 	.smLbl { fill: #c2cad6; font-size: 11px; pointer-events: none; }
 	.sm-mini .smLbl { font-size: 10px; }
@@ -173,7 +173,7 @@
 	.smTick { fill: #aab2bf; font-size: 9px; }
 	.smInfo { font-size: 10.5px; color: #c2cad6; line-height: 1.45; margin-top: 14px; padding: 0 2px; min-height: 26px; }
 	.smInfo b { color: #f0f3f7; }
-	.smInfo em { font-style: normal; color: var(--amber, #fb923c); }
+	.smInfo em { font-style: normal; color: var(--amber, var(--amber)); }
 	.smEmpty { font-size: 10px; color: #aab2bf; padding: 12px; text-align: center; }
 	.smTrail { stroke-width: 1.3; stroke-opacity: 0.42; stroke-linejoin: round; stroke-linecap: round; }
 	.smTrailDot { opacity: 0.5; }

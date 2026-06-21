@@ -715,7 +715,7 @@
 		border-radius: 2px;
 	}
 	.legend-swatch.flow {
-		background: #fb923c;
+		background: var(--amber);
 	}
 	.legend-swatch.node {
 		background: linear-gradient(to right, #0ea5e9, #f97316);

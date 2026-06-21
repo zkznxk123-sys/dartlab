@@ -615,7 +615,7 @@
 		color: #94a3b8;
 		cursor: pointer;
 	}
-	.ad-x:hover { border-color: rgba(251, 146, 60, 0.5); color: #fb923c; }
+	.ad-x:hover { border-color: rgba(var(--amber-rgb), 0.5); color: var(--amber); }
 	.ad-scroll {
 		flex: 1 1 auto;
 		min-height: 0;
@@ -636,7 +636,7 @@
 		max-width: 92%;
 		padding: 8px 11px;
 		border-radius: 12px 12px 3px 12px;
-		background: rgba(251, 146, 60, 0.14);
+		background: rgba(var(--amber-rgb), 0.14);
 		color: #fde7cf;
 	}
 	.msg.bot {
@@ -665,7 +665,7 @@
 	.gen.err { color: #f87171; }
 	.dot { width: 7px; height: 7px; border-radius: 50%; background: #38bdf8; animation: pulse 1s ease-in-out infinite; }
 	@keyframes pulse { 50% { opacity: 0.3; } }
-	.cite { margin-top: 6px; color: #fb923c; font-size: 11px; }
+	.cite { margin-top: 6px; color: var(--amber); font-size: 11px; }
 	.ev-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 	.ev-chip {
 		max-width: 100%;
@@ -681,7 +681,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	.ev-chip:hover { border-color: rgba(251, 146, 60, 0.55); color: #fb923c; }
+	.ev-chip:hover { border-color: rgba(var(--amber-rgb), 0.55); color: var(--amber); }
 	.ev-chip.on { border-color: rgba(52, 211, 153, 0.6); color: #34d399; background: rgba(52, 211, 153, 0.1); }
 	.ollama-pick { justify-content: center; }
 	.ev-chip.stale { border-style: dashed; }
@@ -718,10 +718,10 @@
 	.nav-chip {
 		max-width: 100%;
 		padding: 5px 10px;
-		border: 1px solid rgba(251, 146, 60, 0.55);
+		border: 1px solid rgba(var(--amber-rgb), 0.55);
 		border-radius: 999px;
-		background: rgba(251, 146, 60, 0.1);
-		color: #fb923c;
+		background: rgba(var(--amber-rgb), 0.1);
+		color: var(--amber);
 		font: inherit;
 		font-size: 11px;
 		font-weight: 600;
@@ -730,7 +730,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	.nav-chip:hover { background: rgba(251, 146, 60, 0.2); }
+	.nav-chip:hover { background: rgba(var(--amber-rgb), 0.2); }
 	/* 중앙 온보딩 — 빈 대화 시 아바타 + 모델 영역 + Ollama 영역. 단일 폭(.ob-block)으로 좌우 정렬 일치. */
 	.onboard {
 		margin: auto;
@@ -908,7 +908,7 @@
 		resize: none;
 		outline: none;
 	}
-	.ad-askbox textarea:focus { border-color: #fb923c; }
+	.ad-askbox textarea:focus { border-color: var(--amber); }
 	.ad-send {
 		display: grid;
 		place-items: center;
@@ -917,7 +917,7 @@
 		flex-shrink: 0;
 		border: none;
 		border-radius: 8px;
-		background: #fb923c;
+		background: var(--amber);
 		color: #1a1206;
 		cursor: pointer;
 	}
@@ -935,7 +935,7 @@
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
-	.ollama-link:hover { color: #fb923c; }
+	.ollama-link:hover { color: var(--amber); }
 	/* hidden 상태 가이드 펼치기 토글 — 작은 보조 링크(평소 접힘, 클릭 시 인라인 가이드). */
 	.ob-guide-toggle {
 		padding: 0;
@@ -954,16 +954,16 @@
 	.ollama-diag { color: #fdba74; font-size: 10.5px; line-height: 1.5; text-align: center; }
 	.retry {
 		padding: 5px 12px;
-		border: 1px solid rgba(251, 146, 60, 0.4);
+		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 7px;
-		background: rgba(251, 146, 60, 0.08);
+		background: rgba(var(--amber-rgb), 0.08);
 		color: #fdba74;
 		font: inherit;
 		font-size: 11px;
 		font-weight: 600;
 		cursor: pointer;
 	}
-	.retry:hover { background: rgba(251, 146, 60, 0.18); }
+	.retry:hover { background: rgba(var(--amber-rgb), 0.18); }
 	/* 인라인 설치 가이드 — 컨테이너 폭(최대 300px) 안에서 줄바꿈, 좌측 정렬. 절대배치/280px 툴팁 폐기로 클리핑 0. */
 	.ob-guide {
 		width: 100%;

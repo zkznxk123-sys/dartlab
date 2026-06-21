@@ -35,7 +35,7 @@
 
 	const focusId = $derived(slots[focus]?.id ?? slots[0]?.id);
 	const result = $derived(pf.slots.find((s) => s.id === focusId)?.result ?? pf.slots[0].result);
-	const stratColor = $derived(slots.find((s) => s.id === focusId)?.color ?? '#fb923c');
+	const stratColor = $derived(slots.find((s) => s.id === focusId)?.color ?? '#ec4899');
 	const combo = $derived(pf.combo);
 	const multi = $derived(pf.slots.length >= 2);
 	const metaOf = (id: string) => slots.find((s) => s.id === id);
@@ -380,7 +380,7 @@
 <style>
 	.btReport { display: flex; flex-direction: column; gap: 10px; padding: 4px 2px 14px; }
 	.brHead { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
-	.brMark { width: 4px; height: 18px; border-radius: 2px; background: var(--amber, #fb923c); }
+	.brMark { width: 4px; height: 18px; border-radius: 2px; background: var(--amber, var(--amber)); }
 	.brTitle { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: var(--dl-ink, #c8cfdb); }
 	.brScope { font-size: 10.5px; color: var(--dim, #8b94a3); border: 1px solid var(--dl-line, #1b2130); border-radius: 9px; padding: 1px 8px; }
 	.brHeadline { margin-left: auto; display: flex; align-items: baseline; gap: 8px; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -397,29 +397,29 @@
 	.brEv { font-size: 11.5px; font-weight: 700; padding: 1px 9px; border-radius: 4px; }
 	.brEv.evUp { color: var(--up, #34d399); background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.35); }
 	.brEv.evMid { color: #aeb6c2; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--dl-line, #1b2130); }
-	.brEv.evDn { color: var(--amber, #fb923c); background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.4); }
+	.brEv.evDn { color: var(--amber, var(--amber)); background: rgba(var(--amber-rgb), 0.1); border: 1px solid rgba(var(--amber-rgb), 0.4); }
 	.brStamp { font-size: 11px; color: #8b94a3; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 0 6px; }
-	.brWarn { font-size: 11px; color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.35); border-radius: 3px; padding: 0 6px; }
+	.brWarn { font-size: 11px; color: var(--amber, var(--amber)); border: 1px solid rgba(var(--amber-rgb), 0.35); border-radius: 3px; padding: 0 6px; }
 	.brBanner { font-size: 11px; border-radius: 4px; padding: 6px 11px; line-height: 1.5; }
 	.brBanner.mag { color: #cbb4f5; background: rgba(232, 121, 249, 0.07); border: 1px solid rgba(232, 121, 249, 0.25); }
-	.brBanner.lag { color: #fbbf77; background: rgba(251, 146, 60, 0.08); border: 1px solid rgba(251, 146, 60, 0.3); }
+	.brBanner.lag { color: #fbbf77; background: rgba(var(--amber-rgb), 0.08); border: 1px solid rgba(var(--amber-rgb), 0.3); }
 	/* G3 체리피킹 대조 — 이 구간 vs 전체 기간 병기(표본운 구조적 자백). */
-	.brBanner.cherry { color: #d7c4a8; background: rgba(251, 146, 60, 0.06); border: 1px solid rgba(251, 146, 60, 0.28); display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
+	.brBanner.cherry { color: #d7c4a8; background: rgba(var(--amber-rgb), 0.06); border: 1px solid rgba(var(--amber-rgb), 0.28); display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
 	.brBanner.cherry i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 11px; }
-	.brCherryFlag { flex-basis: 100%; color: var(--amber, #fb923c); font-size: 11px; }
+	.brCherryFlag { flex-basis: 100%; color: var(--amber, var(--amber)); font-size: 11px; }
 	.brHero { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 	.brCard { display: flex; flex-direction: column; gap: 2px; padding: 9px 11px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; }
 	/* 히어로 카드 #1 = 보유 대비 초과수익 — 백테스트의 진짜 답. 앰버 좌측 액센트 + 가장 큰 숫자(CAGR 압도 차단). */
-	.brCard.hero { border-left: 3px solid var(--amber, #fb923c); background: rgba(251, 146, 60, 0.04); }
+	.brCard.hero { border-left: 3px solid var(--amber, var(--amber)); background: rgba(var(--amber-rgb), 0.04); }
 	.brCard.hero > b { font-size: 27px; }
-	.brCard.hero > span { color: var(--amber, #fb923c); font-weight: 600; }
+	.brCard.hero > span { color: var(--amber, var(--amber)); font-weight: 600; }
 	.brCard > span { font-size: 11px; color: var(--dim, #8b94a3); }
 	.brCard > b { font-size: 21px; font-weight: 700; line-height: 1.1; color: var(--dl-ink, #c8cfdb); font-variant-numeric: tabular-nums; }
 	.brCard > em { font-style: normal; font-size: 11px; color: var(--dimmer, #5b6573); font-family: var(--dl-font-mono, monospace); }
 	/* 상세 통계 토글 — 무거운 tearsheet 접힘(매매표 선두 유지). */
 	.brTearToggle { width: 100%; text-align: left; font-size: 11.5px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; padding: 7px 11px; cursor: pointer; font-family: inherit; color: #aeb6c2; }
 	.brTearToggle:hover { border-color: #2a3142; color: var(--dl-ink, #c8cfdb); }
-	.brTearCaret { color: var(--amber, #fb923c); font-weight: 700; margin-right: 4px; }
+	.brTearCaret { color: var(--amber, var(--amber)); font-weight: 700; margin-right: 4px; }
 	.brSec { display: flex; flex-direction: column; gap: 7px; }
 	.brSecHd { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: #aeb6c2; text-transform: uppercase; display: flex; align-items: center; gap: 9px; }
 	.brN { font-family: var(--dl-font-mono, monospace); font-size: 11px; color: var(--dimmer, #5b6573); font-weight: 400; }
@@ -453,7 +453,7 @@
 	.brRowT { cursor: pointer; }
 	.brRowT:hover td { background: rgba(96, 165, 250, 0.1); }
 	/* 역 hover-sync — 차트 crosshair 가 이 거래봉 위면 행 강조(앰버=crosshair 색). 차트↔표 루프 완성. */
-	.brRowT.hl td { background: rgba(251, 146, 60, 0.16); }
+	.brRowT.hl td { background: rgba(var(--amber-rgb), 0.16); }
 	.brEmpty { font-size: 11px; color: var(--dimmer, #5b6573); padding: 14px; text-align: center; }
 	/* 청산사유 분해 — 사유별 건수+평균손익 막대(신규 통계 0, exitReason 표면화). */
 	.brExit { display: flex; flex-direction: column; gap: 3px; padding: 5px 9px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; }
@@ -467,7 +467,7 @@
 	.brExitAvg { flex: 0 0 56px; text-align: right; font-weight: 700; }
 	.brAssume { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
 	.brAssume li { font-size: 11.5px; color: #aeb6c2; line-height: 1.5; }
-	.brAssume li.warn { color: var(--amber, #fb923c); }
+	.brAssume li.warn { color: var(--amber, var(--amber)); }
 	.brSpec { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: #8b94a3; margin-top: 4px; }
 	.brFoot { font-size: 11px; color: var(--dimmer, #5b6573); margin-top: 6px; line-height: 1.5; }
 	.tUp { color: var(--up, #34d399); }

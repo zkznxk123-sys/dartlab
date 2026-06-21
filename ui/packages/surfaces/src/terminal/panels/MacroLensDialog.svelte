@@ -842,7 +842,7 @@
 	.mlTabs button { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-height: 28px; line-height: 1; white-space: nowrap; box-sizing: border-box; border: 1px solid transparent; border-bottom: 0; background: rgba(255,255,255,.012); color: var(--dl-ink-muted, #7b8493); font-size: 11px; font-weight: 800; padding: 7px 11px; cursor: pointer; border-radius: 5px 5px 0 0; }
 	.mlTabs button:hover { color: var(--amber); }
 	.mlTabs button.active { color: var(--dl-ink); border-color: var(--dl-line, #1b2130); background: var(--dl-bg-raised, #0e141f); box-shadow: inset 0 2px 0 var(--amber); }
-	.mlAlwaysNote { padding: 6px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); color: var(--dl-ink-dim, #5b6473); background: rgba(251,146,60,.035); font-size: 10.5px; line-height: 1.4; }
+	.mlAlwaysNote { padding: 6px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); color: var(--dl-ink-dim, #5b6473); background: rgba(var(--amber-rgb),.035); font-size: 10.5px; line-height: 1.4; }
 	.mlAlwaysNote.inline { border-bottom: 0; border-radius: 5px; background: transparent; padding: 0 2px; }
 	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 	.mlGrid { display: grid; gap: 10px; }
@@ -852,6 +852,8 @@
 	/* 블록 A·B·D 스트립 (테두리 없음) */
 	.mlPhaseStrip, .mlPulseStrip, .mlGateStrip { display: grid; gap: 8px; }
 	.mlPhaseStrip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	/* Driver Pulse — 데스크톱 가로 스트립(최대 6개 한 줄). 누락 시 단일 컬럼으로 붕괴되어 Map 을 화면 밖으로 밀어냄. */
+	.mlPulseStrip { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
 	.mlPhaseStrip div, .mlGate, .mlPulse { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
 	.mlPhaseStrip span, .mlGate span, .mlPulse span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	.mlPhaseStrip b, .mlGate b, .mlPulse b { display: block; margin-top: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
@@ -902,7 +904,7 @@
 	.mlBandSpark { flex: 1 1 auto; height: 18px; min-width: 0; }
 	.mlBandSpark polyline { fill: none; stroke: var(--amber); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
 	.mlPulse { color: var(--dl-ink); text-align: left; cursor: pointer; }
-	.mlPulse:hover, .mlPulse.on { border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.045); }
+	.mlPulse:hover, .mlPulse.on { border-color: rgba(var(--amber-rgb),.55); background: rgba(var(--amber-rgb),.045); }
 	.mlPulse:disabled { cursor: not-allowed; opacity: .5; }
 	.mlPulse b { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
 	.mlPulse svg { width: 100%; height: 20px; margin-top: 5px; overflow: visible; }
@@ -953,7 +955,7 @@
 	.mlDashGate { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr); gap: 10px; align-items: start; }
 	.mlGateStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.mlGate.ok { border-color: rgba(52,211,153,.42); }
-	.mlGate.watch { border-color: rgba(251,146,60,.42); }
+	.mlGate.watch { border-color: rgba(var(--amber-rgb),.42); }
 	.mlGate.blocked { border-color: rgba(248,113,113,.42); }
 	.mlGate.ok b { color: var(--up); }
 	.mlGate.watch b { color: var(--warn); }
@@ -965,9 +967,9 @@
 	.mlRailTitle em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
 	.mlRailRows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
 	.mlRailItem { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.015); color: var(--dl-ink); text-align: left; padding: 7px; cursor: pointer; }
-	.mlRailItem:hover, .mlRailItem.focused { border-color: rgba(251,146,60,.55); background: rgba(251,146,60,.04); }
+	.mlRailItem:hover, .mlRailItem.focused { border-color: rgba(var(--amber-rgb),.55); background: rgba(var(--amber-rgb),.04); }
 	.mlRailItem.fresh { border-color: rgba(52,211,153,.28); }
-	.mlRailItem.watch, .mlRailItem.unknown { border-color: rgba(251,146,60,.36); }
+	.mlRailItem.watch, .mlRailItem.unknown { border-color: rgba(var(--amber-rgb),.36); }
 	.mlRailItem.stale { border-color: rgba(248,113,113,.42); }
 	.mlRailItem span, .mlRailItem b, .mlRailItem em, .mlRailItem i { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlRailItem span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .04em; }
@@ -976,7 +978,7 @@
 	/* 경로 탭 drilldown */
 	.mlBlock, .mlEdge, .mlScenario, .mlFocus { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 10px; min-width: 0; }
 	.mlDrill { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.25fr; gap: 8px; }
-	.mlDrillCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(251,146,60,.035); padding: 9px; }
+	.mlDrillCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(var(--amber-rgb),.035); padding: 9px; }
 	.mlDrillCard b { display: block; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 	.mlDrillCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
 	.mlDrillCard em { display: block; margin-top: 5px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9.5px; line-height: 1.3; overflow-wrap: anywhere; }
@@ -987,17 +989,17 @@
 	.mlStackTrack { height: 7px; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; overflow: hidden; background: rgba(255,255,255,.025); }
 	.mlStackFill { display: block; height: 100%; border-radius: 999px; background: var(--dl-ink-dim, #5b6473); }
 	.mlStackFill.ok { background: rgba(52,211,153,.72); }
-	.mlStackFill.watch { background: rgba(251,146,60,.72); }
+	.mlStackFill.watch { background: rgba(var(--amber-rgb),.72); }
 	.mlStackFill.blocked { background: rgba(248,113,113,.65); }
 	.mlContributionPanel { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
 	.mlEvidenceBreakdown { display: grid; grid-template-columns: repeat(5, minmax(98px, 1fr)); gap: 6px; margin-top: 8px; overflow-x: auto; padding-bottom: 1px; }
 	.mlEvidenceStep { position: relative; min-width: 0; height: 112px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); overflow: hidden; padding: 7px; }
 	.mlEvidenceStep.ok { border-color: rgba(52,211,153,.36); }
-	.mlEvidenceStep.watch { border-color: rgba(251,146,60,.38); }
+	.mlEvidenceStep.watch { border-color: rgba(var(--amber-rgb),.38); }
 	.mlEvidenceStep.blocked { border-color: rgba(248,113,113,.42); }
 	.mlEvidenceStep i { position: absolute; left: 0; right: 0; bottom: 0; min-height: 4px; opacity: .32; background: var(--dl-ink-dim, #5b6473); }
 	.mlEvidenceStep.ok i { background: rgba(52,211,153,.78); }
-	.mlEvidenceStep.watch i { background: rgba(251,146,60,.76); }
+	.mlEvidenceStep.watch i { background: rgba(var(--amber-rgb),.76); }
 	.mlEvidenceStep.blocked i { background: rgba(248,113,113,.72); }
 	.mlEvidenceStep span, .mlEvidenceStep b, .mlEvidenceStep em, .mlEvidenceStep small, .mlEvidenceStep code { position: relative; z-index: 1; display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlEvidenceStep span { color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 800; }
@@ -1012,25 +1014,25 @@
 	.mlPacketGrid b { display: block; margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
 	.mlCoMovePanel { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.015); padding: 9px; }
 	.mlCoMovePanel.candidate { border-color: rgba(52,211,153,.38); }
-	.mlCoMovePanel.unstable { border-color: rgba(251,146,60,.36); }
+	.mlCoMovePanel.unstable { border-color: rgba(var(--amber-rgb),.36); }
 	.mlCoMovePanel.missing { border-color: rgba(248,113,113,.36); }
 	.mlCorrPlot { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); height: 28px; margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: linear-gradient(90deg, rgba(248,113,113,.06), rgba(255,255,255,.02), rgba(52,211,153,.06)); overflow: hidden; }
 	.mlCorrPlot span { display: flex; align-items: flex-end; padding: 0 5px 3px; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 9px; }
 	.mlCorrPlot span:nth-child(2) { justify-content: center; border-left: 1px solid rgba(255,255,255,.05); border-right: 1px solid rgba(255,255,255,.05); }
 	.mlCorrPlot span:nth-child(3) { justify-content: flex-end; }
-	.mlCorrPlot i { position: absolute; top: 5px; width: 8px; height: 18px; border: 1px solid var(--amber); border-radius: 999px; background: rgba(251,146,60,.35); transform: translateX(-50%); }
+	.mlCorrPlot i { position: absolute; top: 5px; width: 8px; height: 18px; border: 1px solid var(--amber); border-radius: 999px; background: rgba(var(--amber-rgb),.35); transform: translateX(-50%); }
 	.mlScatterPlot { position: relative; height: 126px; margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: linear-gradient(180deg, rgba(52,211,153,.035), rgba(255,255,255,.012) 48%, rgba(248,113,113,.035)); overflow: hidden; }
 	.mlScatterPlot::before { content: ""; position: absolute; inset: 10px 12px 18px 24px; border-left: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); pointer-events: none; }
 	.mlScatterPlot .mlZeroX, .mlScatterPlot .mlZeroY { position: absolute; display: block; pointer-events: none; background: rgba(255,255,255,.12); }
 	.mlScatterPlot .mlZeroX { top: 8px; bottom: 15px; width: 1px; }
 	.mlScatterPlot .mlZeroY { left: 20px; right: 10px; height: 1px; }
 	.mlScatterPlot b { position: absolute; width: 5px; height: 5px; border: 1px solid rgba(148,163,184,.6); border-radius: 999px; background: rgba(148,163,184,.38); transform: translate(-50%, -50%); }
-	.mlScatterPlot b.latest { width: 8px; height: 8px; border-color: var(--amber); background: rgba(251,146,60,.72); box-shadow: 0 0 0 3px rgba(251,146,60,.12); }
+	.mlScatterPlot b.latest { width: 8px; height: 8px; border-color: var(--amber); background: rgba(var(--amber-rgb),.72); box-shadow: 0 0 0 3px rgba(var(--amber-rgb),.12); }
 	.mlAxisLabel { position: absolute; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
 	.mlAxisLabel.x { right: 8px; bottom: 3px; }
 	.mlAxisLabel.y { left: 5px; top: 8px; writing-mode: vertical-rl; transform: rotate(180deg); }
 	.mlCoLimits { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-	.mlCoLimits span { border: 1px solid rgba(251,146,60,.22); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); background: rgba(251,146,60,.025); padding: 2px 7px; font-size: 9px; line-height: 1.25; }
+	.mlCoLimits span { border: 1px solid rgba(var(--amber-rgb),.22); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); background: rgba(var(--amber-rgb),.025); padding: 2px 7px; font-size: 9px; line-height: 1.25; }
 	.mlCoMovePanel p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10px; line-height: 1.35; }
 	.mlBlockTop, .mlEdgeTop { display: flex; align-items: center; gap: 7px; min-width: 0; }
 	.mlBlockK { font-size: 9px; font-weight: 800; color: var(--amber); letter-spacing: .06em; text-transform: uppercase; }
@@ -1044,7 +1046,7 @@
 	.good { color: var(--good); }
 	.warn { color: var(--warn); }
 	.neutral { color: var(--dl-ink-dim, #5b6473); }
-	.mlFocus { display: flex; gap: 8px; align-items: flex-start; border-color: rgba(251,146,60,.38); background: rgba(251,146,60,.06); }
+	.mlFocus { display: flex; gap: 8px; align-items: flex-start; border-color: rgba(var(--amber-rgb),.38); background: rgba(var(--amber-rgb),.06); }
 	.mlFocusIcon { color: var(--amber); flex: 0 0 auto; margin-top: 1px; }
 	.mlFocus div { display: flex; flex-direction: column; gap: 2px; }
 	.mlFocus span { color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
@@ -1053,7 +1055,7 @@
 	.mlDriverHead { font-size: 9px; font-weight: 800; color: var(--dl-ink-dim, #5b6473); background: rgba(255,255,255,.025); letter-spacing: .05em; }
 	.mlDriverRow { font-size: 11px; border-top: 1px solid rgba(255,255,255,.045); }
 	.mlDriverRow.primary { background: rgba(52,211,153,.035); }
-	.mlDriverRow.secondary { background: rgba(251,146,60,.025); }
+	.mlDriverRow.secondary { background: rgba(var(--amber-rgb),.025); }
 	.mlDriverRow.focused, .mlEdge.focused { outline: 1px solid var(--amber); outline-offset: -1px; }
 	.mlDriverName { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
 	.mlDriverName em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1061,12 +1063,12 @@
 	.mlDriverScore em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 8.5px; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlScore { display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 18px; border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; font-family: var(--dl-font-mono); font-size: 10px; padding: 0 4px; }
 	.mlScore.high { color: var(--up); border-color: rgba(52,211,153,.45); }
-	.mlScore.medium { color: var(--amber); border-color: rgba(251,146,60,.45); }
+	.mlScore.medium { color: var(--amber); border-color: rgba(var(--amber-rgb),.45); }
 	.mlScore.low { color: var(--dl-ink-dim, #5b6473); }
 	.mlScore.blocked { color: var(--dn); border-color: rgba(248,113,113,.45); }
 	.mlDriverLine { display: flex; flex-direction: column; gap: 1px; min-width: 0; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.25; }
 	.mlDriverLine em { color: var(--amber); font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlDriverLine small { width: max-content; max-width: 100%; color: var(--warn); border: 1px solid rgba(251,146,60,.35); border-radius: 999px; padding: 1px 5px; font-size: 8.5px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlDriverLine small { width: max-content; max-width: 100%; color: var(--warn); border: 1px solid rgba(var(--amber-rgb),.35); border-radius: 999px; padding: 1px 5px; font-size: 8.5px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlIconBtn { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 72px; border: 1px solid var(--dl-line, #1b2130); background: var(--dl-bg-base, #080d16); color: var(--dl-ink-dim, #5b6473); border-radius: 3px; padding: 3px 4px; cursor: pointer; font-size: 9px; font-weight: 700; }
 	.mlIconBtn:hover, .mlIconBtn.on { color: var(--amber); border-color: var(--amber); }
 	.mlIconBtn:disabled { cursor: not-allowed; opacity: .48; color: var(--dl-ink-dim, #5b6473); border-color: var(--dl-line, #1b2130); }
@@ -1095,7 +1097,7 @@
 	.mlFalse span { color: var(--dl-ink-dim, #5b6473); font-size: 10.5px; line-height: 1.35; }
 	.mlScenario b { display: block; margin-top: 5px; }
 	.mlScenario .mlBlockTop em { font-style: normal; font-family: var(--dl-font-mono); font-size: 10px; color: var(--amber); }
-	.mlScenario.needsEvidence { border-color: rgba(251,146,60,.36); }
+	.mlScenario.needsEvidence { border-color: rgba(var(--amber-rgb),.36); }
 	.mlScenario.blocked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.035); }
 	.mlScenario em { display: block; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; margin-top: 8px; }
 	.mlSrc { padding: 6px 0; border-top: 1px solid rgba(255,255,255,.045); color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
@@ -1103,15 +1105,15 @@
 	.mlSrc em { display: block; margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; overflow-wrap: anywhere; }
 	.mlQuantCard { margin-top: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.016); padding: 9px; }
 	.mlQuantCard.ok { border-color: rgba(52,211,153,.42); }
-	.mlQuantCard.watch { border-color: rgba(251,146,60,.42); }
+	.mlQuantCard.watch { border-color: rgba(var(--amber-rgb),.42); }
 	.mlQuantCard.blocked { border-color: rgba(248,113,113,.42); }
 	.mlQuantTop { display: flex; align-items: center; gap: 8px; min-width: 0; }
 	.mlQuantTop b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dl-ink); font-size: 11px; }
 	.mlQuantCard p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
-	.mlQuantAlt { margin-top: 7px; border: 1px solid rgba(251,146,60,.28); border-radius: 5px; background: rgba(251,146,60,.03); color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.35; padding: 6px 8px; }
+	.mlQuantAlt { margin-top: 7px; border: 1px solid rgba(var(--amber-rgb),.28); border-radius: 5px; background: rgba(var(--amber-rgb),.03); color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.35; padding: 6px 8px; }
 	.mlQualityCard { margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.016); padding: 9px; }
 	.mlQualityCard.ok { border-color: rgba(52,211,153,.42); background: rgba(52,211,153,.035); }
-	.mlQualityCard.watch { border-color: rgba(251,146,60,.42); background: rgba(251,146,60,.035); }
+	.mlQualityCard.watch { border-color: rgba(var(--amber-rgb),.42); background: rgba(var(--amber-rgb),.035); }
 	.mlQualityCard.blocked { border-color: rgba(248,113,113,.42); background: rgba(248,113,113,.032); }
 	.mlQualityTop { display: grid; grid-template-columns: 82px 60px minmax(0, 1fr); gap: 7px; align-items: center; min-width: 0; }
 	.mlQualityTop b { color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 13px; }
@@ -1130,7 +1132,7 @@
 	.mlModelMetrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
 	.mlModelMetric { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 6px; }
 	.mlModelMetric.ok { border-color: rgba(52,211,153,.28); }
-	.mlModelMetric.watch { border-color: rgba(251,146,60,.34); }
+	.mlModelMetric.watch { border-color: rgba(var(--amber-rgb),.34); }
 	.mlModelMetric.blocked { border-color: rgba(248,113,113,.36); }
 	.mlModelMetric span, .mlModelMetric b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlModelMetric span { color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
@@ -1141,7 +1143,7 @@
 	.mlIndicatorGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
 	.mlIndicatorCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.014); padding: 7px; }
 	.mlIndicatorCard.ok { border-color: rgba(52,211,153,.28); }
-	.mlIndicatorCard.watch { border-color: rgba(251,146,60,.34); }
+	.mlIndicatorCard.watch { border-color: rgba(var(--amber-rgb),.34); }
 	.mlIndicatorCard.blocked { border-color: rgba(248,113,113,.38); }
 	.mlIndicatorCard div:first-child { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 6px; align-items: center; min-width: 0; }
 	.mlIndicatorCard span, .mlIndicatorCard b, .mlIndicatorCard em, .mlIndicatorCard small { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1155,7 +1157,7 @@
 	.mlMissingItem, .mlFalsifierToken { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.012); padding: 6px; }
 	.mlMissingItem { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 5px 7px; align-items: baseline; }
 	.mlMissingItem.ok { border-color: rgba(52,211,153,.28); }
-	.mlMissingItem.watch { border-color: rgba(251,146,60,.34); }
+	.mlMissingItem.watch { border-color: rgba(var(--amber-rgb),.34); }
 	.mlMissingItem.blocked { border-color: rgba(248,113,113,.36); }
 	.mlMissingItem b, .mlMissingItem span, .mlMissingItem em, .mlFalsifierToken b, .mlFalsifierToken span, .mlFalsifierToken em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlMissingItem b { color: var(--warn); font-family: var(--dl-font-mono); font-size: 9px; text-transform: uppercase; }
@@ -1163,19 +1165,19 @@
 	.mlMissingItem em { grid-column: 2; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 8.5px; }
 	.mlFalsifierStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.mlFalsifierToken.info { border-color: rgba(52,211,153,.26); }
-	.mlFalsifierToken.warn { border-color: rgba(251,146,60,.34); }
+	.mlFalsifierToken.warn { border-color: rgba(var(--amber-rgb),.34); }
 	.mlFalsifierToken.block { border-color: rgba(248,113,113,.38); }
 	.mlFalsifierToken b { display: block; color: var(--dl-ink); font-size: 10px; }
 	.mlFalsifierToken span { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
 	.mlFalsifierToken em { display: block; margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 8.5px; }
 	.mlSrcPacket { width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,.045); background: transparent; color: inherit; text-align: left; padding: 7px 0; cursor: pointer; }
-	.mlSrcPacket:hover, .mlSrcPacket.focused { background: rgba(251,146,60,.035); }
+	.mlSrcPacket:hover, .mlSrcPacket.focused { background: rgba(var(--amber-rgb),.035); }
 	.mlSrcPacket b, .mlSrcPacket span, .mlSrcPacket em, .mlSrcPacket small { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlSrcPacket b { color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
 	.mlSrcPacket span { margin-top: 2px; color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
 	.mlSrcPacket em, .mlSrcPacket small { margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
 	.mlSrcPacket.stale { border-left: 2px solid rgba(248,113,113,.52); padding-left: 6px; }
-	.mlSrcPacket.watch, .mlSrcPacket.unknown { border-left: 2px solid rgba(251,146,60,.52); padding-left: 6px; }
+	.mlSrcPacket.watch, .mlSrcPacket.unknown { border-left: 2px solid rgba(var(--amber-rgb),.52); padding-left: 6px; }
 	.mlSrcPacket.fresh { border-left: 2px solid rgba(52,211,153,.48); padding-left: 6px; }
 	.mlSrcPacket.missing { border-left: 2px solid rgba(248,113,113,.75); padding-left: 6px; }
 	.mlSrcSep { height: 8px; border-top: 1px dashed rgba(255,255,255,.08); }

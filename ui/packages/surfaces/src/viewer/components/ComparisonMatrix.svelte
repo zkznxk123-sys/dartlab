@@ -143,7 +143,7 @@
 		white-space: nowrap;
 	}
 	.src-link:hover {
-		color: #fb923c;
+		color: var(--amber);
 	}
 	.rm-btn {
 		display: inline-flex;

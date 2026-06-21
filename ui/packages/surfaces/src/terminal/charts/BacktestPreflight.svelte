@@ -58,7 +58,7 @@
 	/* ① 히어로 — 이겨야 할 선 */
 	.bpHero { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; padding: 9px 12px; background: rgba(255, 255, 255, 0.02); }
 	.bpHeroLbl { font-size: 11.5px; color: #aeb6c2; margin-bottom: 7px; }
-	.bpHeroLbl b { color: var(--amber, #fb923c); font-weight: 700; }
+	.bpHeroLbl b { color: var(--amber, var(--amber)); font-weight: 700; }
 	.bpHeroLbl i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 11px; }
 	.bpNums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 22px; }
 	.bpBig { display: flex; flex-direction: column; gap: 1px; }
@@ -72,7 +72,7 @@
 	.bpV b { color: var(--dl-ink, #c8cfdb); font-weight: 700; }
 	.bpV i { font-style: normal; color: var(--dimmer, #5b6573); font-size: 11px; }
 	.bpFlag { font-size: 11px; border-radius: 3px; padding: 0 6px; }
-	.bpFlag.warn { color: var(--amber, #fb923c); border: 1px solid rgba(251, 146, 60, 0.4); }
+	.bpFlag.warn { color: var(--amber, var(--amber)); border: 1px solid rgba(var(--amber-rgb), 0.4); }
 	.bpFlag.ok { color: var(--up, #34d399); border: 1px solid rgba(52, 211, 153, 0.35); }
 	.bpHint { font-size: 11.5px; color: #8b94a3; padding-top: 2px; }
 	.bpHint b { color: #a78bfa; font-weight: 600; }
