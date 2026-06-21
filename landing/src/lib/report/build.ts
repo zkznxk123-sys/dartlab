@@ -1510,7 +1510,6 @@ export async function buildOverview(rt: DartLabRuntime, code: string): Promise<O
 	if (payoutNum != null) tail.push(`다만 주주환원은 배당성향 ${payout}로 ${payoutNum < 30 ? '이익체력 대비 보수적' : payoutNum > 60 ? '적극적' : '중간 수준'}`);
 	if (valBand) tail.push(`시장은 이를 자기 PER ${valBand}에 반영`);
 	if (tail.length) parts.push(tail.join('이고, ') + '하고 있습니다.');
-	parts.push('아래 관점별 한 줄 요지를 먼저 보고, 좌측에서 관심 관점을 펼치십시오. (관점을 교차한 사실 서술이며 종합점수·매수의견이 아닙니다.)');
 	const thesis = parts.join(' ');
 
 	return { corpName: first.corpName, stockCode: code, asOf: first.asOf, dataBasis: first.dataBasis, industry: first.industry, thesis, takes };

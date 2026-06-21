@@ -34,6 +34,15 @@
   $effect(() => {
     if (data.perspective) perspectiveKey = data.perspective;
   });
+  // 활성 관점 메타(표지 제목 옆 ! 툴팁용) — PERSPECTIVES SSOT. 클릭=토글, 다음 클릭/관점전환=닫힘.
+  const persp = $derived(PERSPECTIVES.find((p) => p.key === perspectiveKey) ?? null);
+  let perspTipOpen = $state(false);
+  $effect(() => {
+    if (!perspTipOpen) return;
+    const close = () => (perspTipOpen = false);
+    const id = setTimeout(() => document.addEventListener('click', close, { once: true }), 0);
+    return () => { clearTimeout(id); document.removeEventListener('click', close); };
+  });
 
   // ── 종목 검색 (공통 작업대 SSOT — loadJson, raw fetch·자체 캐시 금지) ──
   // 회사명·코드 유니버스 = map/search-index.json (buildReport 와 동일 직독 경로, 추가 다운로드 0).
@@ -125,6 +134,7 @@
 
   function selectPerspective(key: string) {
     perspectiveKey = key;
+    perspTipOpen = false;
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -290,19 +300,12 @@
         <span class="brandTag">report</span>
       </a>
 
-      <div class="hdrLinks perspLinks">
-        {#each PERSPECTIVES as p}
-          <button class={'hdrLink' + (p.key === perspectiveKey ? ' on' : '')} disabled={!p.built}
-            onclick={() => selectPerspective(p.key)} title={p.question}>{p.label}</button>
-        {/each}
-      </div>
-
       <form class="cmdBar" role="search" onsubmit={onSearchSubmit}>
         <span class="cmdPrompt">‹GO›</span>
         <input class="cmdInput" bind:this={cmdInput} bind:value={query} spellcheck={false}
           oninput={onSearchInput} onkeydown={onSearchKey} onfocus={onSearchInput}
           onblur={() => setTimeout(() => (showSuggest = false), 120)}
-          placeholder={`종목 검색 — 현재 ${model?.corpName ?? data.sym}`} aria-label="종목 검색" />
+          placeholder="종목 검색" aria-label="종목 검색" />
         <kbd class="cmdKbd">⌘K</kbd>
         <button class="cmdGo" type="submit">GO</button>
         {#if showSuggest && suggestions.length}
@@ -318,6 +321,13 @@
           </div>
         {/if}
       </form>
+
+      <div class="hdrLinks perspLinks">
+        {#each PERSPECTIVES as p}
+          <button class={'hdrLink' + (p.key === perspectiveKey ? ' on' : '')} disabled={!p.built}
+            onclick={() => selectPerspective(p.key)} title={p.question}>{p.label}</button>
+        {/each}
+      </div>
 
       <div class="topRight">
         <button class="snsBtn" onclick={toggleTheme} title={theme === 'light' ? '다크 모드' : '화이트 모드'} aria-label="테마 전환">
@@ -389,10 +399,24 @@
     {:else if model}
       {@const allAnalysis = model.sections.every((s) => s.sourceEngine === 'analysis')}
       <article class="sheet">
-        <!-- ── 통합 리드 (5관점 한 몸) ── -->
+        <!-- ── 표지 (보고서를 리드 — 인쇄 1쪽도 표지로 시작) ── -->
+        <header class="cover">
+          <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> {model.perspectiveLabel}{#if persp}<span class="perspInfoWrap"><button class="perspInfo" onclick={(e) => { e.stopPropagation(); perspTipOpen = !perspTipOpen; }} aria-label="이 관점이 답하는 질문" title="관점 설명">!</button>{#if perspTipOpen}<span class="perspTip" role="tooltip"><b>{persp.label}</b> — {persp.question}{#if persp.focusQuestions.length}<span class="perspTipQs">{#each persp.focusQuestions as fq}<span>{fq}</span>{/each}</span>{/if}</span>{/if}</span>{/if}</div>
+          <h1 class="coverTitle">{model.corpName}<span class="code">{model.stockCode}</span></h1>
+          <dl class="coverFacts">
+            {#if model.industry}<div class="fact"><dt>업종</dt><dd>{model.industry}</dd></div>{/if}
+            <div class="fact"><dt>데이터 기준</dt><dd>{model.dataBasis}</dd></div>
+            <div class="fact"><dt>최근 접수</dt><dd>{model.asOf}</dd></div>
+            <div class="fact"><dt>분석범위</dt><dd>{model.sections.length}개 섹션 · 최대 6개년</dd></div>
+            <div class="fact"><dt>작성</dt><dd>dartlab 분석엔진 · 리얼타임</dd></div>
+          </dl>
+          {#if model.narrativeOverview}<p class="coverIntro">{clean(model.narrativeOverview)}</p>{/if}
+        </header>
+
+        <!-- ── 5관점 통합 요지 (표지 다음 = executive summary) ── -->
         {#if overview && overview.takes.length > 1}
           <section class="overviewLead">
-            <div class="ovKicker">기업분석보고서 · 5관점 통합 요지</div>
+            <div class="ovKicker">5관점 통합 요지</div>
             <p class="ovThesis">{clean(overview.thesis)}</p>
             <ol class="ovTakes">
               {#each overview.takes as t}
@@ -405,19 +429,6 @@
             </ol>
           </section>
         {/if}
-        <!-- ── 표지 ── -->
-        <header class="cover">
-          <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> {model.perspectiveLabel}</div>
-          <h1 class="coverTitle">{model.corpName}<span class="code">{model.stockCode}</span></h1>
-          <dl class="coverFacts">
-            {#if model.industry}<div class="fact"><dt>업종</dt><dd>{model.industry}</dd></div>{/if}
-            <div class="fact"><dt>데이터 기준</dt><dd>{model.dataBasis}</dd></div>
-            <div class="fact"><dt>최근 접수</dt><dd>{model.asOf}</dd></div>
-            <div class="fact"><dt>분석범위</dt><dd>{model.sections.length}개 섹션 · 최대 6개년</dd></div>
-            <div class="fact"><dt>작성</dt><dd>dartlab 분석엔진 · 리얼타임</dd></div>
-          </dl>
-          {#if model.narrativeOverview}<p class="coverIntro">{clean(model.narrativeOverview)}</p>{/if}
-        </header>
 
         <div class="printPerspective">관점: {model.perspectiveLabel} — {PERSPECTIVES.find((p) => p.key === model!.perspectiveKey)?.question}</div>
 
@@ -625,11 +636,24 @@
     height: auto; display: block; overflow: visible;
     position: sticky; top: 0; z-index: 30;
   }
+  /* 종목검색 = 아바타 옆 고정폭(터미널은 flex:1 — 여기선 늘리지 않음). 관점탭 = 중앙(좌측 search·우측 SNS 사이 free space 분할). */
+  .rptHeader .cmdBar { flex: 0 1 300px; }
+  .rptHeader .perspLinks { margin-left: auto; }
   /* 관점 탭 = 터미널 .hdrLink(amber active) 그대로. 한 줄, 넘치면 가로 스크롤(스크롤바 숨김). */
   .perspLinks { overflow-x: auto; scrollbar-width: none; }
   .perspLinks::-webkit-scrollbar { display: none; }
 
   .main { min-width: 0; }
+
+  /* ── 표지 제목 옆 관점 ! — 클릭 시 '이 관점이 답하는 질문' 툴팁(AI 사족 prose 폐기, 느낌표로 압축) ── */
+  .perspInfoWrap { position: relative; display: inline-block; }
+  .perspInfo { width: 15px; height: 15px; margin-left: 7px; padding: 0; border: 1px solid var(--accent); border-radius: 50%; background: transparent; color: var(--accent); font-family: var(--mono); font-weight: 800; font-size: 10px; line-height: 1; cursor: pointer; vertical-align: 1px; }
+  .perspInfo:hover { background: var(--accent); color: #fff; }
+  .perspTip { position: absolute; top: calc(100% + 8px); left: 0; z-index: 20; width: max-content; max-width: 330px; text-transform: none; letter-spacing: normal; font-weight: 500; background: var(--sheet); color: var(--ink); border: 1px solid var(--bd2); border-radius: 8px; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16); padding: 10px 13px; font-size: 12px; line-height: 1.6; }
+  .perspTip b { color: var(--accent); font-weight: 800; }
+  .perspTip .perspTipQs { display: flex; flex-direction: column; gap: 2px; margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--bd); }
+  .perspTip .perspTipQs span { font-size: 11px; color: var(--dim); }
+  .perspTip .perspTipQs span::before { content: '· '; color: var(--accent); }
 
   /* ── A4 용지 ── */
   .sheet {
