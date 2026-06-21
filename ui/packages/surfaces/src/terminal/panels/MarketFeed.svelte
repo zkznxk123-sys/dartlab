@@ -5,6 +5,7 @@
 	import type { MarketFiling } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Lang } from '../lib/types';
+	import { Search } from 'lucide-svelte';
 	import { MARKET_FEED_CATS, marketFeedCategory, isInstitutionalFiler } from '../lib/marketFeed';
 	import Panel from '../ui/Panel.svelte';
 
@@ -12,8 +13,9 @@
 		lang: Lang;
 		active: string; // 현재 선택 종목 — 행 강조
 		onPick: (code: string) => void; // 행 클릭 → 회사 전환(차트+우측 패널 갱신)
+		onFilingSearch?: () => void; // 공시 본문 검색(⌘⇧F) — 시장공시 헤더 아래 배치(읽기↔찾기 한 쌍)
 	}
-	let { lang, active, onPick }: Props = $props();
+	let { lang, active, onPick, onFilingSearch }: Props = $props();
 	const rt = useDartLabRuntime();
 
 	const STEP = 200; // 무한스크롤 윈도우 증가 단위 — 스크롤 끝마다 +200. 데이터(38k)는 이미 메모리라 재fetch 0.
@@ -105,6 +107,15 @@
 	}}
 	flush
 >
+	<!-- 공시 본문 검색 — 시장공시 헤더 바로 아래(읽기↔찾기 한 쌍). 클릭=⌘⇧F 다이얼로그(FilingSearchDialog). -->
+	{#if onFilingSearch}
+		<button class="feedSearchBar" onclick={() => onFilingSearch?.()} title={t('전역 공시 본문 검색 (⌘⇧F)', 'global filing full-text search (⌘⇧F)')}>
+			<Search class="feedSearchIcon" size={13} />
+			<span class="feedSearchPh">{t('공시 본문 검색', 'Search filing text')}</span>
+			<kbd class="feedSearchKbd">⌘⇧F</kbd>
+		</button>
+	{/if}
+
 	<!-- 카테고리 칩 스트립 — 가로 스크롤. 활성 칩 amber underline + 전수 카운트 배지 -->
 	<div class="feedCats">
 		{#each MARKET_FEED_CATS as c (c.key)}

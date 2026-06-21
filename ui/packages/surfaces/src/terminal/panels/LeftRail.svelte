@@ -128,17 +128,9 @@
 	</div>
 </Panel>
 
-<!-- 공시 본문 검색 트리거 — 시장공시 피드 바로 위(읽기↔찾기 한 쌍). 클릭=⌘⇧F 다이얼로그(FilingSearchDialog
-     재사용·새 표면 0). 종목 점프는 상단 cmdBar(헤더) 담당, 여긴 *시장 전체 공시 본문* BM25. -->
-<button class="feedSearchBar" onclick={() => onFilingSearch?.()} title={lang === 'en' ? 'global filing full-text search (⌘⇧F)' : '전역 공시 본문 검색 (⌘⇧F)'}>
-	<span class="feedSearchIcon">⌕</span>
-	<span class="feedSearchPh">{lang === 'en' ? 'Search filing text' : '공시 본문 검색'}</span>
-	<kbd class="feedSearchKbd">⌘⇧F</kbd>
-</button>
-
 <!-- 시장 공시 피드 — 산업 아래 *전상장사* 최근 3개월 수시공시. 우측 단일기업/좌측 워치(내 종목)와 다른
-     시장 전체 멘탈모델. 고정높이 섹션(내부 스크롤) — fillCol 은 아래 eQuant(스크리너) 단독 유지. -->
-<MarketFeed {lang} {active} {onPick} />
+     시장 전체 멘탈모델. 공시 본문 검색(⌘⇧F)은 이 패널 헤더 아래로 배치(읽기↔찾기 한 쌍). 고정높이·내부 스크롤. -->
+<MarketFeed {lang} {active} {onPick} {onFilingSearch} />
 
 <!-- 하단 통합 — 스크리너 ⇄ 공시 워치 탭. 워치가 무한 증가해 스크리너를 가리던 문제 해소
      (한 자리를 탭으로 공유 · 각 탭이 잔여 높이 전부 차지 · 내부 스크롤). 탭 바가 패널 헤더 역할. -->

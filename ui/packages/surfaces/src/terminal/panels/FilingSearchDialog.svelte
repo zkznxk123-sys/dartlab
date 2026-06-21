@@ -3,6 +3,7 @@
 	// 공통배선: useDartLabRuntime().search(=createSearchPort) — 퍼블릭/로컬 동일 코어·HF sidecar byte-range.
 	// 콜드 1회(~10MB stats)는 첫 질의 시 lazy 로드(검색 안 쓰면 비용 0). 행 클릭 → 회사 soft-swap(onPick) +
 	// dart/edgar 원문 외부 링크(정직 floor — 본문 직행 불가). 회사 인덱스 검색은 cmdBar 담당(여기 아님).
+	import { Search, X } from 'lucide-svelte';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { FilingHit } from '@dartlab/ui-contracts';
 	import type { Lang } from '../lib/types';
@@ -24,6 +25,7 @@
 	let coldFirst = $state(true); // 첫 질의 = 콜드 stats 로드(스피너 카피 분기)
 	let selIdx = $state(0);
 	let inputEl = $state<HTMLInputElement | null>(null);
+	let bodyEl = $state<HTMLDivElement | null>(null); // 결과 스크롤 컨테이너 — 키보드 이동 시 선택행 추적
 	let seq = 0; // in-flight 토큰 — stale 응답 폐기
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -142,6 +144,14 @@
 		inputEl?.focus();
 	});
 
+	// 키보드 ↑↓ 이동 시 선택 행을 뷰포트로 스크롤(리스트가 선택을 따라가지 않던 버그 수정).
+	$effect(() => {
+		selIdx;
+		if (typeof document === 'undefined') return;
+		const row = bodyEl?.querySelectorAll<HTMLElement>('.fsRow')[selIdx];
+		row?.scrollIntoView({ block: 'nearest' });
+	});
+
 	// 인덱스 as-of 라벨 — 다이얼로그 열릴 때 manifest builtAt 만 경량 조회(콜드 stats ~10MB 강제 안 함).
 	$effect(() => {
 		rt.search
@@ -165,11 +175,11 @@
 			<span class="scrTitle">{lang === 'en' ? 'FILING SEARCH' : '공시 검색'}</span>
 			<span class="fsSub">{lang === 'en' ? 'all companies · full text' : '전 종목 공시 본문'}{#if builtAt}<span class="fsAsOf">{lang === 'en' ? ` · as of ${builtAt.slice(0, 10)}` : ` · ~${builtAt.slice(0, 10)} 기준`}</span>{/if}</span>
 			<span class="fsKbd">⌘⇧F</span>
-			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
+			<button class="scrClose" onclick={onClose} aria-label="close"><X size={14} /></button>
 		</div>
 
 		<div class="fsSearchRow">
-			<span class="fsIcon">🔍</span>
+			<span class="fsIcon"><Search size={14} /></span>
 			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				bind:this={inputEl}
@@ -192,7 +202,7 @@
 			</div>
 		{/if}
 
-		<div class="fsBody">
+		<div class="fsBody" bind:this={bodyEl}>
 			{#if busy}
 				<div class="fsState">
 					<span class="fsSpin">◴</span>
@@ -248,7 +258,7 @@
 	.fsSub { font-size: 10px; color: #c2cad6; font-style: italic; }
 	.fsKbd { margin-left: auto; font-size: 10px; color: #c2cad6; border: 1px solid var(--dl-line, #2a3142); border-radius: 3px; padding: 1px 6px; }
 	.fsSearchRow { display: flex; align-items: center; gap: 7px; padding: 10px 14px 6px; }
-	.fsIcon { font-size: 13px; opacity: 0.7; }
+	.fsIcon { display: inline-flex; align-items: center; color: var(--dim, #c2cad6); opacity: 0.85; }
 	.fsInput { flex: 1 1 auto; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--dl-line, #2a3142); border-radius: 4px; color: var(--dl-ink, #c8cfdb); font-size: 13px; font-family: inherit; padding: 6px 10px; outline: none; }
 	.fsInput:focus { border-color: var(--amber, var(--amber)); }
 	.fsRecent { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 0 14px 8px; }
