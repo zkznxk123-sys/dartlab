@@ -931,12 +931,14 @@
     /* 루트 레이아웃의 :global(html/body){overflow-x:clip} 이 Chrome 인쇄 페이지네이션을 비워(빈 미리보기)
        인쇄 시에만 해제 — 화면 가로스크롤 가드는 그대로 유지. */
     :global(html), :global(body) { overflow: visible !important; max-width: none !important; height: auto !important; }
+    /* 색 변수는 !important 로 강제 — 다크 테마(.rptRoot.dark)나 dev 스타일 주입 순서에 상관없이
+       인쇄는 무조건 검정-on-흰색. (override 가 못 이기면 본문이 흰색으로 찍혀 빈 페이지처럼 보였다) */
     .rptRoot, .rptRoot.dark {
-      --backdrop: #fff; --sheet: #fff; --soft: #eef2f6; --ink: #161616; --dim: #555a60;
-      --bd: #d8dde3; --bd2: #b9c1c9;
-      --accent: var(--dl-accent-dim); --up: #1a7f37; --down: #b02a1a; --warn: #8a6100; --emph: var(--dl-accent-dim);
-      --e-analysis: var(--dl-accent-dim); --e-credit: #b02a1a; --e-quant: #0a7d86; --e-industry: #1a7f37; --e-macro: #8a6100; --e-story: #6f42c1;
-      background: #fff; font-size: 10.2pt;
+      --backdrop: #fff !important; --sheet: #fff !important; --soft: #eef2f6 !important; --ink: #161616 !important; --dim: #555a60 !important;
+      --bd: #d8dde3 !important; --bd2: #b9c1c9 !important;
+      --accent: var(--dl-accent-dim) !important; --up: #1a7f37 !important; --down: #b02a1a !important; --warn: #8a6100 !important; --emph: var(--dl-accent-dim) !important;
+      --e-analysis: var(--dl-accent-dim) !important; --e-credit: #b02a1a !important; --e-quant: #0a7d86 !important; --e-industry: #1a7f37 !important; --e-macro: #8a6100 !important; --e-story: #6f42c1 !important;
+      background: #fff !important; color: #161616 !important; font-size: 10.2pt;
       print-color-adjust: exact; -webkit-print-color-adjust: exact;
     }
     .rptHeader, .toc, .secSrc { display: none !important; }

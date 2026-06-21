@@ -1358,7 +1358,9 @@ export async function buildReport(
 	// scope 명시(기관 요구) — 번들 기본은 연결(CFS). 별도만 보고한 회사는 별도.
 	const scope = fin.scope === 'OFS' ? '별도' : '연결';
 	const scopeNote = fin.availScopes.length > 1 ? `${scope}재무제표 기준(별도재무제표 별도 보고)` : `${scope}재무제표 기준`;
-	const qw = tfQ ? quarterWindow(tfQ, 8) : null;
+	// 분기 표는 6분기(+TTM·YoY 열)까지만 — 8분기는 라벨+8+TTM+YoY 가 본문폭을 넘어 가로 스크롤이 생긴다.
+	// 최신 분기 YoY 는 4분기 전(윈도 내)과 비교하므로 6분기로도 충분.
+	const qw = tfQ ? quarterWindow(tfQ, 6) : null;
 
 	const asOf = latestFiled(fin) ?? (tf ? pYear(last(tf.periods)) : '');
 	const dataBasis = qw ? `${qw.periods[qw.periods.length - 1]} (분기 · ${scope})` : tf ? `FY${pYear(last(tf.periods)).slice(2)} (연간 · ${scope})` : `(${scope})`;
