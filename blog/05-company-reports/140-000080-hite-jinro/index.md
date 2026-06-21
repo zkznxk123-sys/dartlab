@@ -25,6 +25,7 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 </script>
 
@@ -326,3 +327,7 @@ c.select("CF", ["operating_cashflow"], freq="Y")
 | 소주/맥주 사업별 손익 — 연결에 세그먼트 줄 없음 | dartlab 데이터 한계 | 주의/제외 |
 
 본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 점유율·맥주전쟁·세제·원재료는 dartlab 연결로 증명되지 않는 외부 인용이며, 음의 영업CF는 손실의 '예고'가 아니라 운전자본 흡수와도 양립하는 부호 어긋남이고, 소주·맥주 사업별 마진 비교는 연결 손익에 줄이 없어 일절 내부 수치로 제시하지 않는다 — 연결이 증명하는 것은 '변동성이 매출이 아니라 이익·현금에 있다'는 위치까지다.
+
+---
+
+<CompanyFinancials code="000080" />

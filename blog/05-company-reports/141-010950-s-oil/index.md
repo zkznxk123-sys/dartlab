@@ -25,6 +25,7 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 </script>
 
@@ -311,3 +312,7 @@ c.select("CF", ["operating_cashflow"], freq="Y")
 | 사업부문(정유/석유화학/윤활)별 손익 — 연결에 분해 없음 | dartlab 데이터 한계 | 주의/제외 |
 
 본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 정제마진·유가·재고손익·아람코·샤힌은 dartlab 연결로 증명되지 않는 외부 인용이며, '순익이 적은 해에 현금이 많다'는 위상 역전은 재고평가손익 때문이라 단정하지 않고 운전자본과도 양립하는 어긋남까지만 둔다 — 연결이 증명하는 것은 '손익과 현금이 다른 박자로 돈다'는 두 시계의 위상차까지다.
+
+---
+
+<CompanyFinancials code="010950" />

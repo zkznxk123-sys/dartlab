@@ -25,6 +25,7 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
@@ -347,3 +348,7 @@ HD현대중공업의 2026년 1분기는 이 순서에서 대부분 좋은 답을
 | BS(대차대조표) 매핑 불안정 — 인용 주의 | dartlab 데이터 한계 | 주의/제외 |
 
 본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 후판가·수주잔고·사업부·힘센·합병은 dartlab 연결로 증명되지 않으며 공시·언론 외부 인용임을 명시한다. 내부는 '시차가 존재한다'까지만, 외부 수치(82조는 그룹 합산)는 인과로 잇지 않고 정합/양립까지만 두는 것이 이 글의 원칙이다.
+
+---
+
+<CompanyFinancials code="329180" />

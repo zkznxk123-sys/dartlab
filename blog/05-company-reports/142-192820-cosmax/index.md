@@ -25,6 +25,7 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 </script>
 
@@ -319,3 +320,7 @@ c.select("CF", ["operating_cashflow"], freq="Y")
 | 지역·고객사별 손익 — 연결에 분해 없음 | dartlab 데이터 한계 | 주의/제외 |
 
 본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. ODM 마진 구조·지역 법인·K뷰티 수출은 dartlab 연결로 증명되지 않는 외부 인용이며, 영업이익 반토막(2022)·영업선 아래 누수의 원인은 항목 분해 없이 단정하지 않고, 음의 영업CF(2018)나 2023~2025 CF 하락도 '이익≠현금'이라는 어긋남까지만 둔다 — 연결이 증명하는 것은 '매출은 두 배인데 남은 비율은 한 자릿수, 그마저 영업선 아래에서 샌다'는 세 수평선의 다른 박자까지다.
+
+---
+
+<CompanyFinancials code="192820" />

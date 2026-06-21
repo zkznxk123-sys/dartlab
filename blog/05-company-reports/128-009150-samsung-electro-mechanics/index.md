@@ -25,6 +25,7 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
@@ -315,3 +316,7 @@ c.select("IS", ["영업이익"], freq="Q")  # 2023 분기 영업이익률이 해
 | BS(대차대조표) 매핑 불안정 — 인용 주의 | dartlab 데이터 한계 | 주의/제외 |
 
 본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. MLCC 점유·전방 수요·부문·신사업은 dartlab 연결로 증명되지 않으며 외부 인용임을, 증분 효율 저하가 일시인지 구조인지는 손익 7줄만으로 단정하지 않음을 명시한다 — 연결이 증명하는 것은 '외형은 컸는데 이익은 천장에 못 닿았다'(결과)까지이고, '왜'는 손익 밖에 있다. 다음 공시에서도 같은 원칙을 적용한다. 매출·사업부 성장률이 먼저 눈에 들어와도, 최종 판정은 전사 영업이익률과 절대 영업이익이 과거 정점을 넘는지로 닫는다.
+
+---
+
+<CompanyFinancials code="009150" />

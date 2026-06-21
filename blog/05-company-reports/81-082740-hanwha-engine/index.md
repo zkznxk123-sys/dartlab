@@ -36,6 +36,7 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import BarChart from '$lib/components/blog/BarChart.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
@@ -264,3 +265,7 @@ c.story(
 | 영업현금흐름 | 0.330조 | — | 0.070조 | -0.021조 | -0.046조 |
 
 `—` 표시는 로컬 timeline 또는 분석 출력에서 해당 연도 손익 항목이 비어 있어 본문 수치로 사용하지 않은 값이다. 이 글의 핵심 판단은 2025년 실측과 2021~2023년 비교 가능 항목을 기준으로 했다.
+
+---
+
+<CompanyFinancials code="082740" />

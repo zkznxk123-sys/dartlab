@@ -35,6 +35,10 @@ ai:
   dataAsOf: "2026-06-18"
 ---
 
+<script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
+</script>
+
 > **주의**: 이 글은 투자 권유가 아니다. 목표가를 제시하지 않는다. "언제까지 상승할까"라는 질문을 **상승이 유지되는 조건과 끝나는 조건**으로 바꿔 읽는다.
 >
 > **데이터 기준**: 2026-06-18 Google Finance 주가 화면, Samsung Electronics 2025년 4Q/FY 및 2026년 1Q IR 자료, 2026-06-18 dartlab 실측.
@@ -309,3 +313,7 @@ Q1 EPS 연환산 P/E 12.7배는 계산 예시다. Q1 실적이 네 분기 반복
 | CAPEX/매출 | 17.8% | 17.6% | 23.4% | 17.9% | 15.6% |
 
 이 표의 핵심은 삼성전자가 "좋은 회사인가"가 아니다. 좋은 회사다. 문제는 사이클이다. 2023년에는 영업이익률 2.5%, 2026년 1분기에는 42.8%다. 주가가 더 오르는지는 이 간극이 얼마나 오래 유지되는지에 달려 있다.
+
+---
+
+<CompanyFinancials code="005930" />

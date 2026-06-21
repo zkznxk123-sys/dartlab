@@ -25,6 +25,7 @@ ai:
 ---
 
 <script>
+	import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
@@ -320,3 +321,7 @@ BGF리테일의 2026년 1분기 IR 자료는 연결 기준 매출 **2조1,204억
 | IFRS16 리스부채 상환액(재무활동) — 내부 격자에 미표기 | dartlab 데이터 한계 | 주의/제외 |
 
 본문의 숫자 중 이 표에 없는 것은 발행 차단 대상이다. 점포·순증·점당 매출·점유율·최저임금·해외는 dartlab 연결로 증명되지 않으며 공시·언론 외부 인용임을 명시한다. 매출 총액을 본부 사업 규모로 읽지 않고, OCF 3배를 '현금부자'로 읽지 않으며, 두 선의 격차를 *관찰*까지만 단언하는 것이 이 글의 원칙이다.
+
+---
+
+<CompanyFinancials code="282330" />
