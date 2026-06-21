@@ -1315,7 +1315,7 @@ function pendingModel(
 		industry,
 		perspectiveKey: persp.key,
 		perspectiveLabel: persp.label,
-		conclusion: `「${persp.label}」 관점은 다음 사이클에서 데이터 작업대 리얼타임으로 구현됩니다.`,
+		conclusion: `「${persp.label}」 관점은 다음 사이클에서 구현됩니다.`,
 		headlineKpis: [],
 		narrativeOverview: '',
 		keyFindings: [],
@@ -1436,8 +1436,8 @@ export async function buildReport(
 
 	// 출처 = 섹션 sourceEngine 별 정직 집계(재무/시장 혼재 시 각각).
 	const ENG_LABEL: Record<string, string> = {
-		analysis: '재무분석 (브라우저 리얼타임)',
-		quant: '시장·기술 (브라우저 리얼타임)',
+		analysis: '재무분석',
+		quant: '시장·기술',
 		credit: '신용평가',
 		industry: '산업비교',
 		macro: '거시',
@@ -1461,13 +1461,13 @@ export async function buildReport(
 		perspectiveLabel: persp.label,
 		conclusion: built.conclusion,
 		headlineKpis: built.kpis,
-		narrativeOverview: `이 보고서는 ${corpName}의 ${persp.label} — ${persp.question} — 를 ${scopeNote}으로 정리했습니다. 손익·현금·효율은 ${qw ? '분기(전년동기 YoY)를 주(主)로, 장기 그림은 연간 보충 섹션' : '연간'}으로 보며, 배당·소유·인력·감사 등 연 1회 확정 항목은 사업보고서(연간) 기준입니다. 모든 수치는 데이터 작업대에서 조회 시점에 계산되며 사전 bake·정적 캐시는 없습니다.`,
+		narrativeOverview: `이 보고서는 ${corpName}의 ${persp.label} — ${persp.question} — 를 ${scopeNote}으로 정리했습니다. 손익·현금·효율은 ${qw ? '분기(전년동기 YoY)를 주(主)로, 장기 그림은 연간 보충 섹션' : '연간'}으로 보며, 배당·소유·인력·감사 등 연 1회 확정 항목은 사업보고서(연간) 기준입니다.`,
 		keyFindings: built.findings,
 		sections: built.sections,
 		closing: built.closing,
 		provenance: {
 			engines: engAgg,
-			note: `모든 수치는 HuggingFace parquet(재무·주가·정기보고)을 브라우저가 직접 읽어 ${scope}재무제표 기준으로 계산했습니다. 정적 캐시·사전 bake 없음 — 조회 시점 리얼타임.`
+			note: `재무·주가·정기보고 공시를 ${scope}재무제표 기준으로 계산했습니다.`
 		},
 		assumptionsNote:
 			`${scopeNote} · 손익·현금흐름은 ${qw ? '단일분기(누계 YTD는 차분 정규화)·전년동기(YoY) 비교·TTM(직전 4분기 합) 병기' : '연간'} · 재무상태표는 기말 시점값 · 수익성 비율의 연율화는 연간 기준(분기 단독 연율화 안 함) · 운전자본 회전일은 평균잔액·${qw ? '분기(91일)' : '연간(365일)'} 기준이라 계절성 영향 · 동종업종 백분위는 industryStats 분포(연간) 대비 좌표(목표주가 아님) · 사업부문(세그먼트) 분해는 공시 주석 인코딩 의존으로 이 버전에서는 제공하지 않습니다(추정 대신 비표기) · 표 단위는 자릿수에 따라 조/억 자동 스케일 · 공시 항목이 빈약한 행은 자동 생략 · 일회성 손익이 큰 기간은 각주 표시 · 재무건전성 점검은 브라우저 재무비율(Python 신용등급 dCR 아님)${qw && qw.excluded.length ? ` · ⚠ 최신 ${qw.excluded.map((e) => e.period).join('·')}는 영업이익률이 본업 범위를 크게 벗어나(데이터 정합성 의심) 분석 윈도에서 제외` : ''}.`,

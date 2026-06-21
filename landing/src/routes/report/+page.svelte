@@ -282,7 +282,7 @@
   <title>기업분석보고서 · {model?.corpName ?? data.sym} | dartlab</title>
   <meta
     name="description"
-    content={`DartLab 데이터 작업대가 HF parquet 을 직접 읽어 조회 시점에 계산한 ${model?.corpName ?? '상장사'} 기업분석보고서 — 수익성·재무안정성·주주환원·시장평가·지배구조 5관점. 인쇄·PDF 가능.`}
+    content={`${model?.corpName ?? '상장사'} 기업분석보고서 — 수익성·재무안정성·주주환원·시장평가·지배구조 5관점. 인쇄·PDF 가능.`}
   />
 </svelte:head>
 
@@ -392,7 +392,7 @@
           <h1 class="coverTitle">{model.corpName}<span class="code">{model.stockCode}</span></h1>
         </header>
         <div class="pendingNote">
-          <p class="pendBig">「{model.perspectiveLabel}」 관점은 다음 사이클에서 리얼타임으로 구현됩니다.</p>
+          <p class="pendBig">「{model.perspectiveLabel}」 관점은 다음 사이클에서 구현됩니다.</p>
           <p class="muted">현재 사이클 = <b>수익성</b> 관점. 관점을 하나씩 추가하고 있습니다.</p>
         </div>
       </article>
@@ -408,7 +408,7 @@
             <div class="fact"><dt>데이터 기준</dt><dd>{model.dataBasis}</dd></div>
             <div class="fact"><dt>최근 접수</dt><dd>{model.asOf}</dd></div>
             <div class="fact"><dt>분석범위</dt><dd>{model.sections.length}개 섹션 · 최대 6개년</dd></div>
-            <div class="fact"><dt>작성</dt><dd>dartlab 분석엔진 · 리얼타임</dd></div>
+            <div class="fact"><dt>작성</dt><dd>dartlab 분석엔진</dd></div>
           </dl>
           {#if model.narrativeOverview}<p class="coverIntro">{clean(model.narrativeOverview)}</p>{/if}
         </header>
@@ -577,7 +577,7 @@
 
         <!-- ── 근거·출처 ── -->
         <section class="block evidenceStrip">
-          <h2 class="blockTitle">근거·출처 <span class="subNote">이 보고서를 계산한 dartlab 엔진 (조회 시점 리얼타임)</span></h2>
+          <h2 class="blockTitle">근거·출처 <span class="subNote">이 보고서를 계산한 dartlab 엔진</span></h2>
           <div class="evEngines">
             {#each Object.entries(model.provenance.engines) as [eng, info]}
               <div class="evEngine"><span class="evDot"></span><span class="evLabel">{info.label ?? engineLabel[eng] ?? eng}</span><span class="evMeta">{info.sections}섹션 · {info.blocks}블록</span></div>
@@ -590,15 +590,15 @@
         <!-- ── 푸터 / 서명 ── -->
         <footer class="rptFooter">
           {#if model.assumptionsNote}<div class="assump">가정·한계 — {model.assumptionsNote}</div>{/if}
-          <div class="freezeNote">※ 본 출력본(인쇄/PDF)은 <b>데이터 기준 {model.asOf} 시점의 동결 스냅샷</b>입니다. 화면은 조회 시점 리얼타임으로 갱신되므로, 이후 원천 데이터가 갱신되면 동일 보고서라도 수치가 달라질 수 있습니다 — 배포본은 이 동결 시점을 근거로 인용하십시오.</div>
+          <div class="freezeNote">※ 본 출력본(인쇄/PDF)은 <b>데이터 기준 {model.asOf} 시점의 스냅샷</b>입니다. 이후 원천 데이터가 갱신되면 동일 보고서라도 수치가 달라질 수 있습니다.</div>
           <div class="footSign">
             <span class="signMain">{model.corpName} 기업분석보고서</span>
             <span class="dot">·</span><span>{model.perspectiveLabel} 관점</span>
             <span class="dot">·</span><span>데이터 기준 {model.asOf}</span>
-            <span class="dot">·</span><span>작성 dartlab 분석엔진 (리얼타임)</span>
+            <span class="dot">·</span><span>작성 dartlab 분석엔진</span>
           </div>
           <div class="footLine">
-            모든 수치 = dartlab 엔진({Object.values(model.provenance.engines).map((e) => e.label).join('·')}) 조회 시점 산출
+            모든 수치 = dartlab 엔진({Object.values(model.provenance.engines).map((e) => e.label).join('·')}) 산출
             <span class="dot">·</span> sourceEngine = 계산 엔진(원천 DART 공시 줄 아님)
             <span class="dot">·</span> 본 보고서는 투자 권유가 아니며, 투자 판단의 책임은 이용자에게 있습니다.
           </div>
