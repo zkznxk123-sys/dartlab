@@ -338,9 +338,14 @@
 .dlTerm .feedInst.on { color: var(--amber); border-color: var(--amber); }
 .dlTerm .feedInst:hover:not(.on) { color: var(--txt); }
 .dlTerm .feedInstNote { font-family: var(--cond); font-size: 8px; color: var(--dimmer); }
-.dlTerm .filingList.feedList { max-height: 150px; } /* 특이도(0,3,0) — 기본 .filingList(230px, 소스 뒤) 안 밀리게 */
+.dlTerm .filingList.feedList { max-height: 104px; } /* 특이도(0,3,0) — 매크로·산업·공시 패널 높이 일치용(168px panel 에 내부 스크롤) */
+/* 좌측 레일 높이 정렬 — 매크로·산업·시장공시 3 패널 동일 높이(계기판 정렬) + feed 바 고정.
+   하단 스크리너/워치(fillCol)가 잔여를 흡수해 리스트가 가장 크게(전체 스크롤 회피). */
+.dlTerm .colL > .panel.eMacro,
+.dlTerm .colL > .panel.eIndustry,
+.dlTerm .colL > .panel.eMarketFeed { flex: 0 0 166px; height: 166px; }
 /* 스크리너(scan)가 피드에 밀려 0 으로 압착되지 않게 min-height — 초과 시 .col(overflow-y:auto) 스크롤. */
-.dlTerm .col > .panel.eQuant.fillCol { min-height: 232px; }
+.dlTerm .col > .panel.eQuant.fillCol { min-height: 172px; }
 /* .filingRow.feedRow 특이도(0,3,0) — 기본 .filingRow(0,2,0, 소스 뒤)에 안 밀리게 회사명 58px 고정 + 제목 1fr. */
 .dlTerm .filingRow.feedRow { grid-template-columns: 58px minmax(0, 1fr) auto 12px; }
 .dlTerm .feedRow.on { background: var(--dl-bg-overlay); }

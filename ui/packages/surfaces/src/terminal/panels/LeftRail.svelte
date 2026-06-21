@@ -124,7 +124,7 @@
 		<button class="finFullBtn" onclick={() => onIndustry?.('')} title={lang === 'en' ? 'detail · all industries' : '상세보기 · 전체 산업'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
 	{/snippet}
 	<div class="swMap">
-		<ScatterMap pts={industryPts} compact compactH={104} highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
+		<ScatterMap pts={industryPts} compact compactH={132} highlightId={curIndustry} onPick={pickIndustry} xLabel="" yLabel="" zeroX />
 	</div>
 </Panel>
 
