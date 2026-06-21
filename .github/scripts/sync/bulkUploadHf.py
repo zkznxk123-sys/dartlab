@@ -54,12 +54,11 @@ def _saveExistingCache(category: str, existing: set) -> None:
 # naver(private) 는 repoFor 가 자동으로 전용 private repo 로 라우팅 → 공개 dartlab-data 안 감.
 _NEWS_CATEGORIES = ("newsHeadlines", "newsEnriched", "newsGdelt", "newsNaver", "newsNaverEnriched")
 
+# dir 은 dataConfig.DATA_RELEASES SSOT 파생 (하드코딩 복제 금지 — 한쪽만 바꾸면 조용히 drift).
+# krxPricesV2 는 1 회용 bitemporal 마이그레이션 ad-hoc 키라 DATA_RELEASES 미등록 → 명시 유지.
 CATEGORY_DIR = {
-    "finance": "dart/finance",
-    "report": "dart/report",
-    "panel": "dart/panel",
+    **{c: DATA_RELEASES[c]["dir"] for c in ("finance", "report", "panel", *_NEWS_CATEGORIES)},
     "krxPricesV2": "krx/prices/v2",
-    **{c: DATA_RELEASES[c]["dir"] for c in _NEWS_CATEGORIES},
 }
 
 # nested=True 카테고리는 sub-dir (예: news/public/rss/{market}/ · dart/panel/{code}/) 까지 rglob 으로 수집,
