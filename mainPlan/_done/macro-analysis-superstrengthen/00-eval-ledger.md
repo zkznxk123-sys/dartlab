@@ -53,3 +53,9 @@ v2 통과 후 퀀트가 권고한 비차단 정밀 흠 3건도 발간 전 반영
 ## 4. 최종 판정
 
 5분야 전부 ≥95(경제 96·퀀트 95·UX/PM 95·시각화 96·데이터아키 96), blocking 0, min 95 통과. 모든 인용 경로·필드·줄번호를 5명이 소스와 직접 대조해 정합 확인. 퀀트 권고 3건도 반영해 완전 소스 정합.
+
+---
+
+## 5. as-built 냉정평가 (2026-06-21 · 99점 게이트)
+
+재설계 base 위 초강화(Regime Lens) 구현 완료 후, **구현본(as-built)** 을 5렌즈 냉정 워크플로로 **99점 게이트**까지 9라운드 반복(소스 직접 검증 교정). Regime Lens 양언어화가 주변 표면의 EN 누출을 층층이 드러냄 → 전층 폐쇄(빌더 lang 주입·결정론 EN 매핑·재귀 Hangul 스캔). **R9 최종: 5렌즈 전부 99 · confirmed defect 0**(vitest 43/43·svelte-check 0err). 상세 = [../macro-lens-redesign/02-impl-map.md](../macro-lens-redesign/02-impl-map.md) §7. 잔여 = deploy-state(§4.5 — live macro.json regime 키는 운영자 배포단계 주입)·주관 taste뿐.

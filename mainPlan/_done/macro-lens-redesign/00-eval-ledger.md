@@ -50,3 +50,9 @@
 - 분석가 96 (시각24·정직20·anti14·구현19·데이터10·가치9) — "데이터정합 10/10, 모든 줄번호·값 실측 일치. 정직 20/20."
 - 사용자 96 (시각24·정직20·anti14·구현20·데이터10·가치8) — "남은 사실오류 0건. 95+ 가치 있는 탁월한 PRD."
 - 두 평가자 blocking 0건. **min 96 ≥ 95 통과.**
+
+---
+
+## 5. as-built 냉정평가 (2026-06-21 · 99점 게이트)
+
+PRD(96) 위에 구현 완료 후, **구현본(as-built)** 을 5렌즈(honesty·uxpm·dataviz·frontend·redteam) 냉정 워크플로로 **99점 게이트**까지 9라운드 반복(매 차단항목 소스 직접 검증 후 교정·에이전트 측정 인용 금지). 최대 발견 = i18n EN 패리티 전층 누출(regime→주변→transmission payload→driver→MacroPathRail→macroExposure 157사). 빌더 lang 주입 + 결정론 EN 매핑 + 재귀 Hangul 스캔 테스트로 폐쇄. **R9 최종: 5렌즈 전부 99 · confirmed defect 0**(vitest 43/43·svelte-check 0err). 상세 fix 원장·아키텍처 = [02-impl-map.md](02-impl-map.md) §7. 잔여 = 주관 taste(GaR 수평팬)·deploy-state(regime 키 주입)뿐.

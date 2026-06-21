@@ -76,3 +76,23 @@ TerminalSurface L64`$state('regime')`·L241`openMacroLens(tab='regime')`·L280`o
 - `rates/yieldCurve.py::nelsonSiegel`: interp **L151-161** `steep_normal/normal/flat/inverted`(영어enum 확정)·L171 interpretation=interp.
 - `crisis/growthAtRisk.py::growthAtRisk` **L65-71**(fciValues,gdpGrowthValues,*,horizon=4,quantiles)·키 currentGaR5/25/median/75/95/currentFCI/tailRisk/tailRiskLabel/skewness/horizon/observations/description·None가드 L138/L149/L160·observations=len(X_raw)=len(fci)-horizon.
 - `summary.py::_addGrowthAtRisk` **263-294**·fci.history 271-272·GDP fetch 275·NFCI fallback **284-287**(>=20)·call `_gar(fci,gdp,horizon=4)` L290.
+
+## 7. as-built 냉정평가 루프 (2026-06-21 · 운영자 goal "매크로 uiux 한번더 점검·99점 냉정평가까지 루프")
+
+> redesign + superstrengthen **구현본(as-built)** 을 5렌즈(honesty·uxpm·dataviz·frontend·redteam) 냉정 워크플로로 99점 게이트까지 반복 평가. 매 라운드 차단항목은 **소스 직접 검증**(에이전트 측정 인용 금지) 후 정밀 교정. baseline·종착 모두 **svelte-check 0 err · vitest green**.
+
+**점수 추이(min / confirmed):** R1 90/9 → R2 93/i18n → R3 82(payload 발견) → R4 90 → **R5 98/0** → R6 90/4(인접) → R7 90/1 → R8 97/2(minor) → R9 확정. confirmed 차단은 매 라운드 소스 검증 후 전부 해소, i18n 은 점진적으로 전층 폐쇄.
+
+**핵심 발견 = i18n EN 패리티 전층 누출.** regime lens 를 양언어화하자 주변 기존 표면이 단일언어 outlier 로 드러나며 층층이 노출: ① regime lens prose ② Phase Strip/Sector/GaR median/growthLabel ③ **transmission payload edge**(macro.json·production 기본경로·EDGE_TEMPLATES fallback만 양언어였음) ④ driver directionSemantics/group/unit(payload override 가 역누출) ⑤ **MacroPathRail.svelte** 칩 tooltip `tailwindLabelKr` ⑥ **analysis.macroExposure**(finance.json 157사) reason/indicator label/impact(MACRO_SERIES 43-id 밖 6 series 포함).
+
+**해소 아키텍처:**
+- regime lens = `{kr,en}` view-model + 템플릿 `T(x.kr,x.en)` (RegimeText 타입).
+- 콘텐츠층(edge/scenario/checkpoint/falsifier/driver/co-move/exposureQuality) = **빌더 lang 주입**(snapshot 빌더 `lang` 파라미터·default 'kr' → 테스트 KR 단언 보존). TerminalSurface `$derived` 가 반응형 lang 전달.
+- backend 한국어 bake(payload·analysis) = **결정론 EN 매핑**: `TR_FINLINE_EN/TR_EVIDENCE_EN/TR_FALSIFIER_EN`(payload edge 48문자열), `GROUP_EN/UNIT_EN`(driver), `ZONE_EN/SIGNAL_EN/GROWTH_LABEL_EN/REGIME_*`(regime enum), `EXPOSURE_REASON_EN/EXPOSURE_IMPACT_EN/EXPOSURE_SERIES_EN`(macroExposure 20 라벨). 미매핑은 원문(한국어) 유지 — EN 날조 금지(정직).
+- MacroPathRail = `T(s.tailwindLabelKr, s.tailwindLabelEn)`. dialog aria 11개 + pressureText 양언어. phaseHeadline = `.phase` enum(EN)·backend label(KR).
+
+**결정론 검증(에이전트 라운드보다 강함):** `macroLens.test.ts` "EN mode: comprehensive snapshot scan" — `macroWithRegime()`(payload+regime) + 비-null tailwind + macroExposure(미포함 series APT_PRICE) 로 snapshot 빌드 후 **재귀 Hangul 스캔**: `{kr,en}`·`X/XEn`·`XKr/XEn` 쌍은 EN 측만, regime 서브트리 포함, marketPhase/company/glance 제외. 한국어 누출 path 0 단언. + dialog/rail 직접 grep(bare 한국어 0). 종착: **vitest 43/43 · svelte-check 0 err**.
+
+**비차단 잔여(결함 아님·미적용):** GaR 세로막대 vs 수평팬(주관 인코딩·축 cue 로 완화), Phase/Pulse/Gate per-tile border(taste), deploy-state(live macro.json regime 키 부재 — 운영자 §4.5 배포단계 주입), 미래 backend 한국어 string future-proofing(현재 누출 0).
+
+**파일:** `lib/macroLens.ts`(view-model+빌더+EN맵)·`panels/MacroLensDialog.svelte`(템플릿+helper)·`panels/MacroPathRail.svelte`(칩 tooltip)·`lib/engine.ts`(Tailwind en/labelEn)·`lib/types.ts`(Tailwind 타입)·`TerminalSurface.svelte`(lang 배선)·`lib/macroLens.test.ts`(43 tests·포괄 스캔).
