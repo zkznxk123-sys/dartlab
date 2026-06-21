@@ -5,6 +5,7 @@
 	import { buildExposureMatrixRows, pickFocusCell } from '../lib/macroLens';
 	import { ECON_MAX } from '../charts/chartState.svelte';
 	import MacroPathRail from './MacroPathRail.svelte';
+	import RegimePlaneHero from './RegimePlaneHero.svelte';
 
 	interface Props {
 		snapshot: MacroLensSnapshot;
@@ -102,25 +103,10 @@
 	// 채널 열 클러스터: 켜진 채널만 열, 각 driver 칩을 자기 채널 열 아래로 모음(빈 셀 0).
 	const mapColumns = $derived(buildMapColumns(exposureRows));
 	const pulseDrivers = $derived(exposureRows.length ? exposureRows.slice(0, 6).map((r) => r.driver) : snapshot.topPressures.slice(0, 6));
-	// 국면 렌즈(Regime Lens·초강화) — A블록 inline <details>. macro.regime 부재 시 미가용.
+	// 심화 국면 렌즈(Regime Lens·초강화) — Plane hero 아래 <details>. macro.regime 부재 시 미가용(hero 는 라이브).
 	const regime = $derived(snapshot.regime);
 	const usLens = $derived(regime?.us ?? null);
 	const krLens = $derived(regime?.kr ?? null);
-	const transitionFrac = $derived(regime?.transitionFraction ?? null);
-	// 전이 phase 한국어 라벨 — us.transition.from/to 가 영어 phase 코드라 라벨 매핑.
-	const phaseKo: Record<string, string> = {
-		expansion: '확장', slowdown: '둔화', contraction: '수축', recovery: '회복',
-		stagflation: '스태그', reflation: '리플레', deflation: '디플레', goldilocks: '골디락스'
-	};
-	const phaseLabelKo = (p: string): string => (lang === 'en' ? (phaseEn[p] ?? p) : (phaseKo[p] ?? p));
-	// Phase Strip 헤드라인 — KR 은 backend 정본 label(침체 등), EN 은 phase enum(영문). phaseKo 재유도 금지(SSOT=엔진 label).
-	const phaseEn: Record<string, string> = {
-		expansion: 'Expansion', slowdown: 'Slowdown', contraction: 'Contraction', recovery: 'Recovery',
-		stagflation: 'Stagflation', reflation: 'Reflation', deflation: 'Deflation', goldilocks: 'Goldilocks'
-	};
-	const phaseHeadline = (p?: { label: string; phase: string } | null): string =>
-		p ? (lang === 'en' ? (phaseEn[p.phase] ?? p.phase) : (p.label || p.phase)) : '—';
-	const transitionText = $derived(transitionFrac ? `${phaseLabelKo(transitionFrac.from)}→${phaseLabelKo(transitionFrac.to)} ${transitionFrac.fraction} ${T('충족', 'met')}` : null);
 	let regimeOpen = $state(false);
 	// D블록 Gate Strip = evidenceGates 중 quant 제외 4개(데이터·전파·동행·회사).
 	const gateRows = $derived(snapshot.evidenceGates.filter((g) => g.id !== 'quant'));
@@ -205,12 +191,6 @@
 	const gateDetail = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.detailKr, g.detailEn);
 	const pct = (v: number) => `${Math.max(4, Math.min(100, Math.round(v * 100)))}%`;
 	const corrLeft = (corr: number | null) => `${Math.max(0, Math.min(100, ((corr ?? 0) + 1) * 50))}%`;
-	function motionLabel(value: string | null | undefined): string {
-		const raw = value ?? '—';
-		if (lang === 'en') return raw;
-		const key = raw.toLowerCase();
-		return key === 'rising' ? '상승' : key === 'falling' ? '하락' : key === 'stable' ? '횡보' : raw;
-	}
 	function goto(tabName: MacroLensTab, id = '') {
 		localFocus = id || activeFocusId;
 		localTab = tabName;
@@ -322,13 +302,17 @@
 
 		<div class="mlBody" class:mlVoid={localTab === 'dashboard' && !focusCell} id={tabPanelId} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
 			{#if localTab === 'dashboard'}
-				<!-- 블록 A — Phase Strip (클릭 → 국면 렌즈 toggle) -->
+				<!-- 블록 A — Regime Plane (GIP 4사분면 hero · 라이브 marketPhase, 배포 불요) -->
+				{#if snapshot.glance}
+					<RegimePlaneHero view={snapshot.glance.regime} {lang} />
+				{/if}
+				<!-- 심화 국면 렌즈 — macro.regime 배포 시 (침체 confluence · GaR · 수익률곡선) -->
 				{#if regime?.available}
 					<details class="mlRegimeFold" bind:open={regimeOpen}>
-						<summary class="mlPhaseStrip" aria-label={T('Macro 국면 — 클릭하면 국면 렌즈', 'Macro phases — click for Regime Lens')}>
-							<div><span>KR</span><b>{phaseHeadline(snapshot.marketPhase.kr)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
-							<div><span>US <i class="mlPhaseCaret" aria-hidden="true">{regimeOpen ? '▴' : '▾'}</i></span><b>{phaseHeadline(snapshot.marketPhase.us)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
-							<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind ? T(snapshot.sectorBinding.tailwind.kr, snapshot.sectorBinding.tailwind.en) : T(snapshot.company.sector.kr, snapshot.company.sector.en)}</b><em>{snapshot.sectorBinding.tailwind ? `${T(snapshot.sectorBinding.tailwind.label, snapshot.sectorBinding.tailwind.labelEn)} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
+						<summary class="mlRegimeSummary" aria-label={T('국면 렌즈 — 침체 confluence·GaR·수익률곡선', 'Regime Lens — recession confluence·GaR·yield curve')}>
+							<span class="mlBlockK">REGIME LENS</span>
+							<b>{T('침체 confluence · GaR · 수익률곡선', 'Recession confluence · GaR · yield curve')}</b>
+							<i class="mlPhaseCaret" aria-hidden="true">{regimeOpen ? '▴' : '▾'}</i>
 						</summary>
 						<!-- 국면 렌즈 (Regime Lens) — 회고는 phase, 검증은 아래 -->
 						<div class="mlRegimeLens" aria-label={T('국면 렌즈', 'Regime Lens')}>
@@ -407,13 +391,6 @@
 							{/if}
 						</div>
 					</details>
-				{:else}
-					<!-- regime 데이터 준비 전 — 기본 Phase Strip (전향 분수만, 이미 라이브) -->
-					<section class="mlPhaseStrip" aria-label={T('거시 국면', 'Macro phases')}>
-						<div><span>KR</span><b>{phaseHeadline(snapshot.marketPhase.kr)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
-						<div><span>US</span><b>{phaseHeadline(snapshot.marketPhase.us)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
-						<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind ? T(snapshot.sectorBinding.tailwind.kr, snapshot.sectorBinding.tailwind.en) : T(snapshot.company.sector.kr, snapshot.company.sector.en)}</b><em>{snapshot.sectorBinding.tailwind ? `${T(snapshot.sectorBinding.tailwind.label, snapshot.sectorBinding.tailwind.labelEn)} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
-					</section>
 				{/if}
 
 				<!-- 블록 B — Driver Pulse -->
@@ -849,23 +826,22 @@
 	.mlGrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.edgeGrid { grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); }
 	.scenarioGrid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-	/* 블록 A·B·D 스트립 (테두리 없음) */
-	.mlPhaseStrip, .mlPulseStrip, .mlGateStrip { display: grid; gap: 8px; }
-	.mlPhaseStrip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	/* 블록 B·D 스트립 (테두리 없음) */
+	.mlPulseStrip, .mlGateStrip { display: grid; gap: 8px; }
 	/* Driver Pulse — 데스크톱 가로 스트립(최대 6개 한 줄). 누락 시 단일 컬럼으로 붕괴되어 Map 을 화면 밖으로 밀어냄. */
 	.mlPulseStrip { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
-	.mlPhaseStrip div, .mlGate, .mlPulse { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
-	.mlPhaseStrip span, .mlGate span, .mlPulse span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-	.mlPhaseStrip b, .mlGate b, .mlPulse b { display: block; margin-top: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-	.mlPhaseStrip em, .mlGate em, .mlPulse em { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	/* US 칩 em — 전향 분수 inline 시도. 넘치면 자연 줄바꿈으로 .mlTransFrac 가 2번째 줄(9.5px dim)로 강등(A블록 height 재예산 0). */
-	.mlPhaseStrip div:nth-child(2) em { white-space: normal; overflow: visible; line-height: 1.35; }
-	/* 국면 렌즈 (Regime Lens) — A블록 inline <details>. summary = Phase Strip(클릭 toggle). */
+	.mlGate, .mlPulse { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
+	.mlGate span, .mlPulse span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+	.mlGate b, .mlPulse b { display: block; margin-top: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+	.mlGate em, .mlPulse em { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	/* 심화 국면 렌즈 (Regime Lens) — Plane hero 아래 <details>. summary = 컴팩트 바. */
 	.mlRegimeFold { display: block; }
 	.mlRegimeFold > summary { cursor: pointer; list-style: none; }
 	.mlRegimeFold > summary::-webkit-details-marker { display: none; }
+	.mlRegimeSummary { display: flex; align-items: center; gap: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 8px 10px; }
+	.mlRegimeSummary b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 700; }
+	.mlRegimeSummary:hover b { color: var(--amber); }
 	.mlPhaseCaret { font-style: normal; color: var(--amber); font-size: 9px; }
-	.mlTransFrac { margin-left: 5px; color: var(--dl-ink-muted, #7b8493); font-size: 9.5px; }
 	.mlRegimeLens { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px dashed var(--bd); }
 	.mlRegimeHead, .mlRegimeHeadKr { color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 700; line-height: 1.4; }
 	.mlRegimeHeadKr { margin-top: 4px; border-top: 1px dashed var(--bd); padding-top: 8px; color: var(--amber); }
@@ -1184,7 +1160,7 @@
 	.mlLimitSub { margin-top: 8px; color: var(--amber); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	@media (max-width: 760px) {
 		.mlModal { height: 92vh; }
-		.mlGrid.two, .mlPhaseStrip, .mlPulseStrip, .mlGateStrip, .mlDrill, .mlRailRows, .mlDashGate { grid-template-columns: 1fr; }
+		.mlGrid.two, .mlPulseStrip, .mlGateStrip, .mlDrill, .mlRailRows, .mlDashGate { grid-template-columns: 1fr; }
 		.mlTabs { min-height: 38px; padding-left: 8px; padding-right: 8px; }
 		.mlTabs button { min-width: 50px; min-height: 30px; padding: 8px 9px; text-align: center; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
