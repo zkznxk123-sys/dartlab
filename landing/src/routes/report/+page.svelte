@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { flushSync } from 'svelte';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
   import { setStaticBase, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
@@ -134,6 +135,20 @@
   });
   // 활성 관점(헤더 탭·검색 view·표지 등) — 빌드된 models 에서 선택. 없으면 첫 관점.
   const model = $derived(models.find((m) => m.perspectiveKey === perspectiveKey) ?? models[0] ?? null);
+
+  // 인쇄 = 5관점 전부 이어붙임. 화면은 활성 관점만 *렌더*(display:none 토글 금지 — 헤디드 Chrome 은
+  // 숨김 요소를 인쇄 시 재배치하지 않아 빈 페이지가 난다). beforeprint 에서 전체를 렌더(flushSync 동기 반영)
+  // 한 뒤 인쇄, afterprint 에서 원복. 버튼·Ctrl+P 둘 다 beforeprint 발화.
+  let printing = $state(false);
+  $effect(() => {
+    const before = () => { printing = true; flushSync(); };
+    const after = () => { printing = false; };
+    window.addEventListener('beforeprint', before);
+    window.addEventListener('afterprint', after);
+    return () => { window.removeEventListener('beforeprint', before); window.removeEventListener('afterprint', after); };
+  });
+  // 화면=활성 1개만 실제 렌더, 인쇄=5관점 전부. (숨김 후 인쇄-되살리기 대신 *렌더 자체*를 토글)
+  const renderModels = $derived(printing ? models : model ? [model] : []);
 
   function selectPerspective(key: string) {
     perspectiveKey = key;
@@ -272,7 +287,12 @@
 
   function printReport() {
     if (status !== 'ready' || !model || model.pending) return;
-    if (typeof window !== 'undefined') window.print();
+    if (typeof window === 'undefined') return;
+    // 5관점 전부 렌더(동기 반영) 후 인쇄 — beforeprint 미발화 환경 대비 버튼에서도 직접 토글.
+    // printing 원복은 afterprint 가 담당(window.print() 가 즉시 반환하는 브라우저에서 조기 원복 방지).
+    printing = true;
+    flushSync();
+    window.print();
   }
   function scrollSec(key: string) {
     document.getElementById(`sec-${key}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -400,10 +420,10 @@
         </div>
       </article>
     {:else if models.length}
-      {#each models as m (m.perspectiveKey)}
+      {#each renderModels as m (m.perspectiveKey)}
       {@const mPersp = findPerspective(m.perspectiveKey)}
       {@const allAnalysis = m.sections.every((s) => s.sourceEngine === 'analysis')}
-      <article class="sheet perspSheet" class:screenActive={m.perspectiveKey === perspectiveKey}>
+      <article class="sheet perspSheet">
         <!-- ── 표지 (관점마다 표지로 시작 — 인쇄 시 관점별 섹션 구분) ── -->
         <header class="cover">
           <div class="coverKicker">기업분석보고서 <span class="kSep">·</span> {m.perspectiveLabel}{#if m.perspectiveKey === perspectiveKey}<span class="perspInfoWrap"><button class="perspInfo" onclick={(e) => { e.stopPropagation(); perspTipOpen = !perspTipOpen; }} aria-label="이 관점이 답하는 질문" title="관점 설명">!</button>{#if perspTipOpen}<span class="perspTip" role="tooltip"><b>{mPersp.label}</b> — {mPersp.question}{#if mPersp.focusQuestions.length}<span class="perspTipQs">{#each mPersp.focusQuestions as fq}<span>{fq}</span>{/each}</span>{/if}</span>{/if}</span>{/if}</div>
@@ -667,9 +687,8 @@
     background: var(--sheet); border: 1px solid var(--bd); border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 12px 40px rgba(0, 0, 0, 0.10);
   }
-  /* 5관점은 항상 빌드돼 DOM 에 있다 — 화면은 활성 관점만, 인쇄는 전부(@media print). 탭 전환=재빌드 없이 즉시. */
-  .perspSheet { display: none; }
-  .perspSheet.screenActive { display: block; }
+  /* 5관점은 항상 빌드(models)돼 있고, 화면은 활성 1개만 *렌더*(renderModels), 인쇄는 beforeprint 가 전부 렌더.
+     display:none 후 인쇄-되살리기는 헤디드 Chrome 빈 페이지 버그라 쓰지 않는다(렌더 자체를 토글). */
   .skip, .pending { text-align: center; padding-top: 70px; padding-bottom: 70px; }
   .skip h1 { font-size: 22px; } .skipReason { font-family: var(--mono); color: var(--warn); }
   .retryBtn { margin-top: 16px; background: var(--accent); color: #fff; border: 0; padding: 7px 16px; border-radius: 7px; cursor: pointer; font-weight: 700; }
@@ -923,9 +942,8 @@
     .rptHeader, .toc, .secSrc { display: none !important; }
     .printPerspective { display: block; font-size: 11px; color: #555; margin-bottom: 12px; font-weight: 600; }
     .sheet { width: 100%; max-width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; border-radius: 0; }
-    /* 인쇄 = 5관점 전부 이어붙임(탭은 못 찍으니 연속 문서). 관점마다 새 페이지·"5관점 요약"은 첫 관점에만. */
-    .perspSheet { display: block !important; }
-    .perspSheet + .perspSheet { break-before: page; }
+    /* 인쇄 = 5관점 전부(beforeprint 가 렌더). 관점마다 새 페이지·"5관점 요약"은 첫 관점에만. */
+    .perspSheet + .perspSheet { break-before: page; page-break-before: always; }
     .perspSheet:not(:first-of-type) .overviewLead { display: none; }
     /* break-inside:avoid 는 *작은 원자 단위*에만 — 한 페이지보다 큰 섹션 컨테이너에 걸면 Chrome 이
        클리핑/빈 페이지를 낸다. 섹션은 하위 블록(.bTableWrap·.secHead) 경계에서 깔끔히 쪼개지게 둔다. */
