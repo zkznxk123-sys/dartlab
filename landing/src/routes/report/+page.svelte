@@ -687,12 +687,12 @@
   .coverFacts .fact:last-child { border-right: 0; }
   .coverFacts dt { font-size: 10px; color: var(--dim); letter-spacing: 0.05em; text-transform: uppercase; }
   .coverFacts dd { font-size: 13px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
-  .coverIntro { font-size: 13px; line-height: 1.75; color: var(--dim); margin: 18px 0 0; max-width: 70ch; }
+  .coverIntro { font-size: 13px; line-height: 1.75; color: var(--dim); margin: 18px 0 0; }
 
   /* ── 통합 리드 (5관점 한 몸 — 보고서 첫 페이지 executive overview) ── */
   .overviewLead { border: 1px solid var(--bd2); border-radius: 6px; background: var(--soft); padding: 16px 18px; margin-bottom: 26px; }
   .ovKicker { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 9px; }
-  .ovThesis { font-size: 13.5px; line-height: 1.72; font-weight: 600; margin: 0 0 12px; max-width: 82ch; }
+  .ovThesis { font-size: 13.5px; line-height: 1.72; font-weight: 600; margin: 0 0 12px; }
   .ovTakes { margin: 0; padding: 0; list-style: none; counter-reset: ov; }
   .ovTakes li { counter-increment: ov; border-top: 1px solid var(--bd); }
   .ovTake { display: block; width: 100%; text-align: left; background: transparent; border: 0; padding: 7px 0 7px 28px; cursor: pointer; font-family: var(--sans); position: relative; }
@@ -717,8 +717,8 @@
   .blockTitle .subNote { font-size: 10.5px; font-weight: 400; color: var(--dim); }
 
   /* ── 요약(Executive Summary) — 문서형 산문 리드 + 요약 지표표(카드 폐기) ── */
-  .leadProse { font-size: 15px; font-weight: 600; line-height: 1.68; letter-spacing: -0.005em; margin: 0 0 10px; max-width: 80ch; }
-  .leadSub { font-size: 12.5px; line-height: 1.75; color: var(--dim); margin: 0 0 14px; max-width: 80ch; }
+  .leadProse { font-size: 15px; font-weight: 600; line-height: 1.68; letter-spacing: -0.005em; margin: 0 0 10px; }
+  .leadSub { font-size: 12.5px; line-height: 1.75; color: var(--dim); margin: 0 0 14px; }
   .summaryTable { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 6px; border-top: 1px solid var(--bd2); }
   .summaryTable th { text-align: left; font-weight: 500; color: var(--dim); font-family: var(--sans); padding: 7px 10px 7px 0; border-bottom: 1px solid var(--bd); white-space: nowrap; width: 1%; }
   .summaryTable td { text-align: left; font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; padding: 7px 28px 7px 0; border-bottom: 1px solid var(--bd); }
@@ -766,7 +766,7 @@
   .rptSection.emph .secTitle::after { content: '핵심'; font-size: 10px; font-weight: 700; color: var(--emph); border: 1px solid var(--emph); border-radius: 4px; padding: 1px 5px; margin-left: 9px; vertical-align: middle; }
 
   .bHeading { font-size: 13px; font-weight: 700; margin: 16px 0 7px; color: var(--ink); }
-  .bText { font-size: 12.5px; line-height: 1.78; margin: 7px 0; max-width: 74ch; }
+  .bText { font-size: 12.5px; line-height: 1.78; margin: 7px 0; }
 
   .bMetrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 8px; margin: 12px 0; }
   .metric { background: var(--soft); border: 1px solid var(--bd); border-left: 2.5px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 7px; padding: 9px 13px; display: flex; flex-direction: column; gap: 4px; }
