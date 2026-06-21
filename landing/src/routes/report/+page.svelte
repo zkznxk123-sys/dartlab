@@ -5,7 +5,9 @@
   import { setStaticBase, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
   import type { IndexRow } from '@dartlab/ui-contracts';
   import { getPublicRuntime } from '$lib/runtime/publicRuntime';
-  import { DARTLAB_BRAND_LINKS, SupportDialog } from '@dartlab/ui-surfaces/terminal';
+  // 헤더 = 터미널 top bar 디자인 그대로 재사용(.dlTerm 스코프 + 터미널 클래스). 색·아이콘·SNS 동일 SSOT.
+  import '@dartlab/ui-surfaces/terminal/terminal.css';
+  import { DARTLAB_BRAND_LINKS, SupportDialog, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
   import { buildReport, buildOverview } from '$lib/report/build';
   import { isSkipped, type ReportModel, type OverviewModel } from '$lib/report/model';
   import { PERSPECTIVES } from '$lib/report/perspectives';
@@ -17,6 +19,9 @@
   const rt = getPublicRuntime();
   // SNS·후원 링크 = dartlab 공통 SSOT(터미널 상단과 동일 정본).
   const links = DARTLAB_BRAND_LINKS;
+  // GitHub 스타 라이브 배지 — 터미널 SNS 와 동일(fetchGithubStars 재사용). null=미조회/실패(배지 숨김).
+  let ghStars = $state<number | null>(null);
+  fetchGithubStars(links.repo).then((n) => (ghStars = n));
 
   // 화이트/다크 — A4 용지 위 두 모드. 기본 = 화이트(진짜 보고서). 헤더 크롬은 항상 다크 에디토리얼.
   let theme = $state<'light' | 'dark'>('light');
@@ -39,6 +44,18 @@
   let query = $state('');
   let showSuggest = $state(false);
   let selIdx = $state(-1);
+  let cmdInput = $state<HTMLInputElement | null>(null);
+  // ⌘K / `/` 종목검색 포커스 — 터미널 cmdBar 와 동일 거동.
+  $effect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); cmdInput?.focus(); }
+      else if (e.key === '/' && !inInput) { e.preventDefault(); cmdInput?.focus(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
   const suggestions = $derived.by(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [] as IndexRow[];
@@ -260,35 +277,38 @@
 </svelte:head>
 
 <div class="rptRoot" class:dark={theme === 'dark'}>
-  <!-- ── 헤더(다크 에디토리얼 크롬) — 터미널 상단과 결을 맞춘 brand · 종목검색 · SNS / 관점탭 ── -->
-  <header class="rptHeader">
-    <div class="hdrRow hdrTop">
-      <a class="hBrand" href="{base}/terminal" title="dartlab terminal">
+  <!-- ── 헤더 = 터미널 top bar 디자인 그대로(.dlTerm 스코프 + terminal.css 재사용). 단일행: brand · 관점탭 · 종목검색 · 테마/인쇄 · SNS ── -->
+  <header class="rptHeader dlTerm">
+    <div class="topBar">
+      <a class="brand" href="{base}/terminal" title="dartlab terminal">
         <picture>
           <source srcset="{base}/avatar.webp" type="image/webp" />
-          <img class="hBrandLogo" src="{base}/avatar.png" alt="DartLab" width="22" height="22" />
+          <img class="brandLogo" src="{base}/avatar.png" alt="DartLab" width="22" height="22" />
         </picture>
-        <span class="hBrandName">DartLab</span>
-        <span class="hBrandSlash">/</span>
-        <span class="hBrandTag">report</span>
+        <span class="brandName">DartLab</span>
+        <span class="brandSlash">/</span>
+        <span class="brandTag">report</span>
       </a>
 
-      <form class="hSearch" role="search" onsubmit={onSearchSubmit}>
-        <span class="hSearchIcon" aria-hidden="true">⌕</span>
-        <input
-          class="hSearchInput"
-          bind:value={query}
-          spellcheck={false}
-          oninput={onSearchInput}
-          onkeydown={onSearchKey}
-          onfocus={onSearchInput}
+      <div class="hdrLinks perspLinks">
+        {#each PERSPECTIVES as p}
+          <button class={'hdrLink' + (p.key === perspectiveKey ? ' on' : '')} disabled={!p.built}
+            onclick={() => selectPerspective(p.key)} title={p.question}>{p.label}</button>
+        {/each}
+      </div>
+
+      <form class="cmdBar" role="search" onsubmit={onSearchSubmit}>
+        <span class="cmdPrompt">‹GO›</span>
+        <input class="cmdInput" bind:this={cmdInput} bind:value={query} spellcheck={false}
+          oninput={onSearchInput} onkeydown={onSearchKey} onfocus={onSearchInput}
           onblur={() => setTimeout(() => (showSuggest = false), 120)}
-          placeholder={`종목 검색 — 현재 ${model?.corpName ?? data.sym}`}
-          aria-label="종목 검색" />
+          placeholder={`종목 검색 — 현재 ${model?.corpName ?? data.sym}`} aria-label="종목 검색" />
+        <kbd class="cmdKbd">⌘K</kbd>
+        <button class="cmdGo" type="submit">GO</button>
         {#if showSuggest && suggestions.length}
-          <div class="hSuggest">
+          <div class="suggest">
             {#each suggestions as s, i (s.stockCode)}
-              <button type="button" class={'hSuggestRow' + (i === selIdx ? ' on' : '')}
+              <button type="button" class={'suggestRow' + (i === selIdx ? ' on' : '')}
                 onmousedown={() => selectCompany(s.stockCode)} onmouseenter={() => (selIdx = i)}>
                 <span class="sgName">{s.corpName}</span>
                 <span class="sgCode">{s.stockCode}</span>
@@ -299,37 +319,37 @@
         {/if}
       </form>
 
-      <nav class="hSns" aria-label="dartlab 채널">
-        <a class="snsBtn" href={links.repo} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" /><path d="M9 18c-4.51 2-5-2-7-2" /></svg>
-        </a>
-        <button class="snsBtn snsHeart" onclick={() => (supportOpen = true)} title="후원·기여" aria-label="후원·기여">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="rgba(251, 113, 133, 0.32)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+      <div class="topRight">
+        <button class="snsBtn" onclick={toggleTheme} title={theme === 'light' ? '다크 모드' : '화이트 모드'} aria-label="테마 전환">
+          {#if theme === 'light'}
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          {:else}
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          {/if}
         </button>
-        <a class="snsBtn" href={links.youtube} target="_blank" rel="noopener" title="YouTube" aria-label="YouTube">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-        </a>
-        <a class="snsBtn" href={links.threads} target="_blank" rel="noopener" title="Threads · @dartlab.ai" aria-label="Threads">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z"/></svg>
-        </a>
-        <a class="snsBtn" href={links.instagram} target="_blank" rel="noopener" title="Instagram · @dartlab.ai" aria-label="Instagram">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
-        </a>
-      </nav>
-    </div>
-
-    <div class="hdrRow hdrTabs">
-      <nav class="perspTabs" aria-label="관점">
-        {#each PERSPECTIVES as p}
-          <button class={'perspTab' + (p.key === perspectiveKey ? ' on' : '') + (p.built ? '' : ' pending')}
-            onclick={() => selectPerspective(p.key)} title={p.question}>
-            {p.label}{#if !p.built}<span class="ptMeta">준비 중</span>{/if}
+        <button class="snsBtn" onclick={printReport} disabled={status !== 'ready' || !!model?.pending} title="인쇄 / PDF" aria-label="인쇄 / PDF">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+        </button>
+        <nav class="sns" aria-label="dartlab 채널">
+          <a class="snsBtn" href={links.repo} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" /><path d="M9 18c-4.51 2-5-2-7-2" /></svg>
+          </a>
+          {#if ghStars != null}
+            <a class="ghStars" href={links.repo} target="_blank" rel="noopener" title="GitHub 스타로 응원"><span class="ghStar">★</span>{fmtStars(ghStars)}</a>
+          {/if}
+          <button class="snsBtn snsHeart" onclick={() => (supportOpen = true)} title="후원·기여" aria-label="후원·기여">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="rgba(251, 113, 133, 0.32)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
           </button>
-        {/each}
-      </nav>
-      <div class="hdrTools">
-        <button class="hTool" onclick={toggleTheme} title="화이트/다크 전환">{theme === 'light' ? '🌙 다크' : '☀ 화이트'}</button>
-        <button class="hTool hPrint" onclick={printReport} disabled={status !== 'ready' || !!model?.pending}>🖨 인쇄 / PDF</button>
+          <a class="snsBtn" href={links.youtube} target="_blank" rel="noopener" title="YouTube" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          </a>
+          <a class="snsBtn" href={links.threads} target="_blank" rel="noopener" title="Threads · @dartlab.ai" aria-label="Threads">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z"/></svg>
+          </a>
+          <a class="snsBtn" href={links.instagram} target="_blank" rel="noopener" title="Instagram · @dartlab.ai" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+          </a>
+        </nav>
       </div>
     </div>
   </header>
@@ -598,60 +618,16 @@
     --e-analysis: #fb923c; --e-credit: #f85149; --e-quant: #56d4dd; --e-industry: #2bc583; --e-macro: #d29922; --e-story: #9385ff;
   }
 
-  /* ── 헤더(다크 에디토리얼 크롬) — 본문 라이트/다크와 무관하게 항상 dartlab 토큰(--dl-*) 기반.
-     터미널 상단 톤과 결을 맞춘 brand · 종목검색 · SNS / 관점탭. ── */
-  .rptHeader {
+  /* ── 헤더 = 터미널 top bar 그대로 재사용(terminal.css · .dlTerm 스코프). 색·brand·cmdBar·SNS·hdrLink 는
+     terminal.css 가 소유(단일 SSOT). 여기선 .dlTerm 의 전체화면 레이아웃(100vh·flex·overflow:hidden)만
+     중화해 sticky 헤더로 쓴다 — 내 자체 색/스타일 없음. ── */
+  .rptHeader.dlTerm {
+    height: auto; display: block; overflow: visible;
     position: sticky; top: 0; z-index: 30;
-    background: color-mix(in srgb, var(--dl-bg-base, #0f0f10) 92%, #000);
-    border-bottom: 1px solid var(--dl-line-strong, rgba(255, 255, 255, 0.12));
-    color: var(--dl-ink, #e8eaef);
-    font-family: var(--dl-font-ui, 'Pretendard Variable', sans-serif);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
-  .hdrRow { display: flex; align-items: center; gap: 12px; padding: 0 16px; max-width: var(--dl-w-max, 1440px); margin-inline: auto; }
-  .hdrTop { height: 46px; }
-  .hdrTabs { height: 40px; border-top: 1px solid var(--dl-line, rgba(255, 255, 255, 0.06)); }
-
-  .hBrand { display: inline-flex; align-items: baseline; gap: 6px; text-decoration: none; color: var(--dl-ink, #e8eaef); flex: 0 0 auto; }
-  .hBrandLogo { border-radius: 50%; align-self: center; }
-  .hBrandName { font-family: var(--dl-font-head, 'Newsreader', serif); font-weight: 700; font-size: 16px; letter-spacing: -0.02em; }
-  .hBrandSlash { color: var(--dl-ink-faint, #4a5160); font-weight: 300; }
-  .hBrandTag { font-family: var(--dl-font-mono, 'JetBrains Mono', monospace); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--dl-orange, #fb923c); }
-
-  /* 종목검색 — 공통 작업대(loadJson) 유니버스 위 autocomplete. 헤더 중앙. */
-  .hSearch { position: relative; display: flex; align-items: center; gap: 6px; flex: 1 1 auto; max-width: 460px; margin: 0 auto; height: 30px; padding: 0 10px; border: 1px solid var(--dl-line-strong, rgba(255, 255, 255, 0.12)); border-radius: 8px; background: var(--dl-bg-raised, #16171a); }
-  .hSearch:focus-within { border-color: var(--dl-orange, #fb923c); }
-  .hSearchIcon { color: var(--dl-ink-dim, #6b7280); font-size: 15px; line-height: 1; }
-  .hSearchInput { flex: 1; background: transparent; border: 0; outline: none; color: var(--dl-ink, #e8eaef); font-size: 12.5px; font-family: var(--dl-font-ui, sans-serif); min-width: 0; }
-  .hSearchInput::placeholder { color: var(--dl-ink-dim, #6b7280); }
-  .hSuggest { position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: var(--dl-bg-modal, #25272d); border: 1px solid var(--dl-line-strong, rgba(255, 255, 255, 0.12)); border-radius: 8px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45); overflow: hidden; z-index: 40; max-height: 320px; overflow-y: auto; }
-  .hSuggestRow { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 'name code' 'ind code'; align-items: center; gap: 0 10px; width: 100%; text-align: left; background: transparent; border: 0; padding: 7px 12px; cursor: pointer; color: var(--dl-ink, #e8eaef); border-bottom: 1px solid var(--dl-line, rgba(255, 255, 255, 0.06)); }
-  .hSuggestRow:last-child { border-bottom: 0; }
-  .hSuggestRow.on, .hSuggestRow:hover { background: var(--dl-bg-overlay, #1d1f23); }
-  .hSuggestRow .sgName { grid-area: name; font-size: 13px; font-weight: 600; }
-  .hSuggestRow .sgCode { grid-area: code; font-family: var(--dl-font-mono, monospace); font-size: 11.5px; color: var(--dl-orange, #fb923c); }
-  .hSuggestRow .sgInd { grid-area: ind; font-size: 10.5px; color: var(--dl-ink-dim, #6b7280); }
-
-  /* SNS — 터미널 상단과 동일 채널(GitHub · ♥ 후원 · YouTube · Threads · Instagram). */
-  .hSns { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
-  .snsBtn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px; border: 0; background: transparent; color: var(--dl-ink-mute, #a3a8b3); cursor: pointer; text-decoration: none; transition: color 0.15s, background 0.15s; }
-  .snsBtn:hover { color: var(--dl-ink, #e8eaef); background: var(--dl-bg-overlay, #1d1f23); }
-  .snsHeart:hover { color: #fb7185; }
-
-  /* 관점 탭 — 좌측 rail 폐기, 헤더 상단 가로 탭. 활성 = 브랜드 오렌지 언더라인. */
-  .perspTabs { display: flex; align-items: stretch; gap: 2px; flex: 1 1 auto; min-width: 0; overflow-x: auto; }
-  .perspTab { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 13px; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--dl-ink-mute, #a3a8b3); font-size: 13px; font-weight: 600; font-family: var(--dl-font-ui, sans-serif); cursor: pointer; white-space: nowrap; transition: color 0.15s; }
-  .perspTab:hover { color: var(--dl-ink, #e8eaef); }
-  .perspTab.on { color: var(--dl-orange, #fb923c); border-bottom-color: var(--dl-orange, #fb923c); }
-  .perspTab.pending { opacity: 0.55; }
-  .ptMeta { font-size: 9px; font-family: var(--dl-font-mono, monospace); color: var(--dl-ink-dim, #6b7280); border: 1px dashed var(--dl-line-strong, rgba(255, 255, 255, 0.18)); border-radius: 3px; padding: 0 4px; }
-
-  .hdrTools { display: flex; align-items: center; gap: 7px; flex: 0 0 auto; }
-  .hTool { background: var(--dl-bg-raised, #16171a); color: var(--dl-ink, #e8eaef); border: 1px solid var(--dl-line-strong, rgba(255, 255, 255, 0.12)); padding: 5px 11px; border-radius: 7px; cursor: pointer; font-size: 12px; white-space: nowrap; }
-  .hTool:hover { border-color: var(--dl-orange, #fb923c); }
-  .hPrint { background: var(--dl-orange, #fb923c); color: #1a1206; border-color: transparent; font-weight: 700; }
-  .hPrint:hover { filter: brightness(1.08); }
-  .hPrint:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+  /* 관점 탭 = 터미널 .hdrLink(amber active) 그대로. 한 줄, 넘치면 가로 스크롤(스크롤바 숨김). */
+  .perspLinks { overflow-x: auto; scrollbar-width: none; }
+  .perspLinks::-webkit-scrollbar { display: none; }
 
   .main { min-width: 0; }
 
@@ -890,8 +866,6 @@
 
   /* ── 반응형 ── */
   @media (max-width: 860px) {
-    .hdrTop { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
-    .hSearch { order: 3; flex-basis: 100%; max-width: none; margin: 0; }
     .sheet { max-width: calc(100vw - 24px); padding: 32px 22px 30px; }
     .coverTitle { font-size: 28px; }
   }

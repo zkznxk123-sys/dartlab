@@ -18,6 +18,8 @@ export type {
 export { DARTLAB_BRAND_LINKS } from './lib/brandLinks';
 export { LAST_SYM_KEY } from './lib/lastSymbol';
 export { warmCompany } from './lib/warmup';
+// GitHub 스타 라이브 배지 — landing 보고서 헤더 등 다른 셸이 터미널과 동일한 SNS 배지를 재현할 때 재사용.
+export { fetchGithubStars, fmtStars } from './lib/githubStars';
 // 데이터 형태 — landing 셸 글루(terminal-shell/routeLoad.ts)의 RawData 조립 + ui/web 브리지(localTerminalData) 소비.
 export type {
 	RawData,

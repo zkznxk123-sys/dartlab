@@ -14,6 +14,7 @@
 			"svelte": "./src/terminal/index.ts",
 			"default": "./src/terminal/index.ts"
 		},
+		"./terminal/terminal.css": "./src/terminal/terminal.css",
 		"./terminal/dev": {
 			"types": "./src/terminal/dev/index.ts",
 			"svelte": "./src/terminal/dev/index.ts",
