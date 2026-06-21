@@ -1,6 +1,6 @@
 # DartLab 부채 정직화 (Debt-Honesty)
 
-> 상태: **PRD 확정 (2026-06-21) · 6 전문가 적대 평가 3라운드 → 전원 ≥95 통과(min 97, blocking 0) · ground-truth 교정 11항 반영.** (운영자 goal "dartlab 전수조사 → 약점 개선 플랜 → 개별 95점 냉정평가까지 토론 루프"의 산출물). 착수 = 운영자 go. 백엔드/가드/문서가 주 범위이나 P2 UI 제거는 운영자 push 승인 필수.
+> 상태: **PRD 확정 (2026-06-21) · 1차(7차원)+2차(미감사 13엔진+landing+ui-packages) 전수조사 = 66 finding · 6 전문가 적대 평가 5라운드(R1~R3 1차 PRD min 97, R4~R5 2차 확장 min 97) → 전원 ≥95 통과(blocking 0) · ground-truth 교정 12+항 반영.** (운영자 goal "dartlab 전수조사 → 약점 개선 플랜 → 개별 95점 냉정평가까지 토론 루프"의 산출물). **커버리지 = 전 엔진+landing+ui-packages(ui/web·blog만 제외).** 착수 = 운영자 go. 백엔드/가드/문서가 주 범위이나 P2 UI 제거는 운영자 push 승인 필수.
 > 거처: src/dartlab + tests + .github + ui + 문서. SSOT = `mainPlan/debt-honesty/`.
 
 ---
@@ -29,6 +29,8 @@
 | ③ **표면 드리프트** | MCP·AGENTS·catalog·README_EN 광고 ≠ 현실 5종 | P0·P2 |
 | ④ **god 무게** | providers 82배·Company god-class·builders.py 6,111줄 등 | P3 (위임·점진) |
 | ⑤ **테스트 비율** | viz 6%·macro 6%·story 15% 단위테스트 빈약 | P3 |
+
+**2차 census 보강(§2.8)** — 운영자 "모든 엔진·랜딩·프론트 다 봤나(web·blog 빼고)" 요청에 미감사 13엔진+landing+ui-packages 전수(5 finder). **38 신규 finding**, 같은 5 메타테마 재현 + 새 메커니즘 2종: ① **importlib 문자열 import가 AST 레이어 가드 우회**(analysis→macro L2→L2·synth→frame/scan L1.5 cross — "0건 보장" 거짓) ② **"빌드-후-미배선" 유령 ~6-8K LOC**(analysis/graph 1,147·quant transforms 719·server/api 죽은라우터 1,840·core/plugins 312·ui-pkg throw-stub 7포트 등 — 전부 importer/caller 0). 내 P2-3도 정정(charts.ts 죽음, live=surfaces MiniFinChart 단독). **커버리지 = 전 엔진+landing+ui-packages(ui/web·blog만 제외).**
 
 ---
 
