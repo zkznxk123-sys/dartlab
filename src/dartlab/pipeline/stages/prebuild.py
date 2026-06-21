@@ -116,7 +116,10 @@ def _analyzeMarket(market: str) -> dict:
     try:
         from huggingface_hub import hf_hub_download
 
-        path = hf_hub_download(
+        from dartlab.core.hfRetry import retryHfCall
+
+        path = retryHfCall(
+            hf_hub_download,
             repo_id=_REPO_ID,
             repo_type="dataset",
             filename=f"macro/cycle/{lower}.json",
@@ -148,7 +151,10 @@ def _loadRegime(market: str) -> dict:
     try:
         from huggingface_hub import hf_hub_download
 
-        path = hf_hub_download(
+        from dartlab.core.hfRetry import retryHfCall
+
+        path = retryHfCall(
+            hf_hub_download,
             repo_id=_REPO_ID,
             repo_type="dataset",
             filename=f"macro/regime/{lower}.json",
