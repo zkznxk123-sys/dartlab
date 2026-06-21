@@ -202,32 +202,6 @@ def extract_data(stockCode: str) -> dict | None:
         print(f"  [WARN] CF 추출 실패: {e}")
         result["CF"] = None
 
-    # --- SCE ---
-    try:
-        df = c.show("SCE", **freq_kw) if not is_edgar else None
-        if df is not None and len(df) > 0:
-            years = recent_periods(df.columns)
-            item_col = "항목" if "항목" in df.columns else df.columns[0]
-            rows = []
-            for row in df.iter_rows(named=True):
-                name = row.get(item_col, "")
-                if not name or name == "":
-                    continue
-                vals = []
-                for y in years:
-                    v = row.get(y)
-                    vals.append(fmt_억(v, is_edgar) if isinstance(v, (int, float)) else str(v or "—"))
-                # "cause / detail" 형태면 cause만 사용
-                display_name = name.split(" / ")[0].strip() if " / " in name else name
-                rows.append((display_name, vals))
-            # 너무 많으면 주요 항목만 (15행 제한)
-            result["SCE"] = {"years": years, "rows": rows[:15]}
-        else:
-            result["SCE"] = None
-    except Exception as e:
-        print(f"  [WARN] SCE 추출 실패: {e}")
-        result["SCE"] = None
-
     # --- Filings ---
     try:
         df = c.filings()
@@ -374,12 +348,10 @@ def build_auto_section(data: dict) -> str:
     parts.append("> ```python")
     parts.append("> import dartlab")
     parts.append(f'> c = dartlab.Company("{sc}")')
-    parts.append('> c.show("IS")              # 손익계산서 (분기)')
-    parts.append('> c.show("IS", freq="Y")    # 손익계산서 (연간)')
-    parts.append('> c.show("BS")              # 재무상태표')
-    parts.append('> c.show("CF")              # 현금흐름표')
-    parts.append('> c.show("SCE")             # 자본변동표')
-    parts.append('> c.show("ratios")          # 재무비율')
+    parts.append('> c.select("IS", freq="Y")  # 손익계산서 (연간)')
+    parts.append('> c.select("BS", freq="Y")  # 재무상태표')
+    parts.append('> c.select("CF", freq="Y")  # 현금흐름표')
+    parts.append('> c.select("ratios")        # 재무비율')
     parts.append("> ```")
     parts.append("")
 
@@ -422,11 +394,6 @@ def build_auto_section(data: dict) -> str:
             )
             parts.append("")
         parts.append(build_table(d["rows"], d["years"], ""))
-
-    # SCE
-    if data.get("SCE") and len(data["SCE"]["rows"]) > 0:
-        d = data["SCE"]
-        parts.append(build_table(d["rows"], d["years"], "자본변동표 (SCE) — 단위 " + unit_label + ""))
 
     now = datetime.now().strftime("%Y-%m-%d")
     parts.append(f"*최종 갱신: {now} | dartlab 실측 (DART 공시 기준)*")
