@@ -15,7 +15,7 @@ ogImage: /thumbnails/34-operating-cash-flow-vs-net-income.webp
 
 하지만 실제로는 이 지점이 사업의 질을 가장 빨리 갈라주는 경우가 많다. 영업현금흐름은 회계상 이익이 실제 현금 회수로 이어지고 있는지 보여준다. 그래서 순이익이 좋아도 영업현금흐름이 약하면, 먼저 낙관보다 원인을 분해하는 쪽이 맞다.
 
-이 글은 `순이익 -> 영업현금흐름 -> 운전자본 -> 비현금 이익 -> 다음 보고서 추적` 순서로 읽는 법을 정리한다. 채권과 대손충당금은 [매출채권과 대손충당금 읽는 법](/blog/receivables-and-allowance), 재고 쪽은 [재고자산과 평가손실 읽는 법](/blog/receivables-and-allowance), 성장의 질 전체는 [매출은 느는데 왜 위험할 수 있나](/blog/why-rising-sales-can-still-be-risky)와 같이 보면 더 잘 맞물린다.
+이 글은 `순이익 -> 영업현금흐름 -> 운전자본 -> 비현금 이익 -> 다음 보고서 추적` 순서로 읽는 법을 정리한다. 채권과 대손충당금은 [매출채권과 대손충당금 읽는 법](/blog/receivables-and-allowance), 재고 쪽은 재고자산과 평가손실 읽는 법, 성장의 질 전체는 [매출은 느는데 왜 위험할 수 있나](/blog/why-rising-sales-can-still-be-risky)와 같이 보면 더 잘 맞물린다.
 
 ![영업현금흐름과 순이익의 관계를 어떤 순서로 읽어야 하는지 정리한 구조도](./assets/035-reading-flow.svg)
 
@@ -183,7 +183,7 @@ ogImage: /thumbnails/34-operating-cash-flow-vs-net-income.webp
 ## 관련 분석 글
 
 - [매출채권과 대손충당금 읽는 법](/blog/receivables-and-allowance)
-- [재고자산과 평가손실 읽는 법](/blog/receivables-and-allowance)
+- 재고자산과 평가손실 읽는 법
 - [매출은 느는데 왜 위험할 수 있나](/blog/why-rising-sales-can-still-be-risky)
 - [사업보고서에서 CEO 말보다 숫자가 중요한 순간](/blog/reading-business-reports)
 

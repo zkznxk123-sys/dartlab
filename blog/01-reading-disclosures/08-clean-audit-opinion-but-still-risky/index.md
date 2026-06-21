@@ -15,7 +15,7 @@ ogImage: /thumbnails/08-clean-audit-opinion-but-still-risky.webp
 
 그래서 적정 의견과 위험 신호는 얼마든지 함께 존재할 수 있다. KAM이 반복되고, 계속기업 관련 문구가 무거워지고, 우발부채와 소송이 커지고, 정정공시가 잦고, 영업현금흐름이 약해지는 회사는 적정 의견 아래에서도 충분히 불안할 수 있다.
 
-이 글은 감사의견 적정이라는 한 줄에서 멈추지 않고 `KAM -> 계속기업 관련 문구 -> 우발부채·소송 -> 정정공시 반복 -> 현금흐름·지배구조 확인` 순서로 읽는 방법을 정리한다. 기본 구조는 [감사보고서와 KAM은 어디까지 믿어야 하나](/blog/audit-report-and-kam), 우발 위험은 [우발부채와 소송 공시 읽는 법](/blog/audit-report-and-kam), 현금 신호는 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income)와 같이 보면 더 선명해진다.
+이 글은 감사의견 적정이라는 한 줄에서 멈추지 않고 `KAM -> 계속기업 관련 문구 -> 우발부채·소송 -> 정정공시 반복 -> 현금흐름·지배구조 확인` 순서로 읽는 방법을 정리한다. 기본 구조는 [감사보고서와 KAM은 어디까지 믿어야 하나](/blog/audit-report-and-kam), 우발 위험은 우발부채와 소송 공시 읽는 법, 현금 신호는 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income)와 같이 보면 더 선명해진다.
 
 ![감사의견 적정 아래에서 무엇을 추가로 확인해야 하는지 정리한 구조도](./assets/040-reading-flow.svg)
 
@@ -48,7 +48,7 @@ ogImage: /thumbnails/08-clean-audit-opinion-but-still-risky.webp
 | 영업현금흐름 | 손익 설명이 실제 현금으로 이어지는지 본다 |
 | 지배구조·특수관계인 | 누가 부담을 지고 누가 혜택을 받는지 본다 |
 
-이 항목들을 같이 붙여 보면 감사의견 적정이 더 이상 결론처럼 보이지 않는다. 오히려 `어디를 더 봐야 하는지 알려주는 출발점`으로 바뀐다. 예를 들어 KAM이 재고나 매출 인식에 집중되어 있으면 [재고자산과 평가손실 읽는 법](/blog/receivables-and-allowance)이나 [매출채권과 대손충당금 읽는 법](/blog/receivables-and-allowance)으로 내려가서 숫자를 다시 붙여 보는 편이 훨씬 유용하다.
+이 항목들을 같이 붙여 보면 감사의견 적정이 더 이상 결론처럼 보이지 않는다. 오히려 `어디를 더 봐야 하는지 알려주는 출발점`으로 바뀐다. 예를 들어 KAM이 재고나 매출 인식에 집중되어 있으면 재고자산과 평가손실 읽는 법이나 [매출채권과 대손충당금 읽는 법](/blog/receivables-and-allowance)으로 내려가서 숫자를 다시 붙여 보는 편이 훨씬 유용하다.
 
 ![감사의견 적정 아래에서 같이 확인해야 할 레이어를 정리한 도식](./assets/040-evidence-layer.svg)
 
@@ -189,7 +189,7 @@ ogImage: /thumbnails/08-clean-audit-opinion-but-still-risky.webp
 ## 관련 분석 글
 
 - [감사보고서와 KAM은 어디까지 믿어야 하나](/blog/audit-report-and-kam)
-- [우발부채와 소송 공시 읽는 법](/blog/audit-report-and-kam)
+- 우발부채와 소송 공시 읽는 법
 - [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income)
 - [DART 정정공시를 파이프라인에서 다루는 법](/blog/corp-code-to-filing-pipeline)
 - [지배구조가 위험한 회사는 어떤 패턴을 보이나](/blog/governance-red-flags)

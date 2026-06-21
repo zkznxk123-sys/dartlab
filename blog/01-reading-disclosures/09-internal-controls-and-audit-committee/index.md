@@ -15,7 +15,7 @@ ogImage: /thumbnails/09-internal-controls-and-audit-committee.webp
 
 특히 정정공시가 잦거나, KAM이 같은 항목에서 반복되거나, 우발부채·보증 구조가 복잡한 회사일수록 감사위원회 활동과 내부회계 운영실태를 같이 보는 편이 좋다. 여기서 반복되는 빈칸은 대개 숫자보다 늦지 않게 문제를 드러낸다.
 
-이 글은 내부회계관리제도와 감사위원회 활동을 `감독 구조 -> 출석과 안건 -> 내부회계 운영실태 -> 외부감사 연결 -> 후속 정정공시와 숫자` 순서로 읽는 방법을 정리한다. 기본 감사 프레임은 [감사의견이 적정이어도 불안한 회사는 어떤 패턴을 보이나](/blog/clean-audit-opinion-but-still-risky), KAM 읽기는 [사업보고서에서 감사보고서와 KAM 읽는 법](/blog/audit-report-and-kam), 보증·약정 구조는 [지급보증·담보·약정 공시는 어디가 위험 신호인가](/blog/audit-report-and-kam)와 같이 보면 좋다.
+이 글은 내부회계관리제도와 감사위원회 활동을 `감독 구조 -> 출석과 안건 -> 내부회계 운영실태 -> 외부감사 연결 -> 후속 정정공시와 숫자` 순서로 읽는 방법을 정리한다. 기본 감사 프레임은 [감사의견이 적정이어도 불안한 회사는 어떤 패턴을 보이나](/blog/clean-audit-opinion-but-still-risky), KAM 읽기는 [사업보고서에서 감사보고서와 KAM 읽는 법](/blog/audit-report-and-kam), 보증·약정 구조는 지급보증·담보·약정 공시는 어디가 위험 신호인가와 같이 보면 좋다.
 
 ![내부회계관리제도와 감사위원회 활동을 어떤 순서로 읽어야 하는지 정리한 구조도](./assets/044-reading-flow.svg)
 
@@ -57,7 +57,7 @@ ogImage: /thumbnails/09-internal-controls-and-audit-committee.webp
 
 또 하나 유용한 포인트는 `위원 구성과 전문성`이다. 숫자상 독립성이 충분해 보여도 실제 재무·회계 안건을 소화할 수 있는지, 회의 빈도와 안건 밀도가 균형적인지 보는 편이 좋다. 위원 경력이 화려하다는 사실보다 실제로 무엇을 검토하고 어떻게 기록하는지가 더 중요하다.
 
-실전에서는 이 문서를 혼자 읽기보다 [사업보고서에서 감사보고서와 KAM 읽는 법](/blog/audit-report-and-kam), [우발부채와 소송 공시 읽는 법](/blog/audit-report-and-kam), [지급보증·담보·약정 공시는 어디가 위험 신호인가](/blog/audit-report-and-kam)와 묶어 보면 좋다. 같은 회사가 통제, 리스크, 주석, 감사 문구에서 어떤 패턴을 반복하는지가 더 중요하기 때문이다.
+실전에서는 이 문서를 혼자 읽기보다 [사업보고서에서 감사보고서와 KAM 읽는 법](/blog/audit-report-and-kam), 우발부채와 소송 공시 읽는 법, 지급보증·담보·약정 공시는 어디가 위험 신호인가와 묶어 보면 좋다. 같은 회사가 통제, 리스크, 주석, 감사 문구에서 어떤 패턴을 반복하는지가 더 중요하기 때문이다.
 
 ![내부회계관리제도와 감사위원회 활동을 읽을 때 같이 붙여야 할 레이어를 정리한 도식](./assets/044-evidence-layer.svg)
 
@@ -185,7 +185,7 @@ ogImage: /thumbnails/09-internal-controls-and-audit-committee.webp
 
 - [감사의견이 적정이어도 불안한 회사는 어떤 패턴을 보이나](/blog/clean-audit-opinion-but-still-risky)
 - [사업보고서에서 감사보고서와 KAM 읽는 법](/blog/audit-report-and-kam)
-- [지급보증·담보·약정 공시는 어디가 위험 신호인가](/blog/audit-report-and-kam)
+- 지급보증·담보·약정 공시는 어디가 위험 신호인가
 - [DART 정정공시를 파이프라인에서 다루는 법](/blog/corp-code-to-filing-pipeline)
 
 ## 공식 출처와 근거

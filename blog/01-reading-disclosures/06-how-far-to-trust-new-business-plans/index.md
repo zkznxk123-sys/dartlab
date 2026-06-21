@@ -15,7 +15,7 @@ ogImage: /thumbnails/06-how-far-to-trust-new-business-plans.webp
 
 하지만 실전에서는 계획보다 증거가 먼저다. 설비투자, 인허가, 인력 충원, 고객 계약, 자금조달, 주석과 후속 공시가 붙지 않는 신규사업 계획은 설명일 수는 있어도 아직 사업이라고 보기 어렵다.
 
-이 글은 신규사업 계획을 `문장 -> 실행 자원 -> 고객·계약 -> 자금조달 -> 후속 공시와 숫자` 순서로 읽는 방법을 정리한다. 사업의 내용 텍스트는 [사업보고서 II. 사업의 내용, 이 섹션이 투자 판단을 바꾼다](/blog/business-section-changes-judgment), 말과 숫자의 충돌은 [사업보고서에서 CEO 말보다 숫자가 중요한 순간](/blog/reading-business-reports), 자금 뒷받침은 [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)이나 [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)과 같이 보면 더 현실적으로 읽힌다.
+이 글은 신규사업 계획을 `문장 -> 실행 자원 -> 고객·계약 -> 자금조달 -> 후속 공시와 숫자` 순서로 읽는 방법을 정리한다. 사업의 내용 텍스트는 [사업보고서 II. 사업의 내용, 이 섹션이 투자 판단을 바꾼다](/blog/business-section-changes-judgment), 말과 숫자의 충돌은 [사업보고서에서 CEO 말보다 숫자가 중요한 순간](/blog/reading-business-reports), 자금 뒷받침은 유상증자 공시 읽는 법이나 전환사채와 BW 공시 읽는 법과 같이 보면 더 현실적으로 읽힌다.
 
 ![신규사업 계획을 어떤 순서로 검증해야 하는지 정리한 구조도](./assets/042-reading-flow.svg)
 
@@ -190,8 +190,8 @@ ogImage: /thumbnails/06-how-far-to-trust-new-business-plans.webp
 
 - [사업보고서 II. 사업의 내용, 이 섹션이 투자 판단을 바꾼다](/blog/business-section-changes-judgment)
 - [사업보고서에서 CEO 말보다 숫자가 중요한 순간](/blog/reading-business-reports)
-- [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
-- [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
+- 유상증자 공시 읽는 법
+- 전환사채와 BW 공시 읽는 법
 - [좋은 사업보고서와 위험한 사업보고서는 무엇이 다른가](/blog/reading-business-reports)
 
 ## 관련 공식 자료

@@ -43,11 +43,11 @@ ogImage: /thumbnails/11-audit-fees-and-non-audit-fees.webp
 | 정정공시·재감사 | 감사 품질과 후속 문제를 연결해 볼 수 있다 |
 | 같은 감사인의 역할 범위 | 감사 외 업무가 과도한지 본다 |
 
-실전에서는 감사보수와 감사시간을 같이 보는 것이 가장 중요하다. 감사보수만 보면 싼지 비싼지 판단이 잘 안 된다. 하지만 감사시간까지 같이 보면 회사가 받은 감사 자원의 대략적 감이 잡힌다. 특히 연결 구조가 복잡하거나 [환율 손익과 파생상품은 본업을 어떻게 왜곡하나](/blog/foreign-exchange-gains-and-derivatives), [메자닌 보호조항과 리픽싱은 누구에게 유리한가](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change) 같은 이슈가 많은 회사는 감사 난이도가 원래 높다.
+실전에서는 감사보수와 감사시간을 같이 보는 것이 가장 중요하다. 감사보수만 보면 싼지 비싼지 판단이 잘 안 된다. 하지만 감사시간까지 같이 보면 회사가 받은 감사 자원의 대략적 감이 잡힌다. 특히 연결 구조가 복잡하거나 [환율 손익과 파생상품은 본업을 어떻게 왜곡하나](/blog/foreign-exchange-gains-and-derivatives), 메자닌 보호조항과 리픽싱은 누구에게 유리한가 같은 이슈가 많은 회사는 감사 난이도가 원래 높다.
 
 그다음은 전년 대비 변화다. 감사보수가 크게 늘었는데 그 이유가 신규 자회사 편입, 재고 실사 범위 확대, 내부회계 강화, 정정 이슈 대응인지 확인해야 한다. 반대로 회사는 더 복잡해졌는데 감사보수와 감사시간이 거의 변하지 않았다면 투자자는 한 번 더 멈춰야 한다.
 
-비감사보수는 반드시 성격을 적어야 한다. 세무 신고 지원, 내부통제 자문, 가치평가, M&A 관련 자문은 의미가 다르다. 특히 회사가 동시에 자금조달, 구조조정, 감자, 합병, 자산 매각 같은 큰 이벤트를 진행 중이라면 감사인과 비감사 용역의 관계는 더 민감하게 읽어야 한다. 이때 [감자와 주식병합 공시는 무엇을 먼저 봐야 하나](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change), [합병·분할 공시는 어디를 먼저 봐야 하나](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change) 같은 글과의 연결이 생긴다.
+비감사보수는 반드시 성격을 적어야 한다. 세무 신고 지원, 내부통제 자문, 가치평가, M&A 관련 자문은 의미가 다르다. 특히 회사가 동시에 자금조달, 구조조정, 감자, 합병, 자산 매각 같은 큰 이벤트를 진행 중이라면 감사인과 비감사 용역의 관계는 더 민감하게 읽어야 한다. 이때 감자와 주식병합 공시는 무엇을 먼저 봐야 하나, 합병·분할 공시는 어디를 먼저 봐야 하나 같은 글과의 연결이 생긴다.
 
 ![감사보수와 비감사보수 해석에 필요한 증거 레이어를 정리한 도식](./assets/064-evidence-layer.svg)
 
@@ -171,7 +171,7 @@ ogImage: /thumbnails/11-audit-fees-and-non-audit-fees.webp
 - [감사 전 재무제표 정정과 재감사는 어디서 위험 신호가 보이나](/blog/restatement-before-audit-and-reaudit-signals)
 - [적정 의견이 적정이어도 불안한 회사는 어떤 패턴을 보이나](/blog/clean-audit-opinion-but-still-risky)
 - [계속기업 관련 불확실성 문구는 어디서 강해지나](/blog/clean-audit-opinion-but-still-risky)
-- [메자닌 보호조항과 리픽싱은 누구에게 유리한가](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
+- 메자닌 보호조항과 리픽싱은 누구에게 유리한가
 
 ## 출처
 

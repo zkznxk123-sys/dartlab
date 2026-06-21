@@ -154,7 +154,7 @@ ogImage: /thumbnails/24-why-rising-sales-can-still-be-risky.webp
 | 가장 불편한 지점 | 다음에 볼 글 |
 | --- | --- |
 | 매출채권 | [매출채권과 대손충당금 읽는 법](/blog/receivables-and-allowance) |
-| 재고 | [재고자산과 평가손실 읽는 법](/blog/receivables-and-allowance) |
+| 재고 | 재고자산과 평가손실 읽는 법 |
 | 마진 압력과 투자 | [사업보고서에서 감가상각 읽는 법](/blog/capacity-utilization-capex) |
 | 말과 숫자 충돌 | [사업보고서에서 CEO 말보다 숫자가 중요한 순간](/blog/reading-business-reports) |
 

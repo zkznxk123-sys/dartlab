@@ -52,7 +52,7 @@ ogImage: /thumbnails/25-development-costs-and-intangibles.webp
 
 그다음은 상각과 손상이다. 무형자산이 늘어도 상각이 너무 느리거나 손상이 거의 없으면, 자산이 부담을 뒤로 미루는 장치가 될 수 있다. 반대로 자산화는 늘어도 상각과 손상이 비교적 일찍 따라오고, 그 사이 매출과 영업현금흐름이 실제로 개선되면 다른 읽기가 가능하다.
 
-마지막으로 꼭 붙여야 하는 것은 현금과 자금조달이다. 개발비는 손익에서 비용이 덜 보이게 만들 수 있어도 현금지출 자체를 없애지 못한다. 그래서 자산은 늘고 손익은 덜 나빠 보이는데 영업현금흐름은 약하고, 뒤이어 증자나 CB/BW가 붙는 구조라면 조심해서 봐야 한다. 이 부분은 [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change), [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)과 함께 보면 훨씬 또렷하다.
+마지막으로 꼭 붙여야 하는 것은 현금과 자금조달이다. 개발비는 손익에서 비용이 덜 보이게 만들 수 있어도 현금지출 자체를 없애지 못한다. 그래서 자산은 늘고 손익은 덜 나빠 보이는데 영업현금흐름은 약하고, 뒤이어 증자나 CB/BW가 붙는 구조라면 조심해서 봐야 한다. 이 부분은 유상증자 공시 읽는 법, 전환사채와 BW 공시 읽는 법과 함께 보면 훨씬 또렷하다.
 
 ![개발비와 무형자산을 읽을 때 같이 확인해야 할 레이어를 정리한 도식](./assets/045-evidence-layer.svg)
 
@@ -175,8 +175,8 @@ ogImage: /thumbnails/25-development-costs-and-intangibles.webp
 - [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex)
 - [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)
 - [공시에서 신규사업 계획은 어디까지 믿어야 하나](/blog/how-far-to-trust-new-business-plans)
-- [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
-- [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
+- 유상증자 공시 읽는 법
+- 전환사채와 BW 공시 읽는 법
 
 ## 공식 출처와 근거
 

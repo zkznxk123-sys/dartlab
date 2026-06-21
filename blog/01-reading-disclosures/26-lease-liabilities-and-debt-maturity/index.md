@@ -15,7 +15,7 @@ ogImage: /thumbnails/26-lease-liabilities-and-debt-maturity.webp
 
 같은 1조원 차입이라도 5년 이상 분산된 만기와 충분한 영업현금흐름을 가진 회사는 다르게 읽어야 하고, 1년 안에 대규모 상환이 몰려 있는데 영업현금흐름과 보유현금이 약한 회사는 훨씬 더 보수적으로 봐야 한다. 리스부채도 마찬가지다. 사용권자산과 함께 잡히는 리스 구조는 겉으로 보기엔 안정적일 수 있어도, 실제로는 고정 현금 유출 압박으로 작동할 수 있다.
 
-이 글은 리스부채와 차입 만기 구조를 `부채 총액 -> 만기 분포 -> 영업현금흐름 -> 차환 가능성 -> 다음 보고서 추적` 순서로 읽는 방법을 정리한다. 현금 검증은 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income), 숫자 해석의 기본은 [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers), 고정비 압박은 [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex), 구조 재편 이벤트는 [감자와 주식병합 공시는 무엇을 먼저 봐야 하나](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)와 같이 보면 더 잘 맞물린다.
+이 글은 리스부채와 차입 만기 구조를 `부채 총액 -> 만기 분포 -> 영업현금흐름 -> 차환 가능성 -> 다음 보고서 추적` 순서로 읽는 방법을 정리한다. 현금 검증은 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income), 숫자 해석의 기본은 [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers), 고정비 압박은 [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex), 구조 재편 이벤트는 감자와 주식병합 공시는 무엇을 먼저 봐야 하나와 같이 보면 더 잘 맞물린다.
 
 ![리스부채와 차입 만기 구조를 어떤 순서로 읽어야 하는지 정리한 구조도](./assets/047-reading-flow.svg)
 
@@ -82,7 +82,7 @@ ogImage: /thumbnails/26-lease-liabilities-and-debt-maturity.webp
 
 핵심은 부채가 많으냐 적으냐가 아니라 `가까운 만기 압박을 스스로 소화할 수 있느냐`다. 건강한 경우는 만기표와 현금창출력이 어느 정도 맞물린다. 더 조심해야 하는 경우는 부채 총액보다 단기 구간과 리스료 지급이 먼저 문제를 만든다.
 
-특히 차입 만기가 짧은데 동시에 신규사업 설명만 커지고 있거나, 자산 매각·증자·사채 발행이 반복적으로 붙으면 위험 해석이 달라진다. 이럴 때는 [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change), [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change), [공시에서 신규사업 계획은 어디까지 믿어야 하나](/blog/how-far-to-trust-new-business-plans)까지 함께 보는 편이 좋다.
+특히 차입 만기가 짧은데 동시에 신규사업 설명만 커지고 있거나, 자산 매각·증자·사채 발행이 반복적으로 붙으면 위험 해석이 달라진다. 이럴 때는 유상증자 공시 읽는 법, 전환사채와 BW 공시 읽는 법, [공시에서 신규사업 계획은 어디까지 믿어야 하나](/blog/how-far-to-trust-new-business-plans)까지 함께 보는 편이 좋다.
 
 ---
 
@@ -181,8 +181,8 @@ ogImage: /thumbnails/26-lease-liabilities-and-debt-maturity.webp
 - [생산능력·가동률·설비투자 읽는 법](/blog/capacity-utilization-capex)
 - [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex)
 - [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)
-- [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
-- [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
+- 유상증자 공시 읽는 법
+- 전환사채와 BW 공시 읽는 법
 - [공시에서 신규사업 계획은 어디까지 믿어야 하나](/blog/how-far-to-trust-new-business-plans)
 
 ## 공식 출처와 근거

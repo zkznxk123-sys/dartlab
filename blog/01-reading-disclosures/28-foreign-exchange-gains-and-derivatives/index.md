@@ -78,7 +78,7 @@ ogImage: /thumbnails/28-foreign-exchange-gains-and-derivatives.webp
 
 건강한 경우의 핵심은 복잡한 숫자를 단순하게 설명할 수 있다는 점이다. 어떤 통화에 노출돼 있고, 어떤 계약으로 어떻게 줄였으며, 그 결과 손익과 현금이 어느 정도 맞물리는지 읽힌다. 반대로 더 조심해야 하는 경우는 환율 효과를 강조하면서도 정작 차입 구조와 파생 계약의 목적, 현금 연결은 흐리다.
 
-특히 순이익이 개선됐는데 영업이익은 평범하고, 외화 차입 부담은 커지고, 다음 분기 자금조달 이벤트까지 붙는다면 [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)이나 [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)까지 같이 보는 편이 맞다. 환율 손익은 때로 자금 구조 불안을 잠깐 가려 주는 역할을 할 수 있기 때문이다.
+특히 순이익이 개선됐는데 영업이익은 평범하고, 외화 차입 부담은 커지고, 다음 분기 자금조달 이벤트까지 붙는다면 유상증자 공시 읽는 법이나 전환사채와 BW 공시 읽는 법까지 같이 보는 편이 맞다. 환율 손익은 때로 자금 구조 불안을 잠깐 가려 주는 역할을 할 수 있기 때문이다.
 
 ---
 

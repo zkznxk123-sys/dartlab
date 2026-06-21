@@ -87,7 +87,7 @@ ogImage: /thumbnails/18-biotech-company-filings.webp
 - **현금 활주로(runway)**: 현금성자산 / 번 레이트 = 추가 자금 조달 없이 버틸 수 있는 개월 수. 12개월 미만이면 곧 유상증자나 CB/BW 발행이 나온다.
 - **자금 조달 이력**: 유상증자를 몇 번 했는지, 전환사채(CB)·신주인수권부사채(BW)를 발행했는지. 반복적인 자금 조달은 기존 주주 희석을 의미한다.
 
-[영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income)의 기본 프레임이 바이오에서도 그대로 작동한다. [전환사채·신주인수권부사채 공시](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)에서 CB/BW 구조의 주주 희석 효과를 상세하게 다뤘다.
+[영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income)의 기본 프레임이 바이오에서도 그대로 작동한다. 전환사채·신주인수권부사채 공시에서 CB/BW 구조의 주주 희석 효과를 상세하게 다뤘다.
 
 ![바이오에서 먼저 봐야 할 5가지 숫자와 각각의 과열 신호를 정리한 체크보드](./assets/102-five-numbers-checklist.svg)
 
@@ -185,7 +185,7 @@ ogImage: /thumbnails/18-biotech-company-filings.webp
 
 **바이오에서 매출이 갑자기 늘면 좋은 신호인가?**
 
-반드시 그렇지 않다. 바이오 매출 급증은 대부분 마일스톤 일시 인식이다. 다음 분기에 같은 규모가 반복될 가능성은 낮다. 매출 구성에서 제품 매출과 기술이전 매출을 분리해서, 제품 매출의 추세를 따로 봐야 한다. [매출 인식 시점 변경은 어디가 신호인가](/blog/operating-cash-flow-vs-net-income)에서 이 문제를 더 깊게 다뤘다.
+반드시 그렇지 않다. 바이오 매출 급증은 대부분 마일스톤 일시 인식이다. 다음 분기에 같은 규모가 반복될 가능성은 낮다. 매출 구성에서 제품 매출과 기술이전 매출을 분리해서, 제품 매출의 추세를 따로 봐야 한다. 매출 인식 시점 변경은 어디가 신호인가에서 이 문제를 더 깊게 다뤘다.
 
 **개발비 잔액이 크면 좋은 것 아닌가?**
 
@@ -193,7 +193,7 @@ ogImage: /thumbnails/18-biotech-company-filings.webp
 
 **유상증자를 하면 무조건 나쁜 신호인가?**
 
-바이오에서 유상증자는 사업 모델의 일부다. 매출이 없으니 외부 자금 조달이 불가피하다. 문제는 **빈도와 조건**이다. 2~3년마다 한 번이고 조건이 합리적이면 정상이다. 매년 반복하고, 할인율이 점점 커지며, CB·BW의 리픽싱 조건이 극단적이면 기존 주주를 희석시키면서 버티는 구조다. [전환사채·신주인수권부사채 공시](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)에서 상세하게 다뤘다.
+바이오에서 유상증자는 사업 모델의 일부다. 매출이 없으니 외부 자금 조달이 불가피하다. 문제는 **빈도와 조건**이다. 2~3년마다 한 번이고 조건이 합리적이면 정상이다. 매년 반복하고, 할인율이 점점 커지며, CB·BW의 리픽싱 조건이 극단적이면 기존 주주를 희석시키면서 버티는 구조다. 전환사채·신주인수권부사채 공시에서 상세하게 다뤘다.
 
 **CMO·CDMO는 일반 바이오와 같은 기준으로 읽어야 하나?**
 
@@ -213,7 +213,7 @@ ogImage: /thumbnails/18-biotech-company-filings.webp
 - [개발비·무형자산은 어디서 과열 신호가 보이나](/blog/development-costs-and-intangibles) — 자산화 정책의 보수성 판단, 손상 지연 감지
 
 **매출 인식과 기술이전**
-- [매출 인식 시점 변경은 어디가 신호인가](/blog/operating-cash-flow-vs-net-income) — 마일스톤 일시 인식과 매출 변동 해석
+- 매출 인식 시점 변경은 어디가 신호인가 — 마일스톤 일시 인식과 매출 변동 해석
 - [신사업·사업 다각화 공시는 어디까지 믿어야 하나](/blog/how-far-to-trust-new-business-plans) — 파이프라인 확장의 실현 가능성 판단
 
 **현금흐름과 생존**
@@ -221,7 +221,7 @@ ogImage: /thumbnails/18-biotech-company-filings.webp
 - [계속기업 불확실성은 어디가 진짜 위험인가](/blog/clean-audit-opinion-but-still-risky) — 자본잠식, 계속기업 판단 기준
 
 **자금 조달과 주주 희석**
-- [전환사채·신주인수권부사채 공시](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change) — CB·BW 구조와 희석 계산
+- 전환사채·신주인수권부사채 공시 — CB·BW 구조와 희석 계산
 
 **감사와 경고 신호**
 - [감사보고서와 핵심감사사항은 무엇을 먼저 봐야 하나](/blog/audit-report-and-kam) — KAM에서 개발비 리스크 읽기
