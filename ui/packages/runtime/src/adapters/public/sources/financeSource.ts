@@ -5,6 +5,8 @@
 // 타입 정본 = contracts (옛 로컬 재정의는 contracts 로 승격 완료 — 중복 정의 금지).
 import type { FinCard, FinMode, FinScope, FinSeries, Num, StmtKind, StmtRow, TerminalFinance, TerminalFinanceBundle } from '@dartlab/ui-contracts';
 import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
+// 28 표준계정·계정매칭·파싱 primitive 는 data/finance/accounts.ts 단일 SSOT (블로그 annual.ts 와 공유).
+import { buildGrid, FINANCE_COLUMNS, isStock, num, Q_BY_CODE, type Parsed, type RawRow } from '../../../data/finance/accounts';
 
 const browser = typeof window !== 'undefined';
 
@@ -41,98 +43,7 @@ const STMT_DEF: Record<StmtKind, { key: string; kr: string; en: string }[]> = {
 	]
 };
 
-// ── 28 표준계정 (accounts.py _STANDARDS 포팅) ──
-interface StdAcct {
-	key: string;
-	sj: 'IS' | 'BS' | 'CF' | 'CIS';
-	ids: string[]; // account_id (IFRS) 우선
-	kw: string[]; // account_nm 키워드 fallback
-	ex?: string[]; // nm 매칭 제외 키워드 — includes 포함매칭의 오선택 차단 (예: longDebt 가 '유동성장기차입금'을 잡는 사고)
-}
-const STD: StdAcct[] = [
-	// IS
-	{ key: 'revenue', sj: 'IS', ids: ['ifrs-full_Revenue', 'ifrs_Revenue'], kw: ['매출액', '영업수익', '수익(매출액)'] },
-	{ key: 'costOfSales', sj: 'IS', ids: ['ifrs-full_CostOfSales', 'ifrs_CostOfSales'], kw: ['매출원가'] },
-	{ key: 'grossProfit', sj: 'IS', ids: [], kw: ['매출총이익'] },
-	{ key: 'operatingIncome', sj: 'IS', ids: ['dart_OperatingIncomeLoss', 'ifrs-full_ProfitLossFromOperatingActivities', 'ifrs_OperatingProfitLoss'], kw: ['영업이익', '영업이익(손실)'] },
-	{ key: 'netIncome', sj: 'IS', ids: ['ifrs-full_ProfitLoss', 'ifrs_ProfitLoss'], kw: ['당기순이익', '당기순이익(손실)', '순이익'] },
-	{ key: 'sga', sj: 'IS', ids: ['dart_TotalSellingGeneralAdministrativeExpenses', 'ifrs-full_SellingGeneralAndAdministrativeExpense'], kw: ['판매비와관리비', '판매관리비'] },
-	{ key: 'financeIncome', sj: 'IS', ids: ['ifrs-full_FinanceIncome', 'ifrs_FinanceIncome'], kw: ['금융수익'] },
-	{ key: 'financeCosts', sj: 'IS', ids: ['ifrs-full_FinanceCosts', 'ifrs_FinanceCosts'], kw: ['금융비용'] },
-	{ key: 'incomeTax', sj: 'IS', ids: ['ifrs-full_IncomeTaxExpenseContinuingOperations', 'ifrs_IncomeTaxExpense'], kw: ['법인세비용'] },
-	// BS
-	{ key: 'assets', sj: 'BS', ids: ['ifrs-full_Assets', 'ifrs_Assets'], kw: ['자산총계'] },
-	{ key: 'currentAssets', sj: 'BS', ids: ['ifrs-full_CurrentAssets', 'ifrs_CurrentAssets'], kw: ['유동자산'] },
-	{ key: 'cash', sj: 'BS', ids: ['ifrs-full_CashAndCashEquivalents', 'ifrs_CashAndCashEquivalents'], kw: ['현금및현금성자산', '현금성자산'] },
-	{ key: 'inventories', sj: 'BS', ids: ['ifrs-full_Inventories', 'ifrs_Inventories'], kw: ['재고자산'] },
-	{ key: 'receivables', sj: 'BS', ids: ['ifrs-full_TradeAndOtherCurrentReceivables', 'dart_ShortTermTradeReceivable'], kw: ['매출채권'] },
-	{ key: 'liabilities', sj: 'BS', ids: ['ifrs-full_Liabilities', 'ifrs_Liabilities'], kw: ['부채총계'] },
-	{ key: 'currentLiabilities', sj: 'BS', ids: ['ifrs-full_CurrentLiabilities', 'ifrs_CurrentLiabilities'], kw: ['유동부채'] },
-	{ key: 'payables', sj: 'BS', ids: ['ifrs-full_TradeAndOtherCurrentPayables', 'dart_ShortTermTradePayables'], kw: ['매입채무'] },
-	{ key: 'shortDebt', sj: 'BS', ids: ['ifrs-full_ShorttermBorrowings', 'ifrs_ShorttermBorrowings'], kw: ['단기차입금'], ex: ['유동성'] },
-	// '유동성장기차입금'.includes('장기차입금')=true 라 ex 가드 없이는 longDebt 가 유동성 행을
-	// 오선택/이중계상 — 차입 3분해(shortDebt·currentLtDebt·longDebt)의 정합 전제.
-	{ key: 'longDebt', sj: 'BS', ids: ['ifrs-full_LongtermBorrowings', 'ifrs_LongtermBorrowings'], kw: ['장기차입금', '사채'], ex: ['유동성'] },
-	{ key: 'currentLtDebt', sj: 'BS', ids: [], kw: ['유동성장기차입금', '유동성장기부채', '유동성사채'] },
-	{ key: 'equity', sj: 'BS', ids: ['ifrs-full_Equity', 'ifrs_Equity'], kw: ['자본총계'] },
-	{ key: 'capitalStock', sj: 'BS', ids: ['ifrs-full_IssuedCapital', 'ifrs_IssuedCapital', 'dart_IssuedCapital'], kw: ['자본금'], ex: ['잉여금'] },
-	{ key: 'capitalSurplus', sj: 'BS', ids: ['ifrs-full_SharePremium', 'dart_AdditionalPaidInCapital', 'ifrs_SharePremium'], kw: ['자본잉여금', '주식발행초과금'] },
-	{ key: 'retainedEarnings', sj: 'BS', ids: ['ifrs-full_RetainedEarnings', 'ifrs_RetainedEarnings'], kw: ['이익잉여금'] },
-	// CF
-	{ key: 'cfOperating', sj: 'CF', ids: ['ifrs-full_CashFlowsFromUsedInOperatingActivities', 'ifrs_CashFlowsFromUsedInOperatingActivities'], kw: ['영업활동현금흐름', '영업활동'] },
-	{ key: 'cfInvesting', sj: 'CF', ids: ['ifrs-full_CashFlowsFromUsedInInvestingActivities', 'ifrs_CashFlowsFromUsedInInvestingActivities'], kw: ['투자활동현금흐름', '투자활동'] },
-	{ key: 'cfFinancing', sj: 'CF', ids: ['ifrs-full_CashFlowsFromUsedInFinancingActivities', 'ifrs_CashFlowsFromUsedInFinancingActivities'], kw: ['재무활동현금흐름', '재무활동'] },
-	{ key: 'capex', sj: 'CF', ids: ['ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities', 'dart_PurchaseOfPropertyPlantAndEquipment'], kw: ['유형자산의취득', '유형자산취득'] },
-	{ key: 'dividendsPaid', sj: 'CF', ids: ['ifrs-full_DividendsPaidClassifiedAsFinancingActivities', 'ifrs_DividendsPaid'], kw: ['배당금지급'] },
-	// CIS — 포괄손익계산서 원본 레인. 기존 CIS→IS 정규화(단일 포괄손익 회사의 손익 카드 생명줄)와
-	// 완전 별개로, CIS 가 있는 모든 회사에서 포괄손익 격차 카드·SCE 브리지 OCI 폴백에 쓴다.
-	{ key: 'cisNetIncome', sj: 'CIS', ids: ['ifrs-full_ProfitLoss', 'ifrs_ProfitLoss'], kw: ['당기순이익', '분기순이익', '반기순이익'] },
-	{ key: 'cisComprehensive', sj: 'CIS', ids: ['ifrs-full_ComprehensiveIncome', 'ifrs_ComprehensiveIncome'], kw: ['총포괄손익', '총포괄이익'] }
-];
-const STD_BY_KEY: Record<string, StdAcct> = Object.fromEntries(STD.map((s) => [s.key, s]));
-const isStock = (k: string) => STD_BY_KEY[k]?.sj === 'BS';
-
 const TRILLION = 1e12; // 조 KRW 환산
-
-interface RawRow extends Record<string, unknown> {
-	sj_div?: string | null;
-	fs_div?: string | null;
-	reprt_code?: string | null;
-	rcept_no?: string | null;
-	bsns_year?: string | number | null;
-	account_id?: string | null;
-	account_nm?: string | null;
-	account_detail?: string | null;
-	thstrm_amount?: string | number | null;
-	thstrm_add_amount?: string | number | null;
-	ord?: string | number | null;
-}
-interface Parsed {
-	sj: string;
-	year: number;
-	q: number; // 1..4
-	id: string;
-	nm: string;
-	detail: string;
-	ord: number;
-	amt: number; // 누적(YTD) for IS/CF, 시점 for BS
-}
-
-const Q_BY_CODE: Record<string, number> = { '11013': 1, '11012': 2, '11014': 3, '11011': 4 };
-
-function num(v: unknown): number | null {
-	if (typeof v === 'number') return Number.isFinite(v) ? v : null;
-	if (typeof v === 'bigint') return Number(v);
-	if (typeof v === 'string' && v.trim()) {
-		const n = Number(v.replace(/,/g, ''));
-		return Number.isFinite(n) ? n : null;
-	}
-	return null;
-}
-
-// thstrm_add_amount = 누적(YTD) 금액 — 정량재무제표 표(분기단독 Q4=연간−Q3누적·누적freq)가 쓴다. 차트 번들엔
-// 불요지만 같은 parquet read 를 공유(표·차트 1회 다운로드)하려 컬럼셋 통일.
-const FINANCE_COLUMNS = ['sj_div', 'fs_div', 'reprt_code', 'rcept_no', 'bsns_year', 'account_id', 'account_nm', 'account_detail', 'thstrm_amount', 'thstrm_add_amount', 'ord'];
 
 // 표시 모드: 연간 / 분기(standalone 단일분기) / TTM(직전 4분기 합). 기본 = 분기 (계약 FinMode·번들 정의는 contracts).
 
@@ -297,22 +208,7 @@ function buildBundle(rows: RawRow[], fs: FinScope, availScopes: FinScope[]): Ter
 
 	// 표준계정 × (year,q) 매핑 — STD 별 독립 매칭 (row 소비/순서 의존 없음).
 	// id 매칭 우선, 없으면 nm 키워드. 같은 셀 다중 후보 시 account_detail='-' 우선·ord 최소.
-	type PK = string; // `${year}-${q}`
-	const score = (x: Parsed, byId: boolean) => (byId ? 0 : 1000) + (x.detail === '-' || x.detail === '' ? 0 : 100) + Math.min(x.ord, 99);
-	const grid: Record<string, Map<PK, Parsed>> = {};
-	for (const s of STD) {
-		const m = new Map<PK, Parsed>();
-		for (const p of parsed) {
-			if (p.sj !== s.sj) continue;
-			const idHit = s.ids.length > 0 && s.ids.includes(p.id);
-			const nmHit = !idHit && s.kw.some((k) => p.nm.includes(k)) && !s.ex?.some((x) => p.nm.includes(x));
-			if (!idHit && !nmHit) continue;
-			const pk = `${p.year}-${p.q}`;
-			const cur = m.get(pk);
-			if (!cur || score(p, idHit) < score(cur, s.ids.includes(cur.id))) m.set(pk, p);
-		}
-		grid[s.key] = m;
-	}
+	const grid = buildGrid(parsed);
 
 	// 사용 가능한 (year,q) 모음 (자산총계 또는 매출 존재 기준) — 분기 우선
 	const pkSet = new Set<string>();
