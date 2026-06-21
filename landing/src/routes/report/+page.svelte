@@ -615,9 +615,9 @@
   .rptRoot {
     --backdrop: #e8eaed; --sheet: #ffffff; --ink: #1b1e23; --dim: #6b7178;
     --bd: #e6e9ed; --bd2: #d6dbe1; --soft: #f6f7f9;
-    /* accent·emph·analysis = dartlab 브랜드(red→orange) — 옛 블루 #0b63d6 폐기(off-brand). 흰 용지 대비용 deep orange. */
-    --accent: #c2410c; --up: #1a7f37; --down: #c0392b; --warn: #9a6700; --emph: #c2410c;
-    --e-analysis: #c2410c; --e-credit: #c0392b; --e-quant: #0a7d86; --e-industry: #1a7f37; --e-macro: #9a6700; --e-story: #6f42c1;
+    /* accent·emph·analysis = dartlab 시그니처 accent SSOT(tokens.css --dl-accent, 캐러셀 핑크). 흰 용지 대비용 진한 핑크(--dl-accent-dim). */
+    --accent: var(--dl-accent-dim); --up: #1a7f37; --down: #c0392b; --warn: #9a6700; --emph: var(--dl-accent-dim);
+    --e-analysis: var(--dl-accent-dim); --e-credit: #c0392b; --e-quant: #0a7d86; --e-industry: #1a7f37; --e-macro: #9a6700; --e-story: #6f42c1;
     --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
     --sans: 'Pretendard', -apple-system, system-ui, sans-serif;
     background: var(--backdrop); color: var(--ink); min-height: 100vh; font-family: var(--sans); font-size: 13px; line-height: 1.6;
@@ -625,8 +625,8 @@
   .rptRoot.dark {
     --backdrop: #0a0c10; --sheet: #161b24; --ink: #e8eef5; --dim: #8b949e;
     --bd: rgba(255, 255, 255, 0.10); --bd2: rgba(255, 255, 255, 0.18); --soft: #222a36;
-    --accent: #fb923c; --up: #2bc583; --down: #f85149; --warn: #d29922; --emph: #fb923c;
-    --e-analysis: #fb923c; --e-credit: #f85149; --e-quant: #56d4dd; --e-industry: #2bc583; --e-macro: #d29922; --e-story: #9385ff;
+    --accent: var(--dl-accent); --up: #2bc583; --down: #f85149; --warn: #d29922; --emph: var(--dl-accent);
+    --e-analysis: var(--dl-accent); --e-credit: #f85149; --e-quant: #56d4dd; --e-industry: #2bc583; --e-macro: #d29922; --e-story: #9385ff;
   }
 
   /* ── 헤더 = 터미널 top bar 그대로 재사용(terminal.css · .dlTerm 스코프). 색·brand·cmdBar·SNS·hdrLink 는
@@ -900,11 +900,14 @@
 
   /* ── 인쇄 — A4, 화이트 강제 ── */
   @media print {
+    /* 루트 레이아웃의 :global(html/body){overflow-x:clip} 이 Chrome 인쇄 페이지네이션을 비워(빈 미리보기)
+       인쇄 시에만 해제 — 화면 가로스크롤 가드는 그대로 유지. */
+    :global(html), :global(body) { overflow: visible !important; max-width: none !important; height: auto !important; }
     .rptRoot, .rptRoot.dark {
       --backdrop: #fff; --sheet: #fff; --soft: #eef2f6; --ink: #161616; --dim: #555a60;
       --bd: #d8dde3; --bd2: #b9c1c9;
-      --accent: #b4350b; --up: #1a7f37; --down: #b02a1a; --warn: #8a6100; --emph: #b4350b;
-      --e-analysis: #b4350b; --e-credit: #b02a1a; --e-quant: #0a7d86; --e-industry: #1a7f37; --e-macro: #8a6100; --e-story: #6f42c1;
+      --accent: var(--dl-accent-dim); --up: #1a7f37; --down: #b02a1a; --warn: #8a6100; --emph: var(--dl-accent-dim);
+      --e-analysis: var(--dl-accent-dim); --e-credit: #b02a1a; --e-quant: #0a7d86; --e-industry: #1a7f37; --e-macro: #8a6100; --e-story: #6f42c1;
       background: #fff; font-size: 10.2pt;
       print-color-adjust: exact; -webkit-print-color-adjust: exact;
     }
