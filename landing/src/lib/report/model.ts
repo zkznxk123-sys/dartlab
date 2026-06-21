@@ -6,7 +6,8 @@ export type ReportBlock =
 	| { type: 'heading'; title: string }
 	| { type: 'text'; text: string }
 	| { type: 'metrics'; metrics: { label: string; value: string }[] }
-	| { type: 'table'; label?: string; data: Record<string, string>[]; snapshot?: boolean }
+	// unit = 표 우측상단 단위 배지(%·억원 등). 셀은 단위 없는 숫자만 — 칸 폭 절약 + 숫자 줄바뀜 방지.
+	| { type: 'table'; label?: string; data: Record<string, string>[]; snapshot?: boolean; unit?: string }
 	| { type: 'flags'; kind: 'warning' | 'opportunity'; flags: string[] }
 	// ── 차트 블록(이미 로드한 데이터의 시각화 — 발명 없음) ──
 	// 수평 막대: 값 크기 비교(채무 만기 사다리 등). value=정렬·스케일용 숫자, display=표시 문자열.

@@ -496,7 +496,7 @@
                   {@const cols = Object.keys(b.data[0])}
                   {@const ts = isTimeSeries(cols) && tableHasSpark(b.data, cols)}
                   <div class="bTableWrap">
-                    {#if b.label}<div class="tCap">{b.label}</div>{/if}
+                    {#if b.label || b.unit}<div class="bTableTop">{#if b.label}<span class="tCap">{b.label}</span>{:else}<span></span>{/if}{#if b.unit}<span class="tUnit">단위 {b.unit}</span>{/if}</div>{/if}
                     <table class="bTable" class:snapshot={b.snapshot}>
                       <thead><tr>{#each cols as c, ci}<th class={ci === 0 ? 'lbl' : c === '판정' ? 'verdict-h' : TXT_COLS.has(c) ? 'txt-h' : 'num'}>{c}</th>{/each}{#if ts}<th class="sparkCol">추이</th>{/if}</tr></thead>
                       <tbody>
@@ -721,7 +721,7 @@
   .leadSub { font-size: 12.5px; line-height: 1.75; color: var(--dim); margin: 0 0 14px; }
   .summaryTable { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 6px; border-top: 1px solid var(--bd2); }
   .summaryTable th { text-align: left; font-weight: 500; color: var(--dim); font-family: var(--sans); padding: 7px 10px 7px 0; border-bottom: 1px solid var(--bd); white-space: nowrap; width: 1%; }
-  .summaryTable td { text-align: left; font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; padding: 7px 28px 7px 0; border-bottom: 1px solid var(--bd); }
+  .summaryTable td { text-align: left; font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; padding: 7px 28px 7px 0; border-bottom: 1px solid var(--bd); white-space: nowrap; }
   .summaryTable td.neg { color: var(--down); } .summaryTable td.pos { color: var(--up); }
 
   /* ── 주요 관찰 — 칩 폐기, 문서형 목록 ── */
@@ -732,7 +732,7 @@
   /* 본문 figure 표 — 메트릭 칩 대체(라벨|값 인라인 표) */
   .figTable { border-collapse: collapse; font-size: 12px; margin: 10px 0; }
   .figTable th { text-align: left; font-weight: 500; color: var(--dim); font-family: var(--sans); padding: 5px 10px 5px 0; white-space: nowrap; }
-  .figTable td { text-align: left; font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; padding: 5px 24px 5px 0; }
+  .figTable td { text-align: left; font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; padding: 5px 24px 5px 0; white-space: nowrap; }
   .figTable td.neg { color: var(--down); } .figTable td.pos { color: var(--up); }
 
   /* ── 목차 ── */
@@ -777,6 +777,10 @@
 
   .bTableWrap { margin: 12px 0; overflow-x: auto; }
   .tCap { font-size: 11.5px; color: var(--dim); margin-bottom: 6px; font-weight: 600; }
+  /* 표 캡션(좌) + 단위 배지(우상단) — 단위를 셀에서 빼 칸 폭 절약·숫자 줄바뀜 방지 */
+  .bTableTop { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .bTableTop .tCap { margin-bottom: 0; }
+  .tUnit { font-size: 11px; color: var(--dim); font-family: var(--mono); white-space: nowrap; flex-shrink: 0; }
   .bTable { border-collapse: collapse; font-size: 12px; width: 100%; }
   .bTable th { padding: 7px 10px; border-bottom: 1.5px solid var(--ink); color: var(--dim); font-weight: 700; font-family: var(--mono); background: color-mix(in srgb, var(--soft) 70%, transparent); }
   .bTable th.lbl { text-align: left; font-family: var(--sans); }
@@ -787,7 +791,7 @@
   .bTable th.txt-h:first-of-type, .bTable td.txt:first-of-type { border-left: 1px solid var(--bd); }
   .bTable td { padding: 6px 10px; border-bottom: 1px solid var(--bd); }
   .bTable td.lbl { text-align: left; font-weight: 600; white-space: nowrap; }
-  .bTable td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .bTable td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .bTable td.num.neg { color: var(--down); } .bTable td.num.pos { color: var(--up); }
   .bTable td.num.dash { color: var(--bd2); } /* 결측 '-' 은 옅게 — 있는 숫자가 도드라지게 */
   /* 비숫자 의미 컬럼 — 좌측 sans (시계열표 흉내 방지) */
@@ -818,7 +822,7 @@
   .barTrack { height: 15px; background: var(--soft); border-radius: 3px; overflow: hidden; }
   .barFill { display: block; height: 100%; background: var(--accent); border-radius: 3px; min-width: 2px; }
   .barFill.neg { background: var(--down); }
-  .barVal { font-size: 11.5px; font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  .barVal { font-size: 11.5px; font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
   .barVal.neg { color: var(--down); }
 
   /* ── 라인 차트(주가 궤적) ── */

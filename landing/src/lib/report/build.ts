@@ -99,7 +99,7 @@ function quarterFlowTable(
 		rec['YoY'] = lastY != null ? fmtPctSigned(lastY) : '-';
 		return rec;
 	});
-	return { type: 'table', label: `${caption} (단위: ${unit}${hasTtm ? ' · TTM=직전 4분기 합(최신 정상분기 정렬)' : ''} · YoY=${yoyLabel})`, data };
+	return { type: 'table', label: `${caption}${hasTtm ? ' · TTM=직전 4분기 합(최신 정상분기 정렬)' : ''} · YoY=${yoyLabel}`, data, unit };
 }
 
 function amtTable(
@@ -120,7 +120,7 @@ function amtTable(
 		});
 		return rec;
 	});
-	return { type: 'table', label: `${caption} (단위: ${unit})`, data };
+	return { type: 'table', label: caption, data, unit };
 }
 
 // 비율 표(% 또는 배). signed=true 면 +부호 표기(성장률).
@@ -133,15 +133,19 @@ function pctTable(
 ): ReportBlock | null {
 	const present = rows.filter((r) => coverage(r.values) >= 2);
 	if (!present.length) return null;
+	// 단위 혼재(% + 배) 표는 셀에 단위 유지, 단일 % 표는 단위를 우상단으로 빼고 셀은 숫자만(칸 폭↓·줄바뀜 방지).
+	const anyMult = present.some((r) => r.unit === '배');
+	const tableUnit = anyMult ? undefined : '%';
 	const data = present.map((r) => {
 		const rec: Record<string, string> = { [labelHeader]: r.label };
 		yearCols.forEach((yc, i) => {
 			const v = r.values[i] ?? null;
-			rec[yc] = r.unit === '배' ? fmtMult(v) : signed ? fmtPctSigned(v) : fmtPct(v);
+			if (tableUnit) rec[yc] = v == null || !Number.isFinite(v) ? '-' : `${signed && (v as number) > 0 ? '+' : ''}${(v as number).toFixed(1)}`;
+			else rec[yc] = r.unit === '배' ? fmtMult(v) : signed ? fmtPctSigned(v) : fmtPct(v);
 		});
 		return rec;
 	});
-	return { type: 'table', label: caption, data };
+	return { type: 'table', label: caption, data, unit: tableUnit };
 }
 
 // ── 관점 1: 수익성 (Earnings Power) — 분기 우선 ─────────────
