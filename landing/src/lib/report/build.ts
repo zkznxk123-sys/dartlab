@@ -144,7 +144,7 @@ function pctTable(
 	return { type: 'table', label: caption, data };
 }
 
-// ── 관점 1: 수익체력 (Earnings Power) — 분기 우선 ─────────────
+// ── 관점 1: 수익성 (Earnings Power) — 분기 우선 ─────────────
 function buildEarningsPower(
 	tfx: TerminalFinance, // 본문 시간축 뷰(분기 우선)
 	win: QWindow, // 본문 윈도(분기 8개 또는 연간 6개)
@@ -263,7 +263,7 @@ function buildEarningsPower(
 			const opmPh = pc.phrases.find((p) => p.label === '영업이익률');
 			const roePh = pc.phrases.find((p) => p.label === 'ROE');
 			// 관점 교차 — 마진 위치 vs ROE(자본효율) 위치의 갭(레버리지·자산효율 함의).
-			const cross = opmPh && roePh && Math.abs(opmPh.top - roePh.top) >= 15 ? ` 영업이익률(${topPctLabel(opmPh)})과 ROE(${topPctLabel(roePh)})의 위치 차이는 자산효율·레버리지에서 갈린다는 뜻으로, 곳간과 빚·자본배분과 함께 보십시오.` : '';
+			const cross = opmPh && roePh && Math.abs(opmPh.top - roePh.top) >= 15 ? ` 영업이익률(${topPctLabel(opmPh)})과 ROE(${topPctLabel(roePh)})의 위치 차이는 자산효율·레버리지에서 갈린다는 뜻으로, 재무안정성·자본배분과 함께 보십시오.` : '';
 			const lead = opmPh
 				? `${corpName}의 영업이익률(연간 ${opmPh.valFmt})은 ${peer.name} 업종(유효표본 ${opmPh.n}사·결손 제외) 중 ${topPctLabel(opmPh)}로, 업종 중앙값(${opmPh.median}) 대비 ${opmPh.top <= 40 ? '뚜렷이 높은' : opmPh.top <= 60 ? '중간 수준의' : '낮은'} 수익성입니다. 자기 이력만으로는 알 수 없는 *업종 내 위치*를 더한 것으로, 동종업종 분포 대비 백분위일 뿐 목표주가·투자판단이 아닙니다.${cross}`
 				: `아래는 ${peer.name} 분포 대비 위치입니다(연간 기준).`;
@@ -451,7 +451,7 @@ function healthTable(
 	return { type: 'table', label: '재무건전성 점검 · 4축 측정값 (각 축 독립 — 종합점수 없음, Python 신용등급 아님)', data: rows };
 }
 
-// ── 관점 2: 곳간과 빚 (Liquidity & Solvency) — 분기 우선 ─────
+// ── 관점 2: 재무안정성 (Liquidity & Solvency) — 분기 우선 ─────
 function buildLiquidity(
 	tfx: TerminalFinance, // 본문 시간축(분기 우선)
 	win: QWindow,
@@ -582,7 +582,7 @@ function buildLiquidity(
 	);
 	if (levTbl) {
 		const drRead = readTrend(win.pick(rRow('debtRatio')), false); // 부채비율↑ = 약화
-		const s2text = `부채비율 ${fmtPct(drL)} · 유동비율 ${fmtPct(crL)} 입니다(${snapWord} 시점값). 부채비율은 자본 대비 부채(낮을수록 안정), 유동비율은 1년 내 갚을 빚 대비 1년 내 현금화 자산(100% 이상이면 단기 상환 여력)입니다.${drRead ? ` 부채비율은 최근 ${finite(win.pick(rRow('debtRatio'))).length}개 ${periodWord} ${drRead}.` : ''}`;
+		const s2text = `부채비율 ${fmtPct(drL)} · 유동비율 ${fmtPct(crL)} 입니다(${snapWord} 시점값). 부채비율은 자본 대비 부채(낮을수록 안정), 유동비율은 1년 내 갚을 부채 대비 1년 내 현금화 자산(100% 이상이면 단기 상환 여력)입니다.${drRead ? ` 부채비율은 최근 ${finite(win.pick(rRow('debtRatio'))).length}개 ${periodWord} ${drRead}.` : ''}`;
 		sections.push({ key: 'leverage', title: '레버리지·유동성 -- 빚은 감당 가능한가', sourceEngine: 'analysis', blocks: [{ type: 'text', text: s2text }, levTbl] });
 		const drTag = drL != null ? (drL <= 100 ? ' (낮음)' : drL >= 200 ? ' (높음)' : '') : '';
 		findings.push({ key: '안정성', finding: `부채비율 ${fmtPct(drL)}${drTag} · 유동비율 ${fmtPct(crL)} · 자기자본비율 ${fmtPct(erL)}.`, sourceEngine: 'analysis' });
@@ -880,7 +880,7 @@ function buildCapitalReturn(
 	return { sections, findings, closing, kpis, conclusion };
 }
 
-// ── 관점 4: 시장의 평가 (Market & Valuation Context) ──────
+// ── 관점 4: 시장평가 (Market & Valuation Context) ──────
 // NEVER-CLAIM 위험 최대 — 목표주가·매수/매도·적정주가 환산 절대 금지. 측정값·맥락만.
 function buildMarket(
 	candles: Candle[] | null,
@@ -1067,7 +1067,7 @@ function buildMarket(
 	return { sections, findings, closing, kpis, conclusion };
 }
 
-// ── 관점 5: 누구의 회사 (Ownership, People & Governance) ──
+// ── 관점 5: 지배구조 (Ownership, People & Governance) ──
 interface OwnershipData {
 	shareholders: ShareholdersView | null;
 	ownership: OwnershipYear[] | null;
@@ -1367,7 +1367,7 @@ export async function buildReport(
 	const yearCols = idx.map((i) => pYear(tf!.periods[i]));
 	const pick = (values: Num[]): Num[] => idx.map((i) => values[i] ?? null);
 
-	// 본문 시간축 — 분기 우선, 없으면 연간. 재무 챕터(수익체력·곳간과빚)가 공유.
+	// 본문 시간축 — 분기 우선, 없으면 연간. 재무 챕터(수익성·재무안정성)가 공유.
 	const win = qw ?? (tf ? annualWindow(tf) : null);
 	const tfWin = qw ? tfQ : tf;
 	const winKind: '분기' | '연간' = qw ? '분기' : '연간';
@@ -1423,7 +1423,7 @@ export async function buildReport(
 			}
 		);
 	} else {
-		// 수익체력 — 분기 우선 본문 + 연간 보충
+		// 수익성 — 분기 우선 본문 + 연간 보충
 		if (!tfWin || !win) return { skipped: true, stockCode: code, reason: '재무 시계열이 부족합니다.' };
 		built = buildEarningsPower(tfWin, win, tf, winKind === '분기' ? tfT : null, winKind, { corpName, peer });
 	}
@@ -1501,7 +1501,7 @@ export async function buildOverview(rt: DartLabRuntime, code: string): Promise<O
 	const payoutNum = payout ? parseFloat(payout) : null;
 	const valBand = /자기역사\s*(하단|중단|상단)/.exec(findOf(mk, '밸류'))?.[1] ?? null;
 
-	const parts: string[] = [`${first.corpName}를 수익체력·곳간과 빚·주주환원·시장의 평가·누구의 회사 다섯 관점으로 봤습니다.`];
+	const parts: string[] = [`${first.corpName}를 ${PERSPECTIVES.map((p) => p.label).join('·')} 다섯 관점으로 봤습니다.`];
 	const clauses: string[] = [];
 	if (marginTop) clauses.push(`수익력은 동종업종 ${marginTop}로 업종 상위권`);
 	if (drTop) clauses.push(`재무 안정성은 ${drTop}`);

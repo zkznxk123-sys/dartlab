@@ -11,37 +11,37 @@ export interface PerspectiveMeta {
 export const PERSPECTIVES: PerspectiveMeta[] = [
 	{
 		key: 'earningsPower',
-		label: '수익체력',
-		question: '얼마나 · 어떤 질로 버는가',
+		label: '수익성',
+		question: '수익의 규모와 질',
 		focusQuestions: ['매출과 이익은 어떻게 움직였나', '마진은 개선되나', '이익이 현금으로 돌아오나'],
 		built: true
 	},
 	{
 		key: 'liquidity',
-		label: '곳간과 빚',
-		question: '버틸 수 있는가 · 현금이 도는가',
-		focusQuestions: ['현금은 어떻게 도나', '빚을 갚을 여력은', '재무건전성은 견고한가'],
+		label: '재무안정성',
+		question: '부채 부담과 현금흐름',
+		focusQuestions: ['현금은 어떻게 도나', '부채 상환 여력은', '재무건전성은 견고한가'],
 		built: true
 	},
 	{
 		key: 'capitalReturn',
 		label: '주주환원',
-		question: '무엇을 돌려주고 얼마나 희석하나',
-		focusQuestions: ['배당은 얼마나', '자사주는 태우나 쌓나', '주식 희석 이력'],
+		question: '주주 환원과 주식 희석',
+		focusQuestions: ['배당은 얼마나', '자사주는 소각하나 적립하나', '주식 희석 이력'],
 		built: true
 	},
 	{
 		key: 'market',
-		label: '시장의 평가',
-		question: '시장은 어떻게 값매기나',
+		label: '시장평가',
+		question: '시장의 가치 평가',
 		focusQuestions: ['주가는 어떻게 움직였나', '시장과 얼마나 동행하나', '이익 대비 얼마에 거래되나'],
 		built: true
 	},
 	{
 		key: 'ownership',
-		label: '누구의 회사',
-		question: '주인 · 인력 · 감사의 질',
-		focusQuestions: ['누가 소유했나', '누가 일하고 받나', '회계는 믿을 만한가'],
+		label: '지배구조',
+		question: '소유구조와 회계 신뢰성',
+		focusQuestions: ['소유구조는 어떠한가', '인력과 보상은', '회계는 신뢰할 만한가'],
 		built: true
 	}
 ];

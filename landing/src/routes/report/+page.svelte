@@ -282,7 +282,7 @@
   <title>기업분석보고서 · {model?.corpName ?? data.sym} | dartlab</title>
   <meta
     name="description"
-    content={`DartLab 데이터 작업대가 HF parquet 을 직접 읽어 조회 시점에 계산한 ${model?.corpName ?? '상장사'} 기업분석보고서 — 수익체력·곳간과 빚·주주환원·시장의 평가·소유까지 5관점. 인쇄·PDF 가능.`}
+    content={`DartLab 데이터 작업대가 HF parquet 을 직접 읽어 조회 시점에 계산한 ${model?.corpName ?? '상장사'} 기업분석보고서 — 수익성·재무안정성·주주환원·시장평가·지배구조 5관점. 인쇄·PDF 가능.`}
   />
 </svelte:head>
 
@@ -393,7 +393,7 @@
         </header>
         <div class="pendingNote">
           <p class="pendBig">「{model.perspectiveLabel}」 관점은 다음 사이클에서 리얼타임으로 구현됩니다.</p>
-          <p class="muted">현재 사이클 = <b>수익체력</b> 관점. 매 사이클마다 전문 애널리스트·UI/UX 전문가 토론 → 개발 → 감수를 거쳐 관점을 하나씩 완성합니다.</p>
+          <p class="muted">현재 사이클 = <b>수익성</b> 관점. 관점을 하나씩 추가하고 있습니다.</p>
         </div>
       </article>
     {:else if model}
@@ -413,10 +413,10 @@
           {#if model.narrativeOverview}<p class="coverIntro">{clean(model.narrativeOverview)}</p>{/if}
         </header>
 
-        <!-- ── 5관점 통합 요지 (표지 다음 = executive summary) ── -->
+        <!-- ── 5관점 요약 (표지 다음 = executive summary) ── -->
         {#if overview && overview.takes.length > 1}
           <section class="overviewLead">
-            <div class="ovKicker">5관점 통합 요지</div>
+            <div class="ovKicker">5관점 요약</div>
             <p class="ovThesis">{clean(overview.thesis)}</p>
             <ol class="ovTakes">
               {#each overview.takes as t}
@@ -690,7 +690,7 @@
   .coverIntro { font-size: 13px; line-height: 1.75; color: var(--dim); margin: 18px 0 0; max-width: 70ch; }
 
   /* ── 통합 리드 (5관점 한 몸 — 보고서 첫 페이지 executive overview) ── */
-  .overviewLead { border: 1px solid var(--bd2); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--soft); padding: 16px 18px; margin-bottom: 26px; }
+  .overviewLead { border: 1px solid var(--bd2); border-radius: 6px; background: var(--soft); padding: 16px 18px; margin-bottom: 26px; }
   .ovKicker { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 9px; }
   .ovThesis { font-size: 13.5px; line-height: 1.72; font-weight: 600; margin: 0 0 12px; max-width: 82ch; }
   .ovTakes { margin: 0; padding: 0; list-style: none; counter-reset: ov; }

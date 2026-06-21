@@ -7,7 +7,7 @@ export const prerender = false;
 
 export const load: PageLoad = ({ url }) => {
 	const sym = url.searchParams.get('sym') || '005930';
-	// 관점 키 — 레거시 'type=full' 은 첫 관점(수익체력)으로 매핑.
+	// 관점 키 — 레거시 'type=full' 은 첫 관점(수익성)으로 매핑.
 	const raw = url.searchParams.get('view') || url.searchParams.get('type') || 'earningsPower';
 	const perspective = raw === 'full' ? 'earningsPower' : raw;
 	return { sym, perspective };
