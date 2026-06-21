@@ -161,11 +161,13 @@
 			transmission: macroTransmission,
 			macroLatest,
 			sectorTailwinds,
-			coMovers: macroCoMovers
+			coMovers: macroCoMovers,
+			lang
 		}) : buildMarketMacroLensSnapshot({
 			macro: eng.raw.macro,
 			macroLatest,
-			sectorTailwinds
+			sectorTailwinds,
+			lang
 		});
 	});
 	$effect(() => {

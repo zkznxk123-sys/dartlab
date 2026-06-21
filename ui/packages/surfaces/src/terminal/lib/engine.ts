@@ -411,8 +411,8 @@ export function createEngine(raw: RawData): Engine {
 		const b = tw.blended;
 		const cls = classifyTailwind(b);
 		return {
-			key: k, kr: SECTOR_KR[industry] || industry, blended: b, krScore: tw.kr, usScore: tw.us,
-			label: cls.labelKr,
+			key: k, kr: SECTOR_KR[industry] || industry, en: SECTOR_EN[industry] || industry, blended: b, krScore: tw.kr, usScore: tw.us,
+			label: cls.labelKr, labelEn: cls.labelEn,
 			tone: cls.tone
 		};
 	}

@@ -206,6 +206,55 @@ describe('macroLens snapshot — verdict layer removed, evidence gates kept', ()
 		expect(fxEdge?.falsifiers[0]).toContain('달러 원가');
 	});
 
+	it('EN mode: comprehensive snapshot scan finds no Korean leak (payload edges + regime subtree + all Path/Sources prose)', () => {
+		const HANGUL = /[가-힣]/;
+		// macroWithRegime() carries BOTH the live Korean transmission payload AND a regime payload, so this single
+		// snapshot exercises the payload edge path (R3 leak) AND the Regime Lens subtree (R5 coverage gap). Non-null
+		// tailwind exercises sectorBinding.tailwind.label/labelEn (R5 walker blind spot).
+		const snapshot = buildMacroLensSnapshot({
+			co: companyFixture({
+				tailwind: { key: 'semiconductor', kr: '반도체', en: 'Semiconductor', blended: 0.45, krScore: 0.5, usScore: 0.4, label: '순풍', labelEn: 'tailwind', tone: 'up' },
+				// macroExposure carries Korean engine reasons + Korean indicator labels/impact (157 live companies) — exercise the analysis-data EN path.
+				macroExposure: {
+					exposureQuality: { status: 'blocked', reason: '회사 매출과 매크로 지표의 겹친 표본이 부족합니다.', blockedReason: 'selected macro regression absent', missingEvidence: [], sourceRef: 'analysis.macroExposure:005930', nObs: null, rSquared: null, window: null, frequency: null, lagMonths: null, coverage: 'missing', minObs: 5, method: 'ols', modelVersion: 'v1', targetMetric: 'salesGrowth' },
+					// APT_PRICE is NOT in MACRO_SERIES (the 43-id contract), so this exercises the EXPOSURE_SERIES_EN map path (the R7 leak), not macroDefOf.
+					selected: [{ seriesId: 'APT_PRICE', label: '아파트가격', impact: '상승', axis: 'macro', rSquared: 0.31, nObs: 8, window: '2018-2026', frequency: 'annual', lagMonths: 0, coverage: 'company', minObs: 5, method: 'ols', modelVersion: 'v1', targetMetric: 'salesGrowth', sourceRef: 'analysis.macroExposure:005930', sourceRefs: [], latestChange: 1.2 }]
+				}
+			} as unknown as Partial<Company>),
+			macro: macroWithRegime(),
+			macroLatest: macroLatest(),
+			sectorTailwinds: sectorTailwinds(),
+			coMovers: [],
+			lang: 'en'
+		});
+		expect(snapshot.transmissionEdges.length).toBeGreaterThan(0);
+		expect(snapshot.regime!.available).toBe(true);
+		const fxEdge = snapshot.transmissionEdges.find((edge) => edge.driverId === 'USDKRW');
+		expect(fxEdge?.falsifiers[0]).not.toMatch(HANGUL); // Korean in KR mode (see the test above)
+		// Recursive Hangul scan of the WHOLE rendered snapshot (incl. regime). A bilingual pair only needs a clean
+		// EN side: {kr,en}, X/XEn (e.g. label/labelEn), and XKr/XEn are all resolved to the EN member.
+		// Skipped: marketPhase (phase label resolved at render via phaseHeadline), company (proper-noun name + {kr,en} sector),
+		// glance (a separate market-overview surface this dialog does NOT render).
+		const SKIP = new Set(['marketPhase', 'company', 'glance']);
+		const leaks: string[] = [];
+		const walk = (v: unknown, path: string): void => {
+			if (typeof v === 'string') { if (HANGUL.test(v)) leaks.push(`${path} = ${v}`); return; }
+			if (Array.isArray(v)) { v.forEach((x, i) => walk(x, `${path}[${i}]`)); return; }
+			if (v && typeof v === 'object') {
+				const o = v as Record<string, unknown>;
+				for (const k of Object.keys(o)) {
+					if (SKIP.has(k)) continue;
+					if (k === 'kr' && 'en' in o) continue; // {kr,en} → scan EN side only
+					if ((k + 'En') in o) continue; // X/XEn pair (e.g. label/labelEn) → scan EN side only
+					if (k.endsWith('Kr') && (k.slice(0, -2) + 'En') in o) continue; // XKr/XEn pair → scan EN side only
+					walk(o[k], `${path}.${k}`);
+				}
+			}
+		};
+		walk(snapshot, '$');
+		expect(leaks, leaks.join('\n')).toEqual([]);
+	});
+
 	it('blocks the quant gate when quantCandidate lacks required evidence fields', () => {
 		const snapshot = buildMacroLensSnapshot({
 			co: companyFixture({
@@ -455,7 +504,8 @@ describe('macro regime view-model — transitionFraction', () => {
 		const side = { transition: { from: 'slowdown', to: 'contraction', progress: 33, triggered: ['gold_surging'], pending: ['vix_spiking', 'term_spread_inverted'] } } as unknown as MacroSide;
 		const frac = transitionFraction(side);
 		expect(frac).not.toBeNull();
-		expect(frac!.fraction).toBe('1/3 충족');
+		// fraction 은 언어중립 '1/3' 만 — '충족'/'met' 접미는 템플릿이 T() 로 붙인다(i18n).
+		expect(frac!.fraction).toBe('1/3');
 		expect(frac!.from).toBe('slowdown');
 		expect(frac!.to).toBe('contraction');
 		// 백분율·progress 노출 0 (L1757 % 경로 미재현).
@@ -494,14 +544,16 @@ describe('macro regime view-model — bucketOf (§3.3 3-step table)', () => {
 });
 
 describe('macro regime view-model — agreementOf (adjacent=agree, names disagreeing, no score)', () => {
-	it('returns 교차 불가 with valid count when <2 valid', () => {
-		expect(agreementOf([{ model: 'CLI', bucket: null }])).toBe('교차 불가 (유효 0개)');
-		expect(agreementOf([{ model: 'probit', bucket: 0 }, { model: 'Sahm', bucket: null }])).toBe('교차 불가 (유효 1개)');
+	it('returns 교차 불가 with valid count when <2 valid (bilingual {kr,en})', () => {
+		expect(agreementOf([{ model: 'CLI', bucket: null }]).kr).toBe('교차 불가 (유효 0개)');
+		expect(agreementOf([{ model: 'CLI', bucket: null }]).en).toBe('cross-check N/A (0 valid)');
+		expect(agreementOf([{ model: 'probit', bucket: 0 }, { model: 'Sahm', bucket: null }]).kr).toBe('교차 불가 (유효 1개)');
 	});
 	it('treats adjacent buckets (0-1, 1-2) as agreement', () => {
 		const txt = agreementOf([{ model: 'probit', bucket: 0 }, { model: 'LEI', bucket: 1 }]);
-		expect(txt).toContain('동의');
-		expect(txt).not.toContain('vs');
+		expect(txt.kr).toContain('동의');
+		expect(txt.en).toContain('agree');
+		expect(txt.kr).not.toContain('vs');
 	});
 	it('names the disagreeing models when ≥2 buckets apart', () => {
 		const txt = agreementOf([
@@ -509,31 +561,38 @@ describe('macro regime view-model — agreementOf (adjacent=agree, names disagre
 			{ model: 'Sahm', bucket: 0 },
 			{ model: 'LEI', bucket: 2 }
 		]);
-		expect(txt).toContain('LEI');
-		expect(txt).toContain('침체');
-		expect(txt).toContain('vs');
+		expect(txt.kr).toContain('LEI');
+		expect(txt.kr).toContain('침체');
+		expect(txt.kr).toContain('vs');
+		expect(txt.en).toContain('Recession');
 	});
 	it('renders no ordinal/score/badge token (verdict backdoor guard)', () => {
 		const txt = agreementOf([{ model: 'probit', bucket: 0 }, { model: 'LEI', bucket: 2 }]);
-		expect(txt).not.toMatch(/\/100|score|badge|점수/i);
-		expect(txt).not.toMatch(/\b[0-2]\b/); // 서수 bucket 숫자 비노출
+		expect(txt.kr).not.toMatch(/\/100|score|badge|점수/i);
+		expect(txt.en).not.toMatch(/\/100|score|badge|점수/i);
+		expect(txt.kr).not.toMatch(/\b[0-2]\b/); // 서수 bucket 숫자 비노출
+		expect(txt.en).not.toMatch(/\b[0-2]\b/);
 	});
 });
 
 describe('macro regime view-model — focusChannelAlignment (narrative only, no 수혜/sensitivity)', () => {
 	const focusOf = (channel: MacroChannel, sign: MacroTransmissionEdgeView['sign']) =>
 		({ channel, edge: { sign } });
-	it('describes alignment when edge sign positive', () => {
-		const txt = focusChannelAlignment({ growth: 'rising', inflation: 'rising' }, focusOf('revenue', 'positive'));
-		expect(txt).toContain('정합');
-		expect(txt).toContain('성장↑');
-		expect(txt).not.toMatch(/수혜|유리|매수/);
-		expect(txt).not.toMatch(/\d/); // 민감도 숫자 0
+	it('describes alignment when edge sign positive (bilingual, no 수혜/sensitivity)', () => {
+		const txt = focusChannelAlignment({ growth: 'rising', inflation: 'rising' }, focusOf('revenue', 'positive'))!;
+		expect(txt.kr).toContain('정합');
+		expect(txt.kr).toContain('성장↑');
+		expect(txt.en).toContain('aligned');
+		expect(txt.kr).not.toMatch(/수혜|유리|매수/);
+		expect(txt.en).not.toMatch(/favored|favou?rs|buy/i);
+		expect(txt.kr).not.toMatch(/\d/); // 민감도 숫자 0
+		expect(txt.en).not.toMatch(/\d/);
 	});
 	it('describes 역방향 when edge sign negative', () => {
-		const txt = focusChannelAlignment({ growth: 'rising', inflation: 'rising' }, focusOf('balanceSheet', 'negative'));
-		expect(txt).toContain('역방향');
-		expect(txt).not.toMatch(/수혜|유리/);
+		const txt = focusChannelAlignment({ growth: 'rising', inflation: 'rising' }, focusOf('balanceSheet', 'negative'))!;
+		expect(txt.kr).toContain('역방향');
+		expect(txt.en).toContain('opposite');
+		expect(txt.kr).not.toMatch(/수혜|유리/);
 	});
 	it('returns null when no quadrant or no focusCell', () => {
 		expect(focusChannelAlignment(null, focusOf('revenue', 'positive'))).toBeNull();
@@ -559,23 +618,25 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		expect(view.us!.validCount).toBe(3);
 		const ham = view.us!.tiles.find((t) => t.model === 'hamilton')!;
 		expect(ham.suppressed).toBe(true);
-		expect(ham.zoneLabel).toBe('표시 보류');
+		expect(ham.zoneLabel.kr).toBe('표시 보류');
+		expect(ham.zoneLabel.en).toBe('suppressed');
 		// 각 타일이 자기 호라이즌 (단일 '12M·확률' 프레임 아님).
 		const probit = view.us!.tiles.find((t) => t.model === 'probit')!;
 		const sahm = view.us!.tiles.find((t) => t.model === 'sahm')!;
 		const lei = view.us!.tiles.find((t) => t.model === 'lei')!;
-		expect(probit.horizonLabel).toContain('12M');
-		expect(probit.horizonLabel).toContain('leading');
-		expect(sahm.horizonLabel).toContain('realtime');
-		expect(lei.horizonLabel).toContain('6-9M');
-		expect(ham.horizonLabel).toContain('retrospective');
+		expect(probit.horizonLabel.kr).toContain('12M');
+		expect(probit.horizonLabel.kr).toContain('leading');
+		expect(sahm.horizonLabel.kr).toContain('realtime');
+		expect(lei.horizonLabel.kr).toContain('6-9M');
+		expect(ham.horizonLabel.kr).toContain('retrospective');
 	});
 	it('probit zone is primary, probability 5%p rounded is secondary, precisionNote in title', () => {
 		const view = buildRegimeView(macroWithRegime(), null);
 		const probit = view.us!.tiles.find((t) => t.model === 'probit')!;
-		expect(probit.zoneLabel).toBe('낮음'); // zone 주역
+		expect(probit.zoneLabel.kr).toBe('낮음'); // zone 주역(KR)
+		expect(probit.zoneLabel.en).toBe('Low'); // enum 매핑(EN)
 		expect(probit.secondary).toBe('~20%'); // probabilityRounded
-		expect(probit.note).toContain('표준오차 미산출'); // precisionNote
+		expect(probit.note.kr).toContain('표준오차 미산출'); // precisionNote
 		// 소수 2자리(0.18) 단독 노출 0.
 		expect(probit.secondary).not.toContain('18');
 		expect(probit.secondary).not.toContain('0.1');
@@ -583,16 +644,17 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 	it('LEI tile carries overlapNote (partial correlation, not fully independent)', () => {
 		const view = buildRegimeView(macroWithRegime(), null);
 		const lei = view.us!.tiles.find((t) => t.model === 'lei')!;
-		expect(lei.note).toContain('내포');
-		expect(lei.note).toMatch(/term-spread|initial-claims/);
+		expect(lei.note.kr).toContain('내포');
+		expect(lei.note.kr).toMatch(/term-spread|initial-claims/);
 	});
 	it('yield curve note carries the double-count guard, agreement counts probit once', () => {
 		const view = buildRegimeView(macroWithRegime(), null);
 		expect(view.us!.yieldCurve).not.toBeNull();
-		expect(view.us!.yieldCurve!.note).toContain('동일곡선');
-		expect(view.us!.yieldCurve!.note).toContain('독립 신호 아님');
+		expect(view.us!.yieldCurve!.note.kr).toContain('동일곡선');
+		expect(view.us!.yieldCurve!.note.kr).toContain('독립 신호 아님');
 		// agreement 는 텍스트만(점수·badge 0).
-		expect(view.us!.agreement).not.toMatch(/\/100|score|badge/i);
+		expect(view.us!.agreement.kr).not.toMatch(/\/100|score|badge/i);
+		expect(view.us!.agreement.en).not.toMatch(/\/100|score|badge/i);
 	});
 	it('GaR renders all 5 quantiles + skewness + tailRisk + 4Q forward (no single-number collapse, fan allowed)', () => {
 		const view = buildRegimeView(macroWithRegime(), null);
@@ -601,8 +663,9 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		expect(gar.bars.map((b) => b.key)).toEqual(['gar5', 'gar25', 'median', 'gar75', 'gar95']);
 		expect(gar.bars.find((b) => b.key === 'median')!.value).toBe(2.1); // median 동반
 		expect(gar.skewness).toBe(-0.8);
-		expect(gar.tailRiskLabel).toBe('주의');
-		expect(gar.horizonLabel).toContain('4Q 전향');
+		expect(gar.tailRiskLabel.kr).toBe('주의');
+		expect(gar.horizonLabel.kr).toContain('4Q 전향');
+		expect(gar.horizonLabel.en).toContain('forward');
 	});
 	it('GaR hides when status-only (표본 부족)', () => {
 		const view = buildRegimeView(macroWithRegime(usRegimePayload({ gar: { status: '표본 부족·표시 보류' } })), null);
@@ -614,8 +677,13 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		expect(band.available).toBe(true);
 		expect(band.points.length).toBeLessThanOrEqual(24);
 		expect(band.points.length).toBe(11);
-		expect(band.caption).toContain('회고적');
-		expect(band.caption).toContain('smoothed');
+		// 절대 침체확률(0~1) 보존 — per-window 재정규화 금지(진폭 정직).
+		expect(Math.max(...band.points)).toBeLessThanOrEqual(1);
+		expect(Math.min(...band.points)).toBeGreaterThanOrEqual(0);
+		expect(band.points[0]).toBeCloseTo(0.05, 5); // 원 확률 그대로(정규화 시 0 이 됨)
+		expect(band.caption.kr).toContain('회고적');
+		expect(band.caption.kr).toContain('smoothed');
+		expect(band.caption.en).toContain('retrospective');
 	});
 	it('quadrant direction shows growth/inflation labels + assets, raw signals never exposed', () => {
 		// 합성 us.quadrant 부착(라이브 macro.us.quadrant 존재 여부 무관 — fixture 명시).
@@ -623,9 +691,11 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		m.us = { ...m.us, quadrant: { quadrant: 'reflation', quadrantLabel: '리플레이션', growth: 'rising', inflation: 'rising', growthSignal: 662678, inflationSignal: 26.71, assetImplication: { commodity: 'overweight', bond: 'underweight' }, description: '' } } as unknown as MacroSide;
 		const view = buildRegimeView(m, { channel: 'revenue', edge: { sign: 'positive' } });
 		const q = view.us!.quadrant!;
-		expect(q.growthLabel).toBe('성장↑');
-		expect(q.inflationLabel).toBe('물가↑');
-		expect(q.alignment).toContain('정합');
+		expect(q.growthLabel.kr).toBe('성장↑');
+		expect(q.growthLabel.en).toBe('growth↑');
+		expect(q.inflationLabel.kr).toBe('물가↑');
+		expect(q.alignment!.kr).toContain('정합');
+		expect(q.alignment!.en).toContain('aligned');
 		// raw growthSignal/inflationSignal 비노출.
 		const json = JSON.stringify(q);
 		expect(json).not.toContain('662678');
@@ -641,11 +711,14 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		expect(view.kr!.band).toBeNull();
 		// hamilton/probit/sahm/gar 은 빈 셀 아닌 명시 라벨.
 		const ham = view.kr!.notApplicable.find((n) => n.id === 'hamilton')!;
-		expect(ham.reason).toContain('단위');
+		expect(ham.reason.kr).toContain('단위');
 		const probit = view.kr!.notApplicable.find((n) => n.id === 'probit')!;
-		expect(probit.reason).toContain('US 전용');
-		// CLI 1타일뿐이라 교차 불가.
-		expect(view.kr!.agreement).toContain('교차 불가');
+		expect(probit.reason.kr).toContain('US 전용');
+		expect(probit.reason.en).toContain('US-only');
+		// CLI 1타일뿐이라 교차 불가(단일 모델 문구·'유효 0개' 모순 제거).
+		expect(view.kr!.agreement.kr).toContain('교차 불가');
+		expect(view.kr!.agreement.kr).toContain('단일 모델');
+		expect(view.kr!.agreement.en).toContain('single model');
 	});
 	it('snapshot.regime is wired and undefined-safe on the live (regime-less) macro.json', () => {
 		const snapshot = buildMarketMacroLensSnapshot({ macro, macroLatest: macroLatest(), sectorTailwinds: sectorTailwinds() });

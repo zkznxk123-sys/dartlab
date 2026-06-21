@@ -27,7 +27,8 @@
 		{ k: 'sources', kr: '근거', en: 'Sources' }
 	];
 	const tabButtonId = (k: MacroLensTab) => `macro-lens-tab-${k}`;
-	const tabPanelId = (k: MacroLensTab) => `macro-lens-panel-${k}`;
+	// 단일 패널(내부 {#if} 분기)이라 id 도 1개 고정 — 비활성 탭의 aria-controls 가 없는 id 를 가리키지 않게.
+	const tabPanelId = 'macro-lens-panel';
 	const focusableSelector = [
 		'a[href]',
 		'button:not([disabled])',
@@ -46,9 +47,10 @@
 	];
 	const signText: Record<string, string> = { positive: '+', negative: '-', mixed: '±', unknown: '?' };
 	const confidenceText: Record<string, string> = { high: 'HIGH', medium: 'MED', low: 'LOW', blocked: 'LOCK' };
-	const evidenceText: Record<string, string> = { observed: 'OBS', sectorPrior: 'PRIOR', template: 'TPL' };
 	const severityCls: Record<string, string> = { info: 'info', warning: 'warn', blocker: 'block' };
-	const pressureText: Record<string, string> = { high: '검토우선', medium: '보조', low: '맥락', blocked: '차단' };
+	const pressureTextKr: Record<string, string> = { high: '검토우선', medium: '보조', low: '맥락', blocked: '차단' };
+	const pressureTextEn: Record<string, string> = { high: 'REVIEW', medium: 'AUX', low: 'CONTEXT', blocked: 'BLOCKED' };
+	const pressureText = (lvl: string): string => T(pressureTextKr[lvl] ?? lvl, pressureTextEn[lvl] ?? lvl);
 	const readinessText: Record<string, string> = { ready: 'READY', needsEvidence: 'EVIDENCE', blocked: 'BLOCK' };
 	const exposureQualityText: Record<string, string> = { quantCandidate: 'OPEN', qualitativeOnly: 'QUAL', blocked: 'LOCK' };
 	const componentStatusText: Record<string, string> = { ok: 'OPEN', watch: 'WATCH', blocked: 'LOCK' };
@@ -110,8 +112,15 @@
 		expansion: '확장', slowdown: '둔화', contraction: '수축', recovery: '회복',
 		stagflation: '스태그', reflation: '리플레', deflation: '디플레', goldilocks: '골디락스'
 	};
-	const phaseLabelKo = (p: string): string => (lang === 'en' ? p : (phaseKo[p] ?? p));
-	const transitionText = $derived(transitionFrac ? `${phaseLabelKo(transitionFrac.from)}→${phaseLabelKo(transitionFrac.to)} ${transitionFrac.fraction}` : null);
+	const phaseLabelKo = (p: string): string => (lang === 'en' ? (phaseEn[p] ?? p) : (phaseKo[p] ?? p));
+	// Phase Strip 헤드라인 — KR 은 backend 정본 label(침체 등), EN 은 phase enum(영문). phaseKo 재유도 금지(SSOT=엔진 label).
+	const phaseEn: Record<string, string> = {
+		expansion: 'Expansion', slowdown: 'Slowdown', contraction: 'Contraction', recovery: 'Recovery',
+		stagflation: 'Stagflation', reflation: 'Reflation', deflation: 'Deflation', goldilocks: 'Goldilocks'
+	};
+	const phaseHeadline = (p?: { label: string; phase: string } | null): string =>
+		p ? (lang === 'en' ? (phaseEn[p.phase] ?? p.phase) : (p.label || p.phase)) : '—';
+	const transitionText = $derived(transitionFrac ? `${phaseLabelKo(transitionFrac.from)}→${phaseLabelKo(transitionFrac.to)} ${transitionFrac.fraction} ${T('충족', 'met')}` : null);
 	let regimeOpen = $state(false);
 	// D블록 Gate Strip = evidenceGates 중 quant 제외 4개(데이터·전파·동행·회사).
 	const gateRows = $derived(snapshot.evidenceGates.filter((g) => g.id !== 'quant'));
@@ -284,7 +293,7 @@
 				<span class="mlKicker">MACRO LENS</span>
 				<b>{snapshot.company.name}</b>
 				<span class="mono">{snapshot.company.code}</span>
-				<span>{snapshot.company.sector}</span>
+				<span>{T(snapshot.company.sector.kr, snapshot.company.sector.en)}</span>
 			</div>
 			<div class="mlAsOf">
 				<span>macro <b>{snapshot.asOf.macro ?? '—'}</b></span>
@@ -301,7 +310,7 @@
 					role="tab"
 					class:active={localTab === t.k}
 					aria-selected={localTab === t.k}
-					aria-controls={tabPanelId(t.k)}
+					aria-controls={tabPanelId}
 					tabindex={localTab === t.k ? 0 : -1}
 					onclick={() => selectTab(t.k)}
 				>{T(t.kr, t.en)}</button>
@@ -311,53 +320,54 @@
 			{T('노출 점검표입니다. 정량 민감도·투자 결론·가격 산출은 표시하지 않습니다.', 'Exposure checklist only. No quantitative sensitivity, investment call, or price output.')}
 		</div>
 
-		<div class="mlBody" id={tabPanelId(localTab)} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
+		<div class="mlBody" class:mlVoid={localTab === 'dashboard' && !focusCell} id={tabPanelId} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
 			{#if localTab === 'dashboard'}
 				<!-- 블록 A — Phase Strip (클릭 → 국면 렌즈 toggle) -->
 				{#if regime?.available}
 					<details class="mlRegimeFold" bind:open={regimeOpen}>
 						<summary class="mlPhaseStrip" aria-label={T('Macro 국면 — 클릭하면 국면 렌즈', 'Macro phases — click for Regime Lens')}>
-							<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
-							<div><span>US <i class="mlPhaseCaret" aria-hidden="true">{regimeOpen ? '▴' : '▾'}</i></span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
-							<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
+							<div><span>KR</span><b>{phaseHeadline(snapshot.marketPhase.kr)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
+							<div><span>US <i class="mlPhaseCaret" aria-hidden="true">{regimeOpen ? '▴' : '▾'}</i></span><b>{phaseHeadline(snapshot.marketPhase.us)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
+							<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind ? T(snapshot.sectorBinding.tailwind.kr, snapshot.sectorBinding.tailwind.en) : T(snapshot.company.sector.kr, snapshot.company.sector.en)}</b><em>{snapshot.sectorBinding.tailwind ? `${T(snapshot.sectorBinding.tailwind.label, snapshot.sectorBinding.tailwind.labelEn)} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
 						</summary>
 						<!-- 국면 렌즈 (Regime Lens) — 회고는 phase, 검증은 아래 -->
 						<div class="mlRegimeLens" aria-label={T('국면 렌즈', 'Regime Lens')}>
 							{#if usLens}
 								{@const lens = usLens}
-								<div class="mlRegimeHead">{T('침체 신호', 'Recession signals')} ({lens.totalCount}{T('모델 중', ' models, ')} {lens.validCount} {T('유효 · 호라이즌·시간성 상이 · 동의', 'valid · horizons/timing differ · agreement')}: {lens.agreement})</div>
+								<div class="mlRegimeHead">{T('침체 신호', 'Recession signals')} ({lens.totalCount}{T('모델 중', ' models, ')} {lens.validCount} {T('유효 · 호라이즌·시간성 상이 · 동의', 'valid · horizons/timing differ · agreement')}: {T(lens.agreement.kr, lens.agreement.en)})</div>
 								<div class="mlConfluence">
 									{#each lens.tiles as tile (tile.model)}
-										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={tile.note}>
-											<b>{tile.zoneLabel}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
-											<span>{tile.modelName} · {tile.horizonLabel}</span>
-											<em>{tile.scaleLabel}</em>
-											<em class="mlTileMeta">{#if tile.suppressed}{tile.statusText}{:else}{tile.asOf ?? '—'}{#if tile.staleLabel} · {tile.staleLabel}{/if}{/if}</em>
+										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={T(tile.note.kr, tile.note.en)}>
+											<b>{T(tile.zoneLabel.kr, tile.zoneLabel.en)}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
+											<span>{tile.modelName} · {T(tile.horizonLabel.kr, tile.horizonLabel.en)}</span>
+											<em>{T(tile.scaleLabel.kr, tile.scaleLabel.en)}</em>
+											<em class="mlTileMeta">{#if tile.suppressed}{tile.statusText ? T(tile.statusText.kr, tile.statusText.en) : ''}{:else}{tile.asOf ?? '—'}{#if tile.staleLabel} · {tile.staleLabel}{/if}{/if}</em>
 										</div>
 									{/each}
 								</div>
-								<div class="mlRegimeNote">{T('probit=고정계수·SE미산출(점추정) · LEI=term/claims 내포(부분상관) · Hamilton=동행·회고', 'probit=fixed-coef·no SE (point est) · LEI embeds term/claims (partial corr) · Hamilton=coincident·retrospective')}</div>
+								<div class="mlRegimeNote">{T("probit=고정계수·SE미산출(점추정) · probit '보통'(moderate)=확장 집계 · LEI=term/claims 내포(부분상관) · Hamilton=동행·회고", "probit=fixed-coef·no SE (point est) · probit 'moderate' counted as expansion · LEI embeds term/claims (partial corr) · Hamilton=coincident·retrospective")}</div>
 								{#if lens.yieldCurve}
-									<div class="mlRegimeRow" title={lens.yieldCurve.note}>
-										<b>{T('수익률곡선', 'Yield curve')}</b> {lens.yieldCurve.curveShapeLabel} · 10Y-3M {lens.yieldCurve.spreadText}
+									<div class="mlRegimeRow" title={T(lens.yieldCurve.note.kr, lens.yieldCurve.note.en)}>
+										<b>{T('수익률곡선', 'Yield curve')}</b> {T(lens.yieldCurve.curveShapeLabel.kr, lens.yieldCurve.curveShapeLabel.en)} · 10Y-3M {lens.yieldCurve.spreadText}
 										<i class="mlRegimeDim">░{lens.yieldCurve.asOf ?? '—'} · {T('역전≠즉시침체 · 형태=NS·spread=동일곡선', 'inversion≠immediate recession · shape=NS·spread=same curve')}</i>
 									</div>
 								{/if}
 								{#if lens.gar}
 									{@const gar = lens.gar}
-									<div class="mlGaR" title={gar.note}>
-										<div class="mlGaRTop"><b>GaR {gar.horizonLabel}</b><i class="mlRegimeDim">[{T('조건부 분포·점추정 아님', 'conditional dist · not point est')}] · tail {gar.tailRiskLabel}{#if gar.skewness != null} · {T('비대칭', 'skew')} {gar.skewness.toFixed(1)}{/if} · ░{gar.asOf ?? '—'}</i></div>
+									<div class="mlGaR" title={T(gar.note.kr, gar.note.en)}>
+										<div class="mlGaRTop"><b>GaR {T(gar.horizonLabel.kr, gar.horizonLabel.en)}</b><i class="mlRegimeDim">[{T('조건부 분포·점추정 아님', 'conditional dist · not point est')}] · tail {T(gar.tailRiskLabel.kr, gar.tailRiskLabel.en)}{#if gar.skewness != null} · {T('비대칭', 'skew')} {gar.skewness.toFixed(1)}{/if} · ░{gar.asOf ?? '—'}</i></div>
 										<div class="mlGaRBars">
 											{#each gar.bars as bar (bar.key)}
-												<div class="mlGaRBar"><i style={`height:${Math.round(bar.frac * 100)}%`}></i><span>{bar.label}</span><em>{bar.value.toFixed(1)}</em></div>
+												<div class="mlGaRBar" class:tail={bar.key === 'gar5' || bar.key === 'gar95'} class:mid={bar.key === 'median'}><i style={`height:${Math.round(bar.frac * 100)}%`}></i><span>{bar.label}</span><em>{bar.value.toFixed(1)}</em></div>
 											{/each}
 										</div>
-										<div class="mlRegimeNote">{gar.note}</div>
+										<div class="mlGaRAxis">{T('막대 = 5분위 상대 위치 · 분위별 GDP 성장률(%)은 아래 숫자 · 높이는 확률 아님', 'bars = relative position across the 5 quantiles · GDP growth (%) is the number below each · height is not probability')}</div>
+										<div class="mlRegimeNote">{T(gar.note.kr, gar.note.en)}</div>
 									</div>
 								{/if}
 								{#if lens.band}
 									<div class="mlBandRow">
-										<b>{lens.band.caption}</b>
+										<b>{T(lens.band.caption.kr, lens.band.caption.en)}</b>
 										<svg class="mlBandSpark" viewBox="0 0 100 18" preserveAspectRatio="none" aria-hidden="true">
 											<polyline points={bandPoints(lens.band.points)} />
 										</svg>
@@ -367,49 +377,49 @@
 								{#if lens.quadrant}
 									{@const q = lens.quadrant}
 									<div class="mlRegimeRow">
-										<b>{T('국면 사분면', 'Regime quadrant')}</b> {q.growthLabel} {q.inflationLabel}
-										{#if q.assets.length}→ {q.assets.filter((a) => a.weight === 'overweight').map((a) => a.label).join('·') || T('중립', 'neutral')} {T('유리', 'favored')}{/if}
+										<b>{T('국면 사분면', 'Regime quadrant')}</b> {T(q.growthLabel.kr, q.growthLabel.en)} {T(q.inflationLabel.kr, q.inflationLabel.en)}
+										{#if q.assets.length}→ {T('비중확대 함의', 'overweight implication')}: {q.assets.filter((a) => a.weight === 'overweight').map((a) => T(a.label, a.labelEn)).join('·') || T('중립', 'neutral')} <i class="mlRegimeDim">{T('국면 교과서·추천 아님', 'regime textbook · not advice')}</i>{/if}
 										<i class="mlRegimeDim">[{T('회고', 'retrospective')}]</i>
-										{#if q.alignment}<i class="mlRegimeAlign">· {q.alignment}</i>{/if}
+										{#if q.alignment}<i class="mlRegimeAlign">· {T(q.alignment.kr, q.alignment.en)}</i>{/if}
 									</div>
 								{/if}
 							{/if}
 							{#if krLens}
 								{@const lens = krLens}
-								<div class="mlRegimeHeadKr">KR — {T('침체 confluence', 'recession confluence')} ({lens.validCount} {T('유효', 'valid')} · {T('동의', 'agreement')}: {lens.agreement})</div>
+								<div class="mlRegimeHeadKr">KR — {T('침체 confluence', 'recession confluence')} ({lens.validCount} {T('유효', 'valid')} · {T('동의', 'agreement')}: {T(lens.agreement.kr, lens.agreement.en)})</div>
 								<div class="mlConfluence">
 									{#each lens.tiles as tile (tile.model)}
-										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={tile.note}>
-											<b>{tile.zoneLabel}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
-											<span>{tile.modelName} · {tile.horizonLabel}</span>
-											<em>{tile.scaleLabel}</em>
+										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={T(tile.note.kr, tile.note.en)}>
+											<b>{T(tile.zoneLabel.kr, tile.zoneLabel.en)}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
+											<span>{tile.modelName} · {T(tile.horizonLabel.kr, tile.horizonLabel.en)}</span>
+											<em>{T(tile.scaleLabel.kr, tile.scaleLabel.en)}</em>
 											<em class="mlTileMeta">{tile.asOf ?? '—'}{#if tile.staleLabel} · {tile.staleLabel}{/if}</em>
 										</div>
 									{/each}
 								</div>
 								{#if lens.notApplicable.length}
-									<div class="mlRegimeNote">{#each lens.notApplicable as na (na.id)}<span class="mlNaChip">{na.label}: {na.reason}</span>{/each}</div>
+									<div class="mlRegimeNote">{#each lens.notApplicable as na (na.id)}<span class="mlNaChip">{na.label}: {T(na.reason.kr, na.reason.en)}</span>{/each}</div>
 								{/if}
 								{#if lens.quadrant}
 									{@const q = lens.quadrant}
-									<div class="mlRegimeRow"><b>{T('국면 사분면', 'Regime quadrant')}</b> {q.growthLabel} {q.inflationLabel} <i class="mlRegimeDim">[{T('회고', 'retrospective')}]</i>{#if q.alignment}<i class="mlRegimeAlign">· {q.alignment}</i>{/if}</div>
+									<div class="mlRegimeRow"><b>{T('국면 사분면', 'Regime quadrant')}</b> {T(q.growthLabel.kr, q.growthLabel.en)} {T(q.inflationLabel.kr, q.inflationLabel.en)} <i class="mlRegimeDim">[{T('회고', 'retrospective')}]</i>{#if q.alignment}<i class="mlRegimeAlign">· {T(q.alignment.kr, q.alignment.en)}</i>{/if}</div>
 								{/if}
 							{/if}
 						</div>
 					</details>
 				{:else}
 					<!-- regime 데이터 준비 전 — 기본 Phase Strip (전향 분수만, 이미 라이브) -->
-					<section class="mlPhaseStrip" aria-label="Macro phases">
-						<div><span>KR</span><b>{snapshot.marketPhase.kr?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
-						<div><span>US</span><b>{snapshot.marketPhase.us?.label ?? '—'}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
-						<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind?.kr ?? snapshot.company.sector}</b><em>{snapshot.sectorBinding.tailwind ? `${snapshot.sectorBinding.tailwind.label} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
+					<section class="mlPhaseStrip" aria-label={T('거시 국면', 'Macro phases')}>
+						<div><span>KR</span><b>{phaseHeadline(snapshot.marketPhase.kr)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.kr?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.kr?.inflation)}</em></div>
+						<div><span>US</span><b>{phaseHeadline(snapshot.marketPhase.us)}</b><em>{T('성장', 'growth')} {motionLabel(snapshot.marketPhase.us?.growth)} · {T('물가', 'inflation')} {motionLabel(snapshot.marketPhase.us?.inflation)}{#if transitionText}<span class="mlTransFrac">· {transitionText}</span>{/if}</em></div>
+						<div><span>{T('업종', 'Sector')}</span><b>{snapshot.sectorBinding.tailwind ? T(snapshot.sectorBinding.tailwind.kr, snapshot.sectorBinding.tailwind.en) : T(snapshot.company.sector.kr, snapshot.company.sector.en)}</b><em>{snapshot.sectorBinding.tailwind ? `${T(snapshot.sectorBinding.tailwind.label, snapshot.sectorBinding.tailwind.labelEn)} ${snapshot.sectorBinding.tailwind.blended.toFixed(2)}` : T('미산출', 'not computed')}</em></div>
 					</section>
 				{/if}
 
 				<!-- 블록 B — Driver Pulse -->
-				<section class="mlPulseStrip" aria-label="Macro pulse">
+				<section class="mlPulseStrip" aria-label={T('거시 펄스', 'Macro pulse')}>
 					{#each pulseDrivers as d (d.id)}
-						<button class={'mlPulse ' + d.pressureLevel} class:on={activeEcon.includes(d.id) || activeFocusId === d.id} disabled={econBlocked(d.id)} onclick={() => { localFocus = d.id; onToggleEcon?.(d.id); }} title={econBlocked(d.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : `${d.value} · ${d.asOf} · ${d.source}`}>
+						<button class={'mlPulse ' + d.pressureLevel} class:on={activeEcon.includes(d.id) || activeFocusId === d.id} aria-pressed={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => { localFocus = d.id; onToggleEcon?.(d.id); }} title={econBlocked(d.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : `${d.value} · ${d.asOf} · ${d.source}`}>
 							<span>{d.label}</span>
 							<b>{d.value}</b>
 							<em>{d.change} · {d.asOf || d.freshness.label}</em>
@@ -467,6 +477,12 @@
 										{/each}
 									</div>
 								{/each}
+							</div>
+							<div class="mlMapLegend" aria-label={T('증거 칩 범례', 'evidence chip legend')}>
+								<span><i class="mlMapChip OBS"></i>{T('관측', 'obs')}</span>
+								<span><i class="mlMapChip PRIOR"></i>{T('업종 prior', 'prior')}</span>
+								<span><i class="mlMapChip TPL"></i>{T('템플', 'tpl')}</span>
+								<span><i class="mlMapChip LOCK"></i>{T('잠금', 'lock')}</span>
 							</div>
 							<div class="mlMapNote">{T('색=증거 상태(방향 아님) · 닿는 채널만 표시(빈 열 생략)', 'Color = evidence state (not direction) · only mapped channels shown (empty columns omitted)')}</div>
 						{:else}
@@ -558,7 +574,7 @@
 						</div>
 					</section>
 					{#if focusContribution}
-						<section class="mlContributionPanel" aria-label="Evidence contribution breakdown">
+						<section class="mlContributionPanel" aria-label={T('증거 기여 분해', 'Evidence contribution breakdown')}>
 							<div class="mlRailTitle">
 								<span class="mlBlockK">Evidence Contribution</span>
 								<b>{focusContribution.label}</b>
@@ -586,7 +602,7 @@
 						<section class={'mlCoMovePanel ' + focusCoMove.status}>
 							<div class="mlRailTitle"><span class="mlBlockK">Co-movement Gate</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
 							{#if focusCoMove.points.length}
-								<div class="mlScatterPlot" aria-label="Monthly co-movement scatter">
+								<div class="mlScatterPlot" aria-label={T('월별 동행 산점도', 'Monthly co-movement scatter')}>
 									<i class="mlZeroX" style={`left:${focusCoMove.xZero}%`}></i>
 									<i class="mlZeroY" style={`top:${focusCoMove.yZero}%`}></i>
 									<span class="mlAxisLabel x">{T('macro 월말 Δ', 'macro month-end Δ')}</span>
@@ -596,7 +612,7 @@
 									{/each}
 								</div>
 							{:else}
-								<div class="mlCorrPlot" aria-label="Co-movement correlation position">
+								<div class="mlCorrPlot" aria-label={T('동행 상관 위치', 'Co-movement correlation position')}>
 									<span>-1</span><span>0</span><span>+1</span>
 									<i style={`left:${corrLeft(focusCoMove.corr)}`}></i>
 								</div>
@@ -634,7 +650,7 @@
 								<p>{e.note}</p>
 								<div class="mlMiniList">
 									<span>{T('lag', 'lag')}: {e.lagMonths ? `${e.lagMonths[0]}-${e.lagMonths[1]}M` : '—'}</span>
-									<span>{e.evidenceLevel}</span>
+									<span>{T(evidenceMicroLabel[chipState(e)].kr, evidenceMicroLabel[chipState(e)].en)}</span>
 								</div>
 								<div class="mlEvidence">
 									{#each e.requiredCompanyEvidence.slice(0, 3) as x (x)}<span>{x}</span>{/each}
@@ -672,12 +688,12 @@
 						{#each visibleDrivers as d (d.id)}
 							<div class={'mlDriverRow ' + d.relevance} class:focused={activeFocusId === d.id}>
 								<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
-								<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText[d.pressureLevel]}</b><em>{d.qualityHint}</em></span>
+								<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText(d.pressureLevel)}</b><em>{d.qualityHint}</em></span>
 								<span class="mono">{d.value}</span>
 								<span class="mono">{d.change}</span>
 								<span class="mlDriverLine">{d.sourceLineage}{#if d.coMovement}<em>{d.coMovement.label}</em><small>{T('동행상관 · 인과 아님', 'co-movement · not causal')}</small>{/if}</span>
 								<span>
-									<button class="mlIconBtn" class:on={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => onToggleEcon?.(d.id)} title={econBlocked(d.id) ? T('동시 3개까지 표시됩니다', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle chart ECON overlay')}>
+									<button class="mlIconBtn" class:on={activeEcon.includes(d.id)} aria-pressed={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => onToggleEcon?.(d.id)} title={econBlocked(d.id) ? T('동시 3개까지 표시됩니다', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle chart ECON overlay')}>
 										<LineChart size={12} />{activeEcon.includes(d.id) ? 'ON' : econBlocked(d.id) ? 'MAX' : 'ECON'}
 									</button>
 								</span>
@@ -721,7 +737,7 @@
 					</div>
 					<div class="mlBlock">
 						<div class="mlBlockTop"><span class="mlBlockK">{T('한계·결손', 'Limits')}</span><b>{T('모르는 것은 숨기지 않음', 'Unknowns stay visible')}</b></div>
-						<div class={'mlQuantCard ' + exposureQualityClass} aria-label="Quant gate status">
+						<div class={'mlQuantCard ' + exposureQualityClass} aria-label={T('정량 게이트 상태', 'Quant gate status')}>
 							<div class="mlQuantTop">
 								<span class="mlBlockK">{T('정량 게이트', 'Quant gate')}</span>
 								<b>{quantStatusLabel}</b>
@@ -731,14 +747,14 @@
 								<div class="mlQuantAlt">{quantAltValue}</div>
 							{/if}
 						</div>
-						<div class={'mlQualityCard ' + exposureQualityClass} aria-label="Quality gate model card">
+						<div class={'mlQualityCard ' + exposureQualityClass} aria-label={T('품질 게이트 모델 카드', 'Quality gate model card')}>
 							<div class="mlQualityTop">
 								<span class="mlBlockK">Quality Gate</span>
 								<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
 								<em>{T('정량 claim gate · 추천/목표가 아님', 'quant claim gate · no recommendation')}</em>
 							</div>
 							<p>{snapshot.exposureQuality.reason}</p>
-							<div class="mlModelSpec" aria-label="Macro exposure model specification">
+							<div class="mlModelSpec" aria-label={T('거시 노출 모델 사양', 'Macro exposure model specification')}>
 								{#each modelSpecRows as r (r.label)}
 									<div class={'mlModelSpecItem ' + r.status} title={r.value}>
 										<span>{r.label}</span>
@@ -757,7 +773,7 @@
 							<div class="mlModelSource"><span>sourceRef</span><b>{snapshot.exposureQuality.sourceRef}</b></div>
 						</div>
 						<div class="mlLimitSub">Model Card</div>
-						<div class="mlIndicatorGrid" aria-label="Selected company macro indicators">
+						<div class="mlIndicatorGrid" aria-label={T('선택 회사 거시 지표', 'Selected company macro indicators')}>
 							{#each snapshot.exposureIndicators.slice(0, 4) as x, i (`${x.seriesId}-${x.axis}-${i}`)}
 								<div class={'mlIndicatorCard ' + (x.coverage === 'company' ? 'ok' : x.coverage === 'sectorOnly' ? 'watch' : 'blocked')}>
 									<div><span>{x.axis}</span><b>{x.seriesId}</b></div>
@@ -778,7 +794,7 @@
 							{/each}
 						</div>
 						<div class="mlLimitSub">Missing Ledger</div>
-						<div class="mlMissingLedger" aria-label="Missing evidence ledger">
+						<div class="mlMissingLedger" aria-label={T('결손 증거 원장', 'Missing evidence ledger')}>
 							{#each snapshot.exposureQuality.missingEvidence as x (x)}
 								<div class="mlMissingItem blocked"><b>required</b><span>{x}</span><em>{snapshot.exposureQuality.sourceRef}</em></div>
 							{/each}
@@ -790,8 +806,8 @@
 							{/if}
 						</div>
 						<div class="mlLimitSub">Falsifier Strip</div>
-						<div class="mlFalsifierStrip" aria-label="Macro falsifiers">
-							{#each snapshot.falsifiers.slice(0, 4) as f (f.label)}
+						<div class="mlFalsifierStrip" aria-label={T('거시 반증', 'Macro falsifiers')}>
+							{#each snapshot.falsifiers.slice(0, 4) as f (f.id)}
 								<div class={'mlFalsifierToken ' + severityCls[f.severity]}>
 									<b>{f.label}</b>
 									<span>{f.detail}</span>
@@ -865,7 +881,8 @@
 	.mlRegimeRow { color: var(--dl-ink); font-size: 11px; line-height: 1.4; }
 	.mlRegimeRow b { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-right: 5px; }
 	.mlRegimeDim { font-style: normal; color: var(--dl-ink-muted, #7b8493); font-size: 9px; }
-	.mlRegimeAlign { font-style: normal; color: var(--amber); font-size: 10px; }
+	/* 정합 서술은 중립 ink — accent(amber)가 방향=good 으로 읽히는 색 결합 차단(서술만·판정 아님). */
+	.mlRegimeAlign { font-style: normal; color: var(--dl-ink-dim, #6b7280); font-size: 10px; }
 	/* GaR 분위 막대 — 진짜 5분위 조건부 분포(probit 점확률 아님·fan 정당). */
 	.mlGaR { border-top: 1px dashed var(--bd); padding-top: 8px; }
 	.mlGaRTop { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; }
@@ -873,8 +890,12 @@
 	.mlGaRBars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: end; height: 42px; margin: 6px 0 4px; }
 	.mlGaRBar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
 	.mlGaRBar i { display: block; width: 60%; min-height: 2px; background: var(--amber); border-radius: 2px 2px 0 0; opacity: .8; }
+	/* 분포 시각화: 꼬리(5%·95%) 흐리게·중위 또렷 → '점추정 아닌 분포' 를 라벨 너머 시각으로도 전달. */
+	.mlGaRBar.tail i { opacity: .4; }
+	.mlGaRBar.mid i { opacity: 1; }
 	.mlGaRBar span { margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
 	.mlGaRBar em { color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; font-variant-numeric: tabular-nums; }
+	.mlGaRAxis { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-size: 9px; line-height: 1.3; }
 	/* Hamilton regime band — 가로 스파크 1줄(막대/점추정 아님·회고 라벨). */
 	.mlBandRow { display: flex; align-items: center; gap: 8px; min-width: 0; }
 	.mlBandRow b { flex: 0 0 auto; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 700; }
@@ -889,6 +910,9 @@
 	/* 블록 C — Exposure Map (단일 테두리 주역) */
 	.mlMap { border: 1px solid var(--bd); background: var(--panel); border-radius: 8px; padding: 8px; animation: mlFade .15s ease-out; }
 	@keyframes mlFade { from { opacity: 0; } to { opacity: 1; } }
+	/* §6.2 폴백: 초점 셀 0(macro.json 결손) 극단 — Map 테두리 흐리게 + Pulse 값 13→15px 로 Pulse 를 2차 주역 승격(빈 Map 이 시선 독점 방지). */
+	.mlVoid .mlMap { border-color: color-mix(in srgb, var(--bd) 45%, transparent); }
+	.mlVoid .mlPulse b { font-size: 15px; }
 	/* 읽기 1차 — 초점 사슬 (중립 강조 + amber 좌측선, opacity 1 고정) */
 	.mlMapFocus { opacity: 1; border-left: 2px solid var(--amber); background: color-mix(in srgb, var(--dim) 7%, var(--panel)); border-radius: 0 6px 6px 0; padding: 8px 10px; }
 	.mlMapChain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -914,13 +938,17 @@
 	.mlMapCell .mlMapSign { font-weight: 700; font-size: 11px; color: var(--txt); }
 	.mlMapCell em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 8px; }
 	.mlMapNote { margin-top: 8px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.3; }
+	/* 형태 칩 범례 — 한 줄, 실제 칩 CSS 재사용(색맹 무손실 형태 4종 해독). */
+	.mlMapLegend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+	.mlMapLegend span { display: inline-flex; align-items: center; gap: 5px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
 	/* CSS 도형 칩 — ::before 16×16, 색=증거 상태(방향 아님), 글리프 폰트 의존 0 */
 	.mlMapChip { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; }
 	.mlMapChip::before { content: ""; display: block; width: 16px; height: 16px; box-sizing: border-box; }
-	.mlMapChip.OBS::before { border-radius: 50%; background: var(--up); border: 1.5px solid var(--up); }
+	/* 색=증거 상태(방향 아님): 중립 ink 램프(OBS 밝음→PRIOR amber→TPL dim→LOCK faint). 녹/적(--up/--dn)은 방향 전용이라 칩에서 배제. 형태가 1차 구분자(색맹 무손실). */
+	.mlMapChip.OBS::before { border-radius: 50%; background: var(--dl-ink, #e8eaef); border: 1.5px solid var(--dl-ink, #e8eaef); }
 	.mlMapChip.PRIOR::before { border-radius: 50%; border: 1.5px solid var(--amber); background: transparent; box-shadow: inset 8px 0 0 0 var(--amber); }
-	.mlMapChip.TPL::before { border-radius: 50%; background: transparent; border: 1.5px dashed var(--bd); }
-	.mlMapChip.LOCK::before { border-radius: 3px; border: 1px solid var(--dn); background: repeating-linear-gradient(45deg, transparent 0 2px, color-mix(in srgb, var(--dn) 30%, transparent) 2px 4px); }
+	.mlMapChip.TPL::before { border-radius: 50%; background: transparent; border: 1.5px dashed var(--dl-ink-dim, #6b7280); }
+	.mlMapChip.LOCK::before { border-radius: 3px; border: 1px solid var(--dl-ink-faint, #4a5160); background: repeating-linear-gradient(45deg, transparent 0 2px, color-mix(in srgb, var(--dl-ink-faint, #4a5160) 45%, transparent) 2px 4px); }
 	/* 블록 D */
 	.mlDashGate { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr); gap: 10px; align-items: start; }
 	.mlGateStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -930,7 +958,8 @@
 	.mlGate.ok b { color: var(--up); }
 	.mlGate.watch b { color: var(--warn); }
 	.mlGate.blocked b { color: var(--dn); }
-	.mlReleaseRail { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
+	/* 테두리·배경 없는 스트립 (mlGateStrip 와 동일 패턴) — Map 이 첫 화면 유일 테두리 패널이 되도록. 내부 mlRailItem 타일만 테두리. */
+	.mlReleaseRail { padding: 0; }
 	.mlRailTitle { display: flex; align-items: center; gap: 8px; min-width: 0; }
 	.mlRailTitle b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 	.mlRailTitle em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }

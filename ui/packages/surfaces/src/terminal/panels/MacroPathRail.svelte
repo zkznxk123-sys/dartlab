@@ -27,7 +27,7 @@
 	const fullLinks = $derived([...view.links, ...view.allSectorLinks]);
 </script>
 
-<section class={'mpr ' + mode} aria-label="Macro path rail">
+<section class={'mpr ' + mode} aria-label={T('거시 전파 레일', 'Macro path rail')}>
 	<div class="mprHead">
 		<span>{T('전파', 'Path')}</span>
 		<b>{T('동행≠인과', 'co-move≠causation')}</b>
@@ -36,7 +36,7 @@
 	{#if mode === 'compact'}
 		<div class="mprChips">
 			{#each compactSectors as s (s.key)}
-				<button class={'mprChip ' + s.tone} class:on={s.active} disabled={!isClickable(s)} onclick={() => activate(s)} onkeydown={(e) => onKey(e, s)} title={`${sectorLabel(s)} · ${s.tailwindLabelKr} · ${label(s)}`}>
+				<button class={'mprChip ' + s.tone} class:on={s.active} disabled={!isClickable(s)} onclick={() => activate(s)} onkeydown={(e) => onKey(e, s)} title={`${sectorLabel(s)} · ${T(s.tailwindLabelKr, s.tailwindLabelEn)} · ${label(s)}`}>
 					<span>{sectorLabel(s)}</span><em>{label(s)}</em>
 				</button>
 			{/each}
@@ -60,7 +60,7 @@
 					<div class="mprChannel"><b>{T(link.channelLabelKr, link.channelLabelEn)}</b><em>{link.financialLine}</em></div>
 					<div class="mprSectors">
 						{#each link.sectorNodes as s (s.key)}
-							<button class={'mprChip ' + s.tone} class:on={s.active} disabled={!isClickable(s)} onclick={() => activate(s)} onkeydown={(e) => onKey(e, s)} title={`${sectorLabel(s)} · ${s.tailwindLabelKr} · ${label(s)}`}>
+							<button class={'mprChip ' + s.tone} class:on={s.active} disabled={!isClickable(s)} onclick={() => activate(s)} onkeydown={(e) => onKey(e, s)} title={`${sectorLabel(s)} · ${T(s.tailwindLabelKr, s.tailwindLabelEn)} · ${label(s)}`}>
 								<span>{sectorLabel(s)}</span><em>{s.key === 'all' ? link.evidenceLabel : label(s)}</em>
 							</button>
 						{/each}

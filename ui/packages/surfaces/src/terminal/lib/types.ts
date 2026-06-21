@@ -484,10 +484,12 @@ export interface Valuation {
 export interface Tailwind {
 	key: string;
 	kr: string;
+	en: string;
 	blended: number;
 	krScore: number;
 	usScore: number;
 	label: string;
+	labelEn: string;
 	tone: Tone;
 }
 export interface Verdict {
