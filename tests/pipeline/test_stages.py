@@ -18,12 +18,36 @@ def _capture(monkeypatch, modname):
 
 
 def test_macro_faithful(monkeypatch):
-    """macro — buildMacroData(--source --push) + buildMacroCycle(--push)."""
+    """macro — in-library 흡수: runMacroData(source=MACRO_SOURCE) + cycle + regime.
+
+    옛 runScript 서브프로세스 위임은 흡수됨(stages/macro.py). MACRO_SOURCE 입구 해석 +
+    data 성공 시 cycle/regime 독립 호출 + token/upload 전파를 단언한다.
+    """
+    import importlib
+
+    from dartlab.pipeline.types import StageResult
+
     monkeypatch.setenv("MACRO_SOURCE", "fred")
-    mod, calls = _capture(monkeypatch, "dartlab.pipeline.stages.macro")
-    res = mod.runMacro()
-    assert calls[0][0] == (".github/scripts/sync/buildMacroData.py", "--source", "fred", "--push")
-    assert calls[1][0] == (".github/scripts/sync/buildMacroCycle.py", "--push")
+    mod = importlib.import_module("dartlab.pipeline.stages.macro")
+    seen: list[tuple[str, dict]] = []
+
+    def _ok(cat):
+        def _fn(**k):
+            seen.append((cat, k))
+            r = StageResult(category=cat)
+            r.report.ok = 1
+            return r
+
+        return _fn
+
+    monkeypatch.setattr(mod, "runMacroData", _ok("data"))
+    monkeypatch.setattr(mod, "runMacroCycle", _ok("cycle"))
+    monkeypatch.setattr(mod, "runMacroRegime", _ok("regime"))
+    res = mod.runMacro(upload=False, token="tok")
+    cats = [c for c, _ in seen]
+    assert cats == ["data", "cycle", "regime"]
+    assert seen[0][1]["source"] == "fred"  # MACRO_SOURCE 입구 해석
+    assert all(k["upload"] is False and k["token"] == "tok" for _, k in seen)  # 전파
     assert res.report.ok == 1
 
 
