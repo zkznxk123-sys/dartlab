@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
+	/* 색상 SSOT — 정본은 tokens.css(--dl-*). 여기 Tailwind @theme 는 *별칭*만 둬서
+	 * 한 곳(tokens.css)에서 전 제품(랜딩·터미널·scan·map·viewer) 색을 제어한다.
+	 * 강조색=캐러셀 핑크(--dl-accent)로 통일. 브랜드 레드(--dl-red)·신호색은 토큰 공유.
+	 * bg/text/border 는 랜딩 고유 톤(더 깊은 마케팅 다크) — 후속 단계서 토큰 수렴 검토. */
 @theme {
-	--color-dl-primary: #ea4647;
-	--color-dl-primary-dark: #c83232;
+	--color-dl-primary: var(--dl-red);
+	--color-dl-primary-dark: var(--dl-red-deep);
 	--color-dl-primary-light: #f87171;
-	--color-dl-accent: #fb923c;
-	--color-dl-accent-light: #fdba74;
+	--color-dl-accent: var(--dl-accent);
+	--color-dl-accent-light: var(--dl-accent-light);
+	--color-dl-orange: var(--dl-orange); /* 옛 accent(오렌지) — 보조색 명시(브랜드 그라데이션용) */
 	--color-dl-bg-dark: #050811;
 	--color-dl-bg-darker: #030509;
 	--color-dl-bg-card: #0f1219;
@@ -14,8 +19,8 @@
 	--color-dl-text-muted: #94a3b8;
 	--color-dl-text-dim: #64748b;
 	--color-dl-border: #1e2433;
-	--color-dl-success: #34d399;
-	--color-dl-warning: #fbbf24;
+	--color-dl-success: var(--dl-good);
+	--color-dl-warning: var(--dl-warn);
 	--color-dl-coffee: #ffdd00;
 
 	--font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;

@@ -46,6 +46,7 @@
 	--dl-accent: #ec4899;
 	--dl-accent-rgb: 236, 72, 153;
 	--dl-accent-dim: #be185d;
+	--dl-accent-light: #f9a8d4; /* 핑크 라이트 — 랜딩 accent-light·연한 강조 (오렌지 라이트 대체) */
 	--dl-accent-soft: rgba(236, 72, 153, 0.12);
 	/* surfaces 레거시 alias 전역 fallback — scan/map/viewer 등 .dlTerm 밖에서도 강조색 var 이 항상 해석되게(accent 로 위임). */
 	--amber: var(--dl-accent);
