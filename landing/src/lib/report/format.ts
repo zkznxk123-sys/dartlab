@@ -45,7 +45,8 @@ export function scaleAmt(values: Num[]): { unit: string; scale: number } {
 
 export function fmtScaled(v: Num, scale: number): string {
 	if (v == null || !Number.isFinite(v)) return '-';
-	return ((v as number) * scale).toFixed(1);
+	// 천단위 콤마 + 소수 1자리 고정(열 정렬). 억 단위 4자리 값(1,147.3)에 콤마가 가독성 핵심.
+	return ((v as number) * scale).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 /** 주식수 — 억주/만주/주 자동. */

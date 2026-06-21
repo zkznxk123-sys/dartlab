@@ -336,8 +336,10 @@ function buildBundle(rows: RawRow[], fs: FinScope, availScopes: FinScope[]): Ter
 		};
 		const lag = isAnnual ? 1 : 4; // YoY: 연간 1년 전, 분기/TTM 4분기 전
 
-		// 계정 시리즈 — 조 KRW 환산 (BS 시점, flow 모드별)
-		const ser = (key: string): Num[] => used.map((_, i) => { const v = valAtIdx(key, i); return v == null ? null : +(v / TRILLION).toFixed(3); });
+		// 계정 시리즈 — 조 KRW 환산 (BS 시점, flow 모드별).
+		// 정밀도 6자리(=백만원) — toFixed(3)은 0.001조=10억 양자화라 소형주(매출 수백억)는 전 값이 10억 배수로
+		// 반올림돼 실제값(1,147억)이 1,150억으로 틀리게 보였다. 대형주는 6자리여도 표시 단계에서 동일 반올림.
+		const ser = (key: string): Num[] => used.map((_, i) => { const v = valAtIdx(key, i); return v == null ? null : +(v / TRILLION).toFixed(6); });
 		const raw = (key: string): Num[] => used.map((_, i) => valAtIdx(key, i));
 		const ratio = (numK: string, denK: string, scale = 100, avgDen = false): Num[] => {
 			const n = raw(numK);
@@ -362,7 +364,7 @@ function buildBundle(rows: RawRow[], fs: FinScope, availScopes: FinScope[]): Ter
 				let s = 0;
 				let any = false;
 				for (const [k, sign] of parts) { const v = valAtIdx(k, i); if (v != null) { s += sign * v; any = true; } }
-				return any ? +(s / TRILLION).toFixed(3) : null;
+				return any ? +(s / TRILLION).toFixed(6) : null; // 6자리=백만원 (ser 와 동일 — 소형주 FCF 10억 양자화 방지)
 			});
 
 		// 보조: grossProfit 없으면 revenue - costOfSales
