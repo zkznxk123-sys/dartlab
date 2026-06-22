@@ -3,24 +3,26 @@
 	import type { Lang } from '../lib/types';
 	import type { MacroChannel, MacroDriverView, MacroExposureMatrixRow, MacroLensSnapshot, MacroLensTab, MacroTransmissionEdgeView } from '../lib/macroLens';
 	import { buildExposureMatrixRows, pickFocusCell } from '../lib/macroLens';
+	import type { MacroPort } from '@dartlab/ui-contracts';
 	import { ECON_MAX } from '../charts/chartState.svelte';
 	import MacroPathRail from './MacroPathRail.svelte';
-	import RegimePlaneHero from './RegimePlaneHero.svelte';
-	import MacroCycleRisk from './MacroCycleRisk.svelte';
+	import MacroBoard from './MacroBoard.svelte';
 
 	interface Props {
 		snapshot: MacroLensSnapshot;
 		lang: Lang;
-		// tab = 초기 스크롤 앵커(레거시 onMacroLens 시그니처 호환). 더 이상 탭 UI 아님 — 단일 캔버스.
+		// tab = 레거시 onMacroLens 시그니처 호환(미사용). 다이얼로그 = 회사 무관 거시 보드.
 		tab?: MacroLensTab;
 		focusId?: string;
 		activeEcon?: string[];
+		// 회사 무관 거시 시계열 공급(MacroBoard). 미연결 시 보드 숨김.
+		macro?: MacroPort;
 		onTab?: (tab: MacroLensTab) => void;
 		onClose: () => void;
 		onToggleEcon?: (id: string) => void;
 		onSector?: (industryId: string) => void;
 	}
-	let { snapshot, lang, tab = 'dashboard', focusId = '', activeEcon = [], onTab, onClose, onToggleEcon, onSector }: Props = $props();
+	let { snapshot, lang, tab = 'dashboard', focusId = '', activeEcon = [], macro, onTab, onClose, onToggleEcon, onSector }: Props = $props();
 	let localFocus = $state('');
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const focusableSelector = [
@@ -95,11 +97,6 @@
 	const focusCell = $derived(pickFocusCell(exposureRows));
 	// 채널 열 클러스터: 켜진 채널만 열, 각 driver 칩을 자기 채널 열 아래로 모음(빈 셀 0).
 	const mapColumns = $derived(buildMapColumns(exposureRows));
-	const pulseDrivers = $derived(exposureRows.length ? exposureRows.slice(0, 6).map((r) => r.driver) : snapshot.topPressures.slice(0, 6));
-	// 국면 렌즈(Regime Lens) — S2 MacroCycleRisk 가 시각으로 소비. macro.regime 부재 시 null(폴백).
-	const regime = $derived(snapshot.regime);
-	const usLens = $derived(regime?.us ?? null);
-	const krLens = $derived(regime?.kr ?? null);
 	// S5 Gate Strip = evidenceGates 중 quant 제외 4개(데이터·전파·동행·회사).
 	const gateRows = $derived(snapshot.evidenceGates.filter((g) => g.id !== 'quant'));
 	const exposureQualityClass = $derived(snapshot.exposureQuality.status === 'quantCandidate' ? 'ok' : snapshot.exposureQuality.status === 'qualitativeOnly' ? 'watch' : 'blocked');
@@ -141,13 +138,6 @@
 			if (cells.length) out.push({ channel: ch.k, cells });
 		});
 		return out;
-	}
-	function sparkPoints(vals: number[]): string {
-		if (!vals.length) return '';
-		const min = Math.min(...vals);
-		const max = Math.max(...vals);
-		const span = max - min || 1;
-		return vals.map((v, i) => `${(i / Math.max(1, vals.length - 1)) * 48},${18 - ((v - min) / span) * 16}`).join(' ');
 	}
 	const cellClass = (edge: MacroTransmissionEdgeView | null) => edge ? edge.evidenceLevel : 'none';
 	const cellTitle = (edge: MacroTransmissionEdgeView, ch: MacroChannel): string => {
@@ -233,37 +223,18 @@
 			<button class="scrClose" onclick={onClose} aria-label="close"><X size={14} /></button>
 		</div>
 
-		<!-- 단일 캔버스(탭 0). 위→아래 매크로 내러티브: 국면 → 사이클·위험 → 드라이버 → 전파 → 출처/한계. -->
+		<!-- 회사 무관 거시 보드(주역) + 회사 전이는 임시 하단 fold(추후 중간 패널 이관). -->
 		<div class="mlBody">
-			<!-- S1 — 국면 평면(히어로): 지금 어디인가 -->
-			{#if snapshot.glance}
-				<RegimePlaneHero view={snapshot.glance.regime} {lang} />
+			{#if macro}
+				<MacroBoard {macro} {lang} />
+			{:else}
+				<div class="mlNoMacro">{T('거시 시계열 미연결', 'macro time series not connected')}</div>
 			{/if}
 
-			<!-- S2 — 사이클 & 침체위험: 어디로 가는가 (probit 다이얼·수익률곡선·사이클 링·신호등) -->
-			<MacroCycleRisk us={usLens} kr={krLens} quadrant={snapshot.glance?.regime ?? null} {lang} />
-
-			<!-- S3 — 드라이버 펄스: 무엇이 움직이는가 (클릭=차트 ECON 오버레이) -->
-			<section class="mlSection" aria-label={T('거시 펄스', 'Macro pulse')}>
-				<div class="mlSecHead"><span class="mlBlockK">DRIVERS</span><b>{T('거시 펄스 — 클릭하면 가격 차트에 겹쳐 봅니다', 'Macro pulse — click to overlay on the price chart')}</b></div>
-				<div class="mlPulseStrip">
-					{#each pulseDrivers as d (d.id)}
-						<button class={'mlPulse ' + d.pressureLevel} class:on={activeEcon.includes(d.id) || activeFocusId === d.id} aria-pressed={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => { localFocus = d.id; onToggleEcon?.(d.id); }} title={econBlocked(d.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : `${d.value} · ${d.asOf} · ${d.source}`}>
-							<span>{d.label}</span>
-							<b>{d.value}</b>
-							<em>{d.change} · {d.asOf || d.freshness.label}</em>
-							<svg viewBox="0 0 48 20" preserveAspectRatio="none" aria-hidden="true">
-								<polyline points={sparkPoints(d.spark)} />
-							</svg>
-						</button>
-					{/each}
-				</div>
-			</section>
-
-			<!-- S4 — 전파: 이 회사에 어떻게 닿는가 (시각 흐름 + 노출 지도 + 동행 산점도) -->
-			<section class="mlSection" id="macroS4" aria-label={T('전파 경로', 'Transmission')}>
-				<div class="mlSecHead"><span class="mlBlockK">TRANSMISSION</span><b>{T('이 회사에 어떻게 닿는가 — 거시 → 재무 → 밸류', 'How it reaches this company — macro → financials → value')}</b></div>
-				{#if snapshot.macroPath}
+			<details class="mlFold">
+				<summary><span class="mlBlockK">{T('이 회사 ↔ 거시', 'This company ↔ macro')}</span><b>{T('전파 · 출처 · 한계 (임시 위치 · 추후 중간 패널 이관)', 'Transmission · sources · limits (temporary · moving to center panel)')}</b><i class="mlFoldCaret" aria-hidden="true">▾</i></summary>
+				<div class="mlFoldBody">
+					{#if snapshot.macroPath}
 					<MacroPathRail view={snapshot.macroPath} {lang} mode="full" onSector={onSector} />
 				{/if}
 
@@ -346,12 +317,7 @@
 						</div>
 					</section>
 				{/if}
-			</section>
 
-			<!-- S5 — 출처 · 한계 · 심화 (단일 접힘 fold. 정직 보존, 화면 비지배). -->
-			<details class="mlFold">
-				<summary><span class="mlBlockK">SOURCES · LIMITS</span><b>{T('출처 · 한계 · 심화 (게이트 · 시나리오 · 지표)', 'Sources · limits · advanced (gates · scenarios · drivers)')}</b><i class="mlFoldCaret" aria-hidden="true">▾</i></summary>
-				<div class="mlFoldBody">
 					<!-- 증거 게이트 + 릴리즈 레일 -->
 					<section class="mlDashGate" aria-label={T('증거 게이트와 릴리즈 레일', 'Evidence gates and release rail')}>
 						<div class="mlGateStrip">
@@ -612,26 +578,17 @@
 	.mlKicker { font-family: var(--dl-font-mono); color: var(--amber); font-weight: 800; font-size: 10px; letter-spacing: .06em; }
 	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 	/* 섹션 — 헤더(kicker + 한 줄 안내) + 본문 */
-	.mlSection { display: flex; flex-direction: column; gap: 8px; }
-	.mlSecHead { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-	.mlSecHead b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 600; color: var(--dim); }
+	.mlNoMacro { padding: 30px; text-align: center; color: var(--dim); font-size: 11px; }
 	.mlGrid { display: grid; gap: 10px; }
 	.mlGrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.edgeGrid { grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); }
 	.scenarioGrid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 	/* Driver Pulse — 데스크톱 가로 스트립(최대 6개 한 줄). */
-	.mlPulseStrip, .mlGateStrip { display: grid; gap: 8px; }
-	.mlPulseStrip { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
-	.mlGate, .mlPulse { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
-	.mlGate span, .mlPulse span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-	.mlGate b, .mlPulse b { display: block; margin-top: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-	.mlGate em, .mlPulse em { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlPulse { color: var(--dl-ink); text-align: left; cursor: pointer; }
-	.mlPulse:hover, .mlPulse.on { border-color: rgba(var(--amber-rgb),.55); background: rgba(var(--amber-rgb),.045); }
-	.mlPulse:disabled { cursor: not-allowed; opacity: .5; }
-	.mlPulse b { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-	.mlPulse svg { width: 100%; height: 20px; margin-top: 5px; overflow: visible; }
-	.mlPulse polyline { fill: none; stroke: var(--amber); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+	.mlGateStrip { display: grid; gap: 8px; }
+	.mlGate { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
+	.mlGate span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+	.mlGate b { display: block; margin-top: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+	.mlGate em { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	/* Exposure Map */
 	.mlMap { border: 1px solid var(--bd); background: var(--panel); border-radius: 8px; padding: 8px; }
 	.mlMapFocus { opacity: 1; border-left: 2px solid var(--amber); background: color-mix(in srgb, var(--dim) 7%, var(--panel)); border-radius: 0 6px 6px 0; padding: 8px 10px; }
@@ -855,7 +812,7 @@
 	.mlLimitSub { margin-top: 8px; color: var(--amber); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	@media (max-width: 760px) {
 		.mlModal { height: 92vh; }
-		.mlGrid.two, .mlPulseStrip, .mlGateStrip, .mlDrill, .mlRailRows, .mlDashGate { grid-template-columns: 1fr; }
+		.mlGrid.two, .mlGateStrip, .mlDrill, .mlRailRows, .mlDashGate { grid-template-columns: 1fr; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
 		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
 		.mlQualityTop, .mlIndicatorGrid { grid-template-columns: 1fr; }
@@ -863,7 +820,6 @@
 		.mlModelMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	}
 	@media (max-width: 560px) {
-		.mlPulseStrip { grid-auto-flow: column; grid-auto-columns: minmax(104px, 1fr); grid-template-columns: none; overflow-x: auto; }
 		.mlMapHead { display: none; }
 		.mlMapRow { display: flex; flex-direction: column; gap: 6px; }
 		.mlMapCol { width: 100%; }

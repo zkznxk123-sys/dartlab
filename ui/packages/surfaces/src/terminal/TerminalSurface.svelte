@@ -410,6 +410,7 @@
 		<MacroLensDialog
 			snapshot={macroLensSnapshot}
 			{lang}
+			macro={runtime.macro}
 			tab={macroLensTab}
 			focusId={macroLensFocus}
 			activeEcon={chartCtl.econ}
