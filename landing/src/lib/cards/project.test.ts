@@ -57,6 +57,32 @@ describe('projectBlock — 8 변종 명시 매핑', () => {
 	});
 });
 
+describe('projectBlock table — 4:5 카드 정규화(라벨 맨앞·기간 cap·요약열 드롭)', () => {
+	it('라벨이 끝열인 표(연간추세)도 라벨을 cols[0] 로 정규화 — 열 어긋남 방지', () => {
+		// 실제 케이스: ['2020'..'2025','연간 지표'] (라벨이 마지막). 라벨이 맨 앞으로 와야 함.
+		const block: ReportBlock = {
+			type: 'table',
+			data: [{ '2020': '59.2', '2021': '69.9', '2022': '86.6', '2023': '99.8', '2024': '107.4', '2025': '114.1', '연간 지표': '매출액(조)' }]
+		};
+		const card = projectBlock(block, HEAD);
+		expect(card?.kind).toBe('table');
+		if (card?.kind !== 'table') throw new Error('table 아님');
+		expect(card.cols[0]).toBe('연간 지표'); // 라벨 맨앞
+		expect(card.cols.slice(1)).toEqual(['2020', '2021', '2022', '2023', '2024', '2025']); // 기간 순서 보존
+	});
+	it('기간 7+ · 요약열(YoY) → 라벨 + 최근 6기간만(요약열 드롭, 헤더 절단 해소)', () => {
+		const periods: Record<string, string> = {};
+		['23Q3', '23Q4', '24Q1', '24Q2', '24Q3', '24Q4', '25Q1'].forEach((q, i) => (periods[q] = String(i)));
+		const block: ReportBlock = { type: 'table', data: [{ 항목: '매출', ...periods, YoY: '-5%' }] };
+		const card = projectBlock(block, HEAD);
+		if (card?.kind !== 'table') throw new Error('table 아님');
+		expect(card.cols[0]).toBe('항목');
+		expect(card.cols).not.toContain('YoY'); // 요약열 드롭
+		expect(card.cols.slice(1)).toEqual(['23Q4', '24Q1', '24Q2', '24Q3', '24Q4', '25Q1']); // 최근 6기간(23Q3 탈락)
+		expect(card.cols.length).toBeLessThanOrEqual(7); // 라벨+6 → 추이 포함해도 8열 ≤ 가독 한계
+	});
+});
+
 describe('projectReport — 덱 구조 + 정직', () => {
 	const sec: ReportSection = {
 		key: 'profit',

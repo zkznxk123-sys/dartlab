@@ -140,7 +140,7 @@
 				</div>
 			{:else if card.kind === 'finChart'}
 				<div class="finWrap">
-					{#if finState === 'ready' && finCards}<MiniFinChart card={finCards.card} periods={finCards.periods} h={300} />
+					{#if finState === 'ready' && finCards}<MiniFinChart card={finCards.card} periods={finCards.periods} h={340} />
 					{:else if finState === 'loading'}<p class="muted">재무 추이 불러오는 중…</p>
 					{:else}<p class="muted">재무 추이 데이터가 아직 없습니다.</p>{/if}
 				</div>
@@ -441,8 +441,10 @@
 		padding: 5%;
 		box-sizing: border-box;
 	}
-	.finWrap {
-		align-items: center;
+	/* MiniFinChart 가 패널 폭을 꽉 채우게(.mfc 가 content 폭으로 줄어 작은 정사각으로 뜨던 것 교정).
+	   svg 는 width:100%·height:auto(terminal.css) → 폭 = 패널 폭, h={340} 비율로 세로도 더 채움. */
+	.finWrap :global(.mfc) {
+		width: 100%;
 	}
 	.lineChart {
 		width: 100%;
@@ -551,7 +553,9 @@
 	}
 	.cT th:first-child,
 	.cT td:first-child {
-		width: 34%;
+		width: 26%; /* 라벨 열 — 좁혀서 기간 열에 폭을 양보(헤더 '24Q1' 절단 방지) */
+		white-space: normal;
+		word-break: keep-all;
 	}
 	.cT th.num,
 	.cT td.num {

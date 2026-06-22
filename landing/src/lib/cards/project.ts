@@ -48,9 +48,17 @@ export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | 
 		case 'share':
 			return block.rows.length ? { ...head, kind: 'share', rows: block.rows, legend: block.legend } : null;
 		case 'table': {
-			const cols = block.data.length ? Object.keys(block.data[0]) : [];
+			const raw = block.data.length ? Object.keys(block.data[0]) : [];
 			// 시계열 표만 캐러셀(스파크라인) — 비시계열 dense 표는 슬라이드에 안 맞아 명시 skip.
-			return isTimeSeries(cols) ? { ...head, kind: 'table', cols, data: block.data, unit: block.unit } : null;
+			if (!isTimeSeries(raw)) return null;
+			// 4:5 카드는 좁다 → 라벨(기간 아닌 첫 열) + 최근 6기간만. 라벨이 끝열인 표(연간추세=
+			// [2020..2025, '연간 지표'])도 맨 앞으로 정규화해 열 어긋남 방지, 요약열(YoY/TTM)은 드롭
+			// (추이 스파크라인이 흐름 전달). 9~10열을 8열 이하로 줄여 헤더 절단('24…')도 해소.
+			const isPd = (c: string) => /^\d{4}$/.test(c) || /^\d{2}Q[1-4]$/.test(c);
+			const periods = raw.filter(isPd);
+			const label = raw.find((c) => !isPd(c)) ?? raw[0];
+			const cols = [label, ...periods.slice(-6)];
+			return { ...head, kind: 'table', cols, data: block.data, unit: block.unit };
 		}
 		default:
 			return assertNever(block);
