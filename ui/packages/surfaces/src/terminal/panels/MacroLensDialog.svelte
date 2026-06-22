@@ -214,11 +214,11 @@
 <div class="scrimWrap macroLensScrim" role="presentation" onclick={onClose}>
 	<div bind:this={dialogEl} class="scrModal mlModal" role="dialog" aria-modal="true" aria-label="Macro Lens" tabindex="-1" onclick={(e) => e.stopPropagation()} onkeydown={onDialogKeydown}>
 		<div class="scrHead mlHead">
+			<!-- 회사 무관 거시 상황판 — 헤더는 거시 제목(회사명 금지). 회사는 아래 전이 fold 에만. -->
 			<div class="mlTitle">
 				<span class="mlKicker">MACRO LENS</span>
-				<b>{snapshot.company.name}</b>
-				<span class="mono">{snapshot.company.code}</span>
-				<span>{T(snapshot.company.sector.kr, snapshot.company.sector.en)}</span>
+				<b>{T('거시 상황판', 'Macro board')}</b>
+				<span>{T('성장 · 물가 · 금리 · 신용 — 한눈에 (회사 무관)', 'growth · inflation · rates · credit — at a glance (company-agnostic)')}</span>
 			</div>
 			<button class="scrClose" onclick={onClose} aria-label="close"><X size={14} /></button>
 		</div>
@@ -232,7 +232,7 @@
 			{/if}
 
 			<details class="mlFold">
-				<summary><span class="mlBlockK">{T('이 회사 ↔ 거시', 'This company ↔ macro')}</span><b>{T('전파 · 출처 · 한계 (임시 위치 · 추후 중간 패널 이관)', 'Transmission · sources · limits (temporary · moving to center panel)')}</b><i class="mlFoldCaret" aria-hidden="true">▾</i></summary>
+				<summary><span class="mlBlockK">{T('이 회사 ↔ 거시', 'This company ↔ macro')}</span><b>{snapshot.company.name} · {T('전파 · 출처 · 한계 (임시 위치 · 추후 중간 패널 이관)', 'transmission · sources · limits (temporary · moving to center panel)')}</b><i class="mlFoldCaret" aria-hidden="true">▾</i></summary>
 				<div class="mlFoldBody">
 					{#if snapshot.macroPath}
 					<MacroPathRail view={snapshot.macroPath} {lang} mode="full" onSector={onSector} />
@@ -574,7 +574,7 @@
 	.mlHead { flex-wrap: wrap; }
 	.mlTitle { display: flex; align-items: center; gap: 8px; min-width: 0; }
 	.mlTitle b { font-size: 14px; }
-	.mlTitle .mono, .mlTitle span:last-child { color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
+	.mlTitle span:last-child { color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
 	.mlKicker { font-family: var(--dl-font-mono); color: var(--amber); font-weight: 800; font-size: 10px; letter-spacing: .06em; }
 	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 	/* 섹션 — 헤더(kicker + 한 줄 안내) + 본문 */
