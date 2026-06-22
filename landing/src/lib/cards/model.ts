@@ -20,13 +20,15 @@ export interface MediaIndex {
 	companies: Record<string, MediaCompany>;
 }
 
-/** 슬라이드 공통 머리 — splitTitle 로 쪼갠 섹션 제목 + 큐레이션 손글 caption(note). */
+/** 슬라이드 공통 머리 — splitTitle 로 쪼갠 섹션 제목 + 큐레이션 손글 caption(note) + 배경 hero 사진. */
 interface CardHead {
 	heading?: string;
 	sub?: string;
 	engine?: ReportSourceEngine;
 	/** 큐레이션 오버레이(CarouselSpec.notes)에서 주입한 손글 한 줄 — no-new-number(본문 숫자⊆). 자동 투영엔 없음. */
 	note?: string;
+	/** 배경 hero 사진 URL — 전 슬라이드가 회사 사진을 배경으로(인스타 에디토리얼). hero 전부를 슬라이드에 순환 배정. */
+	bg?: string;
 }
 
 // 카드(슬라이드) 판별 유니온. chart 계열(line/bars/share/table)은 ReportBlock 과 1:1.
@@ -38,7 +40,6 @@ export type CarouselCard =
 			perspectiveLabel: string;
 			conclusion: string;
 			dataBasis: string;
-			heroUrl?: string; // hfMedia hero (없으면 SVG/그라데이션 폴백)
 	  })
 	| (CardHead & { kind: 'kpis'; metrics: { label: string; value: string }[] })
 	| (CardHead & { kind: 'narrative'; text: string })
@@ -68,7 +69,7 @@ export interface CarouselDeck {
 	perspectiveKey: string;
 	perspectiveLabel: string;
 	asOf: string;
-	heroUrl?: string;
+	heroUrls: string[]; // 회사 hero 전부(슬라이드 배경 순환). 첫 장 = 표지 사진.
 	cards: CarouselCard[];
 }
 

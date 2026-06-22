@@ -1,14 +1,19 @@
 <script lang="ts">
-	// 한 슬라이드 렌더 — CarouselCard 종류별 분기. 차트는 $lib/report/render 순수 SVG 헬퍼로 그려
-	// klinecharts·백테스트 0 의존(백본). finChart 만 MiniFinChart(finance.bundle) 로 재무 추이 재현.
+	// 한 슬라이드 — 인스타 4:5 에디토리얼. 회사 hero 사진을 배경으로 깔고(전 슬라이드), 헤드라인은
+	// AccentText(`[[구절]]`=rose-red). 색감·레이아웃은 기존 SNS 캐러셀(colors.ts/PhotoFrame/InsightCard)
+	// 재현 — 새로 짓지 않음. 차트는 $lib/report/render 순수 SVG(klinecharts·백테스트 0), finChart 만 MiniFinChart.
 	import type { DartLabRuntime, FinCard } from '@dartlab/ui-contracts';
 	import { MiniFinChart } from '@dartlab/ui-surfaces/terminal';
+	import { CARD, accentParts } from './theme';
 	import { cellTone, verdictTone, TXT_COLS, spark, isTimeSeries, lineGeo, wonLabel } from '$lib/report/render';
 	import type { CarouselCard } from './model';
 
 	let { card, rt }: { card: CarouselCard; rt: DartLabRuntime } = $props();
 
-	// finChart — finance.bundle 의 첫 1~2 카드를 MiniFinChart 로(없으면 정직 폴백).
+	// 사진 모드 — 텍스트 카드=풀(또렷), 차트 카드=dim(가독 위해 어둡게).
+	const CHART_KINDS = new Set(['kpis', 'line', 'bars', 'share', 'table', 'finChart']);
+	const photoMode = $derived(card.kind === 'cover' ? 'cover' : CHART_KINDS.has(card.kind) ? 'dim' : 'full');
+
 	let finCards = $state<{ card: FinCard; periods: string[] } | null>(null);
 	let finState = $state<'idle' | 'loading' | 'ready' | 'empty'>('idle');
 	$effect(() => {
@@ -28,252 +33,250 @@
 			.catch(() => (finState = 'empty'));
 	});
 
-	// line/bars/share 기하 — report 와 동일 헬퍼.
 	const line = $derived(card.kind === 'line' ? lineGeo(card.series, card.markers ?? []) : null);
 	const barMax = $derived(card.kind === 'bars' ? Math.max(1, ...card.rows.map((r) => Math.abs(r.value))) : 1);
-	const SHARE_C = ['#5b9bf0', '#34d399', '#fbbf24', '#a78bfa', '#f0616f', '#22d3ee', '#64748b'];
-	function shareColor(i: number) {
-		return SHARE_C[i % SHARE_C.length];
-	}
+	const SHARE_C = [CARD.accent, CARD.success, CARD.warning, '#a78bfa', '#f87171', '#22d3ee', CARD.textDim];
+	const shareColor = (i: number) => SHARE_C[i % SHARE_C.length];
 </script>
 
-<article class="slide kind-{card.kind}" aria-roledescription="slide">
-	{#if card.heading}
-		<header class="sHead">
-			<h3>{card.heading}</h3>
-			{#if card.sub}<p class="sSub">{card.sub}</p>{/if}
-		</header>
-	{/if}
-	{#if card.note}<p class="sNote">{card.note}</p>{/if}
+{#snippet accent(text: string, cls = '')}
+	<span class={cls}>{#each accentParts(text) as p}<span class:hl={p.accent}>{p.text}</span>{/each}</span>
+{/snippet}
 
-	{#if card.kind === 'cover'}
-		<div class="cover" class:hasHero={!!card.heroUrl}>
-			{#if card.heroUrl}
-				<img class="hero" src={card.heroUrl} alt={card.corpName} loading="lazy" />
-			{/if}
-			<div class="coverBody">
-				<p class="cPersp">{card.perspectiveLabel}</p>
-				<h2 class="cName">{card.corpName}</h2>
-				<p class="cCode">{card.stockCode} · {card.dataBasis}</p>
-				<p class="cConcl">{card.conclusion}</p>
-			</div>
-		</div>
-	{:else if card.kind === 'kpis'}
-		<div class="kpis">
-			{#each card.metrics as m (m.label)}
-				<div class="kpi">
-					<span class="kLabel">{m.label}</span>
-					<span class="kVal {cellTone(m.value)}">{m.value}</span>
-				</div>
-			{/each}
-		</div>
-	{:else if card.kind === 'narrative'}
-		<p class="narr">{card.text}</p>
-	{:else if card.kind === 'flags'}
-		<ul class="flags {card.tone}">
-			{#each card.items as f}<li>{f}</li>{/each}
-		</ul>
-	{:else if card.kind === 'line' && line}
-		<div class="chart">
-			<svg viewBox="0 0 100 30" preserveAspectRatio="none" class="lineChart">
-				<polygon points={line.area} class="lArea" />
-				<polyline points={line.pts} class="lLine" />
-				{#each line.mk as m}
-					<line x1="0" x2="100" y1={m.y} y2={m.y} class="lMark" />
-				{/each}
-				<circle cx={line.lastX} cy={line.lastY} r="0.9" class="lDot" />
-			</svg>
-			{#if card.markers?.length}
-				<div class="lMarkers">
-					{#each card.markers as m}<span>{m.label} {card.valueFmt === 'won' ? wonLabel(m.v) : m.v}</span>{/each}
-				</div>
-			{/if}
-		</div>
-	{:else if card.kind === 'bars'}
-		<div class="bars">
-			{#each card.rows as r (r.label)}
-				<div class="bar">
-					<span class="bLabel">{r.label}</span>
-					<span class="bTrack"><span class="bFill" class:neg={r.tone === 'neg'} style="width:{(Math.abs(r.value) / barMax) * 100}%"></span></span>
-					<span class="bVal">{r.display}</span>
-				</div>
-			{/each}
-		</div>
-	{:else if card.kind === 'share'}
-		<div class="share">
-			{#each card.rows as row (row.year)}
-				<div class="shRow">
-					<span class="shYear">{row.year}</span>
-					<span class="shBar">
-						{#each row.segs as s (s.key)}
-							<span class="shSeg" style="width:{s.pct}%;background:{shareColor(card.legend.findIndex((l) => l.key === s.key))}" title="{s.label} {s.pct}%"></span>
-						{/each}
-					</span>
-				</div>
-			{/each}
-			<div class="shLegend">
-				{#each card.legend as l, i (l.key)}<span class="shLi"><i style="background:{shareColor(i)}"></i>{l.label}</span>{/each}
-			</div>
-		</div>
-	{:else if card.kind === 'table'}
-		<div class="tableWrap">
-			<table class="cTable">
-				<thead><tr>{#each card.cols as c}<th class:num={c !== card.cols[0]}>{c}</th>{/each}{#if isTimeSeries(card.cols)}<th class="num">추이</th>{/if}</tr></thead>
-				<tbody>
-					{#each card.data as row}
-						{@const sp = spark(row, card.cols.slice(1))}
-						<tr>
-							{#each card.cols as c, ci}
-								<td class:num={ci !== 0} class="{ci === 0 || TXT_COLS.has(c) ? verdictTone(row[c]) : cellTone(row[c])}">{row[c] ?? '-'}</td>
-							{/each}
-							{#if isTimeSeries(card.cols)}
-								<td class="num spk">
-									{#if sp}
-										<svg viewBox="0 0 64 22" class="spark"><polygon points={sp.area} class="spkArea" /><polyline points={sp.points} class="spkLine" /></svg>
-									{/if}
-								</td>
-							{/if}
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-			{#if card.unit}<p class="tUnit">단위: {card.unit}</p>{/if}
-		</div>
-	{:else if card.kind === 'finChart'}
-		<div class="finWrap">
-			{#if finState === 'ready' && finCards}
-				<MiniFinChart card={finCards.card} periods={finCards.periods} h={220} />
-			{:else if finState === 'loading'}
-				<p class="muted">재무 추이 불러오는 중…</p>
-			{:else}
-				<p class="muted">재무 추이 데이터가 아직 없습니다.</p>
-			{/if}
-		</div>
-	{:else if card.kind === 'closing'}
-		<blockquote class="closing">{card.thesis}</blockquote>
-	{:else if card.kind === 'empty'}
-		<div class="empty">
-			<p>{card.reason}</p>
-		</div>
+<article class="slide pm-{photoMode}">
+	{#if card.bg}
+		<img class="bg" src={card.bg} alt="" loading="lazy" />
+		<div class="scrim"></div>
 	{/if}
+
+	<div class="content">
+		{#if card.kind === 'cover'}
+			<div class="cover">
+				<span class="kicker"><i></i>{card.perspectiveLabel}</span>
+				<h2 class="bigName">{card.corpName}</h2>
+				<p class="lead">{@render accent(card.conclusion)}</p>
+				<p class="mono">{card.stockCode} · {card.dataBasis}</p>
+			</div>
+		{:else}
+			{#if card.heading}
+				<header class="sHead">
+					<span class="kicker"><i></i>{card.heading}</span>
+					{#if card.sub}<p class="sSub">{@render accent(card.sub)}</p>{/if}
+				</header>
+			{/if}
+			{#if card.note}<p class="note">{@render accent(card.note)}</p>{/if}
+
+			{#if card.kind === 'kpis'}
+				<div class="kpis">
+					{#each card.metrics as m (m.label)}
+						<div class="kpi"><span class="kL">{m.label}</span><span class="kV {cellTone(m.value)}">{m.value}</span></div>
+					{/each}
+				</div>
+			{:else if card.kind === 'narrative'}
+				<p class="narr">{@render accent(card.text)}</p>
+			{:else if card.kind === 'flags'}
+				<ul class="flags {card.tone}">{#each card.items as f}<li>{@render accent(f)}</li>{/each}</ul>
+			{:else if card.kind === 'line' && line}
+				<div class="chart">
+					<svg viewBox="0 0 100 30" preserveAspectRatio="none" class="lineChart">
+						<polygon points={line.area} class="lArea" />
+						<polyline points={line.pts} class="lLine" />
+						{#each line.mk as m}<line x1="0" x2="100" y1={m.y} y2={m.y} class="lMark" />{/each}
+						<circle cx={line.lastX} cy={line.lastY} r="0.9" class="lDot" />
+					</svg>
+					{#if card.markers?.length}
+						<div class="lMarkers">{#each card.markers as m}<span>{m.label} {card.valueFmt === 'won' ? wonLabel(m.v) : m.v}</span>{/each}</div>
+					{/if}
+				</div>
+			{:else if card.kind === 'bars'}
+				<div class="bars">
+					{#each card.rows as r (r.label)}
+						<div class="bar"><span class="bL">{r.label}</span><span class="bT"><span class="bF" class:neg={r.tone === 'neg'} style="width:{(Math.abs(r.value) / barMax) * 100}%"></span></span><span class="bV">{r.display}</span></div>
+					{/each}
+				</div>
+			{:else if card.kind === 'share'}
+				<div class="share">
+					{#each card.rows as row (row.year)}
+						<div class="shRow"><span class="shY">{row.year}</span><span class="shBar">{#each row.segs as s (s.key)}<span class="shSeg" style="width:{s.pct}%;background:{shareColor(card.legend.findIndex((l) => l.key === s.key))}" title="{s.label} {s.pct}%"></span>{/each}</span></div>
+					{/each}
+					<div class="shLeg">{#each card.legend as l, i (l.key)}<span class="shLi"><i style="background:{shareColor(i)}"></i>{l.label}</span>{/each}</div>
+				</div>
+			{:else if card.kind === 'table'}
+				<div class="tWrap">
+					<table class="cT">
+						<thead><tr>{#each card.cols as c}<th class:num={c !== card.cols[0]}>{c}</th>{/each}{#if isTimeSeries(card.cols)}<th class="num">추이</th>{/if}</tr></thead>
+						<tbody>
+							{#each card.data as row}
+								{@const sp = spark(row, card.cols.slice(1))}
+								<tr>
+									{#each card.cols as c, ci}<td class:num={ci !== 0} class="{ci === 0 || TXT_COLS.has(c) ? verdictTone(row[c]) : cellTone(row[c])}">{row[c] ?? '-'}</td>{/each}
+									{#if isTimeSeries(card.cols)}<td class="num">{#if sp}<svg viewBox="0 0 64 22" class="spark"><polygon points={sp.area} class="spkA" /><polyline points={sp.points} class="spkL" /></svg>{/if}</td>{/if}
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			{:else if card.kind === 'finChart'}
+				<div class="finWrap">
+					{#if finState === 'ready' && finCards}<MiniFinChart card={finCards.card} periods={finCards.periods} h={300} />
+					{:else if finState === 'loading'}<p class="muted">재무 추이 불러오는 중…</p>
+					{:else}<p class="muted">재무 추이 데이터가 아직 없습니다.</p>{/if}
+				</div>
+			{:else if card.kind === 'closing'}
+				<blockquote class="closing">{@render accent(card.thesis)}</blockquote>
+			{:else if card.kind === 'empty'}
+				<div class="empty"><p>{card.reason}</p></div>
+			{/if}
+		{/if}
+	</div>
 </article>
 
 <style>
 	.slide {
-		display: flex;
-		flex-direction: column;
-		gap: 14px;
+		position: relative;
 		width: 100%;
 		height: 100%;
-		padding: 28px 26px;
-		box-sizing: border-box;
-		color: #e7ecf3;
-		overflow: hidden;
-	}
-	.sHead h3 {
-		margin: 0;
-		font-size: 13px;
-		letter-spacing: 0.04em;
-		color: #9fb0c4;
-		text-transform: uppercase;
-	}
-	.sSub {
-		margin: 2px 0 0;
-		font-size: 17px;
-		font-weight: 600;
+		background: #050811;
 		color: #f1f5f9;
-	}
-	/* 큐레이션 손글 caption */
-	.sNote {
-		margin: 0;
-		font-size: 14px;
-		line-height: 1.5;
-		color: #cdd9e6;
-		border-left: 2px solid #7dd3fc;
-		padding-left: 10px;
-	}
-	/* cover */
-	.cover {
-		position: relative;
-		flex: 1;
-		display: flex;
-		align-items: flex-end;
-		border-radius: 14px;
 		overflow: hidden;
-		background: linear-gradient(160deg, #1a2535, #0e1722);
+		container-type: inline-size; /* cqw = 슬라이드 폭 기준 반응형 타이포(인스타 1080 기준 스케일) */
+		font-family: 'Pretendard Variable', 'Pretendard', system-ui, sans-serif;
 	}
-	.cover .hero {
+	.bg {
 		position: absolute;
 		inset: 0;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		opacity: 0.9;
 	}
-	.coverBody {
+	.pm-cover .bg {
+		opacity: 0.95;
+	}
+	.pm-full .bg {
+		opacity: 0.62;
+	}
+	.pm-dim .bg {
+		opacity: 0.16;
+	}
+	.scrim {
+		position: absolute;
+		inset: 0;
+	}
+	.pm-cover .scrim {
+		background: linear-gradient(180deg, rgba(5, 8, 17, 0.1) 0%, rgba(5, 8, 17, 0.25) 45%, rgba(5, 8, 17, 0.96) 100%);
+	}
+	.pm-full .scrim {
+		background: linear-gradient(180deg, rgba(5, 8, 17, 0.55) 0%, rgba(5, 8, 17, 0.35) 40%, rgba(5, 8, 17, 0.9) 100%);
+	}
+	.pm-dim .scrim {
+		background: rgba(5, 8, 17, 0.82);
+	}
+	.content {
 		position: relative;
 		z-index: 1;
-		padding: 24px;
-		width: 100%;
-		background: linear-gradient(0deg, rgba(8, 12, 18, 0.88) 30%, rgba(8, 12, 18, 0) 100%);
+		height: 100%;
+		box-sizing: border-box;
+		padding: 7% 7.5% 9%;
+		display: flex;
+		flex-direction: column;
 	}
-	.hasHero .coverBody {
-		padding-top: 64px;
-	}
-	.cPersp {
-		margin: 0;
-		font-size: 12px;
-		color: #7dd3fc;
-		letter-spacing: 0.08em;
+	/* kicker (accent dot + label) */
+	.kicker {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6em;
+		font-size: clamp(11px, 2.4cqw, 17px);
+		color: #fb923c;
+		font-weight: 800;
+		letter-spacing: 0.12em;
 		text-transform: uppercase;
 	}
-	.cName {
-		margin: 4px 0 2px;
-		font-size: 30px;
-		font-weight: 700;
-		line-height: 1.1;
+	.kicker i {
+		width: 0.55em;
+		height: 0.55em;
+		border-radius: 999px;
+		background: #fb923c;
 	}
-	.cCode {
-		margin: 0 0 10px;
-		font-size: 12px;
+	.hl {
+		color: #ea4647;
+	}
+	/* cover */
+	.cover {
+		margin-top: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+	}
+	.bigName {
+		margin: 0.1em 0 0;
+		font-size: clamp(32px, 9cqw, 76px);
+		font-weight: 900;
+		line-height: 1.05;
+		letter-spacing: -0.03em;
+	}
+	.lead {
+		margin: 0.2em 0 0;
+		font-size: clamp(16px, 4cqw, 32px);
+		font-weight: 600;
+		line-height: 1.35;
+		color: #e7edf5;
+	}
+	.mono {
+		margin: 0.6em 0 0;
+		font-family: Menlo, Consolas, monospace;
+		font-size: clamp(11px, 2.4cqw, 18px);
+		letter-spacing: 0.12em;
 		color: #94a3b8;
 	}
-	.cConcl {
-		margin: 0;
-		font-size: 16px;
+	/* section head */
+	.sHead {
+		margin-bottom: 1.2em;
+	}
+	.sSub {
+		margin: 0.4em 0 0;
+		font-size: clamp(20px, 5cqw, 44px);
+		font-weight: 800;
+		line-height: 1.15;
+		letter-spacing: -0.02em;
+	}
+	.note {
+		margin: 0 0 1em;
+		font-size: clamp(13px, 2.8cqw, 22px);
 		line-height: 1.5;
-		color: #dbe4ee;
+		color: #cdd9e6;
+		border-left: 2px solid #ea4647;
+		padding-left: 0.7em;
 	}
 	/* kpis */
 	.kpis {
 		flex: 1;
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 12px;
+		gap: 4%;
 		align-content: center;
 	}
 	.kpi {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
-		padding: 16px;
-		background: #121b27;
-		border: 1px solid #1e2a3a;
-		border-radius: 12px;
+		gap: 0.3em;
+		padding: 6%;
+		background: rgba(15, 18, 25, 0.72);
+		border: 1px solid #1e2433;
+		border-radius: 14px;
 	}
-	.kLabel {
-		font-size: 12px;
-		color: #93a4b8;
+	.kL {
+		font-size: clamp(12px, 2.6cqw, 20px);
+		color: #94a3b8;
 	}
-	.kVal {
-		font-size: 24px;
-		font-weight: 700;
+	.kV {
+		font-size: clamp(22px, 6cqw, 50px);
+		font-weight: 800;
 		font-variant-numeric: tabular-nums;
 	}
-	.kVal.neg {
-		color: #f0616f;
+	.kV.neg {
+		color: #ea4647;
 	}
-	.kVal.pos {
+	.kV.pos {
 		color: #34d399;
 	}
 	/* narrative */
@@ -282,54 +285,62 @@
 		display: flex;
 		align-items: center;
 		margin: 0;
-		font-size: 19px;
-		line-height: 1.65;
-		color: #e2e8f0;
+		font-size: clamp(22px, 5.6cqw, 52px);
+		font-weight: 800;
+		line-height: 1.25;
+		letter-spacing: -0.02em;
 	}
 	/* flags */
 	.flags {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 0.7em;
 		justify-content: center;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 	.flags li {
-		padding: 12px 16px;
-		border-radius: 10px;
-		font-size: 15px;
-		border-left: 3px solid;
+		padding: 0.7em 0.9em;
+		border-radius: 12px;
+		font-size: clamp(15px, 3.4cqw, 28px);
+		font-weight: 600;
+		border-left: 4px solid;
+		background: rgba(5, 8, 17, 0.5);
 	}
 	.flags.warning li {
-		background: rgba(240, 97, 111, 0.08);
-		border-color: #f0616f;
+		border-color: #ea4647;
 	}
 	.flags.opportunity li {
-		background: rgba(52, 211, 153, 0.08);
 		border-color: #34d399;
 	}
-	/* line */
-	.chart {
+	/* charts */
+	.chart,
+	.bars,
+	.share,
+	.finWrap {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
 		justify-content: center;
+		gap: 0.7em;
+	}
+	.finWrap {
+		align-items: center;
 	}
 	.lineChart {
 		width: 100%;
-		height: 180px;
+		height: 40%;
+		min-height: 180px;
 	}
 	.lArea {
-		fill: rgba(91, 155, 240, 0.16);
+		fill: rgba(234, 70, 71, 0.16);
 	}
 	.lLine {
 		fill: none;
-		stroke: #5b9bf0;
-		stroke-width: 0.6;
+		stroke: #ea4647;
+		stroke-width: 0.7;
 		vector-effect: non-scaling-stroke;
 	}
 	.lMark {
@@ -339,154 +350,124 @@
 		vector-effect: non-scaling-stroke;
 	}
 	.lDot {
-		fill: #5b9bf0;
+		fill: #ea4647;
 	}
 	.lMarkers {
 		display: flex;
-		gap: 14px;
-		font-size: 12px;
+		gap: 1.2em;
+		font-size: clamp(12px, 2.4cqw, 18px);
 		color: #94a3b8;
-	}
-	/* bars */
-	.bars {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		justify-content: center;
 	}
 	.bar {
 		display: grid;
-		grid-template-columns: 90px 1fr auto;
-		gap: 10px;
+		grid-template-columns: 28% 1fr auto;
+		gap: 0.7em;
 		align-items: center;
-		font-size: 13px;
+		font-size: clamp(13px, 2.8cqw, 22px);
 	}
-	.bTrack {
-		height: 16px;
-		background: #121b27;
+	.bT {
+		height: 1.1em;
+		background: rgba(15, 18, 25, 0.8);
 		border-radius: 4px;
 		overflow: hidden;
 	}
-	.bFill {
+	.bF {
 		display: block;
 		height: 100%;
-		background: #5b9bf0;
+		background: #fb923c;
 	}
-	.bFill.neg {
-		background: #f0616f;
+	.bF.neg {
+		background: #ea4647;
 	}
-	.bVal {
+	.bV {
 		font-variant-numeric: tabular-nums;
 		color: #cbd5e1;
 	}
-	/* share */
-	.share {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		justify-content: center;
-	}
 	.shRow {
 		display: grid;
-		grid-template-columns: 56px 1fr;
-		gap: 10px;
+		grid-template-columns: 18% 1fr;
+		gap: 0.7em;
 		align-items: center;
 	}
-	.shYear {
-		font-size: 12px;
+	.shY {
+		font-size: clamp(12px, 2.4cqw, 18px);
 		color: #94a3b8;
 	}
 	.shBar {
 		display: flex;
-		height: 18px;
+		height: 1.3em;
 		border-radius: 4px;
 		overflow: hidden;
 	}
 	.shSeg {
 		height: 100%;
 	}
-	.shLegend {
+	.shLeg {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 12px;
-		font-size: 12px;
+		gap: 1em;
+		font-size: clamp(11px, 2.2cqw, 16px);
 		color: #94a3b8;
-		margin-top: 4px;
 	}
 	.shLi {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: 0.4em;
 	}
 	.shLi i {
-		width: 10px;
-		height: 10px;
+		width: 0.7em;
+		height: 0.7em;
 		border-radius: 2px;
 	}
-	/* table */
-	.tableWrap {
+	.tWrap {
 		flex: 1;
+		display: flex;
+		align-items: center;
 		overflow: auto;
 	}
-	.cTable {
+	.cT {
 		width: 100%;
 		border-collapse: collapse;
-		font-size: 12px;
+		font-size: clamp(11px, 2.3cqw, 18px);
 	}
-	.cTable th,
-	.cTable td {
-		padding: 6px 8px;
+	.cT th,
+	.cT td {
+		padding: 0.5em 0.6em;
 		text-align: left;
-		border-bottom: 1px solid #1a2533;
+		border-bottom: 1px solid rgba(30, 36, 51, 0.9);
 		white-space: nowrap;
 	}
-	.cTable th.num,
-	.cTable td.num {
+	.cT th.num,
+	.cT td.num {
 		text-align: right;
 		font-variant-numeric: tabular-nums;
 	}
-	.cTable td.neg {
-		color: #f0616f;
+	.cT td.neg {
+		color: #ea4647;
 	}
-	.cTable td.pos {
+	.cT td.pos,
+	.cT td.ok {
 		color: #34d399;
 	}
-	.cTable td.ok {
-		color: #34d399;
-	}
-	.cTable td.warn {
+	.cT td.warn {
 		color: #fbbf24;
 	}
 	.spark {
 		width: 64px;
 		height: 22px;
 	}
-	.spkArea {
-		fill: rgba(125, 211, 252, 0.18);
+	.spkA {
+		fill: rgba(251, 146, 60, 0.18);
 	}
-	.spkLine {
+	.spkL {
 		fill: none;
-		stroke: #7dd3fc;
+		stroke: #fb923c;
 		stroke-width: 1;
 		vector-effect: non-scaling-stroke;
 	}
-	.tUnit {
-		margin: 6px 0 0;
-		font-size: 11px;
-		color: #64748b;
-	}
-	/* finChart */
-	.finWrap {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
 	.muted {
 		color: #64748b;
-		font-size: 14px;
+		font-size: clamp(13px, 2.6cqw, 20px);
 	}
 	/* closing / empty */
 	.closing {
@@ -494,19 +475,19 @@
 		display: flex;
 		align-items: center;
 		margin: 0;
-		padding-left: 16px;
-		border-left: 3px solid #5b9bf0;
-		font-size: 19px;
-		line-height: 1.6;
-		color: #e2e8f0;
+		padding-left: 0.6em;
+		border-left: 4px solid #ea4647;
+		font-size: clamp(20px, 5cqw, 44px);
+		font-weight: 700;
+		line-height: 1.3;
 	}
 	.empty {
 		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: #64748b;
-		font-size: 15px;
+		color: #94a3b8;
+		font-size: clamp(14px, 3cqw, 24px);
 		text-align: center;
 	}
 </style>

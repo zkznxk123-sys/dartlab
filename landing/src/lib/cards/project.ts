@@ -49,17 +49,21 @@ export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | 
 }
 
 /** 관점 보고서 → 슬라이드 덱. cover → KPIs → finChart 백본 → 섹션 블록 → closing.
- *  opts.spec(blog frontmatter `carousel:`)이 있으면 큐레이션 오버레이 — order 로 섹션 필터/재정렬,
- *  notes[key] 로 섹션 첫 카드에 손글 caption 주입(자동 투영은 spec 없이 그대로). */
-export function projectReport(model: ReportModel, opts: { heroUrl?: string; spec?: CarouselSpec } = {}): CarouselDeck {
+ *  hero 사진 전부를 슬라이드 배경으로 순환 배정(인스타 에디토리얼). opts.spec(blog frontmatter
+ *  `carousel:`)이 있으면 큐레이션 오버레이 — order 로 섹션 필터/재정렬, notes[key] 로 손글 caption. */
+export function projectReport(
+	model: ReportModel,
+	opts: { heroUrls?: string[]; spec?: CarouselSpec } = {}
+): CarouselDeck {
 	const spec = opts.spec;
+	const heroUrls = opts.heroUrls ?? [];
 	const base = {
 		stockCode: model.stockCode,
 		corpName: model.corpName,
 		perspectiveKey: model.perspectiveKey,
 		perspectiveLabel: model.perspectiveLabel,
 		asOf: model.asOf,
-		heroUrl: opts.heroUrl
+		heroUrls
 	};
 	const cards: CarouselCard[] = [
 		{
@@ -68,14 +72,14 @@ export function projectReport(model: ReportModel, opts: { heroUrl?: string; spec
 			stockCode: model.stockCode,
 			perspectiveLabel: model.perspectiveLabel,
 			conclusion: clean(model.conclusion),
-			dataBasis: model.dataBasis,
-			heroUrl: opts.heroUrl
+			dataBasis: model.dataBasis
 		}
 	];
 
 	// 미구현 관점 → 정직 빈 카드(broken img 아님).
 	if (model.pending) {
 		cards.push({ kind: 'empty', reason: `${model.perspectiveLabel} 관점은 다음 사이클에 추가됩니다.` });
+		assignHeroes(cards, heroUrls);
 		return { ...base, cards };
 	}
 
@@ -108,14 +112,23 @@ export function projectReport(model: ReportModel, opts: { heroUrl?: string; spec
 	const thesis = clean(model.closing.map((c) => c.line).filter(Boolean).join(' ').trim() || model.conclusion);
 	if (thesis) cards.push({ kind: 'closing', heading: '종합', thesis });
 
+	assignHeroes(cards, heroUrls);
 	return { ...base, cards };
+}
+
+/** hero 사진 전부를 슬라이드에 순환 배정 — 한 장도 안 빠지게(텍스트 카드=풀, 차트 카드=dim 은 렌더가 판단). */
+function assignHeroes(cards: CarouselCard[], heroUrls: string[]): void {
+	if (!heroUrls.length) return;
+	cards.forEach((c, i) => {
+		if (c.kind !== 'empty') c.bg = heroUrls[i % heroUrls.length];
+	});
 }
 
 /** buildReport 결과(또는 skip) → 덱. skip 도 정직 카드로 렌더(빈 화면 금지). */
 export function projectResult(
 	result: ReportResult,
 	perspectiveLabel: string,
-	opts: { heroUrl?: string; spec?: CarouselSpec } = {}
+	opts: { heroUrls?: string[]; spec?: CarouselSpec } = {}
 ): CarouselDeck {
 	if (isSkipped(result)) {
 		return {
@@ -124,7 +137,7 @@ export function projectResult(
 			perspectiveKey: '',
 			perspectiveLabel,
 			asOf: '',
-			heroUrl: opts.heroUrl,
+			heroUrls: opts.heroUrls ?? [],
 			cards: [{ kind: 'empty', reason: result.reason }]
 		};
 	}

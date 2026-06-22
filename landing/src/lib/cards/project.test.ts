@@ -69,7 +69,7 @@ describe('projectReport — 덱 구조 + 정직', () => {
 		]
 	};
 	it('cover → kpis → finChart → 섹션카드 → closing 순서', () => {
-		const deck = projectReport(model({ sections: [sec] }), { heroUrl: 'https://x/h.webp' });
+		const deck = projectReport(model({ sections: [sec] }), { heroUrls: ['https://x/h.webp'] });
 		const kinds = deck.cards.map((c) => c.kind);
 		expect(kinds[0]).toBe('cover');
 		expect(kinds).toContain('kpis');
@@ -84,7 +84,14 @@ describe('projectReport — 덱 구조 + 정직', () => {
 		const deck = projectReport(model());
 		const cover = deck.cards[0];
 		expect(cover.kind === 'cover' && cover.conclusion).toBe('영업이익률이 회복 국면에 있다.');
-		expect(cover.kind === 'cover' && cover.heroUrl).toBeUndefined(); // hero 없으면 폴백(undefined)
+		expect(cover.bg).toBeUndefined(); // hero 없으면 폴백(undefined)
+	});
+	it('hero 사진 전부를 슬라이드에 순환 배정(한 장도 안 빠짐)', () => {
+		const deck = projectReport(model({ sections: [sec] }), { heroUrls: ['a', 'b', 'c'] });
+		expect(deck.heroUrls).toEqual(['a', 'b', 'c']);
+		const bgs = deck.cards.filter((c) => c.kind !== 'empty').map((c) => c.bg);
+		expect(deck.cards[0].bg).toBe('a'); // 표지 = 첫 hero
+		expect(new Set(bgs).size).toBeGreaterThan(1); // 여러 hero 가 실제로 쓰임(순환)
 	});
 	it('hero 부재 시에도 덱 렌더 가능(빈 화면 금지) — cover+finChart 최소', () => {
 		const deck = projectReport(model({ headlineKpis: [], sections: [] }));
