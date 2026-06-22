@@ -41,7 +41,7 @@
 - **데이터 SSOT**: HF=공개 truth, 공통배선(공개+로컬 동일), 로컬전용 금지. 전부 HF-parquet read.
 - **안티클러터**: 순 패널 DOWN. 새 패널·새 다이얼로그·레이더·종합점수 = red flag. 강함=빼기.
 - **전상장사 커버**: ~2,800 침묵 top-N cap 금지. 표본 절단 시 명시 라벨. 데모 소형주 포함.
-- **정직갭**: 모든 숫자 ref-trace + as-of. 결측=first-class `—`/미공시, 0-fill·impute 금지. 종합점수·buy/sell 톤 금지.
+- **한계 표기**: 모든 숫자 ref-trace + as-of. 결측=first-class `—`/미공시, 0-fill·impute 금지. 종합점수·buy/sell 톤 금지.
 - **레이아웃법**: center=차트, right=표/텍스트/메트릭(그래프 금지), left=내비. 흐름막대=center-stack only.
 - **commit 자율 / push 운영자 게이트**(UI surface).
 
@@ -73,4 +73,4 @@
 
 **개발자**: 최대 위험 = ① `rcept_no` 배선(유일 신규 의존, 순수 additive 컬럼 → Phase 0 단독·svelte-check 선). ② 딥링크 mis-wire(`urlForCompany`=null → `viewerUrl`). ③ R&D 공개배선(엔진 재구축 함정 — CI bake 1 task 로). ④ 누적 소각 비율(same-year undefined). ⑤ contribShare 가짜 분모(보고순익 재배선/삭제). ⑥ 교집합 N(글로벌 N=top-cap 침묵). ⑦ 레이아웃법 누출(그래프=center, 백분위=단일시점, grep 게이트). 재사용 지도 정밀(새 셸 0).
 
-**PM**: 사용자 명령("강력한 정보 못 씀") 정확 진단. ROI 탁월 — P0/P1 거의 전부 *빼기*(중복 패널 제거 + 메모리 배열 리프레임, 새 fetch 0), 순 패널 DOWN 하며 최고신호 KR-equity read(소각vs금고·lossPct·control-shift·인적자본) 표면화. '강함'과 '단순함'이 일치하는 드문 기능. **컷라인**: Phase 0(스파인) + Phase 1(zero-fetch 리프레임) = MVP. Phase 2(엔진 R&D/백분위)는 고가치이나 CI-bake 비용 → blocking 없이 slip 허용. Phase 3 = 선택, 새 파싱 필요 시 컷. 데모 게이트=3-케이스 소형주(삼성 아님)가 PM 강제 정직 계약. 경계는 소비만(재소유 금지). UI push 운영자 게이트.
+**PM**: 사용자 명령("강력한 정보 못 씀") 정확 진단. ROI 탁월 — P0/P1 거의 전부 *빼기*(중복 패널 제거 + 메모리 배열 리프레임, 새 fetch 0), 순 패널 DOWN 하며 최고신호 KR-equity read(소각vs금고·lossPct·control-shift·인적자본) 표면화. '강함'과 '단순함'이 일치하는 드문 기능. **컷라인**: Phase 0(스파인) + Phase 1(zero-fetch 리프레임) = MVP. Phase 2(엔진 R&D/백분위)는 고가치이나 CI-bake 비용 → blocking 없이 slip 허용. Phase 3 = 선택, 새 파싱 필요 시 컷. 데모 게이트=3-케이스 소형주(삼성 아님)가 PM 강제 빈상태 검증 계약. 경계는 소비만(재소유 금지). UI push 운영자 게이트.

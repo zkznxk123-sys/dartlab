@@ -64,7 +64,7 @@
     <text x="450" y="768" fill="#94a3b8" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11">SBC + warrant 제외</text>
 
     <rect x="800" y="700" width="340" height="75" rx="8" fill="#1a1f2b" stroke="#22c55e" stroke-width="2"/>
-    <text x="820" y="725" fill="#22c55e" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="700">3. 영업활동현금흐름 (가장 정직)</text>
+    <text x="820" y="725" fill="#22c55e" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="700">3. 영업활동현금흐름 (가장 실질적)</text>
     <text x="820" y="748" fill="#f1f5f9" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600">-$283M</text>
     <text x="920" y="748" fill="#94a3b8" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11">실제 현금 번율</text>
     <text x="820" y="768" fill="#22c55e" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11">이것이 진짜 "얼마 태웠나"</text>

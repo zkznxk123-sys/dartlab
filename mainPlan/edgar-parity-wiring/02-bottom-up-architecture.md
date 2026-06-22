@@ -9,7 +9,7 @@
 ```
 L5 제품 배선        landing · ui/apps/local 시장 스위처
      ▲ (서피스가 시장 인지해야 제품이 스위치 가능)
-L4 서피스 인지      terminal · viewer · scan · map  (US 렌더 + EXEMPT 정직)
+L4 서피스 인지      terminal · viewer · scan · map  (US 렌더 + EXEMPT 명시)
      ▲ (포트가 US 데이터를 줘야 서피스가 그릴 게 있음)
 L3 소스 분기        adapters/*/sources/*  (market → dart|edgar 경로)
      ▲ (계약에 market 차원이 있어야 소스가 분기 시그니처를 가짐)
@@ -45,7 +45,7 @@ KR은 `gov/prices`(공공데이터 KOGL)를 baked parquet로 빌드해 퍼블릭
 | **B. 워커 프록시 라이브** | news/naver처럼 CF 워커로 가격 라이브 fetch | 빌드 0 | 퍼블릭 floor 약함(라이브 의존)·KR과 비동형 |
 | **C. 가격 패널 US 미지원** | 터미널 가격 차트만 US에서 비활성, 나머지(panel/finance/scan) 배선 | 범위 축소 | "동일 배선" 목표 미달 |
 
-**[정정] 결정 = 슬라이스로 분리.** A(baked)가 *동일 배선* 목표엔 정합이나 라이선스(yfinance ToS 재배포 회색·stooq EOD)+새 워크플로로 **L0 최난도 미결정** → S0를 인질로 잡음. 따라서 **Slice 1 = 옵션 C(가격 US 비활성, 정직 빈)로 출발**, A(가격 baked)는 **Slice 2 S2-L0.3**에서 라이선스 실조사 후. 03 슬라이스 구조 참조.
+**[정정] 결정 = 슬라이스로 분리.** A(baked)가 *동일 배선* 목표엔 정합이나 라이선스(yfinance ToS 재배포 회색·stooq EOD)+새 워크플로로 **L0 최난도 미결정** → S0를 인질로 잡음. 따라서 **Slice 1 = 옵션 C(가격 US 비활성, 비워 둠)로 출발**, A(가격 baked)는 **Slice 2 S2-L0.3**에서 라이선스 실조사 후. 03 슬라이스 구조 참조.
 
 ## 3.5. ★scan baking 모델 — KR(baked) vs EDGAR(라이브) [정정]
 

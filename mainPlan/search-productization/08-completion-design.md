@@ -182,7 +182,7 @@ manifest 필수 필드:
 - `buildCommand`
 - `gitSha`
 
-`indexInfo()` 는 이 manifest 를 읽어 사용자가 "얼마나 최신인가"를 판단할 수 있게 한다. source 별 `dataAsOf` 가 없으면 public/local UI 에서 최신성 badge 를 정직하게 그릴 수 없다.
+`indexInfo()` 는 이 manifest 를 읽어 사용자가 "얼마나 최신인가"를 판단할 수 있게 한다. source 별 `dataAsOf` 가 없으면 public/local UI 에서 최신성 badge 를 표시할 수 없다.
 
 ---
 

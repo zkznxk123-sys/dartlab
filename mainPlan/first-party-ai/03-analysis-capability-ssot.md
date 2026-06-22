@@ -124,7 +124,7 @@ export function verifyGrounded(text: string, pack: GroundingPack): {
 ```
 
 원리:
-1. **renderedForms 생성기 — *신규 로직*(정직 인정, R2 데이터 BLOCKER 해소).** 실측 `landing/src/lib/report/format.ts` 의 `fmtAmt1`/`fmtPct`/`fmtScaled`·answerCompose `won` 은 **값당 단일 표기만** 반환한다(`fmtAmt1(1.52)`→`"1.5조"` 하나). 따라서 허용표기 *집합* 은 끌어올림이 아니라 **신규 함수** 다:
+1. **renderedForms 생성기 — *신규 로직*(한계 인정, R2 데이터 BLOCKER 해소).** 실측 `landing/src/lib/report/format.ts` 의 `fmtAmt1`/`fmtPct`/`fmtScaled`·answerCompose `won` 은 **값당 단일 표기만** 반환한다(`fmtAmt1(1.52)`→`"1.5조"` 하나). 따라서 허용표기 *집합* 은 끌어올림이 아니라 **신규 함수** 다:
 
 ```ts
 // runtime/src/ai/analysis/formats.ts — 신규(§8 "로직 신설 0" 의 예외, format.ts 포맷터를 재사용해 조립)
@@ -144,11 +144,11 @@ export function renderedForms(value: number, unit: Unit): string[] {
 
 정책: compose baked 경로는 `grounded=false` 면 그 카피 **불채택 → 결정론 폴백**(검수부담 0). live 는 경고 표시 또는 stray 문장 절단.
 
-> 한계 정직: 사후검증은 *숫자* 환각만. 인과("때문에")·정성 과장은 못 잡음 → LLM 티어는 *서술/연결/큐레이션* 만(§6), 인과 단정 프롬프트 억제, 투자조언 05 차단.
+> 한계 명시: 사후검증은 *숫자* 환각만. 인과("때문에")·정성 과장은 못 잡음 → LLM 티어는 *서술/연결/큐레이션* 만(§6), 인과 단정 프롬프트 억제, 투자조언 05 차단.
 
 ---
 
-## 6. LLM 이 결정론 대비 *더하는 값* (R1 혁신 해소 — 정직과 혁신의 경계)
+## 6. LLM 이 결정론 대비 *더하는 값* (R1 혁신 해소 — 한계 표기와 혁신의 경계)
 
 "숫자는 결정론, 서술만 모델" 이 LLM 을 "문장 다듬기" 로 쪼그라뜨릴 위험에 대한 명시 답. LLM 이 결정론 템플릿 대비 더하는 정확한 값(전부 *숫자 생성 아님* → 척추 무손상):
 
@@ -158,7 +158,7 @@ export function renderedForms(value: number, unit: Unit): string[] {
 | **큐레이션** | 질문 의도에 맞춰 12 facts 중 *어느 3개* 를 말할지 선택 | intent 분류는 거칠고, 미묘한 관련성은 모델 |
 | **맥락화** | 동종 백분위를 평이한 한국어 비교로 | 결정론은 숫자, "업종 상위권" 같은 자연어 맥락은 모델 |
 
-**측정**: 00 §5 성공기준에 "determinismAnswer(LLM 0) vs LLM 서술의 *체감 차이*" 추가 — 차이가 미미하면(8B≈템플릿) LLM 경로 가치 재검(혁신 위해 정직 안 깨고, 정직 위해 LLM 가치 안 죽임). 이게 정직-혁신 긴장의 해소 지점.
+**측정**: 00 §5 성공기준에 "determinismAnswer(LLM 0) vs LLM 서술의 *체감 차이*" 추가 — 차이가 미미하면(8B≈템플릿) LLM 경로 가치 재검(혁신 위해 한계 표기 안 깨고, 한계 표기를 위해 LLM 가치 안 죽임). 이게 한계 표기-혁신 긴장의 해소 지점.
 
 ---
 
@@ -183,4 +183,4 @@ export function renderedForms(value: number, unit: Unit): string[] {
 3. **회귀 게이트**: 이관 전후 viewer Tier0 답 바이트 동일(스냅샷). [[feedback_no_graph_regression]] + 02 §4 "공개 AskDrawer 회귀 금지" 동시 충족.
 4. 멀티턴(01 §7): `streamAsk` + `history?`/`evidence`, history 는 surface Storage(`ask.*`).
 
-이관은 로직 신설 *거의* 0(위치 상향 + 포트 노출). **단 두 곳은 명시적 신규**(R2 데이터 정직 인정): ① `renderedForms()` variant 조립기(§5 — 기존 포맷터는 단일표기만 반환), ② tolerance 대조. 나머지는 의존 동반 이동. "의존 동반 이동"·"실파일 census"·"신규 2곳 명시" 로 R1 "존재 안 하는 파일 인용"·"로직 신설 0 과장" 둘 다 제거.
+이관은 로직 신설 *거의* 0(위치 상향 + 포트 노출). **단 두 곳은 명시적 신규**(R2 데이터 한계 인정): ① `renderedForms()` variant 조립기(§5 — 기존 포맷터는 단일표기만 반환), ② tolerance 대조. 나머지는 의존 동반 이동. "의존 동반 이동"·"실파일 census"·"신규 2곳 명시" 로 R1 "존재 안 하는 파일 인용"·"로직 신설 0 과장" 둘 다 제거.

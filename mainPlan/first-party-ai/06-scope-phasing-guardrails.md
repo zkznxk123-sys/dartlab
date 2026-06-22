@@ -67,7 +67,7 @@
 |---|---|---|
 | Grounding 결정론 | vitest | facts·intent·asOf 안정, 합성키·분모정의 |
 | **환각 가드 정밀도** | vitest | `verifyGrounded` **false-positive 율 ≤ 임계**(정상답 코퍼스), renderedForms·derivedForms 매칭, 반올림 미탐 0 |
-| 티어 강등 | vitest(mock backends) | edge fail→onDevice→det 순서·tierUsed 정직·**전체 타임아웃 예산** 준수·스트림중 무전환 |
+| 티어 강등 | vitest(mock backends) | edge fail→onDevice→det 순서·tierUsed 명시·**전체 타임아웃 예산** 준수·스트림중 무전환 |
 | **강등 답 품질 floor** | snapshot | determinismAnswer 가 *읽을 만한* 한국어(00 §5) |
 | 워커 budget 동시성 | wrangler test | **Durable Object 원자 increment**·reserve/settle·CF 429 ground-truth 차단(02 §6) |
 | 워커 남용 | wrangler test | origin·Rate Limiting·Turnstile·spend cap·`BUDGET_HARD=0` 즉시차단 |
@@ -100,7 +100,7 @@
 
 ### 5.2 PM 관점
 - 사용자 가치 순서가 맞나? viewer 품질↑(P1) → terminal 신기능(P3) → 배치 카피(P4). edge(P2)는 인프라.
-- "퍼블릭 무료" 가 과장 아닌가? budget·강등·정직 고지로 방어(K4).
+- "퍼블릭 무료" 가 과장 아닌가? budget·강등·한도 고지로 방어(K4).
 - UI push 승인 병목? Phase 0/2 는 비-UI 라 선행 가능, UI 는 묶어서 승인 요청.
 - 커넥터와 혼동되지 않나? 00 §7·K6 경계 명시.
 

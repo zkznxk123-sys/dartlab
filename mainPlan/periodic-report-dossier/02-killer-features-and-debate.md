@@ -12,7 +12,7 @@
 | F4 | 인력 자기이력 프레임 + R&D 집약도 행 + `상세보기` | **P1** | needs-parsing | 0(R&D 제외) | 인적자본 + forward-investment 운영현실 |
 | F5 | 인적자본 유니버스-백분위 축(죽은 엔진 배선) | **P2** | structured-ready | CI bake | 기존 백분위 머신에 1축 추가, 단일시점 |
 | F6 | 의미층 글로서리(CARD_GUIDE 올라가면/내려가면 리프레임) | **P1** | structured-ready | 0 | 이 PRD 팩트들의 so-what 층 |
-| F7 | 가동률·생산설비 원문 발췌(narrative honest-gap) | **P3** | narrative-only | 0(zero추출 한정) | 가장 어려운 갭의 정직 비추출 |
+| F7 | 가동률·생산설비 원문 발췌(narrative, 미추출 명시) | **P3** | narrative-only | 0(zero추출 한정) | 가장 어려운 갭, 추출 대신 원문만 |
 
 ---
 
@@ -38,8 +38,8 @@
 
 **적대검증 평결**:
 - ✅ "새 fetch 0" 문자 그대로 참(`buildShareholderReturn` L207-248 전 배열 fetch, RightStack 은 `srLast` 만 렌더).
-- ⚠️ **커버리지 정직하게 낮다**: treasury 경로가 `acqs_mth1='총계' AND stock_knd='보통' AND quarter='4분기'` 필터 → 소형주 다수는 4필드 전부 null. **빈상태가 default 렌더('미공시·해당 자사주 거래 없음·연 단위·사업보고서 기준')**, 에러 아님.
-- ❌ **컷**: 시총분모 총주주환원율(gov price T+1·2020+, stale·거짓정밀). FCF 분모(returnToFcf)가 정직하나 그건 P3(CF 배선). **CF 배선 전까지 지속가능성 비율 표시 0** — 흐름막대 + 발행주식수 변화%만으로 완결.
+- ⚠️ **커버리지 낮음(실측)**: treasury 경로가 `acqs_mth1='총계' AND stock_knd='보통' AND quarter='4분기'` 필터 → 소형주 다수는 4필드 전부 null. **빈상태가 default 렌더('미공시·해당 자사주 거래 없음·연 단위·사업보고서 기준')**, 에러 아님.
+- ❌ **컷**: 시총분모 총주주환원율(gov price T+1·2020+, stale·거짓정밀). FCF 분모(returnToFcf)는 적절하나 그건 P3(CF 배선). **CF 배선 전까지 지속가능성 비율 표시 0** — 흐름막대 + 발행주식수 변화%만으로 완결.
 - ❌ **컷**: same-year "취득의 X% 소각" 비율(buybackQty=0 인데 buybackCancel>0=전년 매입 소각 케이스에서 undefined) → **누적 취득 대비 누적 소각** 으로 계산.
 - ❌ **컷**: `capitalChanges.reduction` 교차검증을 *사용자向* 으로 → 침묵 데이터품질 게이트로만(두 숫자 노출=덕지덕지).
 - ❌ **defer**: 섹터 분포 사실("소각하는 회사 X곳") = industry-lab 경계 한 발, v1 제외.
@@ -57,7 +57,7 @@
 - ❌ **심각 — `contribShare` 헤드라인 컷(현 제안 그대로)**: 분모 `parentNet=mktcap/PER`(시장함축 순익, 다이얼로그가 이미 hedge). 상시 헤드라인 승격=추정의 prime fact 둔갑(honest-gap 의 역). 보고 `fin.is.net` 재배선 또는 라인 삭제.
 - ⚠️ pctOfParentCap **self-gate**: `lookupListed` 가 상장 피출자만 해소 → 비상장 다수 소형주는 null/오해소지. **listed 커버리지 material 일 때만 렌더, 아니면 라인 자체 suppress**(0-fill·null-render 아님). 지주/재벌 모회사(killer use)엔 세계급, 독립 소형주엔 침묵.
 - ✅ **lossPct = 가장 강한 생존자**: lossBook/bookTotal, 시장조회 불필요, 전 2,800사 동작(장부가 항상 존재), 판정 없음, 가장 national-salient 포렌식(부실 계열사에 묶인 자본). **항상 켜진 단 하나 앵커.**
-- ✅ control-shift = 0-fetch·법인기관 한정 정직(개인 익명 집계). 명시 기간 라벨(YYYYqQ→YYYYqQ)이면 terminal-improvement(visit-delta)·fin-stmt-lab(peer) 경계 안전.
+- ✅ control-shift = 0-fetch·법인기관 한정(개인 익명 집계). 명시 기간 라벨(YYYYqQ→YYYYqQ)이면 terminal-improvement(visit-delta)·fin-stmt-lab(peer) 경계 안전.
 - ❌ **컷**: 출자 장부가합 micro-스파크라인(우측 레일 그래프 금지 + 장식). 상호출자 K건 헤더 배지("순환출자=K" 오독 유발, 다단 미탐지) → 다이얼로그 ↔ 커넥터 안에서만.
 - ❌ **헤더 2줄 cap**: 4줄=덕지덕지. lossPct(항상) + {control-shift OR value-gated} 중 1.
 
@@ -67,7 +67,7 @@
 
 ## 섹션 4 — 생산·설비·R&D·세그먼트 (F4 R&D · F7 가동률)
 
-**도메인 killer(정직 제약)**: 이 영토는 *가장 얇다*. 생산능력/가동률=구조화 컬럼 0(narrative). 세그먼트=4.6%만 clean. R&D=59.7% 유일한 진짜 승. → killer = R&D 집약도 1행(인력 패널), + 가동률은 원문 발췌만.
+**도메인 killer(데이터 한계 명시)**: 이 영토는 *가장 얇다*. 생산능력/가동률=구조화 컬럼 0(narrative). 세그먼트=4.6%만 clean. R&D=59.7% 유일한 진짜 승. → killer = R&D 집약도 1행(인력 패널), + 가동률은 원문 발췌만.
 
 **적대검증 평결**:
 - ❌ **제안 오류 정정**: "`calcRndExpense` 를 graduate" = FALSE. *이미 완성 엔진*(9섹션·@memoizedCalc·available-flag). 진짜 일 = CI-baked rndIntensity parquet + reportSource 5번째 hyparquet read + `report.rndIntensity(code)` 포트. **엔진 재구축 금지.**

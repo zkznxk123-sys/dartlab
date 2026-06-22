@@ -93,7 +93,7 @@ export interface AiComposeInput {
 export interface AiComposeResult {
   text: string;
   refs: EvidenceRef[];
-  tierUsed: AiTier;                 // 정직 표면화(§6)
+  tierUsed: AiTier;                 // 답한 티어 명시(§6)
   grounded: boolean;                // 숫자 사후검증(03 §5)
   limitations?: string;
 }
@@ -179,7 +179,7 @@ else webgpuUsable()                                                    → onDev
 else                                                                    → deterministic(rank 10)
 ```
 
-**스트림 강등의 정직·안전 규칙(R1 아키텍처/운영 해소):**
+**스트림 강등의 안전 규칙(R1 아키텍처/운영 해소):**
 1. **첫 토큰 전 티어 확정.** `isAvailable()` 를 스트림 시작 *전* 평가하고, 그 요청은 그 티어로 끝까지. 스트림 *도중* 조용한 티어 전환 금지(부분 텍스트 + 재시작 혼란 차단).
 2. **스트림 중 백엔드 사망**(워커 die·device-lost)은 **부분 출력 폐기 + "끊김" 표시**, onDevice 재시작은 *명시적 사용자 액션* 으로(자동 이중답 금지). `tierUsed` 는 단일 값 유지.
 3. **전체 타임아웃 예산**(예 8s) — `isAvailable` 프로브 누적이 폭주하지 않게. 초과 시 즉시 deterministic.

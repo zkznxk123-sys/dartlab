@@ -106,7 +106,7 @@ Mode: 조사 전용. 구현 없음.
 첫 실측:
 
 - one AI stream fixture를 JSONL로 고정.
-- parser가 unknown event를 거부하거나 `RUN_ERROR`로 정직 강등하는지 확인.
+- parser가 unknown event를 거부하거나 `RUN_ERROR`로 강등하는지 확인.
 
 ### D. CI Evidence Bus
 

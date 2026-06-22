@@ -40,7 +40,7 @@ const col = (f) => peers.map(n => n[f] ?? null);
 
 ---
 
-## ④ 소속지수 — BLOCKED (정직 판정)
+## ④ 소속지수 — BLOCKED (데이터 게이트)
 
 KRX 지수 데이터는 **OHLCV 전용**이다 — `IDX_NM`(지수명) + 종가/시총 포인트뿐, "어느 종목이 KOSPI200 에 속하는가" 라는 **구성종목 멤버십이 데이터 전체에 없다**(`gather/krx/krxIndex.py`, 빌더 `buildKrxIndexData.py` 모두 OHLCV 만 push). 코드 전역의 "코스피200/코스닥150" 은 전부 OHLCV 행의 지수 *이름*이지 편입 리스트가 아니다. KRX OpenAPI `idx` endpoint 도 멤버십을 안 준다.
 

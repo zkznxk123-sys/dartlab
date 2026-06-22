@@ -65,7 +65,7 @@ export function originUrl(id: OriginId, path: string): string;
 - `duckdbHf` 는 landing duckdb 가 HF parquet URL 을 만들 때 origin.ts 대신 레지스트리를 쓰게(이미 HF_RESOLVE 재사용 중이라 저비용).
 - **정책 표 한곳**: env 전환(CF 프록시↔직결), range 직결 여부, 기본 TTL 을 레지스트리에서 한눈에.
 
-## 4. 캐시/dedup 정책 — 오리진별 차등(정직 TTL)
+## 4. 캐시/dedup 정책 — 오리진별 차등 TTL
 
 `CachePolicy` 기본값을 오리진 정의가 제공, 호출부가 override:
 

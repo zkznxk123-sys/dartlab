@@ -82,7 +82,7 @@ source workflows complete
 -> local clients keep old active until they verify the new manifest
 ```
 
-Daily delta 의 성공은 "새 문서가 있었다"가 아니라 "새 source manifest 를 읽었고, no-op 이든 changed-set 이든 정직하게 판정했다"다.
+Daily delta 의 성공은 "새 문서가 있었다"가 아니라 "새 source manifest 를 읽었고, no-op 이든 changed-set 이든 있는 그대로 판정했다"다.
 
 ### 3.2 Monthly Main Compaction
 

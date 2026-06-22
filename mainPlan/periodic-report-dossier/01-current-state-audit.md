@@ -41,13 +41,13 @@
 ## 5. 갇힌 계산들 (이미 코드에 있고, 표면화만 안 됨)
 
 - **인적자본 효율 엔진 (Phase 2)**: `src/dartlab/scan/workforce/scanner.py` + `growth.py` — `scanValueAdded()`=(영업이익+급여)/직원수, `scanLaborRatio()`, `computeSalaryVsRevenue()`=급여매출괴리, `scanTopPay()`. 전부 유니버스-wide·가드 클램프(근속>60y·급여>50억→null·±500% clamp). **단 `scanRevenuePerEmployee()` 만 baked**(`src/dartlab/scan/builders/kr/snapshot.py:159-161` — ⚠ 옛 `scan/workforce/snapshot.py`는 부재, 08 G2 정정); 나머지는 Python 안에서 dead-end, UI 배선 0.
-- **R&D 엔진 (Phase 2)**: `src/dartlab/analysis/financial/costStructure.py` `calcRndExpense` — **이미 graduated 완성 엔진**(9섹션 docstring·`@memoizedCalc`·2-tier IS라인→`NT_D834310/834315` 주석 fallback·`_inferNoteUnitScale` 단위추론·available-flag 정직). *재graduate 할 것 없음.* 센서스: `tests/_attempts/segmentRndExtraction/outputs/census_shard0.json` R&D any 874/1465=59.7%, 세그먼트 axis-tagged 67/1465=4.6%.
+- **R&D 엔진 (Phase 2)**: `src/dartlab/analysis/financial/costStructure.py` `calcRndExpense` — **이미 graduated 완성 엔진**(9섹션 docstring·`@memoizedCalc`·2-tier IS라인→`NT_D834310/834315` 주석 fallback·`_inferNoteUnitScale` 단위추론·available-flag 명시). *재graduate 할 것 없음.* 센서스: `tests/_attempts/segmentRndExtraction/outputs/census_shard0.json` R&D any 874/1465=59.7%, 세그먼트 axis-tagged 67/1465=4.6%.
 - **타법인출자 모델 (P0/P1, 새 fetch 0)**: `ui/.../terminal/lib/holdings.ts buildHoldingsModel()` — `pctOfParentCap`/`sumEquityEarn`/`contribShare`(L113-116), lossPct=lossBook/bookTotal(`HoldingsDialog` L120-121), `mutualCodes`, `invTrend`. **함정**: `contribShare` 의 분모 `parentNet=mktcap/PER`(L27-28, 다이얼로그가 이미 '참고·미산출' 로 hedge L207) — 상시 헤드라인 승격 시 추정을 prime fact 로 둔갑 → 보고 `fin.is.net`(engine.ts L594/L707) 재배선 또는 라인 삭제.
 - **control-shift (P1, 새 helper)**: `reportSource buildShareholderPeriods()`(L363-383)가 전 기간 `named[]` 반환하나 `shareholders()` 는 `.at(-1)` 최신 1개만. → `controlShiftSummary(periods)` 순수 helper 로 기간 간 `named[]` diff(법인·기관만, 개인은 익명 집계 Δ). 새 fetch 0.
 
 ## 6. 백분위 머신 (재사용 자산)
 
-`engine.ts` `mk()`(L479)+`pctRank`(L181)+`buildFundMetrics`(L461) + `DistCurve.svelte`(`neutral` 그레이핀 모드 있음) + `PercentileCrossDialog.svelte`(`rowDefs`·`MIN_N` n<10 가드·`—`/분포없음 상태·정직 푸터). 현재 12+축 전부 재무지표 — **인적자본 축 0**. cross-universe-percentile(`_done`) 가 배선 패턴 정본.
+`engine.ts` `mk()`(L479)+`pctRank`(L181)+`buildFundMetrics`(L461) + `DistCurve.svelte`(`neutral` 그레이핀 모드 있음) + `PercentileCrossDialog.svelte`(`rowDefs`·`MIN_N` n<10 가드·`—`/분포없음 상태·한계 푸터). 현재 12+축 전부 재무지표 — **인적자본 축 0**. cross-universe-percentile(`_done`) 가 배선 패턴 정본.
 
 ## 7. 결론
 

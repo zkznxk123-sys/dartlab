@@ -8,7 +8,7 @@
 ## 1. 현재 결정 (2026-06-14)
 
 - **방향 확정**: A(profit-pool) → B(공급망 evidence) → C(백분위 통일) **3단계 전부**, 선결조건순 순차. 운영자 승인(2026-06-14): "3개 다 하되 순서 지켜서".
-- **핵심 재구성(v0.2 정정)**: industry 엔진은 약한 게 아니라 *만들어 묻어둔* 엔진 — 단 "묻어둔"은 **함수·화면·DataFrame 노출**에 한정한다(orphan은 build/insights.py 함수가 verb/화면에 안 나옴 + /industry static JSON이 격자/밴드 미렌더 + edges() 컬럼 누락 + engine.ts marketShare inert dead). 산업 분석 *능력* 자체는 `recipes.industry/` 8 curated·validated가 이미 RunPython 런타임 가동 → 중복 신설 금지. lifecycle도 orphan 아님(industryBadge.phase 자동 부착 live). 1순위 = 묻어둔 *함수* 배선 + 정직 라벨 + 분기 통일. 신규는 profit-pool 격자 하나.
+- **핵심 재구성(v0.2 정정)**: industry 엔진은 약한 게 아니라 *만들어 묻어둔* 엔진 — 단 "묻어둔"은 **함수·화면·DataFrame 노출**에 한정한다(orphan은 build/insights.py 함수가 verb/화면에 안 나옴 + /industry static JSON이 격자/밴드 미렌더 + edges() 컬럼 누락 + engine.ts marketShare inert dead). 산업 분석 *능력* 자체는 `recipes.industry/` 8 curated·validated가 이미 RunPython 런타임 가동 → 중복 신설 금지. lifecycle도 orphan 아님(industryBadge.phase 자동 부착 live). 1순위 = 묻어둔 *함수* 배선 + 한계 라벨 + 분기 통일. 신규는 profit-pool 격자 하나.
 - **킬 확정**: 시장점유율·컨센서스·TAM·operational KPI·대체재·S-curve·경험곡선·platform KPI(EXCLUDED) / Porter 5힘 점수·HHI DOJ 라벨·moat 라벨·진입장벽 점수·GE 9box·7 Powers·Leontief 명명(REJECT) / profit-pool migration(코호트 노이즈 kill) / Capital Cycle·Damodaran 자본효율(OWNED-ELSEWHERE).
 - **거처**: 엔진 EXTEND + 퍼블릭 `/industry/[id]` EXTEND + 로컬 터미널 CenterStack/RightStack 배선. 새 파일·verb·패널 0(집중도 함수는 calcs/concentration.py 승격이지 새 능력 아님). 엔진 리팩토링 = **design-only**([03 §8](03-architecture-and-reuse.md)).
 
@@ -19,9 +19,9 @@
 `tests/_attempts/industryAnalysisLab/` 전수 발굴(9 루트 measure-first)의 산물을 본진 졸업. **거처=엔진 EXTEND**(새 패널·새 데이터 채널 0 — `Industry().__call__` 플래그 1개 + `calcs/` 모듈 1개).
 
 - **무엇**: `dartlab.industry(id, polarization=True)` — 산업이 *승자독식으로 갈라지나 vs 동질 평준화* 를 **독립 두 자료원 교차검증**으로 판정. ① 마진 렌즈 = 멤버 OPM IQR(p75−p25) 다년 방향 ② 밸류 렌즈 = 멤버 P/B p90/p10 분산. 둘 다 넓음→승자독식·`교차검증=일치`, 갈리면→혼재·`불일치(렌즈 갈림)`.
-- **왜 졸업 1순위였나**: 루트1(마진분산, 발산 8:2)·루트3(밸류괴리, 발산 3.3x) 둘이 robust PASS + **서로 교차검증**(제약이 양 렌즈 극단 일치). 단일 각도보다 교차검증이 folk통계 방어. 실측 일치: 제약 33→78·P/B 22.5 / 반도체 13→26·11.7 / 철강=마진좁음·밸류넓음 → **불일치 정직 포착**(렌즈 갈림 자체가 통찰).
+- **왜 졸업 1순위였나**: 루트1(마진분산, 발산 8:2)·루트3(밸류괴리, 발산 3.3x) 둘이 robust PASS + **서로 교차검증**(제약이 양 렌즈 극단 일치). 단일 각도보다 교차검증이 folk통계 방어. 실측 일치: 제약 33→78·P/B 22.5 / 반도체 13→26·11.7 / 철강=마진좁음·밸류넓음 → **불일치 명시 포착**(렌즈 갈림 자체가 통찰).
 - **산출 파일**: [polarization.py](../../src/dartlab/industry/calcs/polarization.py)(9섹션 docstring·`_distribution` 재사용) + [__init__.py](../../src/dartlab/industry/__init__.py) verb 배선 + `test_financials_sanity::TestPolarization`(7 테스트: `_crossVerdict` 4 + monkeypatch end-to-end 3) + SKILL.md/web.json 동기.
-- **정직 경계(코드 1급)**: 음수자본 제외수 인용·생존편향(현 멤버십 소급)·5점 윈도(방향신호)·밸류 스냅샷(시점 1)·임계는 `_attempts` 실측 분포 기반 라벨(절대 진리 아님). 점유율·인과 금지. `concentration`(산업이 과점이냐)과 직교.
+- **한계 경계(코드 1급)**: 음수자본 제외수 인용·생존편향(현 멤버십 소급)·5점 윈도(방향신호)·밸류 스냅샷(시점 1)·임계는 `_attempts` 실측 분포 기반 라벨(절대 진리 아님). 점유율·인과 금지. `concentration`(산업이 과점이냐)과 직교.
 - **게이트 통과**: docstring4Section·camelcase strict·industry unit 61·architecture 39(L2→L1 prices import = 방향·cycle 위반 0).
 - **남은 루트(졸업 보류)**: 4 accrual(de-mean 후 PASS, 다음 후보)·2 ΔHHI/7 상대강도(BORDERLINE·가드 선결)·5 수출/8 CAR(약함/보류). 카탈로그 SSOT=`_attempts/industryAnalysisLab/ROUTES.md`.
 
@@ -43,7 +43,7 @@
 
 **구현 세션 3차 (2026-06-17 marketShare 라벨 토론, 4에이전트 → [07 §구멍5](07-implementation-plan.md))** — 2차의 "터미널 표시 제거(필드 보존)" 결정을 코드실측이 뒤집음:
 - ★marketShare 소비처가 터미널 2곳이 아니라 **퍼블릭 map(CompanyCard·TreemapView)·scan(metrics·presets)·compare 까지 7곳**, 전부 '점유율' 사칭. 2차 결정은 과소 범위 + 멀쩡한 metric(트리맵 크기·scan industry-leader 프리셋) 기능손실.
-- ★3렌즈 만장일치 **제거 아닌 정직 재라벨**: 값(상장사 내 매출비중)은 정직, 이름만 사칭 → 전 소비처 '점유율'→'상장사매출비중'(키·metric·preset 보존, 회귀 0). map/scan 은 라벨만이라 SSOT 경계 무침범(별도 변경 단위). 로컬 100·industryRank:1·peerCount:1 은 단독유니버스 동어반복 날조라 값 제거.
+- ★3렌즈 만장일치 **제거 아닌 재라벨**: 값(상장사 내 매출비중)은 올바름, 이름만 사칭 → 전 소비처 '점유율'→'상장사매출비중'(키·metric·preset 보존, 회귀 0). map/scan 은 라벨만이라 SSOT 경계 무침범(별도 변경 단위). 로컬 100·industryRank:1·peerCount:1 은 단독유니버스 동어반복 날조라 값 제거.
 
 **구현 진행 (Phase A, 2026-06-17 — 커밋, push 보류)**:
 - 구멍2 ✅ `buildIndustrySummary` 파생 컬럼(영업이익률·coverageRatio)+테스트(872bd2888) + SKILL.md/카탈로그 동기화(b3a0e30c8, 기존 search 부채 동반 해소)
@@ -53,10 +53,10 @@
 - Phase B 642 진단 ✅ (read-only, cd2bb17f4) — 헤더 드리프트(exact lookup miss)가 원인, 재빌드 단독은 ~132 정상. 레버 A(퍼지화)가 커버리지 레버
 - 구멍1 터미널 CenterStack 버블 ✅ — 신규 lazy 채널 `CompanyPort.industryProfitPool`(industryPoolSource: map/industries/{id}.json fetch, relations 패턴·정적자산 공유) + `Company.industry` raw id + CenterStack '이익 풀' Panel(공정별 매출막대×영업이익률, 이익최대≠매출최대 통찰). 기반 d134430f8, 소비처는 멀티세션 `git add -u` sweep으로 4739222c4에 혼입(코드 온전·master green). svelte-check 0err·build 통과
 - 구멍 Killer#2 edges() ✅ — `Industry.edges()` 거래액·의존도(%) 컬럼(빈 schema+채움, None 보존) + docstring/SKILL.md(edges 반환 블록) + test_edges 2건 + 카탈로그 sync(5aaac4e12·ebd9fd210)
-- Phase B Killer#2 공개 ✅ — `/industry/[id]` 공급망 의존도(%)·출처 칩 + 정직 캡션(4418768dd)
+- Phase B Killer#2 공개 ✅ — `/industry/[id]` 공급망 의존도(%)·출처 칩 + 범위 캡션(4418768dd)
 - Phase C 경계 SSOT ✅ — SKILL.md 백분위 경계 박제(단일 pctRank·band 이원화·compare 교차참조·marketShare≠점유율) + sync(60a3c4ecc·cf23cc295)
-- **묻어둔 집중도 함수 런타임 노출 ✅** (2026-06-17, 2에이전트 적대토론 → 정공법) — `build/insights.py` → `calcs/concentration.py` 승격(이력보존 git mv, import re-point: enrichCompany 1 + test_l2 6 + edges/coverage baseline) + **`Industry()(id, concentration=True)`** 모드(산업 매출 시장구조 HHI/CR3 + 상위5사, `_lifecycle` 선례 동형, verb 0) + TestConcentrationVerb 3건 + SKILL.md(concentration 반환블록·args·정직경계) + 카탈로그 sync(web.json). **설계 모호 해소**: dict↔DataFrame은 calc 함수 dict 유지(계약 불변)·verb 어댑터 `_concentration`만 DataFrame 래핑(`_summary`/`_lifecycle` 패턴). **데이터 정직 가드**: revenue 기반(viable)만 노출·"상장사 매출 기준" 캡션·HHI라벨 반독점 어휘 금지 박제.
-  - ★**적대토론 핵심 발견(정직 카탈로그)**: "런타임 노출" thesis는 *상당 부분 이미 충족됨* — `calcSupplyInsights` 출력은 enrichCompany→buildIndustryMap→`CompanyCard.svelte:505-550` 화면 노출 + `buildInsightRankings.py` HHI 랭킹. orphan은 *함수가 query verb DataFrame으로 안 나오는 것*뿐. 진짜 미노출 = `calcIndustryConcentration`(산업 시장구조, recipe·화면 어디에도 없음, `calcSectorMetrics` 백분위와 직교) 하나 → 이것만 노출. supply-side(amount 0.7%)는 거짓정밀이라 의도적 보류(깎아냄).
+- **묻어둔 집중도 함수 런타임 노출 ✅** (2026-06-17, 2에이전트 적대토론 → 정공법) — `build/insights.py` → `calcs/concentration.py` 승격(이력보존 git mv, import re-point: enrichCompany 1 + test_l2 6 + edges/coverage baseline) + **`Industry()(id, concentration=True)`** 모드(산업 매출 시장구조 HHI/CR3 + 상위5사, `_lifecycle` 선례 동형, verb 0) + TestConcentrationVerb 3건 + SKILL.md(concentration 반환블록·args·해석 한계) + 카탈로그 sync(web.json). **설계 모호 해소**: dict↔DataFrame은 calc 함수 dict 유지(계약 불변)·verb 어댑터 `_concentration`만 DataFrame 래핑(`_summary`/`_lifecycle` 패턴). **데이터 한계 가드**: revenue 기반(viable)만 노출·"상장사 매출 기준" 캡션·HHI라벨 반독점 어휘 금지 박제.
+  - ★**적대토론 핵심 발견(한계 카탈로그)**: "런타임 노출" thesis는 *상당 부분 이미 충족됨* — `calcSupplyInsights` 출력은 enrichCompany→buildIndustryMap→`CompanyCard.svelte:505-550` 화면 노출 + `buildInsightRankings.py` HHI 랭킹. orphan은 *함수가 query verb DataFrame으로 안 나오는 것*뿐. 진짜 미노출 = `calcIndustryConcentration`(산업 시장구조, recipe·화면 어디에도 없음, `calcSectorMetrics` 백분위와 직교) 하나 → 이것만 노출. supply-side(amount 0.7%)는 거짓정밀이라 의도적 보류(깎아냄).
 
 - **레버 A 졸업 + 전사 재빌드 ✅** (2026-06-17) — 비상장 매입처 미드롭 + 퍼지헤더. ② 실측(N=300 4.6x·642 정합)→본진:
   - `IndustryNode.supplyFacts`(비상장 leaf fact, 그래프 노드 미승격·buyer 속성) + `extractRawMaterialEdges` 퍼지헤더·leaf 할당 + `calcSupplyInsights` HHI 합산(코드 `799ceb18a`, 테스트 2건)
@@ -65,7 +65,7 @@
   - **전사 재빌드 산출**(`e132fbdaf`): **amount 커버리지 132 → 1,097 (8.3x)** = 상장엣지 123 + 비상장 leaf 974. supplyFacts 260사·1,152 facts. edges 18,418→20,560(supplier 3,191→6,679, listing 복구). peak RSS 2.83GB·80분. **재빌드 비용 실측 = O(n²) 80분 → 향후 CI/운영자 배치 권장(PRD 가드 확증)**
   - 실데이터 검증: 기아 공급 HHI 2979(집중·41조), 반도체 시장구조 HHI 5778(삼성 73%)
 
-**완결 요약**: 3 killer 사용자 대면 전부 ✅ — #1 profit-pool · #2 공급망(edges+칩+**레버A 8.3x amount**) · #3 분포. 정직(marketShare) ✅. 집중도 런타임 노출 ✅. **PRD 정의 범위(3 killer 엔진+표면+정직 라벨) 완성.**
+**완결 요약**: 3 killer 사용자 대면 전부 ✅ — #1 profit-pool · #2 공급망(edges+칩+**레버A 8.3x amount**) · #3 분포. 재라벨(marketShare) ✅. 집중도 런타임 노출 ✅. **PRD 정의 범위(3 killer 엔진+표면+한계 라벨) 완성.**
 
 **남은 작업 (PRD 본체 외 — 보너스/게이트)**:
 - **집중도 verb 화면배선** — `concentration=True`(전사 작동)가 엔진엔 있으나 터미널/랜딩 미노출. PRD 3 killer 넘어선 보너스·UI(검수 게이트). "강하게"의 본체 레버를 화면에 노출하는 다음 후보.
@@ -103,8 +103,8 @@
 | 01-reference-teardown.md | ✅ v0.2 (+§4 부정 카탈로그) |
 | 02-differentiation-killer-features.md | ✅ v0.2 (사실오류 정정) |
 | 03-architecture-and-reuse.md | ✅ v0.2 (+§5.1 recipe·§8 리팩토링) |
-| 04-data-readiness-kill-list.md | ✅ v0.2 (정직 룰 SSOT) |
-| 05-scope-phasing-guardrails.md | ✅ v0.2 (정직 룰 SSOT 포인터화) +2차 정정 |
+| 04-data-readiness-kill-list.md | ✅ v0.2 (한계 표기 규칙 SSOT) |
+| 05-scope-phasing-guardrails.md | ✅ v0.2 (한계 표기 규칙 SSOT 포인터화) +2차 정정 |
 | 06-progress-ledger.md | ✅ v0.2 (본 문서) +2차 정정 |
 | 07-implementation-plan.md | ✅ v1 (구현 플랜 — 5구멍 gap-closure·착수 가능) |
 

@@ -33,18 +33,18 @@
 2. [01-current-state-audit.md](01-current-state-audit.md) — 실측 인벤토리(오리진 7·fetch wrapper 15·캐시 20+·죽은 작업대 2) + file 근거.
 3. [02-target-architecture.md](02-target-architecture.md) — fetch 코어·오리진 레지스트리·캐시/dedup·공개/로컬 공통+로컬 provider 게이트 설계.
 4. [03-folder-structure.md](03-folder-structure.md) — 현재 트리 + 향후 폴더 구조(슬롯 확장).
-5. [04-killlist-and-non-goals.md](04-killlist-and-non-goals.md) — 안 건드리는 것(계약/포트·duckdb 엔진 병합·서버 도입·전면 재작성) + 정직 TTL 정책.
+5. [04-killlist-and-non-goals.md](04-killlist-and-non-goals.md) — 안 건드리는 것(계약/포트·duckdb 엔진 병합·서버 도입·전면 재작성) + 차등 TTL 정책.
 6. [05-migration-phasing-and-rollback.md](05-migration-phasing-and-rollback.md) — 4 페이즈·source 단위 이관 순서·롤백·테스트 매트릭스·이중 평가(개발자+PM).
 7. [06-operation-codification-and-guard.md](06-operation-codification-and-guard.md) — operation 문서 박제 본문 + TS 가드 테스트 명세.
 8. [07-progress-ledger.md](07-progress-ledger.md) — 세션 간 재개 원장(다른 세션 동시작업 충돌 회피 + NEXT 포인터).
 
 ---
 
-## 정직 척추 (전 문서 관통)
+## 설계 원칙 (전 문서 관통)
 
 - **새 발명 아님** — 죽은 작업대를 실배선. "만들어놓고 안 쓴" 모순 해소가 1순위.
 - **공통배선 default** — 로컬은 명시적 로컬 전용이 아니면 공개와 같은 배선. dev 는 :8400 없이 퍼블릭 기준으로 떠야 정상.
-- **정직 캐시** — 모든 캐시가 같은 TTL 이 아니다. `recent.parquet`·naver fresh tail 은 짧은/무 TTL(신선도 생명), 회사 panel·finance 는 길게. 오리진별 정책 명시(04 §정직 TTL).
+- **차등 캐시** — 모든 캐시가 같은 TTL 이 아니다. `recent.parquet`·naver fresh tail 은 짧은/무 TTL(신선도 생명), 회사 panel·finance 는 길게. 오리진별 정책 명시(04 §차등 TTL).
 - **계약 불변** — `DartLabRuntime` 17 포트 인터페이스는 안 바꾼다. 포트 경계 *뒤에서만* 이관(무중단).
 - **점진 이관** — 전면 재작성 금지. source 한 개씩 fetch 코어로 옮기고, 옮긴 것만 가드 적용. 다른 세션의 surface 작업과 충돌 최소(런타임/data 계층만 건드림).
 - **앞으로 못 어기게** — 운영문서(사상) + 기계 가드(강제) 둘 다. 문서만으론 회귀한다.

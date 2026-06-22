@@ -15,7 +15,7 @@
 - 레드팀의 진짜 우려는 *과(過)추상화*(StepGraph/OnboardingKernel/디스패처)지 단순 데이터-주도 엔진이 아니다. 그 우려를 **하드 가드**로 흡수한다(§5·§6):
   - 엔진은 `Step[] 데이터 + spotlight 1컴포넌트`에서 못 벗어난다. 그래프/커널/노드/디스패처 신설 = reject.
   - map은 *얇은 어댑터 뒤*로 축소 → landing 계약 무변경 = **회귀 표면 0**(레드팀의 "복제 안정성" 요구를 마이그레이션 순서로 충족).
-  - localStorage 키 상한·CHANGELOG 파싱 금지·실재 기능만·정직 프레이밍 전부 강제.
+  - localStorage 키 상한·CHANGELOG 파싱 금지·실재 기능만·기능차 표시 원칙 전부 강제.
 
 → 두 렌즈를 모두 만족. 이하 설계.
 
@@ -138,7 +138,7 @@ function evalStep(step: TourStep): 'show' | 'showLocalOnly' | 'skip' {
 }
 ```
 
-`showLocalOnly`는 퍼블릭에서 *숨기지 않고* 팝오버 상단 배지("🖥 로컬 전용") + `publicNote` + 설치 CTA, 데모 버튼 비활성. **포트를 절대 touch 안 함**(퍼블릭에서 `runtime.services`/`ai`/`navigation`은 접근만 해도 getter throw). SSOT·카피·정직 모델은 [02](02-local-public-common-wiring.md).
+`showLocalOnly`는 퍼블릭에서 *숨기지 않고* 팝오버 상단 배지("🖥 로컬 전용") + `publicNote` + 설치 CTA, 데모 버튼 비활성. **포트를 절대 touch 안 함**(퍼블릭에서 `runtime.services`/`ai`/`navigation`은 접근만 해도 getter throw). SSOT·카피·표시 원칙은 [02](02-local-public-common-wiring.md).
 
 ## 4. map 100% 동작 유지 마이그레이션 (무중단)
 

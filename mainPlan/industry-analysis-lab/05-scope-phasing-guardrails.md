@@ -1,7 +1,7 @@
 # 05. 범위·단계·가드레일
 
 상태: 비전 PRD v0.2 (2026-06-14, 2차 대대적 조사·적대검증 반영)
-목적: 적대검증(skeptic PM lens)을 박제한다. MUST/SHOULD/WON'T 단두대, 선결조건순 Phase A→B→C, 성공지표·실패모드·단일 최대 리스크. (정직 룰 SSOT는 [04 §3](04-data-readiness-kill-list.md) — 본 §5는 *Phase 적용 가드* 고유분만.)
+목적: 적대검증(skeptic PM lens)을 박제한다. MUST/SHOULD/WON'T 단두대, 선결조건순 Phase A→B→C, 성공지표·실패모드·단일 최대 리스크. (한계 표기 규칙 SSOT는 [04 §3](04-data-readiness-kill-list.md) — 본 §5는 *Phase 적용 가드* 고유분만.)
 
 ---
 
@@ -12,7 +12,7 @@
 **생존 조건**: 이 업그레이드는 *세계 메커니즘 매칭*이 아니라 **(a) 못 풀던 질문 1개를 답하거나 (b) 묻어둔 함수를 배선하거나 (c) 분기 통일·inert dead 정리를 하는 곳**에서만 산다.
 - (a) profit-pool 격자 = 회사별 사일로 제품이 구조적으로 못 푸는 "이익은 어느 단계가 버나". 신규 데이터 0이라 싸고, born-structured 격자라 우리만.
 - (b) hop2·summary·HHI/CR4 *함수*를 Industry verb DataFrame·화면에 꺼내는 배선 + summary/timeline 화면 노출 = "함수는 만들고 화면엔 안 꺼낸 부채" 상환. (★lifecycle은 industryBadge.phase로 이미 런타임 자동 부착·live이라 "화면 노출"만 — orphan 아님. recipe 층 8 curated도 이미 RunPython 런타임 분석 제공 → 중복 신설 금지, [03 §5.1](03-architecture-and-reuse.md).)
-- (c) 백분위 경계 통일(★실측 정정: "3분기 분기"가 아니라 단일 pctRank+모집단 파라미터화, cross-universe-percentile이 이미 통일 — [07 §구멍5](07-implementation-plan.md)) + `marketShare` 정직 재라벨(전 소비처 '점유율'→'상장사매출비중', 키·metric·preset 보존 — 로컬 100만 값 제거. "inert dead·producer 전무"·"표시 제거"는 사실오류 — [07 §구멍5](07-implementation-plan.md) 토론 정정) = 회귀 차단.
+- (c) 백분위 경계 통일(★실측 정정: "3분기 분기"가 아니라 단일 pctRank+모집단 파라미터화, cross-universe-percentile이 이미 통일 — [07 §구멍5](07-implementation-plan.md)) + `marketShare` 재라벨(전 소비처 '점유율'→'상장사매출비중', 키·metric·preset 보존 — 로컬 100만 값 제거. "inert dead·producer 전무"·"표시 제거"는 사실오류 — [07 §구멍5](07-implementation-plan.md) 토론 정정) = 회귀 차단.
 
 이게 없으면 "세계 제품 흉내"라 안 하느니만 못하다.
 
@@ -42,7 +42,7 @@
 
 ### WON'T (본 PRD, 기록)
 - 시장점유율·컨센서스·TAM/SAM/SOM·operational KPI(소스 부재 — 영구).
-- Porter 5힘 종합 스코어카드·moat wide/narrow 라벨·HHI DOJ 독점라벨·진입장벽 점수(정직성 위반).
+- Porter 5힘 종합 스코어카드·moat wide/narrow 라벨·HHI DOJ 독점라벨·진입장벽 점수(제외 범위).
 - profit-pool 이동 시계열(migration — 코호트 노이즈 확신오정렬).
 - 대체재 정량화·driver DAG(scenario-simulator 소유)·peer N사 비교 재구현(compare 소유).
 - 가동률·세그먼트·US 산업(데이터 추출 선결 — 별도 게이트).
@@ -58,13 +58,13 @@
 - **Phase C — 백분위 경계 문서화(산식은 이미 단일).** ① 백분위 SSOT 경계를 본 PRD/엔진 SKILL.md에 확정(industry=섹터분포 / compare+fin-stmt-lab=peer 정밀) + band 소스 이원화(public industryStats prebuilt / local quantileBand 라이브)는 의도된 설계로 박제. ② `marketShare` 표시 제거(표시층 한정 CenterStack.svelte·ScreenerModal.svelte, EcoNode 필드 보존) — 제거 전 ecosystem.json·routeLoad.ts:46·landing map/compare 미회귀 1회 실측. ③ 퍼블릭 industryStats 분포 밴드(compare는 교차참조로만 분리). ④ 회사→산업 점프. 상세 [07 §구멍5](07-implementation-plan.md).
 - **Phase D — 차단(착수 금지·재방문 게이트).** 적응형 lifecycle 임계(`_attempts` 졸업) · 가동률 셀 추출 · 세그먼트 · US 산업.
 
-각 Phase는 *이미 가진 데이터*로 출시하고 막힌 것을 *연기*한다. "세계 메커니즘 N종"이 아니라 "못 풀던 질문 1개 + 묻어둔 능력 배선 + 정직 라벨"이 합격선.
+각 Phase는 *이미 가진 데이터*로 출시하고 막힌 것을 *연기*한다. "세계 메커니즘 N종"이 아니라 "못 풀던 질문 1개 + 묻어둔 능력 배선 + 범위 라벨"이 합격선.
 
 ---
 
 ## 5. honesty / credibility 가드레일
 
-★**정직 룰 전체 SSOT = [04 §3 honest-gap 규칙](04-data-readiness-kill-list.md)**(결손 0금지·빈곤 1급시민·라벨 사칭 금지·분포≠공식지수·산업집계≠migration 등 9항). 여기 중복 박제하지 않는다(동기화 부채 방지). 본 §5는 *Phase 적용* 고유 가드만:
+★**한계 표기 규칙 전체 SSOT = [04 §3 honest-gap 규칙](04-data-readiness-kill-list.md)**(결손 0금지·빈곤 1급시민·라벨 사칭 금지·분포≠공식지수·산업집계≠migration 등 9항). 여기 중복 박제하지 않는다(동기화 부채 방지). 본 §5는 *Phase 적용* 고유 가드만:
 
 1. **자동 verdict 금지.** profit-pool 격자는 "이 단계가 이익을 가장 많이 번다"(사실)는 OK, "이 산업은 좋다/매력적이다"(판정) 금지.
 2. **경계 인용(중복 구현 금지).** valuation/moat 측정값은 financial-statement-lab, driver/시뮬은 scenario-simulator, peer N사=compare, 횡단=scan으로 교차참조.
@@ -74,9 +74,9 @@
 
 ## 6. 성공 지표 · 실패 모드 · 단일 최대 리스크
 
-**성공 지표**: "이 산업의 이익은 어느 단계가 버나"가 한 화면에서 답해진다 + 묻어둔 *함수*(hop2·summary·CR4)가 Industry verb·화면으로 나온다 + 백분위가 단일 정의로 수렴한다 + 모든 숫자가 정직 라벨(상장사 기준·coverageRatio·source/confidence). 헤드라인 지표가 "세계 메커니즘 구현 개수"면 이미 실패.
+**성공 지표**: "이 산업의 이익은 어느 단계가 버나"가 한 화면에서 답해진다 + 묻어둔 *함수*(hop2·summary·CR4)가 Industry verb·화면으로 나온다 + 백분위가 단일 정의로 수렴한다 + 모든 숫자가 라벨(상장사 기준·coverageRatio·source/confidence)을 단다. 헤드라인 지표가 "세계 메커니즘 구현 개수"면 이미 실패.
 
-**실패 모드**: 세계 제품 parity를 짓다가 born-structured 격자의 진짜 차별(profit-pool)이 Porter 5힘 점수표·HHI 독점라벨·가짜 TAM 같은 *우리에게 없는 데이터의 흉내* 더미에 희석되고, 정직성을 깎아 신뢰를 잃는다 — 사용자가 옮겨오는 이유는 *세계 제품이 추정으로 하는 걸 우리가 인용으로 하기 때문*이지 그들 화면 재현이 아니므로.
+**실패 모드**: 세계 제품 parity를 짓다가 born-structured 격자의 진짜 차별(profit-pool)이 Porter 5힘 점수표·HHI 독점라벨·가짜 TAM 같은 *우리에게 없는 데이터의 흉내* 더미에 희석되고, 범위를 넘어 신뢰를 잃는다 — 사용자가 옮겨오는 이유는 *세계 제품이 추정으로 하는 걸 우리가 인용으로 하기 때문*이지 그들 화면 재현이 아니므로.
 
 **단일 최대 리스크 / 반드시 맞출 것**: **profit-pool 하나를 깨끗이(신규 패널 금지·3게이트) 박고, 나머지는 "신규 메커니즘"이 아니라 "묻어둔 함수 배선 + 분기 통일 + inert dead 정리"로 프레임한다.** 승리 조건 = *못 풀던 질문 1개를 born-structured로 답하고, 없는 데이터는 EXCLUDED로 박는다.* 강함은 빼기에서.
 

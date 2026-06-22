@@ -1,4 +1,4 @@
-# DartLab 부채 정직화 (Debt-Honesty)
+# DartLab 부채 감소 (Debt-Honesty)
 
 > 상태: **PRD 확정 (2026-06-21) · 1차(7차원)+2차(미감사 13엔진+landing+ui-packages) 전수조사 = 66 finding · 6 전문가 적대 평가 5라운드(R1~R3 1차 PRD min 97, R4~R5 2차 확장 min 97) → 전원 ≥95 통과(blocking 0) · ground-truth 교정 12+항 반영.** (운영자 goal "dartlab 전수조사 → 약점 개선 플랜 → 개별 95점 냉정평가까지 토론 루프"의 산출물). **커버리지 = 전 엔진+landing+ui-packages(ui/web·blog만 제외).** 착수 = 운영자 go. 백엔드/가드/문서가 주 범위이나 P2 UI 제거는 운영자 push 승인 필수.
 > 거처: src/dartlab + tests + .github + ui + 문서. SSOT = `mainPlan/debt-honesty/`.
@@ -7,11 +7,11 @@
 
 ## 한 줄 결론
 
-**DartLab 전수조사가 드러낸 진짜 부채는 "코드가 더럽다"가 아니라 "보호받고 있다는 믿음과 현실의 간극"이다.** 7개 차원에서 *독립적으로* 같은 병이 나왔다 — 가드가 죽은 경로(`scripts/`·`ops/`)를 가리키고, 강행 가드 다수가 CI에 배선조차 안 됐고(checkAgentBoundary·staleImports·deprecationAudit·untrustedWrapAudit·9섹션 5/6엔진 = **전부 `tests/run.py` 참조 0, 운영자 직접 검증**), 노이즈로 못 켜고(16 false-positive), 광고(MCP "6 종"·"canonical 7")와 실제(advertised 23 도구)가 다르고, 유령 자산(edinet 3,868줄·ui/web 155파일·ui/shared 20파일)이 parity 게이트나 stale 메모리로 박제됐다. **1순위는 새 기능이 아니라 가드망 자체의 정직화** — 가드가 정직해지면 다른 PRD들이 이미 계획한 분해가 비로소 안전해진다.
+**DartLab 전수조사가 드러낸 진짜 부채는 "코드가 더럽다"가 아니라 "보호받고 있다는 믿음과 현실의 간극"이다.** 7개 차원에서 *독립적으로* 같은 병이 나왔다 — 가드가 죽은 경로(`scripts/`·`ops/`)를 가리키고, 강행 가드 다수가 CI에 배선조차 안 됐고(checkAgentBoundary·staleImports·deprecationAudit·untrustedWrapAudit·9섹션 5/6엔진 = **전부 `tests/run.py` 참조 0, 운영자 직접 검증**), 노이즈로 못 켜고(16 false-positive), 광고(MCP "6 종"·"canonical 7")와 실제(advertised 23 도구)가 다르고, 유령 자산(edinet 3,868줄·ui/web 155파일·ui/shared 20파일)이 parity 게이트나 stale 메모리로 박제됐다. **1순위는 새 기능이 아니라 가드망 자체를 실태에 맞추는 것** — 가드망이 실태와 맞아지면 다른 PRD들이 이미 계획한 분해가 비로소 안전해진다.
 
 ---
 
-## 조사 방법 (정직성 근거)
+## 조사 방법 (근거)
 
 1. **운영자 직접 정찰** — 레포 지형·부채 원장(44 baseline)·Guard Index·god 파일·stray(전부 gitignored 확인)·PRD 포맷 직접 측정.
 2. **7차원 심층 전수조사 워크플로**(`wf_119e02d0-b1d`, 7 finder·245 tool 호출·683K 토큰, effort high, read-only·dartlab import 금지) — 아키텍처/데이터/덕지덕지/테스트/문서/UI/AI 각자 실제 코드를 grep/wc로 측정, 기존 23 mainPlan PRD 교차참조해 *미계획 갭만* 식별.
@@ -43,4 +43,4 @@
 
 ## 기존 PRD와의 관계 (중복 0)
 
-본 PRD는 *어떤 기존 PRD도 안 다루는 갭*만 다룬다. `data-build-workbench-ssot`(빌드 흡수)·`frontend-refactor-loop`(ui dedup)·`search-os`·`polars-gpu-backend`·`ai-workbench-connector` 등이 인접하나, **가드망 정직화·유령 제거·god-split 트랙 박제는 어느 PRD에도 없는 갭**이다(00-prd §2.7 재계획 금지 목록).
+본 PRD는 *어떤 기존 PRD도 안 다루는 갭*만 다룬다. `data-build-workbench-ssot`(빌드 흡수)·`frontend-refactor-loop`(ui dedup)·`search-os`·`polars-gpu-backend`·`ai-workbench-connector` 등이 인접하나, **가드망 실태 정정·유령 제거·god-split 트랙 박제는 어느 PRD에도 없는 갭**이다(00-prd §2.7 재계획 금지 목록).

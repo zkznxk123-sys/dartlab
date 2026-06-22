@@ -88,7 +88,7 @@ TerminalSurface L64`$state('regime')`·L241`openMacroLens(tab='regime')`·L280`o
 **해소 아키텍처:**
 - regime lens = `{kr,en}` view-model + 템플릿 `T(x.kr,x.en)` (RegimeText 타입).
 - 콘텐츠층(edge/scenario/checkpoint/falsifier/driver/co-move/exposureQuality) = **빌더 lang 주입**(snapshot 빌더 `lang` 파라미터·default 'kr' → 테스트 KR 단언 보존). TerminalSurface `$derived` 가 반응형 lang 전달.
-- backend 한국어 bake(payload·analysis) = **결정론 EN 매핑**: `TR_FINLINE_EN/TR_EVIDENCE_EN/TR_FALSIFIER_EN`(payload edge 48문자열), `GROUP_EN/UNIT_EN`(driver), `ZONE_EN/SIGNAL_EN/GROWTH_LABEL_EN/REGIME_*`(regime enum), `EXPOSURE_REASON_EN/EXPOSURE_IMPACT_EN/EXPOSURE_SERIES_EN`(macroExposure 20 라벨). 미매핑은 원문(한국어) 유지 — EN 날조 금지(정직).
+- backend 한국어 bake(payload·analysis) = **결정론 EN 매핑**: `TR_FINLINE_EN/TR_EVIDENCE_EN/TR_FALSIFIER_EN`(payload edge 48문자열), `GROUP_EN/UNIT_EN`(driver), `ZONE_EN/SIGNAL_EN/GROWTH_LABEL_EN/REGIME_*`(regime enum), `EXPOSURE_REASON_EN/EXPOSURE_IMPACT_EN/EXPOSURE_SERIES_EN`(macroExposure 20 라벨). 미매핑은 원문(한국어) 유지 — EN 날조 금지(원문 우선).
 - MacroPathRail = `T(s.tailwindLabelKr, s.tailwindLabelEn)`. dialog aria 11개 + pressureText 양언어. phaseHeadline = `.phase` enum(EN)·backend label(KR).
 
 **결정론 검증(에이전트 라운드보다 강함):** `macroLens.test.ts` "EN mode: comprehensive snapshot scan" — `macroWithRegime()`(payload+regime) + 비-null tailwind + macroExposure(미포함 series APT_PRICE) 로 snapshot 빌드 후 **재귀 Hangul 스캔**: `{kr,en}`·`X/XEn`·`XKr/XEn` 쌍은 EN 측만, regime 서브트리 포함, marketPhase/company/glance 제외. 한국어 누출 path 0 단언. + dialog/rail 직접 grep(bare 한국어 0). 종착: **vitest 43/43 · svelte-check 0 err**.

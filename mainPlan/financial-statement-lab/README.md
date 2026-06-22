@@ -30,7 +30,7 @@
 
 1. [00-product-prd.md](00-product-prd.md) — 판정, 제품 비전(투자자의 5 질문), 차별 명제, 제품 원칙, 핵심 화면, 범위·성공기준 요약.
 2. [01-reference-teardown.md](01-reference-teardown.md) — iTooza 50차트 census 분해 + Butler 분해. 우리가 이미 가진 것 / 고가치 갭 / 덕지덕지. TAKE·REJECT·DEFER 취사선택.
-3. [02-differentiation-killer-features.md](02-differentiation-killer-features.md) — ★차별의 핵. 투자자 실제 질문, iTooza/Butler 천장, killer 5종(동종 백분위·가격 함축 기대·이익품질·정합성·정직 TTM) 각 가치+데이터지원+가드레일.
+3. [02-differentiation-killer-features.md](02-differentiation-killer-features.md) — ★차별의 핵. 투자자 실제 질문, iTooza/Butler 천장, killer 5종(동종 백분위·가격 함축 기대·이익품질·정합성·조정 TTM) 각 가치+데이터지원+가드레일.
 4. [03-architecture-and-reuse.md](03-architecture-and-reuse.md) — 자산 인벤토리 판정(REUSE/EXTEND/NEW), 거처(browser TS·Python·contract), 렌더러 결정, 덕지덕지 함정, 계약 확장.
 5. [04-data-readiness-kill-list.md](04-data-readiness-kill-list.md) — 데이터 가용성 매트릭스, EXCLUDED/BLOCKED/CONDITIONAL 킬리스트, PER/PBR 시계열 조인 정합 분석, honest-gap 규칙.
 6. [05-scope-phasing-guardrails.md](05-scope-phasing-guardrails.md) — MUST/SHOULD/WON'T 단두대, 데이터 준비도순 Phase, honesty 가드레일, 성공지표·실패모드·단일 최대 리스크.
@@ -38,7 +38,7 @@
 
 ---
 
-## 정직 척추 (전 문서 관통)
+## 설계 원칙 (전 문서 관통)
 
 1. **클론 아님.** 차트 수가 성공지표면 이미 실패. 기본 뷰는 더 작게, 카드마다 *별개의 근거 있는 질문*. parity-as-spec(경쟁사 스크린샷 매칭) 금지.
 2. **차별 = 더 많은 차트가 아니라 못 풀던 질문.** 동종 백분위 / 가격 함축 기대 / 이익 품질 / 정합성 — 전부 ref-추적.

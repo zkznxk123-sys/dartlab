@@ -120,7 +120,7 @@ testUniverse:
 - 터미널과 공유 surface는 공개·로컬 공통배선을 기본으로 한다. 로컬은 명시적 로컬 전용이 아니면 공개 HF source를 재사용한다.
 - 로컬 앱(dev)은 `:8400` 백엔드 없이 정적 HF로 떠야 정상이다. `/api`(localApi 오리진)는 라이브 provider·AI 스트림·공시뷰어 격자 같은 실제 로컬 전용 호출만 사용한다. 로컬 전용 호출은 `adapters/local/api` 게이트 한 곳에만 둔다.
 
-### 정직 캐시
+### 신선도 캐시
 
 - 캐시 TTL은 오리진별로 차등한다. 신선도 데이터(`recent.parquet`·naver fresh tail)는 짧은 TTL 또는 무 TTL을 쓰고, 일괄 캐시는 두지 않는다.
 

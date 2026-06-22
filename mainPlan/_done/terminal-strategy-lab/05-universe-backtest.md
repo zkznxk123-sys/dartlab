@@ -2,7 +2,7 @@
 
 상태: v0.1 (2026-06-16, 전문에이전트 4렌즈 토론 + 적대검증). 거처 = `ui/packages/surfaces/src/scan/universe/`(신규).
 
-> ① 단일종목 다전략 캔버스(00~04)와 **별도 객체**다. "이 규칙으로 매 분기 상위 종목을 사면?"을 17년 survivorship-clean 유니버스 위에서 정직하게 회계한다. ①의 단일종목 가드는 *비상속* — 유니버스 특유 거짓말(생존 청산가·자유도 폭발·턴오버·벤치 조작)을 겨냥한 신규 가드가 필요.
+> ① 단일종목 다전략 캔버스(00~04)와 **별도 객체**다. "이 규칙으로 매 분기 상위 종목을 사면?"을 17년 survivorship-clean 유니버스 위에서 그대로 회계한다. ①의 단일종목 가드는 *비상속* — 유니버스 특유 거짓말(생존 청산가·자유도 폭발·턴오버·벤치 조작)을 겨냥한 신규 가드가 필요.
 
 ---
 
@@ -46,7 +46,7 @@ interface RebalanceSnapshot {
   t: string; decisionT: string; fillT: string; // decisionT < fillT 불변 (look-ahead 차단)
   selected: { code; rankValue; weight; delistReason?: DelistReason }[];
   turnover: number; nHeld: number; nEligible: number;
-  mergerExits: number; unknownExits: number; advBreaches: number;  // 정직 카운터 (합병/unknown 분리)
+  mergerExits: number; unknownExits: number; advBreaches: number;  // 카운터 (합병/unknown 분리)
 }
 interface UniverseRun {                          // 한 청산가정의 1회 실행 (unknown 폐지만 분기)
   navByBucket: Record<number, number[]>;         // 분위별 NAV (시작 100). 합병=last-close 고정(밴드 무관)
@@ -82,14 +82,14 @@ interface UniverseBtResult {
 > **★실측 완료 (2026-06-18, commit `34dde130c`)**: F1·F2 수정 + 로컬 17샤드 전체 build.
 > - **G-M1 PASS**: 443,422행 · 3,693종목 · ym 201001~202606 · **11.91MB(<20MB)** → floor 단일파일 로드 OK.
 > - **폐지 886종목** · **F2 reindex 적용**(정지월 stitching 차단, 합성+실데이터 로직검증 PASS).
-> - ⚠ **F1 merger=0 (중요 한계)**: 검출윈도(last ym≥202406) 폐지 151종목이 **allFilings recent에 0 출현** — `recent.parquet`(2024-09+)은 *활성기업* 수시공시라 *폐지기업 공시를 안 담음*. 즉 F1 merger 검출은 *코드는 정상(합성검증 PASS)이나 현 데이터로 실질 no-op* → **밴드가 전부 conservative(886 unknown)**. 정직-degradation 설계대로(거짓 제외 0)지만, 진짜 merger 제외 = **정밀 폐지사유 데이터 소스(KRX 상폐사유)가 별도 트랙**(U4와 함께). 현재는 밴드 폭이 진짜보다 넓을 수 있음을 라벨(보수 안전).
-> - ★**엔진 실데이터 교차검증(mom12-1·분기·5분위)**: **유동성 컷이 필수**(없으면 Q5 저모멘텀 = penny-stock 인공물로 *230배* 폭발 — 거래불가 소형주 극단 반등) → 엔진 `liquidityPctile`(PIT 퍼센타일, 절대임계 아님 — 16년 인플레 robust) **기본 ON(상위30%)**. 정직 결론 둘: ① **liquid 한국주식 모멘텀 프리미엄 약함**(Q1≈Q5, 스프레드 ≈0, 단조성 없음) — "팩터가 먹힌다" 주장 금지의 실증. ② 저모멘텀 bucket 잔여 초과는 *임의 캡으로 숨기지 않음*(folk-stat) — reversal/소형주 틸트로 **U-G3(턴오버·ADV)·U-G4(size 틸트) 라벨로 정직 노출**. vitest 3 PASS(NAV 회계·이중밴드·표본).
+> - ⚠ **F1 merger=0 (중요 한계)**: 검출윈도(last ym≥202406) 폐지 151종목이 **allFilings recent에 0 출현** — `recent.parquet`(2024-09+)은 *활성기업* 수시공시라 *폐지기업 공시를 안 담음*. 즉 F1 merger 검출은 *코드는 정상(합성검증 PASS)이나 현 데이터로 실질 no-op* → **밴드가 전부 conservative(886 unknown)**. 설계 의도대로(거짓 제외 0)지만, 진짜 merger 제외 = **정밀 폐지사유 데이터 소스(KRX 상폐사유)가 별도 트랙**(U4와 함께). 현재는 밴드 폭이 진짜보다 넓을 수 있음을 라벨(보수 안전).
+> - ★**엔진 실데이터 교차검증(mom12-1·분기·5분위)**: **유동성 컷이 필수**(없으면 Q5 저모멘텀 = penny-stock 인공물로 *230배* 폭발 — 거래불가 소형주 극단 반등) → 엔진 `liquidityPctile`(PIT 퍼센타일, 절대임계 아님 — 16년 인플레 robust) **기본 ON(상위30%)**. 실측 결론 둘: ① **liquid 한국주식 모멘텀 프리미엄 약함**(Q1≈Q5, 스프레드 ≈0, 단조성 없음) — "팩터가 먹힌다" 주장 금지의 실증. ② 저모멘텀 bucket 잔여 초과는 *임의 캡으로 숨기지 않음*(folk-stat) — reversal/소형주 틸트로 **U-G3(턴오버·ADV)·U-G4(size 틸트) 라벨로 명시**. vitest 3 PASS(NAV 회계·이중밴드·표본).
 
 `buildUniversePanel.py`가 *존재하나* 데이터층에 U-G1·수익률을 깨는 결함 2종이 박혀 있다(아래 = 수정 전 진단). **코딩 착수 첫 스텝 = `--skip-upload`로 측정 + 아래 수정.**
 
 - **🔴 F1 `delisted` 오염**(`:128` `(_lastYm < globalMaxYm)`): "최근 2개월 미출현"을 폐지로 보나 **합병·정지·코드변경·실폐지를 한 bool로 뭉갬**. U-G1 양극단 밴드가 이 bool 위에 서므로 → 합병(주주 인수가+프리미엄)을 −100% 처리 → 보수 헤드라인 *허구 과소평가* = 밴드가 분류버그 증폭기(04 §2.8 U-G1).
   - **측정**: 이 bool로 잡힌 "폐지" 중 합병/정지/코드변경 비율(allFilings mna 공시 + gov 재상장 코드 cross).
-  - **★수정 방법 (재사용 자산 명시 — 텍스트 완벽판정 불가라 정직 휴리스틱)**:
+  - **★수정 방법 (재사용 자산 명시 — 텍스트 완벽판정 불가라 휴리스틱 사용)**:
     1. **합병 추정**: `quant/signal/event.py:18 _EVENT_RULES`의 mna 분류(`["합병","인수","분할","영업양수","영업양도"]`)를 allFilings `report_nm`에 적용 → **폐지일 직전 ±3개월 윈도에 mna 공시 있는 종목 = `delistReason='merger'`(추정)**. ⚠ 방향(소멸/존속)·종목귀속은 report_nm 텍스트로 완벽판정 불가 → **"합병 추정" 라벨**(확정 아님). `gather/transforms/corporateAction.py`의 `action_type='merger'` SSOT는 *수동 입력 원장*이라 보강 cross(있으면 우선).
     2. **코드변경**: gov 재상장 코드 cross(같은 corp 다른 ISU_CD) = `delistReason='codeChange'` → 가격 연결(폐지 아님).
     3. **나머지 폐지** = `delistReason='unknown'`(상폐·정지 혼재) → 양극단 밴드.
@@ -108,7 +108,7 @@ interface UniverseBtResult {
 ## 5. 벤치마크 — 이중 강제
 
 - **(a) 동일가중 전체 유니버스(primary)** + **(b) 시총가중 지수(KOSPI/KOSDAQ, gov indices 샤드)** — **둘 다 동시 표시 의무(택일 금지)**.
-- 동일가중 = 그 자체가 소형주 size 틸트 → "초과수익은 size 프리미엄 포함" 라벨. 지수만 쓰면 size·비용 차이가 알파로 오인. **둘 다 + 라벨 = 정직 필요조건(충분조건 아님 — size·유동성·생존 잔차 미통제 명시).**
+- 동일가중 = 그 자체가 소형주 size 틸트 → "초과수익은 size 프리미엄 포함" 라벨. 지수만 쓰면 size·비용 차이가 알파로 오인. **둘 다 + 라벨 = 필요조건(충분조건 아님 — size·유동성·생존 잔차 미통제 명시).**
 
 ## 6. 킬러뷰 + UX
 
@@ -130,11 +130,11 @@ interface UniverseBtResult {
 - NAV = klinecharts 아닌 경량 SVG(NavCurves), `btLayer` 공유 절대축 draw 이식. floor 곡선은 **계단**(직선 보간 금지 — 월말만 평가 시각화). 분위 끝만 라벨, 중간 dim.
 - **리밸 walk = 읽기전용 점프 스크럽**(이산 리밸 시점, ①의 연속 재생 아님). 편입▲/편출▼/유지● + "→다음분기 수익"(사후 라벨). 행 클릭 → 단일종목 drill-down("구성원이지 추천 아님" 툴팁).
 
-## 7. 정직 가드 (04 §2.8·2.9 신설 — 떼어낼 수 없음)
+## 7. 가드 (04 §2.8·2.9 신설 — 떼어낼 수 없음)
 
 | 가드 | 내용 |
 |---|---|
-| **U-G1 생존 = 합병식별 + 양극단 이중실행 밴드** | 폐지 청산가는 사유 미구분이라 *알 수 없다* → **임의 숫자(−30% 등) 금지**(folk-stat). ★v0.2 정정(적대검증): "사유 미구분"을 미덕으로 두면 **합병(주주 인수가+프리미엄)이 −100%에 들어가 보수 헤드라인 허구 과소평가** → 밴드가 분류버그 증폭기. **4단계**: ① **합병 식별**(§3.1 F1: allFilings mna 분류 폐지일 근접 휴리스틱) → 합병 추정 = last-close 청산(**밴드에서 제외**), ② **unknown 폐지만** 두 극단 2회 실행 ⓐ 0손실(낙관) ⓑ −100%(보수) → **밴드 폭 = *진짜 unknown 폐지 의존도***(폐지명 없으면 폭 0), ③ 상한은 last-close(0손실)에 고정 + "합병 프리미엄은 이 위 — 낙관 끝도 보수적일 수 있음" 라벨(*비대칭 무지의 방향 정직*: 밴드 전체가 진실의 하방), ④ 밴드 폭>30%p면 **hero 숫자 차단**(라벨 아닌 차단). 헤드라인 정렬·비교는 보수(−100%) 끝 기준. |
+| **U-G1 생존 = 합병식별 + 양극단 이중실행 밴드** | 폐지 청산가는 사유 미구분이라 *알 수 없다* → **임의 숫자(−30% 등) 금지**(folk-stat). ★v0.2 정정(적대검증): "사유 미구분"을 방치하면 **합병(주주 인수가+프리미엄)이 −100%에 들어가 보수 헤드라인 허구 과소평가** → 밴드가 분류버그 증폭기. **4단계**: ① **합병 식별**(§3.1 F1: allFilings mna 분류 폐지일 근접 휴리스틱) → 합병 추정 = last-close 청산(**밴드에서 제외**), ② **unknown 폐지만** 두 극단 2회 실행 ⓐ 0손실(낙관) ⓑ −100%(보수) → **밴드 폭 = *진짜 unknown 폐지 의존도***(폐지명 없으면 폭 0), ③ 상한은 last-close(0손실)에 고정 + "합병 프리미엄은 이 위 — 낙관 끝도 보수적일 수 있음" 라벨(*비대칭 무지 방향 명시*: 밴드 전체가 진실의 하방), ④ 밴드 폭>30%p면 **hero 숫자 차단**(라벨 아닌 차단). 헤드라인 정렬·비교는 보수(−100%) 끝 기준. |
 | **U-G2 PIT 멤버십** | 유니버스·필터(시총/거래대금 컷)는 *그 리밸 시점 그날 date 샤드*로만(코드 assert: 필터 입력 ts ≤ rebalanceT). IPO = 상장+룩백 충족 후만. forward-fill 금지. |
 | **U-G3 턴오버·ADV P1 승격** | 단일종목 P4 아님 — **턴오버율·추정비용·ADV 초과 주문비율 KPI 동급 상시 노출**. 주문>ADV X% = "실거래 불가능" 빨강. bp 고정=소형주 비용 과소 경고. |
 | **U-G4 이중 벤치** | EW 유니버스 + 지수 둘 다 표시 의무. size 틸트 라벨. 필요조건이지 충분조건 아님 명시. |
@@ -145,7 +145,7 @@ interface UniverseBtResult {
 
 ## 8. 단계
 
-- **U1 (최소·정직)**: 단일 가격 팩터(모멘텀 12-1) · 5분위 · 분기 리밸 · 동일가중 · long-only · 이중 벤치 · 보수 청산 · 시도 카운터 · OOS 강제. floor 월말 패널(prebuild) + DuckDB-wasm 루프. 킬러뷰(NAV 분위 + 스프레드 + 턴오버).
+- **U1 (최소 구성)**: 단일 가격 팩터(모멘텀 12-1) · 5분위 · 분기 리밸 · 동일가중 · long-only · 이중 벤치 · 보수 청산 · 시도 카운터 · OOS 강제. floor 월말 패널(prebuild) + DuckDB-wasm 루프. 킬러뷰(NAV 분위 + 스프레드 + 턴오버).
 - **U2**: 가격/기술 팩터 다양화(저변동성·52주·유동성·반전) · 리밸 walk · 보유 회전 테이블 · ① drill-down.
 - **U3 (local bonus)**: Python 일별 정밀 · ADV 비선형 충격 · 리밸일 지터 밴드 · floor/local 오버레이 비교.
 - **U4 (별도 트랙·미착수)**: 재무 팩터 유니버스 = 상폐사 재무 재수집 선결(G6 게이트). 그 전 영구 금지.
@@ -176,21 +176,21 @@ interface UniverseBtResult {
 **U1 AC (전부 충족해야 출시):**
 - N분위 NAV가 *공유 절대축*(공통 lo/hi)에 렌더 — per-series 정규화 0(`btLayer` draw 패턴 회귀 테스트).
 - 이중 벤치(EW+지수) 동시 표시, 택일 불가. 폐지 밴드(0/−100%) 표시, 폐지명 보유 시 단일 hero 숫자 0.
-- 시도 조합 카운터 상존, OOS 분할 끌 수 없음, 정직 라벨(근사·월말·size틸트·추천아님) 상존.
+- 시도 조합 카운터 상존, OOS 분할 끌 수 없음, 라벨(근사·월말·size틸트·추천아님) 상존.
 - `decisionT < fillT` 코드 assert. PIT 필터 입력 ts ≤ rebalanceT assert. 재무 팩터 신호 = 비활성(회색).
 
 **테스트 매트릭스:**
 - **엔진 단위(`universe.engine.test`)**: holdings 회계 보존(Σ가중=1·NAV 연속)·턴오버 산식·`decisionT<fillT`·이중실행이 선정/턴오버 공유하고 청산만 분기·OOS 분할 리밸 단위·헬퍼 6종 재호출 일치.
 - **DuckDB 쿼리**: `NTILE` 크로스섹셔널 랭킹 결정론(동일 입력=동일 분위)·월말 = `MAX(BAS_DD) per (ym,code)`·PIT 필터 미래 행 미접근.
 - **Playwright(`scan/universe`)**: 분위 곡선 N개+이중벤치 렌더·밴드 표시·리밸 walk 점프·Q5행→단일종목 drill·시도카운터 증가·콘솔 0.
-- **정직 회귀(grep)**: "전문가급"·"추천"·"검증된 팩터"·"시장 초과" 0건·IC/팩터 t-stat/분위 단조성 수치 0·시도카운터·이중벤치·폐지밴드 존재.
+- **과잉주장 회귀(grep)**: "전문가급"·"추천"·"검증된 팩터"·"시장 초과" 0건·IC/팩터 t-stat/분위 단조성 수치 0·시도카운터·이중벤치·폐지밴드 존재.
 
 **롤백**: `scan/universe/` 전체가 신규 폴더 + scan LeftRail 진입 버튼 1개 → 폴더 삭제 + 버튼 제거로 완전 가역. `terminal/lib/backtest`(① 엔진)·기존 scan 무수정이라 회귀 0. prebuild 산출물은 HF 별도 파일(기존 데이터 무영향).
 
 ## 13. 평가 (전문 개발자 · PM 이중)
 
 - **개발자**: 위험 집중점 = (a) `buildUniversePanel.py` 산출물 크기/성능(G-M1) (b) DuckDB-wasm 크로스섹셔널 루프 + holdings 회계 신규. 완화 = scan `krxPricesAll`·`btLayer` 공유축 draw·헬퍼 6종 재사용으로 신규 표면 최소화, 회귀는 별 폴더 격리. 이중실행은 월말 패널이 작아(저비용) 부담 없음.
-- **PM**: 킬러 = "분위가 단조롭게 벌어지나"가 한 자에 읽힘 + 폐지 밴드로 *불확실성까지* 정직. 차별 = 가격 백테스터(TradingView 등) 단일종목 한계를 17년 survivorship-clean 유니버스로 넘음 — 단 재무 랭킹 금지를 *제품이 먼저 정직히 답함*(13.9% 회색 비활성)이 신뢰. 위험 = floor/local 괴리(G-M2)가 크면 floor 신뢰 저하 → 범위 축소 분기 대비.
+- **PM**: 킬러 = "분위가 단조롭게 벌어지나"가 한 자에 읽힘 + 폐지 밴드로 *불확실성까지* 명시. 차별 = 가격 백테스터(TradingView 등) 단일종목 한계를 17년 survivorship-clean 유니버스로 넘음 — 단 재무 랭킹 금지를 *제품이 먼저 명시*(13.9% 회색 비활성)함이 신뢰. 위험 = floor/local 괴리(G-M2)가 크면 floor 신뢰 저하 → 범위 축소 분기 대비.
 
 ## 14. 경계 (claim 금지)
 

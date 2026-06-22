@@ -49,7 +49,7 @@ linkedSkills:
 
 **deprecated**: `shortBalanceMomentum` · `consensusRevisionPace` (해당 gather axis 미구현 — 데이터 소스 추가 후 재작성).
 
-## 미커버 영역 (정직 표시)
+## 미커버 영역
 
 다음 raw 는 *여전히 dartlab L1 에 없음* — 본 페르소나의 깊이 확장은 이 raw 가 들어온 뒤:
 - 옵션 Put/Call ratio · skew · OI (KRX 파생 raw 부재)

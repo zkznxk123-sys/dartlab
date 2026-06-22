@@ -9,9 +9,9 @@
 
 이 업그레이드의 출발점은 코드실측이 깬 전제다 — **industry 엔진은 "약한" 게 아니라 "만들어 묻어둔" 엔진이다** (단 "묻어둔"은 *함수·화면·DataFrame 노출*에 한정 — 2차 조사 정정). `calcHHI`·`calcTopNRatio`·`calcSupplyInsights`·`computeHop2` *함수*([build/insights.py](../../src/dartlab/industry/build/insights.py)·[build/hop2.py](../../src/dartlab/industry/build/hop2.py))는 live·정확한데 **빌드 산출물(JSON)에만 baked되고 Industry verb·화면 질의로 못 꺼낸다.** `summary`(공정별 이익집계)·`timeline` 능력도 어느 화면에도 안 뜬다(퍼블릭 `/industry/[id]`는 라이브 엔진이 아니라 사전빌드 static JSON만 렌더, 로컬 터미널은 진짜 엔진 미소비). ★단 산업 분석 *능력* 자체는 orphan이 아니다 — `recipes.industry/`에 8개 curated·validated recipe(industryStagePhase·supplyChainConcentration 등)가 이미 RunPython 런타임 가동하고, `lifecycle`은 `industryBadge.phase`로 자동 부착 live다. **중복 신설 금지.**
 
-> 따라서 목표는 "세계 메커니즘 무더기 추가"가 **아니다.** 1순위는 *이미 만든 능력을 런타임·터미널에 배선하고, 정직 라벨을 붙이고, 분기된 경계를 통일하는 것*이다. 강함은 쌓아서가 아니라 깎아서.
+> 따라서 목표는 "세계 메커니즘 무더기 추가"가 **아니다.** 1순위는 *이미 만든 능력을 런타임·터미널에 배선하고, 라벨을 붙이고, 분기된 경계를 통일하는 것*이다. 강함은 쌓아서가 아니라 깎아서.
 
-핵심 명제: **세계 제품은 "이 산업의 모양"을 그려주고 멈춘다. DartLab은 같은 자산 위에서 못 풀던 한 질문을 답한다 — "이 산업에서 *돈은 어느 단계가 버나*"(매출 큰 단계가 아니다, McKinsey profit pool). 그리고 그 답은 추정 알고리즘이 아니라 공시로 역추적되고(공급망 ratio/amount는 인용이지 추정이 아니다), 결손은 0으로 채우지 않으며, 시장점유율 raw가 없으면 "상장사 매출 기준"이라고 정직하게 라벨한다.**
+핵심 명제: **세계 제품은 "이 산업의 모양"을 그려주고 멈춘다. DartLab은 같은 자산 위에서 못 풀던 한 질문을 답한다 — "이 산업에서 *돈은 어느 단계가 버나*"(매출 큰 단계가 아니다, McKinsey profit pool). 그리고 그 답은 추정 알고리즘이 아니라 공시로 역추적되고(공급망 ratio/amount는 인용이지 추정이 아니다), 결손은 0으로 채우지 않으며, 시장점유율 raw가 없으면 "상장사 매출 기준"이라고 라벨한다.**
 
 ---
 
@@ -39,7 +39,7 @@
 
 ---
 
-## 정직 척추 (요약 — 전체 SSOT = [04 §3 honest-gap](04-data-readiness-kill-list.md))
+## 한계 표기 척추 (요약 — 전체 SSOT = [04 §3 honest-gap](04-data-readiness-kill-list.md))
 
 1. **클론 아님.** 세계 메커니즘 매칭 개수가 성공지표면 이미 실패. 목표는 *못 풀던 질문 1개*(이익은 어느 단계가 버나)지 Porter 5힘 점수표·Bloomberg 화면 재현이 아니다.
 2. **배선 우선 > 신규.** 1순위는 묻어둔 *함수*(HHI·hop2·summary·timeline)를 Industry verb·화면에 *꽂는 것* + 분기 통일. (lifecycle·recipe 층은 이미 live — 중복 신설 금지.) 새 메커니즘은 그 다음.

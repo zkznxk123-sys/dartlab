@@ -1,4 +1,4 @@
-# 02 — 로컬↔퍼블릭 공통배선 + 기능차 정직 안내
+# 02 — 로컬↔퍼블릭 공통배선 + 기능차 안내
 
 > 사용자 요구: "공통배선으로 로컬과 퍼블릭의 기능차이도 같이 설명되면 좋겠다." 이 문서가 그 SSOT를 확정한다.
 
@@ -13,7 +13,7 @@
 
 → **결정적 사실**: services descriptor는 "기능차 SSOT"가 될 수 없다. 퍼블릭에서 호출 자체가 throw이고, 로컬에서조차 export 1건만 등록돼 AI·저장·네비 같은 차이를 *표현하는 descriptor가 존재하지 않는다*.
 
-기존 정직모델 선례 2개(재발명 금지 근거):
+기존 기능차 표시 선례 2개(재발명 금지 근거):
 - `TerminalSurface.svelte` — `allowTerminalAsk = runtime.env.kind === 'local'` → `{#if allowTerminalAsk}` AI 버튼 조건부. **이미 env.kind로 기능 게이팅 중.**
 - `ViewerOverlay.svelte` / `hosts.ts` — `tier={rt.env.kind === 'local' ? 'local' : 'public'}` export tier 라벨. **이미 env.kind로 tier 라벨 주입 중.**
 
@@ -33,7 +33,7 @@
 interface TourStep {
   // ...
   requires?: { kind: 'always' | 'localOnly' | 'service'; serviceId?: string };
-  publicNote?: string;   // localOnly일 때만 의미. 퍼블릭에서 어떻게 보일지 정직 안내
+  publicNote?: string;   // localOnly일 때만 의미. 퍼블릭에서 어떻게 보일지 명시
 }
 ```
 
@@ -45,15 +45,15 @@ interface TourStep {
 - 살려봤자 빈 목록이라 "AI는 로컬 전용"을 *말해주지 않는다*.
 - env.kind 2층 모델이 services 배선 0으로도 완전히 동작 — "퍼블릭 floor에서 throw 없이 동작" 원칙과 정확히 일치.
 
-## 2. 정직 가드 — 카피·톤
+## 2. 기능차 안내 가드 — 카피·톤
 
-퍼블릭=floor(모든 기능 동작해야)·로컬=headroom(같은 코드 bonus). "local-only 기능 금지"는 *새 기능을 로컬에만 만들지 말라*는 **설계 규율**이지, *이미 존재하는 구조적 한계*(AI 질의=로컬 LLM·서버 SSE)를 숨기라는 게 아니다. 투어는 이 구분을 정직하게 말해야 한다.
+퍼블릭=floor(모든 기능 동작해야)·로컬=headroom(같은 코드 bonus). "local-only 기능 금지"는 *새 기능을 로컬에만 만들지 말라*는 **설계 규율**이지, *이미 존재하는 구조적 한계*(AI 질의=로컬 LLM·서버 SSE)를 숨기라는 게 아니다. 투어는 이 구분을 있는 그대로 말해야 한다.
 
 ### upgradeHint/publicNote 카피 3원칙
 
 1. **없는 걸 있는 척 금지** — 퍼블릭에서 AI 버튼은 `{#if allowTerminalAsk}`로 *안 보인다*. 투어가 퍼블릭에서 "AI에게 질문하세요" 카드를 *동작하는 양* 띄우면 클릭 시 막다른 길 = 거짓. → "이 기능은 로컬 버전에서" 명시 + 비활성 스타일.
 2. **퍼블릭을 열등하게 프레이밍 금지** — "퍼블릭은 제한됨/열화판" ❌. *역할 분리*로: "지금 보는 공개 터미널은 설치 없이 즉시 전체 분석·차트·공시를 봅니다. 로컬 버전을 설치하면 *추가로* AI 직접 질의·작업 저장이 켜집니다." **퍼블릭=완결된 floor, 로컬=추가 headroom.**
-3. **막다른 길 금지(CTA 정직)** — localOnly 카드의 `publicNote`는 *행동 가능한 안내*: "로컬 설치 안내 →"(실재 링크 `eddmpython.github.io/dartlab`, feedback_no_fabricated_urls 준수). 안내만 하고 갈 곳 없으면 좌절.
+3. **막다른 길 금지(CTA 명시)** — localOnly 카드의 `publicNote`는 *행동 가능한 안내*: "로컬 설치 안내 →"(실재 링크 `eddmpython.github.io/dartlab`, feedback_no_fabricated_urls 준수). 안내만 하고 갈 곳 없으면 좌절.
 
 ### 카피 예시 (kr)
 
@@ -63,7 +63,7 @@ interface TourStep {
 | 작업 저장/복원 | "차트 설정·종목은 **이 브라우저에 저장**됩니다(기기 종속). 로컬 버전은 작업 공간을 더 풍부하게 보관" | "작업 저장 — 다음 방문에 복원" |
 | 데이터 신선도 | (양쪽 동일 — HF 공유, **차이 언급 안 함**) | (동일) |
 
-**핵심**: price/finance/macro/company는 `publicPricePort` 재사용으로 **양쪽 동일**(로컬 어댑터 주석 "퍼블릭과 동일"). 여기 가짜 차이를 만들면 정직모델 위반. 차이는 *오직* AI·storage·navigation·services(=퍼블릭 throw 포트들)에만.
+**핵심**: price/finance/macro/company는 `publicPricePort` 재사용으로 **양쪽 동일**(로컬 어댑터 주석 "퍼블릭과 동일"). 여기 가짜 차이를 만들면 기능차 표시 원칙 위반. 차이는 *오직* AI·storage·navigation·services(=퍼블릭 throw 포트들)에만.
 
 ## 3. "공통배선"의 의미 — (a)와 (b) 둘 다
 
@@ -104,5 +104,5 @@ ui-platform-refactor 단계-5에서 services가 퍼블릭에 빈 레지스트리
 ## 핵심 주장 3줄
 
 1. 기능차의 진실원천은 `env.kind` 한 줄 — services descriptor는 퍼블릭에서 throw이고 차이를 안 담아 SSOT가 못 된다. 단일 `TourStep[]`를 env.kind로 한 번 갈라 양쪽에 옳게 렌더.
-2. 정직모델은 "퍼블릭=완결된 floor, 로컬=추가 headroom" 역할분리 — 퍼블릭 열등 프레이밍 금지, 차이는 AI·storage·navigation·services 4개에만(데이터는 양쪽 동일), localOnly 카드는 비활성+이유+설치 CTA로 막다른 길 차단.
+2. 기능차 표시 원칙은 "퍼블릭=완결된 floor, 로컬=추가 headroom" 역할분리 — 퍼블릭 열등 프레이밍 금지, 차이는 AI·storage·navigation·services 4개에만(데이터는 양쪽 동일), localOnly 카드는 비활성+이유+설치 CTA로 막다른 길 차단.
 3. 퍼블릭 미배선 포트는 접근만 해도 throw이므로 localOnly 스텝의 퍼블릭 렌더는 포트를 절대 touch 않고 정적 `publicNote`만 — try/catch 감지·env.kind 난발·조기 포트 배선 전부 KILL.

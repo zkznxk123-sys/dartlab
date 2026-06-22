@@ -18,7 +18,7 @@
 | 후보 | 판정 | 근거 |
 |---|---|---|
 | scan-grade-explainer 에 흡수 | **거부** | 운영자 명시: scan-grade = 종합평가(판정), 본 화면 = 분포 사실(판정 0). 진입 헤더도 다름(스캔등급 패널 = CenterStack vs 업종내 백분위 = RightStack). |
-| 별도 mainPlan 카테고리 | **채택** | 진입점·개념·정직 레인(MAP vs JUDGE)이 분리. 단 **공유 SSOT 강제**로 중복 차단(아래 경계). |
+| 별도 mainPlan 카테고리 | **채택** | 진입점·개념·레인(MAP vs JUDGE)이 분리. 단 **공유 SSOT 강제**로 중복 차단(아래 경계). |
 
 본진 화면 이동 0 — 업종내 백분위 패널은 [RightStack.svelte:234-244](../../ui/packages/surfaces/src/terminal/panels/RightStack.svelte) 그대로. 다이얼로그 컴포넌트만 `terminal/panels/` 신설.
 
@@ -37,9 +37,9 @@
 
 1. [00-feasibility-and-universe-verdict.md](00-feasibility-and-universe-verdict.md) — 유니버스 4종 실현가능성 판정(업종 ✅이미라이브 / 시장 ✅라이브 / 전체 ✅라이브+cross-sector caveat / 지수 ❌BLOCKED), 코드 증거, 비용, 재사용 헬퍼.
 2. [01-mechanism-decision.md](01-mechanism-decision.md) — 시각화 메커니즘 결정: 히트맵 reject → **축별 행 × 유니버스 열 백분위 띠 + 행클릭 DistCurve 드릴다운**. 정성 처리. ASCII 목업.
-3. [02-honesty-kill-list.md](02-honesty-kill-list.md) — KILL 목록 + 필수 정직 가드(가격격리·범주형 가짜백분위·허위정밀·cross-sector·판정금지·n<10·분포출처).
+3. [02-honesty-kill-list.md](02-honesty-kill-list.md) — KILL 목록 + 필수 가드(가격격리·범주형 가짜백분위·허위정밀·cross-sector·판정금지·n<10·분포출처).
 4. [03-architecture-and-reuse.md](03-architecture-and-reuse.md) — 영향 파일/함수/테스트/롤백. `percentileIn` 일반화, 다이얼로그 컴포넌트, 셸/DistCurve 재사용, 공유 SSOT.
-5. [04-scope-phasing-boundaries.md](04-scope-phasing-boundaries.md) — **완성 범위(한 빌드)** + 단일 정직 제외(소속지수, 데이터 게이트), 경계 연결 맵(재구현 0), 정직 성공지표, 인접 PRD 침범 KILL.
+5. [04-scope-phasing-boundaries.md](04-scope-phasing-boundaries.md) — **완성 범위(한 빌드)** + 단일 제외(소속지수, 데이터 게이트), 경계 연결 맵(재구현 0), 성공지표, 인접 PRD 침범 KILL.
 6. [05-progress-ledger.md](05-progress-ledger.md) — 상태·결정 로그·NEXT 포인터.
 
 ---
@@ -51,10 +51,10 @@
 
 ---
 
-## 정직 척추
+## 설계 원칙
 
 이 화면은 **판정이 아니라 좌표** — "상위 N%" 라는 분포 사실만 낸다. 매수/매도·목표주가·"좋은 주식"·종합 1위·composite 금지(그건 scan-grade 레인). 결손 축은 `.filter(존재)` 제거(0대체 금지). 분포 출처(KSIC섹터·동일가중·상장 primary ≠ KRX 시총가중)와 표본수 n 을 셀마다 노출. 전체상장사 유니버스는 섹터 혼재(금융·제조) caveat 강제. UI 경로 = `ui/packages/surfaces/src/terminal/`(landing 死경로). UI 변경이라 **자동 push 금지 — 운영자 눈검수 후 명시 승인**.
 
 ## 착수 게이트
 
-운영자 go 후 착수. 다이얼로그는 기존 자산 조합이라 경량·선행 가능. **완성형 = 한 빌드** — 업종+시장+전체 백분위 + 전 유니버스 분포곡선(라이브) + 정성 칩비중 + 가격 격리. 소속지수만 데이터 게이트로 정직 제외.
+운영자 go 후 착수. 다이얼로그는 기존 자산 조합이라 경량·선행 가능. **완성형 = 한 빌드** — 업종+시장+전체 백분위 + 전 유니버스 분포곡선(라이브) + 정성 칩비중 + 가격 격리. 소속지수만 데이터 게이트로 제외.

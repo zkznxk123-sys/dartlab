@@ -51,7 +51,7 @@ ChatGPT / Claude / Gemini / 임의 에이전트
 
 ---
 
-## 정직 척추
+## 설계 원칙
 
 1. **AI 를 호스팅하지 않는다.** 사용자의 AI 가 답변한다. DartLab 은 데이터·근거·링크를 제공한다.
 2. **ChatGPT 전용으로 닫지 않는다.** ChatGPT App 은 첫 배포 채널일 수 있으나, core contract 는 MCP + OpenAPI-compatible 이어야 한다.

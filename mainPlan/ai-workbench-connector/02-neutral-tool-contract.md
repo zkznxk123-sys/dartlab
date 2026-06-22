@@ -315,7 +315,7 @@ type Freshness = {
 }
 ```
 
-정직 문구:
+신선도 문구:
 
 - "이 fetch 기준"
 - "DartLab 공개 데이터 기준"

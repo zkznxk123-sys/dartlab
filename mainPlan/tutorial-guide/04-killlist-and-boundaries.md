@@ -1,4 +1,4 @@
-# 04 — KILL/DEFER/KEEP + 경계 + 정직 가드
+# 04 — KILL/DEFER/KEEP + 경계 + 안내 가드
 
 ## 1. KILL / DEFER / KEEP 판정표 (전수)
 
@@ -10,14 +10,14 @@
 | **강제 첫방문 자동시작 (터미널)** | **DEFER (조건부)** | 사용자 "항상 on 금지" 명시. 터미널은 `?sym=` 딥링크 진입(블로그·SNS)이 많아 *맥락 침입*. Phase 0=버튼만, Phase 1=`?sym` 없는 순수 진입에 *코치마크*(자동 모달 아님, [00](00-product-value-and-pedagogy.md) §7). |
 | **진척 게임화 (배지·"3/10 배움"·완료율·숙달 점수)** | **KILL** | 다크패턴·정체성 오염. 사용자는 forensic 분석가지 게임 플레이어 아님. 진행률 바(스텝 N/M)는 OK, *학습 완료도 게이미피케이션*은 금지. |
 | **다국어 투어 변형 (ko/en i18n 시스템)** | **DEFER→최소** | map 투어는 한국어 단일. i18n 시스템화=유지보수 2배. Phase는 한국어 단일(map 패리티), en 후속. feedback_no_patterns "영어 변형 금지"와 정합. |
-| **텔레메트리/analytics (스텝 이탈 추적)** | **KILL (퍼블릭)** | `TelemetryPort` 존재하나 public=무PII. 이탈 추적=서버 의존+PII 위험+가치 불명. 퍼블릭 floor 불가, 정직모델 위반. |
+| **텔레메트리/analytics (스텝 이탈 추적)** | **KILL (퍼블릭)** | `TelemetryPort` 존재하나 public=무PII. 이탈 추적=서버 의존+PII 위험+가치 불명. 퍼블릭 floor 불가, 표시 원칙 위반. |
 | **"신규기능" 다중 뱃지/항목별 읽음 누적** | **DEFER→단일** | localStorage 키 증식(SSOT 분열). 단일 `seenVersion` 1키, 뱃지 1개. |
 | **별도 "신규기능" 패널 (LeftRail·RightStack 신설)** | **KILL** | 붐비는 화면에 패널 *또* 추가 = 1순위 덕지덕지. 가이드 버튼 메뉴 항목으로 흡수, 새 패널 0. |
 | **외부 투어 라이브러리 (driver.js/shepherd/intro.js)** | **KILL** | 자체구현이 마스크·데모액션·퀵/풀·바텀시트까지 더 풍부. 새 의존성=문화 위반. driver.js는 requires/runtime·actionId·신규기능 못 해 래핑 필요=순손실. |
 | **별도 엔진/커널/그래프/노드/디스패처** | **KILL** | `Step[] + spotlight 1컴포넌트` 상한. no-graph-regression 동형. |
 | **헤더 `?`(가이드) 버튼** | **KEEP (코어)** | map과 동일. hdrLinks 군집에 1개 — 새 표면 0, 패턴 재사용. |
 | **map 투어 → 공유 엔진 추출** | **KEEP** | 사용자 "유지보수 편리·공통배선" 명시 요구. 단 레드팀 가드 박음([01](01-shared-tour-engine-architecture.md) §0). |
-| **로컬/퍼블릭 기능차 설명 스텝** | **KEEP** | 이미 `allowTerminalAsk` 분기가 라이브 — *말로 옮기는 것*. 정직 프레이밍 필수([02](02-local-public-common-wiring.md)). |
+| **로컬/퍼블릭 기능차 설명 스텝** | **KEEP** | 이미 `allowTerminalAsk` 분기가 라이브 — *말로 옮기는 것*. 기능차 표시 원칙 필수([02](02-local-public-common-wiring.md)). |
 | **cardGuide 39개 → 투어 스텝화** | **KILL** | 39스텝 백과사전. cardGuide는 just-in-time 툴팁이 정답. 투어는 "있다"만 1스텝([00](00-product-value-and-pedagogy.md) §5). |
 | **첫방문 코치마크 (펄스 말풍선)** | **KEEP (Phase 1)** | 자동 모달 거부 + 발견성 역설 해소의 유일한 절충([00](00-product-value-and-pedagogy.md) §7). |
 
@@ -39,18 +39,18 @@
 4. **스캔등급 다이얼로그** = `scan-grade-explainer`. 투어는 "헤더 클릭하면 등급 설명 열린다"를 *가리킴*, 다이얼로그 내용 복제하면 중복 SSOT.
 5. **테이블 내보내기** = `table-export`. **포트 원칙·StoragePort** = `ui-platform-refactor`.
 
-**★ServicesPort 소비 금지 가드** — 투어가 `localOnly`/`upgradeHint`를 *처음 소비하는 클라이언트*가 되려는 유혹이 크다(타입이 미소비라 "비었으니 내가 쓰자"). command-palette/service-registry 소비는 terminal-improvement/ui-platform-refactor 소유. **투어는 `runtime.env.kind`만 읽어 정직 카피 분기**, ServiceDescriptor 렌더링은 안 건드린다([02](02-local-public-common-wiring.md) §1).
+**★ServicesPort 소비 금지 가드** — 투어가 `localOnly`/`upgradeHint`를 *처음 소비하는 클라이언트*가 되려는 유혹이 크다(타입이 미소비라 "비었으니 내가 쓰자"). command-palette/service-registry 소비는 terminal-improvement/ui-platform-refactor 소유. **투어는 `runtime.env.kind`만 읽어 카피 분기**, ServiceDescriptor 렌더링은 안 건드린다([02](02-local-public-common-wiring.md) §1).
 
 **★미머지 광고 함정** — "신규기능 안내"가 아직 코드에 없는 PRD 기능을 "곧 나옵니다"로 광고하면 완결성·미래 약속 위반. 규칙: 실재 머지된 기능만, 기능 PR과 같은 커밋에서 스텝 추가([03](03-whatsnew-feature-announcement.md) §4).
 
-## 4. 정직 가드 (출시 차단 항목)
+## 4. 안내 가드 (출시 차단 항목)
 
 - **완결성 주장 금지** — "이제 다 배웠습니다"·"모든 기능을 익혔습니다" 0. map 마지막 스텝("툴은 만들었고 인사이트는 당신이")처럼 *겸손한 종료*. "7/7 완료"는 진행률이지 숙달 주장 아님.
-- **"신규" 정직** — *이 기기의 마지막 본 버전 이후 추가분*이지 절대적 신규 아님(기기종속). 크로스기기 동기화 불가를 숨기지 않음(terminal-improvement "기기·시점 명시" 계승).
+- **"신규" 범위 명시** — *이 기기의 마지막 본 버전 이후 추가분*이지 절대적 신규 아님(기기종속). 크로스기기 동기화 불가를 숨기지 않음(terminal-improvement "기기·시점 명시" 계승).
 - **로컬/퍼블릭 = 열등 프레이밍 금지** — "퍼블릭은 부족"이 아니라 "AI 직접질의는 로컬 LLM이 필요해 로컬 버전에서 켜집니다" *중립·설치 CTA*. 퍼블릭 floor=완전한 제품, 로컬=bonus.
 - **큰 글씨·"유도" ≠ 다크패턴** — 금지: 닫기 숨김, "지금 안 보면 못 봄" 압박, 자동 재팝업, 강제 완주. map처럼 *항상* Esc/건너뛰기/여기서 끝내기(탈출 자유 패리티).
 - **자동생성 카피 금지** — cardGuide 원칙("환각 0, 큐레이션만"). 데이터/CHANGELOG 생성 0.
-- **푸시 전 스크린샷 눈검수** — 정직 문구·큰 글씨 레이아웃은 픽셀 검수(feedback_ui_rules). 정량 PASS가 카피 과장을 못 본다.
+- **푸시 전 스크린샷 눈검수** — 안내 문구·큰 글씨 레이아웃은 픽셀 검수(feedback_ui_rules). 정량 PASS가 카피 과장을 못 본다.
 
 ## 5. 적대검증 — 6개월 뒤 회귀/방치 + 가드
 

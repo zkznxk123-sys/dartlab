@@ -7,7 +7,7 @@
 > - **제품명 = `simulate`**(verb `dartlab.simulate(code, *, scenario, horizon, asOf)`, 결정론 코어 졸업 `ac3905fd9`). 본문의 "Scenario Workbench"·"제품명 후보 3종"·§9 Phase 8 "workbench로 묶는다"는 *옛 후보·옛 Phase 서술* — 01 §3이 `simulate`로 확정(`scenario` 명사형 기각). 본문 §9 Phase 0~8은 v0.1 비전 순서지 현 구현 시퀀스(04 §4·07)가 아니다.
 > - **엔진 거처 = L2.5 독립 묶음 `simulate/`**(story 동급 L3 아님, 신규 L2 아님 — 01 §3). 본문 §7.2 "L2 엔진 간 직접 import 금지"는 유효하나, simulate는 L2.5라 analysis+macro+quant 동시 결합 합법(§7.2 #9 본문 이미 반영).
 > - **중심 산출물 = Play 미래 리플레이**(05). **가치평가(08)·신용(09 §4)은 simulate(mode) 뷰** — 같은 `SimulationResult`의 다른 읽기. 단일 목표가·rating 금지(reverseDCF 닻+조건부 범위). §5 주요 산출물(Environment/Assumption/Bridge/Price)은 이 단면의 화면 표면이다.
-> - **★KR 전용(구현 현실 — 비전 정직):** 현 verb는 `market != "KR"`면 `ValueError`(US ticker → EDGAR, 매크로 프리셋이 KR 기준). 본문 §2 비전("경제·시장 환경")이 시사하는 cross-market 도달은 **US 프리셋·US elasticity가 없어 아직 구조적으로 KR-only**다. US 해제는 07 로드맵에 명시 phase로 두기 전까지 비전 주장이지 가용 기능 아님(01 §3·§9).
+> - **★KR 전용(구현 현실 — 비전 범위):** 현 verb는 `market != "KR"`면 `ValueError`(US ticker → EDGAR, 매크로 프리셋이 KR 기준). 본문 §2 비전("경제·시장 환경")이 시사하는 cross-market 도달은 **US 프리셋·US elasticity가 없어 아직 구조적으로 KR-only**다. US 해제는 07 로드맵에 명시 phase로 두기 전까지 비전 주장이지 가용 기능 아님(01 §3·§9).
 > - 현재/과거 차트 3 컴포넌트(지수·이벤트레일·백테스팅)는 **`../_done/terminal-chart-suite/`로 분리**(01/02/03, 시간축 절단면). 07 = suite ⟶ 시뮬 단방향 시퀀싱 브리지. 전체 정합화·부채 원장 = 09. 현재 상태·NEXT = 04.
 
 ---
@@ -151,7 +151,7 @@ driver가 손익계산서로 전파되는 표다.
 - one-off와 recurring 분리.
 - working capital 압력.
 
-> **★시각 문법 포인터(R8, 2026-06-20):** 시각 인코딩·바 문법(waterfall 바 누적·증감 색·결손 구간 끊김) = 08 §3.2 Bridge Waterfall 시각 명세(businessDriverBridgeBlock·profitBridgeBlock 렌더러) + 05 시각 인코딩 SSOT(미래 구간 점선·fan band σ provenance 실선/점선 가르기, 05 §3 정직 가드) 준수. 본 절은 *내용 표면*, 시각 규율은 그 두 SSOT 가 정본(중복 정의 금지).
+> **★시각 문법 포인터(R8, 2026-06-20):** 시각 인코딩·바 문법(waterfall 바 누적·증감 색·결손 구간 끊김) = 08 §3.2 Bridge Waterfall 시각 명세(businessDriverBridgeBlock·profitBridgeBlock 렌더러) + 05 시각 인코딩 SSOT(미래 구간 점선·fan band σ provenance 실선/점선 가르기, 05 §3 시각 가드) 준수. 본 절은 *내용 표면*, 시각 규율은 그 두 SSOT 가 정본(중복 정의 금지).
 
 ### 5.5 Valuation Bridge
 
@@ -243,7 +243,7 @@ branch는 중첩 가능하지만 각 branch는 독립 가정과 공통 가정을
 - factor attribution.
 - data snooping 경고.
 
-**★ScreenerModal → PriceChart 드릴다운 동선(R23, 2026-06-20 — "경량 근사(스크린) → 정밀(딥다이브)" 단방향).** 통합 스크리너(ScreenerModal)의 *노출-스코어* 컬럼에는 행마다 **mini fan-spark**(해당 종목의 분기별 P25/P75 sparkline = 경량 근사 시나리오 범위, 단일점 금지·범위 인라인)를 둔다. **행 클릭 = 모달 닫힘 + PriceChart 가 simulate 모드를 *유지*한 채 해당 종목으로 soft-swap**(회사전환 선례 = `project_viewer_cag_infeasible` 의 panel soft-swap·`176b58c96`, 차트 인스턴스 신설 0). 이때 현재 켜둔 **scenario 토글 상태(baseline/adverse/severe·if 토글)는 carry-over**(전환 후 같은 가정으로 정밀 DAG 재계산) + "경량 근사(스크린)→정밀(딥다이브)" toast 1회(스크린 fan-spark 는 분위 근사, 딥다이브는 전 DAG = 두 숫자가 미세히 다를 수 있음을 정직 고지, "수정됨" 아님). 새 패널·라우트·둘째 차트 0(§6 정정 박스 무중단 규율 불변 — soft-swap 은 기존 PriceChart 의 종목 바인딩 교체일 뿐).
+**★ScreenerModal → PriceChart 드릴다운 동선(R23, 2026-06-20 — "경량 근사(스크린) → 정밀(딥다이브)" 단방향).** 통합 스크리너(ScreenerModal)의 *노출-스코어* 컬럼에는 행마다 **mini fan-spark**(해당 종목의 분기별 P25/P75 sparkline = 경량 근사 시나리오 범위, 단일점 금지·범위 인라인)를 둔다. **행 클릭 = 모달 닫힘 + PriceChart 가 simulate 모드를 *유지*한 채 해당 종목으로 soft-swap**(회사전환 선례 = `project_viewer_cag_infeasible` 의 panel soft-swap·`176b58c96`, 차트 인스턴스 신설 0). 이때 현재 켜둔 **scenario 토글 상태(baseline/adverse/severe·if 토글)는 carry-over**(전환 후 같은 가정으로 정밀 DAG 재계산) + "경량 근사(스크린)→정밀(딥다이브)" toast 1회(스크린 fan-spark 는 분위 근사, 딥다이브는 전 DAG = 두 숫자가 미세히 다를 수 있음을 명시, "수정됨" 아님). 새 패널·라우트·둘째 차트 0(§6 정정 박스 무중단 규율 불변 — soft-swap 은 기존 PriceChart 의 종목 바인딩 교체일 뿐).
 
 ### 6.5 AI Expert Panel
 
@@ -319,36 +319,36 @@ AI 전문가 패널은 숫자를 만들기보다 가정을 검토한다.
 - **가장 날카로운 wedge 3**: ① reverseDCF 닻을 시뮬레이터 *안에* 박은 것(컨센서스 부재=약점→priced-in 믿음 해부=강점, honesty spine과 wedge가 같은 메커니즘) ② 드라이버-DAG 충격을 회사 pro-forma 시간축까지 내림(MAC3가 못 닿는 자리, L2.5 앵커가 공짜 제공) ③ leaf-binding 앵커 + DriverRegistry의 유지보수 비대칭("데이터=카드 1줄, 코드 0" ↔ "엔진 계약 깨지면 CI red가 단일 노드 지목") = **anti-velocity 해자**(추가가 아니라 제약이라 경쟁자의 기능-출하 속도와 정반대 방향).
 - **가장 큰 위협 3**: ① 텍스트/이벤트→driver 결정론 매핑 커버리지 미실증(메모리 segmentRnd 2/10·incomeExpense 66.9% 천장이 같은 데이터-부재 벽) ② 검증 루프 구조적 미완(`recordForecast`/`gate.py`/`ledger.py`/`admission.py`/`lens.py` 전부 src 부재) ③ 조립-속도 vs 규율-속도 역전(빠른 경쟁자가 4축 융합을 우리가 게이트를 다 짓기 전에 완성).
 - **honest caution**: 9 흡수후보 중 5개가 이미 있거나 honesty 위반 = 토론이 발굴한 "새로움"의 절반은 환상. 융합은 commodity라 차별 못 되고, 차별을 강제하는 lint·게이트·admission이 *대부분 PRD 문구로만* 존재 → 규율이 기계 강제 안 되면 메모리가 반복 기록한 "확신오정렬"(horizonMeaning·accountStructDisambig: 검증 전 성공 주장)의 재현. **지금은 strong-signature가 아니라 "될 설계"다 — 새로움≠검증.**
-- **KEEP 순서**: ① 규율 게이트 먼저(`test_simulate_leaf_binding`·`recordForecast` write-end은 코드 0줄~소량 → 조립보다 먼저 박아 anti-velocity 해자 실재화) ② 텍스트→driver 매핑 커버리지를 held-out으로 정직 측정(design target→proven wedge 승격 단일 분기점) ③ A5(점확률)·A7(공개 리더보드) 정밀 외피는 write-end 라이브 전까지 defer/reject로 honesty spine 보호. **"미검증을 정직히 라벨하는 것이 가치지 우월 증명이 가치가 아니다"를 끝까지 지키는 조건에서만 KEEP.**
+- **KEEP 순서**: ① 규율 게이트 먼저(`test_simulate_leaf_binding`·`recordForecast` write-end은 코드 0줄~소량 → 조립보다 먼저 박아 anti-velocity 해자 실재화) ② 텍스트→driver 매핑 커버리지를 held-out으로 실측(design target→proven wedge 승격 단일 분기점) ③ A5(점확률)·A7(공개 리더보드) 정밀 외피는 write-end 라이브 전까지 defer/reject로 honesty spine 보호. **"미검증을 라벨하는 것이 가치지 우월 증명이 가치가 아니다"를 끝까지 지키는 조건에서만 KEEP.**
 
-> 타사 개념 흡수(absorb-as-defer 4종 A1·A2·A4·A7 + reject 잔여 가드 A5·A6) 상세 = 02 §2.3·§2B.3 / 01 §4·§5b / 05 §4·§3 / 03 §9.3 / 04 §4(12·13). 전부 *새 기능 추가가 아니라 정직-라벨·defer-게이트*로만 흡수("깎아서 강함").
+> 타사 개념 흡수(absorb-as-defer 4종 A1·A2·A4·A7 + reject 잔여 가드 A5·A6) 상세 = 02 §2.3·§2B.3 / 01 §4·§5b / 05 §4·§3 / 03 §9.3 / 04 §4(12·13). 전부 *새 기능 추가가 아니라 한계 라벨·defer-게이트*로만 흡수("깎아서 강함").
 
 ---
 
 ## 8c. ★시그니처 현실 점검 — 부정적 검토 (2026-06-20, 운영자 "억지로 넘기지 마라")
 
-> 운영자 지시: *"억지로 넘게 하지 말고 전부 제대로 부정적 검토해라. 진짜 핵심은 DartLab의 시그니처가 될 수 있는가다."* — 이 절은 PRD-점수 상승을 시그니처 진전으로 오인하는 것을 차단하는 정직 가드다. **결론을 먼저: 두 차례 전문가-패널 uplift(planScore 시각/분석/예측 66·79·82 → 95, 이후 16-분야 천장 추진)는 *설계 완전성*만 올렸고 시그니처 지위는 §8b의 `conditional-signature(61, 될 설계지 strong-signature 아님)`에서 1px도 움직이지 않았다.** planScore는 시그니처의 proxy가 아니다.
+> 운영자 지시: *"억지로 넘게 하지 말고 전부 제대로 부정적 검토해라. 진짜 핵심은 DartLab의 시그니처가 될 수 있는가다."* — 이 절은 PRD-점수 상승을 시그니처 진전으로 오인하는 것을 차단하는 가드다. **결론을 먼저: 두 차례 전문가-패널 uplift(planScore 시각/분석/예측 66·79·82 → 95, 이후 16-분야 천장 추진)는 *설계 완전성*만 올렸고 시그니처 지위는 §8b의 `conditional-signature(61, 될 설계지 strong-signature 아님)`에서 1px도 움직이지 않았다.** planScore는 시그니처의 proxy가 아니다.
 
 **1. planScore↑ ≠ 시그니처↑ (범주 오류 경계).** uplift가 닫은 것은 *문서가 재조사 없이 구현 가능한가*(planScore=설계완전성). 시그니처가 되려면 *빌드되고·실데이터로 증명되고·방어 가능*해야 한다. systemScore(실빌드)는 ~61(09 §10 fatal 4중 빌드티켓 중 1 완료) — 핵심 능력은 **아직 존재하지 않는다**(`gate.py`·`recordForecast` write-end·`mc.distribution` 노드·`ledger.py`·`lens.py`·렌더러 2개·ReportDock 전부 src 부재). 짓지 않은 건물의 완벽한 청사진은 건물이 아니다. *2 라운드의 PRD 정밀화는 필요조건이지 시그니처의 충분조건 근처도 아니다.*
 
-**2. ★검증 못 한 천장 주장 철회.** 2차 천장 재평가(viz 99·분석 98·예측 98 도달 주장)는 세션 한도로 9 검증자 중 **1명만 실행**됐고, 그 1명(접근성)이 준 점수는 99가 아니라 **97 + 미해결 갭 3건**(SC 1.4.11 대비 기준배경 3중 드리프트로 게이트 거짓통과 가능·200% reflow AC 부재·08 waterfall a11y 포인터 의존)이었다. ⟹ **"천장 도달"은 증명된 적 없는 주장**이라 본 문서는 그것을 주장하지 않는다(확신오정렬 가드). 정직 현 상태 = **설계 강건(~95-97, 일부 실측 미해결)·천장 미검증**.
+**2. ★검증 못 한 천장 주장 철회.** 2차 천장 재평가(viz 99·분석 98·예측 98 도달 주장)는 세션 한도로 9 검증자 중 **1명만 실행**됐고, 그 1명(접근성)이 준 점수는 99가 아니라 **97 + 미해결 갭 3건**(SC 1.4.11 대비 기준배경 3중 드리프트로 게이트 거짓통과 가능·200% reflow AC 부재·08 waterfall a11y 포인터 의존)이었다. ⟹ **"천장 도달"은 증명된 적 없는 주장**이라 본 문서는 그것을 주장하지 않는다(확신오정렬 가드). 현 상태 = **설계 강건(~95-97, 일부 실측 미해결)·천장 미검증**.
 
 **3. 부정적 검토 — 시그니처를 막는 3 구조 위협(PRD가 못 고치는 것):**
-- **(A) 데이터-부재 벽 — 가장 깊은 부정.** 분석적으로 *구별되는* 단 하나의 움직임(텍스트/이벤트→business driver→P&L 캐스케이드)이 실측에서 약하고 *설계로 못 고친다*: segment 추출 2/10·incomeExpense 66.9% 천장·driver coverage는 대부분 섹터 단일 GDP/FX/rate 4-beta(02 §2C census가 이제 정직 인정, 회사 고유 ≈0). "드라이버 캐스케이드"는 현실에서 *치장한 4-beta 선형맵*이다. 한국 공시 데이터가 대부분 기업의 미세 driver 분해를 *지지하지 않는다* — 이건 엔지니어링이 아니라 데이터의 벽이라 PRD 어떤 정밀화도 못 넘는다. **시그니처의 핵심 분석 움직임이 데이터에 막혀 있다.**
-- **(B) 차별=규율, 능력 아님 (commodity 융합).** §8b 자인대로 4축 융합은 commodity(AlphaSense·BloombergGPT). 정직 wedge는 결국 *"우리는 불확실성에 규율 있고 정직하다"*로 환원 — 이건 **가치관 포지션이지 해자가 아니다.** 자원 많은 경쟁자가 같은 규율을 채택할 수 있고, "정직"은 마케팅이 어렵다(사용자는 답을 원하지 "목표가 안 드립니다 그 이유는"을 원하지 않는다). "가장 정직한 시나리오 도구"는 *원칙적 니치*지 넓은 시그니처가 아니다.
-- **(C) 시그니처를 *증명할* 검증 루프가 정확히 미빌드·최난이도.** recordForecast write-end·models HF 배포·pooled-β admission·N분기 held-out 캘리브레이션 — 전부 다분기 실데이터 작업이고, 통과 전엔(Brier<0.25·calib MAE<0.1·skill>0 vs naive) "될 설계"다. 그리고 **실제로 돌리면 실패할 수 있다**(플랜 자인: "AI가 엔진보다 낫다는 *증명 대상*이지 전제 아님"; driver admission이 *어떤 driver도 게이트 통과 못 함*을 발견할 가능성 — factor-zoo 규율의 정직한 귀결).
+- **(A) 데이터-부재 벽 — 가장 깊은 부정.** 분석적으로 *구별되는* 단 하나의 움직임(텍스트/이벤트→business driver→P&L 캐스케이드)이 실측에서 약하고 *설계로 못 고친다*: segment 추출 2/10·incomeExpense 66.9% 천장·driver coverage는 대부분 섹터 단일 GDP/FX/rate 4-beta(02 §2C census가 이제 명시, 회사 고유 ≈0). "드라이버 캐스케이드"는 현실에서 *치장한 4-beta 선형맵*이다. 한국 공시 데이터가 대부분 기업의 미세 driver 분해를 *지지하지 않는다* — 이건 엔지니어링이 아니라 데이터의 벽이라 PRD 어떤 정밀화도 못 넘는다. **시그니처의 핵심 분석 움직임이 데이터에 막혀 있다.**
+- **(B) 차별=규율, 능력 아님 (commodity 융합).** §8b 자인대로 4축 융합은 commodity(AlphaSense·BloombergGPT). 구별 wedge는 결국 *"우리는 불확실성에 규율 있다"*로 환원 — 이건 **가치관 포지션이지 해자가 아니다.** 자원 많은 경쟁자가 같은 규율을 채택할 수 있고, "범위 명시"는 마케팅이 어렵다(사용자는 답을 원하지 "목표가 안 드립니다 그 이유는"을 원하지 않는다). "가장 규율 있는 시나리오 도구"는 *원칙적 니치*지 넓은 시그니처가 아니다.
+- **(C) 시그니처를 *증명할* 검증 루프가 정확히 미빌드·최난이도.** recordForecast write-end·models HF 배포·pooled-β admission·N분기 held-out 캘리브레이션 — 전부 다분기 실데이터 작업이고, 통과 전엔(Brier<0.25·calib MAE<0.1·skill>0 vs naive) "될 설계"다. 그리고 **실제로 돌리면 실패할 수 있다**(플랜 자인: "AI가 엔진보다 낫다는 *증명 대상*이지 전제 아님"; driver admission이 *어떤 driver도 게이트 통과 못 함*을 발견할 가능성 — factor-zoo 규율의 귀결).
 
-**4. ★확신오정렬 트랩 — 내가 걸어 들어가던 길.** 플랜의 가장 깊은 반복 교훈은 `확신오정렬 > 정렬실패`(검증 전 성공 주장이 정직한 실패보다 나쁘다 — horizonMeaning §8·accountStructDisambig). 두 uplift 라운드는 *미빌드·미증명* 기능에 "95→98→99 거의완벽"을 표면화할 뻔했다. 운영자 "억지로 넘기지 마라"가 정확히 이걸 잡았다. 정직한 수는 점수-주장을 멈추고: *설계는 강하다·시그니처는 미증명·간극은 BUILD+PROOF이며 어떤 패널도 그걸 못 닫는다.*
+**4. ★확신오정렬 트랩 — 내가 걸어 들어가던 길.** 플랜의 가장 깊은 반복 교훈은 `확신오정렬 > 정렬실패`(검증 전 성공 주장이 솔직한 실패 인정보다 나쁘다 — horizonMeaning §8·accountStructDisambig). 두 uplift 라운드는 *미빌드·미증명* 기능에 "95→98→99 거의완벽"을 표면화할 뻔했다. 운영자 "억지로 넘기지 마라"가 정확히 이걸 잡았다. 바른 수는 점수-주장을 멈추고: *설계는 강하다·시그니처는 미증명·간극은 BUILD+PROOF이며 어떤 패널도 그걸 못 닫는다.*
 
-**5. 부정적 종합 — 시그니처가 될 수 있는가? 정직 판정.**
-- **조건부 YES, 단 PRD가 횡단 못 하는 좁은 경로로만.** 경로 = 최소 검증 척추 빌드 → 실 KR 기업에 N분기 가동 → reverseDCF-닻 위 캘리브레이션된·정직-경계된 시나리오 판정이 *실제로* well-calibrated·baseline-beating임을 실증. 이 경험적 결과가 *착지하면* "자기 정직성을 증명하는 유일한 시나리오 도구"가 진짜 방어가능 시그니처가 될 수 있다(anti-velocity 해자 — 경쟁자가 속도 저하 때문에 복제 안 하는 규율).
-- **그러나 셋 중 하나라도 죽일 수 있다**: (A) 데이터 벽이 driver coverage를 너무 낮춰 "캐스케이드"가 연극이 됨 / (B) 캘리브레이션·skill 게이트가 실데이터에서 *실패*(정직 엔진에 edge 없음) / (C) 정직 프레임이 목표가-경쟁자 대비 너무 니치라 시장성 없음.
-- **가장 가능성 높은 정직 귀결**: 시뮬레이터는 *단일 시그니처*가 아니라 **강하고 방어가능한 *2차* 능력**(터미널의 "정직 시나리오 + reverseDCF 닻" 모드)이 된다. DartLab의 *실제* 시그니처는 이 한 분석엔진보다 **폭**(종목코드 하나 → DART·EDGAR 전체 구조화 스토리, 이미 가동 중인 본진)일 가능성이 높다.
+**5. 부정적 종합 — 시그니처가 될 수 있는가?**
+- **조건부 YES, 단 PRD가 횡단 못 하는 좁은 경로로만.** 경로 = 최소 검증 척추 빌드 → 실 KR 기업에 N분기 가동 → reverseDCF-닻 위 캘리브레이션된·한계-경계된 시나리오 판정이 *실제로* well-calibrated·baseline-beating임을 실증. 이 경험적 결과가 *착지하면* "자기 한계를 실증하는 유일한 시나리오 도구"가 진짜 방어가능 시그니처가 될 수 있다(anti-velocity 해자 — 경쟁자가 속도 저하 때문에 복제 안 하는 규율).
+- **그러나 셋 중 하나라도 죽일 수 있다**: (A) 데이터 벽이 driver coverage를 너무 낮춰 "캐스케이드"가 연극이 됨 / (B) 캘리브레이션·skill 게이트가 실데이터에서 *실패*(규율 엔진에 edge 없음) / (C) 범위-명시 프레임이 목표가-경쟁자 대비 너무 니치라 시장성 없음.
+- **가장 가능성 높은 귀결**: 시뮬레이터는 *단일 시그니처*가 아니라 **강하고 방어가능한 *2차* 능력**(터미널의 "범위-경계된 시나리오 + reverseDCF 닻" 모드)이 된다. DartLab의 *실제* 시그니처는 이 한 분석엔진보다 **폭**(종목코드 하나 → DART·EDGAR 전체 구조화 스토리, 이미 가동 중인 본진)일 가능성이 높다.
 
-**6. 권고(건설적·정직).**
+**6. 권고(건설적).**
 - PRD 점수를 시그니처 proxy로 쓰는 것 중단. 설계는 "강함/완전"에서 **동결**하고 패널-uplift 루프 중단 — 추가 패널은 시그니처 바늘을 못 움직이는 설계 숫자만 부풀린다.
 - 성공 지표를 시그니처를 가르는 *유일한 것*으로 재정박: 최소 검증 척추(recordForecast + 단일 섹터 held-out 데모)를 *빌드*하고 — **어떤 driver가 admission을 통과하는가·fan이 캘리브레이션되는가**를 본다. 그 *하나의 경험적 결과*가 PRD 1000점보다 가치 있다.
-- 정직 프레임은 정체성으로 유지하되, 그것이 자동 시그니처가 아니라 *원칙적 니치*임을 현실로 받아들인다.
+- 범위-명시 원칙은 정체성으로 유지하되, 그것이 자동 시그니처가 아니라 *원칙적 니치*임을 현실로 받아들인다.
 
 > 본 §8c 는 점수가 아니라 *진실*을 기록한다. 2026-06-20 두 uplift 라운드의 설계 산물(시각/분석/예측 절·a11y·규제관할·K-IFRS·tail risk 등)은 **플랜으로서 진짜 개선**이나 시그니처 판정은 §8b `conditional-signature(61)` 그대로다 — *빌드·증명되기 전까지.*
 

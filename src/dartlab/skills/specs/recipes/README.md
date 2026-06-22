@@ -54,7 +54,7 @@ recipes/
 
 1. recipe 의 *주된 사용자 시점* 으로 1차 분류 — 펀더멘털 분석가가 *공시 이벤트 감시* 하면 `fundamental/disclosure/eventRadar/`.
 2. 여러 페르소나가 동등하게 쓰는 결과물·필터·테제 검증 = `meta/`.
-3. "미커버" 페르소나 (sentiment·news) 는 빈 폴더 + README 로 *정직 표시*. 있는 척 placeholder recipe 채우지 않는다.
+3. "미커버" 페르소나 (sentiment·news) 는 빈 폴더 + README 로 *명시*. 있는 척 placeholder recipe 채우지 않는다.
 
 ## id 형식
 

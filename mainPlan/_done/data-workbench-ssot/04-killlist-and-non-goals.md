@@ -1,4 +1,4 @@
-# 04. 킬리스트 · 비목표 · 정직 TTL
+# 04. 킬리스트 · 비목표 · 차등 TTL
 
 상태: 경계 PRD v0.1. "다 SSOT 로 모은다"가 *전면 재작성*으로 번지는 것을 차단.
 
@@ -11,7 +11,7 @@
 - ❌ **duckdb-wasm 엔진을 fetch 코어에 병합.** duckdb 는 SQL 엔진(httpfs 로 HF parquet 직독) — 성격이 다르다. *오리진 레지스트리에서 URL 만 가져오게* 정렬할 뿐, 쿼리 경로를 코어로 흡수하지 않는다.
 - ❌ **공개 플로어에 서버 도입.** 퍼블릭은 서버 0 정적 유지. `localApi` 오리진은 로컬 어댑터만 등록(공개 호출 시 throw = 배선순서 가드).
 - ❌ **단일 글로벌 캐시 인스턴스(싱글턴 전역).** 어댑터당 인스턴스(런타임 생명주기에 묶음). 전역 싱글턴은 테스트 격리·다중 런타임(soft-swap)에서 오염.
-- ❌ **모든 데이터 일괄 동일 TTL.** 신선도 데이터까지 길게 캐시하면 stale 회귀. 오리진별 차등(아래 §정직 TTL).
+- ❌ **모든 데이터 일괄 동일 TTL.** 신선도 데이터까지 길게 캐시하면 stale 회귀. 오리진별 차등(아래 §차등 TTL).
 - ❌ **새 캐시/fetch 라이브러리 도입.** 이미 있는 RuntimeCache·RequestDedup·cacheStore·fetchResilient 로 충분. 외부 의존 추가 금지.
 - ❌ **백엔드(Python) 데이터 파이프라인 손대기.** 본 PRD 는 UI 런타임 한정. HF=SSOT·CI consolidation 은 별도(`feedback_terminal_hf_ssot_local_compute`).
 - ❌ **SvelteKit Remote Functions(`query`/`form`/`command`) 도입.** 서버 런타임을 요구하는데 퍼블릭·로컬 둘 다 `@sveltejs/adapter-static`(서버 0, 정적 빌드)다 — 동적 remote function 은 작동 자체가 불가. 채택 시 "퍼블릭 서버 0 floor" 정면 위반(서버 티어 신설 강제). 타입세이프 server-call 은 이미 contracts 포트가 제공하고, remote 는 포트/어댑터와 경합하는 *세 번째 데이터 패러다임*이라 SSOT 역행. `prerender`(빌드타임) 모드조차 기존 HF 프리빌드+landing JSON 과 겹쳐 이득 0. (2026-06-17 운영자 질의·adapter 실측 확정 → 재론 금지.)
@@ -23,7 +23,7 @@
 - ⏸ **캐시 메트릭/관측(hit/miss/evict 카운터)** — 코어에 hook 자리만 두고, 대시보드화는 후속.
 - ⏸ **cross-session 영속 캐시(IndexedDB) 확장** — 현 cacheStore(landing JSON) 범위 유지. parquet 메타까지 영속화는 후속.
 
-## 3. 정직 TTL 정책 (오리진별 — 일괄 금지)
+## 3. 차등 TTL 정책 (오리진별 — 일괄 금지)
 
 | 데이터 | TTL | 왜 |
 |---|---|---|
@@ -36,7 +36,7 @@
 
 **원칙**: 캐시는 *정확성*을 해치면 안 된다. "신선도 라벨이 붙은 데이터"는 짧은 TTL 이 기본. 길게 캐시할 것과 짧게 할 것을 오리진 정의에 명시하고, 의심스러우면 짧게.
 
-## 4. 정직 한계 (이 PRD 가 *해결하지 않는* 것)
+## 4. 한계 (이 PRD 가 *해결하지 않는* 것)
 
 - 뉴스가 dev 에서 안 뜨는 것은 워커 정책(private 저작권)이라 공통배선으로 못 푼다 — 본 PRD 는 *호출 경로 일원화*까지(데이터 가용성 정책은 불변).
 - 공시뷰어 격자(panel)는 진짜 로컬 전용(공개도 단계-6 notWiredYet) — `localApi` 게이트로 *모으되* 공개화하지 않는다.

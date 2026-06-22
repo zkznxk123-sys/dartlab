@@ -36,8 +36,8 @@
 |---|---|---|
 | `panel`·`finance`·`select`·`trace`·`diff` | **표면+데이터 미러** | [보고] |
 | `disclosure`/`liveFilings`/`readFiling`/`filings` | **미러** | [보고] |
-| `analysis`/`quant`/`macro`/`story` | **[정정] 표면 미러 / 계산 KR가정(정직 None)** | [확인] `_revenueSelect.py:110` US면 `return None`; story `sixAct._sectorScore`→KR `industry()` graceful None |
-| `credit` | **⛔ [정정] 회색지대 — 침묵 KR-garbage** | [확인] market 가드 0, `sectorThresholds.py:85` `sector None→_defaultThresholds()`(KR) → US 숫자 non-None 가짜 등급. `_revenueSelect`(정직 None)와 비대칭 — Slice1 가드 필수 |
+| `analysis`/`quant`/`macro`/`story` | **[정정] 표면 미러 / 계산 KR가정(명시 None)** | [확인] `_revenueSelect.py:110` US면 `return None`; story `sixAct._sectorScore`→KR `industry()` graceful None |
+| `credit` | **⛔ [정정] 회색지대 — 침묵 KR-garbage** | [확인] market 가드 0, `sectorThresholds.py:85` `sector None→_defaultThresholds()`(KR) → US 숫자 non-None 가짜 등급. `_revenueSelect`(명시 None)와 비대칭 — Slice1 가드 필수 |
 | `search`/`listing`/`notes`(wrapper) | **미러** | [보고] |
 | `report` 메서드 | **[정정] 미러됨 (XBRL `_ReportAccessor`)** — EXEMPT는 *DART OpenAPI report 17 apiType*에 한정 | [확인] `company.py:3798 def report` |
 | `scan(market="us")` | **라이브 13축 dispatch** (11 XBRL + account/ratio). changes/shares/docsIndex 축 미라우팅(`return None`) | [확인] `router.py:306-334` |
@@ -82,5 +82,5 @@
 2. **L1 라이브러리**: 비대칭 missing 5건(baseline 원장, P-PR 트랙)·테스트 **이미 존재**. 진짜 갭 = analysis/credit/quant/story **KR 계산가정**(별도 트랙) + scan 보조축 dispatch.
 3. **L2 계약/런타임**: resolveMarket **priority-비대칭** 재설계. 6포트 market + **호출부 전수 전달**(code만 넘김). 식별자 매핑(code↔cik↔ticker) 데이터 소스.
 4. **L3 소스**: adapter source + **scan duckSql·landing browser·viewer 백엔드**까지. EXEMPT=throw(notWiredYet) 관례.
-5. **L4 서피스**: 4 surface US + EXEMPT 정직(빈 항목 카운트 노출) + 식별자 표시.
+5. **L4 서피스**: 4 surface US + EXEMPT 명시(빈 항목 카운트 노출) + 식별자 표시.
 6. **L5 제품**: 시장 스위처. 무회귀.

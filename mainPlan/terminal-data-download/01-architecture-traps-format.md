@@ -35,7 +35,7 @@
 
 `subject==='index'` 일 때 `CenterStack.svelte`(`ui/packages/surfaces/src/terminal/panels/CenterStack.svelte`)가 `rt.index.series` 를 *같은 `candles` prop* 에 싣는다(PriceChart 마운트 `:477`). 그래서 `getDataList()` 는 *비어 있지 않은 전체 지수 시계열*을 반환 — CSV 가 생성되지만 `GOV_ATTRIBUTION`(`contracts/price.ts:23`, KRX 주가 출처)으로 *지수 위에* 오라벨된다.
 
-**해소**: 빈값이 아니라 **명시 `subject!=='index'` 게이트**(출처-정직 제외). index 데이터는 prop 으로 실제로 존재하므로 "빈 CSV 라서 안 됨"이 아니라 "출처 불일치라서 막음"이 정직한 이유.
+**해소**: 빈값이 아니라 **명시 `subject!=='index'` 게이트**(출처 불일치 제외). index 데이터는 prop 으로 실제로 존재하므로 "빈 CSV 라서 안 됨"이 아니라 "출처 불일치라서 막음"이 맞는 이유.
 **테스트**: index 차트 + 비어 있지 않은 `rt.index.series` → 버튼 *미렌더*.
 
 ### 함정 4 — Heikin-Ashi 합성봉 + 리플레이 절단 (두 fork) · 확정 = DISABLE

@@ -42,7 +42,7 @@
 - **★로컬 어댑터는 셋 다 이미 배선됨**: `createLocalRuntime.ts` — `services: createServiceRegistry([exportServiceRegistration(...)])`, `storage: localStoragePort()`, `navigation: options.navigation`(셸 주입). 즉 *로컬에선* 함수문법·워치리스트-via-포트가 **오늘 당장 가능**.
 - **단 퍼블릭 미배선 + 터미널 surface 미소비(C 맞음)**: `createPublicRuntime.ts` 는 `services`/`navigation`/`storage` getter 가 전부 `notWiredYet(...)` throw. 그리고 **공유 터미널 surface 는 셋 중 무엇도 소비하지 않는다**(grep 0 — GO 는 raw `<input>`+search, 저장은 raw `localStorage` 4 키 패밀리 `dlTerm.lastSym`·`dlTerm.chart`·`dlTerm.tmpl`·`dlTerm.draw.{code}`). → 즉 같은 surface 가 로컬에선 포트를 쓸 *수* 있으나 아직 raw localStorage 만 쓴다.
 - **localStorage 구현체는 이미 존재(단 storage getter 미배선)**: `localStoragePort()` 구현체가 퍼블릭에서 이미 *export* 포트에 소비됨(`createPublicRuntime.ts:161` `export: publicExportPort(localStoragePort(), ...)`) — 즉 구현체는 있으나 `storage` getter 는 여전히 `notWiredYet` throw(`:178`). "storage 가 배선됐다"는 아니고 "*구현체는 있고 storage getter 배선만 단계-4a-3 미완*".
-- **정직한 결론**: 함수문법·워치리스트 지속성은 **로컬에선 거의 무료(포트 배선됨)·퍼블릭에선 중간(getter 배선 + surface 소비)**. "신설 아님(계약·레지스트리·예시 커맨드·localStorage 구현체 존재) but 퍼블릭 공짜도 아님". **"배선만 하면 됨"은 퍼블릭 과소평가, "전부 신규 구축"은 과대평가.**
+- **실측 결론**: 함수문법·워치리스트 지속성은 **로컬에선 거의 무료(포트 배선됨)·퍼블릭에선 중간(getter 배선 + surface 소비)**. "신설 아님(계약·레지스트리·예시 커맨드·localStorage 구현체 존재) but 퍼블릭 공짜도 아님". **"배선만 하면 됨"은 퍼블릭 과소평가, "전부 신규 구축"은 과대평가.**
 
 → 함의: 섹션 점프(1)는 ServicesPort 를 *쓸 수도* 있으나(로컬 배선됨), 본질은 검색 한 겹 확장이라 ServicesPort 를 *강제 의존*하지 않는다(퍼블릭에서도 동작해야). 워치리스트(02)는 StoragePort 정합하되 가치가 의존하지 않는다(퍼블릭 floor = raw localStorage). 2 타깃 차이는 §7.
 
@@ -53,7 +53,7 @@
 - **모든 신설은 `ui/packages/surfaces/src/terminal/`** (라이브 터미널 SSOT — 2026-06 `landing/src/lib/terminal/` → 이관 완료, scenario-simulator 07 §5).
 - **워치리스트**: `LeftRail` 신규 패널 + 헤더 ☆ 토글 + `terminal.watchlist` 상태. 데이터 = 가격·재무칩 기존 포트(신규 0) + **공시 신선도 = `dart/allFilings/recent.parquet` cross-company 리더(신규 FilingPort 메서드 1, 02 §5 데이터 계약)**. 신규 데이터셋·인프라 0.
 - **섹션 점프**: `TerminalSurface` 의 `go`/`onInput`/`suggest` 확장 + 각 패널의 탭/스크롤 타깃 식별자. 신규 컴포넌트 최소.
-- **포트 원칙 정합**(ui-platform-refactor): 새 포트 남발 금지. required·silent fallback 금지·미지원=정직(null/throw). 워치리스트가 StoragePort 를 쓰면 그 배선은 ui-platform-refactor 단계-4a-3 과 한 묶음.
+- **포트 원칙 정합**(ui-platform-refactor): 새 포트 남발 금지. required·silent fallback 금지·미지원=명시(null/throw). 워치리스트가 StoragePort 를 쓰면 그 배선은 ui-platform-refactor 단계-4a-3 과 한 묶음.
 
 ---
 
@@ -107,5 +107,5 @@
 **★설계 원칙 — 퍼블릭 floor 에 설계, 로컬은 같은 포트로 bonus:**
 - 워치리스트·섹션점프는 **퍼블릭 floor**(raw localStorage·HF·포트 미배선)에서 *완전히 동작*하게 설계한다. 퍼블릭이 대다수 사용자(landing = 영구 공개 shell).
 - 로컬의 *배선된 포트* + *live 백엔드*는 **같은 코드가 켜는 bonus headroom**이다(예: StoragePort 가 로컬에선 풍부한 store, 퍼블릭에선 localStorage — surface 는 `runtime.storage` 만 호출). **local-only 기능 금지**(ui-platform-refactor "열화 UX 숨김 금지·port required·silent fallback 금지").
-- 따라서 "퍼블릭 서버 0 → 푸시 불가"(02 §6)는 **floor 의 정직 한계**지 로컬을 부정하는 게 아니다. 로컬 백엔드로 *진짜 모니터/알림*을 켤지는 — static 프런트라 여전히 푸시 불가 + local-only 위험 — **별도 판단 항목**(06 NEXT)이고 본 PRD 는 floor 에 설계한다.
+- 따라서 "퍼블릭 서버 0 → 푸시 불가"(02 §6)는 **floor 의 실제 한계**지 로컬을 부정하는 게 아니다. 로컬 백엔드로 *진짜 모니터/알림*을 켤지는 — static 프런트라 여전히 푸시 불가 + local-only 위험 — **별도 판단 항목**(06 NEXT)이고 본 PRD 는 floor 에 설계한다.
 - 데이터 천장도 다름: 로컬은 live dartlab(custom compute) vs 퍼블릭 precomputed HF. 단 이는 *분석 tier*(fin-stmt-lab·simulate 소유)이지 본 PRD(워치/모니터)의 범위 아님 — 워치리스트는 *양쪽 다 있는* price·filing·report 포트만 쓴다.

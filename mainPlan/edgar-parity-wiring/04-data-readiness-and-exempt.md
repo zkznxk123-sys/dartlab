@@ -15,7 +15,7 @@
 | scan/docsIndex | `buildEdgarDocsIndex` 함수 존재하나 [정정] **EDGAR 비기능**(`panelTextRows` marketNs=kr 고정→dart panel만) | ⬜ marketNs/extractor 주입(4-함수) |
 | scan/changes | panel contentRaw 파생 | ⬜ item 경계 개념검증 선행 |
 | scan/sharesOutstanding | `dei:` **단일 스냅샷 1값**(KR 17-col 불가) | ⚠ 부분 EXEMPT |
-| analysis/quant/story | XBRL·yfinance·FRED | ⚠ 표면 미러 / 계산 KR가정(`_revenueSelect.py:110`=정직 None) |
+| analysis/quant/story | XBRL·yfinance·FRED | ⚠ 표면 미러 / 계산 KR가정(`_revenueSelect.py:110`=명시 None) |
 | **credit** | XBRL leverage/cashflow | ⛔ [확인] **침묵 KR-garbage**(market 가드 0, `sector None→_defaultThresholds()` KR → US 숫자 non-None 가짜 등급). Slice1 가드 필수(S1-L4.3) |
 | ticker↔CIK 매핑 | `edgar/tickers` [확인] **DATA_RELEASES 미등록** | ⬜ HF publish(S0.2) |
 | search (공시 본문) | `edgarPanel` 검색 카탈로그 | [보고] 통합 BM25 live |
@@ -30,11 +30,11 @@
 | `report` 17 apiType | 영구 EXEMPT | **[확인] EDGAR 14 추출기 작동**(`reportAccessor._SUPPORTED`) | scan bake + DEF14A 2파서 + 메서드 배선(분류 A 대부분) |
 | `sector`/`rank` | 영구 EXEMPT | **[확인] SIC bulk 존재**(`datasetBulk.py:75`) | SIC→US sector crosswalk + peer 계산(B/A). GICS만 라이선스(D) |
 | `network` | 영구 EXEMPT | Exhibit 21·13D/G·13F 출처 명확 | 신규 파서 + US-native 재정의(B/C) |
-| `industry` 가치사슬 | 영구 EXEMPT | 분류=SIC(B) / **엣지=major-customer 부분(C/D)** | 분류 채움 / 엣지만 부분·정직 빔 ← **유일 진짜 잔여** |
+| `industry` 가치사슬 | 영구 EXEMPT | 분류=SIC(B) / **엣지=major-customer 부분(C/D)** | 분류 채움 / 엣지만 부분·비워 둠 ← **유일 진짜 잔여** |
 | `sharesOutstanding` | 부분 EXEMPT | **[확인] XBRL ~6col**(authorized/issued/outstanding/treasury/preferred) | XBRL 개념 확장(A/B) |
 | `executivePay`/`relatedPartyTx` | missing | executivePay 추출기 有·relatedPartyTx=10-K Item13/ASC850 | 배선+DEF14A(C)/파서(B) |
 
-**→ 진짜 영구 빔(D/불가) = US 가격(라이선스)·가치사슬 *엣지*(부분)·전임원 보수(US=NEO5)뿐. 나머지는 채운다.** "정직하게 빈다"는 이 소수에만 — 가짜 채움 금지는 유지하되 *채울 수 있는데 안 채우는 게으름*도 금지(챌린지 핵심).
+**→ 진짜 영구 빔(D/불가) = US 가격(라이선스)·가치사슬 *엣지*(부분)·전임원 보수(US=NEO5)뿐. 나머지는 채운다.** 비우는 처리는 이 소수에만 — 가짜 채움 금지는 유지하되 *채울 수 있는데 안 채우는 게으름*도 금지(챌린지 핵심).
 
 **처리 철학(00 §1.1)**: 채운 데이터는 US 출처 라벨(SIC-derived·Exhibit 21·DEF 14A NEO5), KR 등가 주장 금지. 진짜 빈 소수는 커버리지/한계 명시.
 
@@ -56,11 +56,11 @@
 > [정정] **2태그는 현재 코드에 없음** — `providerSymmetry.json`은 평면 `missing[]` + 코드 상수 `_DART_ONLY`(permanent만)/`_EDINET_DEFERRED`뿐. permanent/dataWaiting 구분은 *구현 작업*(baseline JSON에 키 분리 or `_SYMMETRY_MAP` 태그 dict). "설계 의도"이지 "현존 구조" 아님.
 
 ### 3.5 ★회색지대 — EXEMPT도 정상도 아닌 제3 분류 ([확인] R2 P0)
-analysis/credit/quant/story는 *호출은 되나 계산이 KR 가정*. **EXEMPT(비활성·정직 빈)와 다르다** — 화면에 *뜨는데 틀린다*. 특히 credit은 [확인] 침묵 KR-garbage(§1). Slice1 처리(S1-L4.3): (a) `market!="KR"→None`/EXEMPT 가드 or (b) "계산 미검증·KR기준" 경고 배지. **EXEMPT 카운트와 별개 "계산 미정합" 분류로 노출** — 사용자가 "빈 화면(EXEMPT)"과 "틀린 숫자(회색지대)"를 가리게. credit 가드=필수. **`_DART_ONLY` allowlist가 이 4엔진을 비대칭 검사에서 제외**하므로 symmetry 게이트로 안 잡힘 → 별도 oracle 필요.
+analysis/credit/quant/story는 *호출은 되나 계산이 KR 가정*. **EXEMPT(비활성·비워 둠)와 다르다** — 화면에 *뜨는데 틀린다*. 특히 credit은 [확인] 침묵 KR-garbage(§1). Slice1 처리(S1-L4.3): (a) `market!="KR"→None`/EXEMPT 가드 or (b) "계산 미검증·KR기준" 경고 배지. **EXEMPT 카운트와 별개 "계산 미정합" 분류로 노출** — 사용자가 "빈 화면(EXEMPT)"과 "틀린 숫자(회색지대)"를 가리게. credit 가드=필수. **`_DART_ONLY` allowlist가 이 4엔진을 비대칭 검사에서 제외**하므로 symmetry 게이트로 안 잡힘 → 별도 oracle 필요.
 
 ## 4. ★sector 결정 [정정 v0.4] — SIC-derived는 범위 안
 - [확인] SIC가 EDGAR bulk에 존재(`datasetBulk.py:75`) → **SIC→US sector crosswalk(자체 공개 분류)는 본 PRD Slice2 범위**. rank=그 위 peer 백분위(scan-finance 재사용).
-- **GICS만 범위 밖**(MSCI 라이선스, 재배포 불가=분류 D). "GICS 섹터"라 라벨 금지 — "SIC-derived sector"로 정직 라벨.
+- **GICS만 범위 밖**(MSCI 라이선스, 재배포 불가=분류 D). "GICS 섹터"라 라벨 금지 — "SIC-derived sector"로 라벨.
 
 ## 5. Kill-List [정정 v0.4] (진짜 안 하는 것 — 채울 수 있는 건 채운다)
 1. **가치사슬 *엣지* 합성** — major-customer 공시 없는데 supplier→customer 관계를 지어냄(FactSet식). 분류=SIC로, 엣지=공시 기반 부분만(저커버리지 라벨).

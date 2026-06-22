@@ -24,7 +24,7 @@
 - dev(로컬 앱)는 :8400 백엔드 없이 정적 HF 로 떠야 정상. /api(localApi 오리진)는 진짜 로컬 전용
   (라이브 provider·AI SSE·공시뷰어 격자)만. 로컬 전용 호출은 adapters/local/api 게이트 한 곳에만 둔다.
 
-### 정직 캐시
+### 차등 캐시
 - 오리진별 TTL 차등. 신선도 데이터(recent.parquet·naver fresh tail)는 짧은/무 TTL. 일괄 캐시 금지.
 
 ### 신규 추가 규칙 (ad-hoc 패치 금지)

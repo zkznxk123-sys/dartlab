@@ -41,7 +41,7 @@
 
 ---
 
-## 4. 제품 원칙 (정직 룰 전체 SSOT = [04 §3](04-data-readiness-kill-list.md))
+## 4. 제품 원칙 (한계 표기 규칙 전체 SSOT = [04 §3](04-data-readiness-kill-list.md))
 
 1. **배선이 먼저, 신규가 다음.** 묻어둔 *함수*(HHI·hop2·summary·timeline)를 Industry verb·화면에 꽂는 게 1순위(lifecycle·recipe 층은 이미 live). 새 메커니즘은 그 위에 최소한으로.
 2. **하나의 킬러.** profit-pool 격자 하나에 집중한다. Porter 5힘 전체를 점수표로 박지 않는다(정성 force를 가짜 정량으로 만드는 fake precision).
@@ -67,5 +67,5 @@
 ## 6. 범위·성공 기준 요약
 
 - **범위**: Phase A(profit-pool) → B(공급망 evidence) → C(백분위 통일). 각 Phase는 선결조건순(05 문서). 위생 작업(유령 API 청소·edges.json 재빌드)은 해당 Phase 선결.
-- **성공 기준**: "이 산업의 이익은 어느 단계가 버나"가 한 화면에서 답해진다 + 묻어둔 능력이 런타임에서 질의된다 + 백분위가 단일 정의로 수렴한다 + 모든 숫자가 정직 라벨(상장사 기준·coverageRatio·source/confidence)을 단다. **헤드라인 지표가 "세계 메커니즘 N종 구현"이면 이미 실패.**
+- **성공 기준**: "이 산업의 이익은 어느 단계가 버나"가 한 화면에서 답해진다 + 묻어둔 능력이 런타임에서 질의된다 + 백분위가 단일 정의로 수렴한다 + 모든 숫자가 라벨(상장사 기준·coverageRatio·source/confidence)을 단다. **헤드라인 지표가 "세계 메커니즘 N종 구현"이면 이미 실패.**
 - **비-목표**: Porter 5힘 종합 스코어카드, moat 등급, TAM/SAM/SOM, 시장점유율, operational KPI 대시보드, 컨센서스. (04·05 킬리스트)

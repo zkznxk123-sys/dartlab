@@ -41,7 +41,7 @@
 4. 가격축을 왜곡하지 않는다. 공시 점은 별도 레일에 표시한다.
 5. 정기공시와 비정기공시는 같은 점 체계로 보이되, 색·라벨로 구분한다.
 6. 같은 날짜 다중 공시는 점 여러 개가 아니라 count 배지 하나로 접는다.
-7. 없는 데이터를 포장하지 않는다. allFilings recent 범위 밖은 "최근 비정기공시 범위"로 정직하게 표시한다.
+7. 없는 데이터를 포장하지 않는다. allFilings recent 범위 밖은 "최근 비정기공시 범위"로 명시한다.
 
 ## 1.5 현재기준 정합 + 설계 확정 (공통배선 이후 — 본 절이 경로·아키텍처·타입·스코프 SSOT)
 
@@ -90,7 +90,7 @@ export function requestDisclosureFocus(rceptNo: string) { disclosureFocus.rceptN
 ### 1.5.6 ★로컬/퍼블릭 공동배선 (운영자 우선순위)
 레일은 `rt.filing.regular`+`rt.filing.nonRegular` 만 소비 → **4 구현 전부 rceptNo 보유, 어댑터 변경 0**:
 - **public**(static·브라우저 parquet): regular/nonRegularFilingsSource, rceptNo 보존. **변경 0**.
-- **local**(:8400): `adapters/local/sources/filingSource.ts` — regular=panel init `dartUrlByPeriod` 에서 rceptNo 파싱, nonRegular=`/api/dartlab/price-events`. **변경 0**. (정직: local nonRegular=30 cap·price-events 파생이라 밀도 < public — "범위" 라벨 반영, 패리티 위장 금지.)
+- **local**(:8400): `adapters/local/sources/filingSource.ts` — regular=panel init `dartUrlByPeriod` 에서 rceptNo 파싱, nonRegular=`/api/dartlab/price-events`. **변경 0**. (local nonRegular=30 cap·price-events 파생이라 밀도 < public — "범위" 라벨 반영, 패리티 위장 금지.)
 - **ui/web bridge**(`ui/web/.../localTerminalData.ts`): 동일 filing 구현. 신규 포트 메서드 0 → **변경 0**(§5.1 ui/web optional-method 후보 = 무의미·삭제).
 - **fake**(`adapters/test/createFakeRuntime.ts`): regular 1행 있음, **nonRegular `[]` → fixture 1~2행 추가**(005930·fixture candle 날짜대 `20260601~05`)로 다중공시일·on-or-after 매핑 surface 테스트. **유일 어댑터 편집**.
 - 포트 메서드 신설 0(§5.1 `localAdapter.ts disclosureEvents?` 후보 = 기각 유지).

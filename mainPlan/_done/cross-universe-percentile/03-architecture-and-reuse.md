@@ -36,7 +36,7 @@ function quantileBand(vals: number[]): PercentileMetric['band'] { /* sort + inde
 co.percentile = percentileIn(code, 'industry');
 ```
 - `pctRank`(engine.ts:88) · `col` · lowerBetter 분기 전부 그대로. **로직 복제 0.**
-- `bandOf` 는 `raw.industryStats[node.industry]` 를 보므로 market/all 에선 자연히 null → 정직(00).
+- `bandOf` 는 `raw.industryStats[node.industry]` 를 보므로 market/all 에선 자연히 null → 그대로 표시(00).
 - 라벨: industry=`node.industryName`, market=`node.market`, all=`'전체상장사'`. 표본수 `n=peers.length`.
 
 ### `PercentileCrossDialog.svelte` — 신규

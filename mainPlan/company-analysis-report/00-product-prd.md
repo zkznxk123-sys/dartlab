@@ -12,7 +12,7 @@
 - KPI 카드 + 전월대비·전년동월 델타 칩
 - 손익분기/안전마진 게이지, 위험선("3/29 · 위험선 근접")
 - 리스크 / 예측 섹션
-- 정직 면책("자동 산출 · 신고 전 검토 필요", "마감 확정 데이터 기준")
+- 면책 안내("자동 산출 · 신고 전 검토 필요", "마감 확정 데이터 기준")
 
 콘텐츠는 그 중소기업 내부 관리보고서를 **dartlab 상장사 분석으로 격상**한다 — 같은 문서 골격, 훨씬 풍부하고 출처 추적되는 분석.
 
@@ -29,17 +29,17 @@ story 엔진(`src/dartlab/story/`, L3 조합기)은 하위 엔진(analysis·cred
 
 ## 3. 무게중심
 
-> **강함은 새 분석이 아니라 "갇힌 story 계산의 정직한 표면화"다.**
+> **강함은 새 분석이 아니라 "갇힌 story 계산의 표면화"다.**
 
-단 두 가지를 정직하게 못 박는다:
+단 두 가지를 명시한다:
 
-1. **표면화는 "거의 0 작업"이 아니다.** 정직하게는 (a) `renderJson` 직렬화를 **~70% 신규 확장**(현 출력 = `stockCode/corpName/sections` 3키 + summaryCard/circulationSummary, [`formats.py:493-507`](../../src/dartlab/story/formats.py#L493) 실측), (b) 11 관점을 manifest 정적 config 위 **결정론 클라 투영**으로 렌더, (c) **honest-skip reject-gate** 를 bake 에 박는 *배선 + 직렬화 확장* 작업이다.
+1. **표면화는 "거의 0 작업"이 아니다.** 실제로는 (a) `renderJson` 직렬화를 **~70% 신규 확장**(현 출력 = `stockCode/corpName/sections` 3키 + summaryCard/circulationSummary, [`formats.py:493-507`](../../src/dartlab/story/formats.py#L493) 실측), (b) 11 관점을 manifest 정적 config 위 **결정론 클라 투영**으로 렌더, (c) **honest-skip reject-gate** 를 bake 에 박는 *배선 + 직렬화 확장* 작업이다.
 
-2. **정직 토대는 `블록→rcept_no` ref 회로가 아니다.** 그 회로는 story 엔진에 **존재하지 않는다**(blocks.py 6 dataclass 에 출처 ref 필드 0, `EnrichedFlag.reference` 는 학술 출처일 뿐 — [`blocks.py:48-57`](../../src/dartlab/story/blocks.py#L48)). "모든 숫자→rcept 묶임"은 story 속성이 아니라 `ai/agent.py` Workbench 의 것이다. 보고서 1차의 정직 토대는 **3중 부분 회로**:
+2. **근거 토대는 `블록→rcept_no` ref 회로가 아니다.** 그 회로는 story 엔진에 **존재하지 않는다**(blocks.py 6 dataclass 에 출처 ref 필드 0, `EnrichedFlag.reference` 는 학술 출처일 뿐 — [`blocks.py:48-57`](../../src/dartlab/story/blocks.py#L48)). "모든 숫자→rcept 묶임"은 story 속성이 아니라 `ai/agent.py` Workbench 의 것이다. 보고서 1차의 근거 토대는 **3중 부분 회로**:
    - ① `sixActScore.evidence` — 축별 `evidenceIds`(예: `analysis:insights:grades`, `credit:distress`, `quant:valuation`), [`sixAct.py:44`](../../src/dartlab/story/sixAct.py#L44).
    - ② 블록별 `sourceEngine` 라벨 — 어느 dartlab 엔진(panel/analysis/credit/quant/industry/macro)이 계산했는가. **신규 정적 catalog 필드**(03문서 §sourceEngine).
    - ③ `narrate._classify` 결정론 레이블 — 값→임계 위치어휘.
-   - 풀 `블록→rcept_no` 역배선(100+ 블록이 DART 공시 줄까지 운반)은 **정직하게 계상한 신규 후속 트랙(P4+)**, P0 필수 아님.
+   - 풀 `블록→rcept_no` 역배선(100+ 블록이 DART 공시 줄까지 운반)은 **명시된 신규 후속 트랙(P4+)**, P0 필수 아님.
 
 ## 4. 차별화 — 왜 90점인가
 
@@ -50,16 +50,16 @@ story 엔진(`src/dartlab/story/`, L3 조합기)은 하위 엔진(analysis·cred
 | 숫자 출처 불명 | 블록별 `sourceEngine` 라벨 + evidenceIds 칩 + 섹션→공시뷰어 핸드오프 링크 |
 | 판정어휘 톤 | raw 블록(표/지표)을 본문 1차, `narrate` 판정 프로즈 미호출. 단정형용사 → C-2 변환표로 측정값+자기이력분위 치환 |
 | 관점 뒤섞임 | 1보고서 = 1관점 lock, emphasize ★만, 헤더 관점 명시, 타관점 섹션 import 금지 |
-| 한계 은폐 | 결손 섹션 = 정직 라벨("데이터 부족 — 생략"), 발행불가 관점 = dim, 0-fill/impute 금지 |
+| 한계 은폐 | 결손 섹션 = 한계 라벨("데이터 부족 — 생략"), 발행불가 관점 = dim, 0-fill/impute 금지 |
 | 닻 없는 점추정 | 예측 섹션 = 결정론 회귀 + `calcPlausibilityBand` 동반("추정" 명시), 궤적/what-if = scenario-sim 링크 |
 
-= 일반 AI 리포트와의 비대칭: **모든 단정이 측정값+분위+출처로 풀리고, 풀리지 않는 문장은 렌더 거부된다(닫힌 정직 루프).**
+= 일반 AI 리포트와의 비대칭: **모든 단정이 측정값+분위+출처로 풀리고, 풀리지 않는 문장은 렌더 거부된다(닫힌 검증 루프).**
 
 ## 5. 간판 5기능 (요약 — 상세 02문서)
 
 1. **단일 reportPayload bake + 발행가능 관점 결정론 클라 투영** — 회사당 1 payload(full detail), 11 관점(full 포함·thesis 제외)은 정적 config 투영(12배 bake 폭발 회피). 신규 fetch 0.
 2. **sixActScore evidenceIds 신규 표면화** — `EvidenceStrip`(점수 비노출, coverage[ready/missing] + evidenceIds 칩만). 축②(근거완전성)의 1차 천장.
-3. **honest-skip reject-gate** — 데이터 빈약 회사는 *안 굽는다*. 클라 404 → "데이터 부족 — 보고서 미생성(사유)". 약한 발행 < 정직 스킵.
+3. **honest-skip reject-gate** — 데이터 빈약 회사는 *안 굽는다*. 클라 404 → "데이터 부족 — 보고서 미생성(사유)". 약한 발행 < 발행 거부.
 4. **`@media print` + `window.print()` zero-dep PDF** — jspdf/html2canvas 금지(무겁고 한글 깨짐). 다크 터미널 → 화이트 A4 문서 토큰 재바인딩.
 5. **섹션→공시뷰어 딥링크(90점 레버)** — 핵심 5막 섹션 헤더에 "원문 보기" → `ViewerOverlay` 가 섹션 대표 `rcept_no` 본문으로(섹션당 1개). 측정값→원문 공시 줄의 마지막 한 홉(신용/포렌식 독자 88→90+). 신규 *엔진* 0(뷰어 본체·데이터 재사용), 신규 *배선* = `ViewerOverlay` rcept 타깃 prop 1개 + 본문 스크롤(현재 code/vs만 받음, P2). 외부 DART floor 링크는 즉시 가능.
 
@@ -68,7 +68,7 @@ story 엔진(`src/dartlab/story/`, L3 조합기)은 하위 엔진(analysis·cred
 1. **종합점수/레이더 화면 노출 금지.** `SixActScore` 는 6축 0~100 종합점수 레이더([`sixAct.py:1-15`](../../src/dartlab/story/sixAct.py#L1))다 — 보고서는 *점수를 빼고* 축별 coverage + evidenceIds 칩만 노출. 7축 품질점수도 내부 발행게이트 전용·화면 비노출.
 2. **"세계급/유일/최고/최강/압도적/매수/매도/목표주가/강력추천" 금지** — 소스 토큰 grep + 생성 출력 claimGuard 이중게이트(둘 다 신규 구현, tests/audit 에 neverClaim 게이트 0개 실측).
 3. **관점 블렌딩 금지** — ReportType lock.
-4. **데이터 없는 섹션 억지 채움·0-fill·impute 금지** — 결측 = first-class, 정직 라벨.
+4. **데이터 없는 섹션 억지 채움·0-fill·impute 금지** — 결측 = first-class, 한계 라벨.
 5. **"발행가능 관점 N개" spike 전 단정 금지** — P0 spike 실측 산출.
 6. **회계사 서명·1인칭·모델명·"AI 가 생성" 금지** — 주체중립. 푸터 = "dartlab 엔진 자동생성 · 데이터 as-of · 모든 수치 출처 · 투자권유 아님".
 7. **외부 본문(공시/뉴스 sourceType=external) 마커 없이 본문화 금지** — `[EXTERNAL — untrusted]` 마커.

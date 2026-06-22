@@ -1,6 +1,6 @@
 # 01 · 현 상태 감사 — 가진 것 vs 표면화한 것 (실측)
 
-> 본 문서의 모든 file:line 은 이번 세션 grep/read 직접 검증. 워크플로 종합 청사진이 88점에서 막힌 이유는 **정직 토대 논거를 떠받치는 4개 사실이 코드와 어긋났기 때문**이며, 그 4건을 코드로 재검증해 정정한다(§4).
+> 본 문서의 모든 file:line 은 이번 세션 grep/read 직접 검증. 워크플로 종합 청사진이 88점에서 막힌 이유는 **근거 토대 논거를 떠받치는 4개 사실이 코드와 어긋났기 때문**이며, 그 4건을 코드로 재검증해 정정한다(§4).
 
 ## 1. story 엔진 — 가진 것 (검증됨)
 
@@ -39,7 +39,7 @@
 
 ## 4. ★검증된 사실 정정 4건 (심판 FATAL → 코드 재검증)
 
-워크플로 종합 청사진이 인용한 4개 "기존 자산 재사용" 논거가 **코드와 어긋났다.** 직접 grep/read 로 재검증해 정정한다. 이 4건이 PRD 정직 토대의 핵심이므로 명시 박제한다.
+워크플로 종합 청사진이 인용한 4개 "기존 자산 재사용" 논거가 **코드와 어긋났다.** 직접 grep/read 로 재검증해 정정한다. 이 4건이 PRD 근거 토대의 핵심이므로 명시 박제한다.
 
 ### F1 — 런타임 `Section` 엔 `act` 없으나 `SectionMeta`(catalog) `act` 실재 + manifest 이미 bake → **catalog act 직접 사용**
 
@@ -63,4 +63,4 @@
 
 ## 5. 정정의 함의
 
-이 4건의 결과로 **"검증된 자산의 표면화"라는 핵심 주장은 여전히 참이되 범위가 정직해진다**: story 엔진 콘텐츠·sixActScore.evidence·narrate 레이블·breakevenEstimate 등은 *실재*하고(표면화 대상), 그 위에 ① **catalog `SectionMeta.act` 사용**(파생 불필요·manifest 이미 bake) ② bake 의 sixActScore 직접호출(asDict 의 `score` 는 `_internalScore` 로 분리, 화면 미참조) ③ EvidenceStrip 신규 렌더 ④ sourceEngine 정적 catalog 필드 ⑤ **per-company 직렬화 확장**(섹션→blockKey 골격은 manifest 에 이미 baked = 25 섹션 `keys`; bake 는 *회사별 present 블록 + sourceEngine + emphasized* 만 신규 emit) = **명시된 신규 작업**을 정직 계상한다. "거의 0 작업"·"이미 다 있음"이라는 과장은 폐기.
+이 4건의 결과로 **"검증된 자산의 표면화"라는 핵심 주장은 여전히 참이되 범위가 명확해진다**: story 엔진 콘텐츠·sixActScore.evidence·narrate 레이블·breakevenEstimate 등은 *실재*하고(표면화 대상), 그 위에 ① **catalog `SectionMeta.act` 사용**(파생 불필요·manifest 이미 bake) ② bake 의 sixActScore 직접호출(asDict 의 `score` 는 `_internalScore` 로 분리, 화면 미참조) ③ EvidenceStrip 신규 렌더 ④ sourceEngine 정적 catalog 필드 ⑤ **per-company 직렬화 확장**(섹션→blockKey 골격은 manifest 에 이미 baked = 25 섹션 `keys`; bake 는 *회사별 present 블록 + sourceEngine + emphasized* 만 신규 emit) = **명시된 신규 작업**을 있는 그대로 계상한다. "거의 0 작업"·"이미 다 있음"이라는 과장은 폐기.

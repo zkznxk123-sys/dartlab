@@ -1,6 +1,6 @@
-# 04 · 관점 매트릭스 + 참조HTML 골격 매핑 + C-2 정직변환표
+# 04 · 관점 매트릭스 + 참조HTML 골격 매핑 + C-2 변환표
 
-> 심판 G5(a)·G7 해소: C-2 정직변환표를 **행 단위로 실제 작성** + conclusion 1줄도 C-2 통과.
+> 심판 G5(a)·G7 해소: C-2 변환표를 **행 단위로 실제 작성** + conclusion 1줄도 C-2 통과.
 
 ## 1. 관점 → 보고서 템플릿 (정적 config, reportTypes.py 정본)
 
@@ -23,11 +23,11 @@
 | **dashboard** | 스냅샷 | 종합평가·수익구조·수익성·현금흐름·안정성·자본배분·가치평가 | 8질문 패턴 | 간결 |
 | ~~thesis~~ | — | **제외** — hypothesis 입력받아 sections 통째 교체([`registry.py:1574`](../../src/dartlab/story/registry.py#L1574) 근방) = 정적 투영 불가 | ask 워크벤치 전용 | — |
 
-★실제 **활성 표시되는 관점**은 `payload.meta.publishablePerspectives`(P0 spike 실측). 미충족 관점은 탭에서 dim + "이 회사는 [관점] 발행 기준 미달" 정직 라벨. **"11개 다 발행" 인상 금지**(NEVER-CLAIM).
+★실제 **활성 표시되는 관점**은 `payload.meta.publishablePerspectives`(P0 spike 실측). 미충족 관점은 탭에서 dim + "이 회사는 [관점] 발행 기준 미달" 표기. **"11개 다 발행" 인상 금지**(NEVER-CLAIM).
 
 ## 2. 참조HTML 골격 → story 섹션/블록 매핑
 
-참조(그랜터커머스 월간 경영성과 보고서)의 문서 골격을 dartlab 자산에 1:1 매핑. **구현 확인된 것 / 매핑되는 것 / 정직 스킵**을 구분.
+참조(그랜터커머스 월간 경영성과 보고서)의 문서 골격을 dartlab 자산에 1:1 매핑. **구현 확인된 것 / 매핑되는 것 / 생략**을 구분.
 
 | 참조HTML 섹션 | dartlab 매핑 | 상태 |
 |---|---|---|
@@ -37,7 +37,7 @@
 | 재무상태 | 안정성(`leverageTrend`·`distressScore` Altman Z) + 자금조달(liquidity) | 구현됨 |
 | 자금·현금흐름("운영 가용일수"·위험선) | 현금흐름(`cashFlowOverview`·`cashQuality`) + 자금조달(cashFlowStructure) | 구현됨 |
 | 월 비용 구조(고정/변동) | 비용구조 `costBreakdown` | 구현됨. ★costBreakdown SSOT **확정**(H6): 비율 블록(매출원가율·판관비율·DOL) = story/analysis 소유, 보고서가 렌더. periodic-dossier 의 *비용 성격별 raw 명세*(주석 행)는 dossier 소유 → 보고서는 **링크만**(동일 숫자 이중경로 금지) |
-| 세무 일정 | — | **정직 스킵**(상장사 분기보고서엔 무의미) |
+| 세무 일정 | — | **생략**(상장사 분기보고서엔 무의미) |
 | 리스크 | threads(severity) + flags + valuationSins | 구현됨 |
 | 예측 | 매출전망 `revenueForecast` + `calcPlausibilityBand` 동반("추정" 명시), 궤적/what-if = scenario-sim 링크 | 구현됨(닻 필수) |
 | 6막 헤더 | `getSectionMeta(key).act`→ACT_HEADERS (F1 재정정: catalog 기존 필드·manifest 이미 baked, `partId.split` 폐기) | 기존 필드 |
@@ -52,7 +52,7 @@
 - **분위** = **자기이력분위**(story-local 가능)만 1차. ★**유니버스분위는 fin-stmt-lab(L2) 소유** → story(L3)에서 호출 시 import 방향 위반 → 유니버스분위는 fin-stmt-lab 링크로 핸드오프(자체 계산 금지, 07 경계).
 - **출처** = 블록 `sourceEngine` 라벨 + evidenceIds 칩.
 
-## 4. ★C-2 정직변환표 (행 단위 — 정본 박제)
+## 4. ★C-2 변환표 (행 단위 — 정본 박제)
 
 참조HTML(및 narrate)의 **판정형용사**를 **측정값 + 자기이력분위 + sourceEngine** 으로 1:1 치환하는 변환표. 보고서 본문·conclusion 1줄 **모두** 이 표를 통과(G7 — conclusion 도 raw 판정어휘 금지).
 

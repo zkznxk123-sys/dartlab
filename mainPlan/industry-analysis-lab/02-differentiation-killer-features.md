@@ -2,7 +2,7 @@
 
 상태: 비전 PRD v0.2 (2026-06-14, 2차 대대적 조사·적대검증 반영)
 목적: ★이 PRD의 심장. 세계 제품이 답하지 못하는(또는 컨센서스/점유율 raw로만 답하는) 질문을 우리 자산으로 답하는 killer 3종. 각 가치 + 데이터 지원(file:line) + 가드레일.
-정직 룰 SSOT는 [04 §3](04-data-readiness-kill-list.md) (본 문서는 killer별 *고유* 가드만).
+한계 표기 규칙 SSOT는 [04 §3](04-data-readiness-kill-list.md) (본 문서는 killer별 *고유* 가드만).
 
 > real upgrade vs reskin 테스트: *"이 능력이 우리가 이미 신뢰하는 데이터로, 전에 답 못하던 질문을 답하게 하나?"* 아니오면 기각.
 
@@ -37,7 +37,7 @@
 
 **질문**: 이 공급사가 어느 *매출처*에 매출 몇 %를 의존하나(매출처 의존도)? 이 산업이 어느 산업에 2-hop 노출됐나?
 
-**세계 천장**: Bloomberg SPLC·Interos는 100k사 공급망을 *추정 알고리즘*으로 엮는다. 우리는 규모는 발끝에도 못 미치지만 **추정이 아니라 사업보고서 「주요 매출처/매입처」 본문 인용**이다 — 현대모비스→기아 91.4%, 현대글로비스→기아 96.9%가 그 예. ★단 이 ratio들은 `type=supplier`·`source=docs_table`, 즉 *공급사가 신고한 매출처 의존도*다(구매자 교섭력의 한 측면이지 customer 측 데이터가 아님). `type=customer` 엣지는 7건 전원 `ratio=None`이라 인용할 구매자측 ratio는 0건 — 우리가 정직하게 답하는 건 "supplier 매출처 의존도"까지다.
+**세계 천장**: Bloomberg SPLC·Interos는 100k사 공급망을 *추정 알고리즘*으로 엮는다. 우리는 규모는 발끝에도 못 미치지만 **추정이 아니라 사업보고서 「주요 매출처/매입처」 본문 인용**이다 — 현대모비스→기아 91.4%, 현대글로비스→기아 96.9%가 그 예. ★단 이 ratio들은 `type=supplier`·`source=docs_table`, 즉 *공급사가 신고한 매출처 의존도*다(구매자 교섭력의 한 측면이지 customer 측 데이터가 아님). `type=customer` 엣지는 7건 전원 `ratio=None`이라 인용할 구매자측 ratio는 0건 — 우리가 답할 수 있는 건 "supplier 매출처 의존도"까지다.
 
 **우리 우위**: edges.json이 ratio(매출처 의존도%, 전부 type=supplier 19건)·amount를 confidence/source와 함께 보유. `IndustryEdge` 객체는 amount/ratio를 들고 있는데 **`Industry.edges()` DataFrame이 두 컬럼을 select에서 누락**([__init__.py:359-371](../../src/dartlab/industry/__init__.py#L359)) — 노출이 select 2줄 추가가 전부. 묻어둔 `computeHop2`([hop2.py:32](../../src/dartlab/industry/build/hop2.py#L32))·`calcSupplyInsights`([insights.py:201](../../src/dartlab/industry/build/insights.py#L201)) *함수*를 런타임 인자로 배선(★단 산업 분석 *능력* 자체는 orphan 아님 — `recipes.industry.supplyChainConcentration`가 이미 RunPython으로 HHI 교섭력을 답한다, [03 §5.1](03-architecture-and-reuse.md)). 중복 신설 금지.
 
@@ -49,11 +49,11 @@
 **가드레일 (★빈곤을 화면 1급시민으로 — 과대포장 한 번이면 확신오정렬)**:
 1. **선결: edges.json 재빌드.** docstring precise 642 vs 실제 132·source 라벨(코드 panel_text/panel_table vs 디스크 docs/docs_table) 불일치 = 구버전 산출물. 재빌드 없이 surface하면 거짓 숫자. 별도 "정리: edges 재빌드" commit.
 2. **커버리지 빈곤 노출**: amount 132/18,418(0.7%)·customer 7건·ratio 19개. affiliate 70.5% 압도 → supplier/customer 필터 강제. ratio 없는 엣지 0채움/굵기 균일.
-3. **confidence/source 칩 의무**: docs_table(강한 단정)·network(출자)·docs(언급, 텍스트매칭 0.5~0.7 약). 2-hop은 confidence 곱셈 감쇠. ratio 캡션은 **"사업보고서 「주요 매출처/매입처」 공시 추출(supplier 의존도)"까지만** — US ASC 275 등 회계기준 권위 인용 금지(KR supplier 의존도에 갖다붙이면 규제척도 사칭). provenance 칩 자체가 "왜 추정 아닌 인용인가"를 정직히 수행한다.
+3. **confidence/source 칩 의무**: docs_table(강한 단정)·network(출자)·docs(언급, 텍스트매칭 0.5~0.7 약). 2-hop은 confidence 곱셈 감쇠. ratio 캡션은 **"사업보고서 「주요 매출처/매입처」 공시 추출(supplier 의존도)"까지만** — US ASC 275 등 회계기준 권위 인용 금지(KR supplier 의존도에 갖다붙이면 규제척도 사칭). provenance 칩 자체가 "왜 추정 아닌 인용인가"를 그대로 보여준다.
 4. **amount 단위 억원 + "추출 누락분 존재" 캡션.** amount-가중 전파는 비활성/명시(amount 132/3191=4.1%만, count 기반만 honest).
 5. **인과·미래예측 프레이밍 금지.** static 다양성/hop만(scenario-simulator 경계).
 
-> ⚠ 이 killer는 데이터 천장이 낮다(02 §빈곤). 임팩트가 작을 수 있고, 그게 정직한 평가다. "Bloomberg SPLC식"이라는 단어를 화면·문서에 쓰지 않는다.
+> ⚠ 이 killer는 데이터 천장이 낮다(02 §빈곤). 임팩트가 작을 수 있고, 그게 있는 그대로의 평가다. "Bloomberg SPLC식"이라는 단어를 화면·문서에 쓰지 않는다.
 
 ---
 
@@ -67,12 +67,12 @@
 
 **데이터 지원**:
 - 퍼블릭: 회사값을 industryStats p10~p90 밴드 위 마커로(읽기). compare로 funnel 링크.
-- 로컬: engine.ts industryPercentile([engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))를 industryStats 분포로 통일(또는 정의 일치) + `점유율`(marketShare) 전 소비처 정직 재라벨(→'상장사매출비중', 키 보존)·로컬 100 날조 값 제거([07 §구멍5](07-implementation-plan.md)).
+- 로컬: engine.ts industryPercentile([engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))를 industryStats 분포로 통일(또는 정의 일치) + `점유율`(marketShare) 전 소비처 재라벨(→'상장사매출비중', 키 보존)·로컬 100 날조 값 제거([07 §구멍5](07-implementation-plan.md)).
 
 **가드레일 (4선결)**:
 1. **percentile band만** — mean±std 박스 금지(std가 roe 86.44·opMargin 34.71 heavy outlier까지 = fake precision). mean 마커도 밴드 밖 자주 벗어나므로 percentile만.
 2. **n<10 *분포(metric)* 숨김 + "n=N" 노출.** (industryStats는 산업당 metric별 roe/opMargin/revCagr 독립 distribution이고 각자 n을 가짐 — 산업 단위 아님.)
-3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + `marketShare` 정직 재라벨**(전 소비처 '점유율'→'상장사매출비중', 키·metric 보존·로컬 100만 값 제거 — 라벨 사칭+로컬 날조 시정, §문제·[07 §구멍5](07-implementation-plan.md) 참조). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
+3. **'분포출처=industryStats(KSIC섹터·동일가중·상장 primary사, n=N) ≠ KRX 시총가중 업종지수' 라벨 + `marketShare` 재라벨**(전 소비처 '점유율'→'상장사매출비중', 키·metric 보존·로컬 100만 값 제거 — 라벨 사칭+로컬 날조 시정, §문제·[07 §구멍5](07-implementation-plan.md) 참조). 공식 업종지표는 외부 link-only(미러·reconcile 금지, [04 §3 #8](04-data-readiness-kill-list.md)).
 4. **SSOT 경계 명문화 선결**: industry = 섹터 분포 위 1점 읽기/깔때기, compare + financial-statement-lab = 큐레이션 peer 정밀 SSOT. 이 경계를 mainPlan 문서로 박기 전 코딩 금지(fin-stmt-lab PRD와 충돌이 아니라 de-risk).
 
 > 적대렌즈가 "또 하나의 백분위 패널 신설"을 kill했다. 이 killer가 생존한 유일한 이유는 **신규 계산이 아니라 표시층 통일 + inert dead 정리**이기 때문. 새 백분위 엔진을 만들면 그 순간 kill 대상으로 회귀한다.

@@ -195,7 +195,7 @@ commit: (이 변경의 커밋)
 - 계약 위생 결정: `Num` 1회 정의 수렴(옛 3중 재정의)·parquet 원어 행(한글 컬럼·snake)은 어댑터 내부 비밀로 계약 제외·Map→Record(JSON-safe)·port 메서드 전부 required·빈값 규약 주석 박제([]=해당없음 / null=미존재)·StoragePort 네임스페이스 키·잠정 표면(ScanTableSource/Preset·IndustryMapData)은 단계-8 전 확정 주석
 - 02 §3 스케치와의 의도적 발산(현실 우선): CompanyPort recent 메서드 제외(storage 키로)·MacroPort.getLatest() 무인자(실표면)·liveQuote 미포함(미실측 — 4a에서 추가). **02 §3 스케치는 초안 지위 — 확정 SSOT = contracts**
 
-검증: npm install 워크스페이스 등록 ✓ / tsc strict(noUncheckedIndexedAccess·verbatimModuleSyntax) exit 0 ✓ / 외부 import 0 (no-dependency 기계 확인) ✓ / fixture type conformance 는 fake runtime(단계-2 산출) 전제 — **단계-2로 이월(정직 기록)**  
+검증: npm install 워크스페이스 등록 ✓ / tsc strict(noUncheckedIndexedAccess·verbatimModuleSyntax) exit 0 ✓ / 외부 import 0 (no-dependency 기계 확인) ✓ / fixture type conformance 는 fake runtime(단계-2 산출) 전제 — **단계-2로 이월(기록)**  
 rollback: 이 commit revert (신설 파일만 — 기존 코드 무접촉).
 
 ### [9] 단계-2 ui/packages/runtime — 완료
@@ -239,7 +239,7 @@ commit: (이 변경의 커밋)
 변경 (3축):
 - **어댑터**: 로더 9종 git mv → `runtime/src/adapters/public/sources/`(priceSource·govPriceSource·financeSource·reportSource·macroSource·relationsSource·productIndexSource·regularFilingsSource·nonRegularFilingsSource — localTerminalAdapter fallback 가지 전부 절제, `$app/environment`→`typeof window`, 타입은 contracts 소비로 로컬 재정의 제거). createPublicRuntime 실구현 조립 — **shared 필수 주입 계약**(reportFacts=companyLive·changes=duckSql, landing 잔류라 의존 방향 보존) + viewer 포트 셸 주입. 옛 workbench price.initial 합성(gov∥recent 병합→seed→date 폴백)은 PricePort.initial 로 승격. filing.panel*(단계-6)·scan 프리셋류(단계-8)·navigation/storage/map/search/ai 는 명시 throw 게이트 유지. createRuntime kind 디스패처는 discriminated union 으로 개정. contracts 보강: GOV_ATTRIBUTION(price)·MACRO_SERIES+MACRO_ATTRIBUTION(macro) 상수 승격. govRecent·productIndex Map→Record(JSON-safe 계약 정합).
 - **landing**: 컴포지션 루트 `lib/runtime/publicRuntime.ts` 신설(getPublicRuntime 싱글턴 — route·scan 글루 전용, 컴포넌트는 컨텍스트). Terminal.svelte `runtime` 필수 prop + setDartLabRuntime 컨텍스트 배포. 패널 6종(CenterStack·RightStack·LeftRail·FinFullscreen·ViewerOverlay·SourcesModal)·PriceChart·finTabs(ReportPort 파라미터 주입)·routeLoad(warmup)·scan 2곳(Detail·+page) 호출부 전부 포트 치환. 차트 순수수학은 `charts/candleMath.ts` 분리(어댑터 아님). lastSymbol·warmup 신설. **workbench.ts·localAdapter.ts 삭제**. /terminal·/lab/terminal-dev 라우트가 runtime 주입.
-- **ui/web**: localTerminalData 를 **DartLabRuntime 재조립**(price/finance/company/filing(panel* HTTP 정규화기 — toc 메타 null 정직·sectionKey 파생)·report=null 정직·scan.changes=[]·viewer=external-url·macro=createHfMacroPort 명시 재사용). LandingTerminalSurface 가 runtime 을 mount prop 주입 — **`window.__DARTLAB_LOCAL_TERMINAL__` 전역 locator 철거**. landingDataShims.ts 삭제 + vite 데이터 alias 5종 제거. tsconfig paths 에 @dartlab 2종.
+- **ui/web**: localTerminalData 를 **DartLabRuntime 재조립**(price/finance/company/filing(panel* HTTP 정규화기 — toc 메타 null 명시·sectionKey 파생)·report=null 명시·scan.changes=[]·viewer=external-url·macro=createHfMacroPort 명시 재사용). LandingTerminalSurface 가 runtime 을 mount prop 주입 — **`window.__DARTLAB_LOCAL_TERMINAL__` 전역 locator 철거**. landingDataShims.ts 삭제 + vite 데이터 alias 5종 제거. tsconfig paths 에 @dartlab 2종.
 - **배포 가드(entry #12 후속)**: deploy-landing.yml paths 에 `ui/packages/**`+루트 package.json/lock 편입(원래 4b 예정 — 단계-3부터 빌드 의존이라 앞당김. 누락 시 패키지만 바뀐 push 가 deploy 를 건너뜀).
 
 검증: runtime tsc strict 0 ✓(noUncheckedIndexedAccess 마찰 40건 → 근원 수정: pk 파싱 destructuring·grid 조회·인덱스 가드 — 전부 동작 불변 보강) / landing check 0 에러·4395파일 ✓ / landing 풀빌드+prerender ✓ / ui/web build(tsc -b 포함) ✓ — 로컬 HTTP 패널 타입과 계약의 실제 발산 3건(toc block 메타·chapter null·init first 포인터)을 tsc 가 적발, 정규화기로 해소 / `localTerminalAdapter`·`__DARTLAB_LOCAL_TERMINAL__`·옛 모듈 경로 grep 0 ✓ / 신설 파일 staging 후 ?? 잔존 0 확인 ✓(entry #12 룰)  
@@ -321,9 +321,9 @@ commit: (예약 — 본 entry 자체는 문서)
 - **adapter = adapter-static + `fallback:'index.html'`(SPA)** + 루트 `+layout.ts ssr=false` — `[code]` 동적 라우트는
   prerender 불가(3000+사)라 SPA fallback 필수(적대 R2). landing(adapter-static·fallback 404.html) 툴체인 미러(Vite 8·
   kit ^2.65·vite-plugin-svelte ^7.1.2·svelte 5.56.3 루트 override·svelte-check ^4.6·ts ^6).
-- **AiPort 정직 강등**(적대 R5): `capabilities()` 는 provider 상태 probe → 설정 시 `tier:'advanced'`, 미설정 시
+- **AiPort 강등**(적대 R5): `capabilities()` 는 provider 상태 probe → 설정 시 `tier:'advanced'`, 미설정 시
   `tier:'deterministic'`+`upgradeHint`(throw 금지). `streamAsk`→`POST /api/agent/runs` SSE→AiStreamEvent.
-  `runTool`/`explainEvidence` 는 V1 에서 honest error 결과 반환(throw 아님, surface-safe). 깊은 advanced Ask UX=단계-7.
+  `runTool`/`explainEvidence` 는 V1 에서 error 결과 반환(throw 아님, surface-safe). 깊은 advanced Ask UX=단계-7.
 - **viewer = hosts.viewerStudio:null + ViewerPort URL-embed**(ui/web 기출시 패턴): 로컬앱은 hosts 양 로더 null 주입,
   `viewer.urlForCompany(code)`→`${base}/analysis/${code}/viewer?...&terminalEmbed=1`(iframe). 단계-6(viewer 추출) 선점 안 함.
 - **Python `_ui_path.py` 무변경**(적대 R6 교정 — 기본 UI 전환은 단계-**10**, 단계-9 아님). DARTLAB_UI_DIR 이미 임의경로 지원.
@@ -337,7 +337,7 @@ sub-unit 분해 (각 1커밋, 비순환 — 5-1 placeholder 라우트는 surface
   landing build green(무영향)·ui/web 단독 build green(무영향).
 - **5-2 createLocalRuntime 채움**: runtime/adapters/local/ 에 localApiClient + sources/ (company·price·filing·finance·ai)
   — public sources/ 구조 미러. 포트별 매핑(위 계약대로): 호출 포트 실구현/honest-empty, scan-presets/map/search throw.
-  AiPort 정직 강등. 게이트: runtime tsc strict 0(필수 메서드 컴파일 강제)·landing build green(같은 패키지 공유)·ui/web build green.
+  AiPort 강등. 게이트: runtime tsc strict 0(필수 메서드 컴파일 강제)·landing build green(같은 패키지 공유)·ui/web build green.
 - **5-3 라우트 배선 + TerminalSurface 마운트 + chat→terminal + viewer overlay**: lib/runtime/localRuntime(getLocalRuntime
   컴포지션 루트)·lib/shell/{terminalShell(hosts null+links),routeLoad(RawData 조립)}·/terminal/[code] 풀스크린 마운트+컨텍스트·
   /chat·/ask 네비(navigation.toTerminal goto·recentCompanies=storage)·/analysis/[code]/viewer 스켈레톤(overlay iframe 대상).
@@ -383,11 +383,11 @@ commit: (이 변경의 커밋)
   workspaceContext,stream})·SSE `_event`(data JSON 에 type+계약 필드명 그대로 = AG-UI allowlist 가 ai.ts 계약 SSOT)·
   `/api/status`(providers{secretConfigured,available}). 구현:
   - capabilities() = /api/status probe → provider available/secretConfigured 있으면 tier:'advanced', 없으면
-    tier:'deterministic'+upgradeHint(throw 금지·정직 강등, 02 §4).
+    tier:'deterministic'+upgradeHint(throw 금지·강등, 02 §4).
   - streamAsk = fetch POST SSE → ReadableStream reader → `\n\n` 블록 분할 → data JSON 파싱 → AiStreamEvent
-    (서버 필드명 일치라 통과). 네트워크/HTTP 실패는 RUN_ERROR 이벤트로 정직 표기.
+    (서버 필드명 일치라 통과). 네트워크/HTTP 실패는 RUN_ERROR 이벤트로 표기.
   - ask = streamAsk 수집(TEXT_MESSAGE_CONTENT delta 누적·TOOL_CALL_RESULT refDetails·RUN_ERROR throw).
-  - runTool/explainEvidence = honest error/빈 결과(throw 아님, surface-safe). listModes/setMode/getMode = 로컬 상태.
+  - runTool/explainEvidence = 빈 결과 반환(throw 아님, surface-safe). listModes/setMode/getMode = 로컬 상태.
 검증 (양쪽+신규 무중단): runtime tsc strict 0 ✓(AiPort 전 메서드 계약 정합) / landing check 0에러 4405파일 ✓
   (신규 aiSource graph 포함) / ui/web build EXIT0 ✓(동결). 호출처 없음(셸 배선=5-3)이라 컴파일 검증.
   push 는 5-2a (eccfcab25) CI Fast 완료 후(concurrency cancel-in-progress 취소가드).
@@ -455,7 +455,7 @@ rollback: 해당 없음(예약 문서). 추출은 6-0a/6-1 각 단일 커밋 rev
 census 의 "데이터레이어 순수" 주장이 **적대 검토로 부분 반증** — 숨은 landing-셸 결합 발견. 확정 설계:
 - **★duckdb 결합(census 누락·둘 다 발견)**: `lib/viewer/finance/financeQuery.ts` → `$lib/data/duckdb`(loadDartDb·sqlEscape). duckdb.ts 는
   `$app/environment`+`@vite-ignore`(SvelteKit/Vite 전용)라 vanilla-svelte surface 비이식. **해법=`provideDuckDb` 주입 seam**
-  (financeQuery 는 surface 이동, 엔진 loader 는 landing 이 `provideDuckDb(loadDartDb)` 주입·미주입=null→정직 fallback). sqlEscape
+  (financeQuery 는 surface 이동, 엔진 loader 는 landing 이 `provideDuckDb(loadDartDb)` 주입·미주입=null 폴백). sqlEscape
   는 1줄 순수 유틸 인라인. 적대의 "financeQuery 2분할+wrapper"보다 깔끔(아키텍트 채택).
 - **★lab/viewer-* 3 라우트 = 무거운 importer(census 누락)**: `routes/lab/{viewer-dev,viewer-search,viewer-analyze}` 가 viewer
   컴포넌트 8종+`$lib/viewer/*` 12종 직수입(landing svelte-check 게이트 포함) → 원자 커밋서 전부 `@dartlab/ui-surfaces/viewer`
@@ -515,7 +515,7 @@ commit: 9dfde877e (75 files)
   prop**(★신규발견 — `$lib/components/sections/Header.svelte` 직수입, surface 비이식 → 셸이 Header 스니펫 주입) ②
   AskDrawer basePath ③ CompanySearch **onpick 필수화**(goto/base fallback 제거) ④ financeQuery **provideDuckDb 주입
   seam**(`$lib/data/duckdb` = $app/environment·@vite-ignore SvelteKit 전용 → 구조적 타입 ViewerDuckDb·셸이 loadDartDb
-  주입·미주입=null 정직 빈재무)·sqlEscape 인라인 ⑤ AskDrawer `import.meta.env` 안전캐스트(vite/client 타입 무의존).
+  주입·미주입=null 빈재무)·sqlEscape 인라인 ⑤ AskDrawer `import.meta.env` 안전캐스트(vite/client 타입 무의존).
 **공개표면 index.ts**(컴포넌트 9 + 데이터심볼 ~40, 외부 import 로 검증된 심볼만). **외부 재배선**: viewer/company 라우트
   (ViewerStudio named + Header 스니펫·basePath·repoUrl 주입)·terminalShell hosts(lazy `.then(m=>({default:m.ViewerStudio}))`
   R1)·lab/viewer-{search,dev,analyze} 3·CompanyQuickSearch(companyNames)·dev/{askSession,AskDrawer}·**+layout provideDuckDb
@@ -784,7 +784,7 @@ rollback: e42eaf5fb revert(analysis +page.ts 삭제·+page.svelte/workspace/홈 
   - serving-runtime = CLEAN(라우트 순서·MIME·base=root·404·path traversal 전부 정합 재확인).
   - web.py 크래시는 워크플로 *전에* 정독으로 잡아 수정 완료(컴파일·빌드 통과 코드의 런타임 사각 — [30][34] 동류).
   - stray `src/dartlab/ui/build`(검증자 copy 흔적) 정리 + gitignore 동반.
-**의도적 trade-off(정직)**: pip 기본 UI 에서 옛 React 전용 **재무 35카드 bento·퀀트 대시보드**(/api/viz layout-stream)는
+**의도적 trade-off**: pip 기본 UI 에서 옛 React 전용 **재무 35카드 bento·퀀트 대시보드**(/api/viz layout-stream)는
   공유 surface 미이관이라 빠진다 → `DARTLAB_UI_LEGACY=1` 가역. 터미널은 자체 FinFullscreen 재무 심화·ScreenerModal·
   공시 레일 보유. events 탭(뉴스/shock/regime 혼합)은 공시 레일이 상위호환 대체(PRD 혼합금지). /api/viz 엔드포인트는
   legacy 전용 dead 표면으로 잔존. publish.yml 편집은 발행 아님 — 다음 릴리즈(운영자 tag) 가 자연 sign-off 체크포인트.

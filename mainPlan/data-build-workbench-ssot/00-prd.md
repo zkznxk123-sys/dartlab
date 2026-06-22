@@ -3,7 +3,7 @@
 
 > 상태: 설계(PRD) · plan-deep 자기충족 표준 · 범위 = 데이터 전부(모든 도메인 빌드 배선), 실행 = phased(macro 우선 증명)
 > SSOT 거처(권장): `mainPlan/data-build-workbench-ssot/` (본 PRD = `00-prd.md`)
-> 정직 가드: artifact shape / HF 경로 / consume seam **절대 불변**. churn 최소. 재구현 금지(별도빌드 금지 재확인). 위치만 흡수.
+> 불변 가드: artifact shape / HF 경로 / consume seam **절대 불변**. churn 최소. 재구현 금지(별도빌드 금지 재확인). 위치만 흡수.
 
 ---
 
@@ -167,7 +167,7 @@ def runMacro(*, category="macro", mode="recent", codes=None, upload=True, token=
         res.report.ok = 1
     return res
 ```
-**의존게이트 보존 + 독립성 정직화**: 현 `macro.py:5-6` 주석이 "cycle/regime 서로 독립·둘 다 rc1 의존"을 명시. 개정판은 이를 **코드로** 보존 — rc1 실패 시 cycle/regime 둘 다 skip(둘 다 FRED bulk 캐시 의존), rc1 성공 시 cycle 실패가 regime을 막지 않음(현 `macro.py:41-42`는 rc1==0이면 둘 다 독립 실행 — **이미 올바름**). UI consume seam 회귀 평가단(skeptic)이 우려한 "rc2 실패가 rc3 강제 실패"는 **현 코드에 없으며**(둘 다 rc1==0에만 의존), 흡수판도 동일하게 독립.
+**의존게이트 보존 + 독립성 명시화**: 현 `macro.py:5-6` 주석이 "cycle/regime 서로 독립·둘 다 rc1 의존"을 명시. 개정판은 이를 **코드로** 보존 — rc1 실패 시 cycle/regime 둘 다 skip(둘 다 FRED bulk 캐시 의존), rc1 성공 시 cycle 실패가 regime을 막지 않음(현 `macro.py:41-42`는 rc1==0이면 둘 다 독립 실행 — **이미 올바름**). UI consume seam 회귀 평가단(skeptic)이 우려한 "rc2 실패가 rc3 강제 실패"는 **현 코드에 없으며**(둘 다 rc1==0에만 의존), 흡수판도 동일하게 독립.
 
 #### `runMacroJson` (신규, prebuild offline)
 **거처: `src/dartlab/pipeline/stages/prebuild.py`(신규 모듈)::`runMacroJson()`.**

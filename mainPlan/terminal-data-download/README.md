@@ -2,7 +2,7 @@
 
 상태: PRD v7 (코드 전수 재검증 확정, 2026-06-19). 전문 에이전트 다기 토론(5라운드) → 적대 반증으로 결론 *역전* → 보정 합성(2라운드, 심사단 100/100) → 최종 레드팀 3 major 정정 흡수. 본 README + 3 문서가 SSOT(메모리=포인터).
 
-범위: 터미널이 로드해 보여 주는 데이터를 사용자가 **파일로 내려받는** 기능. "그 데이터를 모두 다운로드"를 정직하게 해부한 결과 — 대부분은 *이미 작동*하고, 진짜 빈 곳은 **딱 하나**다.
+범위: 터미널이 로드해 보여 주는 데이터를 사용자가 **파일로 내려받는** 기능. "그 데이터를 모두 다운로드"를 해부한 결과 — 대부분은 *이미 작동*하고, 진짜 빈 곳은 **딱 하나**다.
 
 ---
 
@@ -12,7 +12,7 @@
 
 ---
 
-## "모두"의 정직한 해부
+## "모두"의 실제 해부
 
 | 도메인 | 형식 | 상태 | 거처 |
 |---|---|---|---|
@@ -41,13 +41,13 @@ ViewerStudio 는 `RightStack.svelte:29 import → :787 mount ViewerOverlay → V
 
 ## 문서 지도
 
-1. [00-product-and-scope.md](00-product-and-scope.md) — 사용자 스토리, 이미 ship 된 것의 지도, "모두" 정의, 범위 in/out, 차별점, **산출물 무게 정직 고지**, 개발자·PM 이중 평가.
+1. [00-product-and-scope.md](00-product-and-scope.md) — 사용자 스토리, 이미 ship 된 것의 지도, "모두" 정의, 범위 in/out, 차별점, **산출물 무게 고지**, 개발자·PM 이중 평가.
 2. [01-architecture-traps-format.md](01-architecture-traps-format.md) — `getDataList()` render 진실 직렬화, **다섯 함정 + 해소**, 형식·파일명·출처 결정, HA/리플레이/index fork 확정, 재사용 자산, 경계·SSOT 청결.
 3. [02-validation-and-ledger.md](02-validation-and-ledger.md) — 테스트 매트릭스, 롤백, 부채 티켓 3종, OPEN QUESTION, 결정 로그·토론·점수 이력·NEXT·착수 게이트.
 
 ---
 
-## 정직 척추 (전 문서 관통)
+## 설계 원칙 (전 문서 관통)
 
 - **이미 있는 걸 다시 짓지 않는다.** 공시·재무·parquet·bulk 는 ViewerStudio 가 이미 한다 — 사용자를 그리 안내하고, 본 PRD 는 *유일하게 빈* 가격 egress 한 칸만 채운다.
 - **render 진실만 내보낸다.** 차트가 그리는 봉(`getDataList`)을 내보낸다 — 캐시 fallback prop 이 아니라. 보이는 것과 파일이 어긋나면 그건 거짓이다.

@@ -108,7 +108,7 @@ story full payload 는 macro 섹션을 포함 → `macroCycleBlock` 이 `analyze
     "actsCovered": ["1","2","3","4","5","6"],
     "publishablePerspectives": ["executive","credit","valuation","growth","dashboard","crisis"],
     // ★P0 spike 가 실측한, emphasize 블록이 nonEmpty 를 낸 관점 집합 (박지 않음)
-    "qualityLabel": "verified"           // verified | conditional (정직라벨, 점수 아님)
+    "qualityLabel": "verified"           // verified | conditional (한계 라벨, 점수 아님)
   }
 }
 ```
@@ -124,9 +124,9 @@ story full payload 는 macro 섹션을 포함 → `macroCycleBlock` 이 `analyze
 1. `catalog.py` `BlockMeta` 에 **정적 `sourceEngine: str` 필드 1개 추가**(key/label/section/description 옆). 블록키당 사람 큐레이션 1줄 — docstring 규칙처럼(자동 sweep 금지, [[feedback_no_docstring_auto_sweep]] 정합). 값 = `panel | analysis | credit | quant | industry | macro`. 멀티소스 블록은 **계산 주도 엔진**(primary). 100+ 항목이나 **단일 파일·사람 큐레이션**.
 2. bake 직렬화기는 `renderJson(story)`(blockKey 손실)을 호출하지 않고 **`buildBlocks` 의 BlockMap(blockKey→[Block]) + catalog(keysForSection, getBlockMeta)** 을 walk. 각 blockKey 그룹에 `sourceEngine = getBlockMeta(blockKey).sourceEngine` stamp. blockKey 가 직렬화 시점에 살아 있으므로 100% 결정론.
 
-> ★정직 계상(H3): **섹션→blockKey 골격 + act 는 manifest 에 이미 baked**([`buildStoryManifest.py:102-104`](../../.github/scripts/prebuild/buildStoryManifest.py#L102), per-section `keys`/`act`/`partId`, manifest.json 25 섹션). 따라서 catalog 골격 자체는 신규가 아니다. bake 의 신규 작업 = **회사별로 *실제 present(nonEmpty) 블록* + 그 블록의 sourceEngine·emphasized·데이터**를 emit 하는 per-company 직렬화. act 도 catalog `SectionMeta.act` 그대로(파생 불필요, F1 재정정).
+> ★범위 재계상(H3): **섹션→blockKey 골격 + act 는 manifest 에 이미 baked**([`buildStoryManifest.py:102-104`](../../.github/scripts/prebuild/buildStoryManifest.py#L102), per-section `keys`/`act`/`partId`, manifest.json 25 섹션). 따라서 catalog 골격 자체는 신규가 아니다. bake 의 신규 작업 = **회사별로 *실제 present(nonEmpty) 블록* + 그 블록의 sourceEngine·emphasized·데이터**를 emit 하는 per-company 직렬화. act 도 catalog `SectionMeta.act` 그대로(파생 불필요, F1 재정정).
 
-**정직 한계 명시.** `sourceEngine` = "어느 dartlab 엔진이 계산했는가"이지 "어느 DART 공시 줄"이 아니다. 후자(rcept_no 풀 회로)는 신규 후속 트랙(P4+). 이 구분을 EvidenceStrip 툴팁·푸터에 명시해 과대주장 차단.
+**한계 명시.** `sourceEngine` = "어느 dartlab 엔진이 계산했는가"이지 "어느 DART 공시 줄"이 아니다. 후자(rcept_no 풀 회로)는 신규 후속 트랙(P4+). 이 구분을 EvidenceStrip 툴팁·푸터에 명시해 과대주장 차단.
 
 ## 5. bake 조립 절차 (publisher 재사용 거짓 철회)
 
@@ -150,7 +150,7 @@ story full payload 는 macro 섹션을 포함 → `macroCycleBlock` 이 `analyze
 | 핵심막 블록 수 | 수익구조·수익성·현금흐름·안정성·가치평가 중 블록 보유 막 수 | **M = 3**(5막 중 과반, 분포로 검증) |
 | evidenceFrame 채움 | `coverage='ready'` 축 수 | **K = 분포 중앙값 −1**(과반 회사 통과·빈약 회사 컷) |
 | 관점별 nonEmpty emphasize 충족률 | 관점 p 의 emphasize 블록 중 nonEmpty 비율 | 충족률 ≥ 0.5 관점만 `publishablePerspectives` 등록 |
-| breakevenEstimate/operatingLeverage coverage | 실데이터 산출 회사 비율(구현은 확인됨: [`builders.py:1784,1805`](../../src/dartlab/story/builders.py#L1784)·registry 586/596/604) | 손익분기/안전마진(참조HTML DNA 핵심)이 몇 % 회사에서 뜨는지 — 낮으면 honest-skip 라벨로 정직 표시 |
+| breakevenEstimate/operatingLeverage coverage | 실데이터 산출 회사 비율(구현은 확인됨: [`builders.py:1784,1805`](../../src/dartlab/story/builders.py#L1784)·registry 586/596/604) | 손익분기/안전마진(참조HTML DNA 핵심)이 몇 % 회사에서 뜨는지 — 낮으면 honest-skip 라벨로 명시 |
 | payload 크기 | JSON byte | 상한 결정(>200KB 시 ChartBlock sidecar 분리) |
 | macro offline 경로 | cached JSON 주입 시 enforceOffline 통과 여부 | bake 의 prebuild 분류 확정 |
 | **섹션→대표 rcept_no coverage**(간판5) | 핵심 5막에 대표 rcept_no 매핑되는 회사 비율(panel 보유 rcept 로) | 딥링크 닻 도달율 — 낮은 막은 honest-skip 라벨, 매핑식 확정 |
@@ -180,7 +180,7 @@ function buildReportView(payload: ReportPayload, reportType: string, manifest: M
   // 3) focusQuestions 상단 칩 (참조HTML '한 줄 요약' DNA)
   const focusQuestions = rt.focusQuestions ?? [];
 
-  // 4) 발행가능 여부 — publishablePerspectives 미포함 관점은 dim + 정직라벨
+  // 4) 발행가능 여부 — publishablePerspectives 미포함 관점은 dim + 한계 라벨
   const publishable = payload.meta.publishablePerspectives.includes(reportType);
 
   return { reportType, label: rt.label, focusQuestions, sections,

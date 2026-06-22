@@ -19,7 +19,7 @@
 | F4 | **담보/채무보증/충당부채 등 23 주석** | **CUT (뷰어 전속)** | 헤더 리본 ↗원문 anchor only | 0 | 0 |
 
 - **간판 = F1.** 사용자의 "panel IS처럼 이어서"를 정확히 푼다 — `auditFees` 가 *이미* 당기/전기/전전기를 `relOffset`+`fyOf` 로 체이닝(reportSource.ts L618-665) → 그 검증된 패턴을 배당으로 일반화. 발명 아닌 *생성(generalize)*.
-- **정직 다운그레이드**: 적대검증이 헤드라인 2개를 깎음 — (a) 체이닝 이득 = **1.4x(배당 한정)**, "8-12yr·2-3x" 마케팅 금지(workforce/treasury/ownership 파케이는 triplet 미populate = dead code). (b) 희석 % = **이중-내러티브 거짓정밀** → DEFER.
+- **적대검증 하향 조정**: 적대검증이 헤드라인 2개를 깎음 — (a) 체이닝 이득 = **1.4x(배당 한정)**, "8-12yr·2-3x" 마케팅 금지(workforce/treasury/ownership 파케이는 triplet 미populate = dead code). (b) 희석 % = **이중-내러티브 거짓정밀** → DEFER.
 - **순 패널 = 0.** 06 의 −1 위에 07 은 0 을 더한다(체이닝=배열 길이, 비용성격별=PROFIT 탭이 오늘 비어있는 `load` 슬롯 채움).
 
 ---
@@ -42,16 +42,16 @@
 - 거처 = `shareholderReport`(finTabs.ts L58-107)가 이미 빌드하는 `divYield`/`perShare` 카드. **x축만 길어짐**. 새 카드·새 차트 0.
 - `ShareholderReturnYear` 에 additive optional `prov?: { restated; sources[]; originalValue?; proxy? }`. 오늘 모든 레코드 prov=undefined → 동일 렌더.
 - `FinSeries` 에 additive optional `mark?: ('restated'|'proxy'|null)[]` (data[] 평행). MiniFinChart `<rect>` 루프(L341/348/356)가 `s.mark?.[i]` 읽어 fill 전환 — `url(#hatch)`(정정·빗금) 또는 hollow stroke+50% opacity(전기재현). **새 `<pattern>` def 1개 = 전 기능 유일 신규 픽셀.**
-- 3가지 정직 표시: (a) 정정해=빗금막대, hover 시 기존 tooltip(L366-398)에 '원공시 X→정정 Y · rcept …' 1줄 + ↗딥링크. (b) proxy해=hollow+'○ 전기재현' 라벨. (c) clean 체이닝해=완전 일반 막대(90% 무마커). 탭 `note` 에 1절 추가: '배당 시계열은 사업보고서 당기·전기·전전기 3열 연결 — 빗금=정정 반영, ○=전기재현'.
+- 3가지 마커 표시: (a) 정정해=빗금막대, hover 시 기존 tooltip(L366-398)에 '원공시 X→정정 Y · rcept …' 1줄 + ↗딥링크. (b) proxy해=hollow+'○ 전기재현' 라벨. (c) clean 체이닝해=완전 일반 막대(90% 무마커). 탭 `note` 에 1절 추가: '배당 시계열은 사업보고서 당기·전기·전전기 3열 연결 — 빗금=정정 반영, ○=전기재현'.
 
-### 2.4 정직 천장
+### 2.4 능력 천장
 - 커버리지: 성공 연차 보유 대형/중형주만 ~1.4x(3-5yr→5-7yr). 1공시 소형주 = 정확히 오늘(3막대), proxy 패딩 금지. 무배당 소형주 = 카드 미렌더(기존 null-skip). **appears-only-when-clean 을 시간축에 적용** — ≥2 사업보고서 + triplet populate 시에만 발현.
 - NEVER-CLAIM: 감사된 연속 기록 주장 금지(중첩 자기보고 stitch). 정정값을 '진실'이라 주장 금지('최신 공시는 Y 보고'까지). proxy해를 primary 와 동일 시각 가중 금지. 연결/별도·K-IFRS 전환 break 가로질러 연속 주장 금지(scope 플래그로 break 가시화). **충돌 평균 절대 금지.**
 - 위험: 단위/스케일 drift(백만원↔원)가 2% gate 를 1e6× 거짓 정정으로 트리거 — **정규화는 chaining 前**(totalDividend ×1e6 이 L227 read 시점에 선행, reconcile 은 정규화값만). 비-12월 결산은 `rcept_no.slice(0,4)-1` 깨짐 — auditTrail 이 *이미* 안고 가는 기존 도시에 한계(신규 부채 아님), 카드 가이드에 명시.
 
 ---
 
-## 3. F2 — 비용 성격별 % stacked 시계열 (제조업 ~6% 한정 정직승리)
+## 3. F2 — 비용 성격별 % stacked 시계열 (제조업 ~6% 한정, 범위 명시)
 
 ### 3.1 무엇이 갇혀 있나
 - `calcCostByNatureAnalysis`(_costStructureDeep.py L22-220)가 **이미** 원재료/인건비/감가/외주/기타의 연도별 `{amount,ratio,direction}` + `insight` 자동생성. 단위스케일 `_inferNoteUnitScale`(costStructure.py L406-418) 해결. **단 계산 엔진은 `fetchNotesDetail`(L92-98)로 note-cell(Python L2 panel)을 읽는다 — 공개 터미널은 Python·note-cell 접근 0** ⚠(08 G1): "백엔드 0·reportSource read"는 *오류*. 공개 경로 = CI가 `report/costByNature.parquet`를 bake(엔진 출력 per-company 직렬화)하고 reportSource가 그 parquet를 read. bake 전 공개 불가(F4 rndIntensity와 동급).
@@ -69,7 +69,7 @@
 - **proxy 라벨 필수**(적대검증 CRACK): `scanWorkforceSalary`(scanner.py L185-227)가 `fyer_salary_totamt` 결측 시 `sm×jan_salary_am`(직원수×평균) fallback + 반기 ×2 외삽 → 그 slice 는 '괴리'가 추정오차일 뿐. fallback 발화 시 배지 = **'근사 정합'**(bare '정합' 금지). 단일-최신년 only(salary 시계열 없음 — 다년 정합은 F1 의존 follow-on, '백엔드 0' 청구 금지).
 - **조건부 강등**: F2b 는 *항상 붙는 둘째 겹* 아님 — 인건비 카테고리가 '기타'에 안 먹히고 깨끗 분리 + q4 사업보고서 해 + 단위정규화 동시 충족 시에만 1줄. 아니면 사라짐(F2 본체는 단독 렌더). 두 질문 영구 용접 금지.
 
-### 3.4 정직 천장
+### 3.4 능력 천장
 - 커버리지 ~6%(173사, 제조업 편중). 부제 고정 라벨 '제조업 등 주석 공시사 한정(~6%)'. 금융/REIT/지주 = 구조적 미공시 → 카드 자체 사라짐(— 아님). NEVER-CLAIM: 전상장사 비용구조 주장 금지·점수/등급/radar 금지·동종백분위 금지(industry-lab/fin-stmt-lab 경계)·시계열 백분위 금지·gap 의 인과귀속 단정 금지.
 
 ---
@@ -78,7 +78,7 @@
 
 - **이미 surfaced(재제안 금지)**: capitalChange 전환권행사/신주인수권행사 = 실현된 희석이력, RETURN 탭 `DilutionYear` 카드(reportSource L506-547). 만기 사다리도 surfaced(finTabs L281, instrument-type 구분없어 convertible 분리 불가).
 - **신규 후보 = 미전환 전환사채 잔량(예고된 희석)** — 그러나 **데이터층 BLOCKED**: reportSource.ts(adapters/public/sources)는 report parquet만 읽고 **note-cell 접근 0**. NT_D822450 carrying value 는 Python L2 엔진에만 존재 → 엔진콜/신규 parquet sink 필요 = 'no-backend' 금지와 충돌. 게다가 noteTaxonomyData.py 가 일반사채·전환사채·BW 를 **같은 코드 NT_D822450** 에 매핑 → numerator 를 일반사채와 분리 불가(본문파싱 필요, 거부). 희석률 % = 이중-내러티브(convertible-vs-bond split 미구조 + 전환가 미구조) = **거짓정밀**.
-- **2-gate 로드맵**: GATE 1(백엔드, 이 PRD 밖) = per-company convertible carrying-value sink, NT_D822450 의 convertible/BW/EB 라인을 일반사채와 disambiguate(세그먼트를 막은 *동일* XBRL 축-vs-행라벨 문제). GATE 2(GATE 1 후) = **잔액(원)만, % 절대 금지**, 기존 희석이력 카드 footer, latestRcept 추적, appears-only-when-clean. 실현 커버리지는 segments-grade(2/10) 추정 → DEFER 강화. **정직한 부재 > 거짓 12%.** 코리아디스카운트 거버넌스 가치는 진짜라 로드맵 유지.
+- **2-gate 로드맵**: GATE 1(백엔드, 이 PRD 밖) = per-company convertible carrying-value sink, NT_D822450 의 convertible/BW/EB 라인을 일반사채와 disambiguate(세그먼트를 막은 *동일* XBRL 축-vs-행라벨 문제). GATE 2(GATE 1 후) = **잔액(원)만, % 절대 금지**, 기존 희석이력 카드 footer, latestRcept 추적, appears-only-when-clean. 실현 커버리지는 segments-grade(2/10) 추정 → DEFER 강화. **미측정 부재 표시 > 거짓 12%.** 코리아디스카운트 거버넌스 가치는 진짜라 로드맵 유지.
 
 ---
 
@@ -136,6 +136,6 @@
 
 ## 9. 평가 (개발자 + PM 렌즈)
 
-**개발자**: 최대 위험 = ① **체이닝 정정 reconciliation**(happy-path 아닌 진짜 위험) — naive frmtrm_N vs thstrm_{N-1} 는 K-IFRS 전환/정정공시에서 거짓말. report-fact 용 overlap 탐지 부재 → 2%/0.5pp gate + latestRcept + 빗금 정직성이 게이트(polish 아님). reconcile 없으면 긴 x축=날조. ② **fy 앵커** raw year(기수 오염) 금지, rcept-derived 강제 — 단일 오앵커가 전 시계열 silent 오stitch. ③ **단위-drift** 정규화 chaining 前. ④ **"기타" 우세** >40% 가드(신규 필수, restatement 다음 최고확률 silent 실패). ⑤ **proxy denominator** sm×salary fallback 이 forensic 괴리로 위장 → '근사 정합'. ⑥ note-cell 은 reportSource 도달불가(F3 BLOCKED 정직 인정). 재사용 지도 정밀(새 셸 0, 검증된 패턴 5종 합성).
+**개발자**: 최대 위험 = ① **체이닝 정정 reconciliation**(happy-path 아닌 진짜 위험) — naive frmtrm_N vs thstrm_{N-1} 는 K-IFRS 전환/정정공시에서 거짓말. report-fact 용 overlap 탐지 부재 → 2%/0.5pp gate + latestRcept + 빗금 마커가 게이트(polish 아님). reconcile 없으면 긴 x축=날조. ② **fy 앵커** raw year(기수 오염) 금지, rcept-derived 강제 — 단일 오앵커가 전 시계열 silent 오stitch. ③ **단위-drift** 정규화 chaining 前. ④ **"기타" 우세** >40% 가드(신규 필수, restatement 다음 최고확률 silent 실패). ⑤ **proxy denominator** sm×salary fallback 이 forensic 괴리로 위장 → '근사 정합'. ⑥ note-cell 은 reportSource 도달불가(F3 BLOCKED, 접근 한계). 재사용 지도 정밀(새 셸 0, 검증된 패턴 5종 합성).
 
-**PM**: 사용자 양대 명령("당기/전기 이어서 panel IS처럼" + "비용 성격별 시계열 병합") 정확 대응. ROI 탁월 — F1 은 *데이터층 1.4x*(새 fetch 0, 검증된 auditFees 패턴 일반화), F2 는 *완성 엔진 배선*(백엔드 0), 둘 다 순 패널 0. **컷라인**: F1(체이닝, MVP 간판) + F2(비용성격별, 제조업 thin-but-clean). F2b 는 조건부(양변 clean 시만). **F3 DEFER**(numerator sink 선결, 거짓 % 금지). **F4 CUT**(23주석 뷰어 전속). 정직 다운그레이드 수용 — "8-12yr·2-3x" 헤드라인 거부가 PM 강제 정직계약. 데모 게이트 = 정정 케이스 + 제조업(F2 점등) + 은행(F2 깨끗한 부재) + 소형주(체이닝 degrade=현행). 경계 소비만(fin-stmt-lab 이익품질/diluted-EPS, industry-lab 섹터, cross-universe 단일시점). UI push 운영자 게이트.
+**PM**: 사용자 양대 명령("당기/전기 이어서 panel IS처럼" + "비용 성격별 시계열 병합") 정확 대응. ROI 탁월 — F1 은 *데이터층 1.4x*(새 fetch 0, 검증된 auditFees 패턴 일반화), F2 는 *완성 엔진 배선*(백엔드 0), 둘 다 순 패널 0. **컷라인**: F1(체이닝, MVP 간판) + F2(비용성격별, 제조업 thin-but-clean). F2b 는 조건부(양변 clean 시만). **F3 DEFER**(numerator sink 선결, 거짓 % 금지). **F4 CUT**(23주석 뷰어 전속). 적대검증 하향 조정 수용 — "8-12yr·2-3x" 헤드라인 거부가 PM 강제 범위 검증 계약. 데모 게이트 = 정정 케이스 + 제조업(F2 점등) + 은행(F2 깨끗한 부재) + 소형주(체이닝 degrade=현행). 경계 소비만(fin-stmt-lab 이익품질/diluted-EPS, industry-lab 섹터, cross-universe 단일시점). UI push 운영자 게이트.

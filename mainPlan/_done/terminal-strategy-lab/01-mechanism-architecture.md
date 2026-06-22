@@ -23,7 +23,7 @@ CMP는 캔들축 % 리베이스, ECON은 시리즈별 독립 정규화 — **둘
 ### 1.2 combo 거래 부재 (치명)
 combo = equity 가중 산술합 → 체결 개념 0 → 승률·손익비·노출·거래표·CSV **전부 N.A.**(억지 합산=거짓). equity 메트릭(수익·MDD·Sharpe·Calmar·vs B&H)만 순수헬퍼를 combo equity에 재호출. **거래 KPI는 UI에서 명시적 "—"**.
 
-### 1.3 확인된 정직 사실
+### 1.3 확인된 사실
 한 run의 모든 전략은 동일 candles·windowBars → **동일 startIdx·전부 non-null·시작 100**(워밍업 차이는 flat target=0, null 아님). `combo[i]=Σ wₛ·eqₛ[i]`는 "고정가중 보유합성(리밸런싱 없음)"의 정확한 표현. OOS 분할선은 BT_TRADES(캔들페인) draw라 figures 무관 → 회귀 0. "lines deep-merge 함정"은 직접 draw 전환 시 소멸(이득).
 
 ## 2. 3겹 메커니즘
@@ -66,7 +66,7 @@ interface StrategyRule { entry: Condition[]; exit: Condition[]; combine: 'AND'|'
 ```
 - **펀더 게이트 데이터**: `quant/alphas`(Piotroski 등 9개)·panel account 필드를 *과거 시점별로* 산출 → `rcept_dt` 이후 봉부터 그 분기 값 적용(PIT 근사·계단). 생존편향 무관(단일종목). 브라우저 floor면 prebuilt 시계열, 로컬이면 라이브 계산.
 - **렌더(02 §1.5)**: 조건별 `satisfied` → 조건 레인 서브페인(`figures:[]` draw, on/off 스트립). 펀더 게이트 = 가격 페인 **배경 음영**(분기 계단). AND 합성 레인이 진입 마커와 수직 정렬. 레인 LOD: 줌아웃=합성만, 줌인=개별 펼침.
-- **정직**: 펀더 게이트는 PIT 근사(공시일 기준)·계단·생존편향 무관 라벨. 유니버스 랭킹 아님(단일종목 게이트).
+- **라벨**: 펀더 게이트는 PIT 근사(공시일 기준)·계단·생존편향 무관 라벨. 유니버스 랭킹 아님(단일종목 게이트).
 
 ## 3. 엔진 계약 (P1, `runPass` 무수정)
 
@@ -112,13 +112,13 @@ interface PitDecision<T> {
 interface KrFillModel {
   tickRound: (px) => number;          // 호가단위 스냅 (소형주 0.5% 비용 — 가격대별)
   priceLimit: (fillPx, prevClose) => number | null;  // 상하한가 ±30% 클램프, 갇힘=null=이연(deferredBars 재사용)
-  // 슬리피지: 두 정직 경로 중 택1 (점추정 금지)
-  //  (A) "슬리피지=사용자 입력 가정, 우리가 추정 안 함" (현 bp 고정 + "가정값" 라벨) — 가장 정직
+  // 슬리피지: 두 경로 중 택1 (점추정 금지)
+  //  (A) "슬리피지=사용자 입력 가정, 우리가 추정 안 함" (현 bp 고정 + "가정값" 라벨) — 가장 명확
   //  (B) 유동성 비례를 *밴드*로: slip ∈ [k_lo·√(orderValue/ADV), k_hi·√(...)] 이중실행(U-G1식) — 불확실성 노출
 }
 ```
 - ADV = `volSma(v,20)·close`(이미 indicators에 있음, 신규 데이터 0). **세금**: 매도만(이미 정확), 2025 거래세 인하 스케줄 반영. **VI/단일가**: EOD로 복원 불가 → "체결 ±15% 봉=VI 가능성" 라벨(가짜 정밀 금지). **비용 4성분 워터폴**: `costDragPct` 한 줄 → 세금/수수료/슬리피지/충격 분해(기관급 표식이 아니라 *투명성*).
-- 세계급 floor의 진짜 상한 = "더 정교한 비용 함수"가 아니라 **"비용 불확실성을 밴드/가정으로 정직하게 노출"**. local(Python)만 일중 VWAP·비선형 충격(`vectorBacktest` 갭 슬리피지 이미 보유).
+- 세계급 floor의 진짜 상한 = "더 정교한 비용 함수"가 아니라 **"비용 불확실성을 밴드/가정으로 명시"**. local(Python)만 일중 VWAP·비선형 충격(`vectorBacktest` 갭 슬리피지 이미 보유).
 
 ## 4. 상태 계약 (`chartState.svelte.ts`)
 - 단수→배열: `btKey/btParams/activeBt/setPreset/stepBtParam` → `btStrategies:StrategySlot[]` + `addStrategy/removeStrategy/setSlotPreset(i)/stepSlotParam(i)`. 공유 단수 유지: `btCosts/btCostsBp/btOosSplit`. 포커스 `btFocus:number`.

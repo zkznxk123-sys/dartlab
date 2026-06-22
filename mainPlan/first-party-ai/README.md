@@ -35,7 +35,7 @@ surface (terminal · report · carousel · blog · landing)
 
 ## 무엇을 잠그나 (Section B)
 
-7. **정직 척추 코드화** — 숫자는 Grounding SSOT 만 생성하고 모델은 *서술만*(생성된 숫자 사후 검증), 외부 본문 untrusted-wrap, "어느 티어가 답했는지" provenance 표면화, "영구 무료" 약속 금지. `operation.ui` AI 레인 절 + 기계 가드.
+7. **한계 표기 원칙 코드화** — 숫자는 Grounding SSOT 만 생성하고 모델은 *서술만*(생성된 숫자 사후 검증), 외부 본문 untrusted-wrap, "어느 티어가 답했는지" provenance 표면화, "영구 무료" 약속 금지. `operation.ui` AI 레인 절 + 기계 가드.
 8. **경계 박제** — 이 PRD 는 `ai-workbench-connector`(외부 AI 에게 근거를 *내주는* 아웃바운드)와 **반대 방향**(DartLab 이 *직접* 쓰고 분석하는 인바운드). 두 워커·두 정체성을 섞지 않는다([05](05-killlist-and-non-goals.md)).
 
 ---
@@ -44,7 +44,7 @@ surface (terminal · report · carousel · blog · landing)
 
 1. [00-product-vision.md](00-product-vision.md) — 무엇을·누구를 위해·왜 "또 다른 챗봇"이 아니라 surface 전반의 작성·분석 레인인가. 커넥터와의 경계. 성공/실패 기준.
 2. [01-tier-architecture.md](01-tier-architecture.md) — 4 티어 사다리, `AiPort` 확장(`edge` 신설·`compose` 동사), 공개 배선, 런타임 티어 선택·우아한 강등, capabilities 계약.
-3. [02-edge-ai-cloudflare.md](02-edge-ai-cloudflare.md) — Workers AI 무료티어 통합, `aiEdge` 워커·바인딩·라우트, 자동 프로비저닝, neuron 예산·남용 방어, 프라이버시, 비용 정직.
+3. [02-edge-ai-cloudflare.md](02-edge-ai-cloudflare.md) — Workers AI 무료티어 통합, `aiEdge` 워커·바인딩·라우트, 자동 프로비저닝, neuron 예산·남용 방어, 프라이버시, 비용 명시.
 4. [03-analysis-capability-ssot.md](03-analysis-capability-ssot.md) — Grounding SSOT 추출·계약, 티어 공통 근거 재사용, 숫자 환각 가드, untrusted-wrap.
 5. [04-surface-wiring.md](04-surface-wiring.md) — viewer·terminal·report·carousel·blog 별 ask/compose 소비, baked vs live, compose 템플릿 계약.
 6. [05-killlist-and-non-goals.md](05-killlist-and-non-goals.md) — 안 하는 것(투자조언·surface env 분기·온디바이스 장문·영구무료 claim·graph 회귀·커넥터 혼입).
@@ -54,11 +54,11 @@ surface (terminal · report · carousel · blog · landing)
 
 ---
 
-## 정직 척추 (전 문서 관통)
+## 한계 표기 원칙 (전 문서 관통)
 
 1. **새 발명 최소화.** Grounding 은 viewer 의 결정론 분석을 *끌어올린* 것, AiPort 는 *이미 정의된* 계약을 *배선*하는 것. 신설은 `edge` 티어와 `compose` 동사뿐.
 2. **숫자는 결정론, 서술만 모델.** 모든 수치는 Grounding SSOT 가 만들고 LLM 은 문장만 짠다. 출력 숫자는 facts 대조 사후검증으로 환각을 막는다.
-3. **티어는 정직하게 표면화.** 어느 티어가 답했는지(`tierUsed`)와 근거(`evidence[]`)를 답변과 함께 보인다. 강등(edge→onDevice→deterministic)은 조용히 하지 않는다.
+3. **티어는 명시적으로 표면화.** 어느 티어가 답했는지(`tierUsed`)와 근거(`evidence[]`)를 답변과 함께 보인다. 강등(edge→onDevice→deterministic)은 조용히 하지 않는다.
 4. **퍼블릭 무료는 한계가 있다.** Cloudflare 무료티어 = 10,000 neurons/day. 예산 서킷브레이커로 보호하고 "무제한 무료 AI" 로 포지셔닝하지 않는다.
 5. **프라이버시 분기 명시.** baked·onDevice = 디바이스 밖으로 아무것도 안 나감. edge = 프롬프트+근거가 우리 워커로 감(PII 0·근거만). 사용자에게 구분해 알린다.
 6. **투자 조언 금지.** 매수/매도/목표주가/수익률 보장 = 범위 밖. 공시 변화·재무 근거·동종 비교·리스크 서술까지.

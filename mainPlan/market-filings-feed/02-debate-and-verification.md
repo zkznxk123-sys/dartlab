@@ -21,17 +21,17 @@
 - **fix**: ① 3mo 크기 562.9KB→**656.3KB**(cutoff 정의 차, rolling 90일 38,015행) ② 6mo "여유"→**1322KB=임계 86%**(가변) ③ **worker cache 파일명 게이트**(endsWith('recent.parquet') 실패→1h stale) ④ 기관식별률 9.4~9.8% ⑤ category bake "210K→0"은 논리혼선(옵션B는 38K만).
 - **must-fix 5**: worker 분기 / 크기 정정+size assert / cutoff 동적 / 기관 단독탭 kill / classifyFiling equity 분리.
 
-### B-2. 정직성·거짓정밀 검증
+### B-2. 범위검증·거짓정밀 검증
 - **survives**: 기관 거짓정밀 위험 진단·약신호 격리·ref-trace·호재악재 미끄럼 가드.
 - **★방향 정정(fix)**: 지배적 오류는 '개인→기관(false positive, ≈0)'이 아니라 **'기관→누락(false negative)'** — J.P.MORGAN도 점 때문에 사전 누락. 칩 라벨을 '기관 매수' 단정→'제출자=기관(부분식별·약10%)'.
 - **fix**: etc 36.6%→**20.3%**(윈도 기준, 전체파일 아님). etc 내용물=IR·지배구조·기준일 약신호라 '신호 구출' 과대포장 금지. worker 캐시 '한 줄' 거짓. 옵션A 기각에서 '1.5MB falldown' 메커니즘 제거(requestParquetWholeFile size 미검사).
-- **must-fix 8**: 기관 라벨 정직화 / worker 분기 / etc% 정정 / 탭 6~7 수렴(12 금지) / 옵션A 근거 정정 / content_raw 부재 / corp_name COLS / UI push 게이트.
+- **must-fix 8**: 기관 라벨 명시화 / worker 분기 / etc% 정정 / 탭 6~7 수렴(12 금지) / 옵션A 근거 정정 / content_raw 부재 / corp_name COLS / UI push 게이트.
 
 ### B-3. 안티클러터·중복·경계 검증
 - **survives**: 멘탈모델 3분리 코드중복 0(read경로·정렬키·범위 전부 다름) / 옵션B govRecent 선례 / 경계 PRD 침범 0(watchlist·periodic-report 재소유 없음) / 형제 분류기 정당.
 - **kill**: 12탭(과세분화·300px 붕괴) / UI '옵션A whole-file 그대로'(stock_code pushdown 이점 전무).
 - **fix**: fillCol 2분점(50/50 압착)→eMarketFeed max-height 고정·eQuant 단독 fillCol / '필터만 제거 한 줄'→배선 표면 5곳 / 기관 분모 단일 실측 SSOT / 임원소유 그룹핑 상태머신 v1 금지(탭 분리로 충분) / disclosureFocus.pulse v1 미사용.
-- **must-fix 7**: fillCol 2분점 kill / 6탭 수렴 / 기관 독립탭 kill / worker 캐시 / 배선 5곳 명문화 / 분류 SSOT drift 가드 / 정직 라벨 3종.
+- **must-fix 7**: fillCol 2분점 kill / 6탭 수렴 / 기관 독립탭 kill / worker 캐시 / 배선 5곳 명문화 / 분류 SSOT drift 가드 / 범위 라벨 3종.
 
 ### B-4. UI/UX 회귀·구현 위험 검증
 - **survives**: fillCol 2개 메커니즘(가능하나 압착) / ScatterMap 안 깨짐 / 기관 독립탭 kill(report_nm '연금' 0건·9.5% 실측) / 200 cap 가상화 불필요 / 상태기계 존재 / checkUiDataWiring 통과 / 빌드 편승.
@@ -44,7 +44,7 @@
 |---|---|---|
 | 데이터층 | 옵션 B 만장일치 | **B** — 단 옵션A 기각근거를 'stock_code 정렬·210K 파싱'으로 정정(1.5MB falldown 삭제) |
 | 카테고리 탭 | 6~12개 | **6탭+보조칩**(12 kill) |
-| 연금/기관 | 탭 vs 칩 | **보조 [기관] 칩+정직 라벨**(독립탭 kill, 식별 9.5%, false-negative 방향) |
+| 연금/기관 | 탭 vs 칩 | **보조 [기관] 칩+범위 라벨**(독립탭 kill, 식별 9.5%, false-negative 방향) |
 | fillCol | 2분점 vs 단독 | **eMarketFeed 고정높이·eQuant 단독 fillCol**(2분점 kill) |
 | 행 렌더 | .filingRow 재사용 | **CSS만 재사용·요소 신규**(`<a>`행 한계) |
 | category bake | 빌드 vs 클라 | **클라 분류**(SSOT drift 회피, report_nm 원본 유지) |

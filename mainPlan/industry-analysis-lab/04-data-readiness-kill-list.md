@@ -1,8 +1,8 @@
 # 04. 데이터 준비도 · 킬리스트
 
 상태: 비전 PRD v0.2 (2026-06-14, 2차 대대적 조사·적대검증 반영)
-목적: 무엇을 *가졌고* 무엇이 *없는지* 정직하게. 데이터 가용성 매트릭스 + EXCLUDED/BLOCKED/CONDITIONAL 킬리스트 + honest-gap 규칙. "데이터 없으면 카드 없음".
-★**§3 honest-gap 규칙 = 전 PRD 정직 룰 SSOT.** README 정직척추·00 §4·05 §5는 본 §3를 가리킨다(중복 박제 금지 — 동기화 부채 방지).
+목적: 무엇을 *가졌고* 무엇이 *없는지* 있는 그대로. 데이터 가용성 매트릭스 + EXCLUDED/BLOCKED/CONDITIONAL 킬리스트 + honest-gap 규칙. "데이터 없으면 카드 없음".
+★**§3 honest-gap 규칙 = 전 PRD 한계 표기 규칙 SSOT.** README 한계 표기 척추·00 §4·05 §5는 본 §3를 가리킨다(중복 박제 금지 — 동기화 부채 방지).
 
 ---
 
@@ -33,7 +33,7 @@
 
 ---
 
-## 2. 킬리스트 (만들지 않는다 — 정직 가드)
+## 2. 킬리스트 (만들지 않는다 — 한계 가드)
 
 ### EXCLUDED (소스 부재 — 영구)
 - **시장점유율 raw**: HHI를 진짜 share로 계산 불가. "상장사 매출=시장규모" 근사만, DOJ 독점/경쟁 라벨 단정 금지(규제기관 척도 사칭 = 확신오정렬).
@@ -47,7 +47,7 @@
 - **Capital Cycle 순수 CAPEX 비율**(Marathon): KR ICF 분리 불가(BLOCKED §아래) — 자산증가율 프록시만 + `peerCapexWave` recipe 소유.
 - **Damodaran 산업 sales-to-capital/ROC 분포 신설**: damodaranL15.py(curated)·compare·fin-stmt-lab OWNED-ELSEWHERE, industry 백분위 추가=02 vanity 회귀.
 
-### REJECT (데이터는 일부 있으나 정직성 위반)
+### REJECT (데이터는 일부 있으나 범위 위반)
 - **Porter 5힘 종합 스코어카드**: 정성 force(대체재·신규진입)를 가짜 정량 점수로 박는 것 = fake precision. 개별 프록시(거래의존도·자본집약도)는 evidence로 OK, 단일 점수는 금지.
 - **HHI DOJ 독점/경쟁 라벨**: `riskLabel` surface 금지. 라벨 뗀 CR4/top1 비중 + "상장사 매출 기준" 강제 캡션만 조건부 잔존(Phase B/C).
 - **Morningstar wide/narrow/none moat 라벨**: 본질이 애널리스트 정성판단(5소스·20년전망). ROIC-WACC 스프레드 지속성을 *측정값*으로 보여주는 건 financial-statement-lab(reverseDCF) 영역, 라벨 단정만 kill.
@@ -65,7 +65,7 @@
 1. **opMargin 결손 노드는 격자 제외 + coverageRatio 노출** (0 채움 금지).
 2. **ratio 없는 엣지는 굵기 균일** (amount 0을 가는 선으로 거짓 표현 금지).
 3. **HHI/CR4는 "상장사 매출 기준, 진짜 시장점유율 아님" 강제 캡션.**
-4. **공급망 amount는 "추출 누락분 존재" 캡션 + 빈곤을 화면 1급시민으로.** 단 132/18,418(0.7%)을 *공시 빈곤*으로 단정 금지 — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md) 실측상 0.7%는 상장필터 드롭(amount 행 87.3% 폐기)+취약헤더 이중 *추출* 인공물이다. 정직 라벨은 "현 추출 0.7%, 미드롭+퍼지헤더로 제조업 한정 상향 여지" — 추출 보강 후엔 그 시점 커버리지를 1급시민으로(빈곤이든 개선이든 실측값).
+4. **공급망 amount는 "추출 누락분 존재" 캡션 + 빈곤을 화면 1급시민으로.** 단 132/18,418(0.7%)을 *공시 빈곤*으로 단정 금지 — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md) 실측상 0.7%는 상장필터 드롭(amount 행 87.3% 폐기)+취약헤더 이중 *추출* 인공물이다. 라벨은 "현 추출 0.7%, 미드롭+퍼지헤더로 제조업 한정 상향 여지" — 추출 보강 후엔 그 시점 커버리지를 1급시민으로(빈곤이든 개선이든 실측값).
 5. **분포 밴드는 n<10 *분포(metric)* 숨김 + "n=N" 노출, mean±std 금지** (industryStats는 산업당 metric별 독립 distribution+각자 n; mean은 outlier로 밴드 밖 자주 — percentile만).
 6. **lifecycle phase는 advisory confidence + 단일 YoY 점추정 한계 명시 + 백테스트 없음**(quant.walkForward가 backtest SSOT).
 7. **모든 새 surface → sourceRef/as-of + confidence/source 칩.** provenance 없는 카드 = 회귀.

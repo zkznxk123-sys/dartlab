@@ -12,7 +12,7 @@
 1. **"블룸버그식" = 분석들을 묶는 수평 층, 수직 분석 아님.** dartlab 은 비싼 절반(분석)을 이미 초과 수준으로 끝냈고 싼 절반(수평 직조)을 비웠다 — 이 묶는 층 개선 ROI 가 높다. (이건 *기존 터미널 개선*이지 새 제품·새 추상 아님.)
 2. **이 PRD 의 고유 신설 = 워치리스트(공시 워치) 1 개.** 어떤 기존 PRD 도 미claim(코드·PRD grep 0). 가격 워치가 아니라 *공시 델타*가 우리 사용자·우리 데이터·우리 제약에 맞는 유일한 monitor.
 3. **함수문법은 *약화*(섹션 점프)로만.** 풀 mnemonic 백과사전 KILL.
-4. **알림 = 정직 한정 생존.** 푸시 KILL(서버 0). 기기독립 신선도(Tier 1)가 핵심, 재방문 델타(Tier 2)는 완결성 주장 금지·기기/시점 명시로만.
+4. **알림 = 범위 한정 생존.** 푸시 KILL(서버 0). 기기독립 신선도(Tier 1)가 핵심, 재방문 델타(Tier 2)는 완결성 주장 금지·기기/시점 명시로만.
 5. **멀티패널 Launchpad·멀티심볼·reverseDCF 함수승격·크로스에셋 instrument = KILL/DEFER.** 구역규칙·cargo-cult·기존 PRD 소유권·재발명 위험.
 6. **본 PRD 는 *연결* 레이어** — JUDGE(fin-stmt-lab)·시뮬(scenario-simulator)·egress(table-export)·포트(ui-platform-refactor)를 claim 하지 않고 monitor 루프로 묶는다.
 
@@ -28,7 +28,7 @@
 - **Wave 2-D (사용자 워크플로·차별화)**: monitor 루프 5 단계(WATCH→SURFACE→DIG→JUDGE→RECORD), ③DIG 만 완성·①②비어 루프 안 닫힘. ★"공시 워치 ≠ 가격 워치"가 우리만의 monitor. reverseDCF 엔진 실재·미배선 발견(단 fin-stmt-lab 소유).
 - **운영자 코드 실측 판정**: (a) landing = adapter-static·백엔드 0·인증 0 → 푸시·동기화 불가 확정. (b) 포트 계약 실재(B 맞음) but public 어댑터 `notWiredYet` throw + 터미널 미소비(C 맞음) → "신설 아님 but 공짜도 아님". (c) `reverseImpliedGrowth` 엔진 실재(D 맞음). (d) 워치리스트 미claim·reverseDCF/compare = fin-stmt-lab killer #1/#2 소유 확정 → non-encroachment map.
 
-**C vs D 핵심 충돌 해소**: 알림은 *기기독립 신선도(Tier 1) 핵심 + 정직 라벨 재방문 델타(Tier 2) 선택*으로 분리 — D 의 killer 가치를 C 의 확신오정렬 위험 없이 흡수. reverseDCF 는 *표시(연결)하되 함수승격 안 함* — D 의 surfacing 가치 + C 의 라벨갈이 KILL 양립.
+**C vs D 핵심 충돌 해소**: 알림은 *기기독립 신선도(Tier 1) 핵심 + 재방문 델타(Tier 2) 선택*으로 분리 — D 의 killer 가치를 C 의 확신오정렬 위험 없이 흡수. reverseDCF 는 *표시(연결)하되 함수승격 안 함* — D 의 surfacing 가치 + C 의 라벨갈이 KILL 양립.
 
 **Wave 3 — 완전성 비평(v0.2 "완벽 완성" 라운드, 운영자 코드 실측 동반)**: ★차단 결함 3 + 누락 개념 1 + 사실 정밀화 2 를 정정.
 - **C1(완성 차단·정확성 정정 — "치명" 아님)**: 워치리스트 데이터 계약이 비어 있었고 "신규 포트 0" 주장이 *틀림*. 단 *방향 오류가 아니라* 내 비용 주장의 정확성 결함 — 방향(공시 워치)은 무관하게 섬. `FilingPort.regular/nonRegular` = per-code, `syncStatus` = 데이터셋 경로 단위 → 회사별 공시 델타를 *포트로* 못 잼. → 02 §5 데이터 계약 신설·"신규 포트 0" 철회.
@@ -40,7 +40,7 @@
 **Wave 4 — 최종 결함 확인 + 완성도(운영자 직접 코드 적대 검증, 전문에이전트 rate-limit 로 인라인 수행)**:
 - **C1 재검증으로 갭이 *더 작아짐***: `nonRegularFilingsSource.ts:35-37` 가 이미 `dart/allFilings/recent.parquet` 를 `readParquetRows({filter:{stock_code:{$in:[code]}}})`(배열 `$in`·row-group pushdown·컬럼 `rcept_dt`) 로 읽는다 → cross-company 읽기 *능력은 소스에 이미 존재*, 결손은 *공개 포트의 다중코드 메서드 표면*뿐(얇은 래퍼). 02 §5 정밀화. "치명" 아님 재확인.
 - **C2 토큰표 라인 전수 검증 통과**: RightStack `:177`(거버넌스 칩)·`:346`(공급망 Panel)·`:471`(거버넌스 Panel — 모호성 실재)·finTabs FS_TABS `profitability`/`shareholder` 모두 실측 일치.
-- **완성도 자평(5 축 ×20)**: 방향 건전성 19 / 주장 정확성 18(C1 정밀화로 상향) / 경계 명확성 19 / 정직성 20 / 착수 가능성 17(신규 포트 메서드 시그니처는 구현 시 확정) = **93/100**. 착수 임계(≥85) 충족 — *재조사 없이 Phase 0 착수 가능*. 잔여 −7 = 포트 메서드 정확 시그니처·toc별 식별자 부여(Phase 2 선결)는 *의도적으로 구현 단계 결정*으로 남김(vision PRD 적정 깊이).
+- **완성도 자평(5 축 ×20)**: 방향 건전성 19 / 주장 정확성 18(C1 정밀화로 상향) / 경계 명확성 19 / 범위 명확성 20 / 착수 가능성 17(신규 포트 메서드 시그니처는 구현 시 확정) = **93/100**. 착수 임계(≥85) 충족 — *재조사 없이 Phase 0 착수 가능*. 잔여 −7 = 포트 메서드 정확 시그니처·toc별 식별자 부여(Phase 2 선결)는 *의도적으로 구현 단계 결정*으로 남김(vision PRD 적정 깊이).
 
 ---
 
@@ -48,13 +48,13 @@
 
 | 문서 | 상태 |
 |---|---|
-| README | v0.2 — "기존 터미널 개선" 틀(추가할 개념 A + 박을 개념 B)·로컬/퍼블릭·문서지도·정직척추 |
+| README | v0.2 — "기존 터미널 개선" 틀(추가할 개념 A + 박을 개념 B)·로컬/퍼블릭·문서지도·설계원칙 |
 | 00-product-vision | v0.2 — 문제(묶는 층 결손)·사용자·monitor 루프·공시워치≠가격워치·ROI |
 | 01-bloomberg-concept-gap | v0.2 — 원시요소 카탈로그·"묶는 층 vs 분석" 가설·리테일 절제선 |
-| 02-watchlist-disclosure-watch | v0.2 — ★핵심. 3 층·정직 가드·storage 계약·**§5 데이터 계약**·거처·비목표(recentCompanies 경계) |
+| 02-watchlist-disclosure-watch | v0.2 — ★핵심. 3 층·가드·storage 계약·**§5 데이터 계약**·거처·비목표(recentCompanies 경계) |
 | 03-command-and-architecture | v0.2 — 섹션점프(**토큰 매핑표**)·포트 실태(로컬/퍼블릭)·non-encroachment·instrument DEFER·§7 2 타깃 |
 | 04-killlist-and-non-goals | v0.2 — KILL/DEFER 판정표·정체성 가드·덕지덕지 차단 |
-| 05-scope-phasing-guardrails | v0.2 — Phase 0-3·**정량 AC**·정직 가드·성공기준·착수 게이트 |
+| 05-scope-phasing-guardrails | v0.2 — Phase 0-3·**정량 AC**·출시 가드·성공기준·착수 게이트 |
 | 06-progress-ledger | v0.2 — 본 문서 |
 
 ---

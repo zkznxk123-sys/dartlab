@@ -23,7 +23,7 @@
 |---:|---|---|---|---|---|---|---|
 | 1 | needs-context-gate | 공시검색 sidecar + 터미널 전역 검색 팔레트 | 47만 문서를 다 받지 않고도, 공시를 찾는다 | sidecar 인덱스, range fetch, FilingSearchDialog, hard-negative gate | sidecar 단일화, hard-negative gate, HF flip·운영자 눈검수 | 검은 문서 더미, 노란 검색 빔, postings 조각 | AI 검색 완성, 배포 완료, 전 공시 즉시 정확 |
 | 2 | live-check 필요 | 종목코드 하나로 세우는 공시·재무 격자 | PDF 10년치를 표 한 장으로 세운다 | DART 원문, topic-period 정렬, 결손 라벨 | 결손을 0으로 채우지 않는지 | 문서가 노란 격자 표로 접히는 장면 | 모든 회사 완벽 비교, 자동 보정 |
-| 3 | needs-context-gate | 정직 백테스트 OS | 수익률보다 먼저 보여줘야 할 것, 거짓말의 위치 | t+1 체결, 비용, 처음에 안 쓴 기간 검증, 경고문 | 신호일·체결일·비용·검증 구간·사라진 표본 | 시간축 차트 위 노란 경고선 | 전략 검증 완료, 미래 수익 |
+| 3 | needs-context-gate | 백테스트 OS | 수익률보다 먼저 보여줘야 할 것, 거짓말의 위치 | t+1 체결, 비용, 처음에 안 쓴 기간 검증, 경고문 | 신호일·체결일·비용·검증 구간·사라진 표본 | 시간축 차트 위 노란 경고선 | 전략 검증 완료, 미래 수익 |
 | 4 | live-check 필요 | AI Workbench Connector | AI가 말하고, DartLab은 증거를 건넨다 | Evidence Pack, external AI handoff, viewer 딥링크 | 답변이 근거 화면으로 돌아오는지 | 외부 AI와 터미널을 잇는 노란 evidence packet | AI가 분석 해결, 추천 |
 | 5 | needs-context-gate | 공시 테이블 엑셀 내보내기 | 사업보고서 표, 복붙하지 말고 시트로 꺼낸다 | table extraction, merged cell, sheet naming | 숫자 타입·병합셀·목차별 시트 | 공시 표가 스프레드시트 탭으로 변환 | 모든 표 완벽 추출 |
 | 6 | live-check 필요 | Macro Lens | 방향 점수와 근거 신뢰는 다르다 | directionScore, evidenceScore, falsifier, lock state | 반증 조건과 LOCK/OPEN/WATCH | 매크로 보드 위 노란 ref chip | 매크로 예측, 주가 방향 |

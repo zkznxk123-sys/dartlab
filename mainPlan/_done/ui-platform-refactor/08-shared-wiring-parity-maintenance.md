@@ -114,7 +114,7 @@
 1. **basePath** — public 은 `/dartlab` 서브패스, local 은 루트 `''`. 모든 자산/JSON 경로가 여기에 의존.
 2. **데이터 포트** — public 은 백엔드 없는 정적(HF直+브라우저 DuckDB), local 은 Python `/api` 백엔드. per-company 상세·AI·scan.changes·export 가 다른 소스(§4). 형태만 같다.
 3. **뷰어 임베드** — public=컴포넌트(`viewerStudio` 로더), local=iframe(`viewerStudio:null` → ViewerOverlay 가 `/analysis/[code]/viewer?...` 로드). 챗 진입도 public=컴포넌트 onMount, local=iframe `?ask=1`.
-4. **정량재무 다이얼로그** — public 만 DuckDB-WASM. local 은 정직 강등 안내(`financeDialog:null`). 터미널 *기본* 재무카드는 양쪽 동일(HF, §4).
+4. **정량재무 다이얼로그** — public 만 DuckDB-WASM. local 은 미배선 안내(`financeDialog:null`). 터미널 *기본* 재무카드는 양쪽 동일(HF, §4).
 5. **SEO** — public 은 색인+atom feed, local 은 noindex(사적 앱).
 6. **렌더 모드** — public prerender 정적, local SPA(`ssr=false`).
 7. **theme-color** — public `#050811`, local `#0f0f10`(로딩 한순간만 노출, 터미널이 자체 bg 칠함).
@@ -190,7 +190,7 @@
 - [ ] **+layout 글로벌 CSS reset** 변경? → 다른 앱 +layout `<style>` 미러(§6.2).
 - [ ] **브랜드 링크** 변경? → `brand.ts` + `localLinks` 둘 다(§6.4).
 - [ ] **새 동적 라우트** 추가? → public prerender entry 필요한지(`svelte.config.js`), local 은 SPA fallback 이라 무관.
-- [ ] **새 데이터 포트** 추가? → contracts 인터페이스 → public·local 어댑터 둘 다 구현(또는 한쪽 `notWiredYet` 정직 게이트). silent fallback 금지.
+- [ ] **새 데이터 포트** 추가? → contracts 인터페이스 → public·local 어댑터 둘 다 구현(또는 한쪽 `notWiredYet` 게이트). silent fallback 금지.
 
 ### 9.3 commit 전 검증 게이트 (싼 것부터)
 

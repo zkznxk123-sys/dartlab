@@ -1,13 +1,13 @@
 # Simulate — 미래 리플레이 시뮬레이터 PRD Index
 
-상태: 비전 PRD v0.5 (스위트 버전 — 2026-06-20 9인 전문가 패널 uplift: 시각 인코딩 SSOT·Driver Coverage Census·G16 Calibration·valuation coherence·라이프사이클 dispatch·초보 학습성 3종 *가산* 적용, **새 파일 추가 0 = 기존 문서 내 절/소절/표 행 신설만**, 정직 척추 절은 불변 / 직전 v0.4 2026-06-14 구현 정합 정정: simulate/ 결정론 코어 졸업[4노드 DAG·random.Random·proforma-FCFF·공개 verb] 반영 + 문서↔코드 발산 정합)
+상태: 비전 PRD v0.5 (스위트 버전 — 2026-06-20 9인 전문가 패널 uplift: 시각 인코딩 SSOT·Driver Coverage Census·G16 Calibration·valuation coherence·라이프사이클 dispatch·초보 학습성 3종 *가산* 적용, **새 파일 추가 0 = 기존 문서 내 절/소절/표 행 신설만**, 검증 척추 절은 불변 / 직전 v0.4 2026-06-14 구현 정합 정정: simulate/ 결정론 코어 졸업[4노드 DAG·random.Random·proforma-FCFF·공개 verb] 반영 + 문서↔코드 발산 정합)
 범위: 과거 근거 → 미래 시뮬레이션. 거시·지수·뉴스·공시·재무를 미래로 투영하고, if(가정)를 켜고/끄며, **재생버튼으로 미래가 시간순으로 펼쳐지는 퍼포먼스**를 결과물로 내는 DartLab의 정점 기능.
 
 ---
 
 ## 한 줄 결정
 
-이 기능은 "주가 예측기"가 아니다. `asOf` 시점에 알려진 근거와 명시 가정을 고정한 뒤, **재생버튼을 누르면 그 가정 하에서 미래가 시간순으로 펼쳐지는(주가·사건·지표·재무) 결정론적 리플레이 퍼포먼스**다. 핵심 명제: *미래를 맞히려는 게 아니라, 명시된 가정 하에서 무슨 일이 벌어질 수 있는지를 확률 분포로 정직하게 보여준다.* scenario ≠ forecast.
+이 기능은 "주가 예측기"가 아니다. `asOf` 시점에 알려진 근거와 명시 가정을 고정한 뒤, **재생버튼을 누르면 그 가정 하에서 미래가 시간순으로 펼쳐지는(주가·사건·지표·재무) 결정론적 리플레이 퍼포먼스**다. 핵심 명제: *미래를 맞히려는 게 아니라, 명시된 가정 하에서 무슨 일이 벌어질 수 있는지를 확률 분포로 있는 그대로 보여준다.* scenario ≠ forecast.
 
 ---
 
@@ -20,14 +20,14 @@
 - **★차트 suite 분리(2026-06-14)**: 현재/과거 차트 3 컴포넌트(주가/지수 차트·공시 이벤트 레일·백테스팅)는 **`../_done/terminal-chart-suite/`로 분리**(시간축 절단면 — 현재/과거=suite, 미래=시뮬). 셋은 시뮬 미완 게이트와 무관하게 독립 출시 가능. 시뮬 Play(05)가 suite를 **단방향 소비**(역참조 0). → [../_done/terminal-chart-suite/README.md](../_done/terminal-chart-suite/README.md).
 - **통합 시퀀싱(브리지)**: 지수(suite/01) → 공시 이벤트 레일(suite/02) → 백테스팅 Strategy Tester(suite/03) → 시뮬레이션+Play(시뮬 코어, 4). 07이 cross-category 브리지(시퀀스·공유 DNA·미래마커 이관). mainPlan(ui/packages 승격) 이후 착수. 단 차트는 mainPlan 무관 선행 가능. → [07-integration-roadmap.md](07-integration-roadmap.md).
 - **착수 전 선결 kill-test — ✅ 완료(2026-06-14)**: ★MC 재현성(`_simMonteCarlo.py:145`·`pricetarget.py:278` 전역 `random.seed` → 로컬 `random.Random(seed)`, **stdlib·pyodide 안전 — numpy PCG64 아님**) + `:205` 덮어쓰기 버그 → 연도별 cumprod(`test_horizon_widens_cone` kill-test로 옛 버그 증명 후 전환). 단 이 수정은 *레거시 MC 경로*(`analysis/forecast/_simMonteCarlo`) 한정 — **신생 `simulate/` 결정론 코어에는 MC 노드가 아직 없다**(mc.distribution 후속 단계, 01 §5b). Play 결정론·URL 공유·TS 패리티의 척추. 09 P1.
-- **경쟁 지형 + 시그니처 판정(2026-06-14, 웹검증 6서비스 + 12 agent 토론)**: 단일 제품도 우리 4축 조립(텍스트=untrusted 드라이버증거→결정론 pro-forma + det/ai 평행경합+Brier + forward-replay + reverseDCF 닻)을 다 안 함 — 단 부품(특히 융합)은 commodity라 **차별은 기술이 아니라 "조립+규율"**. 시그니처 = **`conditional-signature`(합의 61, KEEP 조건부)**: wedge는 실재(reverseDCF 닻+L2.5 앵커=코드, 경쟁 교집합 비어있음)하나 검증 루프가 미완이라 "strong-signature가 아니라 될 설계". 타사 개념 흡수 = **absorb-as-defer 4종**(A1 명명프리셋·A2 충격전파·A4 라이브레버·A7 Brier리더보드) + reject 잔여가드(A5 점확률·A6 fan σ) — 전부 *새 기능 0, 정직-라벨/defer-게이트*로만("깎아서 강함"). 전문 = 00 §8b, 흡수 거처 = 02·01·05·03·04.
+- **경쟁 지형 + 시그니처 판정(2026-06-14, 웹검증 6서비스 + 12 agent 토론)**: 단일 제품도 우리 4축 조립(텍스트=untrusted 드라이버증거→결정론 pro-forma + det/ai 평행경합+Brier + forward-replay + reverseDCF 닻)을 다 안 함 — 단 부품(특히 융합)은 commodity라 **차별은 기술이 아니라 "조립+규율"**. 시그니처 = **`conditional-signature`(합의 61, KEEP 조건부)**: wedge는 실재(reverseDCF 닻+L2.5 앵커=코드, 경쟁 교집합 비어있음)하나 검증 루프가 미완이라 "strong-signature가 아니라 될 설계". 타사 개념 흡수 = **absorb-as-defer 4종**(A1 명명프리셋·A2 충격전파·A4 라이브레버·A7 Brier리더보드) + reject 잔여가드(A5 점확률·A6 fan σ) — 전부 *새 기능 0, 한계 라벨/defer-게이트*로만("깎아서 강함"). 전문 = 00 §8b, 흡수 거처 = 02·01·05·03·04.
 
 ---
 
 ## 문서 지도
 
 **코어 (시뮬레이터 엔진·방법·검증):**
-1. [00-product-prd.md](00-product-prd.md) — 제품 비전, 사용자 문제, 핵심 화면, 범위, scenario ≠ forecast 정직 척추.
+1. [00-product-prd.md](00-product-prd.md) — 제품 비전, 사용자 문제, 핵심 화면, 범위, scenario ≠ forecast 검증 척추.
 2. [01-engine-architecture.md](01-engine-architecture.md) — 엔진 거처 L2.5 `simulate/`·verb·AI 보완/경합·성능·횡단면·계층 계약.
 3. [02-assumption-and-simulation-method.md](02-assumption-and-simulation-method.md) — 가정 장부·vintage·bridge·절차 + §2B DriverRegistry 수렴/확장.
 4. [03-validation-ai-review.md](03-validation-ai-review.md) — look-ahead 차단·walk-forward·품질 게이트·AI 패널·반증·출시 기준.
@@ -53,8 +53,8 @@
 
 문서별 버전이 어긋나 혼란을 막기 위한 단일 규칙:
 
-- **스위트 버전 = `v0.5`**(2026-06-20 — 9인 전문가 패널 uplift). 직전 v0.4(2026-06-14, 결정론 코어 졸업 정합)에 9인 전문가 패널의 개선 백로그를 *가산 적용*(새 파일 추가 0 = 기존 문서 내 절/소절/표 행 신설만): 시각 인코딩 SSOT 단일화(00 R8/R4 시각 문법·와이어프레임 포인터, 08 §3.2·05 정본)·Driver Coverage Census(회계품질 leaf 2종을 앵커 binding 게이트 안으로, 09 §0 표 7~8행 R3)·G16 Calibration(walk-forward DSR/PBO 과최적화 정직 게이트, 09 §10.3 R10)·valuation coherence(`_fnDcf` WACC-floor 0.5→dcf.py SSOT 1.0 통일, 09 §6 R16)·라이프사이클 dispatch(ScreenerModal→PriceChart 드릴다운 soft-swap, 00 §6.4 R23)·초보 학습성("경량 근사→정밀 딥다이브" toast·mini fan-spark 분위 sparkline, 00 §6.4). **개별 문서 헤더는 그 문서가 마지막으로 *내용 개정*된 시점의 minor를 단다**(README/09 = v0.5 수준 본 uplift 반영, 01/02/04/08 = v0.4 수준, 00/03/05 = uplift 가 닿은 절만 v0.5 라벨). 스위트 버전이 정본 — 개별 헤더는 *그 문서가 어디까지 따라왔나*의 표식이다.
-  - **★R36 — version-header drift 정정(2026-06-20, 본문 불변·status 줄 표식만):** 정책이 "헤더=마지막 내용개정 minor"라 선언하나 실측 헤더는 `00`=「v0.2 정정 헤더」·`03`=「v0.2 정정」·`09`=「v0.3」로, 본문은 그보다 신선한 내용(00 v0.5 시각 문법·09 v0.5 R3~R51·03 v0.3 발간게이팅)을 담는다 = "표식" 주장과 byte 불일치. 봉합 = status 줄에 *마지막으로 따라온 minor 표식*을 1줄씩 append 해 README enum 과 정합: **`09`:3 끝 `+2026-06-20 v0.5`(✅ 본 라운드 적용 — 본 문서 owner)**, **`00`:3 끝 `+2026-06-20 v0.5 uplift`·`03`:3 「v0.2 정정」→「v0.2+v0.3 정정」(00/03 doc-owner 의 status-줄 sync — 본문 불변, 표식만)**. 본 README enum 이 그 표식의 SSOT — 헤더 minor 와 본문 내용의 gap 을 "2층 헤더(아래 줄)+status 표식"으로 정직하게 노출하지, 숨기지 않는다.
+- **스위트 버전 = `v0.5`**(2026-06-20 — 9인 전문가 패널 uplift). 직전 v0.4(2026-06-14, 결정론 코어 졸업 정합)에 9인 전문가 패널의 개선 백로그를 *가산 적용*(새 파일 추가 0 = 기존 문서 내 절/소절/표 행 신설만): 시각 인코딩 SSOT 단일화(00 R8/R4 시각 문법·와이어프레임 포인터, 08 §3.2·05 정본)·Driver Coverage Census(회계품질 leaf 2종을 앵커 binding 게이트 안으로, 09 §0 표 7~8행 R3)·G16 Calibration(walk-forward DSR/PBO 과최적화 검증 게이트, 09 §10.3 R10)·valuation coherence(`_fnDcf` WACC-floor 0.5→dcf.py SSOT 1.0 통일, 09 §6 R16)·라이프사이클 dispatch(ScreenerModal→PriceChart 드릴다운 soft-swap, 00 §6.4 R23)·초보 학습성("경량 근사→정밀 딥다이브" toast·mini fan-spark 분위 sparkline, 00 §6.4). **개별 문서 헤더는 그 문서가 마지막으로 *내용 개정*된 시점의 minor를 단다**(README/09 = v0.5 수준 본 uplift 반영, 01/02/04/08 = v0.4 수준, 00/03/05 = uplift 가 닿은 절만 v0.5 라벨). 스위트 버전이 정본 — 개별 헤더는 *그 문서가 어디까지 따라왔나*의 표식이다.
+  - **★R36 — version-header drift 정정(2026-06-20, 본문 불변·status 줄 표식만):** 정책이 "헤더=마지막 내용개정 minor"라 선언하나 실측 헤더는 `00`=「v0.2 정정 헤더」·`03`=「v0.2 정정」·`09`=「v0.3」로, 본문은 그보다 신선한 내용(00 v0.5 시각 문법·09 v0.5 R3~R51·03 v0.3 발간게이팅)을 담는다 = "표식" 주장과 byte 불일치. 봉합 = status 줄에 *마지막으로 따라온 minor 표식*을 1줄씩 append 해 README enum 과 정합: **`09`:3 끝 `+2026-06-20 v0.5`(✅ 본 라운드 적용 — 본 문서 owner)**, **`00`:3 끝 `+2026-06-20 v0.5 uplift`·`03`:3 「v0.2 정정」→「v0.2+v0.3 정정」(00/03 doc-owner 의 status-줄 sync — 본문 불변, 표식만)**. 본 README enum 이 그 표식의 SSOT — 헤더 minor 와 본문 내용의 gap 을 "2층 헤더(아래 줄)+status 표식"으로 있는 그대로 노출하지, 숨기지 않는다.
   - **★R43 — stale SSOT-boundary leak 정정(2026-06-20):** 직전 enum 이 *현존하지 않는 `06`* 을 포함(`06=v0.4 수준`)했으나 `06`(지수 차트)은 `../_done/terminal-chart-suite/01` 로 git mv 되어 시뮬 namespace 에 부재(실측 = `00-05/07-09` 만 존재). ⟹ 위 enum 에서 `06` 삭제 완료(`01/02/04/08=v0.4 수준`) + 경계 명시: **`06/10/11` = suite 분리 컴포넌트(전 06 지수→suite/01·전 11 레일→suite/02·전 10 백테스팅→suite/03), 별도 버전 라이프사이클** — 위 「레거시 참조 별칭」 규약(`06 §X`=`suite/01 §X` 등) 으로만 참조. 시뮬 버전 namespace 와 suite namespace 의 경계를 정책 줄에서 명시(분리 선언과 자기모순 해소).
 - **minor 범프(0.x→0.x+1)** = 코드-그라운드 사실 정정 또는 새 결정이 한 문서 이상에 반영될 때. **patch(문구·오타)** = 헤더 갱신 없이 본문만 수정. **major(1.0)** = 본진 `simulate/` 졸업 + 발간 게이트가 *기계 강제*로 검증된 뒤(현 미충족 → 09 §10 fatal①~④: 발간표면 투자권유 lint[★T1 빌드·배선 완료]·forward-test write 끝단·gate/ledger/admission/lens·US 해금) **+ ⑤ simulate↔leaf 계약 drift 자동인식(`test_simulate_leaf_binding`, 앵커 순방향, 09 §6·P16)** — 엔진 변환 시 simulate silent 깨짐 0 의 5번째 conformance 표면.
 - **2층 헤더(v0.1 본문 + v0.2 정정)** = 정정 헤더가 본문보다 우선(00·03). 정정 헤더가 정본, 본문은 미개정 잔재로 읽는다.
@@ -62,9 +62,9 @@
 
 ---
 
-## 정직 척추 (전 문서 관통)
+## 검증 척추 (전 문서 관통)
 
 거시·beta·뉴스의 미래는 **예측하지 않고 가정으로 받는다**(scenario ≠ forecast). 회계 항등식(BS 균형·CF 재조정)만 강하게 주장한다. 단일 점추정 금지(fan chart 기본). 결손은 0 대체 금지(missing/blocked/partial 라벨). AI 숫자는 fact 미승격(hypothesis). look-ahead 차단(t종가신호 → t+1시가). 출력에 추천/단정 표현 금지. 본진엔 졸업 게이트 통과 전까지 0줄(시작 = `tests/_attempts/scenarioSimulator/`).
 
-- **★R58 — 근사/미검증 라벨 접근성 (색무관 텍스트 항상 동반 + 200% 확대, 2026-06-20, 적대 레드팀).** 근사·미검증 구간을 amber(`var(--amber, #fb923c)`) 11px 점선 배지로 박는 규율(05 §1.1·08 §3.4)은 통과하나, *11px amber 점선만이 유일 신호*일 때 두 접근성 결함이 생긴다: (1) WCAG SC 1.4.1 — 의미가 "amber 색 + 점선 테두리" 두 *시각* 채널뿐이라 스크린리더(SR) 미도달·색맹 사각, (2) SC 1.4.4 — 11px 가 텍스트 200% 확대 대응 미명시. ⟹ 정직 척추에 박는다: **`근사`(또는 `미검증`) 텍스트 라벨을 색과 무관히 *항상* 동반**(amber 는 강조지 *정보의 유일 운반체가 아님* — 텍스트가 SR·색맹·흑백 인쇄 모두에 도달) + **200% 확대 시 11px→레이아웃 깨짐 0**(배지가 줄바꿈/overflow 없이 확대 — 05/08 amber 배지 전수로 확장, 일부만 명시된 것을 전 배지 규율로). 새 색·새 컴포넌트 0(기존 amber 토큰·기존 배지 재사용 = 텍스트 라벨 1개 동반만).
+- **★R58 — 근사/미검증 라벨 접근성 (색무관 텍스트 항상 동반 + 200% 확대, 2026-06-20, 적대 레드팀).** 근사·미검증 구간을 amber(`var(--amber, #fb923c)`) 11px 점선 배지로 박는 규율(05 §1.1·08 §3.4)은 통과하나, *11px amber 점선만이 유일 신호*일 때 두 접근성 결함이 생긴다: (1) WCAG SC 1.4.1 — 의미가 "amber 색 + 점선 테두리" 두 *시각* 채널뿐이라 스크린리더(SR) 미도달·색맹 사각, (2) SC 1.4.4 — 11px 가 텍스트 200% 확대 대응 미명시. ⟹ 검증 척추에 박는다: **`근사`(또는 `미검증`) 텍스트 라벨을 색과 무관히 *항상* 동반**(amber 는 강조지 *정보의 유일 운반체가 아님* — 텍스트가 SR·색맹·흑백 인쇄 모두에 도달) + **200% 확대 시 11px→레이아웃 깨짐 0**(배지가 줄바꿈/overflow 없이 확대 — 05/08 amber 배지 전수로 확장, 일부만 명시된 것을 전 배지 규율로). 새 색·새 컴포넌트 0(기존 amber 토큰·기존 배지 재사용 = 텍스트 라벨 1개 동반만).
   - **★코드 정본 정정(배경 토큰 SSOT 분리, R17 동일 SSOT):** 근사 배지의 거처 = ReportDock(=`StrategyDock.svelte` fill 일반화)이며 그 배경 fallback 리터럴은 **`var(--dl-bg-base, #0a0e15)`·`var(--dl-bg-raised, #0e141f)`**(`StrategyDock.svelte:396/441/470` 등 실측 = ReportDock-local fallback). ⚠ 이 두 값은 *StrategyDock fallback 리터럴*이지 **글로벌 토큰 SSOT 가 아니다** — `ui/packages/design/src/styles/tokens.css:17-18` 의 canonical `--dl-bg-base: #0f0f10`/`--dl-bg-raised: #16171a` 와 *다르다*(터미널 surface 가 자기 fallback 을 별도 박은 표면, 실측 drift). 따라서 README 가 배경 토큰을 인용할 때는 "ReportDock fallback = `#0a0e15`/`#0e141f`(StrategyDock 실측), 글로벌 토큰 SSOT = `#0f0f10`/`#16171a`(tokens.css)" 로 *두 층을 분리*해 적는다(한쪽을 SSOT 로 오인=환각 — rank17 토큰 인용과 동일 규율). amber=`#fb923c`(`--amber` fallback, `terminal.css:777` 등 실측)는 단일 SSOT 일치.

@@ -10,7 +10,7 @@
 | d | HA 모드(`ctl.candleStyle==='ha'`) → 버튼 비활성 | 함정 4a (합성봉) |
 | e | 리플레이 ON(`ctl.replay.on`) → 버튼 비활성 | 함정 4b (리플레이 절단) |
 | f | turnover 컬럼 미출력(OHLCV-only) | 함정 5 (1e8 단위 거짓) |
-| g | CSV 왕복: BOM + 콤마 이스케이프(`csvExport escapeCell`)로 pandas 등가 리더가 깨끗이 파싱, null 거래량 셀=빈칸(0 아님) | 결손 정직 |
+| g | CSV 왕복: BOM + 콤마 이스케이프(`csvExport escapeCell`)로 pandas 등가 리더가 깨끗이 파싱, null 거래량 셀=빈칸(0 아님) | 결손 빈셀 |
 | h | 클릭 시점 `chart` non-null 가드 (getDataList 최초 사용·0 prior call) | 런타임 안전 |
 
 > 핵심: 테스트 a 는 **백필 divergence** 를 반드시 유발해야 한다. "17개사 LRU eviction" 만으로는 재진입 시 prop/getDataList 가 재-seed 로 수렴해 버그 직렬화기에도 PASS 하므로 함정 1 을 못 잡는다.

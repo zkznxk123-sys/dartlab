@@ -274,7 +274,7 @@ strip 을 **빠르게**가 아니라 **언제·어디서 하나**로 푼다 — 
 - **계산 위치 = panel 자급** — cell.py 가 core(L0)만 import(finance/reference 0, R1 유지). standalone
   `Panel(code)("ratios")` 도 동작. snakeId 버킷 = 읽은 statement(BS/IS/CF) — `standardAccounts.sj` COMMON 모호
   회피. 단위는 동일 표 항목 몫이라 상쇄.
-- **정직성** — 밸류에이션(PER/PBR)은 price 미보유로 제외(statement-only: 수익성/안정성/효율성/현금흐름/복합/
+- **제외 범위** — 밸류에이션(PER/PBR)은 price 미보유로 제외(statement-only: 수익성/안정성/효율성/현금흐름/복합/
   성장). 매핑 갭은 그 비율만 해당 period None(숨김 0) — 갭은 core `accountMappings.json` 보강(panel-local 0).
 
 ### 주석 수평화 (de-chunk 분할 + alignNotes 정렬) — 옛 통짜 주석을 최근 XBRL 뼈대로

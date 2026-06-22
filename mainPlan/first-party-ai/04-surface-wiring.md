@@ -36,7 +36,7 @@ viewer 는 이미 ask(Tier0+WebGPU)를 가진 유일 surface다. 본 PRD 에서 
 - **킬러 가치 = selection-as-evidence("복붙 없는 근거").** 사용자가 보던 셀·차트 커서·선택 섹션이 `evidence`(EvidenceSelection)로 그대로 grounding 이 된다. BYO-key 챗봇은 이 컨텍스트가 없어 복붙을 요구한다. 퍼블릭에서 *키0·로그인0* 으로 "이 화면 그대로, 즉답" 이 경쟁사가 못 하는 한 수(00 §4.3).
 - 퍼블릭 ask 의 가치는 *실행이 아니라 해석* 으로 완결된다 — "왜 마진 빠졌나", "동종 대비 어디 서나" 는 read-only 로 충분히 가치. (실행 명령은 advanced 영역, 아래.)
 - 터미널은 지금 AI 호출 0(전량 결정론 포트). 본 배선이 첫 AI 진입 — 단 **결정론 계기판은 불변**, ask 는 *그 위에 얹는* 질의 레인.
-- terminal mode 의 tool-calling(서비스 커맨드 실행)은 `advanced`(로컬) 전용(01 §2·§5 사다리 밖). 퍼블릭 터미널 ask 는 *분석 서술* 까지(커맨드 실행 X). 이 경계를 capabilities `toolCalling`+`upgradeHint`("로컬에서 실행 명령 가능")로 정직 표시.
+- terminal mode 의 tool-calling(서비스 커맨드 실행)은 `advanced`(로컬) 전용(01 §2·§5 사다리 밖). 퍼블릭 터미널 ask 는 *분석 서술* 까지(커맨드 실행 X). 이 경계를 capabilities `toolCalling`+`upgradeHint`("로컬에서 실행 명령 가능")로 명시 표시.
 - **킬러 합격선(R2 혁신성 — 킬러 자리에 측정).** selection 주입 ask 가 복붙 ask 대비 ① *근거 정확도*(선택 셀이 실제 답 근거에 포함된 비율) ② *시간*(질문→근거포함답 도달, 복붙 0초) ③ grounded 통과율에서 우위. 일반론 체감차(03 §6)가 아니라 *킬러 자체* 의 성공기준이 여기 박힌다.
 - 회귀 가드: ask 입력은 추가 UI일 뿐 기존 패널 0 변경.
 
@@ -106,7 +106,7 @@ report 로드: 결정론 섹션 + baked 리드(lead.asOf === bundle.asOf 일 때
 
 **공통 규칙**: 어느 surface도 webllm/edge/fetch 를 직접 부르지 않는다. `runtime.ai` 만. surface 안 `runtime.env.kind`·티어 분기 코드 금지(02 §1 계승) — 티어는 표시(배지)에만.
 
-**baked vs live 의 사용자 체감(R1 혁신 해소)**: baked = *보이지 않는 품질 향상*(잘 쓰인 정적 텍스트, "AI 가 썼다" 마케팅 금지 — 사용자는 AI 개입을 몰라도 됨). live = *보이는 AI 능력*(터미널 ask·report "더 풀어줘"). **신경험 주장은 live 두 곳에만 건다** — baked 를 "AI 기능" 으로 과장하면 K4·정직 척추 위반. 제품의 AI 다움 간판 = 터미널 selection-grounded ask(§2).
+**baked vs live 의 사용자 체감(R1 혁신 해소)**: baked = *보이지 않는 품질 향상*(잘 쓰인 정적 텍스트, "AI 가 썼다" 마케팅 금지 — 사용자는 AI 개입을 몰라도 됨). live = *보이는 AI 능력*(터미널 ask·report "더 풀어줘"). **신경험 주장은 live 두 곳에만 건다** — baked 를 "AI 기능" 으로 과장하면 K4·한계 표기 원칙 위반. 제품의 AI 다움 간판 = 터미널 selection-grounded ask(§2).
 
 ---
 

@@ -120,7 +120,7 @@ selection은 `ExportInput.selections`(03 §2) DTO로 직렬화 → `generate`. `
 ## 6. 3 표면 UX — 같음/다름
 
 같아야: 선택 인터랙션(셀/TOC 체크박스·드로어·드래그·모드 토글)은 **3 표면 100% 동일**. `ViewerStudio`는 `embedded` prop으로 터미널/공개를 같은 본체로 마운트 → selection UI는 공통, 다운로드 백엔드만 분기.
-다름: 포맷 충실도(공개=zero-dep .xlsx, 로컬=openpyxl 완전판 스타일) — 03 §7 tier UX로 정직 표기.
+다름: 포맷 충실도(공개=zero-dep .xlsx, 로컬=openpyxl 완전판 스타일) — 03 §7 tier UX로 명시.
 
 ---
 

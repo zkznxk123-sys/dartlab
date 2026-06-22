@@ -8,14 +8,14 @@
 - **delta 세그먼트 폐기 → compact-only**: 병합 로직 2벌(Python+JS) → 0벌. 신규 공시는 매일 catalog compaction(`rebuildMainFromCatalog`, 평문 ~4분)으로 main 반영.
 - **npz 폐기 → STORED sidecar 단일 SSOT**: Python도 `loadShardedSegment`로 CSR 무손실 복원(_scoreBM25 그대로). postings 2벌→1벌, 디스크 −132MB.
 - **단일 choke point**: `saveSegmentWithSidecar`(유일 writer) + `indexPublishNames`/`_segmentFiles`(파일명 SSOT). 생성·열거 11곳 → 1 helper.
-- **못 깎음(정직)**: meta 2벌(parquet=엔진 전체스캔 / meta.bin=브라우저 top-k, 접근패턴 상이) · STORED 형식 불가피(무서버 range) · `fieldIndexRebuild.py` >800 LoC(별도 분할 과제).
+- **못 깎음(한계)**: meta 2벌(parquet=엔진 전체스캔 / meta.bin=브라우저 top-k, 접근패턴 상이) · STORED 형식 불가피(무서버 range) · `fieldIndexRebuild.py` >800 LoC(별도 분할 과제).
 - 정량: 인덱스당 파일 20→8, postings 2→1, 병합 2→0, 열거 11→1, ~580 LoC 삭제(목표), pip 영향 0.
 
 ## 4 기둥
 1. **엔진**: compact-only + sidecar SSOT + choke point (위).
 2. **파이프라인**: catalog always-compact 단일 워크플로(`searchIndexBuild`) — 매일 catalog diff → 변화 시 main 재빌드+clean publish, 무변화 시 manifest re-point. per-source 하한 가드 + legacy raw 제거 + 항상 manifest-pointer.
 3. **공통배선**: `createSearchPort(createDataCore())` 퍼블릭/로컬 동일·HF 직독(완료). UI main-only.
-4. **UI/UX**: cmdBar(종목점프) 불변 + 신규 `FilingSearchDialog`(커맨드팔레트, `⌘⇧F`+statusBar). 행 클릭=`pick(stockCode)` soft-swap + dart/edgar "원문 ↗". lazy 콜드 stats. 퍼블릭/로컬 동일. 정직 한계: 본문 직행 불가(회사점프+외부링크 floor)·회사인덱스 검색 없음(cmdBar).
+4. **UI/UX**: cmdBar(종목점프) 불변 + 신규 `FilingSearchDialog`(커맨드팔레트, `⌘⇧F`+statusBar). 행 클릭=`pick(stockCode)` soft-swap + dart/edgar "원문 ↗". lazy 콜드 stats. 퍼블릭/로컬 동일. 기능 한계: 본문 직행 불가(회사점프+외부링크 floor)·회사인덱스 검색 없음(cmdBar).
 
 ## 진행 원장 (as-built)
 - ✅ **P0** 엔진 양읽기 — `loadShardedSegment`(벡터 varint-decode) + `loadSegment` 양읽기 + round-trip/BM25 parity 테스트. **실데이터 475,968 docs array-equal + 5쿼리 BM25 byte-parity** 검증. 콜드 npz 1.2s vs sharded 9.2s. commit `ef17da7e0`.
@@ -23,11 +23,11 @@
 - ✅ **P1-UI** main 단일 — filingSearch.ts delta 병합·dedup 제거(−33 LoC), manifest pointer resolve 유지. tsc 0. commit `1f9cb8d7f`.
 - ✅ **P1-pipeline** — `buildSearchMain.py`에 no-change 단락(previous==current+이전 manifest clean→pointer만 re-point, delta 잔존시 clean 풀압축 강제)+per-source 하한 가드(allFilings130k/panel70k/edgar40k/news70k, env 대체)+`indexPublishNames` clean publish(previousManifestPath seed 안함→fileSources delta키0). `buildSearchDelta.py`(374) 삭제. `searchIndexMain.yml`+`searchIndexDelta.yml`→**단일 `searchIndexBuild.yml`**(일간 cron+월간 cron force_full+4 source workflow_run+build_mode catalog/legacy[operator-only recovery]·gate 일간·workflow_run=ops/월간·수동=release). `checkSearchRemoteEvidence` delta키0 assert. 로컬 활성/해상(resolveActiveIndexDir/selfcheck/_activeIndexDir/ensureContentIndex)을 main.npz→**main.postings.bin(sidecar SSOT)|legacy npz** 판정으로 전환(sidecar-only 오판 회귀 수정). `_encodeVarintArray` 빈 스트림 가드. monitor·planSearchBootstrap·drill/roundtrip·테스트 정합. **424 search/pipeline 테스트 green**. commit `b55003fe6`. ⏳cron 변경+searchIndexBuild 1회 실행(HF flip)=운영자.
 - ✅ **P2** npz 완전 폐기 — `saveSegment`(npz writer) 삭제→`writeSegmentCompanions`(stems/info/parquet, npz 없음)·`saveSegmentWithSidecar`=companions+sidecar(=postings SSOT) 단일 writer·`loadSegment` sidecar 전용(npz fallback 제거)·`_CORE_POSTINGS_ANY`/`_hasMainPostings`=postings.bin 단독. **INDEX_SCHEMA_VERSION 유지(=3, bump 안 함)** — npz→sidecar 는 직렬화 변경일 뿐 CSR/토크나이저/BM25 동일(byte-parity), bump 시 flip 직후 v3 sidecar 를 v4 라이브러리가 거부(compatibleMax 위반)하는 자해라 의도적 비-bump(플랜 §10 deviation). 테스트 12개 npz→sidecar 정합. **195 search + 260 engine 테스트 green · sidecar-only 검색 end-to-end 실측**. commit `53e13f60a`. ⚠**flip 전 미배포** — P0 PyPI(dual-read)+P1 HF flip 후에만 PyPI 발행(미push, P0 발행은 본 커밋 이전 commit/tag 에서 빌드).
-- ✅ **P3** `FilingSearchDialog.svelte`(커맨드 팔레트 ⌘⇧F+statusBar) + TerminalSurface 4지점(import·state·onDocKey ⌘⇧F·statusBar 버튼·마운트). useDartLabRuntime().search 경유·140ms 디바운스+stale 토큰·lazy 콜드·행 클릭 soft-swap+원문↗(DART rcpNo/EDGAR 회사브라우즈)·최근검색·정직 한계 라벨. 전 스타일 컴포넌트 scoped(terminal.css 무변경). **svelte-check 0 err·runtime tsc·checkUiDataWiring PASS**. commit `d0609517f`. ⏳운영자 dev 눈검수+push.
+- ✅ **P3** `FilingSearchDialog.svelte`(커맨드 팔레트 ⌘⇧F+statusBar) + TerminalSurface 4지점(import·state·onDocKey ⌘⇧F·statusBar 버튼·마운트). useDartLabRuntime().search 경유·140ms 디바운스+stale 토큰·lazy 콜드·행 클릭 soft-swap+원문↗(DART rcpNo/EDGAR 회사브라우즈)·최근검색·기능 한계 라벨. 전 스타일 컴포넌트 scoped(terminal.css 무변경). **svelte-check 0 err·runtime tsc·checkUiDataWiring PASS**. commit `d0609517f`. ⏳운영자 dev 눈검수+push.
 
 ## 배포 순서 (운영자 게이트 — 코드는 전부 구현·검증 완료, 남은 건 배포 액션뿐)
 1. P0 → PyPI 선배포(dual-read). **본 커밋 이전 commit/tag(예 `1f9cb8d7f`)에서 빌드** — P2(`53e13f60a`)가 HEAD 라 HEAD 빌드 금지. 2. P1 push(`b55003fe6`) + `searchIndexBuild` 1회(clean publish→HF sidecar-only flip) + cron 변경. 3. P2 push(`53e13f60a`) + PyPI 발행(dual-read 전파+flip 후). 4. P3 push(`d0609517f`, dev 눈검수 후).
 **현재 미push 3(이번 세션): `b55003fe6`(P1-pipeline) · `d0609517f`(P3·UI) · `53e13f60a`(P2)** — 전부 운영자 push/발행 게이트. P0/P1-engine/P1-UI+PRD는 origin/master.
 
-## 정직한 미해소
+## 미해소 한계
 본문 직행 진입(ViewerStudio rceptNo prop 부재·후속) / 회사인덱스 검색(cmdBar) / snippet 고정 400자 / `fieldIndexRebuild` >800 LoC.

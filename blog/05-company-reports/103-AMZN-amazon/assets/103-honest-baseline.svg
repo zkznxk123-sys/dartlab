@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" font-family="-apple-system, 'Segoe UI', sans-serif">
-  <title>6.6배는 붕괴저점 cherry-pick — 정직하게는 약 2.1배</title>
-  <desc>2022년 영업이익률 2.4%는 데이터 자신이 붕괴라 부른 비정상 저점이다. 이를 출발선 삼으면 영업이익 6.6배라는 과장이 나오지만, 정직한 기저(2019 5.2%·2021 5.3%) 대비 2025년 11.2%는 약 2.1배다.</desc>
+  <title>6.6배는 붕괴저점 cherry-pick — 왜곡 없이 보면 약 2.1배</title>
+  <desc>2022년 영업이익률 2.4%는 데이터 자신이 붕괴라 부른 비정상 저점이다. 이를 출발선 삼으면 영업이익 6.6배라는 과장이 나오지만, 왜곡 없는 기저(2019 5.2%·2021 5.3%) 대비 2025년 11.2%는 약 2.1배다.</desc>
   <rect width="1200" height="660" fill="#0a0e1a"/>
   <text x="600" y="54" fill="#f1f5f9" font-size="30" font-weight="700" text-anchor="middle">출발선을 어디 두느냐의 함정</text>
   <text x="600" y="88" fill="#64748b" font-size="16" text-anchor="middle">연결 OPM — 2022는 붕괴저점이지 출발선이 아니다</text>
@@ -28,7 +28,7 @@
   <text x="165" y="612" fill="#64748b" font-size="13">"망했다 부활" 드라마 — 과장</text>
 
   <rect x="630" y="450" width="450" height="180" rx="12" fill="#0f1a17" stroke="#22c55e" stroke-width="2"/>
-  <text x="855" y="486" fill="#22c55e" font-size="18" font-weight="700" text-anchor="middle">✓ 정직한 기저</text>
+  <text x="855" y="486" fill="#22c55e" font-size="18" font-weight="700" text-anchor="middle">✓ 왜곡 없는 기저</text>
   <text x="655" y="522" fill="#f1f5f9" font-size="16">정상 기저(5%대) → 2025(11.2%)</text>
   <text x="655" y="552" fill="#22c55e" font-size="20" font-weight="700">OPM 약 2.1배</text>
   <text x="655" y="586" fill="#94a3b8" font-size="14">2019 5.2%·2021 5.3%이 진짜 출발선</text>

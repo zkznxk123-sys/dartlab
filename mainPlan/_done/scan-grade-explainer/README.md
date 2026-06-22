@@ -3,13 +3,13 @@
 > ✅ **완료 (2026-06-15)** — 구현·검증·푸시 완료(origin/master). 단 *as-built 는 본 PRD 를 확장 supersede*: 「좌 레이더 + 우 근거 + 아래 기준」 골격은 유지하되, 운영자 정정으로 **10~12 종합(composite) 등급축 SSOT(`engine.ts COMPOSITE_AXES`)** 로 통일하고 등급 기준의 근거를 **「축 자체의 동종업종 백분위(midrank) + 등급레벨 분포 막대」** 로 구현했다(원시지표 백분위는 우측 패널·다른 세션 영역). 현금흐름(분류)은 영업/투자/재무 부호로 수평 표기, 색은 터미널 토큰만. 설계 근거 보존용 보관(현역 런북 아님). 구현 SSOT = `ui/packages/surfaces/src/terminal/`(`lib/engine.ts`·`lib/gradeGuide.ts`·`panels/GradeExplainDialog.svelte`).
 
 상태: v0.1 (2026-06-14, 4-ground 코드 실측 + 4렌즈 토론 + 적대검증 5)
-범위: 터미널 per-company **스캔 등급 패널**의 설명 다이얼로그 — 헤더 클릭 → 좌 스파이더(레이더) / 우 "왜 이 등급"(근거) / 아래 등급 기준(주석). + 등급 수 정직 판정.
+범위: 터미널 per-company **스캔 등급 패널**의 설명 다이얼로그 — 헤더 클릭 → 좌 스파이더(레이더) / 우 "왜 이 등급"(근거) / 아래 등급 기준(주석). + 등급 수 판정.
 
 ---
 
 ## 한 줄 결정
 
-스캔등급 설명 다이얼로그(레이더+근거+기준)는 **dartlab 정직/provenance 사상 그 자체** — 강력 진행. 단 데이터·컴포넌트·셸이 **90% 이미 라이브**(`co.radar`·`co.verdict`·`GRADE_SCALE`·map `RadarChart.svelte`·`ScreenerModal` scrim)라 신설은 *다이얼로그 셸 1개 + 큐레이션/정렬 맵*뿐이다. 그리고 운영자가 말한 **"스캔등급 12단계 확장"은 reject(허위정밀)** — 그런 단일 12단 등급은 코드에 부재하고, composite는 진짜 해상도가 5~7밴드이며 가격 오염을 포함한다(상세 = 00).
+스캔등급 설명 다이얼로그(레이더+근거+기준)는 **dartlab provenance 사상 그 자체** — 강력 진행. 단 데이터·컴포넌트·셸이 **90% 이미 라이브**(`co.radar`·`co.verdict`·`GRADE_SCALE`·map `RadarChart.svelte`·`ScreenerModal` scrim)라 신설은 *다이얼로그 셸 1개 + 큐레이션/정렬 맵*뿐이다. 그리고 운영자가 말한 **"스캔등급 12단계 확장"은 reject(허위정밀)** — 그런 단일 12단 등급은 코드에 부재하고, composite는 진짜 해상도가 5~7밴드이며 가격 오염을 포함한다(상세 = 00).
 
 > **★전제 정정 2건(운영자에 보고):**
 > 1. **"12단계 스캔등급으로 확장"** — 현재 그런 단일 12단 등급이 *부재*하다. 실재 = ① 7축 각자 categorical 5~6단(`engine.ts:44-53 GRADE_SCALE`) ② 종합 verdict **5밴드**(STRONG/SOLID/NEUTRAL/CAUTION/WEAK, `:268-300`) ③ *별개* 신용 dCR **14밴드**. 12밴드 신설은 허위정밀 → reject. 대안 = 5밴드 유지 + 연속 composite 0~100 숫자 노출 + dCR-14 합류(00).
@@ -38,14 +38,14 @@
 
 ## 문서 지도
 
-1. [00-grade-count-honesty.md](00-grade-count-honesty.md) — 등급 수 정직 판정(OQ4): "12밴드" 허위정밀 reject, 실측 3층 구조, 정직 권고(5밴드+연속 숫자+dCR-14 합류).
+1. [00-grade-count-honesty.md](00-grade-count-honesty.md) — 등급 수 판정(OQ4): "12밴드" 허위정밀 reject, 실측 3층 구조, 권고(5밴드+연속 숫자+dCR-14 합류).
 2. [01-dialog-radar-evidence-criteria.md](01-dialog-radar-evidence-criteria.md) — 설명 다이얼로그(OQ5): 좌 스파이더(`co.radar` 6축·map RadarChart 재사용)/우 근거(`co.verdict` 원수치)/아래 기준(`GRADE_SCALE`+`GRADE_GUIDE`)·셸·진입점.
 
 ---
 
-## 정직 척추
+## 설계 원칙
 
-등급 = fact 아닌 **판정** → 근거+기준 동반은 운영자 요구와 정합(이미 정직). 다이얼로그 어디에도 **매수/매도 신호·목표주가·"좋은 주식"·인과(선행지표가 주가 예측)** 금지(`00 kill-list` 정합). 결손 축 `.filter(v존재)` 제거 유지(0대체 금지 — 0점 채우면 "취약" 오독). UI 경로 = `ui/packages/surfaces/src/terminal/`(landing 死경로).
+등급 = fact 아닌 **판정** → 근거+기준 동반은 운영자 요구와 정합(설계 정당). 다이얼로그 어디에도 **매수/매도 신호·목표주가·"좋은 주식"·인과(선행지표가 주가 예측)** 금지(`00 kill-list` 정합). 결손 축 `.filter(v존재)` 제거 유지(0대체 금지 — 0점 채우면 "취약" 오독). UI 경로 = `ui/packages/surfaces/src/terminal/`(landing 死경로).
 
 ## 착수 게이트
 

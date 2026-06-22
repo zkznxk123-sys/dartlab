@@ -20,7 +20,7 @@
 
 **무엇.** [`sixAct.py:44`](../../src/dartlab/story/sixAct.py#L44) `SixActScore.evidence: dict[axis, list[evidenceIds]]` 와 `coverage: dict[axis, str]`(ready/missing) 를 bake 가 `sixActScore(company).asDict()` 로 직렬화 → `payload.evidenceFrame`. 보고서 `EvidenceStrip` 이 6축 옆에 evidenceIds(예: `analysis:insights:grades`·`credit:distress`·`industry:position`·`quant:valuation`)를 **칩으로 첫 렌더**한다.
 
-**★F3/F4 정정(코드 실측).** (a) "landing EvidencePanel 이 이미 join → 재사용"은 **거짓**(터미널/landing 에 EvidencePanel 컴포넌트 부재, 01문서 F3). EvidenceStrip 은 **신규 구축**. (b) `SixActScore` 6축 score 는 **종합점수 레이더**(01문서 F4) → NEVER-CLAIM 준수 위해 **점수는 노출하지 않는다.** EvidenceStrip 노출 = 축별 `coverage`(ready/missing) + `evidenceIds` 칩만. (macro 축은 [`sixAct.py:204`](../../src/dartlab/story/sixAct.py#L204) 근방 미구현 → `coverage='missing'` 정직 라벨.)
+**★F3/F4 정정(코드 실측).** (a) "landing EvidencePanel 이 이미 join → 재사용"은 **거짓**(터미널/landing 에 EvidencePanel 컴포넌트 부재, 01문서 F3). EvidenceStrip 은 **신규 구축**. (b) `SixActScore` 6축 score 는 **종합점수 레이더**(01문서 F4) → NEVER-CLAIM 준수 위해 **점수는 노출하지 않는다.** EvidenceStrip 노출 = 축별 `coverage`(ready/missing) + `evidenceIds` 칩만. (macro 축은 [`sixAct.py:204`](../../src/dartlab/story/sixAct.py#L204) 근방 미구현 → `coverage='missing'` 라벨.)
 
 **역할.** 근거완전성(품질 루브릭 축②)의 1차 천장. 풀 `블록→rcept_no` 회로 부재 하에서, **이 evidenceIds 표면화율 + 블록 sourceEngine 도달율**이 근거 신뢰의 측정 가능한 토대.
 
@@ -34,7 +34,7 @@
 
 **임계.** N/M/K 은 **P0 spike(30~50사 분포 실측)로 확정**(03문서 §spike). "권장값" 박지 않음.
 
-**철학.** "약한 발행 < 정직한 스킵"(editorial Hook Engine 공유). 인공 점수 신설 0 — 빈 섹션 카운트는 *이미 있는 신호*(NEVER-CLAIM 종합점수 금지 준수).
+**철학.** "약한 발행 < 발행 거부"(editorial Hook Engine 공유). 인공 점수 신설 0 — 빈 섹션 카운트는 *이미 있는 신호*(NEVER-CLAIM 종합점수 금지 준수).
 
 ---
 
@@ -56,7 +56,7 @@
 
 **범위.** 블록당이 아니라 **섹션당 대표 rcept_no 1개**(P0 spike 측정 항목에 "섹션→대표 rcept_no coverage" 1행 추가). 품질 루브릭 축⑦(실행가능성)을 보조 8점에서 *핵심 5막의 필수 닻*으로 격상. **블록당 rcept(어느 주석 행)는 P4 천장** — 섹션당은 신용 독자의 방향성 요구를 메우되 포렌식의 "어느 줄"까지는 honest-skip 라벨로 cap(은폐 0).
 
-**★정직 계상(2차 적대검증 H7').** "배선만·신규 0"은 과장이었다 — 실측: `ViewerOverlay.svelte` 는 `code`/`vs`(비교종목)만 받아 **회사 단위**로 열고 *rcept 타깃 prop 이 없다*. `FilingSearchDialog` 의 기존 행클릭은 인앱 딥링크가 아니라 **외부 DART 링크**(코드 자백 "본문 직행 불가"). 따라서 *진짜 한 홉*(인앱 뷰어가 그 rcept 본문으로 스크롤) = **`ViewerOverlay` 에 rcept 타깃 prop + 본문 스크롤 = 작지만 신규 배선**(P2 필수 산출물). 신규 *엔진* 0(데이터·뷰어 본체 재사용), 신규 *배선* = 1 prop + 스크롤.
+**★범위 재계상(2차 적대검증 H7').** "배선만·신규 0"은 과장이었다 — 실측: `ViewerOverlay.svelte` 는 `code`/`vs`(비교종목)만 받아 **회사 단위**로 열고 *rcept 타깃 prop 이 없다*. `FilingSearchDialog` 의 기존 행클릭은 인앱 딥링크가 아니라 **외부 DART 링크**(코드 자백 "본문 직행 불가"). 따라서 *진짜 한 홉*(인앱 뷰어가 그 rcept 본문으로 스크롤) = **`ViewerOverlay` 에 rcept 타깃 prop + 본문 스크롤 = 작지만 신규 배선**(P2 필수 산출물). 신규 *엔진* 0(데이터·뷰어 본체 재사용), 신규 *배선* = 1 prop + 스크롤.
 
 **신규 fetch.** 0. payload 에 섹션별 `representativeRceptNo` 1필드 추가(panel `rceptNo` 셀 보유, period 최신 rceptNo 유도). 외부 floor(DART 링크)는 즉시 가능, 인앱 딥링크는 P2 ViewerOverlay prop 신설 후.
 
@@ -84,7 +84,7 @@
 |---|---|---|---|
 | H1 | ★F1 정정 자체가 오류 — `partId.split` 처방이 메타섹션(IP/SV/T)에서 버그, `SectionMeta.act` 실재 무시 | catalog.py:38 `SectionMeta.act` 실재 + manifest 이미 bake | F1 재정정: `getSectionMeta(key).act`→ACT_HEADERS (기존 필드·신규작업 감소) — 01 F1 / 02 G2 갱신 |
 | H2 | payload 예시 `partId:"1-1"` 날조 (실제 "1") | catalog `SectionMeta("수익구조","1",...)` | 03 payload 실데이터("1", act 정수)로 교정 |
-| H3 | 섹션→blockKey 골격이 manifest 에 이미 baked인데 신규작업 과대계상 | buildStoryManifest.py:102-104 per-section keys/act bake | 01 §5 / 03 §4 정직 재계상(bake 는 회사별 present 블록만 신규) |
+| H3 | 섹션→blockKey 골격이 manifest 에 이미 baked인데 신규작업 과대계상 | buildStoryManifest.py:102-104 per-section keys/act bake | 01 §5 / 03 §4 범위 재계상(bake 는 회사별 present 블록만 신규) |
 | H4 | 관점 수 불일치 ("11" vs 12 entry vs 10 나열) | reportTypes.py 12 entry | "11 정적 투영가능(full 포함, thesis 제외)" 통일 — README/00/04 |
 | H5 | `SixActScore.asDict()` 가 `score` 노출 → "점수 비노출"과 모순 | sixAct.py:55 `score:{axis:value}` | bake 가 asDict `score` 를 `_internalScore`(숨김)로 **분리**, axes 엔 coverage+evidenceIds만 — 03 명시 |
 | H6 | costBreakdown SSOT(dossier dual) 미결·"P0 중 결정" 유예 | — | **본 PRD 에서 확정**: 비율 블록 = story/analysis 소유, 성격별 raw 명세 = dossier 소유·링크 — 04/07 |
@@ -95,6 +95,6 @@
 | # | 갭 | 해소 |
 |---|---|---|
 | H8 | 04 §2 매핑표 1셀에 폐기한 `partId.split` 공식이 "신규 파생"으로 잔존(F1 재정정 미전파) | 04 §2 → `getSectionMeta(key).act`→ACT_HEADERS "기존 필드"로 교정 |
-| H9 | 간판5 "배선만·신규 0" 과장 — 실측 `ViewerOverlay` 는 code/vs만(rcept 타깃 prop 없음), `FilingSearchDialog` 한클릭=외부 DART 링크("본문 직행 불가") | 정직 재계상: 신규 *엔진* 0, 신규 *배선* = ViewerOverlay rcept prop 1개+본문 스크롤(P2 필수). valuation 닻=fin-stmt-lab 미착수 시 honest-skip(죽은 링크 금지) — 00/02/06/07 갱신 |
+| H9 | 간판5 "배선만·신규 0" 과장 — 실측 `ViewerOverlay` 는 code/vs만(rcept 타깃 prop 없음), `FilingSearchDialog` 한클릭=외부 DART 링크("본문 직행 불가") | 범위 재계상: 신규 *엔진* 0, 신규 *배선* = ViewerOverlay rcept prop 1개+본문 스크롤(P2 필수). valuation 닻=fin-stmt-lab 미착수 시 honest-skip(죽은 링크 금지) — 00/02/06/07 갱신 |
 
-2차 정정 후 자기평가: PRD 정직성·자기충족성 회복(신규작업 *감소* 방향 + 잔재 0), 보고서 90 레버(간판5)를 *정직 계상*으로 확보(과장 제거가 오히려 신뢰↑).
+2차 정정 후 자기평가: PRD 범위 정합·자기충족성 회복(신규작업 *감소* 방향 + 잔재 0), 보고서 90 레버(간판5)를 *범위 재계상*으로 확보(과장 제거가 오히려 신뢰↑).

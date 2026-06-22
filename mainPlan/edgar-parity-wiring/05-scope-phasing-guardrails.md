@@ -5,7 +5,7 @@
 ---
 
 ## 1. 스코프 경계 (한 문장)
-**범위 = 미국 EDGAR를 한국 DART와 *동일 배선*(빌드→라이브러리→계약→소스→서피스→제품)으로 통일하되, US 동등 데이터 없는 항목은 정직하게 비운다. 범위 밖 = US 고유 데이터 엔진 신설(industry/sector/rank)·ui/web·실시간.**
+**범위 = 미국 EDGAR를 한국 DART와 *동일 배선*(빌드→라이브러리→계약→소스→서피스→제품)으로 통일하되, US 동등 데이터 없는 항목은 명시하고 비운다. 범위 밖 = US 고유 데이터 엔진 신설(industry/sector/rank)·ui/web·실시간.**
 
 ## 2. 슬라이스 묶음 ([정정] 03 상세 요약 — Slice 0/1/2)
 **Slice 0 — 선결 데이터(배선 코드와 병렬):**
@@ -37,7 +37,7 @@
 - **UI push 게이트**: surfaces·landing·ui/apps/local 변경은 운영자 명시 승인("올려"/"발간해") 후에만 push. commit까지만 자율.
 - **무회귀**: market 기본값 KR — US 추가가 KR 경로 바이트 불변.
 
-## 4. ★Never-Claim (grep 게이트 — 정직 경계 강제, *자기 PRD까지 적용*)
+## 4. ★Never-Claim (grep 게이트 — 한계 표기 강제, *자기 PRD까지 적용*)
 다음 표현이 코드·UI·문서·**본 PRD 본문**에 0건이어야 한다:
 - **"완전 동일"·"100% parity"·"full parity"** (무수식) — EXEMPT 때문에 capability는 동일 아님. "동일 *배선*"으로만.
 - **"US 산업 지도"·"US 가치사슬"·"US peer 랭킹"·"US 섹터 분류"** — EXEMPT를 채운 척하는 발명 표면.
@@ -60,8 +60,8 @@
 ## 6. 리스크 · 완화
 | 리스크 | 완화 |
 |---|---|
-| US 가격 소스 라이선스/안정성 | L0.2에서 소스 정밀 검토. 불가 시 옵션 C(가격 패널 US 비활성) 정직 폴백. |
-| 범위 폭발(EXEMPT 채우기 유혹) | §04 kill-list + never-claim. EXEMPT=정직 빈 배선까지만. |
+| US 가격 소스 라이선스/안정성 | L0.2에서 소스 정밀 검토. 불가 시 옵션 C(가격 패널 US 비활성)로 대체. |
+| 범위 폭발(EXEMPT 채우기 유혹) | §04 kill-list + never-claim. EXEMPT=비워 두는 배선까지만. |
 | KR 회귀 | market 기본 KR + 단위 테스트 + 눈검수 + UI push 게이트. |
 | source 분기 drift | resolveMarket 단일 진입점(L2.1) 강제. |
 | sharesOutstanding 필드 부재 | XBRL `dei:` 추출 선결 점검(§04 §6). 불가 시 해당 축만 EXEMPT. |
@@ -69,5 +69,5 @@
 
 ## 7. 평가 합격선 (패널 반복 종료 조건)
 - 각 분야 전문에이전트 평가 점수 전원 ≥ 합의된 임계(예 ≥90/100), confirmed 갭 0.
-- 정직 경계(never-claim·EXEMPT 처리) 만장 통과.
+- 한계 표기(never-claim·EXEMPT 처리) 만장 통과.
 - 아래→위 순서·의존이 모순 없음(빌드 전 소스 진입 등 역전 0).
