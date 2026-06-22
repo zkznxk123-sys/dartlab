@@ -36,7 +36,11 @@ export async function buildDeck(rt: DartLabRuntime, code: string, perspectiveKey
 		loadContract(code)
 	]);
 	const lead = contract ? contractToCards(contract, media) : [];
-	return projectResult(result, persp.label, { heroUrls: resolveHeroes(media, code, spec), spec, lead });
+	// 차트 슬라이드 배경은 **편집 계약의 큐레이션 이미지만** 순환(엉뚱한 자산[generic bg·타사 오배치] 끼우지 않게).
+	// 계약이 없으면(자동 덱) 회사 hero 전체로 폴백.
+	const curated = [...new Set(lead.map((c) => c.bg).filter((u): u is string => !!u))];
+	const heroUrls = curated.length ? curated : resolveHeroes(media, code, spec);
+	return projectResult(result, persp.label, { heroUrls, spec, lead });
 }
 
 

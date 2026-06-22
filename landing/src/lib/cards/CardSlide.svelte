@@ -534,23 +534,24 @@
 		height: 0.7em;
 		border-radius: 2px;
 	}
-	.tWrap {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		overflow: auto;
-	}
 	.cT {
 		width: 100%;
+		table-layout: fixed; /* 4:5 프레임에 맞게 — 컬럼이 균등 축소(가로 스크롤·넘침 금지) */
 		border-collapse: collapse;
-		font-size: clamp(11px, 2.3cqw, 18px);
+		font-size: clamp(9px, 2.1cqw, 15px);
 	}
 	.cT th,
 	.cT td {
-		padding: 0.5em 0.6em;
+		padding: 0.45em 0.4em;
 		text-align: left;
 		border-bottom: 1px solid rgba(30, 36, 51, 0.9);
 		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.cT th:first-child,
+	.cT td:first-child {
+		width: 34%;
 	}
 	.cT th.num,
 	.cT td.num {
@@ -590,8 +591,6 @@
 		display: flex;
 		align-items: center;
 		margin: 0;
-		padding-left: 0.6em;
-		border-left: 4px solid #ea4647;
 		font-size: clamp(20px, 5cqw, 44px);
 		font-weight: 700;
 		line-height: 1.3;

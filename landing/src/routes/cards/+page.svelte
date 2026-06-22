@@ -156,11 +156,16 @@
 
 <style>
 	.cardsPage {
+		/* ⚠ .dlTerm(terminal.css)은 height:100vh·overflow:hidden(고정 풀스크린 앱)이라 그대로 두면 페이지가
+		   스크롤되지 않는다. /cards 는 일반 문서 스크롤이라 height/overflow 를 여기서 덮어쓴다(specificity 우위). */
 		min-height: 100vh;
+		height: auto;
+		overflow: visible;
 		background: #030509;
 		color: #f1f5f9;
 		display: flex;
 		flex-direction: column;
+		font-size: 16px;
 		font-family: 'Pretendard Variable', 'Pretendard', system-ui, sans-serif;
 	}
 	/* 헤더 내부(topBar·brand·cmdBar·sns·snsBtn 등)는 terminal.css(.dlTerm 스코프) 정본 그대로. 여기선
