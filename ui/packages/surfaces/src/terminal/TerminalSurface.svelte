@@ -4,7 +4,7 @@
 	// 중앙 스택            = 시각화 중심 (차트·그래프·전체화면 분석)
 	// 우측 스택            = 테이블·텍스트·수치·정성 — 그래프 배치 금지 (그래프는 중앙으로)
 	import './terminal.css';
-	import type { Candle, DartLabRuntime, MacroLatest, MacroTransmissionResult } from '@dartlab/ui-contracts';
+	import type { Candle, DartLabRuntime, MacroLatest } from '@dartlab/ui-contracts';
 	import { setDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine } from './lib/engine';
 	import type { TerminalHosts, TerminalBrandLinks } from './lib/hosts';
@@ -17,13 +17,10 @@
 	import SourcesModal from './panels/SourcesModal.svelte';
 	import GiscusPanel from './panels/GiscusPanel.svelte';
 	import SupportDialog from './panels/SupportDialog.svelte';
-	import MacroLensDialog from './panels/MacroLensDialog.svelte';
 	import IndustryDialog from './panels/IndustryDialog.svelte';
 	import FilingSearchDialog from './panels/FilingSearchDialog.svelte';
 	import { ChartCtl } from './charts/chartState.svelte';
-	import { buildMacroLensSnapshot, buildMarketMacroLensSnapshot, type MacroLensTab } from './lib/macroLens';
 	import { classifyTailwind, hasNegativeTailwind } from './lib/macroMappings';
-	import type { CoMover } from './lib/coMovement';
 	import { Heart } from 'lucide-svelte';
 	import { LAST_SYM_KEY } from './lib/lastSymbol';
 	import { warmCompany } from './lib/warmup';
@@ -60,14 +57,9 @@
 	let sourcesOpen = $state(false);
 	let discussOpen = $state(false); // 종목 토론 드로어 (giscus)
 	let supportOpen = $state(false); // 후원·기여 센터 다이얼로그
-	let macroLensOpen = $state(false);
-	let macroLensTab = $state<MacroLensTab>('dashboard');
-	let macroLensFocus = $state('');
 	let industryOpen = $state(false); // 산업 분석 다이얼로그 (좌측 산업 sweep 행 클릭)
 	let industryId = $state('');
 	let filingSearchOpen = $state(false); // 전역 공시 본문 검색 팔레트 (⌘⇧F · statusBar)
-	let macroCoMovers = $state<CoMover[]>([]);
-	let macroTransmission = $state<MacroTransmissionResult | null>(null);
 	let sectorFilter = $state('');
 	let bottomTab = $state<'screener' | 'watch'>(readStore<string>('dlTerm.bottomTab', 'screener') === 'watch' ? 'watch' : 'screener');
 	const chartCtl = new ChartCtl();
@@ -129,52 +121,6 @@
 	});
 
 	const co = $derived(eng.buildCompany(sym));
-	$effect(() => {
-		const c = co;
-		if (!c) {
-			macroTransmission = null;
-			return;
-		}
-		const code = c.code;
-		const sectorKey = c.industry;
-		let alive = true;
-		macroTransmission = null;
-		void runtime.macro
-			.getTransmission({ market: 'KR', sectorKey, includeCrossMarket: true })
-			.then((payload) => {
-				if (!alive || co?.code !== code || co?.industry !== sectorKey) return;
-				macroTransmission = payload;
-			})
-			.catch(() => {
-				if (!alive || co?.code !== code || co?.industry !== sectorKey) return;
-				macroTransmission = null;
-			});
-		return () => {
-			alive = false;
-		};
-	});
-	const macroLensSnapshot = $derived.by(() => {
-		const sectorTailwinds = eng.sectorTailwinds();
-		return co ? buildMacroLensSnapshot({
-			co,
-			macro: eng.raw.macro,
-			transmission: macroTransmission,
-			macroLatest,
-			sectorTailwinds,
-			coMovers: macroCoMovers,
-			lang
-		}) : buildMarketMacroLensSnapshot({
-			macro: eng.raw.macro,
-			macroLatest,
-			sectorTailwinds,
-			lang
-		});
-	});
-	$effect(() => {
-		const code = co?.code;
-		if (!code) return;
-		macroCoMovers = [];
-	});
 	// 회사 선택 시 포트 경유로 모든 온디맨드 소스를 병렬 워밍업(패널 effect 전 캐시 준비).
 	$effect(() => {
 		const c = co;
@@ -240,11 +186,6 @@
 		try { localStorage.setItem(LAST_SYM_KEY, code); } catch { /* 시크릿 모드 등 */ }
 		setFlash(code + ' · ' + built.name.kr);
 	}
-	function openMacroLens(tab: MacroLensTab = 'dashboard', focusId = '') {
-		macroLensTab = tab;
-		macroLensFocus = focusId;
-		macroLensOpen = true;
-	}
 	function handleSectorFilter(id: string) {
 		sectorFilter = sectorFilter === id ? '' : id;
 		bottomTab = 'screener';
@@ -279,7 +220,6 @@
 			<div class="bootMark">DartLab <span>terminal</span></div>
 			<div class="bootBar"><div class="bootFill"></div></div>
 			<div class="bootMsg">{lang === 'en' ? 'company not found' : '회사 데이터를 찾을 수 없습니다'}</div>
-			<button class="finFullBtn" onclick={() => openMacroLens('dashboard', '')}>{lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}</button>
 		</div>
 	{:else}
 		<header class="topBar">
@@ -374,10 +314,10 @@
 					<!-- 백테스트 모드 — 좌패널 전체가 조작 패널(스코프·프리셋버튼·커스텀·검증). LeftRail(매크로·스크리너) 교체. -->
 					<StrategyDock ctl={chartCtl} {lang} code={co.code} name={co.name.kr} fill onClose={() => { chartCtl.clearBtAll(); chartCtl.btReportMode = false; chartCtl.btDockOpen = false; }} />
 				{:else}
-					<LeftRail {eng} {lang} active={sym} onPick={pick} onMacroLens={openMacroLens} onIndustry={openIndustry} onFilingSearch={() => (filingSearchOpen = true)} {sectorFilter} {bottomTab} onSectorFilter={handleSectorFilter} onBottomTab={(tab) => (bottomTab = tab)} />
+					<LeftRail {eng} {lang} active={sym} onPick={pick} onIndustry={openIndustry} onFilingSearch={() => (filingSearchOpen = true)} {sectorFilter} {bottomTab} onSectorFilter={handleSectorFilter} onBottomTab={(tab) => (bottomTab = tab)} />
 				{/if}
 			</div>
-			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} onMacroLens={openMacroLens} onCoMovers={(rows) => (macroCoMovers = rows)} /></div>
+			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} /></div>
 			<div class="col colR"><RightStack {co} {lang} {hosts} repoUrl={links.repo} onPick={pick} lookupListed={eng.lookupListed} percentileIn={eng.percentileIn} /></div>
 		</main>
 
@@ -405,19 +345,5 @@
 		{#if industryOpen}
 			<IndustryDialog {eng} {industryId} {lang} onClose={() => (industryOpen = false)} onPick={(c) => { pick(c); industryOpen = false; }} />
 		{/if}
-	{/if}
-	{#if macroLensOpen && macroLensSnapshot}
-		<MacroLensDialog
-			snapshot={macroLensSnapshot}
-			{lang}
-			macro={runtime.macro}
-			tab={macroLensTab}
-			focusId={macroLensFocus}
-			activeEcon={chartCtl.econ}
-			onTab={(t) => (macroLensTab = t)}
-			onClose={() => (macroLensOpen = false)}
-			onToggleEcon={(id) => chartCtl.toggleEcon(id)}
-			onSector={handleSectorFilter}
-		/>
 	{/if}
 </div>

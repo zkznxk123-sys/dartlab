@@ -8,7 +8,6 @@
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import { aggregateCandles, adjustCandles, heikinAshi } from './candleMath';
 	import type { Lang } from '../lib/types';
-	import type { MacroLensTab } from '../lib/macroLens';
 	import { runPortfolioBacktest, type PortfolioBtResult, type BtFullRef, buildGateSeries, ruleUsesGate } from '../lib/backtest';
 	import { loadGateRows, type FundamentalGateRow } from '@dartlab/ui-runtime/data/gateRows'; // 펀더게이트(W2) PIT 행
 	import { focusDisclosure } from '../lib/disclosureFocus.svelte'; // 공시 dot 클릭 → 우측 공시목록 그 날짜로
@@ -45,7 +44,6 @@
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
 		onSrc?: (line: string) => void; // 출처(공공누리)를 차트 하단 대신 패널 헤더에 표기하도록 부모로 끌어올림(econ/adj 반응 유지)
-		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 		onCoMovers?: (rows: CoMover[]) => void;
 		// 백테스트 결과 상향 — 엔진은 PriceChart 소유, 결과(pf+candleTs)를 CenterStack 으로 올려 하단 BacktestReport 가 렌더.
 		onBtResult?: (pf: PortfolioBtResult | null, candleTs: string[], fullRef: BtFullRef | null) => void;
@@ -58,7 +56,7 @@
 		// 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유, 04 §5). PriceChart 가 new 하지 않고 받는다.
 		ctl: ChartCtl;
 	}
-	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, onMacroLens, onCoMovers, onBtResult, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
+	let { candles, code, name = '', lang, events, disclosures = [], valBand, peers = [], suggest, onPick, onSrc, onCoMovers, onBtResult, subject = 'price', indexLine = false, indexCtl, ctl }: Props = $props();
 	const rt = useDartLabRuntime();
 	const browser = typeof window !== 'undefined'; // $app/environment 결합 제거 (4a-3)
 	let el: HTMLDivElement | null = $state(null);
@@ -1283,7 +1281,7 @@
 <div class="chartWrap" class:full={ctl.full} role="img" aria-label="price chart" style={ctl.full ? '' : 'height:480px;min-height:360px;'}>
 	{#if !ctl.full}
 		<!-- 차트 컨트롤 바 — 그래프 위 전용 행(absolute 오버레이 아님, 밀도). 전체화면은 ChartRibbon. -->
-		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} {onMacroLens} />
+		<ChartMenus {ctl} {lang} {subject} {indexLine} {indexCtl} {coMovers} {marketCoMovers} hasBand={!!valBand} {railCatCounts} onDraw={startDraw} onClearDraw={clearDraw} onSnapshot={snapshot} />
 	{/if}
 	<div class="chartHost" bind:this={el}></div>
 
@@ -1343,7 +1341,7 @@
 	{/if}
 
 	{#if ctl.full}
-		<ChartRibbon {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} {railCatCounts} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} {onMacroLens} />
+		<ChartRibbon {ctl} {lang} {subject} {indexLine} hasBand={!!valBand} {name} {code} info={ribbonInfo} {notice} {peers} {cmpRows} {railCatCounts} canJump={!!(suggest && onPick)} onSnapshot={snapshot} onReplay={enterReplay} onJump={() => { jumpOpen = true; helpOpen = false; requestAnimationFrame(() => jumpInput?.focus()); }} onHelp={() => { helpOpen = !helpOpen; jumpOpen = false; }} />
 		<DrawToolbar {ctl} {lang} onDraw={startDraw} onClearDraw={clearDraw} />
 
 		{#if jumpOpen}

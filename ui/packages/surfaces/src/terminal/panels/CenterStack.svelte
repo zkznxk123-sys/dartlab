@@ -8,7 +8,6 @@
 	import PriceChart from '../charts/PriceChart.svelte';
 	import { ChartCtl, ECON_MAX, PERIOD_N } from '../charts/chartState.svelte'; // 차트 상태 SSOT — CenterStack 소유(상단 macro 마퀴가 econ 토글 공유)
 	import type { CoMover } from '../lib/coMovement';
-	import type { MacroLensTab } from '../lib/macroLens';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 	import BacktestReport from '../charts/BacktestReport.svelte';
 	import BacktestPreflight from '../charts/BacktestPreflight.svelte'; // 대기 상태 — void 대신 실행 전 프리플라이트(B&H 기준선·데이터품질·비용·체결모델)
@@ -32,10 +31,9 @@
 		// 전체화면 심볼 점프 (PriceChart ⌘K·/) — 검색·전환은 터미널 엔진 관통
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
-		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 		onCoMovers?: (rows: CoMover[]) => void;
 	}
-	let { co, lang, ctl = new ChartCtl(), kpis = [], suggest, onPick, onMacroLens, onCoMovers }: Props = $props();
+	let { co, lang, ctl = new ChartCtl(), kpis = [], suggest, onPick, onCoMovers }: Props = $props();
 	const rt = useDartLabRuntime();
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
@@ -420,7 +418,7 @@
 			{@const on = !!k.id && ctl.econ.includes(k.id)}
 			{@const blocked = !!k.id && !on && ctl.econ.length >= ECON_MAX}
 			{#if k.id}
-				<button class="kpiItem kpiBtn" class:on disabled={blocked} title={blocked ? (lang === 'en' ? 'up to 3 economy series' : '경제지표는 동시 3개까지') : lang === 'en' ? 'open Macro Lens + overlay on chart' : '매크로 렌즈 열기 + 차트에 겹쳐보기'} onclick={() => { if (!k.id) return; ctl.toggleEcon(k.id); onMacroLens?.('dashboard', k.id); }}><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></button>
+				<button class="kpiItem kpiBtn" class:on disabled={blocked} title={blocked ? (lang === 'en' ? 'up to 3 economy series' : '경제지표는 동시 3개까지') : lang === 'en' ? 'overlay on chart' : '차트에 겹쳐보기'} onclick={() => { if (!k.id) return; ctl.toggleEcon(k.id); }}><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></button>
 			{:else}
 				<span class="kpiItem"><i>{k.l}</i>{#if k.s && k.s.length > 1}<svg class={'kpiSpark ' + k.t} viewBox="0 0 34 11" preserveAspectRatio="none" aria-hidden="true"><polyline points={kpiSpark(k.s)} fill="none" stroke="currentColor" stroke-width="1.1" /></svg>{/if}<b class={k.t}>{k.v}</b></span>
 			{/if}
@@ -503,7 +501,7 @@
 			disclosures={subject === 'index' ? [] : disclosureEvents}
 			valBand={subject === 'index' ? null : priceValBand}
 			peers={subject === 'index' ? [] : chartPeers}
-			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onMacroLens} {onCoMovers}
+			{suggest} onPick={onPickWrapped} onSrc={(s) => (chartSrcLine = s)} {onCoMovers}
 				onBtResult={(pf, ts, fullRef) => { btPf = pf; btCandleTs = ts; btFullRef = fullRef; }} />
 	{:else if candleState === 'loading'}
 		<div class="chartLoad">{lang === 'en' ? (subject === 'index' ? 'loading index series …' : 'loading daily prices …') : (subject === 'index' ? '지수 시계열 불러오는 중 …' : '일별 시세 불러오는 중 …')}</div>

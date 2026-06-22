@@ -3,7 +3,6 @@
 	// Row1 = 보는 방법(종목·기간·캔들·축·마커·ECON), Row2 = 분석 작업대(오버레이/페인 활성 칩+카탈로그·그리기·BT).
 	// 상태 = ChartCtl 단일 SSOT (일반 메뉴와 공유 — 리본에서 켠 지표가 일반 메뉴에도 켜져 있다).
 	import type { Lang } from '../lib/types';
-	import type { MacroLensTab } from '../lib/macroLens';
 	import { type ChartCtl, type OverlayKey, type SubKey, OVERLAY_ALL, SUB_GROUPS, PERIODS, TFS, YMODES, CANDLES, SUB_HINT, OVERLAY_HINT } from './chartState.svelte';
 	import { MACRO_SERIES } from '@dartlab/ui-contracts';
 	import { ECON_COLORS } from './econOverlay';
@@ -33,9 +32,8 @@
 		onHelp?: () => void; // 단축키 도움말 (?)
 		subject?: 'price' | 'index'; // 'index' = BT·매물대·VS 비활성(지수, 01 §4.2-4.3·§5.1)
 		indexLine?: boolean; // US 지수(종가전용) = candleStyle 'area' 고정(세그먼트 disabled, 01 §3.6)
-		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 	}
-	let { ctl, lang, hasBand, name, code, info, notice = null, peers = [], cmpRows = [], railCatCounts = {}, canJump = false, onSnapshot, onReplay, onJump, onHelp, subject = 'price', indexLine = false, onMacroLens }: Props = $props();
+	let { ctl, lang, hasBand, name, code, info, notice = null, peers = [], cmpRows = [], railCatCounts = {}, canJump = false, onSnapshot, onReplay, onJump, onHelp, subject = 'price', indexLine = false }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 	const styleShown = $derived(indexLine ? 'area' : ctl.candleStyle); // US 지수면 'area'(라인) 강조 — disabled 세그먼트 정합
 	const fmtN = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -128,7 +126,6 @@
 			{#if pop === 'econ'}
 				<div class="crMenu">
 					<div class="ctMenuLbl">{T('경제지표 (최대 3 · 자기정규화)', 'Economy (max 3 · self-scaled)')}</div>
-					<div class="ctRow"><button class="mItem" onclick={() => { onMacroLens?.('dashboard'); pop = 'none'; }}>{T('매크로 렌즈 열기', 'Open Macro Lens')}</button></div>
 					<div class="ctMenuLbl ctMenuGrp">{T('국내 시장 동행 (베타 · 인과 아님)', 'Domestic market beta (not causation)')}</div>
 					<div class="ctRow ctRowWrap">
 						{#each MARKET_INDEX_REFS as r (r.code)}

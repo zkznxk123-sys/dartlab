@@ -3,7 +3,6 @@
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Engine, IndustryMacro } from '../lib/engine';
 	import ScatterMap, { type ScatterPt } from './ScatterMap.svelte';
-	import type { MacroLensTab } from '../lib/macroLens';
 	import type { EcoNode, Lang } from '../lib/types';
 	import Panel from '../ui/Panel.svelte';
 	import ScreenerModal from './ScreenerModal.svelte';
@@ -21,7 +20,6 @@
 		lang: Lang;
 		active: string;
 		onPick: (code: string) => void;
-		onMacroLens?: (tab: MacroLensTab, focusId?: string) => void;
 		onIndustry?: (id: string) => void; // 산업 sweep 행 클릭 → IndustryDialog
 		onFilingSearch?: () => void; // 공시 본문 검색(⌘⇧F) 다이얼로그 열기 — 시장공시 피드 위 트리거
 		sectorFilter: string;
@@ -29,7 +27,7 @@
 		onSectorFilter: (id: string) => void;
 		onBottomTab: (tab: 'screener' | 'watch') => void;
 	}
-	let { eng, lang, active, onPick, onMacroLens, onIndustry, onFilingSearch, sectorFilter, bottomTab, onSectorFilter, onBottomTab }: Props = $props();
+	let { eng, lang, active, onPick, onIndustry, onFilingSearch, sectorFilter, bottomTab, onSectorFilter, onBottomTab }: Props = $props();
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
@@ -110,9 +108,6 @@
 <!-- 경제 — 최상단 고정 (탭 토글 폐지, 항상 노출) -->
 {#if macro}
 	<Panel {lang} className="eMacro" title={{ kr: '마켓 펄스', en: 'MARKET PULSE' }} flush>
-		{#snippet right()}
-			<button class="finFullBtn" onclick={() => onMacroLens?.('dashboard', 'KR')} title={lang === 'en' ? 'open macro lens' : '매크로 렌즈 열기'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
-		{/snippet}
 		<RegimeQuadrant view={macroGlance.regime} {lang} />
 	</Panel>
 {/if}
