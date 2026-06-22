@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { flushSync } from 'svelte';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
   import { setStaticBase, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
@@ -136,19 +135,8 @@
   // 활성 관점(헤더 탭·검색 view·표지 등) — 빌드된 models 에서 선택. 없으면 첫 관점.
   const model = $derived(models.find((m) => m.perspectiveKey === perspectiveKey) ?? models[0] ?? null);
 
-  // 인쇄 = 5관점 전부 이어붙임. 화면은 활성 관점만 *렌더*(display:none 토글 금지 — 헤디드 Chrome 은
-  // 숨김 요소를 인쇄 시 재배치하지 않아 빈 페이지가 난다). beforeprint 에서 전체를 렌더(flushSync 동기 반영)
-  // 한 뒤 인쇄, afterprint 에서 원복. 버튼·Ctrl+P 둘 다 beforeprint 발화.
-  let printing = $state(false);
-  $effect(() => {
-    const before = () => { printing = true; flushSync(); };
-    const after = () => { printing = false; };
-    window.addEventListener('beforeprint', before);
-    window.addEventListener('afterprint', after);
-    return () => { window.removeEventListener('beforeprint', before); window.removeEventListener('afterprint', after); };
-  });
-  // 화면=활성 1개만 실제 렌더, 인쇄=5관점 전부. (숨김 후 인쇄-되살리기 대신 *렌더 자체*를 토글)
-  const renderModels = $derived(printing ? models : model ? [model] : []);
+  // 화면 = 활성 관점 1개만 렌더(빌드된 models 에서 선택). 인쇄/PDF 기능은 제거(헤디드 Chrome 빈 페이지 문제로 폐기).
+  const renderModels = $derived(model ? [model] : []);
 
   function selectPerspective(key: string) {
     perspectiveKey = key;
@@ -285,15 +273,6 @@
     return { head: s.trim(), sub: '' };
   }
 
-  function printReport() {
-    if (status !== 'ready' || !model || model.pending) return;
-    if (typeof window === 'undefined') return;
-    // 5관점 전부 렌더(동기 반영) 후 인쇄 — beforeprint 미발화 환경 대비 버튼에서도 직접 토글.
-    // printing 원복은 afterprint 가 담당(window.print() 가 즉시 반환하는 브라우저에서 조기 원복 방지).
-    printing = true;
-    flushSync();
-    window.print();
-  }
   function scrollSec(key: string) {
     document.getElementById(`sec-${key}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -305,7 +284,7 @@
   <title>기업분석보고서 · {model?.corpName ?? data.sym} | dartlab</title>
   <meta
     name="description"
-    content={`${model?.corpName ?? '상장사'} 기업분석보고서 — 수익성·재무안정성·주주환원·시장평가·지배구조 5관점. 인쇄·PDF 가능.`}
+    content={`${model?.corpName ?? '상장사'} 기업분석보고서 — 수익성·재무안정성·주주환원·시장평가·지배구조 5관점.`}
   />
 </svelte:head>
 
@@ -359,9 +338,6 @@
           {:else}
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
           {/if}
-        </button>
-        <button class="snsBtn" onclick={printReport} disabled={status !== 'ready' || !!model?.pending} title="인쇄 / PDF" aria-label="인쇄 / PDF">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
         </button>
         <nav class="sns" aria-label="dartlab 채널">
           <a class="snsBtn" href={links.repo} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
