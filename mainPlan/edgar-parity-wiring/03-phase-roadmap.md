@@ -1,6 +1,6 @@
 # 03. 단계 로드맵 — 슬라이스 × 6층 (아래부터 누적)
 
-상태: **v0.3 (2026-06-22)** — R1·R2 패널 수렴. 6층 아래→위 골격 유지, *이미 빌드된 바닥을 먼저 배선*하는 슬라이스 + **선결 데이터(Slice 0) 분리**(R2 P0: Slice 1 "데이터 무작업"이 backfill·tickers publish를 숨김).
+상태: **v0.4 (2026-06-22)** — R1·R2 수렴 + ★운영자 챌린지(결측 해결) 대응. Slice 0(선결)/1(배선)/2(미빌드+결측 채움)/3(진짜 잔여). 결측 해결 상세=08.
 
 > **델타 선언**: 기존 `project_edgar_dart_parity`(✅ 완료, commit 27337605d)가 **L1 라이브러리(compare·scan router·panel native 메커니즘)·SKILL EXEMPT 분류**를 이미 실행. 본 PRD의 *진짜 신규* = **L2~L5 프론트 시장배선 + L0 보조축 빌드 + Slice0 선결**. L0/L1은 *점검·정정*이지 재구현 아님.
 > **슬라이스 원칙**: Slice 0 = 선결 데이터(backfill·tickers, 배선 코드와 병렬). Slice 1 = *이미 baked + 미러된* panel/finance/scan-**finance**를 L2~L4 배선. Slice 2 = 미빌드(가격·scan 라이브축 baking)를 빌드 후 배선("빌드부터 아래로"가 슬라이스2 안에서 성립).
@@ -62,12 +62,29 @@
 - **S2-L0.3 US 가격 baked (라이선스 선결, 최난도)**: KR `gov/prices` 동형 `edgar/prices`. 소스 라이선스 실조사(yfinance ToS 재배포 회색·stooq EOD 가능·기타) 표로 박기. **불가 시 Slice 1의 가격 비활성(옵션 C) 영구 유지**.
 - **게이트**: 결정된 scan 산출물 baked + (가능 시) `edgar/prices`. backfill 완주.
 
+## S2-L0.4 — ★결측 데이터 채우기 (08 상세, 운영자 챌린지 대응)
+v0.3가 "EXEMPT"로 퉁친 데이터 대부분이 *채울 수 있음*(코드검증, 08). Slice2 빌드 편입:
+- **report 14 apiType cross-sectional bake**: [확인] `reportAccessor._SUPPORTED` 14 추출기(dividend/treasury/employee/audit/executive/majorHolder/...) 이미 작동 → 전종목 aggregate해 `edgar/scan/report/*` bake(데이터 있음, build 작업). KR 17 중 14 커버.
+- **SIC→US sector crosswalk**: [확인] `datasetBulk.py:75` SIC 존재 → 공개 SIC 분류 기반 자체 sector(GICS 아님, 정직 라벨) → rank=peer 백분위(scan 재사용).
+- **sharesOutstanding XBRL 확장**: [확인] `capitalChange.py`/`majorHolder.py`가 issued/outstanding/treasury 파싱 → authorized/preferred 추가해 ~6col 복원(1값 아님).
+- **신규 파서(B)**: relatedPartyTx(10-K Item13/ASC850, sections 재사용)·auditContract(DEF 14A fees).
+
 ## S2-L1 — scan 보조축 dispatch + 계산정합 트랙
 - **S2-L1.1**: S2-L0 산출 parquet을 scan이 읽도록. [확인] 현 `_edgarDispatch`는 라이브 계산이라, baked로 가면 `scanClass`(market 진입점) + `_EDGAR_XBRL_AXES` 확장 + builder 3곳 동시 수정.
-- **S2-L1.2 계산정합 census (별도 트랙, Slice1 가드는 S1-L4.3에서 선제)**: [확인] analysis/credit/quant/story가 KR 계정명·WICS 임계·KR industry 호출에 의존. US에서 (a) market 분기로 US-GAAP 경로 or (b) 정직 "US 미지원". 단 **Slice1에서 이미 회색지대 가드(S1-L4.3)로 침묵 오염은 막음** — S2-L1.2는 *정합 구현*(garbage 차단이 아니라 실제 US 계산 활성화). **주의**: [확인] `_DART_ONLY` allowlist에 analysis/story/credit/industry/search 포함 → 비대칭 게이트가 이들을 *검사 안 함*. 계산정합은 별도 oracle(US fixture 등급 sanity) 필요 — symmetry 게이트 사각지대.
+- **S2-L1.2 계산정합 census (별도 트랙, Slice1 가드는 S1-L4.3에서 선제)**: [확인] analysis/credit/quant/story가 KR 계정명·WICS 임계·KR industry 호출에 의존. credit=US sector(S2-L0.4) 확정 후 `_usDefaultThresholds()` 재캘리브. analysis/story는 (a) US-GAAP 경로 or (b) 정직 "US 미지원". **주의**: [확인] `_DART_ONLY` allowlist에 analysis/story/credit/industry/search 포함 → 비대칭 게이트 사각지대 → 별도 oracle(US fixture sanity) 필요.
 
 ## S2-L2~L5 — 가격/보조축 배선
-- 가격 source 분기(US baked or 비활성 유지)·scan 보조축 surface·검증 유니버스 확장. Slice 1 배선 재사용.
+- 가격 source 분기(US baked or 비활성 유지)·scan 보조축/report surface·검증 유니버스 확장. Slice 1 배선 재사용.
+
+---
+
+# Slice 3 — 진짜 잔여 (구조적 부분·라이선스, 최후순위·정직 한계)
+
+08 분류 C/D — *채울 수 있는 건 Slice2서 다 채운 뒤* 남는 소수. "정직하게 빈다"가 진짜 적용되는 곳.
+- **network US-native**: Exhibit 21(자회사)·SC 13D/G·13F·Form 4 파서 → 자회사+보유자 그래프. **재벌 계열 아님**(US-native 라벨).
+- **industry 가치사슬 엣지**: 분류(SIC)는 Slice2 완료. *공급망 엣지*는 10-K major-customer(ASC 280) 공시 텍스트 파싱=저커버리지 **부분 그래프**(커버리지 라벨) or 비활성. 합성 금지.
+- **executivePay 전임원**: NEO5(DEF 14A)까지만, KR 전임원 불가 → "NEO5" 라벨.
+- **US 가격 baked**: 재배포 라이선스 소스 확보 시 `edgar/prices`, 불가 시 영구 비활성(옵션 C). 라이선스 실조사가 게이트.
 
 ---
 

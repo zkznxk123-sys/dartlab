@@ -1,6 +1,6 @@
 # 07. Specialist Review — 전문패널 평가 라운드
 
-상태: v0.2 (2026-06-22). 각 분야 전문에이전트 냉정 평가 + *작성자 직접 코드 재검증*(에이전트 측정 인용 금지) + 반영.
+상태: **v0.4 (2026-06-22)**. 전문패널 3R(R1·R2·R3) + ★운영자 결측챌린지. 각 분야 냉정 평가 + *작성자 직접 코드 재검증*(에이전트 측정 인용 금지) + 반영.
 
 ---
 
@@ -103,7 +103,23 @@ R3 평가자들이 **v0.3 정정의 코드 전제를 직접 재검증**(grep/rea
 - 아래→위 순서·의존 모순 0. 최소가치 슬라이스(Slice 0/1/2) 실행가능.
 - **결론: v0.3 = 착수 가능한 수렴 설계.** R4는 불요 — 잔존은 설계가 아니라 구현·실측. 운영자 go 시 Slice0 S0.1 ledger 실측부터.
 
+## ★결측챌린지 (2026-06-22) — 운영자 "없는 데이터 어떻게 해결?" → v0.4
+
+R3 PASS 후 운영자가 정직 경계의 약점을 직격: "없는 데이터도 있을 텐데 그건 어떻게 해결?" v0.1~0.3은 결측을 "정직하게 빈다"로 *회피*만 했음. 직접 코드검증으로 **v0.3 "영구 EXEMPT" 분류가 대부분 틀렸음** 확인:
+
+| 직접 확인 발견 | 근거 |
+|---|---|
+| EDGAR `report/`에 **13 추출기 모듈** + `reportAccessor._SUPPORTED` **14 apiType** 이미 작동 | `accessor/reportAccessor.py:322` `_SUPPORTED`(dividend/treasury/employee/audit/executive/majorHolder/executivePay/capitalChange/outsideDirector/minorityHolder/investedCompany/...) |
+| SIC 코드 EDGAR bulk에 존재(sector/rank 채움 가능) | `bulk/datasetBulk.py:75 "sic"` |
+| XBRL 주식수 ~6col(1값 아님) | `report/capitalChange.py:32`(Issued/TreasuryAcquired)·`majorHolder.py:32`(Outstanding/PublicFloat) |
+| executivePay 추출기 존재(메서드만 미배선) | `report/executivePay.py:13 extractExecutivePay`(XBRL ShareBasedComp) |
+| KR 17 apiType ↔ EDGAR 14 대조 | `scan/builders/kr/report/build.py:59 SCAN_API_TYPES`(17) vs `_SUPPORTED`(14) |
+
+→ **진짜 못 채우는 것 = 가치사슬 *엣지*(공급망)·전임원 보수(US=NEO5)·GICS(라이선스)·US 가격(재배포 라이선스) 소수뿐.** 나머지는 *출처가 다를 뿐 존재*하고 *대부분 추출기가 이미 있다*. → **v0.4 = `08-missing-data-resolution.md` 신설**(항목별 미국 출처[Exhibit21·DEF14A·SIC·ASC850·XBRL]·dartlab 현 상태·해결경로·정직 한계) + 04 §2 대정정 + 03 Slice2 결측채움/Slice3 잔여.
+
+**교훈: "정직하게 빈다"가 게으름의 변명이 될 수 있다.** EXEMPT 선언 전 *실제 US 출처를 찾는 것*이 먼저 — 운영자 한마디가 "permanent EXEMPT 7항목"을 "1-2개 진짜 잔여"로 도려냄. C28 "ACHIEVED 과대주장 철회"와 대칭(과대 vs 과소 둘 다 직접검증이 교정).
+
 ## ★메타 교훈 (이 PRD 제작 과정 자체)
 - **v0.1 census(탐색 에이전트 보고)가 다수 거짓** — 비대칭0·notesDetail 미러·scan 1/8·테스트 신설·외부 cron 전부 코드와 모순. **실코드 직접대조가 매 라운드 거짓을 도려냄**(메모리 [[project_search_strengthening_loop]] 교훈 재확인).
-- 점수 궤적 60→87→91은 *설계 개선*이 아니라 *사실 정밀화* — 골격·정직 철학은 v0.1부터 건전했고, 틀린 건 census였다.
+- 점수 궤적 60→87→91은 *설계 개선*이 아니라 *사실 정밀화* — 골격·정직 철학은 v0.1부터 건전했고, 틀린 건 census였다. 단 **결측챌린지가 드러낸 더 깊은 결함 = "정직 경계"가 결측을 *과소평가*(EXEMPT 남발)** — 정직이 게으름으로 변질될 위험. v0.4가 교정.
 - **에이전트 측정 인용 금지**를 매 라운드 이행(R1 6건·R2 3건·R3은 평가자 자체 재검증) — 이게 없었으면 거짓 census 위에 PRD가 섰을 것.

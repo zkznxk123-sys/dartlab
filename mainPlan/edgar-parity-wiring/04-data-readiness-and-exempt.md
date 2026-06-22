@@ -1,6 +1,6 @@
 # 04. 데이터 레디니스 + EXEMPT 경계 + Kill-List
 
-상태: **v0.3 (2026-06-22)** — R1·R2 정정. "완전히 같이 배선"의 *데이터 현실*을 정직하게 박는다. 미러 가능(데이터 있음)·EXEMPT(없음)·회색지대(호출되나 KR가정)·kill(안 함).
+상태: **v0.4 (2026-06-22)** — ★운영자 챌린지("없는 데이터 어떻게 해결") 대응. v0.3 "영구 EXEMPT" 대부분이 *채울 수 있음*을 코드검증으로 정정 — 상세 해결책 = `08-missing-data-resolution.md`. 미러 가능·해결 가능(08)·회색지대·진짜 빔(소수)·kill.
 
 ---
 
@@ -21,54 +21,64 @@
 | search (공시 본문) | `edgarPanel` 검색 카탈로그 | [보고] 통합 BM25 live |
 | 가격 | C(비활성, Slice 1) / A(`edgar/prices` baked, S2-L0.3 라이선스) | ⬜ Slice 분리 |
 
-## 2. EXEMPT — 영구 (US 동등 데이터 구조적 부재)
+## 2. [대정정 v0.4] "영구 EXEMPT" 대부분 틀림 — 결측 해결책 = 08
 
-| 표면 | EXEMPT 사유 | 정직 처리 |
-|---|---|---|
-| `industry()` 가치사슬 지도 | KR 운영자 수동 큐레이션 + 한국 산업정의 + KR peer. US 가치사슬 지도 부재. | map surface US면 "미국 시장 미제공". 발명 금지. |
-| `sector`/WICS 11분류 | KR 거래소 분류체계. | US 섹터 칩 비활성 or GICS 별도결정(§4). |
-| `rank`/섹터내 peer 랭킹 | US peer 유니버스 정의 부재. | US 랭킹 패널 비활성. |
-| `network`/계열사 그래프 | 한국 계열사(지배구조) 공시 기반. US 13F는 *개념 상이*. | US 비활성. |
-| `topicSummaries` | KR 공시 item 분류 의존. | US 비활성. |
-| DART OpenAPI `report` **17 apiType** ([정정] 메서드 `report()`는 미러됨) | SEC 폼 구조 상이(`scan/report/*`). | scan US에서 report 축 비활성. |
+★운영자 챌린지("없는 데이터 어떻게 해결") 대응 직접 코드검증: v0.3 "영구 EXEMPT" 항목 대부분이 **채울 수 있다**(상세 `08-missing-data-resolution.md`).
 
-**EXEMPT 처리 철학(00 §1.1 재확인)**: EXEMPT는 *배선이 없는 게 아니라*, 배선은 시장 차원을 타되 US 분기에서 *정직하게 빈* 것. "데이터 없음"을 표면화하는 것이 본 PRD의 합격 조건. 가짜 채움 = 전체 실패.
+| 표면 | v0.3 | v0.4 실제(08) | 해결 |
+|---|---|---|---|
+| `report` 17 apiType | 영구 EXEMPT | **[확인] EDGAR 14 추출기 작동**(`reportAccessor._SUPPORTED`) | scan bake + DEF14A 2파서 + 메서드 배선(분류 A 대부분) |
+| `sector`/`rank` | 영구 EXEMPT | **[확인] SIC bulk 존재**(`datasetBulk.py:75`) | SIC→US sector crosswalk + peer 계산(B/A). GICS만 라이선스(D) |
+| `network` | 영구 EXEMPT | Exhibit 21·13D/G·13F 출처 명확 | 신규 파서 + US-native 재정의(B/C) |
+| `industry` 가치사슬 | 영구 EXEMPT | 분류=SIC(B) / **엣지=major-customer 부분(C/D)** | 분류 채움 / 엣지만 부분·정직 빔 ← **유일 진짜 잔여** |
+| `sharesOutstanding` | 부분 EXEMPT | **[확인] XBRL ~6col**(authorized/issued/outstanding/treasury/preferred) | XBRL 개념 확장(A/B) |
+| `executivePay`/`relatedPartyTx` | missing | executivePay 추출기 有·relatedPartyTx=10-K Item13/ASC850 | 배선+DEF14A(C)/파서(B) |
+
+**→ 진짜 영구 빔(D/불가) = US 가격(라이선스)·가치사슬 *엣지*(부분)·전임원 보수(US=NEO5)뿐. 나머지는 채운다.** "정직하게 빈다"는 이 소수에만 — 가짜 채움 금지는 유지하되 *채울 수 있는데 안 채우는 게으름*도 금지(챌린지 핵심).
+
+**처리 철학(00 §1.1)**: 채운 데이터는 US 출처 라벨(SIC-derived·Exhibit 21·DEF 14A NEO5), KR 등가 주장 금지. 진짜 빈 소수는 커버리지/한계 명시.
 
 ## 3. EXEMPT 2태그 — permanent vs dataWaiting ([정정] 비대칭 baseline 정합)
 
 [확인] `_baselines/providerSymmetry.json` missing 5건 = `executivePay`·`flow`·`notesDetail`·`relatedPartyTx`·`simulate`(EDGAR 메서드 부재). 비대칭 가드(`providerSymmetry.py`)가 이를 태그로 구분해야 파서 구현 시 게이트가 풀린다.
 
+[정정 v0.4] 아래 2태그는 *symmetry baseline missing-5*에만 적용(method 부재 가드). sector/rank/network/report17은 **§2/08에서 해결로 재분류**되어 여기서 빠짐.
+
 | 항목 | 태그 | 데이터로 가능? | 본 PRD 처리 |
 |---|---|---|---|
-| `industry`/`sector`/`sectorParams`/`rank`/`network`/`topicSummaries`/report17 | **permanent** | US 동등 데이터 부재(SIC/GICS 유추는 *새 US 엔진*) | **범위 밖**(별도 goal) — "동일 배선"≠"새 US 산업엔진" |
-| `executivePay` | **dataWaiting** | [정정] US=**DEF 14A NEO5**(10-K item11 아님)·KR 전원공개와 구조 비동등 | **범위 밖/선택**(파서=기능추가) |
-| `relatedPartyTx` | **dataWaiting** | US=10-K notes(ASC 850) | **범위 밖/선택** |
-| `notesDetail`·`flow`·`simulate` | **dataWaiting/permanent 혼재** | notesDetail=XBRL 일부 가능·flow/simulate=KR 고유 | **범위 밖** — baseline 명시 유지(strict 0 미래목표) |
+| `executivePay` | **dataWaiting** | US=**DEF 14A NEO5**·XBRL 보상(추출기 有) | **Slice2/3**(배선+DEF14A 보강) |
+| `relatedPartyTx` | **dataWaiting** | US=10-K Item13/ASC850 | **Slice2**(파서) |
+| `notesDetail` | **dataWaiting** | XBRL 일부 가능 | Slice2 |
+| `flow`·`simulate` | **permanent** | KR 고유(공시 흐름·KR 시뮬) | baseline 명시 유지 |
 
-**판정 원칙**: 본 PRD는 *배선 통일*이다. EXEMPT를 채우는 것(새 US 데이터 엔진 구축)은 별도 goal. 혼입하면 범위 폭발 → "동일 배선"이 영원히 안 끝남. EXEMPT는 *정직하게 비우는 배선*까지가 본 PRD.
+**판정 원칙 [정정 v0.4]**: v0.3은 "EXEMPT 채우기=범위 밖 별도 goal"이라 했으나, *운영자 챌린지로 재판정* — 채울 수 있는 것(report 14·SIC sector·Exhibit21 network·shares XBRL)은 **본 PRD 범위(Slice 2/3)**다. 진짜 별도 goal/빔 = *가치사슬 엣지 합성·전임원 보수·GICS·US 가격 라이선스*뿐(08 분류 D). 범위 폭발 방지는 "발명 금지"로(있는 출처는 채우되 없는 걸 지어내지 않음).
 
 > [정정] **2태그는 현재 코드에 없음** — `providerSymmetry.json`은 평면 `missing[]` + 코드 상수 `_DART_ONLY`(permanent만)/`_EDINET_DEFERRED`뿐. permanent/dataWaiting 구분은 *구현 작업*(baseline JSON에 키 분리 or `_SYMMETRY_MAP` 태그 dict). "설계 의도"이지 "현존 구조" 아님.
 
 ### 3.5 ★회색지대 — EXEMPT도 정상도 아닌 제3 분류 ([확인] R2 P0)
 analysis/credit/quant/story는 *호출은 되나 계산이 KR 가정*. **EXEMPT(비활성·정직 빈)와 다르다** — 화면에 *뜨는데 틀린다*. 특히 credit은 [확인] 침묵 KR-garbage(§1). Slice1 처리(S1-L4.3): (a) `market!="KR"→None`/EXEMPT 가드 or (b) "계산 미검증·KR기준" 경고 배지. **EXEMPT 카운트와 별개 "계산 미정합" 분류로 노출** — 사용자가 "빈 화면(EXEMPT)"과 "틀린 숫자(회색지대)"를 가리게. credit 가드=필수. **`_DART_ONLY` allowlist가 이 4엔진을 비대칭 검사에서 제외**하므로 symmetry 게이트로 안 잡힘 → 별도 oracle 필요.
 
-## 4. ★sector/GICS 결정 (패널 평가 쟁점)
-- "US도 scan에서 섹터별 비교가 되게 하라"는 압력이 있을 수 있으나, GICS는 라이선스(MSCI) 이슈 + WICS와 경제적 비동등. SIC는 공개지만 조악.
-- **잠정**: 본 PRD 범위 밖. scan US는 *시장 전체* 백분위(섹터 무관)까지만. 섹터 분류는 별도 PRD. — 패널이 반박하면 재고.
+## 4. ★sector 결정 [정정 v0.4] — SIC-derived는 범위 안
+- [확인] SIC가 EDGAR bulk에 존재(`datasetBulk.py:75`) → **SIC→US sector crosswalk(자체 공개 분류)는 본 PRD Slice2 범위**. rank=그 위 peer 백분위(scan-finance 재사용).
+- **GICS만 범위 밖**(MSCI 라이선스, 재배포 불가=분류 D). "GICS 섹터"라 라벨 금지 — "SIC-derived sector"로 정직 라벨.
 
-## 5. Kill-List (명시적으로 안 함)
-1. **US 가치사슬 지도 발명** — industry 엔진 US 복제(SIC 유추). 별도 goal.
-2. **US 섹터/peer 랭킹 발명** — GICS/13F 기반 합성. 별도 goal.
-3. **DART report 17종 US 강제 매핑** — 폼 구조 상이로 1:1 불가.
-4. **ui/web EDGAR 배선** — 제거 예정.
-5. **실시간/장중 US 데이터** — EOD/baked만.
-6. **새 HF repo** — `eddmpython/dartlab-data` 단일에 `edgar/...`.
-7. **KR 경로 회귀** — market 기본값 KR 불변. US 추가가 KR 변경 0.
-8. **EXEMPT 가짜 채움** — US 빈 패널을 KR 데이터·placeholder로 메움.
+## 5. Kill-List [정정 v0.4] (진짜 안 하는 것 — 채울 수 있는 건 채운다)
+1. **가치사슬 *엣지* 합성** — major-customer 공시 없는데 supplier→customer 관계를 지어냄(FactSet식). 분류=SIC로, 엣지=공시 기반 부분만(저커버리지 라벨).
+2. **GICS 섹터 사칭** — SIC-derived를 "GICS"라 라벨. (SIC sector 자체는 채움.)
+3. **전임원 보수 사칭** — US=NEO5인데 "전임원"이라 표기. (NEO5는 채움.)
+4. **재벌 계열 사칭** — Exhibit 21 자회사를 "한국식 계열사"라 표기. (자회사 네트워크는 채움.)
+5. **ui/web EDGAR 배선** — 제거 예정.
+6. **실시간/장중** — EOD/baked만.
+7. **새 HF repo** — `eddmpython/dartlab-data` 단일.
+8. **KR 경로 회귀** — market 기본 KR 불변.
+9. **재배포 불가 데이터 baked** — GICS·라이선스 가격소스를 HF 공개.
+10. **채울 수 있는데 안 채우는 게으름** [신설] — report 14·SIC sector·Exhibit21·shares XBRL을 "EXEMPT"로 퉁치기(운영자 챌린지 직접 대응).
 
-## 6. 데이터 선결 점검표 (L0 진입 전)
-- [ ] `edgar/panel` native payload 보유율 실측(L0.0).
-- [ ] `edgar/sections` 커버리지(docsIndex 입력).
-- [ ] `sharesOutstanding` XBRL 필드(`dei:EntityCommonStockSharesOutstanding`) 추출 가능성.
-- [ ] US 가격 소스 라이선스·갱신주기(옵션 A 채택 시).
-- [ ] `edgar/scan/finance.parquet` 종목 커버리지(scan 유니버스 크기).
+## 6. 데이터 선결 점검표 (착수 전)
+- [ ] `edgar/panel` native payload 보유율 실측(S0.1 ledger).
+- [ ] `edgar/sections` 커버리지(docsIndex·changes·Item13 입력).
+- [ ] XBRL 주식수 개념(`CommonStockSharesAuthorized/Issued/Outstanding`·`TreasuryStockShares`) companyfacts 실측(shares ~6col 복원 확인).
+- [ ] report 14 추출기 실제 데이터 산출률(대표 N종목, apiType별 non-null).
+- [ ] SIC 커버리지(전 종목 SIC 보유?) + SIC→sector crosswalk 설계.
+- [ ] DEF 14A·Exhibit 21 파싱 PoC(executivePay NEO5·자회사 목록).
+- [ ] US EOD 가격 재배포 라이선스 실조사(stooq/tiingo/nasdaq data link ToS).
