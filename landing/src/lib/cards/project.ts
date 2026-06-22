@@ -17,6 +17,15 @@ function assertNever(x: never): never {
 	throw new Error(`projectBlock: 미매핑 ReportBlock 변종 — ${JSON.stringify(x)}`);
 }
 
+/** 카드용 초단문 — 첫 문장(마침표까지)만, 길면 자른다. 캐러셀은 리포트가 아니라 한 줄 후킹(기존 SNS 카피 톤). */
+function hook(text: string, max = 80): string {
+	const t = clean(text).trim();
+	const dot = t.search(/[.!?]\s|다\.\s|입니다\.\s/);
+	let s = dot > 0 && dot < max + 12 ? t.slice(0, t.indexOf('. ', dot - 1) + 1 || dot + 1) : t;
+	if (s.length > max) s = s.slice(0, max).trim() + '…';
+	return s.trim();
+}
+
 /** ReportBlock 1개 → 슬라이드 카드 또는 null(명시 skip). 모든 변종을 다뤄야 컴파일됨(exhaustive). */
 export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | null {
 	switch (block.type) {
@@ -24,7 +33,7 @@ export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | 
 			return null; // 헤딩은 다음 카드의 head 로 접힘 — 독립 슬라이드 아님(명시 skip)
 		case 'text': {
 			const t = clean(block.text).trim();
-			return t.length >= 24 ? { ...head, kind: 'narrative', text: t } : null; // 너무 짧은 텍스트 skip
+			return t.length >= 24 ? { ...head, kind: 'narrative', text: hook(t, 130) } : null; // 첫 문장만(벽 금지)
 		}
 		case 'metrics':
 			return block.metrics.length ? { ...head, kind: 'kpis', metrics: block.metrics } : null;
@@ -71,7 +80,7 @@ export function projectReport(
 			corpName: model.corpName,
 			stockCode: model.stockCode,
 			perspectiveLabel: model.perspectiveLabel,
-			conclusion: clean(model.conclusion),
+			conclusion: hook(model.conclusion, 70), // 표지는 한 줄 후킹(리포트 결론 문단 전체 금지)
 			dataBasis: model.dataBasis
 		}
 	];
@@ -96,15 +105,10 @@ export function projectReport(
 	for (const sec of sections) {
 		const { head, sub } = splitTitle(sec.title);
 		const headCtx: HeadCtx = { heading: head, sub, engine: sec.sourceEngine };
-		const note = spec?.notes?.[sec.key];
-		let first = true;
-		for (const block of sec.blocks) {
-			const card = projectBlock(block, headCtx);
-			if (!card) continue;
-			if (first && note) {
-				card.note = note; // 섹션 손글 caption — 첫 카드에만
-				first = false;
-			}
+		const card = pickSectionCard(sec.blocks, headCtx); // 섹션당 1장(시각 우선) — 텍스트 도배·과다 슬라이드 방지
+		if (card) {
+			const note = spec?.notes?.[sec.key];
+			if (note) card.note = note;
 			cards.push(card);
 		}
 	}
@@ -114,6 +118,14 @@ export function projectReport(
 
 	assignHeroes(cards, heroUrls);
 	return { ...base, cards };
+}
+
+// 섹션 대표 카드 — 시각(차트) 우선, 그다음 신호·지표, 텍스트는 최후. 인스타 캐러셀 = 시각 우선.
+const KIND_RANK: Record<string, number> = { line: 0, bars: 0, share: 1, kpis: 2, flags: 3, table: 4, narrative: 5 };
+function pickSectionCard(blocks: ReportBlock[], head: HeadCtx): CarouselCard | null {
+	const cards = blocks.map((b) => projectBlock(b, head)).filter((c): c is CarouselCard => c !== null);
+	if (!cards.length) return null;
+	return cards.sort((a, b) => (KIND_RANK[a.kind] ?? 9) - (KIND_RANK[b.kind] ?? 9))[0];
 }
 
 /** hero 사진 전부를 슬라이드에 순환 배정 — 한 장도 안 빠지게(텍스트 카드=풀, 차트 카드=dim 은 렌더가 판단). */

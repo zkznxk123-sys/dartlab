@@ -68,16 +68,15 @@ describe('projectReport — 덱 구조 + 정직', () => {
 			{ type: 'flags', kind: 'opportunity', flags: ['신규 라인 가동'] }
 		]
 	};
-	it('cover → kpis → finChart → 섹션카드 → closing 순서', () => {
+	it('cover → kpis → finChart → 섹션카드(시각 우선 1장) → closing 순서', () => {
 		const deck = projectReport(model({ sections: [sec] }), { heroUrls: ['https://x/h.webp'] });
 		const kinds = deck.cards.map((c) => c.kind);
 		expect(kinds[0]).toBe('cover');
 		expect(kinds).toContain('kpis');
 		expect(kinds).toContain('finChart');
-		expect(kinds).toContain('line');
-		expect(kinds).toContain('flags');
+		expect(kinds).toContain('line'); // 섹션은 차트(line) 1장만 — flags 는 같은 섹션이라 탈락(시각 우선)
+		expect(kinds).not.toContain('flags');
 		expect(kinds.at(-1)).toBe('closing');
-		// heading 블록은 슬라이드가 안 됨(접힘).
 		expect(deck.cards.filter((c) => c.kind === 'line')[0]).toMatchObject({ heading: '재무분석', sub: '수익성은 지속되는가' });
 	});
 	it('cover 는 모델값 그대로(신규 숫자 합성 0)', () => {

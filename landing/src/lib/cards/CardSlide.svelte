@@ -179,6 +179,25 @@
 		padding: 7% 7.5% 9%;
 		display: flex;
 		flex-direction: column;
+		overflow: hidden; /* 텍스트가 4:5 프레임을 절대 안 넘치게(hook() 단축 + 하드 클립 belt-and-suspenders) */
+	}
+	/* 다중행 클램프 — 긴 데이터 산문이 카드를 넘치지 않게(인스타 카피는 짧다). 블록 요소만(.narr/.closing
+	   는 flex-center 라 .content overflow:hidden + hook() 단축으로 클립). */
+	.lead,
+	.sSub,
+	.note {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.lead {
+		-webkit-line-clamp: 3;
+	}
+	.sSub {
+		-webkit-line-clamp: 2;
+	}
+	.note {
+		-webkit-line-clamp: 2;
 	}
 	/* kicker (accent dot + label) */
 	.kicker {
