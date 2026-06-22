@@ -12,7 +12,8 @@
 		"sync-brand": "node scripts/syncBrand.js",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"test": "vitest run"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.10",
@@ -30,12 +31,15 @@
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "^4.2.1",
 		"typescript": "^6.0.3",
-		"vite": "^8.0.16"
+		"vite": "^8.0.16",
+		"vitest": "^3.2.4"
 	},
 	"dependencies": {
+		"@dartlab/ui-contracts": "*",
 		"@dartlab/ui-design": "*",
 		"@dartlab/ui-format": "*",
 		"@dartlab/ui-runtime": "*",
+		"@dartlab/ui-surfaces": "*",
 		"@codemirror/autocomplete": "^6.20.3",
 		"@codemirror/commands": "^6.10.3",
 		"@codemirror/lang-sql": "^6.10.0",
