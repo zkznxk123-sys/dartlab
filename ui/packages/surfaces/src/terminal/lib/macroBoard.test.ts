@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import type { MacroPoint, MacroSeriesDef } from '@dartlab/ui-contracts';
 import {
 	ymdToMs, windowSlice, toYoY, toZScore, applyTransform, historyExtent, currentPosition,
-	growthInflationMomentum, quadOf, categoryOf, matchesCountry, NBER_RECESSIONS, BOARD_CATEGORIES
+	growthInflationMomentum, quadOf, categoryOf, matchesCountry, NBER_RECESSIONS, BOARD_CATEGORIES,
+	momentumSign, directionBreadth
 } from './macroBoard';
 
 const def = (over: Partial<MacroSeriesDef> = {}): MacroSeriesDef => ({ id: 'X', src: 'fred', kr: 'x', en: 'x', unit: '%', ...over });
@@ -76,6 +77,23 @@ describe('macroBoard — 변환·위치 (결정론)', () => {
 		expect(currentPosition(pts)).toBeCloseTo((40 - 10) / (50 - 10), 9); // 0.75
 		expect(currentPosition([])).toBeNull();
 		expect(currentPosition(monthly([7, 7, 7]))).toBe(0.5); // 범위 0 → 중앙
+	});
+});
+
+describe('macroBoard — 방향 집계(breadth)', () => {
+	it('momentumSign: 최신값이 ~3개월 전보다 높으면 up, 낮으면 down, 표본부족 flat', () => {
+		expect(momentumSign(monthly([1, 2, 3, 4, 5, 6]))).toBe('up'); // 최신 6 > 3개월전 3
+		expect(momentumSign(monthly([6, 5, 4, 3, 2, 1]))).toBe('down');
+		expect(momentumSign(monthly([5, 5, 5, 5, 5, 5]))).toBe('flat'); // 변화 0
+		expect(momentumSign([{ d: '20260101', v: 1 }])).toBe('flat'); // 1점
+		expect(momentumSign([])).toBe('flat');
+	});
+	it('directionBreadth: 묶음의 가속/감속/횡보 개수 집계', () => {
+		const up = monthly([1, 2, 3, 4, 5, 6]);
+		const down = monthly([6, 5, 4, 3, 2, 1]);
+		const flat = monthly([5, 5, 5, 5, 5, 5]);
+		const b = directionBreadth([up, up, down, flat]);
+		expect(b).toEqual({ up: 2, down: 1, flat: 1, total: 4 });
 	});
 });
 

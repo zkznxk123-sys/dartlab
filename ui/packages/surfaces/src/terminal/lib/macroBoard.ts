@@ -85,6 +85,43 @@ export function currentPosition(points: MacroPoint[]): number | null {
 	return span === 0 ? 0.5 : (cur - ext.min) / span;
 }
 
+/** 방향(가속/감속) — 최신값 vs lookbackMonths 이전값 부호. breadth 집계용. 표본 부족=flat.
+ *  yoy 시리즈는 값=rate 라 상승=가속, level 시리즈는 상승=오름. 무판정(사실: 오르나/내리나). */
+export function momentumSign(points: MacroPoint[], lookbackMonths = 3): 'up' | 'down' | 'flat' {
+	if (points.length < 2) return 'flat';
+	const last = points[points.length - 1];
+	const target = ymdToMs(last.d) - lookbackMonths * 30.44 * DAY;
+	let prior = points[0];
+	for (const p of points) {
+		if (ymdToMs(p.d) <= target) prior = p;
+		else break;
+	}
+	const diff = last.v - prior.v;
+	if (Math.abs(diff) < 1e-9) return 'flat';
+	return diff > 0 ? 'up' : 'down';
+}
+
+/** 축 방향집계 — 시리즈 묶음의 up/down/flat 개수(breadth). "물가 6개 중 6개 가속" 한 줄용. */
+export function directionBreadth(seriesList: MacroPoint[][], lookbackMonths = 3): { up: number; down: number; flat: number; total: number } {
+	let up = 0, down = 0, flat = 0;
+	for (const pts of seriesList) {
+		const s = momentumSign(pts, lookbackMonths);
+		if (s === 'up') up++;
+		else if (s === 'down') down++;
+		else flat++;
+	}
+	return { up, down, flat, total: seriesList.length };
+}
+
+/** 현재 z-격차 — 두 시리즈를 각각 표준화한 *최신* z 차이(A−B). 발산 쌍의 "지금 얼마나 벌어졌나"(절대 임계 아님·롤링상관 베이스라인 아님).
+ *  표본 부족 시 null. 부호=A가 자기 역사 대비 B보다 위/아래. */
+export function zGap(a: MacroPoint[], b: MacroPoint[]): number | null {
+	const za = toZScore(a);
+	const zb = toZScore(b);
+	if (!za.length || !zb.length) return null;
+	return za[za.length - 1].v - zb[zb.length - 1].v;
+}
+
 export interface MomentumPoint {
 	ym: string; // YYYYMM
 	g: number; // 성장 z (세로축 — 높을수록 위)
