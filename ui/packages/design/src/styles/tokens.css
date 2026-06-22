@@ -118,6 +118,15 @@
 	--dl-bg-modal: var(--p-gray-750);
 	--dl-bg-deep: var(--p-gray-950); /* OLED 깊이 (사용 절제) */
 
+	/* ── Marketing surface (랜딩 전용 · 딥다크 네이비, theme 의존) ──
+	 * 제품 그레이와 별도 family — 랜딩 마케팅 톤(더 깊은 네이비) 보존. 라이트에서 화이트로 flip. */
+	--dl-mkt-bg-0: var(--p-navy-950); /* 최심(헤더·darker 섹션) */
+	--dl-mkt-bg: var(--p-navy-900);
+	--dl-mkt-bg-2: var(--p-navy-850);
+	--dl-mkt-card: var(--p-card-900);
+	--dl-mkt-card-2: var(--p-card-800);
+	--dl-mkt-border: var(--p-line-navy);
+
 	/* ── Border · 매우 절제, shadow 대신 1px (theme 의존) ── */
 	--dl-line: rgba(255, 255, 255, 0.06);
 	--dl-line-strong: rgba(255, 255, 255, 0.12);
@@ -204,4 +213,12 @@
 	--dl-ink-dim: #6b7280;
 	--dl-ink-faint: #9aa1ad;
 	--dl-ink-print: #0d0f14;
+
+	/* 랜딩 마케팅 surface — 네이비→화이트(클린 에디토리얼) */
+	--dl-mkt-bg-0: #eef1f5;
+	--dl-mkt-bg: var(--p-white);
+	--dl-mkt-bg-2: #f7f8fa;
+	--dl-mkt-card: var(--p-white);
+	--dl-mkt-card-2: #f2f4f7;
+	--dl-mkt-border: rgba(15, 23, 42, 0.1);
 }

@@ -11,14 +11,14 @@
 	--color-dl-accent: var(--dl-accent);
 	--color-dl-accent-light: var(--dl-accent-light);
 	--color-dl-orange: var(--dl-orange); /* 옛 accent(오렌지) — 보조색 명시(브랜드 그라데이션용) */
-	--color-dl-bg-dark: var(--p-navy-900);
-	--color-dl-bg-darker: var(--p-navy-950);
-	--color-dl-bg-card: var(--p-card-900);
-	--color-dl-bg-card-hover: var(--p-card-800);
+	--color-dl-bg-dark: var(--dl-mkt-bg);
+	--color-dl-bg-darker: var(--dl-mkt-bg-0);
+	--color-dl-bg-card: var(--dl-mkt-card);
+	--color-dl-bg-card-hover: var(--dl-mkt-card-2);
 	--color-dl-text: var(--dl-ink-print);
-	--color-dl-text-muted: var(--p-slate-400);
-	--color-dl-text-dim: var(--p-slate-500);
-	--color-dl-border: var(--p-line-navy);
+	--color-dl-text-muted: var(--dl-ink-mute);
+	--color-dl-text-dim: var(--dl-ink-dim);
+	--color-dl-border: var(--dl-mkt-border);
 	--color-dl-success: var(--dl-good);
 	--color-dl-warning: var(--dl-warn);
 	--color-dl-coffee: var(--p-gold-400);

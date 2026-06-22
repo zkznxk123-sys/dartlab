@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { Search, Menu, X, Construction, Heart } from 'lucide-svelte';
+	import { Search, Menu, X, Construction, Heart, Sun, Moon } from 'lucide-svelte';
+	import { themePref, toggleTheme, isContentPath } from '$lib/theme';
 	import GithubIcon from '$lib/components/GithubIcon.svelte';
 	// SNS·후원 = dartlab 공통 SSOT(DARTLAB_BRAND_LINKS) + 후원·기여 다이얼로그(터미널과 동일 정본 재사용).
 	import { SupportDialog, DARTLAB_BRAND_LINKS } from '@dartlab/ui-surfaces/terminal';
@@ -39,6 +40,9 @@
 		const stripped = base && path.startsWith(base) ? path.slice(base.length) : path;
 		return DASHBOARD_PATHS.some((p) => stripped === p || stripped.startsWith(`${p}/`));
 	});
+
+	// 라이트 토글은 라이트가 실제 적용되는 콘텐츠 표면에서만 노출(도구 표면은 항상 다크 → inert 버튼 숨김).
+	let themeAvailable = $derived(isContentPath(page.url.pathname, base));
 </script>
 
 <svelte:window onscroll={handleScroll} />
@@ -87,6 +91,13 @@
 				<span>검색...</span>
 				<kbd class="ml-1 px-1 py-0.5 rounded bg-dl-bg-darker border border-dl-border text-[10px] font-mono leading-none">⌘K</kbd>
 			</button>
+			{#if themeAvailable}
+				<button onclick={toggleTheme}
+					class="w-7 h-7 rounded-md flex items-center justify-center text-dl-text-dim hover:text-dl-text hover:bg-dl-bg-card transition-colors cursor-pointer"
+					title={$themePref === 'light' ? '다크 모드로' : '라이트 모드로'} aria-label="테마 전환">
+					{#if $themePref === 'light'}<Moon class="w-[15px] h-[15px]" />{:else}<Sun class="w-[15px] h-[15px]" />{/if}
+				</button>
+			{/if}
 			<a href={DARTLAB_BRAND_LINKS.repo} target="_blank" rel="noopener"
 				class="w-7 h-7 rounded-md flex items-center justify-center text-dl-text-dim hover:text-dl-text hover:bg-white/5 transition-colors no-underline"
 				title="GitHub">

@@ -4,6 +4,8 @@
 	import '@dartlab/ui-design/styles/tokens.css';
 	import '@dartlab/ui-design/styles/typography.css';
 	import { base } from '$app/paths';
+	import { page } from '$app/state';
+	import { themePref, applyTheme } from '$lib/theme';
 	import { setStaticBase } from '@dartlab/ui-runtime/data/dartlabData';
 	import { loadFinanceRows } from '@dartlab/ui-runtime/data/financeRows';
 	import { loadDartDb } from '$lib/data/duckdb';
@@ -21,6 +23,11 @@
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 
 	let { children }: { children: Snippet } = $props();
+
+	// 라우트별 테마 적용 — 콘텐츠 표면은 사용자 선호(라이트 가능), 도구 표면은 강제 다크. 네비게이션마다 재평가.
+	$effect(() => {
+		applyTheme($themePref, page.url.pathname, base);
+	});
 </script>
 
 <CloudflareWebAnalytics />
