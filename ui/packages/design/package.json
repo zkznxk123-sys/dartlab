@@ -5,5 +5,8 @@
 	"type": "module",
 	"exports": {
 		"./styles/*": "./src/styles/*"
+	},
+	"scripts": {
+		"check:colors": "node ../../../tests/audit/checkColorSsot.mjs"
 	}
 }
