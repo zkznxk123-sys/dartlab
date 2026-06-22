@@ -178,7 +178,7 @@
 		opacity: 0.62;
 	}
 	.pm-dim .bg {
-		opacity: 0.16;
+		opacity: 0.5; /* 차트 슬라이드도 회사 사진이 또렷이(모든 슬라이드에 이미지) — 차트는 아래 패널로 가독 확보 */
 	}
 	.scrim {
 		position: absolute;
@@ -191,7 +191,7 @@
 		background: linear-gradient(180deg, rgba(5, 8, 17, 0.55) 0%, rgba(5, 8, 17, 0.35) 40%, rgba(5, 8, 17, 0.9) 100%);
 	}
 	.pm-dim .scrim {
-		background: rgba(5, 8, 17, 0.82);
+		background: linear-gradient(180deg, rgba(5, 8, 17, 0.5) 0%, rgba(5, 8, 17, 0.35) 45%, rgba(5, 8, 17, 0.7) 100%);
 	}
 	/* 편집 카드 = 기존 SNS editorial: 사진 monochrome + 강한 하단 그라데이션(가독). 강조색=accentImpact. */
 	.pm-editorial .bg {
@@ -424,16 +424,22 @@
 	.flags.opportunity li {
 		border-color: #34d399;
 	}
-	/* charts */
+	/* charts — 사진 위에서도 가독되게 반투명 패널 + 사진 일부 노출 */
 	.chart,
 	.bars,
 	.share,
-	.finWrap {
+	.finWrap,
+	.tWrap {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		gap: 0.7em;
+		background: rgba(5, 8, 17, 0.58);
+		border: 1px solid rgba(30, 36, 51, 0.7);
+		border-radius: 14px;
+		padding: 5%;
+		box-sizing: border-box;
 	}
 	.finWrap {
 		align-items: center;

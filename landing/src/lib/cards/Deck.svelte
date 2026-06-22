@@ -13,7 +13,8 @@
 		corpName,
 		base = '',
 		heroUrls = [],
-		perspectiveKey = $bindable('earningsPower')
+		perspectiveKey = 'earningsPower',
+		onEnlarge
 	}: {
 		rt: DartLabRuntime;
 		sym: string;
@@ -21,6 +22,7 @@
 		base?: string;
 		heroUrls?: string[];
 		perspectiveKey?: string;
+		onEnlarge?: () => void;
 	} = $props();
 
 	// 표지 미리보기 — buildReport 없이 hfMedia 사진+이름만(피드에서 첫장 즉시 노출).
@@ -80,15 +82,6 @@
 		return () => io.disconnect();
 	});
 
-	// 관점 변경(빌드 이후) 재빌드.
-	let prevPersp = perspectiveKey;
-	$effect(() => {
-		if (built && perspectiveKey !== prevPersp) {
-			prevPersp = perspectiveKey;
-			load();
-		}
-	});
-
 	const total = $derived(deck.cards.length);
 
 	function go(to: number) {
@@ -128,17 +121,11 @@
 			{/each}
 		</div>
 
-		<!-- 코너 크롬(전 슬라이드 고정) -->
-		<div class="badge">{corpName}{sym ? ` · ${sym}` : ''}</div>
+		<!-- 코너 크롬(전 슬라이드 고정) — 회사명·코드 + dartlab 시그니처 + 페이지 + 확대 -->
+		<div class="badge">{deck.corpName}{sym ? ` · ${sym}` : ''}</div>
 		{#if base}<img class="sig" src="{base}/avatar.webp" alt="DartLab" width="40" height="40" />{/if}
 		{#if total > 1}<div class="pageBadge">{idx + 1} / {total}</div>{/if}
-
-		<!-- 관점 탭 -->
-		<nav class="tabs" aria-label="관점">
-			{#each DECK_PERSPECTIVES as p (p.key)}
-				<button class="tab" class:on={perspectiveKey === p.key} onclick={() => (perspectiveKey = p.key)} title={p.label}>{p.label}</button>
-			{/each}
-		</nav>
+		{#if onEnlarge}<button class="enlarge" onclick={onEnlarge} title="확대" aria-label="확대">⤢</button>{/if}
 
 		<!-- 좌우 네비 -->
 		{#if total > 1}
@@ -222,29 +209,24 @@
 		border-radius: 999px;
 		z-index: 3;
 	}
-	.tabs {
+	.enlarge {
 		position: absolute;
 		top: 12px;
 		left: 12px;
-		display: flex;
-		gap: 3px;
-		flex-wrap: wrap;
-		max-width: 60%;
-		z-index: 3;
-	}
-	.tab {
-		font-size: 10px;
-		padding: 3px 7px;
-		color: #cbd5e1;
-		background: rgba(5, 8, 17, 0.62);
-		border: 1px solid transparent;
-		border-radius: 999px;
+		width: 30px;
+		height: 30px;
+		border-radius: 8px;
+		border: 1px solid rgba(232, 234, 237, 0.14);
+		background: rgba(5, 8, 17, 0.6);
+		color: #e7ecf3;
+		font-size: 15px;
 		cursor: pointer;
+		z-index: 3;
+		opacity: 0;
+		transition: opacity 0.15s;
 	}
-	.tab.on {
-		color: #fb923c;
-		border-color: rgba(251, 146, 60, 0.5);
-		background: rgba(251, 146, 60, 0.12);
+	.frame:hover .enlarge {
+		opacity: 1;
 	}
 	.nav {
 		position: absolute;

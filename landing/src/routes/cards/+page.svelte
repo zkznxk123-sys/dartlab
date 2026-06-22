@@ -25,10 +25,11 @@
 	let contractCodes = $state<string[]>([]); // 편집 계약(손글 카피) 있는 회사 = 피드(이미지 있는 것만)
 	let loaded = $state(false);
 	let query = $state(data.sym || '');
-	let visibleCount = $state(24);
+	let visibleCount = $state(12);
 	let searchEl = $state<HTMLInputElement | null>(null);
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let supportOpen = $state(false);
+	let zoom = $state<{ sym: string; corpName: string; heroUrls: string[] } | null>(null); // 확대(전체화면)
 
 	loadMediaIndex().then((m) => (media = m));
 	loadContractCodes().then((s) => {
@@ -65,6 +66,8 @@
 		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
 			e.preventDefault();
 			searchEl?.focus();
+		} else if (e.key === 'Escape' && zoom) {
+			zoom = null;
 		}
 	}
 </script>
@@ -123,13 +126,30 @@
 		{:else}
 			<div class="grid">
 				{#each visible as row (row.stockCode)}
-					<Deck {rt} sym={row.stockCode} corpName={row.corpName} {base} heroUrls={heroUrls(media, row.stockCode)} />
+					<Deck
+						{rt}
+						sym={row.stockCode}
+						corpName={row.corpName}
+						{base}
+						heroUrls={heroUrls(media, row.stockCode)}
+						onEnlarge={() => (zoom = { sym: row.stockCode, corpName: row.corpName, heroUrls: heroUrls(media, row.stockCode) })}
+					/>
 				{/each}
 			</div>
 			<div bind:this={sentinel} class="sentinel"></div>
 			{#if feedRows.length === 0}<p class="feedEmpty">{query ? `"${query}" 검색 결과가 없습니다.` : '게시된 편집 캐러셀이 없습니다.'}</p>{/if}
 		{/if}
 	</main>
+
+	{#if zoom}
+		<!-- 확대(전체화면) — 배경 클릭/Esc 닫기 -->
+		<div class="zoom" role="dialog" aria-modal="true" aria-label="{zoom.corpName} 확대" onclick={() => (zoom = null)}>
+			<div class="zoomInner" role="document" onclick={(e) => e.stopPropagation()}>
+				<Deck {rt} sym={zoom.sym} corpName={zoom.corpName} {base} heroUrls={zoom.heroUrls} />
+			</div>
+			<button class="zoomClose" onclick={() => (zoom = null)} aria-label="닫기">✕</button>
+		</div>
+	{/if}
 </div>
 
 <SupportDialog lang="kr" {links} {base} open={supportOpen} onClose={() => (supportOpen = false)} />
@@ -160,14 +180,44 @@
 	}
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-		gap: 22px;
-		max-width: 1320px;
+		grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+		gap: 24px;
+		max-width: 1480px;
 		margin: 0 auto;
 		align-items: start;
 	}
 	.sentinel {
 		height: 1px;
+	}
+	/* 확대(전체화면) */
+	.zoom {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 3vh 3vw;
+		background: rgba(2, 4, 8, 0.92);
+		backdrop-filter: blur(6px);
+	}
+	.zoomInner {
+		height: min(92vh, 1400px);
+		aspect-ratio: 1080 / 1350;
+		max-width: 96vw;
+	}
+	.zoomClose {
+		position: absolute;
+		top: 18px;
+		right: 22px;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: 1px solid #243244;
+		background: rgba(8, 12, 18, 0.8);
+		color: #cbd5e1;
+		font-size: 18px;
+		cursor: pointer;
 	}
 	.feedEmpty {
 		text-align: center;
