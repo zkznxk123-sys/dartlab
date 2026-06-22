@@ -2,11 +2,10 @@
 	import { MACRO_SERIES, MACRO_ATTRIBUTION, type MacroPoint, type MacroSeriesDef, type MacroPort } from '@dartlab/ui-contracts';
 	import type { Lang } from '../lib/types';
 	import {
-		applyTransform, historyExtent, currentPosition, toYoY, growthInflationMomentum,
-		categoryOf, matchesCountry, BOARD_CATEGORIES, type MacroTransform, type MomentumPoint
+		applyTransform, historyExtent, currentPosition,
+		categoryOf, matchesCountry, BOARD_CATEGORIES, type MacroTransform
 	} from '../lib/macroBoard';
 	import MacroSeriesChart from './MacroSeriesChart.svelte';
-	import MacroGridTrail from './MacroGridTrail.svelte';
 
 	// 매크로 상황판 — 회사 무관 거시 보드. 조작(국가·기간·변환)→즉시 재렌더, hover 연결, 행 클릭 확대.
 	// 무판정: 판정/추천 라벨 0. 데이터는 MacroPort.getSeries(다년 시계열) 소비.
@@ -83,14 +82,7 @@
 		series: MACRO_SERIES.filter((d) => categoryOf(d) === c.key && matchesCountry(d, country))
 	})).filter((c) => c.series.length));
 
-	// ── 국면 모멘텀 궤적 — 성장률·물가율 시리즈에서 계산(KR: CLI YoY×CPI / US: INDPRO×CPIAUCSL) ──
-	const krTrail = $derived<MomentumPoint[]>(
-		series.size ? growthInflationMomentum(toYoY(ptsOf('CLI')), ptsOf('CPI')) : []
-	);
-	const usTrail = $derived<MomentumPoint[]>(
-		series.size ? growthInflationMomentum(ptsOf('INDPRO'), ptsOf('CPIAUCSL')) : []
-	);
-
+	// 국면 평면(성장×물가)은 좌측 패널 "마켓 펄스" 계기판 소관 — 다이얼로그는 *구체 데이터*만(중복 제거).
 	const expandedDef = $derived(expandedId ? defOf(expandedId) : null);
 	const ymd = (d: string | null) => d ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : '—';
 </script>
@@ -116,10 +108,7 @@
 	{#if loading}
 		<div class="mbLoading">{T('시계열 불러오는 중…', 'loading time series…')}</div>
 	{:else}
-		<!-- HERO: 국면 모멘텀 궤적 -->
-		<MacroGridTrail {krTrail} {usTrail} {lang} />
-
-		<!-- 카테고리 시계열 보드 -->
+		<!-- 카테고리 시계열 보드 (주역) — 국면 평면은 좌측 패널 계기판 -->
 		{#each visibleByCategory as cat (cat.key)}
 			<details class="mbCat" open>
 				<summary><span class="mbCatK">{cat.key}</span><i>{cat.en} · {cat.series.length}</i></summary>
