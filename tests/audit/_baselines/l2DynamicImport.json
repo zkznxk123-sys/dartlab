@@ -1,0 +1,10 @@
+{
+  "violations": [
+    "src/dartlab/analysis/financial/macroExposure.py: analysis->macro import_module(dartlab.macro.cycles.macroCycle)",
+    "src/dartlab/credit/models/excessBondPremium.py: credit->macro import_module(dartlab.macro.crisis.excessBondPremium)",
+    "src/dartlab/credit/monitoring/creditCycle.py: credit->macro import_module(dartlab.macro.crisis.creditCycleDetect)",
+    "src/dartlab/credit/monitoring/crisisDetector.py: credit->macro import_module(dartlab.macro.crisis.detectors)",
+    "src/dartlab/credit/scoring/metrics.py: credit->analysis import_module(dartlab.analysis.financial.accountSums)"
+  ],
+  "_note": "L2 importlib 동적 cross — 정적 AST 가드 사각(W-G1) 보강용 baseline. 전부 sanctioned cycle-break: analysis->macro=§172 허용방향, credit->macro·credit->analysis=§181 pattern-4(importlib cycle-break). 유지하되 신규 동적 cross 는 차단(ratchet). (debt-honesty P1-7)"
+}
