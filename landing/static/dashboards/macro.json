@@ -1,6 +1,6 @@
 {
-"version": "v19",
-"asOf": "2026-06-18",
+"version": "v20",
+"asOf": "2026-06-22",
 "kr": {
 "market": "KR",
 "phase": "recovery",
@@ -34,7 +34,7 @@
 "confidence": "high",
 "description": "성장 둔화 + 물가 상승 — 금·TIPS·현금 방어, 주식·채권 불리"
 },
-"computedAt": "2026-06-12T15:39:37.996264+00:00"
+"computedAt": "2026-06-21T01:15:41.082806+00:00"
 },
 "us": {
 "market": "US",
@@ -42,9 +42,9 @@
 "phaseLabel": "둔화",
 "confidence": "medium",
 "signals": [
-"HY 스프레드 안정 (280bp)",
-"수익률곡선 평탄화 (+0.40%)",
-"금 급등 (YoY +39.5%)",
+"HY 스프레드 안정 (263bp)",
+"수익률곡선 평탄화 (+0.27%)",
+"금 급등 (YoY +37.3%)",
 "CPI 4.3% — 물가 과열, 둔화 전조"
 ],
 "sectorStrategy": {
@@ -83,12 +83,12 @@
 "confidence": "high",
 "description": "성장 가속 + 물가 상승 — 원자재·EM 주식·TIPS 유리, 명목채 불리"
 },
-"computedAt": "2026-06-12T15:39:38.196754+00:00"
+"computedAt": "2026-06-21T01:15:41.216713+00:00"
 },
 "transmission": {
 "market": "KR",
 "sectorKey": null,
-"asOf": "2026-06-17",
+"asOf": "2026-06-19",
 "drivers": [
 {
 "id": "BAMLH0A0HYM2",
@@ -110,8 +110,8 @@
 "sourceLineage": {
 "source": "FRED",
 "sourceSeriesId": "BAMLH0A0HYM2",
-"date": "2026-06-16",
-"value": 2.71,
+"date": "2026-06-17",
+"value": 2.63,
 "unit": "%p",
 "artifactPath": "macro/fred/observations.parquet",
 "asOfPolicy": "observation_date <= price_as_of",
@@ -138,7 +138,7 @@
 "sourceLineage": {
 "source": "ECOS",
 "sourceSeriesId": "BASE_RATE",
-"date": "2026-06-15",
+"date": "2026-06-19",
 "value": 2.5,
 "unit": "%",
 "artifactPath": "macro/ecos/observations.parquet",
@@ -194,8 +194,8 @@
 "sourceLineage": {
 "source": "FRED",
 "sourceSeriesId": "DCOILWTICO",
-"date": "2026-06-08",
-"value": 95.0,
+"date": "2026-06-15",
+"value": 84.65,
 "unit": "$",
 "artifactPath": "macro/fred/observations.parquet",
 "asOfPolicy": "observation_date <= price_as_of",
@@ -250,8 +250,8 @@
 "sourceLineage": {
 "source": "ECOS",
 "sourceSeriesId": "USDKRW",
-"date": "2026-06-17",
-"value": 1513.4,
+"date": "2026-06-19",
+"value": 1527.0,
 "unit": "원",
 "artifactPath": "macro/ecos/observations.parquet",
 "asOfPolicy": "observation_date <= price_as_of",
@@ -521,8 +521,8 @@
 "id": "driver:BAMLH0A0HYM2",
 "driverId": "BAMLH0A0HYM2",
 "status": "observed",
-"date": "2026-06-16",
-"value": 2.71,
+"date": "2026-06-17",
+"value": 2.63,
 "unit": "%p",
 "sourceRef": "macro/fred/observations.parquet#BAMLH0A0HYM2"
 },
@@ -530,7 +530,7 @@
 "id": "driver:BASE_RATE",
 "driverId": "BASE_RATE",
 "status": "observed",
-"date": "2026-06-15",
+"date": "2026-06-19",
 "value": 2.5,
 "unit": "%",
 "sourceRef": "macro/ecos/observations.parquet#BASE_RATE"
@@ -548,8 +548,8 @@
 "id": "driver:DCOILWTICO",
 "driverId": "DCOILWTICO",
 "status": "observed",
-"date": "2026-06-08",
-"value": 95.0,
+"date": "2026-06-15",
+"value": 84.65,
 "unit": "$",
 "sourceRef": "macro/fred/observations.parquet#DCOILWTICO"
 },
@@ -566,8 +566,8 @@
 "id": "driver:USDKRW",
 "driverId": "USDKRW",
 "status": "observed",
-"date": "2026-06-17",
-"value": 1513.4,
+"date": "2026-06-19",
+"value": 1527.0,
 "unit": "원",
 "sourceRef": "macro/ecos/observations.parquet#USDKRW"
 }
@@ -646,6 +646,128 @@
 "kr": 0.4,
 "us": -0.3,
 "blended": 0.12
+}
+},
+"regime": {
+"kr": {
+"market": "KR",
+"computedAt": "2026-06-21T01:15:42.342368+00:00",
+"forecast": {
+"models": {
+"lei": {
+"cliMomentum": 1.1,
+"cliLevel": 127.5,
+"growthApprox": null,
+"growthLabel": null,
+"asOf": "2026-04-01",
+"staleAfterDays": 75
+}
+},
+"missing": [
+{
+"id": "probit",
+"status": "notApplicable",
+"reason": "US 전용"
+},
+{
+"id": "sahm",
+"status": "notApplicable",
+"reason": "US 전용"
+},
+{
+"id": "hamilton",
+"status": "단위 parity 미확정·표시 보류",
+"reason": "GROWTH↔A191RL1Q225SBEA 단위 동일성 미확정"
+}
+]
+},
+"rates": {
+"missing": [
+{
+"id": "yieldCurve",
+"status": "notApplicable",
+"reason": "US 전용"
+}
+]
+}
+},
+"us": {
+"market": "US",
+"computedAt": "2026-06-21T01:15:42.444386+00:00",
+"forecast": {
+"models": {
+"probit": {
+"probability": 0.1756,
+"probabilityRounded": 0.2,
+"zone": "moderate",
+"zoneLabel": "보통",
+"spread": 0.63,
+"horizon": "12M",
+"timeKind": "leading",
+"precisionNote": "Estrella-Mishkin 고정계수·표준오차 미산출(점추정)",
+"asOf": "2026-06-18",
+"seriesId": "T10Y3M",
+"staleAfterDays": 7
+},
+"sahm": {
+"value": 0.1,
+"triggered": false,
+"zone": "normal",
+"zoneLabel": "정상",
+"horizon": "realtime",
+"timeKind": "trigger(동행)",
+"asOf": "2026-05-01",
+"seriesId": "UNRATE",
+"staleAfterDays": 45
+},
+"lei": {
+"level": 6282202.46,
+"mom6m": null,
+"signal": "expansion",
+"signalLabel": "확장",
+"availableComponents": 10,
+"totalComponents": 10,
+"overlapNote": "term-spread·initial-claims 내포(probit/Sahm 부분 상관)",
+"horizon": "6-9M",
+"timeKind": "leading",
+"asOf": "2026-05-01",
+"staleAfterDays": 75
+},
+"hamilton": {
+"timeKind": "retrospective",
+"horizon": "동행",
+"staleAfterDays": 120,
+"revisionLabel": "분기 GDP·수정 대상",
+"asOf": "2026-01-01",
+"seriesId": "A191RL1Q225SBEA",
+"seriesSource": "FRED",
+"separation": 0.086,
+"contractionProb": null,
+"converged": true,
+"status": "레짐 분리 약함"
+}
+},
+"missing": []
+},
+"rates": {
+"spread10y3m": 0.63,
+"sign": "+",
+"curveShape": "steep_normal",
+"curveShapeLabel": "가파른정상",
+"curveSource": "NelsonSiegel.interpretation",
+"asOf": "2026-06-18",
+"seriesId": "T10Y3M",
+"staleAfterDays": 7,
+"missing": []
+},
+"gar": {
+"status": "표본 부족·표시 보류"
+},
+"regimeBand": {
+"status": "레짐 분리 약함",
+"converged": true,
+"separation": 0.086
+}
 }
 }
 }
