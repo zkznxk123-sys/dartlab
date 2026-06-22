@@ -46,8 +46,10 @@ _SRC = _REPO_ROOT / "src" / "dartlab"
 #   import dartlab as _dl
 #   import dartlab
 # 단, `from dartlab.xxx import ...` (서브패키지 직접) 는 정상.
-_RE_FROM_TOP = re.compile(r"^\s*from\s+dartlab\s+import\s+(.+?)(?:\s*#.*)?$", re.MULTILINE)
-_RE_IMPORT_TOP = re.compile(r"^\s*import\s+dartlab(?:\s+as\s+\w+)?(?:\s*#.*)?\s*$", re.MULTILINE)
+# 선두 공백은 [ \t]* (줄-로컬) — `\s*` 는 `\n` 도 매칭해 빈 줄 위의 indented import 를
+# cross-line 으로 잡아 line 번호·col-0 판정을 오염시킨다(잠재 버그, debt-honesty P1-2 에서 발견).
+_RE_FROM_TOP = re.compile(r"^[ \t]*from\s+dartlab\s+import\s+(.+?)(?:\s*#.*)?$", re.MULTILINE)
+_RE_IMPORT_TOP = re.compile(r"^[ \t]*import\s+dartlab(?:\s+as\s+\w+)?(?:\s*#.*)?\s*$", re.MULTILINE)
 
 # 면제 — facade 본체 + 의도된 entry 모듈.
 _EXEMPT_FILES: tuple[str, ...] = (
@@ -61,6 +63,10 @@ _EXEMPT_FILES: tuple[str, ...] = (
     # LLM prompt 텍스트 안 사용자용 코드 예시 (markdown 코드 블록) — 실제
     # 패키지 내부 import 가 아니라 사용자에게 보여주는 권장 사용법.
     "src/dartlab/ai/workbench/prompts.py",
+    # 스킬 spec 템플릿 생성기 — 본문 ``import dartlab`` 은 emit 하는 .md 템플릿의
+    # ```python 예시 코드 (실제 import 아님, prompts.py 와 동류). (debt-honesty P1-2)
+    "src/dartlab/skills/addAxis.py",
+    "src/dartlab/skills/addEngine.py",
 )
 
 
@@ -73,64 +79,126 @@ def _isExempt(file: Path) -> bool:
     return rel in _EXEMPT_FILES
 
 
-def _findStale(file: Path) -> list[tuple[int, str]]:
-    """파일 안 stale top-level dartlab import 위치/스니펫 반환."""
+def _findStale(file: Path) -> list[tuple[int, str, bool]]:
+    """파일 안 stale top-level dartlab import 위치/스니펫/모듈레벨여부 반환.
+
+    ``moduleLevel`` = col-0 import (진짜 F6 위반 — facade 정적 chain 무효화).
+    indented import 는 함수-local lazy (sandbox / cycle-break 의도) — 정보용.
+    """
     try:
         source = file.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
         return []
-    out: list[tuple[int, str]] = []
+    out: list[tuple[int, str, bool]] = []
     for m in _RE_FROM_TOP.finditer(source):
-        # 줄 번호 계산 (offset → line).
+        # 줄 번호 계산 (offset → line). m.start() 는 ^ (line start) — 첫 글자가 공백이면 indented.
         line = source.count("\n", 0, m.start()) + 1
         names = m.group(1).strip()
-        out.append((line, f"from dartlab import {names}"))
+        moduleLevel = source[m.start() : m.start() + 1] not in (" ", "\t")
+        out.append((line, f"from dartlab import {names}", moduleLevel))
     for m in _RE_IMPORT_TOP.finditer(source):
         line = source.count("\n", 0, m.start()) + 1
         snippet = source[m.start() : m.end()].strip()
-        out.append((line, snippet))
+        moduleLevel = source[m.start() : m.start() + 1] not in (" ", "\t")
+        out.append((line, snippet, moduleLevel))
     return out
 
 
-def _scan() -> dict[str, list[tuple[int, str]]]:
-    """src/dartlab/ 전수. {파일 상대경로: [(line, snippet), ...]}."""
-    results: dict[str, list[tuple[int, str]]] = defaultdict(list)
+def _scan() -> tuple[dict[str, list[tuple[int, str]]], int]:
+    """src/dartlab/ 전수. (module-level {파일: [(line, snippet)]}, function-local 총수).
+
+    module-level(col-0) 만 F6 위반 — function-local lazy 는 의도된 패턴이라 분리 집계.
+    """
+    moduleLevel: dict[str, list[tuple[int, str]]] = defaultdict(list)
+    funcLocal = 0
     for f in _SRC.rglob("*.py"):
         if "__pycache__" in f.parts:
             continue
         if _isExempt(f):
             continue
-        for line, snippet in _findStale(f):
-            results[_normPath(f)].append((line, snippet))
-    return dict(results)
+        for line, snippet, isModule in _findStale(f):
+            if isModule:
+                moduleLevel[_normPath(f)].append((line, snippet))
+            else:
+                funcLocal += 1
+    return dict(moduleLevel), funcLocal
+
+
+_BASELINE = _REPO_ROOT / "tests" / "audit" / "_baselines" / "staleImports.json"
+
+
+def _baselineKeys(results: dict[str, list[tuple[int, str]]]) -> set[str]:
+    """module-level 위반을 line 무관 ``relpath::snippet`` 키 set 으로 (line 이동 견고)."""
+    return {f"{rel}::{snippet}" for rel, items in results.items() for _line, snippet in items}
+
+
+def _loadBaseline() -> set[str]:
+    if not _BASELINE.exists():
+        raise SystemExit(f"[staleImports] baseline 부재: {_BASELINE}. --write-baseline 로 박제 후 재실행.")
+    import json
+
+    return set(json.loads(_BASELINE.read_text(encoding="utf-8-sig")).get("violations", []))
+
+
+def _writeBaseline(results: dict[str, list[tuple[int, str]]]) -> None:
+    import json
+
+    _BASELINE.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "violations": sorted(_baselineKeys(results)),
+        "_note": (
+            "module-level(col-0) stale top-level dartlab import 알려진 사이트 (relpath::snippet). "
+            "function-local lazy(sandbox/cycle-break)는 제외 — 의도된 패턴. 본 목록은 ratchet "
+            "부채(신규 col-0 차단·목표 0, server/skills.add* codemod 후 축소). (debt-honesty P1-2)"
+        ),
+    }
+    _BASELINE.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[staleImports] baseline 박제 → {_BASELINE} ({len(payload['violations'])} module-level 사이트)")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--strict", action="store_true", help="잔존 ≥ 1 → exit 2")
+    parser.add_argument("--strict", action="store_true", help="module-level 잔존 ≥ 1 → exit 2 (baseline 무시)")
+    parser.add_argument(
+        "--check", action="store_true", help="baseline 대비 신규 module-level 잔존 ≥ 1 → exit 2 (CI 배선용)"
+    )
+    parser.add_argument("--write-baseline", action="store_true", help="현재 module-level 잔존을 baseline 박제")
     parser.add_argument("--quiet", action="store_true", help="violations 만 출력")
     args = parser.parse_args()
 
-    results = _scan()
+    results, funcLocal = _scan()
     total = sum(len(v) for v in results.values())
+
+    if args.write_baseline:
+        _writeBaseline(results)
+        return 0
 
     if not args.quiet:
         print("=" * 72)
-        print("stale top-level dartlab import lint")
+        print("stale top-level dartlab import lint (module-level=col-0 만 위반)")
         print("=" * 72)
 
     if results:
-        # 면제 외 위반 모듈 별로 표시.
         for relPath in sorted(results):
             print(f"\n{relPath}")
             for line, snippet in results[relPath]:
                 print(f"  L{line}  {snippet}")
         if not args.quiet:
-            print(f"\n총 잔존: {total} 건 ({len(results)} 파일)")
+            print(
+                f"\nmodule-level 잔존: {total} 건 ({len(results)} 파일) · function-local(의도된 lazy): {funcLocal} 건"
+            )
             print("→ 서브패키지 직접 import 로 변환. 예: `from dartlab.company import Company`.")
     elif not args.quiet:
-        print("\n잔존 0 건 OK — F6 종료 조건 충족.")
+        print(f"\nmodule-level 잔존 0 건 OK — F6 종료 조건 충족. (function-local lazy {funcLocal} 건은 의도)")
 
+    if args.check:
+        new = sorted(_baselineKeys(results) - _loadBaseline())
+        if new:
+            print(f"\n[staleImports] 신규 module-level stale import {len(new)} 건 (baseline 초과 = 회귀):")
+            for item in new:
+                print(f"  + {item}")
+            return 2
+        return 0
     if args.strict and total > 0:
         return 2
     return 0
