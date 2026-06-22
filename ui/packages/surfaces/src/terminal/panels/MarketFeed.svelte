@@ -116,12 +116,14 @@
 		</button>
 	{/if}
 
-	<!-- 카테고리 칩 스트립 — 가로 스크롤. 활성 칩 amber underline + 전수 카운트 배지 -->
+	<!-- 카테고리 칩 스트립 — 라벨만(컴팩트)이라 좁은 좌측 패널서도 전 탭 노출. 공시 갯수는 hover tooltip. -->
 	<div class="feedCats">
 		{#each MARKET_FEED_CATS as c (c.key)}
-			<button class={'feedCat' + (cat === c.key ? ' on' : '')} onclick={() => (cat = c.key)}>
-				{c.kr}{#if counts[c.key]}<span class="feedCatN">{counts[c.key].toLocaleString()}</span>{/if}
-			</button>
+			<button
+				class={'feedCat' + (cat === c.key ? ' on' : '')}
+				onclick={() => (cat = c.key)}
+				title={counts[c.key] != null ? `${c.kr} ${counts[c.key].toLocaleString()}${lang === 'en' ? '' : '건'}` : c.kr}
+			>{c.kr}</button>
 		{/each}
 	</div>
 
