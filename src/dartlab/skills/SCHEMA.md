@@ -11,6 +11,8 @@
 > - `graph.json` — 257 노드 + 1337 엣지 + cycle/orphan/unreachable 메타.
 >
 > `llms.txt` · `sitemap.xml` 은 landing 정적 SEO 자산(동결·수동 관리) — 본 6 JSON·capability 빌더와 무관.
+>
+> **카탈로그 count 의미** — `catalog.json` meta 의 `skillCount`·카테고리 `count` 는 `listSkills()` 가 `_builtinSpecPaths()` 로 *발견한 spec* 수다. `specs/recipes/**` raw `.md` 파일 수보다 낮은 것이 정상 — `.archive/`(drafted/unverified persona 격리)·`README.md`·비-spec `.md` 는 발견에서 제외된다(예: recipes `count`=161 = raw 243 − 76 `.archive/` − 6 README/non-spec). **status 필터가 아니라 경로-발견 규칙**이라, raw 파일 수를 count 와 비교해 "드리프트"로 오독하지 말 것.
 
 ## 1. 5 카테고리 + 디렉토리
 
