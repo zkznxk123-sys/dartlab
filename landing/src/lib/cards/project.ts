@@ -62,10 +62,11 @@ export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | 
  *  `carousel:`)이 있으면 큐레이션 오버레이 — order 로 섹션 필터/재정렬, notes[key] 로 손글 caption. */
 export function projectReport(
 	model: ReportModel,
-	opts: { heroUrls?: string[]; spec?: CarouselSpec } = {}
+	opts: { heroUrls?: string[]; spec?: CarouselSpec; lead?: CarouselCard[] } = {}
 ): CarouselDeck {
 	const spec = opts.spec;
 	const heroUrls = opts.heroUrls ?? [];
+	const lead = opts.lead ?? [];
 	const base = {
 		stockCode: model.stockCode,
 		corpName: model.corpName,
@@ -74,20 +75,23 @@ export function projectReport(
 		asOf: model.asOf,
 		heroUrls
 	};
-	const cards: CarouselCard[] = [
-		{
-			kind: 'cover',
-			corpName: model.corpName,
-			stockCode: model.stockCode,
-			perspectiveLabel: model.perspectiveLabel,
-			conclusion: hook(model.conclusion, 70), // 표지는 한 줄 후킹(리포트 결론 문단 전체 금지)
-			dataBasis: model.dataBasis
-		}
-	];
+	// lead(편집 계약 슬라이드)가 있으면 그것이 표지·서사 — 자동 cover 생략. 없으면 자동 cover.
+	const cards: CarouselCard[] = lead.length
+		? [...lead]
+		: [
+				{
+					kind: 'cover',
+					corpName: model.corpName,
+					stockCode: model.stockCode,
+					perspectiveLabel: model.perspectiveLabel,
+					conclusion: hook(model.conclusion, 70), // 표지는 한 줄 후킹(리포트 결론 문단 전체 금지)
+					dataBasis: model.dataBasis
+				}
+			];
 
-	// 미구현 관점 → 정직 빈 카드(broken img 아님).
+	// 미구현 관점 → 정직 빈 카드(broken img 아님). lead 가 있으면 편집 슬라이드는 보존.
 	if (model.pending) {
-		cards.push({ kind: 'empty', reason: `${model.perspectiveLabel} 관점은 다음 사이클에 추가됩니다.` });
+		if (!lead.length) cards.push({ kind: 'empty', reason: `${model.perspectiveLabel} 관점은 다음 사이클에 추가됩니다.` });
 		assignHeroes(cards, heroUrls);
 		return { ...base, cards };
 	}
@@ -128,11 +132,11 @@ function pickSectionCard(blocks: ReportBlock[], head: HeadCtx): CarouselCard | n
 	return cards.sort((a, b) => (KIND_RANK[a.kind] ?? 9) - (KIND_RANK[b.kind] ?? 9))[0];
 }
 
-/** hero 사진 전부를 슬라이드에 순환 배정 — 한 장도 안 빠지게(텍스트 카드=풀, 차트 카드=dim 은 렌더가 판단). */
+/** hero 사진 전부를 슬라이드에 순환 배정 — 한 장도 안 빠지게. 이미 bg 있는 카드(편집 계약 image)는 보존. */
 function assignHeroes(cards: CarouselCard[], heroUrls: string[]): void {
 	if (!heroUrls.length) return;
 	cards.forEach((c, i) => {
-		if (c.kind !== 'empty') c.bg = heroUrls[i % heroUrls.length];
+		if (c.kind !== 'empty' && !c.bg) c.bg = heroUrls[i % heroUrls.length];
 	});
 }
 
@@ -140,9 +144,11 @@ function assignHeroes(cards: CarouselCard[], heroUrls: string[]): void {
 export function projectResult(
 	result: ReportResult,
 	perspectiveLabel: string,
-	opts: { heroUrls?: string[]; spec?: CarouselSpec } = {}
+	opts: { heroUrls?: string[]; spec?: CarouselSpec; lead?: CarouselCard[] } = {}
 ): CarouselDeck {
 	if (isSkipped(result)) {
+		// 데이터 skip 이어도 편집 계약 슬라이드(lead)는 그대로 보여준다(굽지 않은 손글). 없으면 정직 빈 카드.
+		const cards = opts.lead?.length ? [...opts.lead] : [{ kind: 'empty' as const, reason: result.reason }];
 		return {
 			stockCode: result.stockCode,
 			corpName: result.stockCode,
@@ -150,7 +156,7 @@ export function projectResult(
 			perspectiveLabel,
 			asOf: '',
 			heroUrls: opts.heroUrls ?? [],
-			cards: [{ kind: 'empty', reason: result.reason }]
+			cards
 		};
 	}
 	return projectReport(result, opts);

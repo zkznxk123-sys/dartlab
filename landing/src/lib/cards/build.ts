@@ -8,6 +8,7 @@ import { buildReport } from '$lib/report/build';
 import { findPerspective, PERSPECTIVES } from '$lib/report/perspectives';
 import { getPostByStockCode } from '$lib/blog/posts';
 import { loadMediaIndex, heroUrls as allHeroUrls, mediaKey, mediaCompany } from './media';
+import { loadContract, contractToCards } from './contract';
 
 /** 회사 hero URL 전부 — spec.hero 가 있으면 그 장을 맨 앞(표지)으로. 파일명은 콘텐츠해시 stem 매칭. */
 function resolveHeroes(media: MediaIndex | null, code: string, spec?: CarouselSpec): string[] {
@@ -24,13 +25,18 @@ function resolveHeroes(media: MediaIndex | null, code: string, spec?: CarouselSp
 	return all;
 }
 
-/** 종목+관점 → 라이브 슬라이드 덱. 데이터·미디어 동시 로드, blog frontmatter `carousel:` 큐레이션 오버레이.
- *  hero 사진 전부를 슬라이드 배경으로. skip/pending 도 정직 카드로(빈 화면 금지). */
+/** 종목+관점 → 라이브 슬라이드 덱. 편집 계약(carousels/{code}.json 손글)이 있으면 그 슬라이드가 서사 표지,
+ *  그 뒤에 핵심 차트(kpis·재무추이·섹션 차트·종합)를 덧붙인다. 굽지 않음. skip/pending 도 정직 카드로. */
 export async function buildDeck(rt: DartLabRuntime, code: string, perspectiveKey: string): Promise<CarouselDeck> {
 	const persp = findPerspective(perspectiveKey);
 	const spec = getPostByStockCode(code)?.carousel;
-	const [result, media] = await Promise.all([buildReport(rt, code, perspectiveKey), loadMediaIndex()]);
-	return projectResult(result, persp.label, { heroUrls: resolveHeroes(media, code, spec), spec });
+	const [result, media, contract] = await Promise.all([
+		buildReport(rt, code, perspectiveKey),
+		loadMediaIndex(),
+		loadContract(code)
+	]);
+	const lead = contract ? contractToCards(contract, media) : [];
+	return projectResult(result, persp.label, { heroUrls: resolveHeroes(media, code, spec), spec, lead });
 }
 
 

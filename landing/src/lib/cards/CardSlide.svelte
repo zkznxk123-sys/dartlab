@@ -10,9 +10,18 @@
 
 	let { card, rt }: { card: CarouselCard; rt: DartLabRuntime } = $props();
 
-	// 사진 모드 — 텍스트 카드=풀(또렷), 차트 카드=dim(가독 위해 어둡게).
+	// 사진 모드 — 편집 카드=monochrome+강한 하단 그라데이션(기존 SNS editorial), 텍스트=풀, 차트=dim.
 	const CHART_KINDS = new Set(['kpis', 'line', 'bars', 'share', 'table', 'finChart']);
-	const photoMode = $derived(card.kind === 'cover' ? 'cover' : CHART_KINDS.has(card.kind) ? 'dim' : 'full');
+	const EDITORIAL_KINDS = new Set(['editorial', 'editorialBeat', 'editorialStat']);
+	const photoMode = $derived(
+		card.kind === 'cover'
+			? 'cover'
+			: EDITORIAL_KINDS.has(card.kind)
+				? 'editorial'
+				: CHART_KINDS.has(card.kind)
+					? 'dim'
+					: 'full'
+	);
 
 	let finCards = $state<{ card: FinCard; periods: string[] } | null>(null);
 	let finState = $state<'idle' | 'loading' | 'ready' | 'empty'>('idle');
@@ -56,6 +65,19 @@
 				<h2 class="bigName">{card.corpName}</h2>
 				<p class="lead">{@render accent(card.conclusion)}</p>
 				<p class="mono">{card.stockCode} · {card.dataBasis}</p>
+			</div>
+		{:else if card.kind === 'editorial' || card.kind === 'editorialBeat'}
+			<div class="editorial">
+				{#if card.kind === 'editorial' && card.date}<span class="eyebrow">· {card.date}</span>{/if}
+				{#if card.kind === 'editorialBeat' && card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
+				<h2 class="eLine">{@render accent(card.line)}</h2>
+				{#if card.sub}<p class="eSub">{card.sub}</p>{/if}
+			</div>
+		{:else if card.kind === 'editorialStat'}
+			<div class="editorial">
+				{#if card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
+				<div class="eStat"><span class="eNum">{card.bigNumber}</span>{#if card.unit}<span class="eUnit">{card.unit}</span>{/if}</div>
+				{#if card.context}<p class="eSub">{card.context}</p>{/if}
 			</div>
 		{:else}
 			{#if card.heading}
@@ -171,6 +193,17 @@
 	.pm-dim .scrim {
 		background: rgba(5, 8, 17, 0.82);
 	}
+	/* 편집 카드 = 기존 SNS editorial: 사진 monochrome + 강한 하단 그라데이션(가독). 강조색=accentImpact. */
+	.pm-editorial .bg {
+		opacity: 0.92;
+		filter: grayscale(0.85) contrast(1.05) brightness(0.92);
+	}
+	.pm-editorial .scrim {
+		background: linear-gradient(180deg, rgba(3, 5, 9, 0.35) 0%, rgba(3, 5, 9, 0.45) 42%, rgba(3, 5, 9, 0.95) 100%);
+	}
+	.pm-editorial .content {
+		--hl: #fb3f6c;
+	}
 	.content {
 		position: relative;
 		z-index: 1;
@@ -217,7 +250,64 @@
 		background: #fb923c;
 	}
 	.hl {
-		color: #ea4647;
+		color: var(--hl, #ea4647);
+	}
+	/* editorial (기존 SNS editorial 재현 — 하단 텍스트 블록) */
+	.editorial {
+		margin-top: auto;
+		display: flex;
+		flex-direction: column;
+	}
+	.eyebrow {
+		font-size: clamp(11px, 2.4cqw, 18px);
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		color: #fb3f6c;
+		margin-bottom: 0.5em;
+	}
+	.eLine {
+		margin: 0;
+		font-size: clamp(26px, 7cqw, 64px);
+		font-weight: 900;
+		line-height: 1.13;
+		letter-spacing: -0.01em;
+		color: #f4f6fb;
+		white-space: pre-line;
+		word-break: keep-all;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		overflow: hidden;
+	}
+	.eSub {
+		margin: 0.7em 0 0;
+		font-size: clamp(13px, 3cqw, 26px);
+		font-weight: 500;
+		line-height: 1.46;
+		color: #a4adba;
+		white-space: pre-line;
+		word-break: keep-all;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		overflow: hidden;
+	}
+	.eStat {
+		display: flex;
+		align-items: baseline;
+		gap: 0.2em;
+	}
+	.eNum {
+		font-size: clamp(56px, 18cqw, 200px);
+		font-weight: 900;
+		line-height: 0.92;
+		color: #fb3f6c;
+	}
+	.eUnit {
+		font-size: clamp(20px, 6cqw, 56px);
+		font-weight: 800;
+		color: #f4f6fb;
+		white-space: nowrap;
 	}
 	/* cover */
 	.cover {

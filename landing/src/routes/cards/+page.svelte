@@ -3,12 +3,12 @@
 	// 바로 보이고 그 자리에서 스와이프, 뷰포트 진입 시 라이브 빌드. 공통배선: 데이터=loadJson·미디어=hfMedia.
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
-	import { setStaticBase, loadJson } from '@dartlab/ui-runtime/data/dartlabData';
-	import type { IndexRow } from '@dartlab/ui-contracts';
+	import { setStaticBase } from '@dartlab/ui-runtime/data/dartlabData';
 	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 	import '@dartlab/ui-surfaces/terminal/terminal.css';
 	import { DARTLAB_BRAND_LINKS, SupportDialog, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
 	import { loadMediaIndex, heroUrls } from '$lib/cards/media';
+	import { loadContractCodes } from '$lib/cards/contract';
 	import type { MediaIndex } from '$lib/cards/model';
 	import Deck from '$lib/cards/Deck.svelte';
 
@@ -21,34 +21,34 @@
 	let ghStars = $state<number | null>(null);
 	fetchGithubStars(links.repo).then((n) => (ghStars = n));
 
-	let index = $state<IndexRow[]>([]);
 	let media = $state<MediaIndex | null>(null);
+	let contractCodes = $state<string[]>([]); // 편집 계약(손글 카피) 있는 회사 = 피드(이미지 있는 것만)
+	let loaded = $state(false);
 	let query = $state(data.sym || '');
 	let visibleCount = $state(24);
 	let searchEl = $state<HTMLInputElement | null>(null);
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let supportOpen = $state(false);
 
-	loadJson<IndexRow[]>('map/search-index.json', { fetchFn: fetch, preferLocal: true })
-		.then((rows) => (index = rows ?? []))
-		.catch(() => {});
 	loadMediaIndex().then((m) => (media = m));
-
-	// 사진 있는 회사 우선(피드 첫 화면이 채워지게) — 그다음 나머지.
-	const ordered = $derived.by(() => {
-		const q = query.trim().toLowerCase();
-		const rows = q ? index.filter((r) => r.corpName?.toLowerCase().includes(q) || r.stockCode?.includes(q)) : index;
-		if (!media) return rows;
-		const has = (r: IndexRow) => (media!.companies[/^\d{6}$/.test(r.stockCode) ? r.stockCode : r.stockCode.toUpperCase()]?.assets.length ?? 0) > 0;
-		return [...rows].sort((a, b) => Number(has(b)) - Number(has(a)));
+	loadContractCodes().then((s) => {
+		contractCodes = [...s].sort();
+		loaded = true;
 	});
-	const visible = $derived(ordered.slice(0, visibleCount));
+
+	// 피드 = 편집 계약 있는 회사(=큐레이션·이미지 있는 것만). 이름은 hfMedia 매니페스트에서.
+	const feedRows = $derived.by(() => {
+		const rows = contractCodes.map((code) => ({ stockCode: code, corpName: media?.companies[code]?.displayName ?? code }));
+		const q = query.trim().toLowerCase();
+		return q ? rows.filter((r) => r.corpName.toLowerCase().includes(q) || r.stockCode.toLowerCase().includes(q)) : rows;
+	});
+	const visible = $derived(feedRows.slice(0, visibleCount));
 
 	$effect(() => {
 		if (!sentinel) return;
 		const io = new IntersectionObserver(
 			(e) => {
-				if (e[0]?.isIntersecting && visibleCount < ordered.length) visibleCount += 24;
+				if (e[0]?.isIntersecting && visibleCount < feedRows.length) visibleCount += 24;
 			},
 			{ rootMargin: '800px' }
 		);
@@ -117,9 +117,9 @@
 		</div>
 	</header>
 
-	<main class="feed" aria-label="전 종목 카드 캐러셀 피드">
-		{#if index.length === 0}
-			<p class="feedEmpty">회사 목록을 불러오는 중…</p>
+	<main class="feed" aria-label="기업이야기 카드 캐러셀 피드">
+		{#if !loaded}
+			<p class="feedEmpty">캐러셀 불러오는 중…</p>
 		{:else}
 			<div class="grid">
 				{#each visible as row (row.stockCode)}
@@ -127,7 +127,7 @@
 				{/each}
 			</div>
 			<div bind:this={sentinel} class="sentinel"></div>
-			{#if ordered.length === 0}<p class="feedEmpty">"{query}" 검색 결과가 없습니다.</p>{/if}
+			{#if feedRows.length === 0}<p class="feedEmpty">{query ? `"${query}" 검색 결과가 없습니다.` : '게시된 편집 캐러셀이 없습니다.'}</p>{/if}
 		{/if}
 	</main>
 </div>

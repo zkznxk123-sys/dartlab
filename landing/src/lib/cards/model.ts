@@ -60,7 +60,11 @@ export type CarouselCard =
 	| (CardHead & { kind: 'table'; cols: string[]; data: Record<string, string>[]; unit?: string })
 	| (CardHead & { kind: 'finChart'; stockCode: string }) // MiniFinChart 백본(finance.bundle)
 	| (CardHead & { kind: 'closing'; thesis: string })
-	| (CardHead & { kind: 'empty'; reason: string }); // pending/skip 정직 카드(broken img 아님)
+	| (CardHead & { kind: 'empty'; reason: string }) // pending/skip 정직 카드(broken img 아님)
+	// ── 편집 카드(기존 SNS 캐러셀 계약 carousels/{code}.json 손글 카피) — `[[강조]]`=accentImpact ──
+	| (CardHead & { kind: 'editorial'; date?: string; line: string; sub?: string }) // 커버
+	| (CardHead & { kind: 'editorialBeat'; kicker?: string; line: string; sub?: string }) // 헤드라인 비트
+	| (CardHead & { kind: 'editorialStat'; kicker?: string; bigNumber: string; unit?: string; context?: string }); // 큰 숫자
 
 export interface CarouselDeck {
 	stockCode: string;
@@ -71,6 +75,28 @@ export interface CarouselDeck {
 	asOf: string;
 	heroUrls: string[]; // 회사 hero 전부(슬라이드 배경 순환). 첫 장 = 표지 사진.
 	cards: CarouselCard[];
+}
+
+// ── 편집 카드 캐러셀 계약(carousels/{code}.json) — 기존 SNS 캐러셀 손글 카피 SSOT. ──
+export interface ContractSlide {
+	layout: 'editorial' | 'editorialBeat' | 'editorialStat';
+	date?: string;
+	kicker?: string;
+	line?: string;
+	sub?: string;
+	bigNumber?: string;
+	unit?: string;
+	context?: string;
+	image?: string; // semantic 파일명(해시 없음) — 렌더가 hfMedia 매니페스트로 해석
+}
+export interface CarouselContract {
+	code: string;
+	name: string;
+	sector?: string;
+	slides: ContractSlide[];
+}
+export interface ContractIndex {
+	codes: string[];
 }
 
 // ── 큐레이션 오버레이(P5) — blog frontmatter `carousel:` 선택 블록. 없으면 자동 투영만. ──
