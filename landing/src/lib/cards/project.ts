@@ -5,7 +5,7 @@
 import type { ReportBlock, ReportModel, ReportResult, OverviewModel } from '$lib/report/model';
 import { isSkipped } from '$lib/report/model';
 import { clean, splitTitle, isTimeSeries } from '$lib/report/render';
-import type { CarouselCard, CarouselDeck } from './model';
+import type { CarouselCard, CarouselDeck, CarouselSpec } from './model';
 
 interface HeadCtx {
 	heading?: string;
@@ -48,8 +48,11 @@ export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | 
 	}
 }
 
-/** 관점 보고서 → 슬라이드 덱. cover → KPIs → finChart 백본 → 섹션 블록 → closing. */
-export function projectReport(model: ReportModel, opts: { heroUrl?: string } = {}): CarouselDeck {
+/** 관점 보고서 → 슬라이드 덱. cover → KPIs → finChart 백본 → 섹션 블록 → closing.
+ *  opts.spec(blog frontmatter `carousel:`)이 있으면 큐레이션 오버레이 — order 로 섹션 필터/재정렬,
+ *  notes[key] 로 섹션 첫 카드에 손글 caption 주입(자동 투영은 spec 없이 그대로). */
+export function projectReport(model: ReportModel, opts: { heroUrl?: string; spec?: CarouselSpec } = {}): CarouselDeck {
+	const spec = opts.spec;
 	const base = {
 		stockCode: model.stockCode,
 		corpName: model.corpName,
@@ -79,12 +82,26 @@ export function projectReport(model: ReportModel, opts: { heroUrl?: string } = {
 	if (model.headlineKpis.length) cards.push({ kind: 'kpis', heading: '핵심 지표', metrics: model.headlineKpis });
 	cards.push({ kind: 'finChart', heading: '재무 추이', stockCode: model.stockCode });
 
-	for (const sec of model.sections) {
+	// 큐레이션 order: 섹션 key 화이트리스트로 필터/재정렬(없으면 원순서). 미지정 key 는 무시(누락 surface 는 audit).
+	let sections = model.sections;
+	if (spec?.order?.length) {
+		const rank = new Map(spec.order.map((k, i) => [k, i]));
+		sections = model.sections.filter((s) => rank.has(s.key)).sort((a, b) => rank.get(a.key)! - rank.get(b.key)!);
+	}
+
+	for (const sec of sections) {
 		const { head, sub } = splitTitle(sec.title);
 		const headCtx: HeadCtx = { heading: head, sub, engine: sec.sourceEngine };
+		const note = spec?.notes?.[sec.key];
+		let first = true;
 		for (const block of sec.blocks) {
 			const card = projectBlock(block, headCtx);
-			if (card) cards.push(card);
+			if (!card) continue;
+			if (first && note) {
+				card.note = note; // 섹션 손글 caption — 첫 카드에만
+				first = false;
+			}
+			cards.push(card);
 		}
 	}
 
@@ -98,7 +115,7 @@ export function projectReport(model: ReportModel, opts: { heroUrl?: string } = {
 export function projectResult(
 	result: ReportResult,
 	perspectiveLabel: string,
-	opts: { heroUrl?: string } = {}
+	opts: { heroUrl?: string; spec?: CarouselSpec } = {}
 ): CarouselDeck {
 	if (isSkipped(result)) {
 		return {

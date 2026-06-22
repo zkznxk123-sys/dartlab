@@ -44,6 +44,7 @@
 			{#if card.sub}<p class="sSub">{card.sub}</p>{/if}
 		</header>
 	{/if}
+	{#if card.note}<p class="sNote">{card.note}</p>{/if}
 
 	{#if card.kind === 'cover'}
 		<div class="cover" class:hasHero={!!card.heroUrl}>
@@ -181,6 +182,15 @@
 		font-size: 17px;
 		font-weight: 600;
 		color: #f1f5f9;
+	}
+	/* 큐레이션 손글 caption */
+	.sNote {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: #cdd9e6;
+		border-left: 2px solid #7dd3fc;
+		padding-left: 10px;
 	}
 	/* cover */
 	.cover {

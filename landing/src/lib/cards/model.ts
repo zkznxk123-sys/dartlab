@@ -20,11 +20,13 @@ export interface MediaIndex {
 	companies: Record<string, MediaCompany>;
 }
 
-/** 슬라이드 공통 머리 — splitTitle 로 쪼갠 섹션 제목. */
+/** 슬라이드 공통 머리 — splitTitle 로 쪼갠 섹션 제목 + 큐레이션 손글 caption(note). */
 interface CardHead {
 	heading?: string;
 	sub?: string;
 	engine?: ReportSourceEngine;
+	/** 큐레이션 오버레이(CarouselSpec.notes)에서 주입한 손글 한 줄 — no-new-number(본문 숫자⊆). 자동 투영엔 없음. */
+	note?: string;
 }
 
 // 카드(슬라이드) 판별 유니온. chart 계열(line/bars/share/table)은 ReportBlock 과 1:1.

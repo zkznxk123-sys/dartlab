@@ -9,7 +9,88 @@ import os
 import re
 import sys
 
+try:
+    import yaml  # frontmatter 중첩(`carousel:`) 검증 — regex 는 중첩 못 읽음
+except ImportError:  # pragma: no cover
+    yaml = None
+
 BLOG_DIR = "blog/05-company-reports"
+
+# 카드 캐러셀 손글 narration 1줄 권장 최대 길이(슬라이드 가독).
+CAROUSEL_NOTE_MAX = 140
+# 캐러셀 hero 로 쓸 수 있는 이미지 확장자.
+HERO_SUFFIXES = (".webp", ".png", ".jpg", ".jpeg")
+
+
+def _numbers(text: str) -> set:
+    """문자열에서 숫자 토큰(2자리+ 또는 소수) 추출 — 콤마 제거한 digit-core. no-new-number 비교용."""
+    out = set()
+    for m in re.findall(r"\d[\d,]*\.?\d*", str(text)):
+        core = m.replace(",", "").rstrip(".")
+        if len(core.replace(".", "")) >= 2:  # 한 자리(연도 끝자리 등) 제외 — 노이즈
+            out.add(core)
+    return out
+
+
+def validate_carousel(folder_path: str) -> list:
+    """frontmatter `carousel:` 블록 검증 — 구조·hero 존재·노트 길이·no-new-number(노트 숫자⊆본문).
+
+    캐러셀은 ReportModel 자동 투영이 기본이고, `carousel:` 는 *선택* 큐레이션 오버레이라
+    없으면 검사 없음(빈 리스트). 손글 narration 이 본문에 없는 숫자를 새로 만들지 않게 가드한다.
+    """
+    index_path = os.path.join(folder_path, "index.md")
+    if not os.path.isfile(index_path) or yaml is None:
+        return []
+    with open(index_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    parts = content.split("---", 2)
+    if len(parts) < 3 or "carousel:" not in parts[1]:
+        return []  # carousel 블록 없는 글은 YAML 파싱 안 함(mdsvex 가 허용하는 느슨한 frontmatter 오탐 회피)
+    try:
+        fm = yaml.safe_load(parts[1]) or {}
+    except yaml.YAMLError as exc:
+        return [("error", f"carousel 글 frontmatter YAML 파싱 실패: {exc}")]
+    spec = fm.get("carousel")
+    if spec is None:
+        return []
+
+    issues = []
+    if not isinstance(spec, dict):
+        return [("error", "carousel 은 매핑(dict)이어야 함")]
+
+    body_numbers = _numbers(parts[2])
+    assets_dir = os.path.join(folder_path, "assets")
+
+    hero = spec.get("hero")
+    if hero is not None:
+        if not isinstance(hero, str) or not hero.lower().endswith(HERO_SUFFIXES):
+            issues.append(("error", f"carousel.hero 는 이미지 파일명이어야 함: {hero!r}"))
+        elif os.path.isdir(assets_dir) and not any(hero in f or f.endswith(hero) for f in os.listdir(assets_dir)):
+            issues.append(("warn", f"carousel.hero {hero!r} 가 assets/ 에 없음(hfMedia 직접 게시면 무시)"))
+
+    order = spec.get("order")
+    if order is not None and not (isinstance(order, list) and all(isinstance(x, str) for x in order)):
+        issues.append(("error", "carousel.order 는 문자열 리스트여야 함"))
+
+    notes = spec.get("notes")
+    if notes is not None:
+        if not isinstance(notes, dict):
+            issues.append(("error", "carousel.notes 는 매핑(key→손글 문장)이어야 함"))
+        else:
+            for key, line in notes.items():
+                if not isinstance(line, str):
+                    issues.append(("error", f"carousel.notes[{key}] 는 문자열이어야 함"))
+                    continue
+                if len(line) > CAROUSEL_NOTE_MAX:
+                    issues.append(("warn", f"carousel.notes[{key}] {len(line)}자 — {CAROUSEL_NOTE_MAX}자 권장 초과"))
+                novel = _numbers(line) - body_numbers
+                if novel:
+                    issues.append(
+                        ("warn", f"carousel.notes[{key}] 본문에 없는 숫자 {sorted(novel)} — no-new-number 위반 의심")
+                    )
+    return issues
+
+
 FORBIDDEN_PATTERNS = [
     r"~입니다$",  # 존댓말 (블로그 톤 아님)
     r"살펴보겠습니다",
@@ -233,6 +314,24 @@ def main():
             print(f"  🔴 {f}: {s['pct']}% — {', '.join(issues)}")
 
     print(f"\n평균: {sum(s['pct'] for _, s in results) // len(results)}%")
+
+    # 카드 캐러셀 큐레이션 검증 — `carousel:` 블록 있는 글만.
+    car_issues = []
+    for folder in sorted(os.listdir(BLOG_DIR)):
+        fp = os.path.join(BLOG_DIR, folder)
+        if os.path.isdir(fp):
+            for level, msg in validate_carousel(fp):
+                car_issues.append((folder, level, msg))
+    if car_issues:
+        errs = [c for c in car_issues if c[1] == "error"]
+        print(f"\n🎠 캐러셀 검증 — {len(car_issues)}건 ({len(errs)} error):")
+        for folder, level, msg in car_issues:
+            mark = "🔴" if level == "error" else "🟡"
+            print(f"  {mark} {folder}: {msg}")
+        if errs:
+            sys.exit(1)
+    elif yaml is not None:
+        print("🎠 캐러셀 검증 — carousel: 블록 없음(자동 투영만) 또는 0 이슈.")
 
 
 if __name__ == "__main__":

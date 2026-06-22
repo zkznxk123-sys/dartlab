@@ -93,6 +93,36 @@ describe('projectReport — 덱 구조 + 정직', () => {
 	});
 });
 
+describe('큐레이션 오버레이(CarouselSpec) — notes/order', () => {
+	const secA: ReportSection = {
+		key: 'profit',
+		title: '재무분석 -- 수익성',
+		sourceEngine: 'analysis',
+		blocks: [{ type: 'line', series: [1, 2, 3] }]
+	};
+	const secB: ReportSection = {
+		key: 'debt',
+		title: '신용 -- 부채',
+		sourceEngine: 'credit',
+		blocks: [{ type: 'flags', kind: 'warning', flags: ['부채 증가'] }]
+	};
+	it('notes[섹션key] → 섹션 첫 카드 note 주입', () => {
+		const deck = projectReport(model({ sections: [secA] }), { spec: { notes: { profit: '본업 현금이 받친다' } } });
+		const line = deck.cards.find((c) => c.kind === 'line');
+		expect(line?.note).toBe('본업 현금이 받친다');
+	});
+	it('order → 섹션 필터/재정렬(미지정 key 제외)', () => {
+		const deck = projectReport(model({ sections: [secA, secB] }), { spec: { order: ['debt'] } });
+		// debt 만 남고 profit(line) 제외.
+		expect(deck.cards.some((c) => c.kind === 'flags')).toBe(true);
+		expect(deck.cards.some((c) => c.kind === 'line')).toBe(false);
+	});
+	it('spec 없으면 자동 투영 그대로(note 없음)', () => {
+		const deck = projectReport(model({ sections: [secA] }));
+		expect(deck.cards.find((c) => c.kind === 'line')?.note).toBeUndefined();
+	});
+});
+
 describe('pending/skip — 정직 빈 카드', () => {
 	it('pending 관점 → empty 카드', () => {
 		const deck = projectReport(model({ pending: true }));

@@ -1,3 +1,5 @@
+import type { CarouselSpec } from '$lib/cards/model';
+
 export const categoryDefinitions = [
 	{
 		id: 'dartlab-news',
@@ -198,9 +200,13 @@ export interface PostMeta {
 	seriesLabel?: string;
 	seriesOrder?: number;
 	youtubeId?: string;
+	stockCode?: string; // 기업이야기 글의 종목코드 — /cards 캐러셀 큐레이션 역인덱스 키.
+	carousel?: CarouselSpec; // frontmatter `carousel:` 선택 블록(손글 narration·hero·순서). 없으면 자동 투영.
 }
 
-type BlogModule = { metadata?: Record<string, string | number> };
+// metadata 는 mdsvex YAML frontmatter → 중첩 객체(`carousel:`·`ai:`)도 담길 수 있으므로 unknown.
+// (옛 string|number 는 중첩 블록을 타입상 드롭했다 — String() 평탄화가 못 읽던 근본.)
+type BlogModule = { metadata?: Record<string, unknown> };
 
 const modules = import.meta.glob('@blog/**/index.md', { eager: true }) as Record<string, BlogModule>;
 const rawModules = import.meta.glob('@blog/**/index.md', { eager: true, query: '?raw', import: 'default' }) as Record<string, string>;
@@ -258,6 +264,10 @@ function buildPosts(): PostMeta[] {
 		const ogImage = metadata.ogImage ? String(metadata.ogImage) : undefined;
 		const cardPreview = metadata.cardPreview ? String(metadata.cardPreview) : ogImage ?? previewAsset ?? thumbnail;
 		const cardPreviewWebp = toWebpAsset(cardPreview);
+		const stockCode = metadata.stockCode ? String(metadata.stockCode).trim() || undefined : undefined;
+		// carousel 은 중첩 객체 — 객체일 때만 채택(스칼라 오기는 무시). 검증은 blog/_scripts/audit_seo.py(yaml).
+		const carousel =
+			metadata.carousel && typeof metadata.carousel === 'object' ? (metadata.carousel as CarouselSpec) : undefined;
 
 		result.push({
 			slug: parsed.slug,
@@ -277,7 +287,9 @@ function buildPosts(): PostMeta[] {
 			series,
 			seriesLabel: series ? seriesDefinitions[series]?.label ?? series : undefined,
 			seriesOrder: Number.isNaN(seriesOrder) ? undefined : seriesOrder,
-			youtubeId
+			youtubeId,
+			stockCode,
+			carousel
 		});
 	}
 
@@ -327,6 +339,11 @@ export const posts: PostMeta[] = buildPosts();
 
 export function getPost(slug: string): PostMeta | undefined {
 	return posts.find((post) => post.slug === slug);
+}
+
+/** 종목코드 → 글(큐레이션 캐러셀 오버레이용 역인덱스). frontmatter `stockCode` 가 있는 글만. */
+export function getPostByStockCode(code: string): PostMeta | undefined {
+	return posts.find((post) => post.stockCode === code);
 }
 
 export function getCategory(categoryIdOrSlug: string): CategoryDefinition | undefined {

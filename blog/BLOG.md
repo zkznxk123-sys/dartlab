@@ -87,6 +87,26 @@ ai:
 - `keyMetrics` = dartlab 실측 (`sync_financials.py` 자동 갱신).
 - KnowledgeDB 자동 파생 → HuggingFace 공유.
 
+### carousel 블록 (선택 — 라이브 카드 캐러셀 큐레이션)
+
+landing `/cards` 라이브 카드 캐러셀은 **기본적으로 ReportModel 을 자동 투영**한다(전 종목 day1, frontmatter
+불필요). `carousel:` 는 *그 위에 얹는* 선택 오버레이일 뿐 — 산문 본문은 건드리지 않는다. **굽지 않음**(조회
+시점 라이브 조립).
+
+```yaml
+# 선택 — 없으면 자동 투영만 (company-reports 권장, 강제 아님)
+carousel:
+  hero: skhynix-dram-chip.webp   # 표지 hero 파일명(없으면 hfMedia 첫 hero). assets/ 또는 hfMedia 게시본.
+  order: [profit, debt, market]  # 슬라이드 섹션 key 화이트리스트(필터+재정렬). 없으면 보고서 원순서.
+  notes:                         # 섹션 key → 손글 한 줄(슬라이드 caption). 섹션 첫 카드에 붙는다.
+    profit: "본업 현금이 사이클을 버틴다 — 차입이 아니라 영업현금으로."
+```
+
+- **no-new-number 강행**: `notes` 의 손글 문장에 **본문에 없는 숫자를 새로 만들지 않는다**(수치는 모델·본문 SSOT).
+  `blog/_scripts/audit_seo.py` 가 yaml 로 검증 — 본문에 없는 숫자 발견 시 경고, 구조 오류는 error.
+- `hero`/`order`/`notes` 모두 선택. 차트·KPI·재무 추이는 **모델에서 자동** 생성되므로 손글로 만들지 않는다
+  (손글은 *해석 한 줄*만).
+
 ### 시리즈 매핑
 
 | 시리즈 id | 라벨 | 약속 |
