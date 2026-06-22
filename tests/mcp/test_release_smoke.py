@@ -117,7 +117,7 @@ def test_release_smoke_streamable_http_app_factory() -> None:
 
 
 def test_release_smoke_advertise_count_meets_target() -> None:
-    """advertisedTools 의 갯수가 PR-M1 목표 ≥ 20 (22 종 — ask + CANONICAL_V2)."""
+    """advertisedTools 의 갯수가 PR-M1 목표 ≥ 20 (23 종 — ask + CANONICAL_V2 22)."""
     from dartlab.mcp.protocol import advertisedTools, mcpAdvertisedToolNames
 
     names = mcpAdvertisedToolNames()

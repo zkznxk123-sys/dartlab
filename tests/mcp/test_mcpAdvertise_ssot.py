@@ -11,7 +11,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_mcpAdvertisedToolNames_returns_ask_plus_canonical_v2() -> None:
-    """ask + CANONICAL_V2 = 22 종 (PR-M1 목표 21+ ask)."""
+    """ask + CANONICAL_V2 = 23 종 (PR-M1 목표 21+ ask)."""
     from dartlab.ai.tools.registry import CANONICAL_V2
     from dartlab.mcp.protocol import mcpAdvertisedToolNames
 

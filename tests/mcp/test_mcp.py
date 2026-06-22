@@ -1,4 +1,4 @@
-"""MCP 서버 기본 테스트 — canonical 7 tool surface, resources, alias 6."""
+"""MCP 서버 기본 테스트 — canonical tool surface, resources, alias 6."""
 
 from __future__ import annotations
 
@@ -90,7 +90,7 @@ def test_mcp_advertised_tools_carry_annotations():
     from dartlab.mcp import _advertisedTools
 
     tools = {t["name"]: t for t in _advertisedTools()}
-    # CANONICAL_V2 (21 종) + ask = 22 종 모두 annotations 키 보유 — 핵심 도구 sample 검증
+    # CANONICAL_V2 (22 종) + ask = 23 종 모두 annotations 키 보유 — 핵심 도구 sample 검증
     for name in (
         "ask",
         "ReadSkill",
