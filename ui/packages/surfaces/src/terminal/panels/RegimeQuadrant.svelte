@@ -88,10 +88,10 @@
 				<span class="rpNa">{T('국면 격자 미산출 — 사이클만', 'No regime grid — cycle only')}</span>
 			{:else}
 				{#each legendMarkets as m (m.market)}
+					<!-- 시장 + 국면만(전이 타깃·%는 매크로 렌즈 사이클 링으로 이관 — 작은 평면 글자 축소). -->
 					<span class="rpLeg" title={m.description}>
 						<b>{m.market}</b>
 						<i>{phaseTxt(m)}</i>
-						{#if m.transition}<em>→{T(m.transition.toKr, m.transition.toEn)}{#if m.transition.progressPct != null} {m.transition.progressPct}%{/if}</em>{/if}
 					</span>
 				{/each}
 			{/if}
@@ -116,6 +116,5 @@
 	.rpLeg { display: inline-flex; align-items: baseline; gap: 4px; border: 1px solid var(--bd); border-radius: 999px; padding: 0 6px; background: color-mix(in srgb, var(--panel) 82%, transparent); }
 	.rpLeg b { color: var(--amber); font-family: var(--mono); font-size: 8.5px; font-weight: 800; }
 	.rpLeg i { font-style: normal; color: var(--fg); font-size: 9px; }
-	.rpLeg em { font-style: normal; color: var(--dim); font-size: 8px; font-family: var(--mono); }
 	.rpNa { color: var(--dim); font-size: 9px; background: color-mix(in srgb, var(--panel) 82%, transparent); padding: 0 6px; border-radius: 999px; }
 </style>
