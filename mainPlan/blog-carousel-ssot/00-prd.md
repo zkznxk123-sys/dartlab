@@ -1,6 +1,6 @@
 # 블로그·캐러셀·SNS 자산 통합 SSOT + 라이브 카드 캐러셀 — PRD
 
-> **상태**: **구현 완료(코드)·운영자 활성화 대기.** P0~P5 전부 구현·검증. 잔여 = ① 운영자 HF `dartlab-media` repo 생성 + `publish_assets_hf.py` 실행 ② UI 눈검수 후 push(landing/ui 변경 미push). 아래 §as-built 정정 참조. 커밋: hfMedia 배선 `c2880c18a` · /cards 캐러셀 `580e5dd0b` · carousel 큐레이션 `bc436bae7`.
+> **상태**: **구현 완료·HF 게시 완료·UI push만 대기.** P0~P5 전부 구현·검증. **HF `dartlab-media` repo 생성 + publish 실행 완료(2026-06-22)** — `companies/index.json`(100사)+hero 695장 라이브(index.json 200·hero 200 검증). 잔여 = UI 눈검수 후 push(landing/ui 변경 미push)뿐. 아래 §as-built 정정 참조. 커밋: hfMedia 배선 `c2880c18a` · /cards 캐러셀 `580e5dd0b` · carousel 큐레이션 `bc436bae7` · PRD as-built `f190392f2`.
 > **검증**: 4 라운드 5 축 적대평가(코드 대조) — 아키텍처·파이프라인·데이터관리·확장성·정직성/UX 전 축 ≥90 (91·91·91·92·93). 검증 과정에서 초기 설계의 과대주장(재사용·신규 0 등)이 코드 대조로 정정됨 — 아래 §설계 정정 이력.
 
 ## Context (왜)
