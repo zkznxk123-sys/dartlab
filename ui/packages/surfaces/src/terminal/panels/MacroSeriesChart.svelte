@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { MacroPoint, MacroSeriesDef } from '@dartlab/ui-contracts';
 	import type { Lang } from '../lib/types';
-	import { applyTransform, ymdToMs, NBER_RECESSIONS, type MacroTransform } from '../lib/macroBoard';
+	import { applyTransform, toZScore, windowSlice, ymdToMs, NBER_RECESSIONS, type MacroTransform } from '../lib/macroBoard';
 
-	// 재사용 시계열 차트 — mini(보드 행)·full(확대) 양용. 무판정: 단일 중립선 + 침체음영 + 기준선.
-	// 색은 방향/상태 아님(녹/적 valence 0). brush = 공유 날짜 커서(부모가 brushMs 전파 → 전 차트 연결).
+	// 재사용 시계열 차트 — mini(보드 행)·full(확대)·overlay(겹쳐보기) 양용. 무판정: 중립선 + 침체음영 + 기준선.
+	// 색은 방향/상태 아님(녹/적 valence 0). brush = 공유 날짜 커서. overlay 시 두 시리즈 z-정규화로 관계 비교.
 	interface Props {
 		points: MacroPoint[];
 		def: MacroSeriesDef;
@@ -16,8 +16,9 @@
 		refLine?: number | null; // 기준선(예: 물가 2%, 스프레드/z 0)
 		brushMs?: number | null; // 공유 커서 위치(ms). null=없음
 		onBrush?: (ms: number | null) => void;
+		overlay?: { points: MacroPoint[]; def: MacroSeriesDef } | null; // 겹쳐보기 2번째 시리즈(있으면 둘 다 z-정규화)
 	}
-	let { points, def, transform, windowYears, lang, compact = false, shading = false, refLine = null, brushMs = null, onBrush }: Props = $props();
+	let { points, def, transform, windowYears, lang, compact = false, shading = false, refLine = null, brushMs = null, onBrush, overlay = null }: Props = $props();
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
 	const W = $derived(compact ? 200 : 760);
@@ -27,17 +28,21 @@
 	const padT = $derived(compact ? 3 : 12);
 	const padB = $derived(compact ? 3 : 22);
 
-	const data = $derived(applyTransform(points, transform, def, windowYears));
-	const displayUnit = $derived(transform === 'z' ? 'σ' : transform === 'yoy' && !def.yoy ? '%' : def.unit);
-	const digits = $derived(transform === 'z' ? 2 : def.digits ?? 1);
+	// overlay 시 두 시리즈 z-정규화(단위 통일·관계 비교). 아니면 단일 시리즈에 변환 렌즈 적용.
+	const data = $derived(overlay ? toZScore(windowSlice(points, windowYears)) : applyTransform(points, transform, def, windowYears));
+	const dataB = $derived(overlay ? toZScore(windowSlice(overlay.points, windowYears)) : []);
+	const displayUnit = $derived(overlay || transform === 'z' ? 'σ' : transform === 'yoy' && !def.yoy ? '%' : def.unit);
+	const digits = $derived(overlay || transform === 'z' ? 2 : def.digits ?? 1);
 
-	const xmin = $derived(data.length ? ymdToMs(data[0].d) : 0);
-	const xmax = $derived(data.length ? ymdToMs(data[data.length - 1].d) : 1);
+	const allX = $derived([...data, ...dataB].map((p) => ymdToMs(p.d)));
+	const xmin = $derived(allX.length ? Math.min(...allX) : 0);
+	const xmax = $derived(allX.length ? Math.max(...allX) : 1);
 	const yRange = $derived.by(() => {
-		if (!data.length) return { lo: 0, hi: 1 };
-		let lo = data[0].v, hi = data[0].v;
-		for (const p of data) { if (p.v < lo) lo = p.v; if (p.v > hi) hi = p.v; }
-		if (refLine != null) { lo = Math.min(lo, refLine); hi = Math.max(hi, refLine); }
+		const all = [...data, ...dataB];
+		if (!all.length) return { lo: 0, hi: 1 };
+		let lo = all[0].v, hi = all[0].v;
+		for (const p of all) { if (p.v < lo) lo = p.v; if (p.v > hi) hi = p.v; }
+		if (refLine != null && !overlay) { lo = Math.min(lo, refLine); hi = Math.max(hi, refLine); }
 		if (lo === hi) { lo -= 1; hi += 1; }
 		const pad = (hi - lo) * 0.08;
 		return { lo: lo - pad, hi: hi + pad };
@@ -45,8 +50,11 @@
 	const xOf = (ms: number) => padL + ((ms - xmin) / Math.max(1, xmax - xmin)) * (W - padL - padR);
 	const yOf = (v: number) => H - padB - ((v - yRange.lo) / (yRange.hi - yRange.lo)) * (H - padT - padB);
 
-	const path = $derived(data.length ? data.map((p, k) => `${k ? 'L' : 'M'}${xOf(ymdToMs(p.d)).toFixed(1)} ${yOf(p.v).toFixed(1)}`).join(' ') : '');
-	const areaPath = $derived(data.length ? `${path} L${xOf(xmax).toFixed(1)} ${(H - padB).toFixed(1)} L${xOf(xmin).toFixed(1)} ${(H - padB).toFixed(1)} Z` : '');
+	const lineOf = (pts: { d: string; v: number }[]) => pts.length ? pts.map((p, k) => `${k ? 'L' : 'M'}${xOf(ymdToMs(p.d)).toFixed(1)} ${yOf(p.v).toFixed(1)}`).join(' ') : '';
+	const path = $derived(lineOf(data));
+	const pathB = $derived(lineOf(dataB));
+	const areaPath = $derived(!overlay && data.length ? `${path} L${xOf(ymdToMs(data[data.length - 1].d)).toFixed(1)} ${(H - padB).toFixed(1)} L${xOf(ymdToMs(data[0].d)).toFixed(1)} ${(H - padB).toFixed(1)} Z` : '');
+	const lastB = $derived(dataB.length ? dataB[dataB.length - 1] : null);
 
 	// 침체 음영 — US(fred) 시리즈 + shading prop. 가시 범위와 겹치는 NBER 구간만 사각형.
 	const shadeRects = $derived.by(() => {
@@ -120,7 +128,15 @@
 		{/if}
 		<path class="mscArea" d={areaPath} />
 		<path class="mscLine" d={path} />
-		{#if last}<circle class="mscNow" cx={xOf(xmax)} cy={yOf(last.v)} r={compact ? 2 : 3} />{/if}
+		{#if last}<circle class="mscNow" cx={xOf(ymdToMs(last.d))} cy={yOf(last.v)} r={compact ? 2 : 3} />{/if}
+		{#if overlay && pathB}
+			<path class="mscLineB" d={pathB} />
+			{#if lastB}<circle class="mscNowB" cx={xOf(ymdToMs(lastB.d))} cy={yOf(lastB.v)} r={compact ? 2 : 3} />{/if}
+			{#if !compact}
+				<text class="mscLegA" x={padL + 4} y={padT + 11}>● {T(def.kr, def.en)} (z)</text>
+				<text class="mscLegB" x={padL + 4} y={padT + 25}>● {T(overlay.def.kr, overlay.def.en)} (z)</text>
+			{/if}
+		{/if}
 		{#if cursor}
 			<line class="mscCursor" x1={cursor.x} y1={padT} x2={cursor.x} y2={H - padB} />
 			<circle class="mscCursorDot" cx={cursor.x} cy={cursor.y} r={compact ? 2.5 : 3.5} />
@@ -143,6 +159,11 @@
 	.mscArea { fill: var(--good); opacity: 0.06; }
 	.mscLine { fill: none; stroke: var(--good); stroke-width: 1.4; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
 	.mscNow { fill: var(--good); }
+	/* overlay 2번째 시리즈 — 보라(valence 아닌 구분색) */
+	.mscLineB { fill: none; stroke: var(--industry); stroke-width: 1.4; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+	.mscNowB { fill: var(--industry); }
+	.mscLegA { fill: var(--good); font-size: 10px; font-weight: 700; }
+	.mscLegB { fill: var(--industry); font-size: 10px; font-weight: 700; }
 	.mscYLbl, .mscXLbl { fill: var(--dimmer); font-size: 9px; font-family: var(--mono); }
 	.mscCursor { stroke: var(--amber); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: 0.7; }
 	.mscCursorDot { fill: var(--amber); }
