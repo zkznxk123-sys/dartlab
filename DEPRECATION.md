@@ -41,19 +41,31 @@ public API (`dartlab.__all__` 에 포함된 심볼) 는 **deprecation 후 최소
 
 ### 자동 검증
 
-`tests/audit/deprecationAudit.py` (T8-1 트랙) 가 PR 차단:
+`tests/audit/deprecationAudit.py` 가 ci-fast `lint` 게이트에서 PR 차단 (debt-honesty P1-3 에서
+*유령 가드 → 실 구현*: 오랫동안 본 문서가 강제한다고 약속했으나 파일 자체가 부재했음). 현재 검사:
 
-1. 코드 안 `@deprecated(...)` 데코레이터 검출 → 본 문서 항목 존재 강제
-2. 본 문서 "Remove in" 버전이 현재 버전 도달 → CI fail (제거 누락 차단)
-3. `__all__` 에서 사라진 심볼 → "Removed" 섹션 등록 강제
+1. **raw stdlib `DeprecationWarning` 금지 (ratchet)** — deprecation 은 사용자에게 보이는
+   `DartlabDeprecationWarning`(FutureWarning 하위) / `warnDeprecated` / `@deprecated` 만 써야 한다.
+   raw `warnings.warn(..., DeprecationWarning, ...)` 는 숨겨져 "언제 무엇이 사라지는지" 알림을 침묵시킨다.
+   현재 9 사이트는 baseline 동결(`tests/audit/_baselines/deprecationAudit.json`), *신규만 차단* (목표 0).
+2. **`@deprecated(...)` 데코레이터 → 본 문서 항목 존재 강제** — 데코 심볼이 본 문서에 없으면 fail.
+
+미구현(후속): "Remove in" 버전 도달 자동 fail · `__all__` 제거 심볼 "Removed" 강제 — 현재는 RELEASE 체크리스트 수동 검증.
 
 ---
 
 ## Currently Deprecated
 
-> 본 섹션은 PR 마다 자동 동기화 (deprecationAudit 통과 조건).
+> raw `DeprecationWarning` 으로 알림 중인 deprecated alias 9 사이트 (baseline 동결 ratchet).
+> `DartlabDeprecationWarning` 이관 시 사용자 가시화 + baseline 항목 제거가 목표 (debt-honesty P1-3).
 
-*(현재 deprecated 항목 0. 첫 항목 추가 시 본 섹션 위 형식대로 채움.)*
+| API | 대체 | 위치 |
+|-----|------|------|
+| `company._report.dividend/employee/majorHolder/executive/audit` (property 5) | `c.panel("…")` | `providers/dart/accessor/reportAccessor.py` |
+| `company._profile.get(topic)` | `c.show(topic)` / `c.finance.*` | `providers/dart/accessor/profileAccessor.py` |
+| `dartlab.quant("코드", "축")` 역순 호출 | `dartlab.quant("축", "코드")` | `quant/__init__.py` |
+| `dartlab.credit("코드", "축")` 역순 호출 | id-first 자동 swap | `credit/__init__.py` |
+| `story.buildStory` legacy 인자 | registry dispatch | `story/registry.py` |
 
 ---
 

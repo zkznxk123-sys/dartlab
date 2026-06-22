@@ -141,7 +141,8 @@ GATES: dict[str, Gate] = {
             '(lint-imports || python -c "pass") && '
             "python -X utf8 tests/audit/namingConsistency.py && "
             "python -X utf8 tests/audit/checkEngineSpecSchema.py && "
-            "python -X utf8 tests/audit/valuationPublishLint.py --strict"
+            "python -X utf8 tests/audit/valuationPublishLint.py --strict && "
+            "python -X utf8 tests/audit/deprecationAudit.py"
         ),
     ),
     "architecture-l0-l15": Gate(

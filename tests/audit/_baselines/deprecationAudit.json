@@ -1,0 +1,14 @@
+{
+  "violations": [
+    "credit/__init__.py::credit",
+    "providers/dart/accessor/profileAccessor.py::_ProfileAccessor.get",
+    "providers/dart/accessor/reportAccessor.py::_ReportAccessor.audit",
+    "providers/dart/accessor/reportAccessor.py::_ReportAccessor.dividend",
+    "providers/dart/accessor/reportAccessor.py::_ReportAccessor.employee",
+    "providers/dart/accessor/reportAccessor.py::_ReportAccessor.executive",
+    "providers/dart/accessor/reportAccessor.py::_ReportAccessor.majorHolder",
+    "quant/__init__.py::Quant.__call__",
+    "story/registry.py::buildStory"
+  ],
+  "_note": "raw stdlib DeprecationWarning 가 쓰인 알려진 사이트 (relpath::qualname). dartlab 은 DartlabDeprecationWarning/warnDeprecated/@deprecated 를 써야 한다 — 본 목록은 ratchet 부채(신규 차단·목표 0). 이관 시 항목 제거. (debt-honesty P1-3)"
+}
