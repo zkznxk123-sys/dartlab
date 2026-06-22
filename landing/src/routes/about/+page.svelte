@@ -183,7 +183,7 @@
 
 	.kicker {
 		margin: 0 0 0.5rem;
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		font-size: 0.72rem;
 		font-weight: 700;
 		text-transform: uppercase;
@@ -220,7 +220,7 @@
 	section h3 {
 		margin: 1.1rem 0 0.4rem;
 		font-size: 0.95rem;
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		font-weight: 600;
 	}
 
@@ -253,7 +253,7 @@
 	}
 
 	.links a {
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		text-decoration: none;
 		font-family: var(--dl-font-mono);
 		font-size: 0.86rem;
@@ -267,13 +267,13 @@
 		padding: 0.08rem 0.4rem;
 		border-radius: var(--dl-r-sm);
 		background: var(--dl-bg-overlay);
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		font-family: var(--dl-font-mono);
 		font-size: 0.86em;
 	}
 
 	a {
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}

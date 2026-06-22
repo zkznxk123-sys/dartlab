@@ -2,30 +2,32 @@
    dartlab design tokens
    ============================================================ */
 :root {
-  --bg: #050811;
-  --bg-elev: #0a0e18;
-  --card: #0f1219;
-  --card-hi: #151924;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-hi: rgba(255, 255, 255, 0.12);
-  --border-accent: rgba(234, 70, 71, 0.35);
+  /* 색상 = tokens.css SSOT(--dl-*/--p-*) alias. 여기서 색 정의 금지 — 색은 tokens.css 한 곳에서 제어.
+   * grad-heat 가 레드→오렌지에서 레드→핑크(--dl-grad-heat)로 통일 → 랜딩 버튼이 전 surface 와 일치. */
+  --bg: var(--p-navy-900);
+  --bg-elev: var(--p-navy-850);
+  --card: var(--p-card-900);
+  --card-hi: var(--p-card-850);
+  --border: var(--dl-line);
+  --border-hi: var(--dl-line-strong);
+  --border-accent: rgba(var(--dl-red-rgb), 0.35);
 
-  --text: #e8ecf5;
-  --text-mid: #a6adbb;
-  --text-dim: #6b7280;
-  --text-faint: #4a5160;
+  --text: var(--dl-ink);
+  --text-mid: var(--dl-ink-mute);
+  --text-dim: var(--dl-ink-dim);
+  --text-faint: var(--dl-ink-faint);
 
-  --red: #ea4647;
-  --red-hot: #ff5757;
-  --orange: #fb923c;
-  --yellow: #fbbf24;
-  --green: #34d399;
-  --green-deep: #10b981;
-  --rose-dim: rgba(234, 70, 71, 0.12);
+  --red: var(--dl-red);
+  --red-hot: var(--p-red-300);
+  --orange: var(--dl-orange);
+  --yellow: var(--dl-warn);
+  --green: var(--dl-good);
+  --green-deep: var(--p-green-600);
+  --rose-dim: rgba(var(--dl-red-rgb), 0.12);
 
-  --grad-heat: linear-gradient(135deg, #ea4647 0%, #fb923c 100%);
-  --grad-heat-soft: linear-gradient(135deg, rgba(234,70,71,0.22) 0%, rgba(251,146,60,0.18) 100%);
-  --grad-hairline: linear-gradient(90deg, transparent, rgba(234,70,71,0.35), transparent);
+  --grad-heat: var(--dl-grad-heat);
+  --grad-heat-soft: linear-gradient(135deg, rgba(var(--dl-red-rgb), 0.22) 0%, rgba(var(--dl-accent-rgb), 0.18) 100%);
+  --grad-hairline: linear-gradient(90deg, transparent, rgba(var(--dl-red-rgb), 0.35), transparent);
 
   --font-ui: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;

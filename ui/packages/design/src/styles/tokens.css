@@ -1,93 +1,145 @@
-/* dartlab Design Tokens — Editorial Dark
+/* dartlab Design Tokens — 3계층 색상 SSOT (Primitive → Semantic → Surface-local)
  *
  * 정체성: "1970년대 금융 저널의 지면을 OLED 패널 위에서 다시 읽는다"
  *
- * 흡수 출처:
- *  - 사용자 zip v3 tokens.css (red-orange 4 팔레트)
- *  - 2026 dark-native (Linear · Vercel · Anthropic Console)
- *  - 한국 금융 컨벤션 (상승 빨강 / 하락 파랑)
- *  - 四季報 + 토스 + 에프앤가이드 정보 밀도 절충
+ * ── 계층 구조 (단일 원천 · 다른 곳에서 색 재정의 금지) ──
+ *  Tier 0  Primitive 팔레트 (--p-*)   raw 색 원자. theme 무관. **컴포넌트 직접 사용 금지**.
+ *  Tier 1  Semantic 토큰 (--dl-*)     의미색. primitive 참조. ★색을 바꾸는 유일한 지점.
+ *          :root = dark 기본 / :root[data-theme=light] = surface·ink·line 만 재매핑.
+ *  Tier 2  Surface-local alias        terminal .dlTerm{--amber…} · v2-tokens{--grad-heat…} 가 Tier1 위임.
  *
- * 적용: +layout.svelte 또는 /lab 라우트에서 import.
- * 단일 원천 (SSOT) — 다른 곳에서 재정의 금지.
+ *  브랜드 색 한 곳(Tier0 --p-*)을 바꾸면 랜딩·터미널·scan·map·viewer 전체에 즉시 반영된다.
+ *  invariant(brand·signal·한국금융)와 theme-dependent(surface·ink·line)를 분리해 라이트 비용을 최소화.
+ *
+ * 흡수 출처: 사용자 zip v3 · 2026 dark-native(Linear·Vercel·Anthropic Console) · 한국 금융 컨벤션 · 四季報+토스.
+ * 적용: +layout.svelte 에서 import.
  */
 
 :root {
-	/* ── Surface · 4단계 elevation (+6% luminance) ── */
-	--dl-bg-base: #0f0f10;
-	--dl-bg-raised: #16171a;
-	--dl-bg-overlay: #1d1f23;
-	--dl-bg-modal: #25272d;
-	--dl-bg-deep: #08090b; /* OLED 깊이 (사용 절제) */
+	/* ═══════════════════════════════════════════════════════════════════
+	   Tier 0 · Primitive 팔레트 — raw 색 원자 (theme 무관 · 직접 사용 금지)
+	   값을 바꾸면 이를 참조하는 모든 semantic 토큰이 따라 바뀐다.
+	   ═══════════════════════════════════════════════════════════════════ */
+	/* Brand — 핑크(시그니처 accent) · 레드(dartlab) */
+	--p-pink-300: #f9a8d4;
+	--p-pink-400: #f472b6;
+	--p-pink-500: #ec4899;
+	--p-pink-700: #be185d;
+	--p-pink-500-rgb: 236, 72, 153;
+	--p-red-300: #ff5757;
+	--p-red-400: #f87171;
+	--p-red-500: #ea4647;
+	--p-red-700: #c83232;
+	--p-red-500-rgb: 234, 70, 71;
+	/* Signal / 보조 */
+	--p-orange-400: #fb923c;
+	--p-amber-400: #fbbf24;
+	--p-green-400: #34d399;
+	--p-green-600: #10b981;
+	--p-blue-400: #60a5fa;
+	--p-violet-400: #a78bfa;
+	--p-coral-500: #ef4444;
+	--p-gold-400: #ffdd00;
+	/* 한국 금융 컨벤션 (상승 빨강 / 하락 파랑) */
+	--p-up: #e43f3f;
+	--p-down: #1d64dc;
+	/* 중성 — 제품 그레이 (터미널·scan·map·viewer dark surface) */
+	--p-gray-950: #08090b;
+	--p-gray-900: #0f0f10;
+	--p-gray-850: #16171a;
+	--p-gray-800: #1d1f23;
+	--p-gray-750: #25272d;
+	/* 중성 — 랜딩 마케팅 네이비 (딥다크 · 별도 family 로 톤 보존) */
+	--p-navy-950: #030509;
+	--p-navy-900: #050811;
+	--p-navy-850: #0a0e18;
+	--p-card-900: #0f1219;
+	--p-card-850: #151924;
+	--p-card-800: #1a1f2b;
+	--p-line-navy: #1e2433;
+	/* 잉크 (dark scale) */
+	--p-ink-100: #f1f3f7;
+	--p-ink-200: #e8eaef;
+	--p-ink-400: #a3a8b3;
+	--p-ink-500: #6b7280;
+	--p-ink-600: #4a5160;
+	--p-slate-400: #94a3b8;
+	--p-slate-500: #64748b;
+	--p-white: #ffffff;
 
-	/* ── Border · 매우 절제, shadow 대신 1px ── */
-	--dl-line: rgba(255, 255, 255, 0.06);
-	--dl-line-strong: rgba(255, 255, 255, 0.12);
-	--dl-line-accent: rgba(234, 70, 71, 0.28);
+	/* ═══════════════════════════════════════════════════════════════════
+	   Tier 1 · Semantic 토큰 — ★색을 바꾸는 유일한 지점 (dark 기본값)
+	   ═══════════════════════════════════════════════════════════════════ */
 
-	/* ── Text · 순백 금지, WCAG 4.5:1 ── */
-	--dl-ink: #e8eaef; /* primary, 본문 */
-	--dl-ink-mute: #a3a8b3; /* secondary */
-	--dl-ink-dim: #6b7280; /* tertiary, label */
-	--dl-ink-faint: #4a5160; /* faint, disabled */
-	--dl-ink-print: #f1f3f7; /* 큰 숫자 · 헤드라인만 */
-
-	/* ── Brand · dartlab red→orange ── */
-	--dl-red: #ea4647;
-	--dl-red-deep: #c83232;
-	--dl-orange: #fb923c;
+	/* ── Brand · dartlab red→accent (theme 무관 = 정체성) ── */
+	--dl-red: var(--p-red-500);
+	--dl-red-deep: var(--p-red-700);
+	--dl-red-rgb: var(--p-red-500-rgb);
+	--dl-orange: var(--p-orange-400); /* 레거시 보조색 — 데이터 카테고리 등 의미색에만 */
 	--dl-orange-soft: rgba(251, 146, 60, 0.12);
-	--dl-grad-heat: linear-gradient(135deg, #ea4647 0%, #fb923c 100%);
+	/* 히트 그라데이션 = 브랜드 레드→시그니처 핑크(accent). 버튼·히어로 강조 표면 통일(SSOT). */
+	--dl-grad-heat: linear-gradient(135deg, var(--dl-red) 0%, var(--dl-accent) 100%);
 
-	/* ── Accent · 시그니처 강조색 (캐러셀 핑크) ──
-	 * 터미널·report·전 surface 강조색 단일 제어점 (SSOT). 여기만 바꾸면 전체 강조색이 바뀐다.
+	/* ── Accent · 시그니처 강조색 (캐러셀 핑크) — 전 surface 강조색 단일 제어점 ──
 	 * --dl-accent-rgb 는 알파 변형용: rgba(var(--dl-accent-rgb), 0.3). 돋보기 로고 붉은톤과 통일.
 	 */
-	--dl-accent: #ec4899;
-	--dl-accent-rgb: 236, 72, 153;
-	--dl-accent-dim: #be185d;
-	--dl-accent-light: #f9a8d4; /* 핑크 라이트 — 랜딩 accent-light·연한 강조 (오렌지 라이트 대체) */
-	--dl-accent-soft: rgba(236, 72, 153, 0.12);
-	/* surfaces 레거시 alias 전역 fallback — scan/map/viewer 등 .dlTerm 밖에서도 강조색 var 이 항상 해석되게(accent 로 위임). */
+	--dl-accent: var(--p-pink-500);
+	--dl-accent-rgb: var(--p-pink-500-rgb);
+	--dl-accent-dim: var(--p-pink-700);
+	--dl-accent-light: var(--p-pink-300);
+	--dl-accent-soft: rgba(var(--p-pink-500-rgb), 0.12);
+	/* surfaces 레거시 alias 전역 fallback — scan/map/viewer 등 .dlTerm 밖에서도 강조색 var 해석되게. */
 	--amber: var(--dl-accent);
 	--amber-rgb: var(--dl-accent-rgb);
 	--amberDim: var(--dl-accent-dim);
 	--dl-grad-bleed: radial-gradient(
 		ellipse 1200px 600px at top,
-		rgba(234, 70, 71, 0.05),
+		rgba(var(--p-red-500-rgb), 0.05),
 		transparent 70%
 	);
 
-	/* ── 한국 금융 컨벤션 (상승 빨강 / 하락 파랑) ──
-	 * brand 의 red 와 의미 충돌 회피 위해 별도 토큰.
-	 * 상승은 한국 표준 양봉 빨강 (#E43F3F)
-	 * 하락은 한국 표준 음봉 파랑 (#1D64DC)
-	 */
-	--dl-up: #e43f3f;
+	/* ── 한국 금융 컨벤션 (상승 빨강 / 하락 파랑 · theme 무관) ── */
+	--dl-up: var(--p-up);
 	--dl-up-soft: rgba(228, 63, 63, 0.1);
-	--dl-down: #1d64dc;
+	--dl-down: var(--p-down);
 	--dl-down-soft: rgba(29, 100, 220, 0.1);
 	--dl-flat: var(--dl-ink-dim);
 
-	/* ── Signal · 데이터 색 (절제, 5색 이내) ── */
-	--dl-good: #34d399;
-	--dl-warn: #fbbf24;
-	--dl-bad: #ef4444;
-	--dl-info: #60a5fa;
+	/* ── Signal · 데이터 색 (절제, theme 무관) ── */
+	--dl-good: var(--p-green-400);
+	--dl-warn: var(--p-amber-400);
+	--dl-bad: var(--p-coral-500);
+	--dl-info: var(--p-blue-400);
 
-	/* ── Skills 카테고리 색상 ──
-	 * 5 카테고리 (start · runtime · operation · engines · recipes) 시각 구분.
-	 * 카드 borderLeft, 사이드바 chip, 검색 결과 badge 에 일관 적용.
-	 */
-	--dl-cat-start: #60a5fa;
+	/* ── Surface · 4단계 elevation (theme 의존 · dark 기본) ── */
+	--dl-bg-base: var(--p-gray-900);
+	--dl-bg-raised: var(--p-gray-850);
+	--dl-bg-overlay: var(--p-gray-800);
+	--dl-bg-modal: var(--p-gray-750);
+	--dl-bg-deep: var(--p-gray-950); /* OLED 깊이 (사용 절제) */
+
+	/* ── Border · 매우 절제, shadow 대신 1px (theme 의존) ── */
+	--dl-line: rgba(255, 255, 255, 0.06);
+	--dl-line-strong: rgba(255, 255, 255, 0.12);
+	--dl-line-accent: rgba(var(--p-red-500-rgb), 0.28);
+
+	/* ── Text · 순백 금지, WCAG 4.5:1 (theme 의존) ── */
+	--dl-ink: var(--p-ink-200); /* primary, 본문 */
+	--dl-ink-mute: var(--p-ink-400); /* secondary */
+	--dl-ink-dim: var(--p-ink-500); /* tertiary, label */
+	--dl-ink-faint: var(--p-ink-600); /* faint, disabled */
+	--dl-ink-print: var(--p-ink-100); /* 큰 숫자 · 헤드라인만 */
+
+	/* ── Skills 카테고리 색상 (5 카테고리 시각 구분) ── */
+	--dl-cat-start: var(--p-blue-400);
 	--dl-cat-start-soft: rgba(96, 165, 250, 0.1);
-	--dl-cat-runtime: #a78bfa;
+	--dl-cat-runtime: var(--p-violet-400);
 	--dl-cat-runtime-soft: rgba(167, 139, 250, 0.1);
-	--dl-cat-operation: #34d399;
+	--dl-cat-operation: var(--p-green-400);
 	--dl-cat-operation-soft: rgba(52, 211, 153, 0.1);
-	--dl-cat-engines: #fb923c;
+	--dl-cat-engines: var(--p-orange-400);
 	--dl-cat-engines-soft: rgba(251, 146, 60, 0.1);
-	--dl-cat-recipes: #f472b6;
+	--dl-cat-recipes: var(--p-pink-400);
 	--dl-cat-recipes-soft: rgba(244, 114, 182, 0.1);
 
 	/* ── Radius · 4/8/12, 16+ 금지 (신뢰감) ── */
@@ -126,12 +178,30 @@
 	--dl-focus: var(--dl-info);
 	--dl-focus-offset: 2px;
 
-	/* ── Type families ──
-	 * 본문: Pretendard Variable (한글)
-	 * 숫자/코드: JetBrains Mono (tabular-nums 필수)
-	 * 헤드라인: Newsreader (slab, 무료) — 편집 톤
-	 */
+	/* ── Type families ── */
 	--dl-font-ui: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
 	--dl-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 	--dl-font-head: 'Newsreader', 'Tiempos Headline', Georgia, serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Tier 1 · Light theme — surface·ink·line 만 재매핑 (brand/signal/한국금융 = 상속)
+   콘텐츠 표면(landing·viewer·blog) 전용. data-theme 미설정 시 dormant(=dark).
+   ⚠ P4 에서 값 확정 + 콘텐츠 표면 적용 + 터미널/scan/map 은 primitive 로 re-pin(다크 고정).
+   ═══════════════════════════════════════════════════════════════════════ */
+:root[data-theme='light'] {
+	--dl-bg-base: var(--p-white);
+	--dl-bg-raised: #f6f7f9;
+	--dl-bg-overlay: #eef0f3;
+	--dl-bg-modal: var(--p-white);
+	--dl-bg-deep: #e9ebef;
+
+	--dl-line: rgba(0, 0, 0, 0.08);
+	--dl-line-strong: rgba(0, 0, 0, 0.16);
+
+	--dl-ink: #1a1d24;
+	--dl-ink-mute: #51596a;
+	--dl-ink-dim: #6b7280;
+	--dl-ink-faint: #9aa1ad;
+	--dl-ink-print: #0d0f14;
 }

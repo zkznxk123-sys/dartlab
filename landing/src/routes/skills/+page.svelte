@@ -166,7 +166,7 @@
 
 	.kicker {
 		margin: 0 0 0.5rem;
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		font-size: 0.72rem;
 		font-weight: 700;
 		text-transform: uppercase;
@@ -207,7 +207,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.4rem;
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		font-size: 0.86rem;
 		text-decoration: none;
 	}
@@ -233,7 +233,7 @@
 	}
 
 	.cmdk-btn:hover {
-		border-color: var(--dl-orange);
+		border-color: var(--dl-accent);
 		color: var(--dl-ink);
 	}
 
@@ -261,7 +261,7 @@
 
 	.local-search:focus {
 		outline: none;
-		border-color: var(--dl-orange);
+		border-color: var(--dl-accent);
 	}
 
 	.local-search::placeholder {
@@ -296,7 +296,7 @@
 	}
 
 	.entry-block :global(.entry-icon) {
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 	}
 
 	.entry-grid {
@@ -323,7 +323,7 @@
 	}
 
 	.entry-card:hover {
-		border-color: var(--dl-orange);
+		border-color: var(--dl-accent);
 		background: var(--dl-bg-overlay);
 		transform: translateY(-1px);
 	}
@@ -337,7 +337,7 @@
 		height: 24px;
 		border-radius: 50%;
 		background: var(--dl-orange-soft);
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		font-family: var(--dl-font-mono);
 		font-size: 0.75rem;
 		font-weight: 700;
@@ -386,7 +386,7 @@
 	}
 
 	.entry-card:hover :global(.arrow) {
-		color: var(--dl-orange);
+		color: var(--dl-accent);
 		transform: translateX(2px);
 	}
 
