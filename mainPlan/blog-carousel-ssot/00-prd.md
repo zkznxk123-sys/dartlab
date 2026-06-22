@@ -1,6 +1,6 @@
 # 블로그·캐러셀·SNS 자산 통합 SSOT + 라이브 카드 캐러셀 — PRD
 
-> **상태**: 설계 완성·구현 미착수. 착수 = 운영자 go (P0 선결 = HF `dartlab-media` dataset repo 생성).
+> **상태**: **구현 완료(코드)·운영자 활성화 대기.** P0~P5 전부 구현·검증. 잔여 = ① 운영자 HF `dartlab-media` repo 생성 + `publish_assets_hf.py` 실행 ② UI 눈검수 후 push(landing/ui 변경 미push). 아래 §as-built 정정 참조. 커밋: hfMedia 배선 `c2880c18a` · /cards 캐러셀 `580e5dd0b` · carousel 큐레이션 `bc436bae7`.
 > **검증**: 4 라운드 5 축 적대평가(코드 대조) — 아키텍처·파이프라인·데이터관리·확장성·정직성/UX 전 축 ≥90 (91·91·91·92·93). 검증 과정에서 초기 설계의 과대주장(재사용·신규 0 등)이 코드 대조로 정정됨 — 아래 §설계 정정 이력.
 
 ## Context (왜)
@@ -144,3 +144,24 @@ SNS 캐러셀은 스토리를 결정론으로 고정 생성할 수 없다 → **
 7. **회귀**: `/report`(추출 동치)·터미널·블로그[slug] 시각 무변경(Playwright)·`tests/run.py preflight` green.
 
 **MCP 정직성**: 카드 수치 `EngineCall`(Company.panel)·`PeerCompareN` 교차검증.
+
+---
+
+## as-built 정정 (구현 중 ground-truth 발견 — 설계 대비 변경)
+
+설계 PRD 대비 구현에서 코드 대조로 정정한 결정들. 정공법 = 발견한 사실을 우회 않고 따른 것.
+
+1. **canonical 키 = `ticker:` 접두 없음** — 6자리 코드(`005930`)와 알파 티커(`META`)는 충돌 0이라 접두가 URL path 에 콜론을 넣어 깨뜨릴 뿐 기능 0. 키 = HF path 세그먼트 = index 키 단일화(변환점 0). KR/US 구분은 `market` 필드(데이터)로. (`build_index.py`·`company_key_from_slug` 재사용.)
+2. **DATA_RELEASES 미등록** — 그 레지스트리는 parquet 가정(`dataLoader.download` 가 전 카테고리를 `{code}.parquet` 로 순회)이라 webp 미디어를 넣으면 특수예외 강요. → 전용 `HF_MEDIA_REPO`/`HF_MEDIA_BASE_URL` 상수(`HF_REPO` 와 대칭, `dataConfig.py`).
+3. **`sns/` 전체 gitignore** — build_index/publish/ingest 는 **운영자 로컬 도구**(commit 불가·CI 미접근, 기존 sync_assets/build_index 와 동일). 추적·CI 가드 대상 = 런타임 계약만(hfMedia origin·dataConfig 상수·소비자·tracked vitest). 로컬 검증 = `sns/scripts/test_assets_pipeline.py`(4/4).
+4. **market 정규화** — meta.market 이 이질적(KOSPI/KOSDAQ/None) → 거래소명→국가코드(kr/us) 정규화로 uniform 필드.
+5. **자산 충돌 해소** — 같은 파일명·다른 내용(HYBE 2건) → bare-code 폴더 우선(suffixed=레거시) + `_assetConflicts` surface + `--check` 게이트. silent drop 금지.
+6. **hero 필터 = build_index** (publish 아님) — card/thumbnail/og 제외를 build_index 에서 → **index == 서빙셋**(drift-free). 'cover' 부분일치 오탐(`v-recovery`) 회피 위해 정밀 토큰만.
+7. **미해결 similarTo 드롭** — dangling peer 참조(POSCO `005490` 폴더 부재)는 served set 에서 제외(소비자 hero-fallback 404 방지) + `_unresolvedSimilarTo` surface.
+8. **landing vitest 도입** + `@dartlab/ui-{surfaces,contracts}` 팬텀 의존 정직화(이미 import 중이나 미선언).
+9. **PriceChart PoC = 보수 백본 폴백** — klinecharts/CenterStack 결합 회피, 캐러셀은 ReportModel SVG 차트 + MiniFinChart 백본만(설계의 "PoC 실패→백본" 분기).
+10. **finChart = MiniFinChart 배선** — `rt.finance.bundle(code).views[*].cards/periods` 로 재무 추이 슬라이드.
+11. **CLAUDE.md 1줄 → memory** — 미디어 serve SSOT 는 즉시-크래시 가드가 아니라 아키텍처 convention(3층 규율상 memory/Skill OS). 기존 "단일 작업대 SSOT" 규칙엔 origins 레지스트리 등록으로 이미 준수.
+12. **P1 실행 완료** — 블로그 hero 201장 ingest(멱등·provenance·충돌 23 보호) → index **100사·695 자산**.
+
+**검증 종합**: runtime tsc 0err·vitest 20/20 · landing svelte-check 0err·vitest 24/24 · sns 로컬 4/4 · build_index 78→100사 · publish dry-run 695장 열거 · audit_seo carousel 패스. **남은 건 운영자 활성화뿐**(HF repo 생성·publish 실행·UI 눈검수·push).
