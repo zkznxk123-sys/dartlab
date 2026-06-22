@@ -3,8 +3,8 @@
 > 본 문서는 `src/dartlab/skills/specs/**/*.md` 에 새 skill 을 추가하거나 기존 skill 의 frontmatter 를 갱신할 때 참고하는 운영 가이드. Skill 은 운영자·사용자·사용자가 명시적으로 위임한 AI 가 관리하고 개발한다.
 >
 > **산출물 6 종** (spec 변경자가 필요한 파일을 명시적으로 patch):
-> - `index.json` — 기존 다운스트림 호환 (agent.json alias).
-> - `agent.json` — 내부 AI 엔진 용 (frontmatter + bodyPreview).
+> - `catalog.json` — 전체 검색 카탈로그 (frontmatter + bodyPreview). landing·wheel 소비 정본.
+> - `agent.json` — `catalog.json` 의 byte-동일 legacy alias (실 리더 0 · 물리 dedup 운영자 결정 대기). *옛 `index.json` 별칭은 미생성·폐기.*
 > - `mcp.json` — 외부 LLM (MCP) 용 경량 (5 핵심 필드 + nextSkills max 5).
 > - `web.json` — 사람 (랜딩) 용 풍부 (humanIntro · visualRefs · bodyHuman).
 > - `pyodide.json` — Pyodide 런타임 manifest.
@@ -42,7 +42,7 @@ recipes/ 는 *분석가 페르소나* 별로 분류된다. 외부 트렌드인 "
 페르소나 분류 룰:
 - recipe 의 *주된 시점* (어떤 분석가가 사용할지) 으로 1차 분류. 펀더멘털 분석가의 *공시 이벤트 감시* = `fundamental/disclosure/eventRadar/`, 펀더멘털의 *이익의 질 forensics* = `fundamental/quality/forensics/`.
 - 여러 페르소나가 동등하게 쓰는 결과물·필터·테제 검증 = `meta/`.
-- "미커버" 페르소나 (sentiment·news) 는 빈 폴더 + README 로 *정직 표시* — 있는 척 placeholder 채우지 않는다.
+- "미커버" 페르소나 (sentiment·news) 는 빈 폴더 + README 로 *명시* — 있는 척 placeholder 채우지 않는다.
 
 ## 2. frontmatter 필드
 
@@ -204,7 +204,7 @@ skill 사이 링크는 항상 `[title](/skills/{id})` 절대 path 로 박는다.
 2. `src/dartlab/skills/specs/{category}/{name}.md` 생성. 엔진 응용은 `specs/engines/{group}/{axis}.md`, recipe 는 `specs/recipes/{domain}/{name}.md`.
 3. 위 §2 의 필수 필드 5 개 + 권장 필드 채우기. `procedure[]` · `examples[]` 비워두기보다 1~2 개라도 채우기 (페이지 풍부도).
 4. 본문 산문 작성 (§3 권장 구조).
-5. 산출물 동기화: 변경 내용이 노출 표면에 영향을 주면 `index.json` · `agent.json` · `mcp.json` · `web.json` · `pyodide.json` · `graph.json` 중 필요한 파일을 명시적으로 patch.
+5. 산출물 동기화: 변경 내용이 노출 표면에 영향을 주면 `catalog.json` · `agent.json` · `mcp.json` · `web.json` · `pyodide.json` · `graph.json` 중 필요한 파일을 명시적으로 patch.
 6. 검증: `uv run python -X utf8 src/dartlab/skills/validateSkills.py src/dartlab/skills/specs/{category}/{name}.md`.
 7. 랜딩 산출물을 바꿨으면 `cd landing; npm run build`.
 

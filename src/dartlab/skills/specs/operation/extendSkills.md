@@ -180,8 +180,8 @@ Skill 산출물은 운영자·사용자·사용자가 명시적으로 위임한 
 
 | 산출물 | 대상 | 크기 (skill 당) |
 |---|---|---|
-| `index.json` | 호환 alias (= agent.json) | ~500 토큰 |
-| `agent.json` | 내부 AI 엔진 (dartlab.ask) | ~500 토큰 |
+| `catalog.json` | 전체 카탈로그 (landing·wheel 정본) | ~500 토큰 |
+| `agent.json` | `catalog.json` byte-동일 legacy alias (실 리더 0) | ~500 토큰 |
 | `mcp.json` | 외부 LLM (MCP first hop) | < 300 토큰 |
 | `web.json` | 사람 (랜딩) | ~1500 토큰 + humanIntro |
 | `pyodide.json` | 브라우저 Pyodide | ~400 토큰 |
