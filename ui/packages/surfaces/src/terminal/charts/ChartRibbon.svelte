@@ -78,7 +78,7 @@
 			{/if}
 		</div>
 		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each PERIODS as p (p)}<button class={ctl.period === p ? 'seg on' : 'seg'} onclick={() => (ctl.period = p)}>{p}</button>{/each}</span></div>
-		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'seg on' : 'seg'} title={T('봉 주기', 'timeframe')} onclick={() => (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}</span></div>
+		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'seg on' : 'seg'} disabled={ctl.btReportMode} title={ctl.btReportMode ? T('백테스트 — 일봉 고정', 'backtest — daily only') : T('봉 주기', 'timeframe')} onclick={() => !ctl.btReportMode && (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}</span></div>
 		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each CANDLES as cs (cs.v)}<button class={styleShown === cs.v ? 'seg on' : 'seg'} disabled={indexLine} title={indexLine ? T('종가 전용 — 라인 고정', 'close-only — line') : ''} onclick={() => !indexLine && (ctl.candleStyle = cs.v)}>{T(cs.kr, cs.en)}</button>{/each}</span></div>
 		<div class="crGrp"><span class="segGroup" role="radiogroup">{#each YMODES as y (y.v)}<button class={ctl.yMode === y.v ? 'seg on' : 'seg'} onclick={() => (ctl.yMode = y.v)}>{T(y.kr, y.en)}</button>{/each}</span></div>
 		<div class="crGrp">

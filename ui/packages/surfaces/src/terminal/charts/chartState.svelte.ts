@@ -43,6 +43,14 @@ export const OVERLAY_HINT: Partial<Record<OverlayKey, string>> = { ICHI: '일목
 export const PERIODS = ['1M', '3M', '6M', '1Y', '3Y', 'MAX'] as const;
 export type PeriodKey = (typeof PERIODS)[number];
 export const PERIOD_N: Record<string, number> = { '1M': 22, '3M': 66, '6M': 132, '1Y': 252, '3Y': 750, MAX: 100000 };
+// 검증 구간 빠른선택 = dataToT(최신) 기준 캘린더 역산 개월수 (MAX 는 dataFromT 직행). 일봉 슬라이싱은 엔진이 거래일로 스냅.
+export const PERIOD_MONTHS: Record<string, number> = { '1M': 1, '3M': 3, '6M': 6, '1Y': 12, '3Y': 36 };
+function subYmdMonths(ymd: string, months: number): string {
+	const d = new Date(Date.UTC(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8)));
+	d.setUTCMonth(d.getUTCMonth() - months);
+	const p = (n: number) => String(n).padStart(2, '0');
+	return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}`;
+}
 // 봉 주기 — 데이터는 일봉, 주/월/분기/년은 클라이언트 집계(aggregateCandles). TF_DIV = 거래일 환산 제수.
 // 자동 상향 체인(바스페이스 1px 미달)은 일→주→월까지만 — 분기·년은 수동 선택 전용.
 export type TfKey = 'D' | 'W' | 'M' | 'Q' | 'Y';
@@ -132,13 +140,46 @@ export class ChartCtl {
 	// 백테스트 검증 구간 — 커스텀 시작/종료(YYYYMMDD). 둘 다 set 이면 period 칩 대신 이 구간(엔진 입력 슬라이싱·차트 줌 동기). null = period 칩.
 	btWinFrom = $state<string | null>(null);
 	btWinTo = $state<string | null>(null);
+	// 가용 데이터 범위(YYYYMMDD) — PriceChart 가 데이터 로드·백필마다 publish. 검증 구간 날짜 입력의 min/max·빠른선택 기준·기본 전체창의 SSOT.
+	dataFromT = $state<string | null>(null);
+	dataToT = $state<string | null>(null);
 	get btCustomWin(): boolean { return !!this.btWinFrom && !!this.btWinTo; }
-	/** period 칩 선택 — 커스텀 구간 해제(칩↔커스텀 상호배타). */
-	setPeriodChip(p: PeriodKey) { this.period = p; this.btWinFrom = null; this.btWinTo = null; }
-	/** 커스텀 구간 설정(둘 다 유효해야 활성). from>to 면 스왑. */
+	/** period → dataToT(최신) 기준 시작일 (MAX·범위초과는 dataFromT 로 clamp). 범위 미상이면 null. */
+	private _periodFrom(p: PeriodKey): string | null {
+		const to = this.dataToT, lo = this.dataFromT;
+		if (!to || !lo) return null;
+		if (p === 'MAX') return lo;
+		const f = subYmdMonths(to, PERIOD_MONTHS[p] ?? 12);
+		return f < lo ? lo : f;
+	}
+	/** 빠른선택 — period 를 시작/종료 날짜창으로 환산해 설정(데이터 범위 미상이면 무동작). 검증 구간은 항상 날짜창. */
+	setWindowPeriod(p: PeriodKey) {
+		const from = this._periodFrom(p);
+		if (!from || !this.dataToT) return;
+		this.btWinFrom = from;
+		this.btWinTo = this.dataToT;
+	}
+	/** 현재 창과 일치하는 period 칩(하이라이트). 전체=MAX 우선, 커스텀(미일치)이면 null. */
+	get btWindowChip(): PeriodKey | null {
+		const to = this.dataToT, lo = this.dataFromT;
+		if (!this.btCustomWin || !to || !lo || this.btWinTo !== to) return null;
+		if (this.btWinFrom === lo) return 'MAX';
+		for (const p of ['1M', '3M', '6M', '1Y', '3Y'] as const) if (this.btWinFrom === this._periodFrom(p)) return p;
+		return null;
+	}
+	/** 창이 전체 데이터의 진부분집합인가 = 체리피킹 위험(전체기간이면 경고 없음). 범위 미상이면 false. */
+	get btWindowIsSubset(): boolean {
+		if (!this.btCustomWin || !this.dataFromT || !this.dataToT) return false;
+		return this.btWinFrom! > this.dataFromT || this.btWinTo! < this.dataToT;
+	}
+	/** 커스텀 구간 설정(둘 다 유효해야 활성). from>to 면 스왑, 데이터 있는 날짜로 clamp(국면 프리셋이 범위 밖이어도 안전). */
 	setCustomWin(from: string, to: string) {
 		if (!from || !to) return;
-		[this.btWinFrom, this.btWinTo] = from <= to ? [from, to] : [to, from];
+		let [f, t] = from <= to ? [from, to] : [to, from];
+		if (this.dataFromT && f < this.dataFromT) f = this.dataFromT;
+		if (this.dataToT && t > this.dataToT) t = this.dataToT;
+		this.btWinFrom = f;
+		this.btWinTo = t;
 	}
 	indParams = $state<Record<string, number[]>>({}); // 지표별 calcParams 오버라이드 (없으면 내장 기본)
 	compares = $state<{ code: string; name: string }[]>([]); // 종목비교 (최대 3, 세션 한정 — 회사 컨텍스트)

@@ -47,18 +47,27 @@
 		presetQuery = '';
 	}
 
-	// ── 검증 구간 — 시작/종료 자유선택(커스텀). period 칩과 상호배타. 국면 프리셋으로 원클릭 ──
-	let customOpen = $state(false);
+	// ── 검증 구간 — 항상 시작/종료 날짜창(기본 전체기간·일봉). period 칩은 날짜를 채우는 빠른선택. 국면 프리셋으로 원클릭 ──
 	const PHASE_PRESETS = [
 		{ k: 'covid', kr: '2020 코로나', en: '2020 COVID', from: '20200101', to: '20201231' },
 		{ k: 'bear22', kr: '2022 약세', en: '2022 bear', from: '20220101', to: '20221231' },
 		{ k: 'rec23', kr: '2023 회복', en: '2023 recovery', from: '20230101', to: '20231231' }
 	];
 	const dateInput = (t: string | null): string => (t && t.length === 8 ? `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}` : '');
+	// 시작/종료 직접 입력(키보드·달력) — 빈값=데이터 경계 복원(창 항상 유효), 범위 밖 입력은 데이터 있는 날짜로 clamp, from>to 방어.
 	function setWinPart(which: 'from' | 'to', v: string) {
-		const ymd = v ? v.replace(/-/g, '') : null;
+		let ymd: string | null = v ? v.replace(/-/g, '') : null;
+		if (!ymd) ymd = which === 'from' ? ctl.dataFromT : ctl.dataToT;
+		if (ymd) {
+			if (ctl.dataFromT && ymd < ctl.dataFromT) ymd = ctl.dataFromT;
+			if (ctl.dataToT && ymd > ctl.dataToT) ymd = ctl.dataToT;
+		}
 		if (which === 'from') ctl.btWinFrom = ymd;
 		else ctl.btWinTo = ymd;
+		if (ctl.btWinFrom && ctl.btWinTo && ctl.btWinFrom > ctl.btWinTo) {
+			if (which === 'from') ctl.btWinTo = ctl.btWinFrom;
+			else ctl.btWinFrom = ctl.btWinTo;
+		}
 	}
 	// 폭 리사이즈 — 드래그 핸들(우측 가장자리). 세션 한정 $state.
 	let dockW = $state(320);
@@ -158,35 +167,30 @@
 				<span class="sdCtxSym">{name ?? ''} {code ?? ''}</span>
 				<span class="sdCtxMeta">· {T('일봉', 'daily')}</span>
 			</div>
-			<!-- 검증 구간 = 백테스트 창(차트 줌과 공유·일봉). 박스+헤더로 '차트 기간'이 아닌 '백테스트 창'임을 시각 명시. -->
+			<!-- 검증 구간 = 백테스트 창(차트 줌과 공유·일봉 고정). 시작/종료 날짜 항상 표시 — 기본 전체기간, 데이터 있는 날짜 안에서만 조작(키보드 입력 가능). -->
 			<div class="sdWindow">
-				<div class="sdWinHd"><span class="sdWinLbl">{T('검증 구간', 'window')}</span><span class="sdWinHint">{T('이 기간으로 백테스트 · 차트도 같은 구간 표시', 'backtest over this period · chart shows the same range')}</span></div>
+				<div class="sdWinHd"><span class="sdWinLbl">{T('검증 구간', 'window')}</span><span class="sdWinHint">{T('이 기간으로 백테스트 · 차트도 같은 구간(일봉)', 'backtest over this period · chart shows the same range (daily)')}</span></div>
+				<!-- 빠른선택 — 클릭 시 아래 시작/종료 날짜를 채움(최신 기준 역산 · 전체=MAX). -->
 				<div class="sdWinSeg" role="radiogroup">
-					{#each PERIODS as p (p)}<button class={ctl.period === p && !ctl.btCustomWin ? 'sdWinBtn on' : 'sdWinBtn'} aria-pressed={ctl.period === p && !ctl.btCustomWin} onclick={() => ctl.setPeriodChip(p)}>{p}</button>{/each}
-					<button class={ctl.btCustomWin || customOpen ? 'sdWinBtn cust on' : 'sdWinBtn cust'} title={T('사용자 지정 구간', 'custom range')} aria-pressed={ctl.btCustomWin} onclick={() => (customOpen = !customOpen)}>⋯</button>
+					{#each PERIODS as p (p)}<button class={ctl.btWindowChip === p ? 'sdWinBtn on' : 'sdWinBtn'} aria-pressed={ctl.btWindowChip === p} disabled={!ctl.dataToT} onclick={() => ctl.setWindowPeriod(p)}>{p}</button>{/each}
 				</div>
-				{#if customOpen || ctl.btCustomWin}
-					<!-- 사용자 지정 구간 — 시작/종료 직접 입력 + 국면 프리셋. 시작/종료 둘 다 유효해야 활성(엔진 슬라이싱). -->
-					<div class="sdCustWin">
-						<div class="sdCustRow">
-							<input class="sdDate mono" type="date" value={dateInput(ctl.btWinFrom)} max={dateInput(ctl.btWinTo) || undefined} onchange={(e) => setWinPart('from', e.currentTarget.value)} aria-label={T('시작일', 'start')} />
-							<span class="sdCustTo">~</span>
-							<input class="sdDate mono" type="date" value={dateInput(ctl.btWinTo)} min={dateInput(ctl.btWinFrom) || undefined} onchange={(e) => setWinPart('to', e.currentTarget.value)} aria-label={T('종료일', 'end')} />
-						</div>
-						<div class="sdPhaseRow">
-							{#each PHASE_PRESETS as ph (ph.k)}<button class="sdPhase" onclick={() => ctl.setCustomWin(ph.from, ph.to)}>{T(ph.kr, ph.en)}</button>{/each}
-							{#if ctl.btCustomWin}<button class="sdPhase clr" onclick={() => { ctl.btWinFrom = null; ctl.btWinTo = null; customOpen = false; }}>{T('해제', 'clear')}</button>{/if}
-						</div>
-						<div class="sdCustNote">{ctl.btCustomWin ? T('⚠ 특정 구간만 보면 체리피킹(좋아 보이게 고른 구간) 위험 — 전체 기간과 비교하세요.', '⚠ a hand-picked window risks cherry-picking — compare with the full period.') : T('시작·종료를 모두 선택하면 적용됩니다.', 'pick both start and end to apply.')}</div>
-					</div>
+				<!-- 시작/종료 직접 입력(키보드·달력) — min/max 가 데이터 있는 날짜로 제한. -->
+				<div class="sdCustRow">
+					<input class="sdDate mono" type="date" value={dateInput(ctl.btWinFrom)} min={dateInput(ctl.dataFromT) || undefined} max={dateInput(ctl.btWinTo) || dateInput(ctl.dataToT) || undefined} onchange={(e) => setWinPart('from', e.currentTarget.value)} aria-label={T('시작일', 'start')} />
+					<span class="sdCustTo">~</span>
+					<input class="sdDate mono" type="date" value={dateInput(ctl.btWinTo)} min={dateInput(ctl.btWinFrom) || dateInput(ctl.dataFromT) || undefined} max={dateInput(ctl.dataToT) || undefined} onchange={(e) => setWinPart('to', e.currentTarget.value)} aria-label={T('종료일', 'end')} />
+				</div>
+				<!-- 국면 프리셋 — 특정 역사 구간(체리피킹 예시) 원클릭. -->
+				<div class="sdPhaseRow">
+					{#each PHASE_PRESETS as ph (ph.k)}<button class="sdPhase" onclick={() => ctl.setCustomWin(ph.from, ph.to)}>{T(ph.kr, ph.en)}</button>{/each}
+				</div>
+				{#if ctl.btWindowIsSubset}
+					<div class="sdCustNote">{T('⚠ 특정 구간만 보면 체리피킹(좋아 보이게 고른 구간) 위험 — 전체 기간과 비교하세요.', '⚠ a hand-picked window risks cherry-picking — compare with the full period.')}</div>
+				{/if}
+				{#if ctl.dataFromT && ctl.dataToT}
+					<div class="sdRangeNote">{T('데이터', 'data')} {dateInput(ctl.dataFromT)} ~ {dateInput(ctl.dataToT)} · {T('일봉', 'daily')}</div>
 				{/if}
 			</div>
-			{#if ctl.period === 'MAX' && !ctl.btCustomWin}
-				<div class="btTfNote">{T('MAX는 일봉이 촘촘합니다 — 수치는 정확, 개별 가격 캔들은 줌인 또는 주·월봉으로 확인하세요.', 'MAX packs daily bars tight — numbers are exact; zoom in or use W/M to read individual price candles.')}</div>
-			{/if}
-			{#if ctl.tf !== 'D'}
-				<div class="btTfNote">{T('차트를 주/월봉으로 보는 동안 거래 마커·에쿼티는 표시되지 않습니다(일봉 시간축 기준). 백테스트 숫자는 일봉으로 정확합니다.', 'While the chart shows W/M bars, trade markers & equity are not drawn (they live on the daily time axis). Backtest numbers stay exact on daily.')} <button class="btTfSwitch" onclick={() => (ctl.tf = 'D')}>{T('일봉으로 전환', 'switch to daily')}</button></div>
-			{/if}
 
 			<!-- ① 전략 -->
 			<div class="btSection">
@@ -422,17 +426,16 @@
 	.sdWinBtn:first-child { border-left: none; }
 	.sdWinBtn:hover { color: var(--dl-ink, #c8cfdb); background: rgba(255, 255, 255, 0.04); }
 	.sdWinBtn.on { background: var(--amber, var(--amber)); color: #1a1206; font-weight: 700; }
-	.sdWinBtn.cust { flex: 0 0 26px; font-size: 13px; line-height: 1; }
-	/* 사용자 지정 구간 — 시작/종료 입력 + 국면 프리셋 + 체리피킹 정직 노트. */
-	.sdCustWin { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
-	.sdCustRow { display: flex; align-items: center; gap: 5px; }
+	.sdWinBtn:disabled { opacity: 0.4; cursor: default; }
+	/* 검증 구간 — 시작/종료 날짜창(상시) + 국면 프리셋 + 체리피킹 정직 노트 + 데이터 범위 캡션. */
+	.sdCustRow { display: flex; align-items: center; gap: 5px; margin-top: 1px; }
 	.sdDate { flex: 1 1 0; min-width: 0; font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: var(--dl-ink, #c8cfdb); border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 3px 5px; font-family: inherit; color-scheme: dark; }
 	.sdCustTo { color: var(--dim, #8b94a3); font-size: 12px; flex: none; }
 	.sdPhaseRow { display: flex; flex-wrap: wrap; gap: 4px; }
 	.sdPhase { font-size: 11px; background: var(--dl-bg-raised, #0e141f); color: #aeb6c2; border: 1px solid var(--dl-line, #1b2130); border-radius: 4px; padding: 3px 9px; cursor: pointer; font-family: inherit; }
 	.sdPhase:hover { border-color: var(--amber, var(--amber)); color: var(--amber, var(--amber)); }
-	.sdPhase.clr { color: var(--dim, #8b94a3); border-style: dashed; margin-left: auto; }
 	.sdCustNote { font-size: 11px; color: var(--dim, #8b94a3); line-height: 1.5; }
+	.sdRangeNote { font-size: 10.5px; color: var(--dimmer, #5b6573); font-variant-numeric: tabular-nums; }
 	.btSection { margin-top: 4px; }
 	/* 리사이즈 핸들 */
 	.sdResize { position: absolute; top: 0; right: -3px; width: 6px; height: 100%; cursor: col-resize; z-index: 2; }
@@ -474,9 +477,6 @@
 		.btAddToggle:hover { border-color: var(--amber, var(--amber)); color: var(--amber, var(--amber)); }
 		.btAddCaret { color: var(--dimmer, #5b6573); }
 	.btModelNote { font-size: 10px; color: var(--dimmer, #5b6573); line-height: 1.5; margin-top: 2px; }
-	.btTfNote { font-size: 11px; color: #fcc98a; background: rgba(var(--amber-rgb), 0.14); border: 1px solid rgba(var(--amber-rgb), 0.5); border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; line-height: 1.5; }
-	.btTfSwitch { font-size: 10.5px; font-weight: 700; background: var(--amber, var(--amber)); border: 1px solid var(--amber, var(--amber)); color: #1a1206; border-radius: 3px; padding: 2px 9px; cursor: pointer; font-family: inherit; margin-left: 3px; white-space: nowrap; }
-	.btTfSwitch:hover { background: rgba(var(--amber-rgb), 0.26); }
 	.btEmpty { padding: 10px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--dl-line-strong, #2a3142); border-radius: 5px; margin-bottom: 4px; }
 	.btEmptyDesc { font-size: 11px; color: #aeb6c2; line-height: 1.6; }
 	.condBlk { margin-top: 5px; padding: 5px; border: 1px solid rgba(27, 33, 48, 0.7); border-radius: 4px; }

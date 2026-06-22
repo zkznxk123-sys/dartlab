@@ -84,7 +84,7 @@
 <div class="chartBar">
 	<span class="segGroup" role="radiogroup">{#each PERIODS as p (p)}<button class={ctl.period === p ? 'seg on' : 'seg'} onclick={() => (ctl.period = p)}>{p}</button>{/each}</span>
 	<span class="cbDiv"></span>
-	<span class="segGroup" role="radiogroup">{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'seg on' : 'seg'} title={T('봉 주기', 'timeframe')} onclick={() => (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}</span>
+	<span class="segGroup" role="radiogroup">{#each TFS as t (t.v)}<button class={ctl.tf === t.v ? 'seg on' : 'seg'} disabled={ctl.btReportMode} title={ctl.btReportMode ? T('백테스트 — 일봉 고정', 'backtest — daily only') : T('봉 주기', 'timeframe')} onclick={() => !ctl.btReportMode && (ctl.tf = t.v)}>{T(t.kr, t.en)}</button>{/each}</span>
 </div>
 
 <!-- 우상 도구 -->

@@ -463,6 +463,10 @@
 		const tfv = untrack(() => ctl.tf);
 		const base = fullSeries();
 		if (!base.length) return;
+		// 가용 데이터 범위 publish — 검증 구간 날짜 입력 bound·기본 전체창(StrategyDock). 동일값 가드로 재실행 루프 0.
+		const loT = base[0].t, hiT = base[base.length - 1].t;
+		if (ctl.dataFromT !== loT) ctl.dataFromT = loT;
+		if (ctl.dataToT !== hiT) ctl.dataToT = hiT;
 		let view = tfv === 'D' ? base : aggregateCandles(base, tfv);
 		hist.viewLen = view.length; // 전체 길이 (리플레이 절단 전 — applySpacing·replay len 기준)
 		// ⚠ untrack 은 콜백 안 읽기만 보호 — proxy 를 꺼내 밖에서 .on 읽으면 호출 effect 에 의존이 생긴다
@@ -602,6 +606,44 @@
 			reapply(c);
 			applySpacing(c);
 		})();
+	});
+
+	// ── 백테스트 = 일봉 고정(무조건). 진입 시 tf→D 강제(이전 tf 기억)·종료 시 복원. tf 토글은 ChartMenus/Ribbon 에서 비활성. ──
+	let btPrevTf: TfKey | null = null;
+	$effect(() => {
+		const open = ctl.btReportMode;
+		untrack(() => {
+			if (open) {
+				if (ctl.tf !== 'D') { if (btPrevTf == null) btPrevTf = ctl.tf; ctl.tf = 'D'; }
+			} else if (btPrevTf != null) {
+				ctl.tf = btPrevTf;
+				btPrevTf = null;
+			}
+		});
+	});
+
+	// ── 백테스트 진입(또는 백테스트 중 회사 전환) = 검증 구간 기본 전체기간. 전이력 백필 후 [최초, 최신] 날짜창을 1회 설정(이후 사용자 편집 보존). ──
+	// dataFromT/dataToT(백필마다 publish) 변화에 반응 = 경합 안전: 다른 백필 진행 중이면 그 reapply 가 effect 를 재실행시켜 끝까지 추적.
+	let btDefaultedFor = '';
+	$effect(() => {
+		const open = ctl.btReportMode;
+		const cd = code;
+		void candles; void ctl.dataFromT; void ctl.dataToT; // 데이터 로드·백필 진행마다 재평가
+		const c = chart;
+		if (!open || !c || btDefaultedFor === cd) return;
+		untrack(() => {
+			const code0 = hist.code;
+			if (!code0 || code0 !== cd || !fullSeries().length) return; // 데이터 준비 전 — candles/range effect 로 재시도
+			// 아직 최초연도(KRX_MIN_YEAR)까지 안 내려왔으면 전이력 백필(주가만 — 지수 series 는 단발 전이력 로드). 진행 중이면 그쪽 reapply 가 dataFromT 갱신→재진입.
+			if (subject !== 'index' && hist.oldestYear > KRX_MIN_YEAR) {
+				if (!hist.loading) void backfillTo(c, KRX_MIN_YEAR);
+				return;
+			}
+			const all = fullSeries();
+			if (!all.length) return;
+			btDefaultedFor = cd; // 전이력 확보 후 1회만
+			ctl.setCustomWin(all[0].t, all[all.length - 1].t);
+		});
 	});
 
 	// ── 수정주가 토글 → 재적용 (mount·회사전환 중복 적용은 스냅샷 가드) ──
@@ -894,8 +936,8 @@
 		const pf = runPortfolioBacktest(all, slots, { windowBars: win, withCosts: wc, costsBp: bp, oosSplit: oos, gate, stop, spec: { code, name, market: 'KR', dataSource: 'gov/prices', adjusted: ctl.adj } });
 		btPf = pf;
 		btCandleTs = all.map((cd) => cd.t); // equity 인덱스 정렬 — BacktestDialog 가 startIdx 오프셋으로 슬라이스
-		// G3 체리피킹 대조 — 커스텀 구간이면 같은 전략을 *전체 기간*에도 돌려 '이 구간 vs 전체'를 보고서가 병기(표본운 구조적 자백).
-		if (ctl.btCustomWin) {
+		// G3 체리피킹 대조 — 창이 전체의 *진부분집합*일 때만 같은 전략을 전체 기간에도 돌려 '이 구간 vs 전체' 병기(전체기간 선택=대조 무의미·자백 불필요).
+		if (ctl.btWindowIsSubset) {
 			const fullSer = displaySeries();
 			const fullGate = usesGate ? buildGateSeries(fullSer.map((cd) => cd.t), gateRows ?? []) : null;
 			// oosSplit:0 — 전체기간 대조는 in/out 분할 없는 순수 벤치(체리피킹 자백 기준선).
