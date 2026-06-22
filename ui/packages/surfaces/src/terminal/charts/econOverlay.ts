@@ -57,7 +57,7 @@ export const ECON_COLORS: Record<string, string> = {
 	PCOPPUSDM: '#facc15',
 	// 국내 시장지수(베타 오버레이) — marketIndex.ts MARKET_INDEX_COLORS 와 일치(amber/orange 시장 톤)
 	'idx:KOSPI/코스피': '#fbbf24',
-	'idx:KOSDAQ/코스닥': '#ec4899'
+	'idx:KOSDAQ/코스닥': '#fb923c'
 };
 
 export interface EconExtend {

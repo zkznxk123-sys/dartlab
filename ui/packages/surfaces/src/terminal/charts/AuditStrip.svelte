@@ -18,7 +18,7 @@
 		}
 		return out;
 	});
-	const RUN_COLORS = ['#5b9bf0', '#a78bfa', '#22d3ee', '#ec4899', '#34d399', '#f472b6'];
+	const RUN_COLORS = ['#5b9bf0', '#a78bfa', '#22d3ee', '#fbbf24', '#34d399', '#fb923c'];
 	const runColor = (ri: number) => RUN_COLORS[ri % RUN_COLORS.length];
 	const isBad = (a: AuditYear) => a.opinion != null && a.opinion !== '적정';
 	const opLabel = (a: AuditYear) => a.opinion ?? '—';

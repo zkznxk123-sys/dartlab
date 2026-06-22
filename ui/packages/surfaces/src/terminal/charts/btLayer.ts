@@ -14,7 +14,7 @@ export const BT_TRADES = 'BT_TRADES';
 export const BT_EQUITY = 'BT_EQUITY';
 // 전략 슬롯 ≤3 색 (캔들 상승/하락·combo·B&H 와 구분). combo=마젠타, B&H=회색.
 // 3번째는 보라(#a78bfa) — 라임(#a3e635)은 손익 초록(--up #34d399)과 혼동돼 제거.
-export const STRAT_COLORS = ['#ec4899', '#38bdf8', '#a78bfa'];
+export const STRAT_COLORS = ['#fbbf24', '#38bdf8', '#a78bfa'];
 export const COMBO_COLOR = '#e879f9';
 export const BH_COLOR = '#8b919e';
 

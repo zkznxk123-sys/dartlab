@@ -40,6 +40,8 @@
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
+	// 등급 칩 상단 바 색 = 품질 tone(녹→청→회→앰버→적). 축 카테고리 무지개(GROUP_COLOR) 대체 — 색이 등급 *의미*를 가리키게.
+	const toneCol = (t: string) => (({ up: 'var(--up)', good: 'var(--good)', neutral: 'var(--dim)', warn: 'var(--warn)', down: 'var(--dn)' }) as Record<string, string>)[t] || 'var(--dim)';
 	let gradeOpen = $state(false); // 스캔등급 설명 다이얼로그
 	// 차트 상태 — TerminalSurface 가 주입하면 Macro Lens 와 ECON 토글을 공유한다. 단독 사용 시 기본 인스턴스 생성.
 
@@ -477,7 +479,7 @@
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
 	<div class="gradeStrip" style={`grid-template-columns:repeat(${co.grades.length || 1},minmax(0,1fr))`}>
 		{#each co.grades as g (g.key)}
-			<div class="gradeChip" style={`--gc:${g.color}`} title={`${txc(g, lang)} · ${g.v}`}>
+			<div class="gradeChip" style={`--gc:${toneCol(g.tone)}`} title={`${txc(g, lang)} · ${g.v}`}>
 				<span class="gcLabel">{txc(g, lang)}</span>
 				<span class={'gcVal ' + tcls(g.tone)}>{g.v}</span>
 			</div>

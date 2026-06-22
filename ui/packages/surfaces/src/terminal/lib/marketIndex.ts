@@ -11,7 +11,7 @@ export const MARKET_INDEX_REFS: IndexRef[] = KR_INDEX_PRESETS.filter((r) => r.na
 // econOverlay 폴백(gray)과 구분되는 시장 톤(amber/orange) — "시장 맥락" 식별.
 export const MARKET_INDEX_COLORS: Record<string, string> = {
 	'idx:KOSPI/코스피': '#fbbf24',
-	'idx:KOSDAQ/코스닥': '#ec4899'
+	'idx:KOSDAQ/코스닥': '#fb923c'
 };
 
 /** IndexRef → 오버레이용 합성 def. econOverlay 는 def 의 id/kr/en/unit/digits 만 사용(src 무관). */

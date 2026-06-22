@@ -35,7 +35,7 @@
 
 	const focusId = $derived(slots[focus]?.id ?? slots[0]?.id);
 	const result = $derived(pf.slots.find((s) => s.id === focusId)?.result ?? pf.slots[0].result);
-	const stratColor = $derived(slots.find((s) => s.id === focusId)?.color ?? '#ec4899');
+	const stratColor = $derived(slots.find((s) => s.id === focusId)?.color ?? '#fbbf24');
 	const combo = $derived(pf.combo);
 	const multi = $derived(pf.slots.length >= 2);
 	const metaOf = (id: string) => slots.find((s) => s.id === id);
