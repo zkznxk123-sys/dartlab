@@ -10,6 +10,10 @@ EXTERNAL_END = "[EXTERNAL CONTENT END]"
 
 # 외부 본문이 ref payload 또는 ToolResult.data 에 담길 때 텍스트가 들어가는 흔한 키.
 # 이 키들의 string 값은 외부 본문으로 간주하고 sentinel 마커로 감싼다.
+# debt-honesty P1-4 (G-6): 하드코드 8-key 만 덮어 html/headline/excerpt 등 외부 본문이
+# unwrapped 되던 prompt-injection 사각을 *모호하지 않은* 외부 키로 보강.
+# ⚠ summary/title/description 은 top-level 툴 요약(내부) 과 충돌해 over-wrap 위험이라 미포함 —
+# 진짜 해소는 ref.sourceType 기준 스코프 wrap (현재는 외부 ref 존재 시 키-이름 전역 wrap).
 _EXTERNAL_TEXT_KEYS: tuple[str, ...] = (
     "text",
     "Text",
@@ -19,6 +23,10 @@ _EXTERNAL_TEXT_KEYS: tuple[str, ...] = (
     "body",
     "content",
     "Result",
+    "html",
+    "htmlContent",
+    "headline",
+    "excerpt",
 )
 
 _HTML_TAG_RE = re.compile(r"<[^<>]+>")
