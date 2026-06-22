@@ -33,10 +33,9 @@ export function toggleTheme(): void {
 	themePref.update((v) => (v === 'light' ? 'dark' : 'light'));
 }
 
-// 라이트 적용 콘텐츠 표면 — 루트(/)·about·skills(+하위)·블로그 article(/blog/<slug>).
-// 블로그 index·category·series 는 아직 미토큰화라 제외(점진 확장). base(GH Pages /dartlab) 접두 제거 후 판정.
-const CONTENT_RE =
-	/(^\/?$)|(\/(about|skills)(\/|$))|(\/blog\/(?!category(?:\/|$)|series(?:\/|$))[^/]+\/?$)/;
+// 라이트 적용 콘텐츠 표면 — 루트(/)·about·skills·blog(전 트리: index·article·category·series).
+// base(GH Pages /dartlab) 접두 제거 후 판정. 도구 표면(터미널·scan·map·viewer 등)은 항상 다크.
+const CONTENT_RE = /(^\/?$)|(\/(about|skills|blog)(\/|$))/;
 
 export function isContentPath(pathname: string, base = ''): boolean {
 	let p = pathname;

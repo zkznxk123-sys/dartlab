@@ -145,14 +145,14 @@
 
 	.category-hero {
 		padding-bottom: 2rem;
-		border-bottom: 1px solid rgba(30, 36, 51, 0.85);
+		border-bottom: 1px solid var(--dl-mkt-border);
 		margin-bottom: 2rem;
 	}
 
 	.category-kicker {
 		font-size: 0.72rem;
 		font-weight: 700;
-		color: #ea4647;
+		color: var(--dl-red);
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		margin-bottom: 0.45rem;
@@ -161,7 +161,7 @@
 	.category-title {
 		font-size: 2.35rem;
 		font-weight: 800;
-		color: #f8fafc;
+		color: var(--dl-ink-print);
 		margin-bottom: 0.8rem;
 	}
 
@@ -170,11 +170,11 @@
 		max-width: 780px;
 		font-size: 1rem;
 		line-height: 1.8;
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 	}
 
 	.category-brand {
-		color: #cbd5e1;
+		color: var(--dl-ink);
 		margin-top: 0.9rem;
 	}
 
@@ -187,7 +187,7 @@
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: #64748b;
+		color: var(--dl-ink-dim);
 		margin-bottom: 0.85rem;
 	}
 
@@ -205,7 +205,7 @@
 		border-radius: 6px;
 		background: rgba(148, 163, 184, 0.08);
 		border: 1px solid rgba(148, 163, 184, 0.14);
-		color: #cbd5e1;
+		color: var(--dl-ink);
 		font-size: 0.68rem;
 		font-weight: 700;
 		text-transform: uppercase;
@@ -218,7 +218,7 @@
 	}
 
 	.category-series-count {
-		color: #64748b;
+		color: var(--dl-ink-dim);
 	}
 
 	.category-posts {
@@ -230,8 +230,8 @@
 	.category-post-card {
 		padding: 1.4rem 1.5rem;
 		border-radius: 12px;
-		border: 1px solid rgba(30, 36, 51, 0.9);
-		background: rgba(15, 18, 25, 0.9);
+		border: 1px solid var(--dl-mkt-border);
+		background: var(--dl-mkt-card);
 		text-decoration: none;
 		transition: border-color 0.15s, transform 0.15s;
 	}
@@ -273,7 +273,7 @@
 		height: 52px;
 		border-radius: 50%;
 		border: 1px solid rgba(234, 70, 71, 0.18);
-		background: rgba(15, 18, 25, 0.92);
+		background: var(--dl-mkt-card);
 		flex-shrink: 0;
 	}
 
@@ -283,7 +283,7 @@
 		flex-wrap: wrap;
 		gap: 0.3rem;
 		font-size: 0.75rem;
-		color: #64748b;
+		color: var(--dl-ink-dim);
 	}
 
 	.category-post-dot {
@@ -298,26 +298,26 @@
 		object-position: center;
 		border-radius: 10px;
 		align-self: stretch;
-		background: #0f1219;
+		background: var(--dl-mkt-card);
 	}
 
 	.category-post-title {
 		font-size: 1.2rem;
 		font-weight: 700;
-		color: #f8fafc;
+		color: var(--dl-ink-print);
 	}
 
 	.category-post-desc {
 		font-size: 0.92rem;
 		line-height: 1.75;
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 	}
 
 	.category-post-cta {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
-		color: #ea4647;
+		color: var(--dl-red);
 		font-size: 0.82rem;
 		font-weight: 700;
 	}
@@ -340,7 +340,7 @@
 	.category-footer-brand {
 		margin-top: 2.5rem;
 		padding-top: 1.5rem;
-		border-top: 1px solid rgba(30, 36, 51, 0.8);
+		border-top: 1px solid var(--dl-mkt-border);
 		display: flex;
 		flex-direction: column;
 		gap: 0.8rem;
@@ -355,23 +355,23 @@
 	.category-footer-copy h2 {
 		font-size: 1.1rem;
 		font-weight: 800;
-		color: #f8fafc;
+		color: var(--dl-ink-print);
 		margin-bottom: 0.4rem;
 	}
 
 	.category-footer-copy p {
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 		line-height: 1.75;
 	}
 
 	.category-footer-link {
-		color: #ea4647;
+		color: var(--dl-red);
 		text-decoration: none;
 		font-weight: 700;
 	}
 
 	.category-footer-link.muted {
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 		font-weight: 600;
 	}
 </style>

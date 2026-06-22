@@ -158,7 +158,7 @@
 
 	.blog-hub-hero {
 		padding: 0.5rem 0 2rem;
-		border-bottom: 1px solid rgba(30, 36, 51, 0.6);
+		border-bottom: 1px solid var(--dl-mkt-border);
 		margin-bottom: 2rem;
 	}
 
@@ -166,7 +166,7 @@
 		font-size: 2rem;
 		font-weight: 700;
 		line-height: 1.2;
-		color: #f1f5f9;
+		color: var(--dl-ink-print);
 		margin-bottom: 0.6rem;
 	}
 
@@ -174,13 +174,13 @@
 		max-width: 600px;
 		font-size: 0.9375rem;
 		line-height: 1.7;
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 	}
 
 	.category-card-kicker {
 		font-size: 0.6875rem;
 		font-weight: 600;
-		color: #64748b;
+		color: var(--dl-ink-dim);
 		letter-spacing: 0.03em;
 		font-family: 'JetBrains Mono', monospace;
 		margin-bottom: 0.25rem;
@@ -189,7 +189,7 @@
 	.section-title {
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: var(--dl-ink-print);
 	}
 
 	.category-grid {
@@ -205,8 +205,8 @@
 		gap: 0.75rem;
 		padding: 1.25rem;
 		border-radius: 12px;
-		border: 1px solid rgba(30, 36, 51, 0.8);
-		background: rgba(10, 13, 20, 0.8);
+		border: 1px solid var(--dl-mkt-border);
+		background: var(--dl-mkt-card);
 		text-decoration: none;
 		transition: border-color 0.15s;
 	}
@@ -225,7 +225,7 @@
 	.category-card-title {
 		font-size: 1.1rem;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: var(--dl-ink-print);
 	}
 
 	.category-count {
@@ -234,15 +234,15 @@
 		padding: 0.2rem 0.5rem;
 		border-radius: 6px;
 		background: rgba(148, 163, 184, 0.08);
-		border: 1px solid rgba(30, 36, 51, 0.6);
-		color: #94a3b8;
+		border: 1px solid var(--dl-mkt-border);
+		color: var(--dl-ink-mute);
 		font-family: 'JetBrains Mono', monospace;
 	}
 
 	.category-card-desc {
 		font-size: 0.875rem;
 		line-height: 1.65;
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 	}
 
 	.category-series-list,
@@ -267,21 +267,21 @@
 	.category-series,
 	.latest-series {
 		background: rgba(148, 163, 184, 0.08);
-		border: 1px solid rgba(30, 36, 51, 0.6);
-		color: #94a3b8;
+		border: 1px solid var(--dl-mkt-border);
+		color: var(--dl-ink-mute);
 	}
 
 	.latest-badge {
 		background: rgba(234, 70, 71, 0.1);
 		border: 1px solid rgba(234, 70, 71, 0.2);
-		color: #f87171;
+		color: var(--p-red-400);
 	}
 
 	.category-card-cta {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
-		color: #ea4647;
+		color: var(--dl-red);
 		font-size: 0.8rem;
 		font-weight: 600;
 	}
@@ -296,7 +296,7 @@
 
 	.section-head {
 		padding-bottom: 0.6rem;
-		border-bottom: 1px solid rgba(30, 36, 51, 0.6);
+		border-bottom: 1px solid var(--dl-mkt-border);
 	}
 
 	.latest-list {
@@ -308,8 +308,8 @@
 	.latest-card {
 		padding: 1rem 1.25rem;
 		border-radius: 12px;
-		border: 1px solid rgba(30, 36, 51, 0.6);
-		background: rgba(10, 13, 20, 0.6);
+		border: 1px solid var(--dl-mkt-border);
+		background: var(--dl-mkt-card);
 		text-decoration: none;
 		transition: border-color 0.15s;
 	}
@@ -351,7 +351,7 @@
 		flex-wrap: wrap;
 		gap: 0.3rem;
 		font-size: 0.72rem;
-		color: #64748b;
+		color: var(--dl-ink-dim);
 	}
 
 	.latest-dot {
@@ -365,19 +365,19 @@
 		object-fit: contain;
 		object-position: center;
 		border-radius: 10px;
-		background: #0f1219;
+		background: var(--dl-mkt-card);
 	}
 
 	.latest-title {
 		font-size: 1.05rem;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: var(--dl-ink-print);
 	}
 
 	.latest-desc {
 		font-size: 0.85rem;
 		line-height: 1.6;
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 	}
 
 	.series-grid {
@@ -392,8 +392,8 @@
 		gap: 0.6rem;
 		padding: 1.1rem 1.25rem;
 		border-radius: 12px;
-		border: 1px solid rgba(30, 36, 51, 0.6);
-		background: rgba(10, 13, 20, 0.6);
+		border: 1px solid var(--dl-mkt-border);
+		background: var(--dl-mkt-card);
 		text-decoration: none;
 		transition: border-color 0.15s;
 	}
@@ -412,27 +412,27 @@
 	.series-card-title {
 		font-size: 0.95rem;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: var(--dl-ink-print);
 	}
 
 	.series-count {
 		font-size: 0.72rem;
 		font-weight: 600;
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 		font-family: 'JetBrains Mono', monospace;
 	}
 
 	.series-card-desc {
 		font-size: 0.85rem;
 		line-height: 1.65;
-		color: #94a3b8;
+		color: var(--dl-ink-mute);
 	}
 
 	.series-card-cta {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
-		color: #ea4647;
+		color: var(--dl-red);
 		font-size: 0.8rem;
 		font-weight: 600;
 	}
@@ -453,7 +453,7 @@
 			height: auto;
 			aspect-ratio: 1 / 1;
 			object-fit: contain;
-			background: #0f1219;
+			background: var(--dl-mkt-card);
 		}
 
 		.blog-hub-title {
