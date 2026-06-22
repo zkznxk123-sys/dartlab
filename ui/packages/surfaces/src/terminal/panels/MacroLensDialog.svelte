@@ -6,30 +6,23 @@
 	import { ECON_MAX } from '../charts/chartState.svelte';
 	import MacroPathRail from './MacroPathRail.svelte';
 	import RegimePlaneHero from './RegimePlaneHero.svelte';
+	import MacroCycleRisk from './MacroCycleRisk.svelte';
 
 	interface Props {
 		snapshot: MacroLensSnapshot;
 		lang: Lang;
-		tab: MacroLensTab;
+		// tab = 초기 스크롤 앵커(레거시 onMacroLens 시그니처 호환). 더 이상 탭 UI 아님 — 단일 캔버스.
+		tab?: MacroLensTab;
 		focusId?: string;
 		activeEcon?: string[];
-		onTab: (tab: MacroLensTab) => void;
+		onTab?: (tab: MacroLensTab) => void;
 		onClose: () => void;
 		onToggleEcon?: (id: string) => void;
 		onSector?: (industryId: string) => void;
 	}
-	let { snapshot, lang, tab, focusId = '', activeEcon = [], onTab, onClose, onToggleEcon, onSector }: Props = $props();
+	let { snapshot, lang, tab = 'dashboard', focusId = '', activeEcon = [], onTab, onClose, onToggleEcon, onSector }: Props = $props();
 	let localFocus = $state('');
-	let localTab = $state<MacroLensTab>('dashboard');
 	const T = (kr: string, en: string) => (lang === 'en' ? en : kr);
-	const tabs: { k: MacroLensTab; kr: string; en: string }[] = [
-		{ k: 'dashboard', kr: '계기판', en: 'Dashboard' },
-		{ k: 'transmission', kr: '경로', en: 'Path' },
-		{ k: 'sources', kr: '근거', en: 'Sources' }
-	];
-	const tabButtonId = (k: MacroLensTab) => `macro-lens-tab-${k}`;
-	// 단일 패널(내부 {#if} 분기)이라 id 도 1개 고정 — 비활성 탭의 aria-controls 가 없는 id 를 가리키지 않게.
-	const tabPanelId = 'macro-lens-panel';
 	const focusableSelector = [
 		'a[href]',
 		'button:not([disabled])',
@@ -103,15 +96,14 @@
 	// 채널 열 클러스터: 켜진 채널만 열, 각 driver 칩을 자기 채널 열 아래로 모음(빈 셀 0).
 	const mapColumns = $derived(buildMapColumns(exposureRows));
 	const pulseDrivers = $derived(exposureRows.length ? exposureRows.slice(0, 6).map((r) => r.driver) : snapshot.topPressures.slice(0, 6));
-	// 심화 국면 렌즈(Regime Lens·초강화) — Plane hero 아래 <details>. macro.regime 부재 시 미가용(hero 는 라이브).
+	// 국면 렌즈(Regime Lens) — S2 MacroCycleRisk 가 시각으로 소비. macro.regime 부재 시 null(폴백).
 	const regime = $derived(snapshot.regime);
 	const usLens = $derived(regime?.us ?? null);
 	const krLens = $derived(regime?.kr ?? null);
-	let regimeOpen = $state(false);
-	// D블록 Gate Strip = evidenceGates 중 quant 제외 4개(데이터·전파·동행·회사).
+	// S5 Gate Strip = evidenceGates 중 quant 제외 4개(데이터·전파·동행·회사).
 	const gateRows = $derived(snapshot.evidenceGates.filter((g) => g.id !== 'quant'));
 	const exposureQualityClass = $derived(snapshot.exposureQuality.status === 'quantCandidate' ? 'ok' : snapshot.exposureQuality.status === 'qualitativeOnly' ? 'watch' : 'blocked');
-	// 정량 LOCK 2케이스 정직 분기 (근거 탭). status로 직접 분기 — UI 추론 0. "분기 누적 시 OPEN" 약속 금지.
+	// 정량 LOCK 2케이스 정직 분기 (S5). status로 직접 분기 — UI 추론 0.
 	const quantBlocks = $derived(snapshot.exposureQuality.status === 'quantCandidate'
 		? [snapshot.exposureQuality.reason]
 		: (snapshot.exposureQuality.blockedReason ? [snapshot.exposureQuality.blockedReason] : [snapshot.exposureQuality.reason]).filter(Boolean));
@@ -122,7 +114,7 @@
 				? T('정량 QUAL · 정성 경로만', 'Quant QUAL · qualitative path only')
 				: T('정량 OPEN', 'Quant OPEN')
 	);
-	const quantAltValue = $derived(T('대신 → 경로 탭 동행(co-move) 반증·업종 prior 경로로 확인', 'Instead → verify via Path tab co-move falsifier / sector prior path'));
+	const quantAltValue = $derived(T('대신 → 전파 동행(co-move) 반증·업종 prior 경로로 확인', 'Instead → verify via co-move falsifier / sector prior path'));
 	const modelMetricRows = $derived([
 		{ label: 'nObs', value: snapshot.exposureQuality.nObs != null ? String(snapshot.exposureQuality.nObs) : '—', status: snapshot.exposureQuality.nObs != null ? 'ok' : 'blocked' },
 		{ label: 'R²', value: fmtR2(snapshot.exposureQuality.rSquared), status: snapshot.exposureQuality.rSquared != null ? 'ok' : 'blocked' },
@@ -157,11 +149,6 @@
 		const span = max - min || 1;
 		return vals.map((v, i) => `${(i / Math.max(1, vals.length - 1)) * 48},${18 - ((v - min) / span) * 16}`).join(' ');
 	}
-	// Hamilton regime band 가로 스파크 — 입력은 이미 0~1 정규화된 침체확률(view-model). 막대 아님·점추정 아님.
-	function bandPoints(vals: number[]): string {
-		if (!vals.length) return '';
-		return vals.map((v, i) => `${(i / Math.max(1, vals.length - 1)) * 100},${16 - Math.max(0, Math.min(1, v)) * 14}`).join(' ');
-	}
 	const cellClass = (edge: MacroTransmissionEdgeView | null) => edge ? edge.evidenceLevel : 'none';
 	const cellTitle = (edge: MacroTransmissionEdgeView, ch: MacroChannel): string => {
 		const ev = chipState(edge);
@@ -185,23 +172,12 @@
 	const gateDetail = (g: MacroLensSnapshot['evidenceGates'][number]) => T(g.detailKr, g.detailEn);
 	const pct = (v: number) => `${Math.max(4, Math.min(100, Math.round(v * 100)))}%`;
 	const corrLeft = (corr: number | null) => `${Math.max(0, Math.min(100, ((corr ?? 0) + 1) * 50))}%`;
-	function goto(tabName: MacroLensTab, id = '') {
+	// 포커스 설정 + 전파 섹션(S4)으로 스크롤 — 옛 goto(tab,id)의 탭 전환을 대체.
+	function setFocus(id: string) {
 		localFocus = id || activeFocusId;
-		localTab = tabName;
-		onTab(tabName);
-	}
-	function selectTab(tabName: MacroLensTab) {
-		localTab = tabName;
-		onTab(tabName);
-	}
-	function focusActiveTab() {
-		queueMicrotask(() => dialogEl?.querySelector<HTMLButtonElement>(`#${tabButtonId(localTab)}`)?.focus());
-	}
-	function selectRelativeTab(delta: number) {
-		const idx = tabs.findIndex((t) => t.k === localTab);
-		const next = tabs[(idx + delta + tabs.length) % tabs.length]?.k ?? tabs[0].k;
-		selectTab(next);
-		focusActiveTab();
+		if (typeof document !== 'undefined') {
+			queueMicrotask(() => dialogEl?.querySelector('#macroS4')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+		}
 	}
 	function visibleFocusableElements(): HTMLElement[] {
 		if (!dialogEl) return [];
@@ -212,18 +188,6 @@
 		if (e.key === 'Escape') {
 			e.preventDefault();
 			onClose();
-			return;
-		}
-		const target = e.target instanceof HTMLElement ? e.target : null;
-		if (target?.closest('.mlTabs') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Home' || e.key === 'End')) {
-			e.preventDefault();
-			if (e.key === 'ArrowRight') selectRelativeTab(1);
-			else if (e.key === 'ArrowLeft') selectRelativeTab(-1);
-			else {
-				selectTab(e.key === 'Home' ? tabs[0].k : tabs[tabs.length - 1].k);
-				focusActiveTab();
-			}
-			e.stopPropagation();
 			return;
 		}
 		if (e.key === 'Tab') {
@@ -249,9 +213,6 @@
 		localFocus = focusId;
 	});
 	$effect(() => {
-		if (localTab !== tab) localTab = tab;
-	});
-	$effect(() => {
 		if (typeof document === 'undefined') return;
 		const prev = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		queueMicrotask(() => dialogEl?.focus());
@@ -272,114 +233,20 @@
 			<button class="scrClose" onclick={onClose} aria-label="close"><X size={14} /></button>
 		</div>
 
-		<div class="mlTabs" role="tablist" aria-label={T('매크로 렌즈 분석 탭', 'Macro Lens analysis tabs')}>
-			{#each tabs as t (t.k)}
-				<button
-					id={tabButtonId(t.k)}
-					role="tab"
-					class:active={localTab === t.k}
-					aria-selected={localTab === t.k}
-					aria-controls={tabPanelId}
-					tabindex={localTab === t.k ? 0 : -1}
-					onclick={() => selectTab(t.k)}
-				>{T(t.kr, t.en)}</button>
-			{/each}
-		</div>
-		<div class="mlBody" class:mlVoid={localTab === 'dashboard' && !focusCell} id={tabPanelId} role="tabpanel" aria-labelledby={tabButtonId(localTab)} tabindex="0">
-			{#if localTab === 'dashboard'}
-				<!-- 블록 A — Regime Plane (GIP 4사분면 hero · 라이브 marketPhase, 배포 불요) -->
-				{#if snapshot.glance}
-					<RegimePlaneHero view={snapshot.glance.regime} {lang} />
-				{/if}
-				<!-- 심화 국면 렌즈 — macro.regime 배포 시 (침체 confluence · GaR · 수익률곡선) -->
-				{#if regime?.available}
-					<details class="mlRegimeFold" bind:open={regimeOpen}>
-						<summary class="mlRegimeSummary" aria-label={T('국면 렌즈 — 침체 confluence·GaR·수익률곡선', 'Regime Lens — recession confluence·GaR·yield curve')}>
-							<span class="mlBlockK">REGIME LENS</span>
-							<b>{T('침체 confluence · GaR · 수익률곡선', 'Recession confluence · GaR · yield curve')}</b>
-							<i class="mlPhaseCaret" aria-hidden="true">{regimeOpen ? '▴' : '▾'}</i>
-						</summary>
-						<!-- 국면 렌즈 (Regime Lens) — 회고는 phase, 검증은 아래 -->
-						<div class="mlRegimeLens" aria-label={T('국면 렌즈', 'Regime Lens')}>
-							{#if usLens}
-								{@const lens = usLens}
-								<div class="mlRegimeHead">{T('침체 신호', 'Recession signals')} ({lens.totalCount}{T('모델 중', ' models, ')} {lens.validCount} {T('유효 · 호라이즌·시간성 상이 · 동의', 'valid · horizons/timing differ · agreement')}: {T(lens.agreement.kr, lens.agreement.en)})</div>
-								<div class="mlConfluence">
-									{#each lens.tiles as tile (tile.model)}
-										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={T(tile.note.kr, tile.note.en)}>
-											<b>{T(tile.zoneLabel.kr, tile.zoneLabel.en)}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
-											<span>{tile.modelName} · {T(tile.horizonLabel.kr, tile.horizonLabel.en)}</span>
-											<em>{T(tile.scaleLabel.kr, tile.scaleLabel.en)}</em>
-											<em class="mlTileMeta">{#if tile.suppressed}{tile.statusText ? T(tile.statusText.kr, tile.statusText.en) : ''}{:else}{tile.asOf ?? '—'}{#if tile.staleLabel} · {tile.staleLabel}{/if}{/if}</em>
-										</div>
-									{/each}
-								</div>
-								<div class="mlRegimeNote">{T("probit=고정계수·SE미산출(점추정) · probit '보통'(moderate)=확장 집계 · LEI=term/claims 내포(부분상관) · Hamilton=동행·회고", "probit=fixed-coef·no SE (point est) · probit 'moderate' counted as expansion · LEI embeds term/claims (partial corr) · Hamilton=coincident·retrospective")}</div>
-								{#if lens.yieldCurve}
-									<div class="mlRegimeRow" title={T(lens.yieldCurve.note.kr, lens.yieldCurve.note.en)}>
-										<b>{T('수익률곡선', 'Yield curve')}</b> {T(lens.yieldCurve.curveShapeLabel.kr, lens.yieldCurve.curveShapeLabel.en)} · 10Y-3M {lens.yieldCurve.spreadText}
-										<i class="mlRegimeDim">░{lens.yieldCurve.asOf ?? '—'} · {T('역전≠즉시침체 · 형태=NS·spread=동일곡선', 'inversion≠immediate recession · shape=NS·spread=same curve')}</i>
-									</div>
-								{/if}
-								{#if lens.gar}
-									{@const gar = lens.gar}
-									<div class="mlGaR" title={T(gar.note.kr, gar.note.en)}>
-										<div class="mlGaRTop"><b>GaR {T(gar.horizonLabel.kr, gar.horizonLabel.en)}</b><i class="mlRegimeDim">[{T('조건부 분포·점추정 아님', 'conditional dist · not point est')}] · tail {T(gar.tailRiskLabel.kr, gar.tailRiskLabel.en)}{#if gar.skewness != null} · {T('비대칭', 'skew')} {gar.skewness.toFixed(1)}{/if} · ░{gar.asOf ?? '—'}</i></div>
-										<div class="mlGaRBars">
-											{#each gar.bars as bar (bar.key)}
-												<div class="mlGaRBar" class:tail={bar.key === 'gar5' || bar.key === 'gar95'} class:mid={bar.key === 'median'}><i style={`height:${Math.round(bar.frac * 100)}%`}></i><span>{bar.label}</span><em>{bar.value.toFixed(1)}</em></div>
-											{/each}
-										</div>
-										<div class="mlGaRAxis">{T('막대 = 5분위 상대 위치 · 분위별 GDP 성장률(%)은 아래 숫자 · 높이는 확률 아님', 'bars = relative position across the 5 quantiles · GDP growth (%) is the number below each · height is not probability')}</div>
-										<div class="mlRegimeNote">{T(gar.note.kr, gar.note.en)}</div>
-									</div>
-								{/if}
-								{#if lens.band}
-									<div class="mlBandRow">
-										<b>{T(lens.band.caption.kr, lens.band.caption.en)}</b>
-										<svg class="mlBandSpark" viewBox="0 0 100 18" preserveAspectRatio="none" aria-hidden="true">
-											<polyline points={bandPoints(lens.band.points)} />
-										</svg>
-										<i class="mlRegimeDim">░{lens.band.asOf ?? '—'}</i>
-									</div>
-								{/if}
-								{#if lens.quadrant}
-									{@const q = lens.quadrant}
-									<div class="mlRegimeRow">
-										<b>{T('국면 사분면', 'Regime quadrant')}</b> {T(q.growthLabel.kr, q.growthLabel.en)} {T(q.inflationLabel.kr, q.inflationLabel.en)}
-										{#if q.assets.length}→ {T('비중확대 함의', 'overweight implication')}: {q.assets.filter((a) => a.weight === 'overweight').map((a) => T(a.label, a.labelEn)).join('·') || T('중립', 'neutral')} <i class="mlRegimeDim">{T('국면 교과서·추천 아님', 'regime textbook · not advice')}</i>{/if}
-										<i class="mlRegimeDim">[{T('회고', 'retrospective')}]</i>
-										{#if q.alignment}<i class="mlRegimeAlign">· {T(q.alignment.kr, q.alignment.en)}</i>{/if}
-									</div>
-								{/if}
-							{/if}
-							{#if krLens}
-								{@const lens = krLens}
-								<div class="mlRegimeHeadKr">KR — {T('침체 confluence', 'recession confluence')} ({lens.validCount} {T('유효', 'valid')} · {T('동의', 'agreement')}: {T(lens.agreement.kr, lens.agreement.en)})</div>
-								<div class="mlConfluence">
-									{#each lens.tiles as tile (tile.model)}
-										<div class={'mlTile' + (tile.suppressed ? ' dim' : '')} title={T(tile.note.kr, tile.note.en)}>
-											<b>{T(tile.zoneLabel.kr, tile.zoneLabel.en)}{#if tile.secondary}<i class="mlTileSec"> {tile.secondary}</i>{/if}</b>
-											<span>{tile.modelName} · {T(tile.horizonLabel.kr, tile.horizonLabel.en)}</span>
-											<em>{T(tile.scaleLabel.kr, tile.scaleLabel.en)}</em>
-											<em class="mlTileMeta">{tile.asOf ?? '—'}{#if tile.staleLabel} · {tile.staleLabel}{/if}</em>
-										</div>
-									{/each}
-								</div>
-								{#if lens.notApplicable.length}
-									<div class="mlRegimeNote">{#each lens.notApplicable as na (na.id)}<span class="mlNaChip">{na.label}: {T(na.reason.kr, na.reason.en)}</span>{/each}</div>
-								{/if}
-								{#if lens.quadrant}
-									{@const q = lens.quadrant}
-									<div class="mlRegimeRow"><b>{T('국면 사분면', 'Regime quadrant')}</b> {T(q.growthLabel.kr, q.growthLabel.en)} {T(q.inflationLabel.kr, q.inflationLabel.en)} <i class="mlRegimeDim">[{T('회고', 'retrospective')}]</i>{#if q.alignment}<i class="mlRegimeAlign">· {T(q.alignment.kr, q.alignment.en)}</i>{/if}</div>
-								{/if}
-							{/if}
-						</div>
-					</details>
-				{/if}
+		<!-- 단일 캔버스(탭 0). 위→아래 매크로 내러티브: 국면 → 사이클·위험 → 드라이버 → 전파 → 출처/한계. -->
+		<div class="mlBody">
+			<!-- S1 — 국면 평면(히어로): 지금 어디인가 -->
+			{#if snapshot.glance}
+				<RegimePlaneHero view={snapshot.glance.regime} {lang} />
+			{/if}
 
-				<!-- 블록 B — Driver Pulse -->
-				<section class="mlPulseStrip" aria-label={T('거시 펄스', 'Macro pulse')}>
+			<!-- S2 — 사이클 & 침체위험: 어디로 가는가 (probit 다이얼·수익률곡선·사이클 링·신호등) -->
+			<MacroCycleRisk us={usLens} kr={krLens} quadrant={snapshot.glance?.regime ?? null} {lang} />
+
+			<!-- S3 — 드라이버 펄스: 무엇이 움직이는가 (클릭=차트 ECON 오버레이) -->
+			<section class="mlSection" aria-label={T('거시 펄스', 'Macro pulse')}>
+				<div class="mlSecHead"><span class="mlBlockK">DRIVERS</span><b>{T('거시 펄스 — 클릭하면 가격 차트에 겹쳐 봅니다', 'Macro pulse — click to overlay on the price chart')}</b></div>
+				<div class="mlPulseStrip">
 					{#each pulseDrivers as d (d.id)}
 						<button class={'mlPulse ' + d.pressureLevel} class:on={activeEcon.includes(d.id) || activeFocusId === d.id} aria-pressed={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => { localFocus = d.id; onToggleEcon?.(d.id); }} title={econBlocked(d.id) ? T('경제지표는 동시 3개까지', 'max 3 overlays') : `${d.value} · ${d.asOf} · ${d.source}`}>
 							<span>{d.label}</span>
@@ -390,12 +257,19 @@
 							</svg>
 						</button>
 					{/each}
-				</section>
+				</div>
+			</section>
 
-				<!-- 블록 C — Exposure Map (단일 테두리 주역) -->
+			<!-- S4 — 전파: 이 회사에 어떻게 닿는가 (시각 흐름 + 노출 지도 + 동행 산점도) -->
+			<section class="mlSection" id="macroS4" aria-label={T('전파 경로', 'Transmission')}>
+				<div class="mlSecHead"><span class="mlBlockK">TRANSMISSION</span><b>{T('이 회사에 어떻게 닿는가 — 거시 → 재무 → 밸류', 'How it reaches this company — macro → financials → value')}</b></div>
+				{#if snapshot.macroPath}
+					<MacroPathRail view={snapshot.macroPath} {lang} mode="full" onSector={onSector} />
+				{/if}
+
+				<!-- 노출 지도 -->
 				<section class="mlMap" aria-label={T('노출 지도', 'Exposure Map')}>
 					{#if focusCell}
-						<!-- 읽기 1차 — 초점 전파사슬 -->
 						<div class="mlMapFocus">
 							<div class="mlMapChain">
 								<b>{focusCell.edge.driverLabel}</b>
@@ -412,15 +286,13 @@
 								<i class="mlMapSign">{signText[focusCell.edge.sign]}</i>
 								<i class="mlMapMeta">{focusCell.driver.value} · {focusCell.driver.change} · {focusCell.driver.asOf} · {focusCell.driver.source}</i>
 							</div>
-							<button class="mlMapDrill" onclick={() => goto('transmission', focusCell.driver.id)}>{T('경로 상세 →', 'Path detail →')}</button>
 						</div>
 					{:else}
 						<div class="mlMapFocus">
-							<div class="mlMapChain"><b>{T('표준 전파 경로 없음 — 경로 탭에서 확인', 'No mapped transmission path — see Path tab')}</b></div>
+							<div class="mlMapChain"><b>{T('표준 전파 경로 없음 — 아래 닷그리드/심화 확인', 'No mapped transmission path — see dot grid / advanced below')}</b></div>
 						</div>
 					{/if}
 
-					<!-- 읽기 2차 — 닷그리드 (채널 열 클러스터, opacity .82) -->
 					<div class="mlMapGrid" aria-label={T('채널 닷그리드', 'channel dot grid')}>
 						{#if mapColumns.length}
 							<div class="mlMapHead">
@@ -430,7 +302,7 @@
 								{#each mapColumns as col (col.channel)}
 									<div class="mlMapCol">
 										{#each col.cells as cell (`${cell.driver.id}-${col.channel}`)}
-											<button class={'mlMapCell ' + cellClass(cell.edge)} onclick={() => goto('transmission', cell.edge.driverId)} title={cellTitle(cell.edge, col.channel)} aria-label={chipAria(cell.edge, col.channel)}>
+											<button class={'mlMapCell ' + cellClass(cell.edge)} onclick={() => setFocus(cell.edge.driverId)} title={cellTitle(cell.edge, col.channel)} aria-label={chipAria(cell.edge, col.channel)}>
 												<span class={'mlMapChip ' + chipState(cell.edge)} aria-hidden="true"></span>
 												<b>{cell.driver.label}</b>
 												<i class="mlMapSign">{signText[cell.edge.sign]}</i>
@@ -446,331 +318,287 @@
 								<span><i class="mlMapChip TPL"></i>{T('템플', 'tpl')}</span>
 								<span><i class="mlMapChip LOCK"></i>{T('잠금', 'lock')}</span>
 							</div>
-							<div class="mlMapNote">{T('색=증거 상태(방향 아님) · 닿는 채널만 표시(빈 열 생략)', 'Color = evidence state (not direction) · only mapped channels shown (empty columns omitted)')}</div>
+							<div class="mlMapNote">{T('색=증거 상태(방향 아님) · 닿는 채널만 표시', 'Color = evidence state (not direction) · only mapped channels shown')}</div>
 						{:else}
-							<div class="mlMapNote">{T('표시 가능한 전파 채널 없음 — 경로 탭 확인', 'No mappable transmission channel — see Path tab')}</div>
+							<div class="mlMapNote">{T('표시 가능한 전파 채널 없음 — 심화 확인', 'No mappable transmission channel — see advanced')}</div>
 						{/if}
 					</div>
 				</section>
 
-				<!-- 블록 D — Evidence Gate(quant 제외 4) + Release Rail -->
-				<section class="mlDashGate" aria-label={T('증거 게이트와 릴리즈 레일', 'Evidence gates and release rail')}>
-					<div class="mlGateStrip">
-						{#each gateRows as g (g.id)}
-							<div class={'mlGate ' + g.status}>
-								<span>{gateLabel(g)}</span>
-								<b>{g.value}</b>
-								<em title={g.sourceRef}>{gateDetail(g)}</em>
+				<!-- 동행 산점도 (회사 선택 시) — macro Δ vs 종목 수익률. 인과 아님. -->
+				{#if focusCoMove && focusCoMove.points.length}
+					<section class={'mlCoMovePanel ' + focusCoMove.status}>
+						<div class="mlRailTitle"><span class="mlBlockK">{T('동행성', 'Co-movement')}</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
+						<div class="mlScatterPlot" aria-label={T('월별 동행 산점도', 'Monthly co-movement scatter')}>
+							<i class="mlZeroX" style={`left:${focusCoMove.xZero}%`}></i>
+							<i class="mlZeroY" style={`top:${focusCoMove.yZero}%`}></i>
+							<span class="mlAxisLabel x">{T('macro 월말 Δ', 'macro month-end Δ')}</span>
+							<span class="mlAxisLabel y">{T('종목 월수익률', 'stock MoM return')}</span>
+							{#each focusCoMove.points as p (p.ym)}
+								<b class:latest={p.latest} style={`left:${p.px}%;top:${p.py}%`} title={p.label}></b>
+							{/each}
+						</div>
+						<div class="mlMiniList">
+							<span>corr {focusCoMove.corr ?? '—'}</span>
+							<span>n {focusCoMove.n ?? '—'}</span>
+							<span>{focusCoMove.lagLabel}</span>
+							<span>{focusCoMove.window}</span>
+						</div>
+					</section>
+				{/if}
+			</section>
+
+			<!-- S5 — 출처 · 한계 · 심화 (단일 접힘 fold. 정직 보존, 화면 비지배). -->
+			<details class="mlFold">
+				<summary><span class="mlBlockK">SOURCES · LIMITS</span><b>{T('출처 · 한계 · 심화 (게이트 · 시나리오 · 지표)', 'Sources · limits · advanced (gates · scenarios · drivers)')}</b><i class="mlFoldCaret" aria-hidden="true">▾</i></summary>
+				<div class="mlFoldBody">
+					<!-- 증거 게이트 + 릴리즈 레일 -->
+					<section class="mlDashGate" aria-label={T('증거 게이트와 릴리즈 레일', 'Evidence gates and release rail')}>
+						<div class="mlGateStrip">
+							{#each gateRows as g (g.id)}
+								<div class={'mlGate ' + g.status}>
+									<span>{gateLabel(g)}</span>
+									<b>{g.value}</b>
+									<em title={g.sourceRef}>{gateDetail(g)}</em>
+								</div>
+							{/each}
+						</div>
+						<div class="mlReleaseRail">
+							<div class="mlRailTitle"><span class="mlBlockK">{T('갱신 시점', 'Release rail')}</span><b>{T('값을 다시 확인할 시점', 'When to re-check')}</b></div>
+							<div class="mlRailRows">
+								{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
+									<button class={'mlRailItem ' + r.status} class:focused={activeFocusId === r.driverId} onclick={() => setFocus(r.driverId)} title={r.sourceRef}>
+										<span>{r.label}</span>
+										<b>{r.lastObservation}</b>
+										<em>{r.frequency}</em>
+										<i>{r.status.toUpperCase()} · next {r.nextCheck}</i>
+									</button>
+								{/each}
 							</div>
-						{/each}
-					</div>
-					<div class="mlReleaseRail">
-						<div class="mlRailTitle"><span class="mlBlockK">{T('갱신 시점', 'Release rail')}</span><b>{T('값을 다시 확인할 시점', 'When to re-check')}</b></div>
-						<div class="mlRailRows">
-							{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
-								<button class={'mlRailItem ' + r.status} class:focused={activeFocusId === r.driverId} onclick={() => goto('transmission', r.driverId)} title={r.sourceRef}>
-									<span>{r.label}</span>
-									<b>{r.lastObservation}</b>
-									<em>{r.frequency}</em>
-									<i>{r.status.toUpperCase()} · next {r.nextCheck}</i>
+						</div>
+					</section>
+
+					<!-- 출처 + 한계 -->
+					<section class="mlGrid two">
+						<div class="mlBlock">
+							<div class="mlBlockTop"><span class="mlBlockK">{T('출처', 'Sources')}</span></div>
+							{#each snapshot.sourcePackets.slice(0, 8) as p (p.driverId)}
+								<button class={'mlSrcPacket ' + p.status} class:focused={activeFocusId === p.driverId} onclick={() => { localFocus = p.driverId; }} title={p.sourceRef}>
+									<b>{p.seriesId}</b>
+									<span>{p.source} · {p.unit} · {p.frequency}</span>
+									<em>{p.asOf} · {p.value} · {p.transform}</em>
+									<small>{p.artifactPath}</small>
 								</button>
 							{/each}
+							<div class="mlSrcSep"></div>
+							{#each snapshot.sourceRefs.filter((s) => !s.includes('/')) as s, i (`${s}-${i}`)}<div class="mlSrc">{s}</div>{/each}
 						</div>
-					</div>
-				</section>
-			{:else if localTab === 'transmission'}
-				{#if snapshot.macroPath}
-					<MacroPathRail view={snapshot.macroPath} {lang} mode="full" onSector={onSector} />
-				{/if}
-				{#if focusEdge}
-					<section class="mlFocus">
-						<GitBranch class="mlFocusIcon" size={15} />
-						<div><b>{focusEdge.driverLabel} → {focusEdge.financialLine}</b><span>{focusEdge.note}</span></div>
-					</section>
-				{/if}
-				{#if focusDriver || focusEdge || focusIndicator}
-					<section class="mlDrill">
-						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('전파 경로', 'Transmission chain')}</span>
-							<b>{(focusDriver?.label ?? focusEdge?.driverLabel ?? activeFocusId) || '—'}</b>
-							<p>{focusEdge ? `${focusEdge.sectorLabel} → ${focusEdge.financialLine} → ${focusEdge.valuationLever}` : T('선택 driver의 표준 전파 경로가 아직 없습니다.', 'No mapped transmission chain for the selected driver yet.')}</p>
-							<em>{focusEdge ? `${focusEdge.evidenceLevel} · ${focusEdge.confidence} · lag ${focusEdge.lagMonths ? `${focusEdge.lagMonths[0]}-${focusEdge.lagMonths[1]}M` : '—'}` : focusDriver?.sourceLineage ?? '—'}</em>
-							<div class="mlEvidence compact">
-								{#each (focusEdge?.requiredCompanyEvidence.length ? focusEdge.requiredCompanyEvidence : snapshot.exposureQuality.missingEvidence).slice(0, 3) as x (x)}<span>{x}</span>{/each}
-								{#if !(focusEdge?.requiredCompanyEvidence.length || snapshot.exposureQuality.missingEvidence.length)}<span>OK</span>{/if}
+						<div class="mlBlock">
+							<div class="mlBlockTop"><span class="mlBlockK">{T('한계·결손', 'Limits')}</span></div>
+							<div class={'mlQuantCard ' + exposureQualityClass} aria-label={T('정량 게이트 상태', 'Quant gate status')}>
+								<div class="mlQuantTop">
+									<span class="mlBlockK">{T('정량 게이트', 'Quant gate')}</span>
+									<b>{quantStatusLabel}</b>
+								</div>
+								{#each quantBlocks as b (b)}<p>{b}</p>{/each}
+								{#if snapshot.exposureQuality.status !== 'quantCandidate'}
+									<div class="mlQuantAlt">{quantAltValue}</div>
+								{/if}
 							</div>
-						</div>
-						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('품질 게이트', 'Quality gate')}</span>
-							<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
-							<p>{focusIndicator ? `${focusIndicator.label} · R² ${focusIndicator.rSquared ?? '—'} · nObs ${focusIndicator.nObs ?? '—'}` : snapshot.exposureQuality.reason}</p>
-							<em>{focusIndicator?.window ?? snapshot.exposureQuality.window ?? T('window 없음', 'window missing')}</em>
-						</div>
-						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('기여', 'Contribution')}</span>
-							<b>{focusContribution?.summary ?? '—'}</b>
-							<div class="mlStackList">
-								{#each focusContribution?.components ?? [] as c (c.id)}
-									<div class="mlStackRow">
-										<span>{c.label}</span>
-										<div class="mlStackTrack"><i class={'mlStackFill ' + c.status} style={`width:${pct(c.value)}`}></i></div>
-										<em>{Math.round(c.value * 100)}</em>
-									</div>
-								{/each}
-							</div>
-						</div>
-						<div class="mlDrillCard">
-							<span class="mlBlockK">{T('출처', 'Source')}</span>
-							<b>{focusSource?.seriesId ?? focusIndicator?.seriesId ?? focusDriver?.seriesId ?? focusEdge?.driverId ?? '—'}</b>
-							<div class="mlPacketGrid">
-								<span>source</span><b>{focusSource?.source ?? '—'}</b>
-								<span>unit</span><b>{focusSource?.unit ?? '—'}</b>
-								<span>freq</span><b>{focusSource?.frequency ?? '—'}</b>
-								<span>asOf</span><b>{focusSource?.asOf ?? '—'}</b>
-								<span>latest</span><b>{focusSource ? `${focusSource.value} / ${focusSource.change}` : '—'}</b>
-								<span>release</span><b>{focusRelease ? `${focusRelease.status} · ${focusRelease.nextCheck}` : '—'}</b>
-							</div>
-							<p>{focusSource?.lineage ?? focusIndicator?.sourceRef ?? focusEdge?.sourceRefs[0] ?? snapshot.exposureQuality.sourceRef}</p>
-							{#each focusFalsifiers.slice(0, 1) as f (f.id)}<em>{f.label}: {f.detail}</em>{/each}
-						</div>
-					</section>
-					{#if focusContribution}
-						<section class="mlContributionPanel" aria-label={T('증거 기여 분해', 'Evidence contribution breakdown')}>
-							<div class="mlRailTitle">
-								<span class="mlBlockK">{T('증거 기여', 'Evidence contribution')}</span>
-								<b>{focusContribution.label}</b>
-								<em>{T('재무 기여도 아님 · 합산 금지', 'not financial contribution · not additive')}</em>
-							</div>
-							<div class="mlEvidenceBreakdown">
-								{#each focusContribution.components as c (c.id)}
-									<div class={'mlEvidenceStep ' + c.status} title={`${c.detail} · ${c.sourceRef}`}>
-										<i style={`height:${pct(c.value)}`}></i>
-										<span>{c.label}</span>
-										<b>{Math.round(c.value * 100)}%</b>
-										<em>{componentStatusText[c.status] ?? c.status.toUpperCase()}</em>
-										<small>{c.detail}</small>
-										<code>{c.sourceRef}</code>
-									</div>
-								{/each}
-							</div>
-							<div class="mlEvidenceMeta">
-								<span>{focusContribution.summary}</span>
-								<span>{T('최근 변화 / 전파 경로 / 동행 후보 / 신선도 / 회사 품질', 'move / path / co-move / freshness / company quality')}</span>
-							</div>
-						</section>
-					{/if}
-					{#if focusCoMove}
-						<section class={'mlCoMovePanel ' + focusCoMove.status}>
-							<div class="mlRailTitle"><span class="mlBlockK">{T('동행성', 'Co-movement')}</span><b>{focusCoMove.label}</b><em>{T('인과 아님', 'not causal')}</em></div>
-							{#if focusCoMove.points.length}
-								<div class="mlScatterPlot" aria-label={T('월별 동행 산점도', 'Monthly co-movement scatter')}>
-									<i class="mlZeroX" style={`left:${focusCoMove.xZero}%`}></i>
-									<i class="mlZeroY" style={`top:${focusCoMove.yZero}%`}></i>
-									<span class="mlAxisLabel x">{T('macro 월말 Δ', 'macro month-end Δ')}</span>
-									<span class="mlAxisLabel y">{T('종목 월수익률', 'stock MoM return')}</span>
-									{#each focusCoMove.points as p (p.ym)}
-										<b class:latest={p.latest} style={`left:${p.px}%;top:${p.py}%`} title={p.label}></b>
+							<div class={'mlQualityCard ' + exposureQualityClass} aria-label={T('품질 게이트 모델 카드', 'Quality gate model card')}>
+								<div class="mlQualityTop">
+									<span class="mlBlockK">{T('품질 게이트', 'Quality gate')}</span>
+									<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
+								</div>
+								<p>{snapshot.exposureQuality.reason}</p>
+								<div class="mlModelMetrics">
+									{#each modelMetricRows as r (r.label)}
+										<div class={'mlModelMetric ' + r.status}>
+											<span>{r.label}</span>
+											<b>{r.value}</b>
+										</div>
 									{/each}
 								</div>
-							{:else}
-								<div class="mlCorrPlot" aria-label={T('동행 상관 위치', 'Co-movement correlation position')}>
-									<span>-1</span><span>0</span><span>+1</span>
-									<i style={`left:${corrLeft(focusCoMove.corr)}`}></i>
-								</div>
-							{/if}
-							<div class="mlMiniList">
-								<span>corr {focusCoMove.corr ?? '—'}</span>
-								<span>n {focusCoMove.n ?? '—'}</span>
-								<span>shown {focusCoMove.displayedPoints}</span>
-								<span>{focusCoMove.lagLabel}</span>
-								<span>{focusCoMove.window}</span>
-								<span>x {focusCoMove.xRange}</span>
-								<span>y {focusCoMove.yRange}</span>
-								<span>{focusCoMove.status.toUpperCase()}</span>
 							</div>
-							<div class="mlCoLimits">
-								<span>{focusCoMove.formula}</span>
-								{#each focusCoMove.limitations as x (x)}<span>{x}</span>{/each}
-							</div>
-							<p>{focusCoMove.detail}</p>
-						</section>
-					{/if}
-				{/if}
-				<details class="mlEdgeDetails">
-					<summary>{T('상세 edge 카드', 'Detailed edge cards')} · {snapshot.transmissionEdges.length}</summary>
-					<section class="mlGrid edgeGrid">
-						{#each snapshot.transmissionEdges as e (e.id)}
-							<div class="mlEdge" class:focused={activeFocusId === e.driverId || activeFocusId === e.sectorKey}>
-								<div class="mlEdgeTop">
-									<span class="mlSign">{signText[e.sign]}</span>
-									<b>{e.driverLabel}</b>
-									<em>{e.market}</em>
-									<span class={'mlConf ' + e.confidence}>{confidenceText[e.confidence]}</span>
-								</div>
-								<div class="mlEdgePath">{e.sectorLabel} → {e.financialLine} → {e.valuationLever}</div>
-								<p>{e.note}</p>
-								<div class="mlMiniList">
-									<span>{T('lag', 'lag')}: {e.lagMonths ? `${e.lagMonths[0]}-${e.lagMonths[1]}M` : '—'}</span>
-									<span>{T(evidenceMicroLabel[chipState(e)].kr, evidenceMicroLabel[chipState(e)].en)}</span>
-								</div>
-								<div class="mlEvidence">
-									{#each e.requiredCompanyEvidence.slice(0, 3) as x (x)}<span>{x}</span>{/each}
-								</div>
-							</div>
-						{/each}
-					</section>
-				</details>
-				<details class="mlEdgeDetails">
-					<summary>{T('심화 (시나리오 · 상세 지표)', 'Advanced (scenarios · detailed drivers)')}</summary>
-					<section class="mlGrid scenarioGrid">
-						{#each snapshot.scenarios as s (s.id)}
-							<div class={'mlScenario ' + s.readiness.status}>
-								<div class="mlBlockTop"><span class="mlBlockK">{s.shock}</span><em>{readinessText[s.readiness.status]}</em></div>
-								<b>{s.label}</b>
-								<p>{T('먼저 흔들리는 곳', 'First break')}: {s.firstBreak}</p>
-								<p>{T('예상 방향', 'Expected direction')}: {s.expectedDirection}</p>
-								<div class="mlMiniList">
-									<span>{s.impactedFinancialLine}</span>
-									<span>{s.valuationLever}</span>
-								</div>
-								<div class="mlEvidence">
-									{#each s.requiredEvidence as x (x)}<span>{x}</span>{/each}
-								</div>
-								<p>{T('반증', 'Falsifier')}: {s.falsifier}</p>
-								<div class="mlSrc warn">{s.readiness.reason}</div>
-								<em>{s.nextSurface}</em>
-							</div>
-						{/each}
-					</section>
-					<div class="mlDriverTable">
-						<div class="mlDriverHead">
-							<span>{T('Driver', 'Driver')}</span><span>{T('품질', 'Quality')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
-						</div>
-						{#each visibleDrivers as d (d.id)}
-							<div class={'mlDriverRow ' + d.relevance} class:focused={activeFocusId === d.id}>
-								<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
-								<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText(d.pressureLevel)}</b><em>{d.qualityHint}</em></span>
-								<span class="mono">{d.value}</span>
-								<span class="mono">{d.change}</span>
-								<span class="mlDriverLine">{d.sourceLineage}{#if d.coMovement}<em>{d.coMovement.label}</em><small>{T('동행상관 · 인과 아님', 'co-movement · not causal')}</small>{/if}</span>
-								<span>
-									<button class="mlIconBtn" class:on={activeEcon.includes(d.id)} aria-pressed={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => onToggleEcon?.(d.id)} title={econBlocked(d.id) ? T('동시 3개까지 표시됩니다', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle chart ECON overlay')}>
-										<LineChart size={12} />{activeEcon.includes(d.id) ? 'ON' : econBlocked(d.id) ? 'MAX' : 'ECON'}
-									</button>
-								</span>
-							</div>
-						{/each}
-					</div>
-				</details>
-				<section class="mlGrid two">
-					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('회사 체크포인트', 'Company checkpoints')}</span></div>
-						{#each snapshot.companyCheckpoints as c (c.id)}
-							<div class="mlCheck">
-								<span>{c.label}</span><b class={c.tone}>{c.value}</b><em>{c.reason}</em>
-							</div>
-						{/each}
-					</div>
-					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('반증 조건', 'Falsifiers')}</span></div>
-						{#each snapshot.falsifiers as f (f.id)}
-							<div class={'mlFalse ' + severityCls[f.severity]}>
-								<ShieldAlert class={'mlFalseIcon ' + severityCls[f.severity]} size={13} />
-								<div><b>{f.label}</b><span>{f.detail}</span></div>
-							</div>
-						{/each}
-					</div>
-				</section>
-			{:else}
-				<section class="mlGrid two">
-					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('출처', 'Sources')}</span></div>
-						{#each snapshot.sourcePackets.slice(0, 8) as p (p.driverId)}
-							<button class={'mlSrcPacket ' + p.status} class:focused={activeFocusId === p.driverId} onclick={() => { localFocus = p.driverId; }} title={p.sourceRef}>
-								<b>{p.seriesId}</b>
-								<span>{p.source} · {p.unit} · {p.frequency}</span>
-								<em>{p.asOf} · {p.value} · {p.transform}</em>
-								<small>{p.artifactPath}</small>
-							</button>
-						{/each}
-						<div class="mlSrcSep"></div>
-						{#each snapshot.sourceRefs.filter((s) => !s.includes('/')) as s, i (`${s}-${i}`)}<div class="mlSrc">{s}</div>{/each}
-					</div>
-					<div class="mlBlock">
-						<div class="mlBlockTop"><span class="mlBlockK">{T('한계·결손', 'Limits')}</span></div>
-						<div class={'mlQuantCard ' + exposureQualityClass} aria-label={T('정량 게이트 상태', 'Quant gate status')}>
-							<div class="mlQuantTop">
-								<span class="mlBlockK">{T('정량 게이트', 'Quant gate')}</span>
-								<b>{quantStatusLabel}</b>
-							</div>
-							{#each quantBlocks as b (b)}<p>{b}</p>{/each}
-							{#if snapshot.exposureQuality.status !== 'quantCandidate'}
-								<div class="mlQuantAlt">{quantAltValue}</div>
-							{/if}
-						</div>
-						<div class={'mlQualityCard ' + exposureQualityClass} aria-label={T('품질 게이트 모델 카드', 'Quality gate model card')}>
-							<div class="mlQualityTop">
-								<span class="mlBlockK">{T('품질 게이트', 'Quality gate')}</span>
-								<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
-							</div>
-							<p>{snapshot.exposureQuality.reason}</p>
-							<div class="mlModelMetrics">
-								{#each modelMetricRows as r (r.label)}
-									<div class={'mlModelMetric ' + r.status}>
-										<span>{r.label}</span>
-										<b>{r.value}</b>
+							<div class="mlLimitSub">{T('회사 지표', 'Company indicators')}</div>
+							<div class="mlIndicatorGrid" aria-label={T('선택 회사 거시 지표', 'Selected company macro indicators')}>
+								{#each snapshot.exposureIndicators.slice(0, 4) as x, i (`${x.seriesId}-${x.axis}-${i}`)}
+									<div class={'mlIndicatorCard ' + (x.coverage === 'company' ? 'ok' : x.coverage === 'sectorOnly' ? 'watch' : 'blocked')}>
+										<div><span>{x.axis}</span><b>{x.seriesId}</b></div>
+										<em>{x.label} · {x.frequency ?? '—'} · lag {x.lagMonths ?? '—'}M</em>
+										<div class="mlIndicatorStats">
+											<span>n {x.nObs ?? '—'}</span>
+											<span>R² {fmtR2(x.rSquared)}</span>
+											<span>{x.targetMetric ?? x.window ?? '—'}</span>
+										</div>
+									</div>
+								{:else}
+									<div class="mlIndicatorCard blocked">
+										<div><span>{T('지표', 'indicator')}</span><b>LOCK</b></div>
+										<em>{T('선택된 회사별 거시 노출 지표 없음', 'No company-level macro exposure indicator')}</em>
 									</div>
 								{/each}
 							</div>
+							<div class="mlLimitSub">{T('결손 항목', 'Missing items')}</div>
+							<div class="mlMissingLedger" aria-label={T('결손 증거 원장', 'Missing evidence ledger')}>
+								{#each snapshot.exposureQuality.missingEvidence as x (x)}
+									<div class="mlMissingItem blocked"><b>{T('필요', 'required')}</b><span>{x}</span></div>
+								{/each}
+								{#each snapshot.missing as m (m.id)}
+									<div class={'mlMissingItem ' + (m.status === 'partial' || m.status === 'staleRisk' ? 'watch' : 'blocked')}><b>{T('한계', 'note')}</b><span>{m.reason}</span></div>
+								{/each}
+								{#if !snapshot.exposureQuality.missingEvidence.length && !snapshot.missing.length}
+									<div class="mlMissingItem ok"><b>OK</b><span>{T('표시 가능한 결손 없음', 'No visible missing item')}</span></div>
+								{/if}
+							</div>
 						</div>
-						<div class="mlLimitSub">{T('회사 지표', 'Company indicators')}</div>
-						<div class="mlIndicatorGrid" aria-label={T('선택 회사 거시 지표', 'Selected company macro indicators')}>
-							{#each snapshot.exposureIndicators.slice(0, 4) as x, i (`${x.seriesId}-${x.axis}-${i}`)}
-								<div class={'mlIndicatorCard ' + (x.coverage === 'company' ? 'ok' : x.coverage === 'sectorOnly' ? 'watch' : 'blocked')}>
-									<div><span>{x.axis}</span><b>{x.seriesId}</b></div>
-									<em>{x.label} · {x.frequency ?? '—'} · lag {x.lagMonths ?? '—'}M</em>
-									<div class="mlIndicatorStats">
-										<span>n {x.nObs ?? '—'}</span>
-										<span>R² {fmtR2(x.rSquared)}</span>
-										<span>{x.targetMetric ?? x.window ?? '—'}</span>
+					</section>
+
+					<!-- 심화 — 초점 드릴 · 기여 · edge · 시나리오 · 드라이버 표 · 체크포인트 · 반증 -->
+					{#if focusDriver || focusEdge || focusIndicator}
+						<section class="mlDrill">
+							<div class="mlDrillCard">
+								<span class="mlBlockK">{T('전파 경로', 'Transmission chain')}</span>
+								<b>{(focusDriver?.label ?? focusEdge?.driverLabel ?? activeFocusId) || '—'}</b>
+								<p>{focusEdge ? `${focusEdge.sectorLabel} → ${focusEdge.financialLine} → ${focusEdge.valuationLever}` : T('선택 driver의 표준 전파 경로가 아직 없습니다.', 'No mapped transmission chain for the selected driver yet.')}</p>
+								<em>{focusEdge ? `${focusEdge.evidenceLevel} · ${focusEdge.confidence} · lag ${focusEdge.lagMonths ? `${focusEdge.lagMonths[0]}-${focusEdge.lagMonths[1]}M` : '—'}` : focusDriver?.sourceLineage ?? '—'}</em>
+								<div class="mlEvidence compact">
+									{#each (focusEdge?.requiredCompanyEvidence.length ? focusEdge.requiredCompanyEvidence : snapshot.exposureQuality.missingEvidence).slice(0, 3) as x (x)}<span>{x}</span>{/each}
+									{#if !(focusEdge?.requiredCompanyEvidence.length || snapshot.exposureQuality.missingEvidence.length)}<span>OK</span>{/if}
+								</div>
+							</div>
+							<div class="mlDrillCard">
+								<span class="mlBlockK">{T('품질 게이트', 'Quality gate')}</span>
+								<b>{exposureQualityText[snapshot.exposureQuality.status] ?? snapshot.exposureQuality.status}</b>
+								<p>{focusIndicator ? `${focusIndicator.label} · R² ${focusIndicator.rSquared ?? '—'} · nObs ${focusIndicator.nObs ?? '—'}` : snapshot.exposureQuality.reason}</p>
+								<em>{focusIndicator?.window ?? snapshot.exposureQuality.window ?? T('window 없음', 'window missing')}</em>
+							</div>
+							<div class="mlDrillCard">
+								<span class="mlBlockK">{T('기여', 'Contribution')}</span>
+								<b>{focusContribution?.summary ?? '—'}</b>
+								<div class="mlStackList">
+									{#each focusContribution?.components ?? [] as c (c.id)}
+										<div class="mlStackRow">
+											<span>{c.label}</span>
+											<div class="mlStackTrack"><i class={'mlStackFill ' + c.status} style={`width:${pct(c.value)}`}></i></div>
+											<em>{Math.round(c.value * 100)}</em>
+										</div>
+									{/each}
+								</div>
+							</div>
+							<div class="mlDrillCard">
+								<span class="mlBlockK">{T('출처', 'Source')}</span>
+								<b>{focusSource?.seriesId ?? focusIndicator?.seriesId ?? focusDriver?.seriesId ?? focusEdge?.driverId ?? '—'}</b>
+								<div class="mlPacketGrid">
+									<span>source</span><b>{focusSource?.source ?? '—'}</b>
+									<span>unit</span><b>{focusSource?.unit ?? '—'}</b>
+									<span>freq</span><b>{focusSource?.frequency ?? '—'}</b>
+									<span>asOf</span><b>{focusSource?.asOf ?? '—'}</b>
+									<span>latest</span><b>{focusSource ? `${focusSource.value} / ${focusSource.change}` : '—'}</b>
+									<span>release</span><b>{focusRelease ? `${focusRelease.status} · ${focusRelease.nextCheck}` : '—'}</b>
+								</div>
+								<p>{focusSource?.lineage ?? focusIndicator?.sourceRef ?? focusEdge?.sourceRefs[0] ?? snapshot.exposureQuality.sourceRef}</p>
+								{#each focusFalsifiers.slice(0, 1) as f (f.id)}<em>{f.label}: {f.detail}</em>{/each}
+							</div>
+						</section>
+					{/if}
+					{#if focusEdge}
+						<section class="mlFocus">
+							<GitBranch class="mlFocusIcon" size={15} />
+							<div><b>{focusEdge.driverLabel} → {focusEdge.financialLine}</b><span>{focusEdge.note}</span></div>
+						</section>
+					{/if}
+
+					<div class="mlEdgeDetails" role="group">
+						<div class="mlEdgeDetailsHead"><span class="mlBlockK">{T('상세 edge 카드', 'Detailed edge cards')} · {snapshot.transmissionEdges.length}</span></div>
+						<section class="mlGrid edgeGrid">
+							{#each snapshot.transmissionEdges as e (e.id)}
+								<div class="mlEdge" class:focused={activeFocusId === e.driverId || activeFocusId === e.sectorKey}>
+									<div class="mlEdgeTop">
+										<span class="mlSign">{signText[e.sign]}</span>
+										<b>{e.driverLabel}</b>
+										<em>{e.market}</em>
+										<span class={'mlConf ' + e.confidence}>{confidenceText[e.confidence]}</span>
+									</div>
+									<div class="mlEdgePath">{e.sectorLabel} → {e.financialLine} → {e.valuationLever}</div>
+									<p>{e.note}</p>
+									<div class="mlMiniList">
+										<span>{T('lag', 'lag')}: {e.lagMonths ? `${e.lagMonths[0]}-${e.lagMonths[1]}M` : '—'}</span>
+										<span>{T(evidenceMicroLabel[chipState(e)].kr, evidenceMicroLabel[chipState(e)].en)}</span>
+									</div>
+									<div class="mlEvidence">
+										{#each e.requiredCompanyEvidence.slice(0, 3) as x (x)}<span>{x}</span>{/each}
 									</div>
 								</div>
-							{:else}
-								<div class="mlIndicatorCard blocked">
-									<div><span>{T('지표', 'indicator')}</span><b>LOCK</b></div>
-									<em>{T('선택된 회사별 거시 노출 지표 없음', 'No company-level macro exposure indicator')}</em>
-								</div>
 							{/each}
-						</div>
-						<div class="mlLimitSub">{T('결손 항목', 'Missing items')}</div>
-						<div class="mlMissingLedger" aria-label={T('결손 증거 원장', 'Missing evidence ledger')}>
-							{#each snapshot.exposureQuality.missingEvidence as x (x)}
-								<div class="mlMissingItem blocked"><b>{T('필요', 'required')}</b><span>{x}</span></div>
-							{/each}
-							{#each snapshot.missing as m (m.id)}
-								<div class={'mlMissingItem ' + (m.status === 'partial' || m.status === 'staleRisk' ? 'watch' : 'blocked')}><b>{T('한계', 'note')}</b><span>{m.reason}</span></div>
-							{/each}
-							{#if !snapshot.exposureQuality.missingEvidence.length && !snapshot.missing.length}
-								<div class="mlMissingItem ok"><b>OK</b><span>{T('표시 가능한 결손 없음', 'No visible missing item')}</span></div>
-							{/if}
-						</div>
-						<div class="mlLimitSub">{T('반증', 'Falsifiers')}</div>
-						<div class="mlFalsifierStrip" aria-label={T('거시 반증', 'Macro falsifiers')}>
-							{#each snapshot.falsifiers.slice(0, 4) as f (f.id)}
-								<div class={'mlFalsifierToken ' + severityCls[f.severity]}>
-									<b>{f.label}</b>
-									<span>{f.detail}</span>
-								</div>
-							{/each}
-						</div>
-						<div class="mlLimitSub">{T('Release freshness', 'Release freshness')}</div>
-						{#each snapshot.releaseRail.slice(0, 6) as r (r.driverId)}
-							<div class={'mlSrc warn ' + r.status}><b>{r.status}</b> {r.label}: last {r.lastObservation} · next {r.nextCheck}<em>{r.frequency} · stale after {r.staleAfterDays}d</em></div>
-						{/each}
-						<div class="mlSrc">{T('상관은 인과가 아니며, 지표 변화가 회사 실적 변화를 보장하지 않는다.', 'Correlation is not causation; indicator moves do not guarantee company results.')}</div>
+						</section>
 					</div>
-				</section>
-			{/if}
+
+					<div class="mlEdgeDetails" role="group">
+						<div class="mlEdgeDetailsHead"><span class="mlBlockK">{T('시나리오 · 상세 지표', 'Scenarios · detailed drivers')}</span></div>
+						<section class="mlGrid scenarioGrid">
+							{#each snapshot.scenarios as s (s.id)}
+								<div class={'mlScenario ' + s.readiness.status}>
+									<div class="mlBlockTop"><span class="mlBlockK">{s.shock}</span><em>{readinessText[s.readiness.status]}</em></div>
+									<b>{s.label}</b>
+									<p>{T('먼저 흔들리는 곳', 'First break')}: {s.firstBreak}</p>
+									<p>{T('예상 방향', 'Expected direction')}: {s.expectedDirection}</p>
+									<div class="mlMiniList">
+										<span>{s.impactedFinancialLine}</span>
+										<span>{s.valuationLever}</span>
+									</div>
+									<div class="mlEvidence">
+										{#each s.requiredEvidence as x (x)}<span>{x}</span>{/each}
+									</div>
+									<p>{T('반증', 'Falsifier')}: {s.falsifier}</p>
+									<div class="mlSrc warn">{s.readiness.reason}</div>
+									<em>{s.nextSurface}</em>
+								</div>
+							{/each}
+						</section>
+						<div class="mlDriverTable">
+							<div class="mlDriverHead">
+								<span>{T('Driver', 'Driver')}</span><span>{T('품질', 'Quality')}</span><span>{T('값', 'Value')}</span><span>{T('변화', 'Chg')}</span><span>{T('계보', 'Lineage')}</span><span>{T('동작', 'Action')}</span>
+							</div>
+							{#each visibleDrivers as d (d.id)}
+								<div class={'mlDriverRow ' + d.relevance} class:focused={activeFocusId === d.id}>
+									<span class="mlDriverName"><b>{d.label}</b><em>{d.id} · {d.group} · {d.directionSemantics}</em></span>
+									<span class="mlDriverScore"><b class={'mlScore ' + d.pressureLevel}>{pressureText(d.pressureLevel)}</b><em>{d.qualityHint}</em></span>
+									<span class="mono">{d.value}</span>
+									<span class="mono">{d.change}</span>
+									<span class="mlDriverLine">{d.sourceLineage}{#if d.coMovement}<em>{d.coMovement.label}</em><small>{T('동행상관 · 인과 아님', 'co-movement · not causal')}</small>{/if}</span>
+									<span>
+										<button class="mlIconBtn" class:on={activeEcon.includes(d.id)} aria-pressed={activeEcon.includes(d.id)} disabled={econBlocked(d.id)} onclick={() => onToggleEcon?.(d.id)} title={econBlocked(d.id) ? T('동시 3개까지 표시됩니다', 'max 3 overlays') : T('차트 ECON 오버레이 토글', 'toggle chart ECON overlay')}>
+											<LineChart size={12} />{activeEcon.includes(d.id) ? 'ON' : econBlocked(d.id) ? 'MAX' : 'ECON'}
+										</button>
+									</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+
+					<section class="mlGrid two">
+						<div class="mlBlock">
+							<div class="mlBlockTop"><span class="mlBlockK">{T('회사 체크포인트', 'Company checkpoints')}</span></div>
+							{#each snapshot.companyCheckpoints as c (c.id)}
+								<div class="mlCheck">
+									<span>{c.label}</span><b class={c.tone}>{c.value}</b><em>{c.reason}</em>
+								</div>
+							{/each}
+						</div>
+						<div class="mlBlock">
+							<div class="mlBlockTop"><span class="mlBlockK">{T('반증 조건', 'Falsifiers')}</span></div>
+							{#each snapshot.falsifiers as f (f.id)}
+								<div class={'mlFalse ' + severityCls[f.severity]}>
+									<ShieldAlert class={'mlFalseIcon ' + severityCls[f.severity]} size={13} />
+									<div><b>{f.label}</b><span>{f.detail}</span></div>
+								</div>
+							{/each}
+						</div>
+					</section>
+					<div class="mlSrc">{T('상관은 인과가 아니며, 지표 변화가 회사 실적 변화를 보장하지 않는다.', 'Correlation is not causation; indicator moves do not guarantee company results.')}</div>
+				</div>
+			</details>
 		</div>
 	</div>
 </div>
@@ -782,85 +610,30 @@
 	.mlTitle b { font-size: 14px; }
 	.mlTitle .mono, .mlTitle span:last-child { color: var(--dl-ink-dim, #5b6473); font-size: 11px; }
 	.mlKicker { font-family: var(--dl-font-mono); color: var(--amber); font-weight: 800; font-size: 10px; letter-spacing: .06em; }
-	.mlAsOf { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; font-size: 10px; color: var(--dl-ink-dim, #5b6473); }
-	.mlAsOf span { border: 1px solid var(--dl-line, #1b2130); border-radius: 3px; padding: 1px 5px; }
-	.mlAsOf b { color: var(--dl-ink, #c8cfdb); font-family: var(--dl-font-mono); }
-	.mlTabs { display: flex; align-items: flex-end; gap: 4px; min-height: 36px; padding: 7px 10px 0; border-bottom: 1px solid var(--dl-line, #1b2130); background: rgba(255,255,255,.016); overflow-x: auto; scrollbar-width: none; }
-	.mlTabs::-webkit-scrollbar { display: none; }
-	.mlTabs button { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-height: 28px; line-height: 1; white-space: nowrap; box-sizing: border-box; border: 1px solid transparent; border-bottom: 0; background: rgba(255,255,255,.012); color: var(--dl-ink-muted, #7b8493); font-size: 11px; font-weight: 800; padding: 7px 11px; cursor: pointer; border-radius: 5px 5px 0 0; }
-	.mlTabs button:hover { color: var(--amber); }
-	.mlTabs button.active { color: var(--amber); border-color: var(--dl-line, #1b2130); background: var(--dl-bg-raised, #0e141f); }
 	.mlBody { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+	/* 섹션 — 헤더(kicker + 한 줄 안내) + 본문 */
+	.mlSection { display: flex; flex-direction: column; gap: 8px; }
+	.mlSecHead { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+	.mlSecHead b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 600; color: var(--dim); }
 	.mlGrid { display: grid; gap: 10px; }
 	.mlGrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.edgeGrid { grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); }
 	.scenarioGrid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-	/* 블록 B·D 스트립 (테두리 없음) */
+	/* Driver Pulse — 데스크톱 가로 스트립(최대 6개 한 줄). */
 	.mlPulseStrip, .mlGateStrip { display: grid; gap: 8px; }
-	/* Driver Pulse — 데스크톱 가로 스트립(최대 6개 한 줄). 누락 시 단일 컬럼으로 붕괴되어 Map 을 화면 밖으로 밀어냄. */
 	.mlPulseStrip { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
 	.mlGate, .mlPulse { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 9px; }
 	.mlGate span, .mlPulse span { display: block; color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 	.mlGate b, .mlPulse b { display: block; margin-top: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 	.mlGate em, .mlPulse em { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	/* 심화 국면 렌즈 (Regime Lens) — Plane hero 아래 <details>. summary = 컴팩트 바. */
-	.mlRegimeFold { display: block; }
-	.mlRegimeFold > summary { cursor: pointer; list-style: none; }
-	.mlRegimeFold > summary::-webkit-details-marker { display: none; }
-	.mlRegimeSummary { display: flex; align-items: center; gap: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 8px 10px; }
-	.mlRegimeSummary b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 700; }
-	.mlRegimeSummary:hover b { color: var(--amber); }
-	.mlPhaseCaret { font-style: normal; color: var(--amber); font-size: 9px; }
-	.mlRegimeLens { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px dashed var(--bd); }
-	.mlRegimeHead, .mlRegimeHeadKr { color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 700; line-height: 1.4; }
-	.mlRegimeHeadKr { margin-top: 4px; border-top: 1px dashed var(--bd); padding-top: 8px; color: var(--amber); }
-	/* confluence — 값+zone 텍스트 타일(막대 아님). 타일 내부 px 위계 §5.5(Pulse 밀도 천장 공유). */
-	.mlConfluence { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-	.mlTile { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); padding: 7px; }
-	.mlTile.dim { opacity: .5; }
-	.mlTile b { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 700; }
-	.mlTileSec { font-style: normal; font-weight: 600; font-size: 10px; color: var(--dl-ink-dim, #5b6473); }
-	.mlTile span { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlTile em { display: block; margin-top: 2px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlTile .mlTileMeta { color: var(--dl-ink-dim, #5b6473); }
-	.mlRegimeNote { color: var(--dl-ink-muted, #7b8493); font-size: 9px; line-height: 1.4; }
-	.mlNaChip { display: inline-block; margin-right: 8px; color: var(--dl-ink-dim, #5b6473); }
-	.mlRegimeRow { color: var(--dl-ink); font-size: 11px; line-height: 1.4; }
-	.mlRegimeRow b { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-right: 5px; }
-	.mlRegimeDim { font-style: normal; color: var(--dl-ink-muted, #7b8493); font-size: 9px; }
-	/* 정합 서술은 중립 ink — accent(amber)가 방향=good 으로 읽히는 색 결합 차단(서술만·판정 아님). */
-	.mlRegimeAlign { font-style: normal; color: var(--dl-ink-dim, #6b7280); font-size: 10px; }
-	/* GaR 분위 막대 — 진짜 5분위 조건부 분포(probit 점확률 아님·fan 정당). */
-	.mlGaR { border-top: 1px dashed var(--bd); padding-top: 8px; }
-	.mlGaRTop { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; }
-	.mlGaRTop b { font-size: 11px; font-weight: 700; }
-	.mlGaRBars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: end; height: 42px; margin: 6px 0 4px; }
-	.mlGaRBar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
-	.mlGaRBar i { display: block; width: 60%; min-height: 2px; background: var(--amber); border-radius: 2px 2px 0 0; opacity: .8; }
-	/* 분포 시각화: 꼬리(5%·95%) 흐리게·중위 또렷 → '점추정 아닌 분포' 를 라벨 너머 시각으로도 전달. */
-	.mlGaRBar.tail i { opacity: .4; }
-	.mlGaRBar.mid i { opacity: 1; }
-	.mlGaRBar span { margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
-	.mlGaRBar em { color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 10px; font-variant-numeric: tabular-nums; }
-	.mlGaRAxis { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-size: 9px; line-height: 1.3; }
-	/* Hamilton regime band — 가로 스파크 1줄(막대/점추정 아님·회고 라벨). */
-	.mlBandRow { display: flex; align-items: center; gap: 8px; min-width: 0; }
-	.mlBandRow b { flex: 0 0 auto; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 700; }
-	.mlBandSpark { flex: 1 1 auto; height: 18px; min-width: 0; }
-	.mlBandSpark polyline { fill: none; stroke: var(--amber); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
 	.mlPulse { color: var(--dl-ink); text-align: left; cursor: pointer; }
 	.mlPulse:hover, .mlPulse.on { border-color: rgba(var(--amber-rgb),.55); background: rgba(var(--amber-rgb),.045); }
 	.mlPulse:disabled { cursor: not-allowed; opacity: .5; }
 	.mlPulse b { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
 	.mlPulse svg { width: 100%; height: 20px; margin-top: 5px; overflow: visible; }
 	.mlPulse polyline { fill: none; stroke: var(--amber); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-	/* 블록 C — Exposure Map (단일 테두리 주역) */
-	.mlMap { border: 1px solid var(--bd); background: var(--panel); border-radius: 8px; padding: 8px; animation: mlFade .15s ease-out; }
-	@keyframes mlFade { from { opacity: 0; } to { opacity: 1; } }
-	/* §6.2 폴백: 초점 셀 0(macro.json 결손) 극단 — Map 테두리 흐리게 + Pulse 값 13→15px 로 Pulse 를 2차 주역 승격(빈 Map 이 시선 독점 방지). */
-	.mlVoid .mlMap { border-color: color-mix(in srgb, var(--bd) 45%, transparent); }
-	.mlVoid .mlPulse b { font-size: 15px; }
-	/* 읽기 1차 — 초점 사슬 (중립 강조 + amber 좌측선, opacity 1 고정) */
+	/* Exposure Map */
+	.mlMap { border: 1px solid var(--bd); background: var(--panel); border-radius: 8px; padding: 8px; }
 	.mlMapFocus { opacity: 1; border-left: 2px solid var(--amber); background: color-mix(in srgb, var(--dim) 7%, var(--panel)); border-radius: 0 6px 6px 0; padding: 8px 10px; }
 	.mlMapChain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 	.mlMapChain b { font-size: 14px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--txt); }
@@ -871,9 +644,6 @@
 	.mlMapEvidence em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9.5px; opacity: 1; }
 	.mlMapEvidence .mlMapSign { font-weight: 700; color: var(--txt); }
 	.mlMapMeta { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-family: var(--dl-font-mono); font-size: 9.5px; opacity: 1; }
-	.mlMapDrill { margin-top: 6px; border: 0; background: transparent; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 700; cursor: pointer; padding: 0; text-align: left; }
-	.mlMapDrill:hover { color: var(--amber); }
-	/* 읽기 2차 — 닷그리드 (채널 열 클러스터, 후퇴 opacity .82) */
 	.mlMapGrid { opacity: 0.82; border-top: 1px solid var(--bd); margin-top: 8px; padding-top: 8px; }
 	.mlMapHead, .mlMapRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 	.mlMapHead span { font-size: 11px; font-weight: 600; color: var(--dl-ink-dim, #5b6473); }
@@ -885,18 +655,24 @@
 	.mlMapCell .mlMapSign { font-weight: 700; font-size: 11px; color: var(--txt); }
 	.mlMapCell em { color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 8px; }
 	.mlMapNote { margin-top: 8px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; line-height: 1.3; }
-	/* 형태 칩 범례 — 한 줄, 실제 칩 CSS 재사용(색맹 무손실 형태 4종 해독). */
 	.mlMapLegend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 	.mlMapLegend span { display: inline-flex; align-items: center; gap: 5px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
-	/* CSS 도형 칩 — ::before 16×16, 색=증거 상태(방향 아님), 글리프 폰트 의존 0 */
 	.mlMapChip { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; }
 	.mlMapChip::before { content: ""; display: block; width: 16px; height: 16px; box-sizing: border-box; }
-	/* 색=증거 상태(방향 아님): 중립 ink 램프(OBS 밝음→PRIOR amber→TPL dim→LOCK faint). 녹/적(--up/--dn)은 방향 전용이라 칩에서 배제. 형태가 1차 구분자(색맹 무손실). */
 	.mlMapChip.OBS::before { border-radius: 50%; background: var(--dl-ink, #e8eaef); border: 1.5px solid var(--dl-ink, #e8eaef); }
 	.mlMapChip.PRIOR::before { border-radius: 50%; border: 1.5px solid var(--amber); background: transparent; box-shadow: inset 8px 0 0 0 var(--amber); }
 	.mlMapChip.TPL::before { border-radius: 50%; background: transparent; border: 1.5px dashed var(--dl-ink-dim, #6b7280); }
 	.mlMapChip.LOCK::before { border-radius: 3px; border: 1px solid var(--dl-ink-faint, #4a5160); background: repeating-linear-gradient(45deg, transparent 0 2px, color-mix(in srgb, var(--dl-ink-faint, #4a5160) 45%, transparent) 2px 4px); }
-	/* 블록 D */
+	/* S5 single fold */
+	.mlFold { border: 1px solid var(--dl-line, #1b2130); border-radius: 8px; background: rgba(255,255,255,.012); overflow: hidden; }
+	.mlFold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
+	.mlFold > summary::-webkit-details-marker { display: none; }
+	.mlFold > summary b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 600; color: var(--dim); }
+	.mlFold > summary:hover b { color: var(--amber); }
+	.mlFoldCaret { font-style: normal; color: var(--amber); font-size: 10px; }
+	.mlFold[open] > summary .mlFoldCaret { transform: rotate(180deg); }
+	.mlFoldBody { display: flex; flex-direction: column; gap: 12px; padding: 0 12px 12px; border-top: 1px solid var(--dl-line, #1b2130); padding-top: 12px; }
+	/* gate / rail */
 	.mlDashGate { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr); gap: 10px; align-items: start; }
 	.mlGateStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.mlGate.ok { border-color: rgba(52,211,153,.42); }
@@ -905,7 +681,6 @@
 	.mlGate.ok b { color: var(--up); }
 	.mlGate.watch b { color: var(--warn); }
 	.mlGate.blocked b { color: var(--dn); }
-	/* 테두리·배경 없는 스트립 (mlGateStrip 와 동일 패턴) — Map 이 첫 화면 유일 테두리 패널이 되도록. 내부 mlRailItem 타일만 테두리. */
 	.mlReleaseRail { padding: 0; }
 	.mlRailTitle { display: flex; align-items: center; gap: 8px; min-width: 0; }
 	.mlRailTitle b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
@@ -920,7 +695,7 @@
 	.mlRailItem span { color: var(--dl-ink-dim, #5b6473); font-size: 9px; font-weight: 800; letter-spacing: .04em; }
 	.mlRailItem b { margin-top: 4px; font-family: var(--dl-font-mono); font-size: 11px; }
 	.mlRailItem em, .mlRailItem i { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 9px; }
-	/* 경로 탭 drilldown */
+	/* drill */
 	.mlBlock, .mlEdge, .mlScenario, .mlFocus { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.018); padding: 10px; min-width: 0; }
 	.mlDrill { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.25fr; gap: 8px; }
 	.mlDrillCard { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(var(--amber-rgb),.035); padding: 9px; }
@@ -936,36 +711,14 @@
 	.mlStackFill.ok { background: rgba(52,211,153,.72); }
 	.mlStackFill.watch { background: rgba(var(--amber-rgb),.72); }
 	.mlStackFill.blocked { background: rgba(248,113,113,.65); }
-	.mlContributionPanel { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.014); padding: 9px; }
-	.mlEvidenceBreakdown { display: grid; grid-template-columns: repeat(5, minmax(98px, 1fr)); gap: 6px; margin-top: 8px; overflow-x: auto; padding-bottom: 1px; }
-	.mlEvidenceStep { position: relative; min-width: 0; height: 112px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.018); overflow: hidden; padding: 7px; }
-	.mlEvidenceStep.ok { border-color: rgba(52,211,153,.36); }
-	.mlEvidenceStep.watch { border-color: rgba(var(--amber-rgb),.38); }
-	.mlEvidenceStep.blocked { border-color: rgba(248,113,113,.42); }
-	.mlEvidenceStep i { position: absolute; left: 0; right: 0; bottom: 0; min-height: 4px; opacity: .32; background: var(--dl-ink-dim, #5b6473); }
-	.mlEvidenceStep.ok i { background: rgba(52,211,153,.78); }
-	.mlEvidenceStep.watch i { background: rgba(var(--amber-rgb),.76); }
-	.mlEvidenceStep.blocked i { background: rgba(248,113,113,.72); }
-	.mlEvidenceStep span, .mlEvidenceStep b, .mlEvidenceStep em, .mlEvidenceStep small, .mlEvidenceStep code { position: relative; z-index: 1; display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.mlEvidenceStep span { color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; font-weight: 800; }
-	.mlEvidenceStep b { margin-top: 6px; font-family: var(--dl-font-mono); font-size: 15px; }
-	.mlEvidenceStep em { margin-top: 4px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 9px; }
-	.mlEvidenceStep small { margin-top: 6px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; line-height: 1.25; }
-	.mlEvidenceStep code { margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; }
-	.mlEvidenceMeta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; color: var(--dl-ink-dim, #5b6473); font-size: 9.5px; }
-	.mlEvidenceMeta span { border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; padding: 2px 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlPacketGrid { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 7px; margin-top: 7px; align-items: baseline; }
 	.mlPacketGrid span { color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
 	.mlPacketGrid b { display: block; margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+	/* co-move */
 	.mlCoMovePanel { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.015); padding: 9px; }
 	.mlCoMovePanel.candidate { border-color: rgba(52,211,153,.38); }
 	.mlCoMovePanel.unstable { border-color: rgba(var(--amber-rgb),.36); }
 	.mlCoMovePanel.missing { border-color: rgba(248,113,113,.36); }
-	.mlCorrPlot { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); height: 28px; margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: linear-gradient(90deg, rgba(248,113,113,.06), rgba(255,255,255,.02), rgba(52,211,153,.06)); overflow: hidden; }
-	.mlCorrPlot span { display: flex; align-items: flex-end; padding: 0 5px 3px; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 9px; }
-	.mlCorrPlot span:nth-child(2) { justify-content: center; border-left: 1px solid rgba(255,255,255,.05); border-right: 1px solid rgba(255,255,255,.05); }
-	.mlCorrPlot span:nth-child(3) { justify-content: flex-end; }
-	.mlCorrPlot i { position: absolute; top: 5px; width: 8px; height: 18px; border: 1px solid var(--amber); border-radius: 999px; background: rgba(var(--amber-rgb),.35); transform: translateX(-50%); }
 	.mlScatterPlot { position: relative; height: 126px; margin-top: 8px; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: linear-gradient(180deg, rgba(52,211,153,.035), rgba(255,255,255,.012) 48%, rgba(248,113,113,.035)); overflow: hidden; }
 	.mlScatterPlot::before { content: ""; position: absolute; inset: 10px 12px 18px 24px; border-left: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); pointer-events: none; }
 	.mlScatterPlot .mlZeroX, .mlScatterPlot .mlZeroY { position: absolute; display: block; pointer-events: none; background: rgba(255,255,255,.12); }
@@ -976,11 +729,8 @@
 	.mlAxisLabel { position: absolute; color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
 	.mlAxisLabel.x { right: 8px; bottom: 3px; }
 	.mlAxisLabel.y { left: 5px; top: 8px; writing-mode: vertical-rl; transform: rotate(180deg); }
-	.mlCoLimits { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-	.mlCoLimits span { border: 1px solid rgba(var(--amber-rgb),.22); border-radius: 999px; color: var(--dl-ink-dim, #5b6473); background: rgba(var(--amber-rgb),.025); padding: 2px 7px; font-size: 9px; line-height: 1.25; }
-	.mlCoMovePanel p { margin: 6px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 10px; line-height: 1.35; }
 	.mlBlockTop, .mlEdgeTop { display: flex; align-items: center; gap: 7px; min-width: 0; }
-	.mlBlockK { font-size: 9px; font-weight: 800; color: var(--amber); letter-spacing: .06em; text-transform: uppercase; }
+	.mlBlockK { font-size: 9px; font-weight: 800; color: var(--amber); letter-spacing: .06em; text-transform: uppercase; flex: 0 0 auto; }
 	.mlMiniList { display: flex; flex-wrap: wrap; gap: 8px; font-size: 10px; color: var(--dl-ink-dim, #5b6473); margin-top: 6px; }
 	.mlBlock p, .mlEdge p, .mlScenario p { margin: 7px 0 0; color: var(--dl-ink-dim, #5b6473); font-size: 11px; line-height: 1.45; }
 	.mlEvidence { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
@@ -1017,12 +767,8 @@
 	.mlIconBtn { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 72px; border: 1px solid var(--dl-line, #1b2130); background: var(--dl-bg-base, #080d16); color: var(--dl-ink-dim, #5b6473); border-radius: 3px; padding: 3px 4px; cursor: pointer; font-size: 9px; font-weight: 700; }
 	.mlIconBtn:hover, .mlIconBtn.on { color: var(--amber); border-color: var(--amber); }
 	.mlIconBtn:disabled { cursor: not-allowed; opacity: .48; color: var(--dl-ink-dim, #5b6473); border-color: var(--dl-line, #1b2130); }
-	.mlEdgeDetails { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.012); padding: 0; overflow: hidden; }
-	.mlEdgeDetails summary { cursor: pointer; list-style: none; padding: 8px 10px; color: var(--dl-ink-dim, #5b6473); font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-	.mlEdgeDetails summary::-webkit-details-marker { display: none; }
-	.mlEdgeDetails summary:hover { color: var(--amber); }
-	.mlEdgeDetails[open] { padding-bottom: 10px; }
-	.mlEdgeDetails[open] .edgeGrid, .mlEdgeDetails[open] .scenarioGrid, .mlEdgeDetails[open] .mlDriverTable { margin: 0 10px; }
+	.mlEdgeDetails { border: 1px solid var(--dl-line, #1b2130); border-radius: 6px; background: rgba(255,255,255,.012); padding: 10px; overflow: hidden; }
+	.mlEdgeDetailsHead { margin-bottom: 8px; }
 	.mlEdgeTop b { flex: 1 1 auto; min-width: 0; }
 	.mlSign { width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--dl-line, #1b2130); display: inline-flex; align-items: center; justify-content: center; color: var(--amber); font-weight: 800; }
 	.mlEdgeTop em { font-style: normal; color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
@@ -1085,26 +831,16 @@
 	.mlIndicatorCard span { color: var(--dl-ink-muted, #7b8493); font-family: var(--dl-font-mono); font-size: 8.5px; text-transform: uppercase; }
 	.mlIndicatorCard b { color: var(--dl-ink); font-family: var(--dl-font-mono); font-size: 10px; }
 	.mlIndicatorCard em { display: block; margin-top: 4px; color: var(--dl-ink-dim, #5b6473); font-style: normal; font-size: 9px; }
-	.mlIndicatorCard small { display: block; margin-top: 4px; color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; }
 	.mlIndicatorStats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 5px; }
 	.mlIndicatorStats span { border: 1px solid rgba(255,255,255,.055); border-radius: 3px; padding: 2px 4px; color: var(--dl-ink-dim, #5b6473); font-size: 8.5px; text-transform: none; }
-	.mlMissingLedger, .mlFalsifierStrip { display: grid; gap: 5px; margin-top: 6px; }
-	.mlMissingItem, .mlFalsifierToken { min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.012); padding: 6px; }
-	.mlMissingItem { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 5px 7px; align-items: baseline; }
+	.mlMissingLedger { display: grid; gap: 5px; margin-top: 6px; }
+	.mlMissingItem { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 5px 7px; align-items: baseline; min-width: 0; border: 1px solid var(--dl-line, #1b2130); border-radius: 5px; background: rgba(255,255,255,.012); padding: 6px; }
 	.mlMissingItem.ok { border-color: rgba(52,211,153,.28); }
 	.mlMissingItem.watch { border-color: rgba(var(--amber-rgb),.34); }
 	.mlMissingItem.blocked { border-color: rgba(248,113,113,.36); }
-	.mlMissingItem b, .mlMissingItem span, .mlMissingItem em, .mlFalsifierToken b, .mlFalsifierToken span, .mlFalsifierToken em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mlMissingItem b, .mlMissingItem span, .mlMissingItem em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mlMissingItem b { color: var(--warn); font-family: var(--dl-font-mono); font-size: 9px; text-transform: uppercase; }
 	.mlMissingItem span { color: var(--dl-ink-dim, #5b6473); font-size: 10px; }
-	.mlMissingItem em { grid-column: 2; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-size: 8.5px; }
-	.mlFalsifierStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-	.mlFalsifierToken.info { border-color: rgba(52,211,153,.26); }
-	.mlFalsifierToken.warn { border-color: rgba(var(--amber-rgb),.34); }
-	.mlFalsifierToken.block { border-color: rgba(248,113,113,.38); }
-	.mlFalsifierToken b { display: block; color: var(--dl-ink); font-size: 10px; }
-	.mlFalsifierToken span { display: block; margin-top: 3px; color: var(--dl-ink-dim, #5b6473); font-size: 9px; }
-	.mlFalsifierToken em { display: block; margin-top: 3px; color: var(--dl-ink-muted, #7b8493); font-style: normal; font-family: var(--dl-font-mono); font-size: 8.5px; }
 	.mlSrcPacket { width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,.045); background: transparent; color: inherit; text-align: left; padding: 7px 0; cursor: pointer; }
 	.mlSrcPacket:hover, .mlSrcPacket.focused { background: rgba(var(--amber-rgb),.035); }
 	.mlSrcPacket b, .mlSrcPacket span, .mlSrcPacket em, .mlSrcPacket small { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1120,22 +856,17 @@
 	@media (max-width: 760px) {
 		.mlModal { height: 92vh; }
 		.mlGrid.two, .mlPulseStrip, .mlGateStrip, .mlDrill, .mlRailRows, .mlDashGate { grid-template-columns: 1fr; }
-		.mlTabs { min-height: 38px; padding-left: 8px; padding-right: 8px; }
-		.mlTabs button { min-width: 50px; min-height: 30px; padding: 8px 9px; text-align: center; }
 		.mlDriverHead, .mlDriverRow { grid-template-columns: minmax(132px, 1.3fr) 72px 76px; }
 		.mlDriverHead span:nth-child(3), .mlDriverHead span:nth-child(4), .mlDriverHead span:nth-child(5), .mlDriverRow > span:nth-child(3), .mlDriverRow > span:nth-child(4), .mlDriverRow > span:nth-child(5) { display: none; }
-		.mlQualityTop, .mlIndicatorGrid, .mlFalsifierStrip { grid-template-columns: 1fr; }
+		.mlQualityTop, .mlIndicatorGrid { grid-template-columns: 1fr; }
 		.mlQualityTop em { text-align: left; }
 		.mlModelMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	}
 	@media (max-width: 560px) {
 		.mlPulseStrip { grid-auto-flow: column; grid-auto-columns: minmax(104px, 1fr); grid-template-columns: none; overflow-x: auto; }
-		/* Map 닷그리드 → driver별 카드 리스트 (채워진 칩만, 빈 채널 생략) */
 		.mlMapHead { display: none; }
 		.mlMapRow { display: flex; flex-direction: column; gap: 6px; }
 		.mlMapCol { width: 100%; }
 		.mlMapCell { width: 100%; }
-		/* 국면 렌즈 — confluence 가로 스와이프(§5.7), GaR 막대는 가로 전폭 유지(5열). */
-		.mlConfluence { grid-auto-flow: column; grid-auto-columns: minmax(118px, 1fr); grid-template-columns: none; overflow-x: auto; }
 	}
 </style>

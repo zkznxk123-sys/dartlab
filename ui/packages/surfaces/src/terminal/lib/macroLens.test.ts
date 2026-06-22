@@ -157,7 +157,8 @@ describe('macroLens builders — current macro v19 artifact (redesign)', () => {
 
 	it('builds a market-only glance before a company is selected', () => {
 		const view = buildMacroGlanceView(macro, sectorTailwinds(), { mode: 'compact' });
-		expect(view.asOf).toBe('2026-06-18');
+		// asOf 는 빌드 시점(재빌드마다 변동) — 날짜 형태만 단언(하드코딩 결합 회피).
+		expect(view.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 		expect(view.regime.markets).toHaveLength(2);
 		expect(view.path.links.length).toBeGreaterThan(0);
 		expect(view.sectorTailwinds.length).toBeGreaterThan(0);
@@ -603,7 +604,8 @@ describe('macro regime view-model — focusChannelAlignment (narrative only, no 
 
 describe('macro regime view-model — buildRegimeView (US confluence, KR asymmetry)', () => {
 	it('is undefined-safe when macro.regime is absent (renders nothing)', () => {
-		const view = buildRegimeView(macro, null);
+		// regime 키를 명시적으로 제거(라이브 artifact 의 regime 배포 여부와 무결합) — undefined-safety 만 검증.
+		const view = buildRegimeView({ ...macro, regime: undefined }, null);
 		expect(view.available).toBe(false);
 		expect(view.us).toBeNull();
 		expect(view.kr).toBeNull();
@@ -641,6 +643,17 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		expect(probit.secondary).not.toContain('18');
 		expect(probit.secondary).not.toContain('0.1');
 	});
+	it('gaugeValue carries raw 0~1 probability for probit/hamilton, null for sahm/lei (arc geometry input)', () => {
+		const view = buildRegimeView(macroWithRegime(), null);
+		const probit = view.us!.tiles.find((t) => t.model === 'probit')!;
+		const sahm = view.us!.tiles.find((t) => t.model === 'sahm')!;
+		const lei = view.us!.tiles.find((t) => t.model === 'lei')!;
+		const ham = view.us!.tiles.find((t) => t.model === 'hamilton')!;
+		expect(probit.gaugeValue).toBe(0.18); // 원확률(probability), probabilityRounded(0.2) 아님
+		expect(sahm.gaugeValue).toBeNull(); // %p 트리거 — 0~1 확률 아님
+		expect(lei.gaugeValue).toBeNull(); // 방향 신호 — 0~1 확률 아님
+		expect(ham.gaugeValue).toBeNull(); // EM 미수렴(contractionProb null) → suppressed
+	});
 	it('LEI tile carries overlapNote (partial correlation, not fully independent)', () => {
 		const view = buildRegimeView(macroWithRegime(), null);
 		const lei = view.us!.tiles.find((t) => t.model === 'lei')!;
@@ -650,6 +663,7 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 	it('yield curve note carries the double-count guard, agreement counts probit once', () => {
 		const view = buildRegimeView(macroWithRegime(), null);
 		expect(view.us!.yieldCurve).not.toBeNull();
+		expect(view.us!.yieldCurve!.spread).toBe(0.4); // 온도계 기하 입력 = rates.spread10y3m 원수치
 		expect(view.us!.yieldCurve!.note.kr).toContain('동일곡선');
 		expect(view.us!.yieldCurve!.note.kr).toContain('독립 신호 아님');
 		// agreement 는 텍스트만(점수·badge 0).
@@ -720,10 +734,12 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		expect(view.kr!.agreement.kr).toContain('단일 모델');
 		expect(view.kr!.agreement.en).toContain('single model');
 	});
-	it('snapshot.regime is wired and undefined-safe on the live (regime-less) macro.json', () => {
-		const snapshot = buildMarketMacroLensSnapshot({ macro, macroLatest: macroLatest(), sectorTailwinds: sectorTailwinds() });
-		expect(snapshot.regime).toBeDefined();
-		expect(snapshot.regime!.available).toBe(false); // 라이브 macro 는 regime 미보유.
+	it('snapshot.regime is wired — present when deployed, undefined-safe when absent', () => {
+		// regime 제거 → available:false (artifact 배포 여부와 무결합).
+		const noRegime = buildMarketMacroLensSnapshot({ macro: { ...macro, regime: undefined }, macroLatest: macroLatest(), sectorTailwinds: sectorTailwinds() });
+		expect(noRegime.regime).toBeDefined();
+		expect(noRegime.regime!.available).toBe(false);
+		// regime 주입 → available:true + US 4타일.
 		const withRegime = buildMarketMacroLensSnapshot({ macro: macroWithRegime(), macroLatest: macroLatest(), sectorTailwinds: sectorTailwinds() });
 		expect(withRegime.regime!.available).toBe(true);
 		expect(withRegime.regime!.us!.tiles).toHaveLength(4);

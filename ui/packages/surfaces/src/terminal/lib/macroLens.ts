@@ -338,6 +338,8 @@ export interface RegimeTileView {
 	modelName: string;
 	zoneLabel: RegimeText; // 주역(13px/700) — 상태성 라벨. status-only 면 '표시 보류'.
 	secondary: string | null; // probit ~20% 등 보조(수치·중립). 없으면 null.
+	gaugeValue: number | null; // 0~1 게이지 기하 입력(probit=probability·hamilton=contractionProb). 확률 아닌 모델(sahm/lei)=null. 표현 아님(데이터).
+	bucket: 0 | 1 | 2 | null; // 위험 군집(bucketOf SSOT·0 낮음/1 상승/2 높음). 색축 결정론 — UI 재유도 금지. status-only=null.
 	horizonLabel: RegimeText; // 호라이즌 + 시간성 (예: '12M·leading')
 	scaleLabel: RegimeText; // 자기 척도 (예: '확률·T10Y3M')
 	asOf: string | null;
@@ -350,6 +352,7 @@ export interface RegimeTileView {
 export interface RegimeYieldCurveView {
 	available: boolean;
 	curveShapeLabel: RegimeText;
+	spread: number | null; // 10Y-3M 스프레드 원수치(온도계 기하 입력·%p). 0 미만=역전.
 	spreadText: string; // 예 '+0.40%p'
 	asOf: string | null;
 	note: RegimeText; // '형태=NS·spread=T10Y3M 동일곡선 — probit과 독립 신호 아님'
@@ -2384,7 +2387,7 @@ function buildRegimeTile(id: 'probit' | 'sahm' | 'lei' | 'hamilton', model: Macr
 	if (!model || model.status) {
 		const statusKr = model?.status ?? '데이터 없음';
 		return {
-			model: id, modelName, zoneLabel: { kr: '표시 보류', en: 'suppressed' }, secondary: null,
+			model: id, modelName, zoneLabel: { kr: '표시 보류', en: 'suppressed' }, secondary: null, gaugeValue: null, bucket: null,
 			horizonLabel, scaleLabel, asOf, stale: fresh.stale, staleLabel: fresh.label,
 			suppressed: true, statusText: { kr: statusKr, en: regimeStatusEn(statusKr) },
 			note: { kr: statusKr, en: regimeStatusEn(statusKr) }
@@ -2403,6 +2406,11 @@ function buildRegimeTile(id: 'probit' | 'sahm' | 'lei' | 'hamilton', model: Macr
 	const zoneLabel: RegimeText = { kr: zoneKr, en: zoneEn };
 	let secondary: string | null = null;
 	let note: RegimeText = { kr: '', en: '' };
+	// 게이지 기하 입력 — probit=원확률(0~1), hamilton=수축확률. 확률 아닌 모델은 null(아크/링 미렌더).
+	const gaugeValue: number | null = id === 'probit'
+		? (typeof model.probability === 'number' ? model.probability : typeof model.probabilityRounded === 'number' ? model.probabilityRounded : null)
+		: id === 'hamilton' && typeof model.contractionProb === 'number' ? model.contractionProb
+		: null;
 	if (id === 'probit') {
 		const pr = typeof model.probabilityRounded === 'number' ? model.probabilityRounded : null;
 		secondary = pr != null ? `~${Math.round(pr * 100)}%` : null;
@@ -2423,7 +2431,7 @@ function buildRegimeTile(id: 'probit' | 'sahm' | 'lei' | 'hamilton', model: Macr
 		note = { kr: '실시간 침체 시작 트리거(동행)', en: 'real-time recession-start trigger (coincident)' };
 	}
 	return {
-		model: id, modelName, zoneLabel, secondary,
+		model: id, modelName, zoneLabel, secondary, gaugeValue, bucket: bucketOf(model),
 		horizonLabel, scaleLabel, asOf, stale: fresh.stale, staleLabel: fresh.label,
 		suppressed: false, statusText: null, note
 	};
@@ -2525,6 +2533,7 @@ function buildUsLens(payload: MacroRegimePayload, side: MacroSide | undefined, a
 		? {
 			available: true,
 			curveShapeLabel: { kr: rates.curveShapeLabel || rates.curveShape || '—', en: rates.curveShape || rates.curveShapeLabel || '—' },
+			spread: rates.spread10y3m as number,
 			spreadText: `${rates.sign === '-' ? '' : '+'}${(rates.spread10y3m as number).toFixed(2)}%p`,
 			asOf: typeof rates.asOf === 'string' ? rates.asOf : null,
 			note: { kr: '형태=NS·spread=T10Y3M 동일곡선 — probit과 독립 신호 아님', en: 'shape=NS·spread=T10Y3M same curve — not an independent signal from probit' }
@@ -2556,6 +2565,7 @@ function buildKrLens(payload: MacroRegimePayload, side: MacroSide | undefined, a
 			model: 'lei', modelName: 'CLI momentum',
 			zoneLabel: { kr: growthLabel, en: GROWTH_LABEL_EN[growthLabel] ?? growthLabel },
 			secondary: cliMomentum != null ? `Δ${cliMomentum.toFixed(2)}` : null,
+			gaugeValue: null, bucket: bucketOf(lei),
 			horizonLabel: { kr: '6-9M 선행', en: '6-9M leading' }, scaleLabel: { kr: 'CLI·ECOS', en: 'CLI·ECOS' },
 			asOf: typeof lei.asOf === 'string' ? lei.asOf : null,
 			stale: fresh.stale, staleLabel: fresh.label,

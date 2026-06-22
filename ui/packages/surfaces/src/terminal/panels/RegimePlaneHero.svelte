@@ -125,19 +125,7 @@
 						<span class={'rhMo ' + motionCls(m.inflation)}>{T('물가', 'inflation')} {motion(m.inflation)}</span>
 						<span class="rhCycle" class:conflict={m.lensConflict} title={m.lensConflict ? T('GIP 국면(성장×물가)과 경기 사이클 렌즈가 상이', 'GIP regime (growth×inflation) and business-cycle lens differ') : ''}>{T('사이클', 'cycle')} {phaseTxt(m)}{#if m.lensConflict} ≠{/if}</span>
 					</div>
-					{#if m.transition}
-						<div class="rhTrans">
-							<div class="rhTransLine">
-								<span>{T(m.transition.fromKr, m.transition.fromEn)}</span>
-								<i aria-hidden="true">→</i>
-								<span>{T(m.transition.toKr, m.transition.toEn)}</span>
-								<em>{m.transition.triggered}/{m.transition.total} {T('신호', 'signals')}</em>
-							</div>
-							{#if m.transition.progressPct != null}
-								<div class="rhBar"><i style={`width:${Math.max(3, Math.min(100, m.transition.progressPct))}%`}></i></div>
-							{/if}
-						</div>
-					{/if}
+					<!-- 전이(from→to·진행률)는 아래 CYCLE·RISK 섹션 사이클 링이 시각으로 소유 — 히어로 중복 제거. -->
 					{#if overweights(m) || tiltOf(m.cellKey)}
 						<div class="rhTilt"><span>{T('비중확대', 'overweight')}</span><b>{overweights(m) || tiltOf(m.cellKey)}</b></div>
 					{/if}
@@ -182,12 +170,6 @@
 	/* 사이클 phase 칩 — GIP 국면과 구분(2차). 상이(lensConflict) 시 dim + ≠ 표기(과장·경보 아님). */
 	.rhCycle { font-size: 9.5px; color: var(--dl-ink-muted, #7b8493); border: 1px dashed var(--dl-line, #1b2130); border-radius: 999px; padding: 1px 7px; }
 	.rhCycle.conflict { color: var(--dl-ink-dim, #5b6473); border-color: rgba(var(--amber-rgb),.34); }
-	.rhTrans { margin-top: 7px; }
-	.rhTransLine { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px; font-size: 10px; color: var(--fg); }
-	.rhTransLine i { font-style: normal; color: var(--amber); }
-	.rhTransLine em { margin-left: auto; font-style: normal; color: var(--dl-ink-muted, #7b8493); font-size: 8.5px; font-family: var(--mono); }
-	.rhBar { height: 5px; border-radius: 999px; background: rgba(255,255,255,.05); overflow: hidden; margin-top: 4px; }
-	.rhBar i { display: block; height: 100%; border-radius: 999px; background: var(--amber); opacity: .82; }
 	.rhTilt { display: flex; align-items: baseline; gap: 6px; margin-top: 7px; min-width: 0; }
 	.rhTilt span { flex: 0 0 auto; color: var(--dl-ink-dim, #5b6473); font-size: 8px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 	.rhTilt b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); font-size: 10px; font-weight: 600; }
