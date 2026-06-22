@@ -10,12 +10,14 @@ tolerance 를 넘으면 회귀로 판정.
     uv run python -X utf8 tests/audit/sourceDriftBaseline.py --write-baseline
     uv run python -X utf8 tests/audit/sourceDriftBaseline.py --stocks 005930,AAPL
 
-baseline: ``tests/audit/_baselines/sourceDriftBaseline.json`` — 5 종목 박제.
-부재 시 ``--check`` 는 stderr 경고 + exit 0 (CI 미설치 / 네트워크 격리 시).
+baseline: ``tests/audit/_baselines/sourceDriftBaseline.json`` — 5 종목 박제 (현재 **미생성**).
+부재 시 ``--check`` 는 ``[DRIFT-UNVERIFIED]`` 경고 + exit 0 — drift 회귀가 검증되지 않음을 명시.
 네트워크 호출 실패 (source 양쪽 또는 한쪽 None) 시 그 종목 silent skip.
 
-본 도구는 nightly 게이트 — 라이브 네트워크 25 회 호출 / 종목당 ~3s 라
-fast tier 부적합.
+**현재 배선 상태 (정직)**: 본 도구는 CI(``tests/run.py``)·nightly 어디에도 배선되지 않았고
+baseline 도 부재라 gov↔krx 가격 fallback drift 회귀가 *무검증*이다. 활성화 = 운영자가
+① ``--write-baseline`` 1 회 네트워크 실행으로 baseline 박제 → ② nightly 데이터 잡에 ``--check``
+배선 (라이브 네트워크 25 회 / 종목당 ~3s 라 fast tier 부적합 → nightly 전용). (debt-honesty P2-8)
 """
 
 from __future__ import annotations
@@ -179,7 +181,11 @@ def main(argv: list[str] | None = None) -> int:
 
     baseline = _loadBaseline()
     if baseline is None:
-        _log.warning("baseline 미등록 (%s) — CI skip", BASELINE_PATH)
+        _log.warning(
+            "[DRIFT-UNVERIFIED] baseline 미등록 (%s) — gov↔krx 가격 drift 회귀 *무검증*. "
+            "운영자 --write-baseline 1 회 실행 + nightly 배선 필요 (debt-honesty P2-8)",
+            BASELINE_PATH,
+        )
         return 0
     return _check(data, baseline)
 
