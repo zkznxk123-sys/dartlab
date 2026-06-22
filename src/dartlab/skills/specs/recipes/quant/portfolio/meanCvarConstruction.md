@@ -66,7 +66,7 @@ runtimeCompatibility:
 ## 공개 호출 방식
 
 ```python
-from dartlab.quant.meanCVaR import optimizeMeanCVaR
+from dartlab.quant.portfolio.meanCVaR import optimizeMeanCVaR
 import dartlab
 
 universe = ["005930", "000660", "035720", "207940", "035420"]

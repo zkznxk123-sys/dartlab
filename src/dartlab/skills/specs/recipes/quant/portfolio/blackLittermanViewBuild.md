@@ -66,7 +66,7 @@ runtimeCompatibility:
 ## 공개 호출 방식
 
 ```python
-from dartlab.quant.blackLitterman import blackLittermanPosterior, buildSimpleViews
+from dartlab.quant.portfolio.blackLitterman import blackLittermanPosterior, buildSimpleViews
 
 universe = ["005930", "000660", "035720", "207940", "035420"]
 prior = ...   # equilibrium prior (market cap weight)
