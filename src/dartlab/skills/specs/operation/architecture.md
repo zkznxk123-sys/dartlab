@@ -180,6 +180,8 @@ python -X utf8 tests/audit/dartlabGuard.py strict --scope l0-l15 --providers dar
 3. story 위임 (조합 책임)
 4. importlib 동적 호출 (cycleScan 의 AST 검사 우회 — analysis ↔ credit 잔존 cycle 에 적용)
 
+> **동적 import 가드 (debt-honesty P1-7)** — 위 pattern-4 importlib 는 정적 AST 가드를 우회한다(설계상). `test_l2_no_cross_import`·`test_l15_no_cross_import` 의 `*_no_new_dynamic_cross_import` 가 `import_module("dartlab.X")` 문자열 import 를 탐지해 baseline(`_baselines/l2DynamicImport.json`·`l15DynamicImport.json`) 대비 *신규* 동적 cross 만 차단한다(ratchet). L2 baseline 5 = 위 sanctioned cycle-break(analysis→macro §172 + credit→macro·analysis pattern-4). **L1.5 baseline 3(synth→frame/scan)은 sanctioned 아닌 추적 부채** — pattern-4 는 L2 전용이라 L1.5 형제 cross 엔 sanction 이 없다. 해소 = 호출자 inversion(L2 가 sector params·scan 데이터를 synth 에 주입).
+
 ### 명명 alias 금지 (operation.philosophy §5)
 
 - "6 분석 엔진" 표현 금지 — 5 L2 분석엔진 + L3 조합기 (story) 분리 명시.
