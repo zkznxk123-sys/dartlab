@@ -5,7 +5,7 @@
 //   landingJson(landing JSON arm)은 origin 에서 제외 — loadJson(dartlabData)이 영속 cacheStore + 다중URL
 //   폴백(local↔HF) + base 전역에 의존하는 별도 arm 이라, 코어 단일-URL origin 추상·전역금지를 어기지 않게
 //   sibling 으로 둔다(dual-SSOT, 설계 패널 적대검증 결론. mainPlan/_done/data-workbench-ssot/07).
-import { hfUrl, hfRangeUrl } from './hf';
+import { hfUrl, hfRangeUrl, hfMediaUrl } from './hf';
 
 // vite env 안전 접근 — runtime 패키지 tsc 는 vite/client 타입 없이 검사된다(origin.ts 동일 패턴, 소비 앱이 번들 시 치환).
 const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefined> }).env;
@@ -19,7 +19,15 @@ const naverDev = Boolean(viteEnv?.DEV);
 // gov 주가 dev 라이브 fill 게이트(naverDev 동형) — dev 만 /__gov 미들웨어 존재, 프로덕션은 읽기 전용.
 const govDev = Boolean(viteEnv?.DEV);
 
-export type OriginId = 'hf' | 'hfRange' | 'localApi' | 'newsWorker' | 'naverWorker' | 'duckdbHf' | 'govDev';
+export type OriginId =
+	| 'hf'
+	| 'hfRange'
+	| 'hfMedia'
+	| 'localApi'
+	| 'newsWorker'
+	| 'naverWorker'
+	| 'duckdbHf'
+	| 'govDev';
 
 /** 캐시 정책 — 오리진별 차등(정직 TTL, 04 §정직 TTL). scope='none' = 무캐시.
  *  ('persist' 는 선언만 하고 미구현이던 죽은 scope라 제거 — 영속 캐시는 JSON arm(dartlabData.loadJson)이
@@ -51,6 +59,9 @@ const naverWorkerUrl = (code: string): string => {
 const ORIGINS: Partial<Record<OriginId, OriginDef>> = {
 	hf: { resolve: hfUrl, defaultCache: { scope: 'memory', ttlMs: 60 * MIN, maxEntries: 64 } },
 	hfRange: { resolve: hfRangeUrl, defaultCache: { scope: 'memory', ttlMs: 60 * MIN, maxEntries: 128 } },
+	// hfMedia=회사 hero 이미지·companies/index.json(전용 media repo, HF 직결). 이미지는 <img src> 로
+	// 브라우저가 직접 로드(콘텐츠해시 파일명=불변)·index.json 은 loadJson 으로 읽어 캐시. 비게이트(항상 설정).
+	hfMedia: { resolve: hfMediaUrl, defaultCache: { scope: 'memory', ttlMs: 60 * MIN, maxEntries: 64 } },
 	newsWorker: {
 		resolve: newsWorkerUrl,
 		defaultCache: { scope: 'memory', ttlMs: 10 * MIN, maxEntries: 64 },

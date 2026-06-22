@@ -28,3 +28,20 @@ export const HF_RANGE_RESOLVE = (viteEnv?.VITE_DARTLAB_HF_RANGE_RESOLVE ?? DEFAU
 
 /** range 읽기 전용 절대 URL — HF 직결(엣지캐시 불가능한 206 을 프록시에 보내 7~9배 느려지는 것 차단). */
 export const hfRangeUrl = (path: string): string => `${HF_RANGE_RESOLVE}/${String(path).replace(/^\/+/, '')}`;
+
+// 회사 hero 이미지 serve SSOT — 전용 media 데이터셋 HF 직결. blog·캐러셀(/cards)·SNS 공용 자산.
+// dartlab-data(hf origin)와 **별개 repo**(eddmpython/dartlab-media)라 base 가 다르다 → 평행 resolver.
+//   왜 프록시 안 씀: hfProxy `/hf` 라우트는 dartlab-data 전용이라 의존 불가(worker.js 21). 게다가
+//   캐시버스트=파일명 콘텐츠해시(`{semantic}.{hash8}.webp`)라 변경=새 파일명=새 URL → staleness 무관,
+//   프록시 엣지캐시/TTL 이 줄 이득이 없다. HF CDN 직결이면 CORS(ACAO echo)도 정상이라 <img>·fetch 동작.
+//   SSOT(개념): src/dartlab/core/dataConfig.py HF_MEDIA_BASE_URL (TS 는 Python import 불가라 상수 미러 —
+//   둘이 drift 하면 안 됨, 변경 시 동반 수정).
+// 가역(한 줄): 빌드 env 에 VITE_DARTLAB_HF_MEDIA_RESOLVE 지정 시 그 base 로 전환(미러/CDN 교체).
+const DEFAULT_HF_MEDIA_RESOLVE = 'https://huggingface.co/datasets/eddmpython/dartlab-media/resolve/main';
+export const HF_MEDIA_RESOLVE = (viteEnv?.VITE_DARTLAB_HF_MEDIA_RESOLVE ?? DEFAULT_HF_MEDIA_RESOLVE).replace(
+	/\/+$/,
+	''
+);
+
+/** 회사 미디어(hero 이미지·companies/index.json) 상대경로 → 절대 resolve URL. (선행 슬래시 정규화) */
+export const hfMediaUrl = (path: string): string => `${HF_MEDIA_RESOLVE}/${String(path).replace(/^\/+/, '')}`;
