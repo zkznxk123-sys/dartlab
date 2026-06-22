@@ -65,8 +65,8 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 _REPO = Path(__file__).resolve().parents[3]
-_BASELINE_DIR = _REPO / "scripts" / "audit" / "_baselines"
-_PROGRESS_DIR = _REPO / "scripts" / "audit" / "_progress"
+_BASELINE_DIR = _REPO / "tests" / "audit" / "_baselines"
+_PROGRESS_DIR = _REPO / "tests" / "audit" / "_progress"
 _HISTORY_PATH = _PROGRESS_DIR / "measureHistory.jsonl"
 _TESTS_DIR = _REPO / "tests"
 
@@ -89,7 +89,9 @@ def _countViolations(baselinePath: Path) -> int:
     if not baselinePath.exists():
         return 0
     try:
-        data = json.loads(baselinePath.read_text(encoding="utf-8"))
+        # utf-8-sig — 일부 baseline(예: testCoverage.json) 이 BOM 으로 적혀 plain
+        # utf-8 디코드가 깨진다. BOM 유무 모두 관용 (정직 경로 재연결로 표면화됨).
+        data = json.loads(baselinePath.read_text(encoding="utf-8-sig"))
     except json.JSONDecodeError as exc:
         raise SystemExit(f"[measureProgress] baseline 손상: {baselinePath} — {exc}") from exc
     if isinstance(data, dict) and isinstance(data.get("violations"), list):
@@ -107,6 +109,12 @@ def _countViolations(baselinePath: Path) -> int:
 
 def _measureBaselineDebt() -> dict:
     """모든 baseline 파일의 위반 총수 + 파일별 카운트."""
+    # 디렉터리 부재 시 빈 glob 가 silent 0 을 낳아 "부채 0" 거짓 시계열을 적재한다.
+    # 경로 drift(scripts/ ↔ tests/audit) 즉시 fail — 가드 정직화.
+    if not _BASELINE_DIR.exists():
+        raise SystemExit(
+            f"[measureProgress] baseline 디렉터리 부재: {_BASELINE_DIR}. 빈 glob silent 0 금지 — 경로 drift 즉시 fail."
+        )
     counts: dict[str, int] = {}
     for path in sorted(_BASELINE_DIR.glob("*.json")):
         counts[path.stem] = _countViolations(path)

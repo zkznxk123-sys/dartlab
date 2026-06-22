@@ -47,12 +47,11 @@ except ImportError:
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _PATTERNS_FILE = _REPO_ROOT / "tests" / "audit" / "stalePatterns.yaml"
 
-# 검사 대상 디렉토리 — planRealdata.py 의 INFRA_PREFIXES 와 일관
+# 검사 대상 디렉토리 (ops/ 는 commit 69d6e667 로 폐기, scripts/ 는 강행규칙상 금지 →
+# 둘 다 부재라 제거. 자기 자신이 죽은 경로를 광고하지 않는다 — 가드 정직화)
 _SCAN_ROOTS: tuple[str, ...] = (
     "src/dartlab",
     "tests",
-    "ops",
-    "scripts",
     ".github",
     "landing/src",
     "README.md",

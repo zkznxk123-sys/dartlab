@@ -19,7 +19,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "rawCrossScan.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "rawCrossScan.json"
 
 # 차단 패턴: data/{provider}/docs/*.parquet · data/{provider}/finance/*.parquet glob 일괄
 _BANNED_PATTERNS = [
@@ -32,9 +32,13 @@ _SCAN_ROOTS = ("src/dartlab",)
 
 
 def _loadBaseline() -> dict:
-    if _BASELINE.exists():
-        return json.loads(_BASELINE.read_text(encoding="utf-8"))
-    return {"violations": [], "_note": "P0.5 baseline"}
+    # 부재 시 silent fallback 금지 — 경로 drift(예: scripts/ ↔ tests/audit 이전) 를
+    # 빈 baseline 으로 삼키면 ledger 가 끊긴 채 우연히 green 이 된다. 즉시 fail.
+    if not _BASELINE.exists():
+        raise FileNotFoundError(
+            f"rawCrossScan baseline 부재: {_BASELINE}. 경로 drift 즉시 fail — 가드 정직화(silent {{}} fallback 금지)."
+        )
+    return json.loads(_BASELINE.read_text(encoding="utf-8"))
 
 
 def _isLineViolation(line: str) -> bool:
