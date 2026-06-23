@@ -7,7 +7,7 @@
 잡는 *수동 verification asset*. 도그푸드 자체가 강화 사이클의 일부 — 단위 테스트만으로는
 LookAheadGuard 의 Company(market=...) 같은 외부 의존 회귀를 못 잡는다는 발견 (2026-05-09).
 
-검증 항목 (12):
+검증 항목 (11):
   1. ReadSkill — 분석 의도 매칭
   2. ReadCapability — API 카탈로그 검색
   3. RunPython sanity
@@ -16,10 +16,9 @@ LookAheadGuard 의 Company(market=...) 같은 외부 의존 회귀를 못 잡는
   6. S3 GroundingCheck 답변 검증
   7. S3 LookAheadGuard 실호출 (asOf 강제)
   7b. LookAheadGuard asOf 누락 거부
-  8. S3 OutcomeLog pending 기록
-  9. S4 RequestUserInput fallback
-  10. S1 progress notification (1 s 임계 + 0.5 s 간격)
-  11. prompts/list
+  8. S4 RequestUserInput fallback
+  9. S1 progress notification (1 s 임계 + 0.5 s 간격)
+  10. prompts/list
 
 판정: 각 항목 OK / MEH / FAIL. 마지막에 카운트 + 상세 출력.
 """
@@ -180,24 +179,8 @@ async def main():
             if not sc.get("ok") and sc.get("error") == "lookahead_guard_missing_asof":
                 note("OK", "asOf 누락을 명시 에러 코드로 거부")
 
-            # ── 8. S3 OutcomeLog — pending 기록 ───────────────────────
-            print("\n## 8. OutcomeLog — pending entry")
-            res = await s.call_tool(
-                "OutcomeLog",
-                {
-                    "stockCode": "005930",
-                    "market": "KR",
-                    "date": "2026-05-09",
-                    "decision": "[Dogfood] Hold — sandbox 검증용 임시 entry",
-                    "theme": "DogfoodTest",
-                },
-            )
-            sc = res.structuredContent or {}
-            data = sc.get("data") or {}
-            note("OK" if sc.get("ok") else "FAIL", f"OutcomeLog ok={sc.get('ok')}, wrote={data.get('wrote')}")
-
-            # ── 9. S4 RequestUserInput — fallback ───────────────────────
-            print("\n## 9. RequestUserInput — 표준 ClientSession 의 fallback")
+            # ── 8. S4 RequestUserInput — fallback ───────────────────────
+            print("\n## 8. RequestUserInput — 표준 ClientSession 의 fallback")
             res = await s.call_tool(
                 "RequestUserInput",
                 {
@@ -213,7 +196,7 @@ async def main():
                 note("MEH", f"unexpected: {err}")
 
             # ── 10. S1 progress — 2 s sleep RunPython ────────────────────
-            print("\n## 10. S1 progress — 2 s sleep RunPython")
+            print("\n## 9. S1 progress — 2 s sleep RunPython")
             events = []
 
             async def on_progress(p, total, msg):
@@ -233,7 +216,7 @@ async def main():
                 print(f"  first event: progress={events[0][0]}, msg={_short(events[0][1], 80)}")
 
             # ── 11. prompts/list — 49 recipe ───────────────────────────
-            print("\n## 11. prompts/list")
+            print("\n## 10. prompts/list")
             prompts = await s.list_prompts()
             recipe_count = sum(1 for p in prompts.prompts if "recipes." in p.name)
             note("OK" if recipe_count >= 30 else "MEH", f"recipe prompt {recipe_count} (전체 {len(prompts.prompts)})")

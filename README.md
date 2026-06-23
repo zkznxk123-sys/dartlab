@@ -608,7 +608,6 @@ HuggingFace Spaces 호스팅. DART API 키 불필요. **Claude Desktop 데스크
 | **WebSearch** | 외부 최신 정보 → webRef (untrusted 마커 자동 적용) |
 | **SaveArtifact** | 큰 표·차트 별도 저장 → artifactRef |
 | **CompileVisual** | 차트 spec codegen → visualRef |
-| **OutcomeLog** | 분석 중 판단·결과를 정형 로그로 남김 |
 | **LookAheadGuard** | 답변 전 누락된 다음 질문·검산 포인트 점검 |
 | **GroundingCheck** | 숫자·날짜·출처 grounding 검산 |
 | **RequestUserInput** | MCP elicit 지원 클라이언트에서 사용자 입력 요청 |

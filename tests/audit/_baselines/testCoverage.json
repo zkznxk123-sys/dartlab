@@ -33,11 +33,6 @@
     },
     {
       "path": "ai/memory/wiring.py",
-      "func": "fetchPastContext",
-      "line": 112
-    },
-    {
-      "path": "ai/memory/wiring.py",
       "func": "fetchRecallContext",
       "line": 127
     },

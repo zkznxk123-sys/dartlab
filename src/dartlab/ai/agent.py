@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 # 한 turn 에 LLM 이 동시에 emit 한 read-only 도구들을 thread pool 로 fan-out.
 # 같은 turn 안 호출은 LLM 이 의존성 없음을 보증 (의존 있으면 다른 turn 으로 분리). 즉
 # ReadSkill + ReadCapability + InspectDataset + EngineCall(scan='roe') + EngineCall(scan='debt')
-# 같은 묶음은 모두 동시 실행 가능. write 도구 (RunPython · SaveArtifact · OutcomeLog) 는 시퀀셜.
+# 같은 묶음은 모두 동시 실행 가능. write 도구 (RunPython · SaveArtifact) 는 시퀀셜.
 #
 # 워커 수 4 — polars/Rust 가 GIL 풀어 CPU bound 도 진짜 병렬, 네트워크 외부 호출 (WebSearch) 도
 # 함께 묶임. 8 까지 늘려도 안전하나 LLM provider rate-limit 측면에서 보수적.
@@ -786,38 +786,12 @@ def _injectPastContextIfAvailable(
     """kwargs 의 보조 컨텍스트를 system prompt 에 부착.
 
     블록:
-        1. stockCode 가 있으면 outcome_log past_context (CHANGELOG #572 패턴)
-            진입 직전 tryResolvePending lazy sweep 으로 pending → resolved 자동 전이 후 회수.
-        2. dashboardSnapshot 이 있으면 "현재 화면" 블록 (Phase 8 bridge)
-        3. 운영자 톤 (feedback_*.md 합성기, 7 일 TTL 캐시)
-        4. dialectic user context (장기 interest profile + 본 세션 intent, history 결정론 통계)
+        1. dashboardSnapshot 이 있으면 "현재 화면" 블록 (Phase 8 bridge)
+        2. 운영자 톤 (feedback_*.md 합성기, 7 일 TTL 캐시)
+        3. dialectic user context (장기 interest profile + 본 세션 intent, history 결정론 통계)
 
     빈 문자열이면 섹션 헤더 자체 부재 — 환각 가드.
     """
-    stockCode = kwargs.get("stockCode")
-    if stockCode:
-        market = kwargs.get("market") or "KR"
-        try:
-            from .memory.wiring import defaultPriceLookup, fetchPastContext, tryResolvePending
-
-            # 진입 lazy resolve — 해당 종목 pending 중 minHoldingDays 충족 entry 가
-            # 있으면 시장 종가로 alpha 산출 후 resolved 전이. 다음 fetchPastContext
-            # 호출이 *방금 resolved* 된 entry 까지 회수하도록 *resolve 먼저, fetch 다음* 순서.
-            try:
-                tryResolvePending(
-                    str(stockCode),
-                    market=str(market),
-                    pricer=defaultPriceLookup if str(market) == "KR" else None,
-                )
-            except Exception:  # noqa: BLE001
-                pass
-
-            past = fetchPastContext(str(stockCode), market=str(market))
-        except Exception:  # noqa: BLE001
-            past = ""
-        if past:
-            systemPrompt = f"{systemPrompt}\n\n## 과거 결정 회고 (참고 — 환각 금지, 위 사실에만 의존하라)\n{past}\n"
-
     snapshot = kwargs.get("dashboardSnapshot")
     if isinstance(snapshot, dict):
         block = _formatDashboardSnapshotBlock(snapshot)
@@ -981,8 +955,6 @@ def _wireChatNativeMemory(
         selectedSkillRefs=(r for r in ref_objects if r.kind == "skillRef"),
         ok=True,
         extraTags=extra_tags,
-        stockCode=stockCode,
-        market=market,
     )
 
 

@@ -75,12 +75,12 @@ def mcpAdvertisedToolNames() -> tuple[str, ...]:
     """MCP tools/list 에 advertise 할 도구 이름 SSOT — registry 변경 자동 추종.
 
     마스터 플랜 v2 트랙 7 PR-M1 — 옛 정적 12-tuple 상수(LookAheadGuard / RequestUserInput stub 포함)는
-    ``CANONICAL_V2`` (22 종 정제 production-grade) 와 deviation 발생해 **폐기**(debt-honesty P2-6 —
+    ``CANONICAL_V2`` (21 종 정제 production-grade) 와 deviation 발생해 **폐기**(debt-honesty P2-6 —
     ask_kernel_status leak 경로 제거). 본 함수가 ``"ask" + CANONICAL_V2`` 를 SSOT 로 노출 → 신규 도구
     추가 시 advertise 도 자동 sync.
 
     Returns:
-        tuple[str, ...]: ``("ask",) + CANONICAL_V2`` 합 (= 23 종).
+        tuple[str, ...]: ``("ask",) + CANONICAL_V2`` 합 (= 22 종).
 
     Example:
         ``names = mcpAdvertisedToolNames()``  # → ("ask", "ReadSkill", ..., "SearchPastSessions")

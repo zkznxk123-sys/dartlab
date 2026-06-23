@@ -1,28 +1,25 @@
 ---
 id: operation.aiEngine
-title: aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)
+title: aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider)
 kind: curated
 scope: builtin
 status: observed
 category: operation
-purpose: aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · outcome ground truth 선순환 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'outcome_log', 'provider catalog'.
+purpose: aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'provider catalog'.
 whenToUse:
   - dartlab.ai 내부 구조 이해
   - workbench 5 패스 (BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST)
   - canonical 도구 화이트리스트
   - provider 카탈로그 (oauth-codex / openai / gemini / groq / cerebras / mistral / custom / ollama / codex)
-  - outcome ground truth 선순환 (pending → resolved + reflection)
   - chat-native HARVEST bridge
   - MCP 표면 매핑
   - 회귀 가드 (test_no_core_import / test_tool_whitelist / test_ref_gate ...)
 inputs:
   - 사용자 질문 (chat-native 또는 mode=analyze)
   - 명시적 RunWorkbench tool 호출 (chat-native → 5 패스 elevate)
-  - stockCode (outcome_log 작성 조건)
 outputs:
   - 답안 + ref 묶음 (dataRef · executionRef · valueRef · dateRef · visualRef · webRef · artifactRef · docRef)
-  - decisions.jsonl (BM25 recall) + skill_stats.jsonl + outcome_log (per-stockCode markdown)
-  - reflection (2-4 문장 평문)
+  - decisions.jsonl (BM25 recall) + skill_stats.jsonl
 capabilityRefs: []
 toolRefs:
   - ReadSkill
@@ -49,14 +46,11 @@ requiredEvidence:
   - mode
   - stockCode
   - refKind
-  - decisionId
   - executionRef
   - sourceRef
 expectedOutputs:
   - chat-native 답안 + ref 검증 통과
   - workbench 5 패스 통과 + GATE 통과
-  - outcome_log per-stockCode markdown (atomic temp+replace)
-  - reflection (alpha-conditioned)
 runtimeCompatibility:
   server:
     status: supported
@@ -75,7 +69,6 @@ failureModes:
   - AI가 공식 Skill OS spec을 직접 작성하거나 승격하려는 경로 재도입
   - local user skill 을 builtin/official skill 처럼 취급
   - 외부 본문 안 지시 따름 (Ref.sourceType="external" untrusted)
-  - past_context 빈 문자열일 때 placeholder 섹션 작성 (환각 가드)
 forbidden:
   - anthropic 직접 호출 (ToS 위반, claude_code.py 9eb9d088e 에서 제거)
   - AI가 공식 Skill OS spec을 직접 생성하거나 공식 승격하는 경로
@@ -86,22 +79,20 @@ forbidden:
 examples:
   - dartlab.ask 진입 — kernel.ask → chat-native 또는 workbench
   - LLM 의 RunWorkbench tool 호출 → 5 패스 elevate
-  - outcome_log per-stockCode markdown (pending → resolved + reflection)
   - 회귀 가드 9 종 통과 (tests/ai/test_*)
 procedure:
   - 1 단계 — dartlab.ask(question, mode=...) 진입.
   - 2 단계 — chat-native LLM 이 canonical 도구 세트를 자율 호출.
   - 3 단계 — 깊은 분석 필요 시 LLM 이 RunWorkbench tool 호출 → 5 패스 elevate.
   - 4 단계 — GATE 가 ref 검증 (미달 시 차단/회귀).
-  - 5 단계 — HARVEST 가 decisions.jsonl + skill_stats.jsonl + outcome_log 작성.
-  - 6 단계 — 다음 같은 종목 호출 시 outcome_resolver 가 pending → resolved + reflection.
+  - 5 단계 — HARVEST 가 decisions.jsonl + skill_stats.jsonl 작성.
 linkedSkills:
   - engines.company
   - operation.philosophy
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-06-16'
+lastUpdated: '2026-06-23'
 testUniverse:
   market: KR
   stockCodes:
@@ -158,7 +149,7 @@ BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST
 - **CRITIQUE** — 반대가설 강제, 누락 lens 점검 → 필요 시 WORK 회귀
 - **COMPOSE** — 답안 + ref 묶음
 - **GATE** — ref 검증 — 미달 시 차단/회귀
-- **HARVEST** — 세션 종료 시 memory wiring (`recordSkillUsage` + `remember` + `outcome_log.store_decision`)
+- **HARVEST** — 세션 종료 시 memory wiring (`recordSkillUsage` + `remember`)
 
 ### 3. canonical 도구 세트 (PascalCase)
 
@@ -180,7 +171,7 @@ BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST
 
 - 추가는 SSOT 갱신 PR 의무. registry 화이트리스트 강제 — 외 등록 거부 (`registerTool` plugin 도구만 허용, `CANONICAL_TOOL_NAMES` 보호).
 - **이름 컨벤션** — API name (registry key, MCP tool name) = snake_case. Python 식별자·파일명 = camelCase. `toolSpecs(provider)` 가 변환.
-- **삭제됨 (P-revised)** — AI가 직접 공식 Skill OS spec을 만들고 승격하는 도구 경로. 대신 실행 결과와 사용자 피드백을 outcome ground truth loop (§6) 로 축적하고 운영자 검토 후 공식 자산에 반영한다. local user draft 는 `CreateUserSkill` 의 `.dartlab/skills` 경로로만 허용한다.
+- **삭제됨 (P-revised)** — AI가 직접 공식 Skill OS spec을 만들고 승격하는 도구 경로. 대신 실행 결과와 사용자 피드백을 ref·메모리 (`decisions.jsonl` recall) 로 남기고 운영자 검토 후 공식 자산에 반영한다. local user draft 는 `CreateUserSkill` 의 `.dartlab/skills` 경로로만 허용한다.
 
 ### 4. Provider 카탈로그 (`provider_catalog.py` 단일 출처)
 
@@ -209,46 +200,12 @@ dartlab 정식 9 종:
 
 `Ref` (contracts.py:15) — `kind ∈ {dataRef, executionRef, valueRef, dateRef, visualRef, webRef, artifactRef, docRef}`. GATE 가 ref 없는 숫자·날짜·랭킹 답을 차단.
 
-### 6. Outcome ground truth 선순환 (P-revised)
+### 6. 컨텍스트 layers — answer-time 자동 주입
 
-```
-분석 결정 (chat-native HARVEST bridge OR workbench HARVEST)
-   ↓
-outcome_log 에 pending entry 작성 (~/.dartlab/decisions/{market}/{stockCode}.md)
-   ↓ (다음 같은 종목 호출 시 BRIEF/agent.py 진입부)
-resolve_pending(stockCode):
-   - dartlab.providers.{dart,edgar}.Company.price(asOf=...) + 벤치마크 비교
-   - 가격/공시 부족 시 pending 유지, 다음 호출까지 굴림
-   ↓
-reflection (2-4 문장 평문, 마크다운 금지):
-   1. 방향성 판단이 옳았는가? (alpha 수치 인용)
-   2. 분석 thesis 의 어느 부분이 유지/실패했는가?
-   3. 다음 비슷한 분석에 적용할 구체 lesson 1 가지
-   ↓
-pending → resolved 로 entry atomic 갱신 (temp+replace)
-   ↓
-다음 분석 BRIEF/agent.py 가 같은 종목 5 + 다른 종목 3 entry 비대칭 주입
-   - same-stockCode — tag + DECISION + REFLECTION 전문
-   - cross-stockCode — tag + REFLECTION 만 (decision 300 자 truncate)
-   ↓
-환각 가드 — past_context 빈 문자열일 때 placeholder 섹션 자체 부재
-```
-
-- **per-stockCode markdown SSOT**. HTML 주석 `<!-- ENTRY_END -->` separator (LLM prose 면역).
-- **idempotency** — 같은 (date, stockCode) pending 중복 거부.
-- **atomic write** — temp file + `os.replace` (크래시 mid-write 시 원본 보존).
-- **rotation** — pending 영구 보존, resolved 만 `outcome_log_max_entries` 임계 초과 시 oldest drop.
-- **chat-native + workbench 양 경로 모두 작성**. 종목 명시 (stockCode 추출 가능) 시에 한해.
-- 기존 `memory/decisions.py` (BM25 recall) + `memory/stats.py` (skill usage) 와 직교 — outcome_log 는 *outcome ground truth*, decisions.jsonl 은 *recall 컨텍스트*.
-
-### 7. 컨텍스트 layers — answer-time 자동 주입
-
-`runAgent` 진입 직후 `_injectPastContextIfAvailable` 가 base system prompt 끝에 다음
-4 종 블록을 순서대로 부착 (각 블록은 데이터 없으면 *섹션 헤더 자체 부재* — 환각 가드).
+`runAgent` 진입 직후 base system prompt 끝에 다음 블록을 순서대로 부착 (각 블록은 데이터 없으면 *섹션 헤더 자체 부재* — 환각 가드).
 
 | Layer | 모듈 | 데이터 소스 | 캐시 | 효과 |
 |---|---|---|---|---|
-| L1 outcome past context | `memory/wiring.fetchPastContext` | `~/.dartlab/decisions/{market}/{stockCode}.md` | (없음 — 진입 직전 `tryResolvePending` lazy sweep 으로 *방금 resolved* 된 alpha 포함) | 종목 분석 시 *과거 결정 회고* + alpha 자동 회수 |
 | L2 dashboard snapshot | `_formatDashboardSnapshotBlock` | kwargs `dashboardSnapshot` dict | (요청별) | UI 뷰 → agent 시야 동기화 |
 | L3 운영자 톤 | `memory/synthesizer.buildToneBlock` | `~/.claude/projects/.../memory/feedback_*.md` (auto-discover, feedback 최다 디렉토리) | `~/.dartlab/ai_memory/feedbackTone.cache.md`, 7 일 TTL + memory mtime 검사 | 답변 톤 일관성 — 톱 토큰 6 + 톱 링크 4 |
 | L4 dialectic user context | `memory/dialectic.buildUserContextBlock` | `sessionIndex.db` user role text 전체 + 현재 `history` | `~/.dartlab/ai_memory/userProfile.cache.json`, 7 일 TTL (intent 는 in-memory) | 누적 종목·테마 + 본 세션 의도 6 분류 |
@@ -258,11 +215,11 @@ pending → resolved 로 entry atomic 갱신 (temp+replace)
 - **결정론 통계만** — LLM 분류 호출 0. 모든 layer 가 SQL/regex/키워드 매칭.
 - **원문 인용 우선** — feedbackSignals 는 *분류 라벨 없이* 발화 원문 그대로. 해석은 답변 LLM 에 위임.
 - **회귀 가드** — layer 별 graceful skip (Exception → 빈 블록). 한 layer 실패가 답변 흐름 중단 X.
-- **순서** — outcome (객관 ground truth) → snapshot → 톤 (메모리 합성) → dialectic (사용자 통계) → 시그널 (가장 최근 학습 신호, 컨텍스트 끝에 박혀 LLM 우선 활용).
+- **순서** — snapshot → 톤 (메모리 합성) → dialectic (사용자 통계) → 시그널 (가장 최근 학습 신호, 컨텍스트 끝에 박혀 LLM 우선 활용).
 
 답변 품질 영향 검증: `tests/_attempts/oauth_dialectic_ab_probe.py` (dialectic 효과 측정) + `tests/_attempts/oauth_feedback_signals_ab_probe.py` (시그널 효과 측정). dialectic ON 일 때 모호 질문에 *누적 통계 기반 default 가정* + top 5 종목 정확 인용, signals ON 일 때 *사용자 특정 부정 패턴* 정확 진단.
 
-### 8. SSOT 우선
+### 7. SSOT 우선
 
 - 코드와 SSOT 충돌 시 (lock 이후) SSOT 가 정답. 코드를 SSOT 에 맞춘다.
 - 새 기능은 SSOT 갱신이 선행.
@@ -292,8 +249,8 @@ src/dartlab/ai/
 │   ├── loop.py                ← orchestration
 │   ├── state.py / prompts.py
 │   └── brief.py / work.py / critique.py / compose.py / gate.py / harvest.py
-├── memory/                    ← outcome ground truth + recall + stats
-│   └── decisions.py / stats.py / outcome_log.py / outcome_resolver.py / wiring.py
+├── memory/                    ← recall + skill stats + wiring
+│   └── decisions.py / stats.py / wiring.py
 ├── lenses/                    ← P5 (옵션)
 │   └── fundamental.py / macro.py / technical.py / sentiment.py
 └── settings/                  ← 기존 유지
@@ -341,14 +298,13 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 - `tests/ai/test_tool_whitelist.py` — registry 가 canonical 도구 보호를 강제. 삭제된 spec 제안 도구 / `skill_search` / `generated_spec_search` / `engine_call` / `verify_answer` / `read` / `write` 등록 시 실패
 - `tests/ai/test_ref_gate.py` — 숫자·날짜·랭킹 답 ref 없으면 GATE 차단. ref token 형식 `<refKind:id>` 단일
 - `tests/ai/test_providers.py` — 어댑터 schema 변환 단위 테스트
-- `tests/ai/test_outcome_log.py` — pending↔resolved 전환, idempotency, atomic temp+replace, asymmetric same/cross format, HTML separator 면역
 - `tests/ai/test_lookahead_filter.py` — `Company.panel(asOf=...)` 가 미래 fiscal period / 가격 컬럼 drop
 - `tests/ai/test_runworkbench_dispatch.py` — chat-native LLM 의 `runWorkbench` tool 호출 시 workbench 5 패스 활성. mode != "analyze" AND tool 미호출 시 workbench 활성 0
-- `tests/ai/test_chat_native_harvest.py` — `agent.py` 종료 시 `decisions.jsonl` + `skill_stats.jsonl` + (stockCode 추출 시) `outcome_log` entry 작성
+- `tests/ai/test_chat_native_harvest.py` — `agent.py` 종료 시 `decisions.jsonl` + `skill_stats.jsonl` 작성
 - `tests/ai/test_provider_whitelist_single_source.py` — `_isLLMProvider` 가 `wired_provider_ids()` 만 사용. hardcoded provider set 0 건 (provider_catalog.py 외)
 - `tests/ai/test_safe_stockcode.py` — path traversal 시도 (`..` · `/` · all-dot · 길이 초과) 거부
 
-**삭제된 가드** — `test_skill_spec_integrity.py` (AI 직접 spec 작성 경로 제거) · `test_no_external_skill_writes.py` (ai/ 가 spec 작성 안 함) · `test_golden_baseline.py` (heuristic 시대 골든 셋, P-revised 후 폐기).
+**삭제된 가드** — `test_skill_spec_integrity.py` (AI 직접 spec 작성 경로 제거) · `test_no_external_skill_writes.py` (ai/ 가 spec 작성 안 함) · `test_golden_baseline.py` (heuristic 시대 골든 셋, P-revised 후 폐기) · `test_outcome_log.py` (outcome ground truth loop 폐기, 2026-06-23).
 
 ### 회귀 가드 보조 스크립트
 
@@ -356,7 +312,7 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 |---|---|
 | `tests/audit/checkAgentBoundary.py` | graph 강박 회귀 패턴 lint — `ai/agent.py` 외 새 `*Loop`/`*Graph` 클래스, 5 패스 패턴 모듈, "graph 강제"/"verify 강제"/"회귀 가드" 자기 인식 단어 등장 감지. 룰 SSOT [memory/feedback_no_graph_regression.md](file://C:/Users/MSI/.claude/projects/c--Users-MSI-OneDrive-Desktop-sideProject-dartlab/memory/feedback_no_graph_regression.md). 경고 모드 default, `--strict` 시 violation 시 exit 1. CI/pre-commit 추적용 |
 | `tests/ai/runners/captureGoldenBaseline.py` | 휴리스틱 `ask()` 의 출력을 baseline.json 캡처 — P1 5 패스 LLM path 와 비교 기준. 안전 question 만 사용 (Company/scan 호출 안 함, OOM 방지) |
-| `tests/ai/runners/runGoldenTrace.py` | 15 케이스 실 LLM (OAuth Codex) 1 회 호출 → outcome_log entry (`~/.dartlab/decisions/{market}/{stockCode}.md`) + taxonomy 분류 결과 `tests/ai/golden/baseline_v{N}.json` freeze. **비용 발생 — 수동 트리거 (CI 자동 실행 X)**. OAuth Codex 토큰 (`~/.dartlab/oauth_token.json` 또는 `DARTLAB_OAUTH_TOKEN`) 필수 |
+| `tests/ai/runners/runGoldenTrace.py` | 15 케이스 실 LLM (OAuth Codex) 1 회 호출 → taxonomy 분류 결과 `tests/ai/golden/baseline_v{N}.json` freeze. **비용 발생 — 수동 트리거 (CI 자동 실행 X)**. OAuth Codex 토큰 (`~/.dartlab/oauth_token.json` 또는 `DARTLAB_OAUTH_TOKEN`) 필수 |
 
 ## SSOT 갱신 PR 룰 (P6)
 
@@ -366,8 +322,7 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 2. 신규 패스 추가/순서 변경 — `BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST` 외.
 3. 신규 provider 어댑터 추가 — `provider_catalog.py` `_PROVIDERS` 변경.
 4. ref kind 추가 — `Ref.kind` 값 집합 변경.
-5. `outcome_log` entry 형식 변경 — `[date | stockCode | theme | pending|resolved | ...]` 태그 컬럼 추가/제거.
-6. 폴더 경계 변경 — `ai/{workbench,tools,providers,lenses,memory}` import 정책.
+5. 폴더 경계 변경 — `ai/{workbench,tools,providers,lenses,memory}` import 정책.
 
 **PR 체크리스트**:
 - [ ] SSOT 해당 섹션 갱신
@@ -386,3 +341,4 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 - 2026-05-12 — `src/dartlab/ai/SSOT.md` → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격).
 - 2026-05-17 — `CreateUserSkill` 추가. 공식 Skill OS 작성 금지는 유지하고 `.dartlab/skills` local user draft 작성 경로만 허용.
 - 2026-06-16 — `ExternalReachDoctor` 추가. 외부 lookup backend 상태 진단만 수행하며 설치·로그인·쿠키 저장은 금지.
+- 2026-06-23 — outcome ground truth loop 폐기. 채점 (pending → resolved + reflection) 이 누적 실측 미작동 (pending 26 / resolved 0) 으로 확인 → `outcome_log` · `outcome_resolver` · per-stockCode markdown · past_context 회고 주입 · `OutcomeLog` MCP 도구 제거. `decisions.jsonl` recall + skill_stats 는 유지.

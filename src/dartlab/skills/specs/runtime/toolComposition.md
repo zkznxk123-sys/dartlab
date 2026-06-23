@@ -61,7 +61,6 @@ linkedSkills:
 
 FSI 패턴 — 다음 단일 도구만 Write 가능:
 - `SaveArtifact` (사용자 산출물 저장)
-- `OutcomeLog` (작업 결과 ledger)
 
 다른 도구는 read-only. 데이터 mutation 단일 책임.
 
@@ -85,7 +84,7 @@ FSI 패턴 — 다음 단일 도구만 Write 가능:
 ## 안티패턴
 
 - 도구 호출 → 결과 무시 → 추가 호출 ("재호출 round" 회피, `engines.search.disclosureSearch` 가드).
-- Bold leaf 외 다른 도구로 Write (`OutcomeLog` 없이 사용자 산출물 저장 금지).
+- Bold leaf 외 다른 도구로 Write (`SaveArtifact` 없이 사용자 산출물 저장 금지).
 - evidence GATE 우회 — 모든 숫자 claim 강행.
 
 ## 기본 검증

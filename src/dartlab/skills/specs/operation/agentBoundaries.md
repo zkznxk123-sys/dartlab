@@ -60,7 +60,7 @@ linkedSkills:
 
 ### 3. Bold leaf 단일 Write
 
-- `SaveArtifact` / `OutcomeLog` 만 Write 권한. 다른 도구 Write 추가 금지.
+- `SaveArtifact` 만 Write 권한. 다른 도구 Write 추가 금지.
 
 ### 4. workbench 본체화 금지
 

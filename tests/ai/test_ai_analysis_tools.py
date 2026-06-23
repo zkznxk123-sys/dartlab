@@ -1,6 +1,6 @@
-"""분석 추론 surfacing 도구 3 종 단위 테스트 — S3.
+"""분석 추론 surfacing 도구 2 종 단위 테스트 — S3.
 
-OutcomeLog · LookAheadGuard · GroundingCheck 가 registry SSOT 에 등록되고 dispatch 되는지,
+LookAheadGuard · GroundingCheck 가 registry SSOT 에 등록되고 dispatch 되는지,
 각 도구의 입력 검증·반환 형태가 일관된지 검증.
 
 LookAheadGuard 는 실제 DART/EDGAR provider 호출이 필요해서 외부 의존이 발생 — 거부 케이스
@@ -12,86 +12,6 @@ from __future__ import annotations
 import pytest
 
 pytestmark = pytest.mark.unit
-
-
-# ── OutcomeLog ──────────────────────────────────────────────────────────────
-
-
-def test_outcome_log_dispatch_via_registry():
-    from dartlab.ai.tools.registry import executeTool
-
-    result = executeTool(
-        "OutcomeLog",
-        {
-            "stockCode": "005930",
-            "market": "KR",
-            "date": "2026-05-09",
-            "decision": "Hold — 현금 비중 높음, ROE 안정.",
-            "theme": "Quarterly Verdict",
-        },
-    )
-    assert result.get("ok") is True
-    assert "outcome_log" in (result.get("summary") or "")
-    refs = result.get("refs") or []
-    assert any(r.get("kind") == "decisionRef" for r in refs)
-
-
-def test_outcome_log_rejects_invalid_stockcode():
-    from dartlab.ai.tools.outcomeLog import outcomeLog
-
-    result = outcomeLog(
-        stockCode="../../../etc",  # path traversal 시도
-        market="KR",
-        date="2026-05-09",
-        decision="should not write",
-    )
-    assert result.ok is False
-    assert "stockCode" in (result.summary or "") or "invalid" in (result.error or "").lower()
-
-
-def test_outcome_log_rejects_invalid_date():
-    from dartlab.ai.tools.outcomeLog import outcomeLog
-
-    result = outcomeLog(
-        stockCode="005930",
-        market="KR",
-        date="not-a-date",  # _normalize_date 가 None 반환 → wrote=False
-        decision="x",
-    )
-    # storeDecision 은 invalid date 시 False 반환 (예외 X). 도구는 ok=True + wrote=False.
-    assert result.ok is True
-    assert result.data.get("wrote") is False
-
-
-def test_outcome_log_happy_path_writes_file(tmp_path, monkeypatch):
-    """happy path — DARTLAB_HOME 격리 + 실 저장 검증 (도그푸드 격차 메우기).
-
-    이전 단위 테스트는 dispatch 거부 경로만 검증했고 실 저장 동작은 검증 없었음. 도그푸드
-    probe 가 발견한 LookAheadGuard market 버그처럼, registry 도구의 *외부 효과* 도 단위
-    테스트에서 검증해야 함.
-    """
-    from dartlab.ai.tools.outcomeLog import outcomeLog
-
-    monkeypatch.setenv("DARTLAB_HOME", str(tmp_path))
-    result = outcomeLog(
-        stockCode="005930",
-        market="KR",
-        date="2026-05-09",
-        decision="Hold — 단위 테스트용 entry",
-        theme="UnitTest",
-    )
-    assert result.ok is True
-    assert result.data.get("wrote") is True
-
-    # 실 파일 검증 — ~/.dartlab 의 ${DARTLAB_HOME}/decisions/KR/005930.md 에 기록됨.
-    target = tmp_path / "decisions" / "KR" / "005930.md"
-    assert target.exists(), f"outcome_log 파일 미생성: {target}"
-    body = target.read_text(encoding="utf-8")
-    assert "2026-05-09" in body
-    assert "005930" in body
-    assert "UnitTest" in body
-    assert "pending" in body
-    assert "Hold — 단위 테스트용 entry" in body
 
 
 # ── LookAheadGuard ──────────────────────────────────────────────────────────
@@ -297,15 +217,14 @@ def test_new_tools_in_legacy_alias_map():
     """snake_case alias 도 함께 매핑."""
     from dartlab.ai.tools.registry import _LEGACY_NAME_MAP
 
-    assert _LEGACY_NAME_MAP.get("outcome_log") == "OutcomeLog"
     assert _LEGACY_NAME_MAP.get("lookahead_guard") == "LookAheadGuard"
     assert _LEGACY_NAME_MAP.get("grounding_check") == "GroundingCheck"
 
 
-def test_canonical_tool_names_includes_three_new_tools():
+def test_canonical_tool_names_includes_analysis_tools():
     from dartlab.ai.tools.registry import CANONICAL_TOOL_NAMES
 
-    for name in ("OutcomeLog", "LookAheadGuard", "GroundingCheck"):
+    for name in ("LookAheadGuard", "GroundingCheck"):
         assert name in CANONICAL_TOOL_NAMES, f"{name} 가 CANONICAL_TOOL_NAMES 에 없음"
 
 

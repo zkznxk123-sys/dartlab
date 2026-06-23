@@ -90,7 +90,7 @@ def test_mcp_advertised_tools_carry_annotations():
     from dartlab.mcp import _advertisedTools
 
     tools = {t["name"]: t for t in _advertisedTools()}
-    # CANONICAL_V2 (22 종) + ask = 23 종 모두 annotations 키 보유 — 핵심 도구 sample 검증
+    # CANONICAL_V2 (21 종) + ask = 22 종 모두 annotations 키 보유 — 핵심 도구 sample 검증
     for name in (
         "ask",
         "ReadSkill",
@@ -99,7 +99,6 @@ def test_mcp_advertised_tools_carry_annotations():
         "WebSearch",
         "SaveArtifact",
         "CompileVisual",
-        "OutcomeLog",
         "DCFValuation",
         "PeerCompareN",
         "CreditScorecard",
@@ -113,8 +112,6 @@ def test_mcp_advertised_tools_carry_annotations():
     assert tools["WebSearch"]["annotations"]["openWorldHint"] is True
     assert tools["SaveArtifact"]["annotations"]["readOnlyHint"] is False
     assert tools["RunPython"]["annotations"]["idempotentHint"] is False
-    # 분석 추론 surfacing — 분류 검증
-    assert tools["OutcomeLog"]["annotations"]["readOnlyHint"] is False  # write tool
 
 
 def test_recipe_skills_all_exposed_as_prompts():

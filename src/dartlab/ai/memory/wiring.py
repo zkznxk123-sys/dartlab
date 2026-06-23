@@ -3,29 +3,18 @@
 세션 종료 시 호출:
 - recordSkillUsage(skillId, ok, valueRefs) — 사용 빈도 통계
 - remember(question + answer 요약, tags=[...]) — 다음 세션 recall 컨텍스트
-- outcome_log.storeDecision(stockCode, market, ...) — stockCode 인식 시 pending entry 작성
-- tryResolvePending(stockCode, market, pricer=...) — 같은 종목 다음 호출 진입부에서 pending → resolved 자동 변환
 
 P-revised: chat-native runAgent 도 본 helper 호출 → SSOT.md Principle 6
-"session trace → HARVEST → decisions.jsonl + outcome_log" 정합 (이전엔 workbench 만 작성).
-
-ai/ 정적 import 가드 (SSOT §1) — providers 호출이 필요한 default lookup 은 함수
-local lazy import. caller 는 더 정교한 pricer 를 주입할 수 있다.
+"session trace → HARVEST → decisions.jsonl" 정합 (이전엔 workbench 만 작성).
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
-from datetime import date
+from collections.abc import Iterable
 from typing import Any
 
 from dartlab.ai.contracts import Ref
 from dartlab.ai.memory.decisions import recall, remember
-from dartlab.ai.memory.outcomeLog import (
-    getPastContext,
-    safeStockcode,
-    storeDecision,
-)
 from dartlab.ai.memory.promotion import recordSkillUsage
 
 _DECISION_DIGEST_CAP = 280
@@ -41,9 +30,6 @@ def wireSessionMemory(
     ok: bool = True,
     runId: str = "",
     extraTags: Iterable[str] = (),
-    stockCode: str | None = None,
-    market: str | None = None,
-    decisionTheme: str | None = None,
 ) -> None:
     """세션 종료 시 memory 작성. 실패해도 조용히 (사용자 흐름 보호).
 
@@ -55,8 +41,6 @@ def wireSessionMemory(
         ok: GATE 통과 / failure 없음 여부
         runId: trace runId (tag 에 포함)
         extraTags: 추가 tag (예: 'target:005930', 'market:KR')
-        stockCode / market: 명시 시 outcome_log 에 pending entry 작성 (다음 같은 종목 호출 시 resolve)
-        decisionTheme: outcome_log entry tag 의 theme 컬럼 (예: "Buy", "Hold", "Concern"). 미지정 시 "Verdict".
     """
     refs_list = list(refs)
     selected_list = list(selectedSkillRefs)
@@ -94,35 +78,6 @@ def wireSessionMemory(
     except Exception:  # noqa: BLE001
         pass
 
-    # outcome_log 에 pending entry — stockCode 명시 + ok 시만.
-    if stockCode and ok:
-        try:
-            safe_code = safeStockcode(stockCode)
-            storeDecision(
-                stockCode=safe_code,
-                market=market or "KR",
-                date=date.today().isoformat(),
-                theme=(decisionTheme or "Verdict").strip()[:32],
-                decisionText=digest,
-            )
-        except Exception:  # noqa: BLE001
-            pass
-
-
-def fetchPastContext(stockCode: str | None, market: str | None = None, *, nSame: int = 5, nCross: int = 3) -> str:
-    """BRIEF / agent.runAgent 진입부에서 호출 — outcome_log past_context 조회.
-
-    빈 문자열 반환 시 호출자가 prompt 의 placeholder 섹션 자체를 부재화 (환각 가드).
-    stockCode 미지정 또는 가드 거부 시 빈 문자열.
-    """
-    if not stockCode:
-        return ""
-    try:
-        safe_code = safeStockcode(stockCode)
-        return getPastContext(safe_code, market=market or "KR", nSame=nSame, nCross=nCross)
-    except Exception:  # noqa: BLE001
-        return ""
-
 
 def fetchRecallContext(question: str, *, k: int = 5) -> list[dict[str, Any]]:
     """BM25 recall — 다음 세션 컨텍스트 주입용. 실패 시 빈 list."""
@@ -148,7 +103,7 @@ def inferStockCodeContext(
 ) -> tuple[str | None, str | None]:
     """누적 refs / kernel kwargs 에서 stockCode + market 추출 시도.
 
-    chat-native HARVEST bridge 가 outcome_log.storeDecision 호출 시 사용 (다음 commit).
+    extraTags (target:/market:) 구성에 사용.
     """
     if kwargs:
         sc = kwargs.get("stockCode")
@@ -164,80 +119,8 @@ def inferStockCodeContext(
     return None, None
 
 
-def defaultPriceLookup(symbol: str, asOf: str, *, market: str = "KR") -> float | None:
-    """KR 종목용 default pricer — Company.gather("price") + asOf 필터.
-
-    SSOT §6 의 `Company.price(asOf=...)` 명시는 본 helper 가 effective 의미를 충족.
-    US 는 EDGAR 측 미구현 (None 반환). 빈 데이터 / 예외 / asOf 이전 가격 0 건 → None
-    (resolver 가 pending 유지).
-
-    네트워크 호출 비용 큼. 운영 cron sweep 에서 사용 시 caller 가 캐시 wrap 권장.
-    """
-    if market != "KR":
-        return None
-    try:
-        import polars as pl  # noqa: PLC0415  (lazy: ai/ 정적 import 가드)
-
-        from dartlab.providers.dart.company import Company  # noqa: PLC0415
-
-        c = Company(symbol)
-        df = c.gather("price")
-        if df is None or df.is_empty():
-            return None
-        target = pl.lit(asOf).cast(pl.Date, strict=False)
-        filtered = df.filter(pl.col("date") <= target)
-        if filtered.is_empty():
-            return None
-        return float(filtered.sort("date").tail(1)["close"][0])
-    except Exception:  # noqa: BLE001
-        return None
-
-
-def tryResolvePending(
-    stockCode: str | None,
-    market: str | None = None,
-    *,
-    pricer: Callable[[str, str], float | None] | None = None,
-    benchmarkPricer: Callable[[str, str], float | None] | None = None,
-    benchmarkSymbol: str | None = None,
-    today: str | None = None,
-    minHoldingDays: int = 30,
-) -> int:
-    """outcome_resolver 호출 wrapper — 진입부 1 줄 호출용.
-
-    pricer 미주입 시 noop (0). 실패 / 가드 거부 / 예외 시 안전 0.
-    caller 는 default 로 `defaultPriceLookup` 사용 가능 (KR 만 지원).
-
-    Returns:
-        resolved 갱신된 entry 수.
-    """
-    if not stockCode:
-        return 0
-    if pricer is None:
-        return 0
-    try:
-        from dartlab.ai.memory.outcomeResolver import resolvePending  # noqa: PLC0415
-
-        safe_code = safeStockcode(stockCode)
-        report = resolvePending(
-            safe_code,
-            market=market or "KR",
-            pricer=pricer,
-            benchmarkPricer=benchmarkPricer,
-            benchmarkSymbol=benchmarkSymbol,
-            today=today,
-            minHoldingDays=minHoldingDays,
-        )
-        return report.resolvedCount
-    except Exception:  # noqa: BLE001
-        return 0
-
-
 __all__ = [
-    "defaultPriceLookup",
-    "fetchPastContext",
     "fetchRecallContext",
     "inferStockCodeContext",
-    "tryResolvePending",
     "wireSessionMemory",
 ]

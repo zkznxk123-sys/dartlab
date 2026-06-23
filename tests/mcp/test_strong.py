@@ -166,11 +166,9 @@ def test_mcp_strong_annotations_and_structured_and_prompts():
     # ── logging/setLevel ──
     assert out.get("set_level_ok") is True, f"setLevel 실패: {out.get('set_level_error')}"
 
-    # ── 분석 추론 도구 3 종 (S3) ──
-    assert "OutcomeLog" in ann, "OutcomeLog 가 tools/list 에 노출"
+    # ── 분석 추론 도구 2 종 (S3) ──
     assert "LookAheadGuard" in ann, "LookAheadGuard 가 tools/list 에 노출"
     assert "GroundingCheck" in ann, "GroundingCheck 가 tools/list 에 노출"
-    assert ann["OutcomeLog"]["readOnly"] is False, "OutcomeLog 는 write tool"
     assert ann["LookAheadGuard"]["readOnly"] is True, "LookAheadGuard 는 read tool"
     assert out.get("grounding_dispatch_ok"), "GroundingCheck 호출 ok + structuredContent"
     assert out.get("grounding_material_number") is True, "12.3% 수치는 material number 분류"

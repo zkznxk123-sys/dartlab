@@ -20,7 +20,6 @@ from .groundingCheck import groundingCheck
 from .inspectDataset import inspectDataset
 from .listEngineGaps import listEngineGaps
 from .lookAheadGuard import lookAheadGuard
-from .outcomeLog import outcomeLog
 from .peerCompareN import peerCompareN
 from .proposeRecipe import proposeRecipe
 from .readCapability import readCapability
@@ -306,27 +305,6 @@ _SPECS: dict[str, ToolSpec] = {
         openWorldHint=False,
     ),
     # ── 분석 추론 surfacing (workbench 내부 → registry SSOT) ──
-    "OutcomeLog": ToolSpec(
-        "OutcomeLog",
-        "분석 의사결정을 ~/.dartlab/decisions/{market}/{stockCode}.md 에 pending entry 로 기록. N 일 뒤 시장 가격으로 reflection — 진화 루프 입구.",
-        {
-            "type": "object",
-            "properties": {
-                "stockCode": {"type": "string"},
-                "market": {"type": "string", "enum": ["KR", "US"]},
-                "date": {"type": "string"},
-                "decision": {"type": "string"},
-                "theme": {"type": "string"},
-            },
-            "required": ["stockCode", "date", "decision"],
-        },
-        # 디스크 쓰기 — write tool. 같은 (date, stockCode) 호출은 storeDecision 이 skip 하지만
-        # 도구 시그니처상 idempotent 단정 X.
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=False,
-        openWorldHint=False,
-    ),
     "LookAheadGuard": ToolSpec(
         "LookAheadGuard",
         "Company.panel 의 asOf 강제 호출 — back-test/decision reflection 시 미래 데이터 누설 차단. asOf 누락 거부.",
@@ -751,7 +729,6 @@ _TOOLS: dict[str, ToolFn] = {
     "SaveArtifact": saveArtifact,
     "CreateUserSkill": createUserSkill,
     "CompileVisual": compileVisual,
-    "OutcomeLog": outcomeLog,
     "LookAheadGuard": lookAheadGuard,
     "GroundingCheck": groundingCheck,
     "RequestUserInput": requestUserInput,
@@ -787,7 +764,6 @@ CANONICAL_V2: tuple[str, ...] = (
     "CreditScorecard",
     "ScenarioCompareN",
     "ScenarioOverlay",
-    "OutcomeLog",
     "SearchPastSessions",
 )
 
@@ -816,7 +792,6 @@ _LEGACY_NAME_MAP = {
     "save_artifact": "SaveArtifact",
     "create_user_skill": "CreateUserSkill",
     "compile_visual": "CompileVisual",
-    "outcome_log": "OutcomeLog",
     "lookahead_guard": "LookAheadGuard",
     "grounding_check": "GroundingCheck",
     "request_user_input": "RequestUserInput",

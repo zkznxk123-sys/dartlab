@@ -29,7 +29,7 @@ codex mcp add dartlab -- dartlab mcp
 | `RunPython` | Polars 다단 계산 (ref 발급) |
 | `CompileVisual` | 차트 spec codegen → visualRef |
 | `SaveArtifact` | 큰 표/차트 별도 저장 → artifactRef |
-| `GroundingCheck` / `OutcomeLog` / `LookAheadGuard` | evidence flow 가드 |
+| `GroundingCheck` / `LookAheadGuard` | evidence flow 가드 |
 | (자동 생성, 후속) `ListPlugins` | 외부 plugin 목록 (T5-5) |
 
 총 ~32 tool 수동 등록. `ai/tools/_autogen.py` (T11-1) 로 120+ 자동 변환 후속.

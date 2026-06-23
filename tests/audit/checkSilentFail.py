@@ -82,11 +82,6 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # AI 런타임 상태 저장 (없으면 첫 실행)
         "ai/__init__.py",
         "skills/registry.py",
-        # AI outcome memory — user-generated decision logs (~/.dartlab/decisions/{market}/)
-        # 디렉토리/파일 부재 = "아직 결정 기록 없음" semantic, FileNotFoundError 부적절.
-        "ai/memory/outcomeResolver.py",
-        "ai/memory/outcomeLog.py",
-        "ai/memory/outcomeStats.py",
         # analysis/forecast/core 런타임 캐시 (HF seed/backtest output)
         "analysis/forecast/forwardTest.py",
         "core/mappers/scanner.py",

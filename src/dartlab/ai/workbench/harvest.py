@@ -3,8 +3,7 @@
 memory/wiring.py 공유 helper 호출 — chat-native 와 동일 SSOT.
 
 P-revised 이전: 모델이 propose_skill tool 로 신규 skill 후보 spec 작성 → kind=generated
-status=unverified 사다리. 0 promoted skill 로 dormant 상태였고 outcome ground truth loop 가
-실용적 학습 신호로 대체.
+status=unverified 사다리. 0 promoted skill 로 dormant 상태였고 폐기됐다.
 """
 
 from __future__ import annotations
@@ -21,7 +20,7 @@ from .state import WorkbenchState
 def runHarvest(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[TraceEvent]:
     """memory wiring 만 실행 (LLM 호출 없음).
 
-    provider 인자는 시그니처 호환을 위해 유지. 향후 outcome_log resolve hook 도입 시 사용.
+    provider 인자는 시그니처 호환을 위해 유지.
     """
     yield TraceEvent(kind="pass_enter", data={"pass": "harvest"})
     _wireMemory(state)
@@ -29,7 +28,7 @@ def runHarvest(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[T
 
 
 def _wireMemory(state: WorkbenchState) -> None:
-    """선택 skill 사용 통계 + 결정 회상 + outcome_log pending entry. 실패해도 조용히."""
+    """선택 skill 사용 통계 + 결정 회상. 실패해도 조용히."""
     from dartlab.ai.memory.wiring import inferStockCodeContext
 
     ok = not state.gateBlocked and state.failure is None
@@ -53,6 +52,4 @@ def _wireMemory(state: WorkbenchState) -> None:
         ok=ok,
         runId=state.runId,
         extraTags=extra_tags,
-        stockCode=stockCode,
-        market=market,
     )
