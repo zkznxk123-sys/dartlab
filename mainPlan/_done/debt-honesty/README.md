@@ -1,6 +1,8 @@
-# DartLab 부채 감소 (Debt-Honesty)
+# DartLab 부채 감소 (Debt-Honesty) — ✅ 완료 (_done)
 
-> 상태: **PRD 확정 (2026-06-21) · 1차(7차원)+2차(미감사 13엔진+landing+ui-packages) 전수조사 = 66 finding · 6 전문가 적대 평가 5라운드(R1~R3 1차 PRD min 97, R4~R5 2차 확장 min 97) → 전원 ≥95 통과(blocking 0) · ground-truth 교정 12+항 반영.** (운영자 goal "dartlab 전수조사 → 약점 개선 플랜 → 개별 95점 냉정평가까지 토론 루프"의 산출물). **커버리지 = 전 엔진+landing+ui-packages(ui/web·blog만 제외).** 착수 = 운영자 go. 백엔드/가드/문서가 주 범위이나 P2 UI 제거는 운영자 push 승인 필수.
+> ✅ **완료 (origin 반영)**: P0~P3 정공법 실행 + push 완수 (32 commit·`ded2daac9`). architecture-l0-l15 전부 PASS·lint 가드 4종·ruff·277 story 테스트 그린. P0 9/9 · P1(가드 5종 배선) · P2(ui/web 26,635줄 등 ~28K줄 dead 회수) · P3-1 트랙박제 + P3-3 builders 6,111줄 god-file 14도메인 분해. 정직한 회수 vs keep(live는 보존)·P1-5 형식주의 명시거부가 정공법. 상세 = `00-eval-ledger.md §5`(as-built·ground-truth 정정 ~17항·잠재버그 5건).
+>
+> 상태(기획): **PRD 확정 (2026-06-21) · 1차(7차원)+2차(미감사 13엔진+landing+ui-packages) 전수조사 = 66 finding · 6 전문가 적대 평가 5라운드(R1~R3 1차 PRD min 97, R4~R5 2차 확장 min 97) → 전원 ≥95 통과(blocking 0) · ground-truth 교정 12+항 반영.** (운영자 goal "dartlab 전수조사 → 약점 개선 플랜 → 개별 95점 냉정평가까지 토론 루프"의 산출물). **커버리지 = 전 엔진+landing+ui-packages(ui/web·blog만 제외).** 착수 = 운영자 go. 백엔드/가드/문서가 주 범위이나 P2 UI 제거는 운영자 push 승인 필수.
 > 거처: src/dartlab + tests + .github + ui + 문서. SSOT = `mainPlan/debt-honesty/`.
 >
 > **구현 상태 (운영자 "정공법으로 끝까지 완성" 지시): MUST(P0+P1) 실질 완료 · 14 commit(미push, 동시 세션 UI interleave로 보류).** P0 9/9 + P1-1·2·3·4·6·7·8B 완료(가드 5종 신규저작/배선·importlib AST 봉합·표면드리프트 정정). P1-5(docstring)=형식주의 함정 확정→부정확 분모 배선 *명시 거부*(좀비 가드 금지). P1-8A(landing)·P2(유령=운영자 결정)·P3(god=위임) 잔여. 구현이 잠재버그 4건·숨은위반 다수·as-built 정정 6항을 추가 표면화. 상세 = [00-eval-ledger.md](00-eval-ledger.md) §5.
