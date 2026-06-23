@@ -339,11 +339,12 @@
 .dlTerm .feedInst:hover:not(.on) { color: var(--txt); }
 .dlTerm .feedInstNote { font-family: var(--cond); font-size: 8px; color: var(--dimmer); }
 .dlTerm .filingList.feedList { flex: 1 1 0; min-height: 0; max-height: none; } /* 고정높이 패널 내부에서 잔여 채우고 스크롤(검색바+칩+sub 와 무관하게 견고) */
-/* 좌측 레일 높이 정렬 — 매크로·산업·시장공시 3 패널 동일 높이(계기판 정렬) + feed 바 고정.
-   하단 스크리너/워치(fillCol)가 잔여를 흡수해 리스트가 가장 크게(전체 스크롤 회피). */
+/* 좌측 레일 높이 — 매크로·산업은 고정 시각화(quadrant·scatter)라 166 정렬, 시장공시는 스크롤
+   리스트라 분리해 더 키운다(헤더+검색바+칩이 166 안을 잠식해 ~4행만 보이던 문제 해소). 컬럼은
+   overflow-y:auto 라 합이 뷰포트를 넘으면 스크롤 흡수 + 하단 스크리너/워치(fillCol)가 잔여 흡수. */
 .dlTerm .colL > .panel.eMacro,
-.dlTerm .colL > .panel.eIndustry,
-.dlTerm .colL > .panel.eMarketFeed { flex: 0 0 166px; height: 166px; }
+.dlTerm .colL > .panel.eIndustry { flex: 0 0 166px; height: 166px; }
+.dlTerm .colL > .panel.eMarketFeed { flex: 0 0 264px; height: 264px; }
 /* 시장공시 패널 body = flex column → 헤더 아래 검색바·칩 고정, 리스트가 잔여 흡수+스크롤. */
 .dlTerm .colL > .panel.eMarketFeed .panelBody { display: flex; flex-direction: column; min-height: 0; }
 /* 스크리너(scan)가 피드에 밀려 0 으로 압착되지 않게 min-height — 초과 시 .col(overflow-y:auto) 스크롤. */
