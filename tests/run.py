@@ -144,7 +144,8 @@ GATES: dict[str, Gate] = {
             "python -X utf8 tests/audit/valuationPublishLint.py --strict && "
             "python -X utf8 tests/audit/deprecationAudit.py && "
             "python -X utf8 tests/audit/staleImports.py --check && "
-            "python -X utf8 tests/audit/untrustedWrapAudit.py --strict"
+            "python -X utf8 tests/audit/untrustedWrapAudit.py --strict && "
+            "python -X utf8 tests/audit/checkAgentBoundary.py --strict"
         ),
     ),
     "architecture-l0-l15": Gate(

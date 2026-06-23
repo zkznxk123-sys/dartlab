@@ -4,13 +4,16 @@
 - 본체는 ai/agent.py (runAgent — chat-native + LLM 자율 tool calling)
 - WorkbenchLoop 는 옵션 sub-agent — agent_gateway.py / kernel.py 만 직접 호출
 - 새 5 패스 패턴 모듈 / *Loop / *Graph 클래스 추가 금지
-- "graph 강제" / "verify 강제" / "회귀 가드" 같은 자기 인식 단어 등장 시 검토
+- "graph 강제" / "verify 강제" / "회귀 가드" 같은 자기 인식 단어 등장 시 검토(advisory)
 
-경고만 — 점진 마이그레이션. CI / pre-commit 추적용.
+검사 2 등급 (debt-honesty P1-1 — 유령 가드 → 실 강제):
+- **구조적 4 검사** (WorkbenchLoop 직접호출 · 새 workbench 모듈 · *Loop/*Graph/*Kernel 클래스 ·
+  5 패스 노드 식별자) = AST/구조 기반 FP-0 → ``--strict`` 로 강제, ``tests/run.py`` 배선.
+- **keyword advisory** (한국어 자기인식 구절 substring) = legit 주석에서 FP 불가피 → 검토만, 차단 X.
 
 Usage:
     uv run python -X utf8 tests/audit/checkAgentBoundary.py
-    uv run python -X utf8 tests/audit/checkAgentBoundary.py --strict   # exit 1 if violations
+    uv run python -X utf8 tests/audit/checkAgentBoundary.py --strict   # 구조적 위반 시 exit 1 (advisory 무관)
 """
 
 from __future__ import annotations
@@ -21,10 +24,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "src" / "dartlab"
 
-# WorkbenchLoop 직접 호출 허용 파일 (agent_gateway / kernel / workbench 내부).
+# WorkbenchLoop 직접 호출 허용 파일 (agentGateway / kernel / RunWorkbench 도구 / workbench 내부).
+# ⚠ 경로는 실제 파일명과 일치해야 한다 — agent_gateway.py 는 agentGateway.py 로 camelCase
+# rename 됐는데 allowlist 가 stale 이라 legit 호출이 FP 됐었다 (debt-honesty P1-1 정정).
 _ALLOWED_WORKBENCH_CALLERS = {
-    SRC / "server" / "agent_gateway.py",
+    SRC / "server" / "agentGateway.py",
     SRC / "ai" / "kernel.py",
+    SRC / "ai" / "tools" / "runWorkbench.py",  # RunWorkbench 도구 = WorkbenchLoop 의 sanctioned 러너
 }
 
 # workbench 모듈에 *기존* 파일들. 새 파일 추가 시 경고.
@@ -201,24 +207,34 @@ def _check_five_pass_node_identifiers(violations: list[str]) -> None:
 
 
 def main() -> int:
-    violations: list[str] = []
-    _check_workbench_direct_calls(violations)
-    _check_new_workbench_modules(violations)
-    _check_new_loop_classes(violations)
-    _check_regression_keywords(violations)
-    _check_five_pass_node_identifiers(violations)
+    # 구조적 위반(strict, FP-0) vs advisory(fuzzy 한국어 구절, 검토용) 분리.
+    # _check_regression_keywords 는 '회귀 가드'·'GATE 차단' 같은 한국어 구절을 substring 매치라
+    # legit 주석에서 FP 가 불가피 → strict 차단 불가. 구조적 4 검사만 --strict 로 강제한다.
+    structural: list[str] = []
+    advisory: list[str] = []
+    _check_workbench_direct_calls(structural)
+    _check_new_workbench_modules(structural)
+    _check_new_loop_classes(structural)
+    _check_five_pass_node_identifiers(structural)
+    _check_regression_keywords(advisory)
 
     strict = "--strict" in sys.argv
 
-    if not violations:
-        print("[agent-boundary] OK — 모든 룰 통과.")
-        return 0
+    if advisory:
+        print(f"[agent-boundary] advisory(검토 권장, fuzzy) {len(advisory)} 건:")
+        for v in advisory:
+            print(f"  ~ {v}")
+        print()
 
-    print(f"[agent-boundary] 위반 {len(violations)} 건:\n")
-    for v in violations:
-        print(f"  - {v}")
-    print("\n룰 본문: memory/feedback_no_graph_regression.md")
-    return 1 if strict else 0
+    if structural:
+        print(f"[agent-boundary] 구조적 위반 {len(structural)} 건:")
+        for v in structural:
+            print(f"  - {v}")
+        print("\n룰 본문: memory/feedback_no_graph_regression.md")
+        return 1 if strict else 0
+
+    print("[agent-boundary] OK — 구조적 룰 통과 (advisory 는 검토만, 차단 아님).")
+    return 0
 
 
 if __name__ == "__main__":
