@@ -55,7 +55,7 @@ def test_svelte_bundle_serves(tmp_path, monkeypatch):
 
 
 def test_react_bundle_serves(tmp_path, monkeypatch):
-    """React 번들(assets/) — DARTLAB_UI_LEGACY 가역 escape 경로 보존."""
+    """assets/ 번들 구조 방어 — registerSpa 가 assets/ 레이아웃도 무크래시 서빙(옛 React 호환, ui/web 회수 후 현재 미사용이나 방어 유지). debt-honesty P2-2."""
     client = _client(monkeypatch, _mkbuild(tmp_path, react=True))
 
     assert client.get("/").status_code == 200

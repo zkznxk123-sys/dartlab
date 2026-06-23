@@ -27,10 +27,9 @@ def configureParser(subparsers) -> None:
 
 
 def _devUiPort() -> int:
-    """dev 모드에서 띄우는 UI dev 서버 포트 — 기본 SvelteKit(ui/apps/local) 5174,
-    DARTLAB_UI_LEGACY=1 면 옛 React(ui/web) 5400. resolveUiSourceDir 분기와 1:1 대응.
-    target(브라우저 자동 열기)과 안내 메시지가 같은 포트를 쓰도록 SSOT."""
-    return 5400 if os.environ.get("DARTLAB_UI_LEGACY") else 5174
+    """dev 모드에서 띄우는 UI dev 서버 포트 — SvelteKit(ui/apps/local) 5174.
+    (옛 React ui/web 5400 escape 는 debt-honesty P2-2 에서 ui/web 회수와 함께 제거.)"""
+    return 5174
 
 
 def run(args) -> int:
@@ -114,7 +113,7 @@ def _runDevMode(url: str) -> None:
         if result.returncode != 0:
             printWarning("Svelte dev 서버가 비정상 종료되었습니다.")
 
-    ui_label = "React (legacy)" if os.environ.get("DARTLAB_UI_LEGACY") else "Svelte"
+    ui_label = "Svelte"
     print("\n  DartLab AI (개발 모드)")
     print(f"  API:     {url}")
     print(f"  {ui_label}:  http://localhost:{_devUiPort()}")

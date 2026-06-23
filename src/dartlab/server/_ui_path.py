@@ -1,19 +1,15 @@
 """UI 빌드 경로 해석 — web.py와 cli/commands/ai.py가 공유한다.
 
-기본 UI = ui/apps/local (SvelteKit 챗·터미널 셸, 단계-10 전환). 옛 ui/web(React) 는
-DARTLAB_UI_LEGACY=1 로 명시 fallback 한다(가역, 한 줄 escape).
+UI = ui/apps/local (SvelteKit 챗·터미널 셸). 번들 UI = 공유 surface(@dartlab/ui-surfaces)
+소비 SvelteKit 앱이라 랜딩(공표)과 로컬(pip·dev)이 같은 터미널을 쓴다.
 
-pip wheel 번들(publish.yml → site-packages/dartlab/ui/build/)도 ui/apps/local 로 전환 완료 —
-번들 UI = 공유 surface(@dartlab/ui-surfaces) 소비 SvelteKit 앱이라 랜딩(공표)과 로컬(pip·dev)이
-같은 터미널을 쓴다. dev 체크아웃(아래 4번)·pip(아래 3번) 모두 svelte 로컬 앱을 서빙한다.
-옛 React ui/web 은 financial/quant bento 대시보드(/api/viz, 미이관) 보존용 가역 escape 로 잔존.
+옛 React ui/web(financial/quant bento 대시보드)은 import 0·미배선으로 회수됨 (debt-honesty P2-2)
+— DARTLAB_UI_LEGACY 가역 escape 도 함께 제거.
 
 resolveUiBuildDir 우선순위:
 1. DARTLAB_UI_DIR 환경변수 (dartlab-desktop 등 외부 소비자가 명시)
-2. DARTLAB_UI_LEGACY=1 → 옛 React UI(ui/web) 명시 요청 (가역 escape)
-3. 패키지 내부: site-packages/dartlab/ui/build/ (pip install — wheel 번들)
-4. 개발 환경: project_root/ui/apps/local/build/ (SvelteKit adapter-static)
-5. 개발 fallback: project_root/ui/web/build → ui/web/client/dist (svelte build 부재 시)
+2. 패키지 내부: site-packages/dartlab/ui/build/ (pip install — wheel 번들)
+3. 개발 환경: project_root/ui/apps/local/build/ (SvelteKit adapter-static)
 """
 
 from __future__ import annotations
@@ -30,44 +26,23 @@ def _repoRoot() -> Path:
     return _PKG_ROOT.parent.parent
 
 
-def _legacyWebBuild() -> Path:
-    """옛 React UI(ui/web) 빌드 디렉토리 — DARTLAB_UI_LEGACY 및 dev fallback 공용."""
-    repo_root = _repoRoot()
-    web_build = repo_root / "ui" / "web" / "build"
-    if web_build.is_dir():
-        return web_build
-    # 과거 LibreChat-derived 산출물
-    return repo_root / "ui" / "web" / "client" / "dist"
-
-
 def resolveUiBuildDir() -> Path:
-    """UI 빌드 결과물(index.html, assets/) 디렉토리를 반환한다."""
+    """UI 빌드 결과물(index.html, _app/) 디렉토리를 반환한다."""
     # 1. 환경변수 — dartlab-desktop 등 외부 소비자가 명시
     if env := os.environ.get("DARTLAB_UI_DIR"):
         return Path(env)
 
-    # 2. 가역 escape — 옛 React UI(ui/web) 명시 요청
-    if os.environ.get("DARTLAB_UI_LEGACY"):
-        return _legacyWebBuild()
-
-    # 3. 패키지 내부 (pip install 환경) — site-packages/dartlab/ui/build/
+    # 2. 패키지 내부 (pip install 환경) — site-packages/dartlab/ui/build/
     pip_build = _PKG_ROOT / "ui" / "build"
     if pip_build.is_dir():
         return pip_build
 
-    # 4. 개발 환경 — SvelteKit 로컬 앱 (adapter-static build)
-    local_build = _repoRoot() / "ui" / "apps" / "local" / "build"
-    if local_build.is_dir():
-        return local_build
-
-    # 5. 개발 fallback — 옛 React UI 빌드 (svelte build 미존재 시)
-    return _legacyWebBuild()
+    # 3. 개발 환경 — SvelteKit 로컬 앱 (adapter-static build)
+    return _repoRoot() / "ui" / "apps" / "local" / "build"
 
 
 def resolveUiSourceDir() -> Path:
     """UI 소스 디렉토리를 반환한다 (dev 모드 npm 명령용)."""
     if env := os.environ.get("DARTLAB_UI_DIR"):
         return Path(env)
-    if os.environ.get("DARTLAB_UI_LEGACY"):
-        return _repoRoot() / "ui" / "web"
     return _repoRoot() / "ui" / "apps" / "local"
