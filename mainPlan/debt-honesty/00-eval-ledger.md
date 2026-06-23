@@ -157,15 +157,16 @@ origin/master 대비 15 commit ahead인데 **동시 세션의 UI 커밋이 inter
 | P2-7 orphan baseline | aiKpiV1·importLinterExceptions 삭제(소비도구0) | `f4c20689b` |
 | P2-8 flakyAudit | dead placeholder 삭제 + flaky SSOT(conftest rerun) 명문화 | `f4c20689b` |
 | P2-9 README_EN | Terminal·Skill OS 영문 섹션 추가(2 기능 갭), '5누락'=구조차이 정정 | `645da56b6` |
-| P2-5 죽은 MCP 6종 | **판정: 제거 부적합** | (코드변경 없음) |
+| P2-1 edinet 동결 | providers `__all__` 제외 + dataConfig phantom 슬롯 라벨 (게이트는 이미 deferred·providerGate 11/11·코드유지·직접 import 보존) | `5d4d7442d`·`d12456a77` |
+| P2-5 죽은 MCP 6종 | **판정: 제거 부적합** (내부 서브시스템) | (코드변경 없음) |
 
 **P2 추가 ground-truth 정정**(census가 또 부정확):
 - **P2-5**: "죽은 MCP 6종 잔재=제거"는 거짓 — 6종은 상호연결된 *내부 recipe/workbench 서브시스템*(ListEngineGaps↔ProposeRecipe↔ValidateRecipe + ai/recipes/ 4모듈·server.py·validate 사용·InspectDataset=work.py). "노출 0"은 *의도된 internal-only*. 진짜 문제(leak)는 P2-6에서 차단 → 제거 안 함.
 - **P2-10 (미배선 6-8K)**: "importer 0 → 삭제 안전"이 **부정확** — (a) `quant/portfolio`(blackLitterman·meanCVaR)는 P0-9 recipe가 가리키는 *사용자-호출 라이브러리 능력*(삭제 시 catalog recipe 깨짐) (b) `plugins`는 import-linter 실측 `company→plugins→ai.tools` *라이브 체인*(PRD "채택 0" 거짓) (c) `server/api 죽은라우터`는 ui/web(FE-1)과 연쇄. → **per-bundle "internal-dead vs 사용자능력" 판정 필수**, 블랜킷 삭제 시 공개능력 회귀.
 
-### 5.8 미완 (운영자 제품결정 / calm-tree 필요 — 블랜킷 실행 시 회귀위험)
-- **P2-1 edinet 동결** = 10+ 가드 파일 조율 수술(`__all__`·providerSymmetry`_EDINET_DEFERRED`·folderMirror 디렉터리기대·folderSize/testCoverage/providerContract baseline). PRD §8 자체가 "4 게이트 걸침" 위험 명시. 동시 churn 중 무리하면 blocking 파리티게이트 회귀. (edinet 소비처는 0 확인 — 동결 자체는 타당, 단 조율이 calm-tree 필요)
-- **P2-2 ui/web**(155파일 17K LOC) = UI 삭제(push 승인 필수) + viz-bento 폐기/이관 *제품결정*.
-- **P2-10 미배선** = 위 5.7 per-bundle 능력판정(공개능력 삭제 위험).
-- **P3 god-split** = builders.py 6,111줄 등 위임 트랙(첫 증명도 큰 refactor·calm-tree).
-- **push** = origin 대비 동시 세션 UI 커밋 interleave로 브랜치 전체 push 불가(운영자 UI 승인 대기).
+### 5.8 미완 (운영자 제품결정 — 블랜킷 실행 시 공개능력/기능 회귀)
+> ★edinet(P2-1)은 calm-tree(동시 세션 종료) 후 완료. 남은 2 P2 는 *제품결정*이 본질.
+- **P2-2 ui/web**(155파일 17K LOC) = 순수 dead 아님 — `_ui_path.py` DARTLAB_UI_LEGACY *가역 escape hatch* + `server/web.py` 서빙 + viz_router(/api/viz) 마운트. 삭제 = **legacy escape 제거 + viz bento 폐기 = 제품결정** + 서버 서빙 변경 + UI push 승인. PRD "폐기 vs 이관" 게이트 그대로.
+- **P2-10 미배선** = ★**census 과대평가 확인**: W-PH "importer 0·live consumer 0" 주장이 검증 시 다수 거짓 — `analysisGraph`(builder.py·__init__·테스트2 import됨, 재export) · `plugins`(import-linter 실측 company→plugins→ai.tools live chain) · `quant/portfolio`(P0-9 recipe 사용자호출 능력). 블랜킷 삭제 = 공개능력/live 회귀. per-bundle 배선/회수/keep 판정 필요(census 신뢰 불가, 직접 재검증 선결).
+- **P3 god-split** = builders.py 6,111줄 등 위임 트랙(첫 증명도 큰 refactor — calm-tree 확보됐으나 6K줄 분할은 별도 집중 필요).
+- **push** = origin 대비 unpushed 24 중 동시 세션 UI 커밋 2(`a4caa1205`·`62f3f9c43` /cards) interleave → 브랜치 전체 push 시 UI 미승인 상행이라 보류. 운영자 UI 승인("푸시해/올려") 시 내 23 debt-honesty 커밋 함께 상행.
