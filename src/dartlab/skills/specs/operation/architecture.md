@@ -229,7 +229,12 @@ cross-company query 는 raw parquet lazy scan 금지. 모든 provider 가 `data/
 
 상세는 `operation.code` "11 룰" 섹션 참조.
 
-## Skill OS 그래프 산출물 6 종
+### providers 레이어 god 격차 분해 트랙 (debt-honesty P3-1 — 위임·점진)
+
+- **측정**: providers 76.7K줄(raw)/61.9K(유효) = frame 대비 **~82배** (dart 하위만 49.9K). 목표 = 레이어간 ≤10배.
+- **근인**: providers 가 panel/finance/search 데이터 owner 라 로직이 집중. 14 sub-namespace 로 자연 분기.
+- **분해 순서**(재구현 아닌 *위치 이동* — HF 경로·consume seam 불변 전제): ① search(~7K) → frame/synth 또는 빌드레이어 ② panel pivot → frame ③ finance pivot → synth. Company facade frozen surface(`checkProviderCompanyFrozenSurface`)·CompanyProtocol 보존이 불변 가드.
+- **추적**: `tests/audit/moduleSizeAudit.py --max-ratio N` 으로 격차 측정 (현재 미배선 advisory — strict 배선은 legit provider 증가까지 차단해 노이즈라 점진 도입). 실행은 frontend-refactor-loop·company-analysis-report 백로그 위임. 본 PRD 는 *순서·측정* 박제만.
 
 Skill 은 운영자·사용자·사용자가 명시적으로 위임한 AI 가 관리하고 개발한다. 산출물 6 종은 spec 변경 의도에 맞춰 같은 변경 단위에서 명시적으로 갱신한다.
 
