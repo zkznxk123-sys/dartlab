@@ -22,6 +22,9 @@ const UPSTREAM = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolv
 // 종목 뉴스(네이버 헤드라인+스니펫) 전용 private 데이터셋 — 언론사 저작권이라 공개 dartlab-data 안 감.
 // 워커가 토큰으로 서버사이드 read 해 화면에 표시하는 것은 "라이브 표시"(의도된 용도) — 공개 벌크 재배포 아님.
 const NEWS_UPSTREAM = 'https://huggingface.co/datasets/eddmpython/dartlab-news-private/resolve/main';
+// 캐러셀/회사 이미지(공개 dartlab-media) — 파일명에 콘텐츠해시가 박혀 불변(immutable). 브라우저가 HF
+// resolve 를 직접 다량 요청해 익명 throttle 당하던 것을 엣지 캐시(1년)로 흡수 → HF 직타 0, 빠름·안정.
+const MEDIA_UPSTREAM = 'https://huggingface.co/datasets/eddmpython/dartlab-media/resolve/main';
 const PASS_HEADERS = ['Content-Type', 'Content-Length', 'Content-Range', 'Accept-Ranges', 'ETag', 'Last-Modified', 'x-linked-size'];
 
 function cacheControlFor(path) {
@@ -126,6 +129,45 @@ export default {
 			if (ctx) ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
 			return resp;
 		}
+		// /media/<path> — dartlab-media(이미지) 엣지 캐시 프록시. 불변 파일명(콘텐츠해시) → 1년 immutable.
+		// <img> 전체 GET 은 엣지 캐시 히트(HF 직타 0). Range 요청도 통과(파셜은 캐시 put 안 함).
+		const mm = url.pathname.match(/^\/media\/(.+)$/);
+		if (mm) {
+			const mpath = mm[1].replace(/^\/+/, '').replace(/\.\.+/g, '');
+			const mUrl = `${MEDIA_UPSTREAM}/${mpath}`;
+			const mRange = req.headers.get('Range');
+			const mFull = req.method === 'GET' && !mRange;
+			const mKey = new Request(mUrl);
+			if (mFull) {
+				const hit = await caches.default.match(mKey);
+				if (hit) {
+					const h2 = new Headers(hit.headers);
+					for (const [k, v] of Object.entries(cors)) h2.set(k, v);
+					h2.set('x-dl-edge', 'HIT');
+					return new Response(hit.body, { status: hit.status, headers: h2 });
+				}
+			}
+			const mfwd = new Headers();
+			if (mRange) mfwd.set('Range', mRange);
+			let mup = null;
+			for (let attempt = 0; attempt < 4; attempt++) {
+				mup = await fetch(mUrl, { method: req.method, headers: mfwd });
+				if (mup.ok || mup.status === 206 || mup.status === 304) break;
+				if (mup.status !== 403 && mup.status !== 429 && mup.status < 500) break;
+				await new Promise((r) => setTimeout(r, 180 * (attempt + 1)));
+			}
+			const mh = new Headers();
+			for (const k of ['Content-Type', 'Content-Length', 'Content-Range', 'Accept-Ranges', 'ETag', 'Last-Modified']) { const v = mup.headers.get(k); if (v) mh.set(k, v); }
+			// 콘텐츠해시 박힌 이미지(name.<8hex>.webp)만 1년 immutable. 가변 JSON(carousels/*.json·index)은
+			// 재게시 갱신돼야 하므로 10분(엣지·브라우저가 곧 새 버전 받게).
+			const mImmutable = /\.[0-9a-f]{8}\.(webp|png|jpe?g|gif|svg|avif)$/i.test(mpath);
+			mh.set('Cache-Control', mImmutable ? 'public, max-age=31536000, immutable' : 'public, max-age=600');
+			for (const [k, v] of Object.entries(cors)) mh.set(k, v);
+			const mresp = new Response(req.method === 'HEAD' ? null : mup.body, { status: mup.status, headers: mh });
+			if (mFull && mup.status === 200 && ctx) ctx.waitUntil(caches.default.put(mKey, mresp.clone()));
+			return mresp;
+		}
+
 		const m = url.pathname.match(/^\/hf\/(.+)$/);
 		if (!m) return new Response('not found — use /hf/<dataset-path>', { status: 404, headers: cors });
 		const path = m[1].replace(/^\/+/, '').replace(/\.\.+/g, ''); // 경로 정규화 (상위 디렉터리 탈출 차단)

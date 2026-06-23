@@ -113,6 +113,9 @@ jobs:
           VITE_FEEDBACK_URL: https://dartlab-question-collector.eddmpython.workers.dev
           # HF parquet 레인지 프록시(콜드 403 흡수 + range 헤더 보존, infra/workers/hfProxy). 비우면 HF 직결로 가역.
           VITE_DARTLAB_HF_RESOLVE: https://dartlab-hf-proxy.eddmpython.workers.dev/hf
+          # 캐러셀/회사 이미지(dartlab-media) 엣지 캐시 프록시(/media 라우트). 브라우저가 HF resolve 를 직접
+          # 다량 요청해 익명 throttle 당하던 것을 엣지 1년 캐시로 흡수. 비우면 HF 직결로 가역.
+          VITE_DARTLAB_HF_MEDIA_RESOLVE: https://dartlab-hf-proxy.eddmpython.workers.dev/media
           # 네이버 fchart fresh-tail 프록시(같은 hfProxy 워커 /naver 라우트). gov(T+1 지연) 미발행 최신 거래일을
           # 표시용으로 채움. 비우면 미동작(EOD 까지만)으로 가역. infra/workers/hfProxy worker.js /naver.
           VITE_DARTLAB_NAVER_PROXY: https://dartlab-hf-proxy.eddmpython.workers.dev/naver
