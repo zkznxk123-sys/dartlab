@@ -36,12 +36,14 @@
 
 ## NEXT (재개 포인터)
 
-> 운영자 go 시 **Phase-0 사전점검 probe(08 §4.1) 먼저** — 체이닝 1.4x·cost-by-nature 6%·shard0 대표성을 전 유니버스 측정해 SHIP 숫자 확정. 그 뒤 Phase 0 스파인. 08 §2 정정 6갭 + §3 UI/UX 상태기계 반영.
+1. ~~**Phase 0 (스파인)**~~ ✅ `b3dec2ff8` — rcept_no/stlm_dt + 헤더 리본 + 팩트별 ↗.
+2. ~~**Phase 1a (lossPct+control-shift)**~~ ✅ `f73cda8ea`.
+3. ~~**Phase 1b (인력·주주환원 자기이력 + 상세보기 네비 + CARD_GUIDE convention + G3 verdict 게이트)**~~ ✅ `e3da75d07`(커밋·UI push 운영자 대기). **= Phase 1 MVP 완료**(스파인+zero-fetch 리프레임 = 컷라인).
+4. **F1 (당기/전기 시계열 체이닝, 사용자 명시 요청 "panel IS처럼 이어서", doc 07 간판)** — ★**SHIP-게이트 정정 reconciliation probe 통과(2026-06-24)**: 7,433 (code,fy) 셀 · thstrm 1차공시 67.1%·proxy(frmtrm/lwfr만) 32.9% · 재수록 ≥2 셀 4,936 중 **2% 내 합치 96.5%**(canonical 명확)·**정정 3.5%**(마커 필요 입증·과설계 아님) · ★002200 DPS 80↔800(10x)=07 §2.4 스케일/데이터 드리프트 실재(단위정규화 선행·latest-wins+원본보존). **설계 견고 검증.** 구현 스코프(다음 단위, UI-visual): `buildShareholderReturn` dividend SELECT +frmtrm/lwfr/rcept_no/stlm_dt + `chainTriplet`(EXPLODE fy/fy-1/fy-2·reconcile 2%money·0.5pp ratio·canonical=thstrm-agree[clean 96.5% 기존값 보존]·정정=latest-wins+restated[3.5%]·proxy='전기재현'[32.9%]). 회귀안전=clean 연차 기존값 불변. **honesty=proxy/restated 마커 필수**(proxy 1/3·정정 3.5% 무표시=오해 → MiniFinChart 마킹+contract `prov`/`FinSeries.mark` 필요=UI-visual, 운영자 눈검수). 08 §3.4 마커=glyph+상시범례(hatch 6px 비가시 기각).
+5. **Phase 2 (엔진 bake)**: 인적자본 분위 배열 + rndIntensity/costByNature CI parquet(08 G1 NEEDS-PARSING/CI-bake). slip 허용.
+6. **Phase 3 (선택)**: 가동률 원문 발췌(zero 추출 한정).
 
-1. **Phase 0 (스파인, 단독 ship 가능)**: `companyLive.ts` 6 SELECT 에 `rcept_no`+`stlm_dt` 추가 (⚠ reportFacts는 이미 hyparquet 이관됨 — `e801f42f0`, 라인 L286-322·DuckDB 아님) → `LiveCompanyReportFact` contract → 도시에 헤더 리본 → 평면 팩트 패널 흡수. svelte-check 0 + 헤더 회귀 가드 + 공개/로컬 동일.
-2. **Phase 1 (zero-fetch 리프레임)**: 환원흐름 문장+RETURN 막대 / lossPct+control-shift / 인력 자기이력+`상세보기` / CARD_GUIDE 리프레임. NEVER-CLAIM grep + 3-케이스 소형주 데모 → 운영자 push 승인.
-3. **Phase 2 (엔진 bake)**: 인적자본 분위 배열 + rndIntensity CI parquet. slip 허용.
-4. **Phase 3 (선택)**: 가동률 원문 발췌(zero 추출 한정).
+> Phase 1b 잔여 하드닝(08 §3 상태기계): factsState 'error'+8s 타임아웃+재시도·형제 패널 4-state·고정높이 스켈레톤·a11y role=status — SHIP 전 정정이나 별도 단위(load effect 변경=UI). F1 과 함께 or 선행.
 
 ## 열린 결정 (착수 전 확인 가능)
 
