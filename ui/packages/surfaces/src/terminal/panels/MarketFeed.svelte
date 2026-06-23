@@ -104,7 +104,9 @@
 	const newsAsOf = $derived(news.length ? news[0].date : '');
 
 	$effect(() => {
-		if (newsState !== 'idle') return; // 1회만(탭 무관 선로드)
+		// ⚠ 가드로 newsState 를 읽지 말 것 — effect 가 자기가 쓰는 state 를 읽으면 write('loading')→재실행→
+		// cleanup(cancelled=true)이 in-flight fetch 결과를 버려 뉴스가 영영 안 뜬다(공시 effect 는 feedState 를
+		// 안 읽어 멀쩡했음). rt 만 읽어 reactive dep 0 → mount 1회 실행(=공시와 동일 패턴).
 		newsState = 'loading';
 		let cancelled = false;
 		rt.news
