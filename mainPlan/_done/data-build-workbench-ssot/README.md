@@ -1,6 +1,8 @@
 # 공동작업대 데이터빌드 SSOT 확립 (Data-Build Workbench SSOT)
 
-> 상태: **PRD 확정 (2026-06-20) · 전문가 토론(5 포지션) + 적대 평가 2인 SHIP(88/88) · ground-truth 4정정 반영.** 착수 = 운영자 go. 본 작업은 백엔드/파이프라인(데이터 빌드 오케스트레이션)이므로 UI push 승인 회로와 무관하나, 첫 흡수는 operator CI dry-run 1회로 구조 동등 확인 후 머지 권장.
+> ✅ **완료 (2026-06-21): MUST(macro 첫 증명) 흡수 구현·검증·푸시 완료.** macro sync(`runMacroData/Cycle/Regime`) + prebuild(`runMacroJson`) in-library 흡수 + 4스크립트 thin shim화(로직 중복 0) + registry + 가드 테스트 3종. master commit `4345453f8`(흡수)·`86ff3c4ad`(테스트)·`0e33bd293`(operation.architecture 박제) — 전부 origin/master 푸시 완료. 검증: ruff 클린·구조 동등(asOf/computedAt 제외)·architecture+pipeline 53 green·적대 SHIP 10/10.
+> ⏭ **SHOULD(dart/news/gov)는 본 PRD 범위 밖 — 별개 후속 웨이브**(각 도메인 audit 선행·세션당 1개·44개 일괄 금지). 동일 흡수 템플릿 적용.
+> 이전 상태: PRD 확정 (2026-06-20) · 전문가 토론(5 포지션) + 적대 평가 2인 SHIP(88/88) · ground-truth 4정정 반영. 백엔드/파이프라인이라 UI push 승인 회로 무관(operator CI dry-run 1회는 선택).
 > 거처: `src/dartlab/pipeline/stages/macro.py`(흡수) + `stages/prebuild.py`(신규) + `registry.py` + 신규 테스트 2종. 흡수 대상 = `.github/scripts/sync/buildMacro{Data,Cycle,Regime}.py` · `prebuild/buildMacroJson.py`.
 
 ---

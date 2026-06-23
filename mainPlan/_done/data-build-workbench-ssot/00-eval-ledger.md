@@ -39,4 +39,6 @@
 
 ## 4. 최종 판정
 
-전문가 5인 종합 PRD가 적대 평가 2인 SHIP(88/88), 핵심 설계 합격. blocker 4종은 소스 ground-truth 직접 검증으로 PRD에 정밀 교정 반영(자기충족성 닫음). PRD는 이제 "이 문서만 보고 재조사 없이 구현 가능"(plan-deep) 기준 충족. 착수 = 운영자 go.
+전문가 5인 종합 PRD가 적대 평가 2인 SHIP(88/88), 핵심 설계 합격. blocker 4종은 소스 ground-truth 직접 검증으로 PRD에 정밀 교정 반영(자기충족성 닫음). PRD는 이제 "이 문서만 보고 재조사 없이 구현 가능"(plan-deep) 기준 충족.
+
+**✅ 후속: MUST(macro) 흡수 구현·검증·푸시 완료(2026-06-21).** master `4345453f8`(흡수)·`86ff3c4ad`(테스트)·`0e33bd293`(박제). ground-truth 4정정 전부 구현 반영(offline 평행테스트·구조 동등·full-folder fallback·commit_message 제외). 적대검증 SHIP 10/10·53 green. SHOULD(dart/news/gov)는 별개 후속 웨이브.
