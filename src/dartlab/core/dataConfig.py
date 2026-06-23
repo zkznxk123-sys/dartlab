@@ -189,14 +189,17 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "통합검색 content 인덱스 (음절 bigram BM25 CSR + 결정론 라우터 router.json) — 런타임 lazy pull",
         "public": True,
     },
+    # ⚠ EDINET 슬롯 2종은 동결·미빌드 (frozen, unbuilt) — EDINET API 통신 불가로 빌드된 적 없는
+    # phantom 슬롯. provider 도 동결(`providers/__init__.py __all__` 제외). 미래 API 복구 시 재활성.
+    # (debt-honesty P2-1)
     "edinetDocs": {
         "dir": "edinet/docs",
-        "label": "EDINET 공시 문서 데이터 (일본)",
+        "label": "EDINET 공시 문서 데이터 (일본) — 동결·미빌드",
         "public": False,
     },
     "edinet": {
         "dir": "edinet/finance",
-        "label": "EDINET 재무 데이터 (일본)",
+        "label": "EDINET 재무 데이터 (일본) — 동결·미빌드",
         "public": False,
     },
     "aiKnowledge": {
