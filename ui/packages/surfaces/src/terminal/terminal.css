@@ -343,10 +343,9 @@
 .dlTerm .feedInstNote { font-family: var(--cond); font-size: 8px; color: var(--dimmer); }
 .dlTerm .filingList.feedList,
 .dlTerm .filingList.newsFeedList { flex: 1 1 0; min-height: 0; max-height: none; } /* 고정높이 패널 내부에서 잔여 채우고 스크롤(검색바+칩+sub 와 무관하게 견고) */
-/* 좌측 레일 높이 — 매크로·산업은 고정 시각화(quadrant·scatter)라 166 정렬, 시장공시는 스크롤
-   리스트라 분리해 더 키운다(헤더+검색바+칩이 166 안을 잠식해 ~4행만 보이던 문제 해소). 컬럼은
-   overflow-y:auto 라 합이 뷰포트를 넘으면 스크롤 흡수 + 하단 스크리너/워치(fillCol)가 잔여 흡수. */
-.dlTerm .colL > .panel.eMacro,
+/* 좌측 레일 높이 — 산업 스윕은 고정 시각화(scatter)라 166, 시장공시는 스크롤 리스트라 분리해 더 키운다
+   (헤더+검색바+칩이 166 안을 잠식해 ~4행만 보이던 문제 해소). 컬럼은 overflow-y:auto 라 합이
+   뷰포트를 넘으면 스크롤 흡수 + 하단 스크리너/워치(fillCol)가 잔여 흡수. */
 .dlTerm .colL > .panel.eIndustry { flex: 0 0 166px; height: 166px; }
 .dlTerm .colL > .panel.eMarketFeed { flex: 0 0 264px; height: 264px; }
 /* 시장공시 패널 body = flex column → 헤더 아래 검색바·칩 고정, 리스트가 잔여 흡수+스크롤. */

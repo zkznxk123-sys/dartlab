@@ -11,8 +11,6 @@
 	import MarketFeed from './MarketFeed.svelte'; // 시장 공시 피드 — 전상장사 3개월 수시공시(워치=내 종목 / 피드=시장 전체)
 	import { watchlist } from '../lib/watchlist.svelte'; // 워치 카운트 — 하단 탭 라벨 배지
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
-	import { buildMacroGlanceView } from '../lib/macroLens';
-	import RegimeQuadrant from './RegimeQuadrant.svelte';
 	import { chgClass, sign, sparkPts } from '../ui/helpers';
 
 	interface Props {
@@ -79,8 +77,6 @@
 			.slice(0, 80)
 	);
 
-	// ── 경제 (최상단 고정) ──
-	const macro = $derived(eng.raw.macro);
 	const setSector = (id: string) => onSectorFilter(id);
 
 	// ── 산업 sweep — 거시 깔때기 산업층. 34산업을 선택 렌즈로 cross-section 비교(섹터 시세 히트맵 대체). ──
@@ -99,18 +95,7 @@
 		setSector(id); // 스크리너 필터(기존 깔때기) — 한 번 더 누르면 해제
 		onIndustry?.(id); // IndustryDialog 열기(신규)
 	}
-	// 매크로 국면 → 순풍/역풍 섹터(blended). 칩 클릭 = 아래 스크리너 섹터 필터.
-	const tailwinds = $derived(eng.sectorTailwinds());
-	const macroGlance = $derived(buildMacroGlanceView(macro, tailwinds, { activeIndustryId: sectorFilter, mode: 'compact' }));
-	const macroAsOf = $derived(macro?.asOf ?? '');
 </script>
-
-<!-- 경제 — 최상단 고정 (탭 토글 폐지, 항상 노출) -->
-{#if macro}
-	<Panel {lang} className="eMacro" title={{ kr: '마켓 펄스', en: 'MARKET PULSE' }} flush>
-		<RegimeQuadrant view={macroGlance.regime} {lang} />
-	</Panel>
-{/if}
 
 <!-- 산업 sweep — 거시 깔때기 산업층(매크로→★산업→종목). 패널 = 미니 지형도(읽기 아닌 *시각화*).
      전 산업을 (수익 수준×마진 격차) 점구름으로 — 현재 산업 강조·클릭=스크리너 필터+상세. 상세는 다이얼로그. -->
