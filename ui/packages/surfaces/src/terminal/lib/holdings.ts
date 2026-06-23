@@ -4,7 +4,7 @@
 //   parentNet·parentMktcap 도 원 — 본체 재무는 조 단위라 호출측에서 *1e12 환산 후 주입(자릿수 함정 가드).
 // 정직 한계: equityEarn 은 지분법 *근사*(내부거래·공정가치 미반영), marketStake 는 상장 해소된 피출자사만,
 //   targetNet 은 최근 1기 단일값. 미해소·null 은 0 으로 뭉개지 않고 분리 카운트.
-import type { InvestmentRow, PersonAggregate, ShareholderRow } from '@dartlab/ui-contracts';
+import type { InvestmentRow, PersonAggregate, ShareholderRow, ShareholdersView } from '@dartlab/ui-contracts';
 import type { Num } from './types';
 
 export type HoldingTier = 'consolidated' | 'equity' | 'simple' | 'unknown';
@@ -43,6 +43,31 @@ export interface HoldingsModel {
 	contribShare: Num; // % — sumEquityEarn / parentNet (참고·하한, parentNet>0 일 때만)
 	bookTotal: number; // 원 — rows 장부가 합
 	maxBook: number; // 원 — 노드 크기·스케일 정규화용
+	lossBook: number; // 원 — 적자 피출자사(targetNet<0) 장부가 합
+	lossPct: Num; // % — lossBook / bookTotal (적자 계열에 묶인 자본 — 시장조회 불필요, 항상 켜진 앵커)
+}
+
+// 적자 피출자사 자본 비중 — lossPct 단일 SSOT(헤더 한 줄 + 다이얼로그 공용, G4 lift).
+// targetNet<0 행의 장부가 합 ÷ 전체 장부가. 시장조회 불필요·전 종목 동작(장부가 항상 존재)·판정 없음.
+export interface LossSummary {
+	lossBook: number;
+	lossPct: Num;
+	lossCount: number; // 적자 피출자사 수
+	bookTotal: number;
+}
+export function lossSummary(rows: Pick<InvestmentRow, 'targetNet' | 'bookValue'>[]): LossSummary {
+	let lossBook = 0;
+	let bookTotal = 0;
+	let lossCount = 0;
+	for (const r of rows) {
+		const bv = r.bookValue ?? 0;
+		if (r.bookValue != null) bookTotal += bv;
+		if (r.targetNet != null && r.targetNet < 0) {
+			lossBook += bv;
+			lossCount++;
+		}
+	}
+	return { lossBook, lossPct: bookTotal ? (lossBook / bookTotal) * 100 : null, lossCount, bookTotal };
 }
 
 export function classifyTier(stakePct: Num): HoldingTier {
@@ -113,7 +138,41 @@ export function buildHoldingsModel(
 	const pctOfParentCap = parentMktcap && parentMktcap > 0 ? (listedStakeSum / parentMktcap) * 100 : null;
 	// 본체 적자(parentNet<=0)면 비중 의미 모호 → 산출 안 함(정직).
 	const contribShare = parentNet && parentNet > 0 ? (sumEquityEarn / parentNet) * 100 : null;
-	return { year, rows: er, counts, listedStakeSum, pctOfParentCap, sumEquityEarn, contribShare, bookTotal, maxBook };
+	const ls = lossSummary(er); // 단일 SSOT — RightStack 헤더와 동일 공식
+	return { year, rows: er, counts, listedStakeSum, pctOfParentCap, sumEquityEarn, contribShare, bookTotal, maxBook, lossBook: ls.lossBook, lossPct: ls.lossPct };
+}
+
+// ───────────────────────── control-shift (지배 이동, 새 fetch 0) ─────────────────────────
+// 최대주주 전(全) 기간(shPeriods named[])에서 earliest↔latest 의 최대주주측 지분(totalPct) 이동 + 신규/이탈 법인·기관 주주.
+// filing-period 자기이력(YYYY→YYYY) — "마지막 본 이후 변화"(watchlist=terminal-improvement 경계) 아님.
+// 개인은 익명 집계라 비교 제외(동명이인·개인정보 가드). 자기주식 제외. 명시 기간 라벨 필수.
+export interface ControlShift {
+	fromLabel: string;
+	toLabel: string;
+	fromPct: Num; // 최대주주측 합 (earliest)
+	toPct: Num; // 최대주주측 합 (latest)
+	newNamed: number; // latest 에 신규 등장한 법인·기관·정부 주주 (earliest 대비)
+	exitedNamed: number; // latest 에서 사라진 법인·기관·정부 주주
+	periods: number; // 비교에 쓰인 전체 기간 수
+}
+const qShort = (q: string): string => (q === '1분기' ? 'q1' : q === '2분기' ? 'q2' : q === '3분기' ? 'q3' : '');
+const normShName = (n: string): string => (n || '').replace(/\(주\)|㈜|주식회사|\s/g, '').trim();
+export function controlShiftSummary(periods: ShareholdersView[] | null | undefined): ControlShift | null {
+	if (!periods || periods.length < 2) return null; // 단일 기간 = 이동 미정의(96.8% 종목 ≥2기간, probe 실측)
+	const first = periods[0];
+	const last = periods[periods.length - 1];
+	if (!first || !last) return null;
+	const label = (p: ShareholdersView): string => `${p.year}${qShort(p.quarter)}`;
+	// 법인·기관·정부 named 만 — 개인(person 집계)·자기주식 제외
+	const namedSet = (p: ShareholdersView): Set<string> =>
+		new Set(p.named.filter((s) => s.kind === 'corp' || s.kind === 'institution' || s.kind === 'gov').map((s) => normShName(s.name)));
+	const fst = namedSet(first);
+	const lst = namedSet(last);
+	let newNamed = 0;
+	let exitedNamed = 0;
+	for (const n of lst) if (!fst.has(n)) newNamed++;
+	for (const n of fst) if (!lst.has(n)) exitedNamed++;
+	return { fromLabel: label(first), toLabel: label(last), fromPct: first.totalPct, toPct: last.totalPct, newNamed, exitedNamed, periods: periods.length };
 }
 
 // ───────────────────────── 양방향 관계망 좌표 (순수, 렌더 0) ─────────────────────────

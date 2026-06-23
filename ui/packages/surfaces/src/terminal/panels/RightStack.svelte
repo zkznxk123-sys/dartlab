@@ -33,6 +33,7 @@
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
 	import { viewerUrl, marketForCode } from '../../viewer/lib/dartUrl'; // 도시에 ↗원문 딥링크(rcept_no → DART 원문, 공개 floor)
+	import { lossSummary, controlShiftSummary, type ControlShift } from '../lib/holdings'; // 타법인출자 lossPct(앵커)·control-shift(지배이동) 순수계산
 	import type { ListedLookup } from '../lib/holdings'; // 피출자사명→상장 종목 해소 hook 타입
 
 	interface Props {
@@ -365,6 +366,17 @@
 	};
 	const srLast = $derived(srs.length ? srs[srs.length - 1] : null);
 	const fmtShares = (v: number | null): string => (v == null ? '—' : v >= 1e8 ? (v / 1e8).toFixed(1) + '억주' : v >= 1e4 ? (v / 1e4).toFixed(0) + '만주' : v.toLocaleString() + '주');
+	// 타법인출자 도시에 섹션 — lossPct(적자 계열 자본, 항상 켜진 앵커) + control-shift(지배 이동). 새 fetch 0(inv·shPeriods 이미 메모리).
+	const invLoss = $derived(inv && inv.rows.length ? lossSummary(inv.rows) : null);
+	const ctrlShift = $derived(controlShiftSummary(shPeriods));
+	// control-shift 자기정규화 문장(판정 0·형용사 0·명시 기간 라벨). 토큰 non-null 일 때만.
+	const ctrlShiftText = (c: ControlShift, l: Lang): string => {
+		const parts: string[] = [];
+		if (c.fromPct != null && c.toPct != null)
+			parts.push(l === 'en' ? `controlling stake ${c.fromPct.toFixed(0)}%→${c.toPct.toFixed(0)}% (${c.fromLabel}→${c.toLabel})` : `최대주주측 ${c.fromPct.toFixed(0)}%→${c.toPct.toFixed(0)}% (${c.fromLabel}→${c.toLabel})`);
+		if (c.newNamed > 0) parts.push(l === 'en' ? `+${c.newNamed} new corp/inst holders` : `신규 법인·기관주주 ${c.newNamed}`);
+		return parts.join(' · ');
+	};
 
 	const risks = $derived(co.risks);
 	const pc = $derived(co.percentile);
@@ -609,6 +621,16 @@
 {#if inv && inv.rows.length}
 	<Panel {lang} className="eCredit" prov="real" title={{ kr: '타법인 출자', en: 'HOLDINGS' }} sub={{ kr: 'report · ' + inv.year + ' · 장부가순', en: 'report · ' + inv.year + ' · by book value' }} flush>
 		{#snippet right()}<span class="dim">{(inv?.rows.length ?? 0) + (inv?.moreCount ?? 0)}{lang === 'en' ? '' : '개사'}</span><button class="finFullBtn" onclick={() => (holdingsOpen = true)} title={lang === 'en' ? 'Relationship analysis (fullscreen)' : '출자 관계 분석 — 전체화면'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
+		{#if (invLoss && invLoss.lossCount > 0 && invLoss.lossPct != null) || (ctrlShift && ((ctrlShift.fromPct != null && ctrlShift.toPct != null) || ctrlShift.newNamed > 0))}
+			<div class="secSentBox">
+				{#if invLoss && invLoss.lossCount > 0 && invLoss.lossPct != null}
+					<div class="secSent">▼ {lang === 'en' ? `loss-making investees = ${invLoss.lossPct.toFixed(0)}% of investment book` : `적자 피출자사 = 출자 장부가의 ${invLoss.lossPct.toFixed(0)}%`}</div>
+				{/if}
+				{#if ctrlShift && ((ctrlShift.fromPct != null && ctrlShift.toPct != null) || ctrlShift.newNamed > 0)}
+					<div class="secSent">▼ {ctrlShiftText(ctrlShift, lang)}</div>
+				{/if}
+			</div>
+		{/if}
 		<div class="finScroll"><table class="finTable">
 			<thead><tr>
 				<th class="finAcct">{lang === 'en' ? 'COMPANY' : '법인명'}</th>

@@ -116,9 +116,9 @@
 		return c.length > n ? c.slice(0, n - 1) + '…' : c;
 	};
 	const maxEarn = $derived(Math.max(...m.rows.map((r) => Math.abs(r.equityEarn ?? 0)), 1));
-	// 적자 자회사 장부가 비중 — "딱 보고 아는 한 문장"(판정 아닌 사실 기술).
-	const lossBook = $derived(m.rows.filter((h) => h.targetNet != null && h.targetNet < 0).reduce((a, h) => a + (h.bookValue ?? 0), 0));
-	const lossPct = $derived(m.bookTotal ? (lossBook / m.bookTotal) * 100 : null);
+	// 적자 자회사 장부가 비중 — "딱 보고 아는 한 문장"(판정 아닌 사실 기술). 단일 SSOT = holdings.ts(헤더·다이얼로그 공용, G4).
+	const lossBook = $derived(m.lossBook);
+	const lossPct = $derived(m.lossPct);
 
 	// reverse 법인·기관 주주 — 상장 해소(클릭 이동용). 개인은 익명 집계라 named 에 없음.
 	const reverseNamed = $derived(
