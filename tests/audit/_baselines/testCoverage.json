@@ -3,6 +3,13 @@
   "total_public_funcs": 3134,
   "missing_count": 1100,
   "missing": [
+    { "path": "ai/agent.py", "func": "keyOf", "line": 611 },
+    { "path": "ai/agent.py", "func": "hitLimit", "line": 616 },
+    { "path": "ai/agent.py", "func": "isBlocked", "line": 620 },
+    { "path": "ai/agent.py", "func": "cachedResult", "line": 624 },
+    { "path": "ai/agent.py", "func": "recordCacheHit", "line": 628 },
+    { "path": "ai/agent.py", "func": "recordResult", "line": 635 },
+    { "path": "ai/tools/registry.py", "func": "isToolReadOnly", "line": 834 },
     { "path": "gather/dart/allFilingsCollector.py", "func": "metaSuffix", "line": 52 },
     { "path": "providers/dart/search/fieldIndexRebuild.py", "func": "feedDf", "line": 128 },
     { "path": "scan/builders/kr/common.py", "func": "say", "line": 221 },
