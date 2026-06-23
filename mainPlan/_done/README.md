@@ -12,8 +12,9 @@
 
 ## 보관 목록
 
-| 폴더 | 완료 | 한 줄 |
+| 폴더 | 완료·상태 | 한 줄 |
 |---|---|---|
+| `realestate-data/` | 🚫 폐기 2026-06-23 | 공공데이터 부동산 실거래(국토부 RTMS) 수집·분석조합 PRD. **미착수 영구 기각**(빌드 0줄). PRD는 96점 완성이나 코드 실측 결론 = net-new 거래량 1축뿐·P1 조건부·즉시가능 비자명연결 0, 게다가 RTMS 키-계정 미스매치(403)로 P1 검증조차 미수행 → ROI 낮아 폐기. 보관 사유 = 경계지도·KILL 5·feasibility 방법론 자산. README 상단 폐기 배너 참조. |
 | `ui-platform-refactor/` | 2026-06-13 | public(GitHub Pages)·local(pip) 단일 UI 자산 공유 리팩토링(단계 1~10). ⚠ `08-shared-wiring-parity-maintenance.md` 는 현역 런북. |
 | `scan-grade-explainer/` | 2026-06-15 | 스캔등급 설명 다이얼로그. as-built 는 PRD 확장 — 10~12 종합축 SSOT(`COMPOSITE_AXES`) 통일 + 등급 근거 = 축 자체 동종업종 백분위(midrank)+분포 막대 + 현금흐름 부호 표기. 구현 SSOT=`ui/packages/surfaces/src/terminal/`. |
 | `data-build-workbench-ssot/` | 2026-06-21 | 공동작업대(in-library `dartlab.pipeline`) 데이터빌드 SSOT. MUST(macro 첫 증명) 흡수 완료 — sync 3 + prebuild 1 스크립트를 `stages/{macro,prebuild}.py` 로 흡수, 4스크립트 thin shim(중복 0). 구현 SSOT=`src/dartlab/pipeline/stages/`. ⏭ SHOULD(dart/news/gov)는 별개 후속 웨이브(미착수). |

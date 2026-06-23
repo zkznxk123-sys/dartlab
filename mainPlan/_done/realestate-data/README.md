@@ -1,5 +1,7 @@
 # 부동산 실거래 데이터 수집·조합 — PRD
 
+> 🚫 **폐기 (2026-06-23) — 미착수 영구 기각.** 빌드 0줄(`✅ 완료` 아님). PRD 자체는 전 7차원 96점으로 완성됐으나, 코드 실측 결론이 "부동산↔분석 net-new = **거래량 1축뿐**(B1 crisis divergence arm), 그것도 P1 walk-forward 통과 조건부"였고 — 즉시 가능한 비자명 연결은 0개([04-discovery.md](04-discovery.md)). 게다가 RTMS API 키-계정 미스매치(세션 재호출 전부 403)로 그 1축조차 **P1 검증을 수행하지 못한** 상태. 운영자 판단: 거래량 1축의 착수 ROI가 낮아 폐기. 되살릴 경우 선결 = RTMS 승인 계정 Decoding 키 확보(메모리 [[project_realestate_data]] ⚠) → B1 P1 walk-forward 실측. 보관 사유 = 경계 지도(STRONG인 척하면 안 되는 곳)·KILL 5(확신오정렬 박제)·feasibility 방법론 자산은 계속 참조 가치.
+>
 > **무게중심**: DartLab은 부동산 *가격*을 이미 쓴다(`APT_PRICE` ecos → 17곳 외생·`macro/crisis/crisis.py:118 apt_yoy`). 국토부 실거래의 유일한 net-new는 가격이 못 담는 직교 축 — **거래량(volume)**. 이 PRD의 진짜 산물은 "부동산↔분석 능력"이 아니라 **① 거래량 집계 수집 파이프라인 1개 ② 어디가 STRONG인 척하면 안 되는지의 코드-실측 경계 지도 ③ STRONG을 가두는 P1 walk-forward 검증 게이트**다.
 >
 > **한 줄 비전**: 실거래 거래량(한국 가계·소비·건설 사이클의 직교 신호)을 customs 거푸집으로 수집해 집계 1축만 HF에 bake하고, firm-level 매출민감도 외생 회로의 검증된 빈 슬롯에 P1 통과 조건부로 1축 추가한다 — 새 패널·새 점수·전수 raw 0, macro-lens 픽셀 불가침, 범위 라벨만 척추.

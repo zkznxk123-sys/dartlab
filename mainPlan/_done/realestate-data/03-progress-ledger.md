@@ -1,6 +1,12 @@
 # 진행 원장 (Progress Ledger)
 
-> SSOT = `mainPlan/realestate-data/`. 메모리는 포인터(`[[project_realestate_data]]`).
+> SSOT = `mainPlan/_done/realestate-data/` (🚫 폐기 2026-06-23, 미착수 영구 기각 — README 상단 배너 참조). 메모리는 포인터(`[[project_realestate_data]]`).
+
+---
+
+## 🚫 종결: 폐기 (2026-06-23)
+
+운영자 결정 — 거래량 1축의 착수 ROI가 낮아 영구 기각. PRD 자체는 96점 완성이나 (1) net-new가 거래량 1축뿐·P1 조건부·즉시가능 비자명연결 0이고 (2) RTMS 키-계정 미스매치(403)로 그 1축조차 P1 walk-forward 검증을 수행하지 못한 상태였다. 빌드 0줄(완료 아님). 되살릴 경우 선결 = RTMS 승인 계정 Decoding 키 확보 → B1 P1 실측. 아래는 폐기 시점까지의 진행 기록.
 
 ---
 
