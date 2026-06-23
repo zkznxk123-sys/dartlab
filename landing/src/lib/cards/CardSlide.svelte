@@ -45,6 +45,25 @@
 			.catch(() => (finState = 'empty'));
 	});
 
+	// 차트 밑에 같이 둘 수치표 — 시리즈(매출·영업이익·순이익…) × 최근 6기간. 정적 카드는 hover 가 없어
+	// 차트만으론 정확값을 못 보니 표를 병치(추세=시각, 정확값=표). 우축은 작은 값(예 영업이익)을 큰 매출
+	// 막대 옆에 보이게 한 2차 *같은 단위* 스케일이라 % 가 아님 → 단위 접미 없이 원값 그대로(헤더에 단위 1회).
+	const finTable = $derived.by(() => {
+		if (!finCards) return null;
+		const all = finCards.periods;
+		const periods = all.slice(-6);
+		const off = all.length - periods.length;
+		const fmt = (v: unknown): string => {
+			if (typeof v !== 'number' || !Number.isFinite(v)) return '–';
+			return Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : v.toFixed(1);
+		};
+		const rows = finCards.card.series.map((s) => ({
+			name: s.name,
+			values: periods.map((_, i) => fmt(s.data[off + i]))
+		}));
+		return { unit: finCards.card.unit ?? '', periods, rows };
+	});
+
 	const line = $derived(card.kind === 'line' ? lineGeo(card.series, card.markers ?? []) : null);
 	const barMax = $derived(card.kind === 'bars' ? Math.max(1, ...card.rows.map((r) => Math.abs(r.value))) : 1);
 	// 비중 차트 세그먼트 색 — 캐러셀 팔레트(로즈+그레이)만. 초록/앰버/보라/시안 금지.
@@ -143,7 +162,20 @@
 				</div>
 			{:else if card.kind === 'finChart'}
 				<div class="finWrap">
-					{#if finState === 'ready' && finCards}<MiniFinChart card={finCards.card} periods={finCards.periods} h={340} />
+					{#if finState === 'ready' && finCards}
+						<MiniFinChart card={finCards.card} periods={finCards.periods} h={190} />
+						{#if finTable}
+							<table class="cT finT">
+								<thead>
+									<tr><th class="finUnit">{finTable.unit}</th>{#each finTable.periods as p (p)}<th class="num">{p}</th>{/each}</tr>
+								</thead>
+								<tbody>
+									{#each finTable.rows as r (r.name)}
+										<tr><td>{r.name}</td>{#each r.values as v, i (i)}<td class="num">{v}</td>{/each}</tr>
+									{/each}
+								</tbody>
+							</table>
+						{/if}
 					{:else if finState === 'loading'}<p class="muted">재무 추이 불러오는 중…</p>
 					{:else}<p class="muted">재무 추이 데이터가 아직 없습니다.</p>{/if}
 				</div>
@@ -451,9 +483,35 @@
 		box-sizing: border-box;
 	}
 	/* MiniFinChart 가 패널 폭을 꽉 채우게(.mfc 가 content 폭으로 줄어 작은 정사각으로 뜨던 것 교정).
-	   svg 는 width:100%·height:auto(terminal.css) → 폭 = 패널 폭, h={340} 비율로 세로도 더 채움. */
+	   svg 는 width:100%·height:auto(terminal.css) → 폭 = 패널 폭. 차트(h=190) 위 + 수치표 아래 병치. */
+	.finWrap {
+		justify-content: flex-start;
+		gap: 0.5em;
+	}
 	.finWrap :global(.mfc) {
 		width: 100%;
+		flex: 0 0 auto;
+	}
+	/* 차트 밑 수치표 — 시리즈×기간(compact). 시리즈명 열은 auto·좌측, 값은 우측. */
+	.finT {
+		font-size: clamp(8px, 1.85cqw, 13px);
+		flex: 0 0 auto;
+	}
+	.finT th,
+	.finT td {
+		padding: 0.3em 0.4em;
+	}
+	.finT th:first-child,
+	.finT td:first-child {
+		width: auto;
+		white-space: nowrap;
+		color: #cdd9e6;
+		font-weight: 600;
+	}
+	.finUnit {
+		color: #9aa3ad !important;
+		font-weight: 600;
+		font-size: 0.9em;
 	}
 	.lineChart {
 		width: 100%;
