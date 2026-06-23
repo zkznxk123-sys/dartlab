@@ -6,22 +6,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-MCP_WORKSPACE_AGENT_TOOL_NAMES = (
-    "ask",
-    "ReadSkill",
-    "ReadCapability",
-    "EngineCall",
-    "RunPython",
-    "WebSearch",
-    "SaveArtifact",
-    "CompileVisual",
-    "OutcomeLog",
-    "LookAheadGuard",
-    "GroundingCheck",
-    "RequestUserInput",
-)
-
-
 MCP_INSTRUCTIONS = """\
 DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 그 아래 데이터·분석 작업대 도구다
 (advertise 되는 전체 도구 목록·갯수는 tools/list 가 정본 — 본 문서는 핵심만 안내). 목적은 LLM이 DartLab을
@@ -90,14 +74,13 @@ RunPython 안에서 직접 호출하는 패턴으로 통합되었다. DARTLAB_MC
 def mcpAdvertisedToolNames() -> tuple[str, ...]:
     """MCP tools/list 에 advertise 할 도구 이름 SSOT — registry 변경 자동 추종.
 
-    마스터 플랜 v2 트랙 7 PR-M1 — 옛 ``MCP_WORKSPACE_AGENT_TOOL_NAMES`` 정적 14 종 (LookAheadGuard /
-    SearchSemantic / ParseChart stub 포함) 은 ``CANONICAL_V2`` (22 종 정제 production-grade) 와
-    deviation 발생. 본 함수가 ``"ask" + CANONICAL_V2`` 를 SSOT 로 노출 → 신규 도구 추가 시
-    advertise 도 자동 sync.
+    마스터 플랜 v2 트랙 7 PR-M1 — 옛 정적 12-tuple 상수(LookAheadGuard / RequestUserInput stub 포함)는
+    ``CANONICAL_V2`` (22 종 정제 production-grade) 와 deviation 발생해 **폐기**(debt-honesty P2-6 —
+    ask_kernel_status leak 경로 제거). 본 함수가 ``"ask" + CANONICAL_V2`` 를 SSOT 로 노출 → 신규 도구
+    추가 시 advertise 도 자동 sync.
 
     Returns:
-        tuple[str, ...]: ``("ask",) + CANONICAL_V2`` 합 (= 23 종). 옛 함수 의존 호출자는
-        ``MCP_WORKSPACE_AGENT_TOOL_NAMES`` 유지 (deprecate 트래커 부착).
+        tuple[str, ...]: ``("ask",) + CANONICAL_V2`` 합 (= 23 종).
 
     Example:
         ``names = mcpAdvertisedToolNames()``  # → ("ask", "ReadSkill", ..., "SearchPastSessions")
@@ -189,13 +172,13 @@ def executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     from dartlab.ai.tools.registry import executeTool as executeAiTool
 
     if name == "ask_kernel_status":
-        from dartlab.ai.workbench.loop import GRAPH_NODES
-
+        # tools = advertised SSOT(mcpAdvertisedToolNames) — 옛 12-tuple leak(LookAheadGuard·
+        # RequestUserInput) 제거. 'passes'(5-pass GRAPH_NODES) 노출도 제거 — chat-native 정체성상
+        # 고정 노드 그래프를 외부 resource 로 광고하지 않는다 (debt-honesty P2-6 / SD-2).
         return {
             "name": "Ask Workbench",
             "entry": "ask",
-            "tools": list(MCP_WORKSPACE_AGENT_TOOL_NAMES),
-            "passes": list(GRAPH_NODES),
+            "tools": list(mcpAdvertisedToolNames()),
         }
     if name == "search_reference":
         query = str(args.get("query") or "")

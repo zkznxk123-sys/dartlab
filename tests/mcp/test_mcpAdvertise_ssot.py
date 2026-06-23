@@ -22,10 +22,12 @@ def test_mcpAdvertisedToolNames_returns_ask_plus_canonical_v2() -> None:
 
 
 def test_mcpAdvertisedToolNames_expands_beyond_legacy() -> None:
-    """옛 MCP_WORKSPACE_AGENT_TOOL_NAMES (14 종) 보다 더 많은 도구 노출."""
-    from dartlab.mcp.protocol import MCP_WORKSPACE_AGENT_TOOL_NAMES, mcpAdvertisedToolNames
+    """advertised 가 옛 정적 12-tuple legacy 보다 많은 도구 노출 (마이그레이션 완료)."""
+    from dartlab.mcp.protocol import mcpAdvertisedToolNames
 
-    assert len(mcpAdvertisedToolNames()) > len(MCP_WORKSPACE_AGENT_TOOL_NAMES)
+    # 옛 MCP_WORKSPACE_AGENT_TOOL_NAMES (12 종, LookAheadGuard/RequestUserInput stub 포함) 는
+    # ask_kernel_status leak 경로와 함께 폐기 (debt-honesty P2-6).
+    assert len(mcpAdvertisedToolNames()) > 12
 
 
 def test_mcpAdvertisedToolNames_includes_finance_primitives() -> None:
