@@ -197,6 +197,8 @@ python -X utf8 tests/audit/dartlabGuard.py strict --scope l0-l15 --providers dar
 | `tests/audit/publicApiCoverage.py` | 공개 API 시나리오 매핑 감사 |
 | `tests/audit/memoryBudgetAudit.py` | `withMemoryBudget` 공개 시나리오 매핑 감사 ([CLAUDE.md](file://./CLAUDE.md) 메모리 안전) |
 
+> **flaky 처리 SSOT** = `tests/conftest.py` 의 `network` 마커 → `reruns=2` (pytest-rerunfailures). 별도 자동 quarantine 시스템(옛 flakyAudit)은 두지 않는다 — placeholder 였고 데이터소스(`flakyGates.json`) 부재로 작동 0이라 폐기(debt-honesty P2-8). flaky 의심 테스트는 `@pytest.mark.network` 부착으로 rerun 안전망에 든다.
+
 ### 진척 측정
 
 | 스크립트 | 역할 |
