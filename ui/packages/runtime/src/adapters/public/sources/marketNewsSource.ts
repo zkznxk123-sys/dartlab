@@ -17,8 +17,8 @@ interface NewsRow extends Record<string, unknown> {
 }
 
 const COLS = ['date', 'title', 'url', 'source'];
-const DAYS = 2; // 최근 N UTC 일 shard (어제부터 역순) — 일 shard ~300~580KB(수백 헤드라인)라 2일이면 충분.
-//                GET 수=속도(병렬이라도 가장 느린 콜드 GET 이 전체를 잡음) → 최소화.
+const DAYS = 3; // 최근 N UTC 일 shard (오늘 포함 역순) — 오늘 shard 가 가장 신선(cron 이 UTC-runner-today 적재).
+//                일 shard ~300~580KB·mount preload 라 3일 OK. 오늘 미존재(첫 run 전)면 404 음성캐시→어제/그제 커버.
 const CAP = 300; // 렌더 상한 — 최근 윈도우라 무한스크롤 불필요
 
 // core 미주입 경로(레거시/어댑터 무인자 호출) 전용 lazy 폴백 — loadCompanyNews(newsSource) 동형.
@@ -34,10 +34,11 @@ function toIsoDate(v: unknown): string {
 	return s;
 }
 
-// 어제(UTC)부터 N일 역순 — [어제, 그제, …]. 오늘은 cron 미반영이라 제외(불필요 404 회피).
+// 오늘(UTC)부터 N일 역순 — [오늘, 어제, 그제]. cron(UTC 08:00/16:00)이 UTC-runner-today 로 shard 를
+// 적재하므로 오늘 shard 가 가장 신선하다. 첫 run 전이면 오늘은 404(음성캐시) → 어제/그제가 커버.
 function recentDays(now: Date, days: number): string[] {
 	const out: string[] = [];
-	for (let i = 1; i <= days; i++) {
+	for (let i = 0; i < days; i++) {
 		const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i));
 		out.push(d.toISOString().slice(0, 10));
 	}
