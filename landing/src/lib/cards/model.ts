@@ -99,6 +99,8 @@ export interface CarouselContract {
 	caption?: string;
 	/** 고정 댓글(comment_pinned.txt) — 근거·면책. 캡션 하단 작게. */
 	pinnedComment?: string;
+	/** 발간일(meta.json date, YYYY-MM-DD) — 피드 최신순 정렬·표시용. */
+	date?: string;
 	slides: ContractSlide[];
 }
 export interface ContractIndex {

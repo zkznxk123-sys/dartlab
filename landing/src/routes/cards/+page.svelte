@@ -49,8 +49,11 @@
 
 	loadMediaIndex().then((m) => (media = m));
 	loadContractCodes().then((s) => {
-		contractCodes = [...s].sort();
+		// index.json 순서 그대로 = 발간 최신순(build 가 meta date 내림차순 정렬). 재정렬 금지.
+		contractCodes = [...s];
 		loaded = true;
+		// 터미널 카드 버튼이 sym 으로 들어왔는데 그 회사 카드가 없으면 전체 피드로(빈 화면 방지).
+		if (data.sym && !contractCodes.includes(data.sym)) query = '';
 	});
 
 	// 피드 = 편집 계약 있는 회사(=큐레이션·이미지 있는 것만). 이름은 hfMedia 매니페스트에서.
