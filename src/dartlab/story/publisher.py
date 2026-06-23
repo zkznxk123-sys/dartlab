@@ -78,15 +78,9 @@ def publishReportFromCompany(
     # 레지스트리 업데이트
     _updateRegistry(stockCode, corpName, order, slug, rv, grade)
 
-    # 블로그 frontmatter ai: 블록 → KnowledgeDB.insights(source="blog") 다리
-    # (operation.philosophy §6 양방향 루프, 사람 → AI 경로 1)
-    try:
-        from dartlab.ai.persistence.blog_insights import upsert_ai_frontmatter_to_insights
-
-        upsert_ai_frontmatter_to_insights(path)
-    except Exception:
-        # hook 실패가 발간 경로를 깨뜨리지 않도록
-        pass
+    # (옛 blog frontmatter → KnowledgeDB.insights 다리 제거 — `dartlab.ai.persistence` 모듈
+    # 부재로 항상 실패하던 silent no-op 였고 story(L3)→ai(L4) 역방향 의존이라 부활도 위반.
+    # operation.philosophy §6 "사람 → AI 경로"는 현재 미구현. debt-honesty P2-4 / PH-4)
 
     return path
 

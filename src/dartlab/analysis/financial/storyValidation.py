@@ -102,35 +102,11 @@ def calcStoryPrecedents(
     precedents: list[dict] = []
     sources: list[str] = []
 
-    # 1. KnowledgeDB insights (블로그/과거 경험 실 추출)
-    if sectorCode:
-        try:
-            from dartlab.ai.persistence.knowledge_db import KnowledgeDB
+    # (옛 KnowledgeDB insights 경로 제거 — `dartlab.ai.persistence` 모듈이 부재해 import 가
+    # 항상 실패하던 silent no-op 였고, analysis(L2)→ai(L4) 역방향 의존이라 부활도 레이어 위반.
+    # precedent 는 아래 scan peer 경로로만 수집한다. debt-honesty P2-4 / PH-4)
 
-            db = KnowledgeDB()
-            records = db.get_sector_insights(sectorCode, limit=limit)
-            for rec in records:
-                if rec.stockCode == stockCode:
-                    continue  # 자기 자신 제외
-                precedents.append(
-                    {
-                        "stockCode": rec.stockCode,
-                        "name": rec.stockCode,
-                        "narrative": (rec.narrative or "")[:200],
-                        "outcome": None,
-                        "similarity": None,
-                        "strengths": rec.strengths[:3] if rec.strengths else [],
-                        "weaknesses": rec.weaknesses[:3] if rec.weaknesses else [],
-                        "source": rec.source,
-                        "createdAt": rec.created_at,
-                    }
-                )
-            if records:
-                sources.append("knowledge_db")
-        except (ImportError, AttributeError, OSError, ValueError):
-            pass
-
-    # 2. scan peer — 동일 lifeCyclePhase 기업 (phase 기반 precedent)
+    # scan peer — 동일 lifeCyclePhase 기업 (phase 기반 precedent)
     if lifeCyclePhase and stockCode:
         try:
             phase_peers = _findPhaseMatchingPeers(stockCode, lifeCyclePhase, limit=limit)
