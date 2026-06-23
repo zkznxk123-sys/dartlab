@@ -47,7 +47,8 @@
 
 	const line = $derived(card.kind === 'line' ? lineGeo(card.series, card.markers ?? []) : null);
 	const barMax = $derived(card.kind === 'bars' ? Math.max(1, ...card.rows.map((r) => Math.abs(r.value))) : 1);
-	const SHARE_C = [CARD.accent, CARD.success, CARD.warning, '#a78bfa', '#f87171', '#22d3ee', CARD.textDim];
+	// 비중 차트 세그먼트 색 — 캐러셀 팔레트(로즈+그레이)만. 초록/앰버/보라/시안 금지.
+	const SHARE_C = ['#ff3f6f', '#ff9ab0', '#d8e2f0', '#9aa7c0', '#6b7794', '#c0cad8', '#7f8aa3'];
 	const shareColor = (i: number) => SHARE_C[i % SHARE_C.length];
 </script>
 
@@ -391,7 +392,7 @@
 		color: #ea4647;
 	}
 	.kV.pos {
-		color: #34d399;
+		color: #d8e2f0;
 	}
 	/* 텍스트 슬라이드(narrative·closing) = 에디토리얼처럼 좌측 정렬 + 하단 고정(중앙정렬 금지). */
 	.content.txtSlide {
@@ -430,7 +431,7 @@
 		border-color: #ea4647;
 	}
 	.flags.opportunity li {
-		border-color: #34d399;
+		border-color: #d8e2f0;
 	}
 	/* charts — 사진 위에서도 가독되게 반투명 패널 + 사진 일부 노출 */
 	.chart,
@@ -575,10 +576,10 @@
 	}
 	.cT td.pos,
 	.cT td.ok {
-		color: #34d399;
+		color: #d8e2f0;
 	}
 	.cT td.warn {
-		color: #fbbf24;
+		color: #ff9ab0;
 	}
 	.spark {
 		width: 64px;

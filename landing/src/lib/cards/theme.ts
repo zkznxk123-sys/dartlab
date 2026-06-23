@@ -15,9 +15,7 @@ export const CARD = {
 	bgDark: '#050811',
 	bgDarker: '#030509',
 	bgCard: '#0f1219',
-	border: '#1e2433',
-	success: '#34d399',
-	warning: '#fbbf24'
+	border: '#1e2433'
 } as const;
 
 /** 차트 시리즈 색(로즈 계열 + 라이트, 엠버/블루/그린 금지). 막대=로즈 hero·선=화이트/라이트로즈. */
