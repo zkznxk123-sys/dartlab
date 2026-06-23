@@ -1,6 +1,9 @@
-"""데이터 제공자 — DART (한국) · EDGAR (미국 SEC) · EDINET (일본 금융청).
+"""데이터 제공자 — DART (한국) · EDGAR (미국 SEC). EDINET (일본 금융청) 은 동결(frozen).
 
-3 regulator 의 공시·재무·검색을 동일 Protocol surface 로 노출하는 dartlab 의 L1 데이터 계층.
+활성 2 regulator (DART·EDGAR) 의 공시·재무·검색을 동일 Protocol surface 로 노출하는 dartlab 의 L1
+데이터 계층. **EDINET 은 API 통신 불가로 동결** — `__all__` 에서 제외(미래 API 복구 옵션 보존 위해 코드는
+유지). 게이트는 이미 deferred 처리(`providerSymmetry._EDINET_DEFERRED` · `providerContract` strict 제외).
+(debt-honesty P2-1)
 
 폴더 mirror 골격 (3 provider 모두 동일):
     accessor / builder / bulk / docs / finance / openapi / ops / parse / report / search
@@ -26,4 +29,7 @@
     4. `providers/__init__.py` `__all__` 에 추가 + `tests/test_providerContract.py` baseline 갱신
 """
 
-__all__ = ["dart", "edgar", "edinet"]
+# EDINET 은 API 통신 불가로 동결(frozen) — 활성 advertise 에서 제외. 코드(providers/edinet/**)는
+# 미래 복구 옵션 보존 위해 유지하되 active provider 가 아니다. 직접 import(dartlab.providers.edinet)는
+# 여전히 가능. 게이트는 _EDINET_DEFERRED 로 이미 deferred. (debt-honesty P2-1)
+__all__ = ["dart", "edgar"]
