@@ -31,6 +31,7 @@ import { loadCompanyNonRegularFilings, loadMarketFeed, loadRecentFilingsForCodes
 import { createDataCore, type DataCore } from '../../data/fetch/request';
 import { createSearchPort } from '../../data/search/filingSearch';
 import { loadCompanyNews } from './sources/newsSource';
+import { loadMarketNews } from './sources/marketNewsSource';
 import { createReportSource } from './sources/reportSource';
 import { publicExportPort, type PublicExportShared } from './sources/exportSource';
 import { localStoragePort } from '../local/sources/storageSource';
@@ -126,7 +127,10 @@ function publicFinancePort(core: DataCore): FinancePort {
 // 로컬 어댑터도 그대로 재사용 — 뉴스는 private 라 브라우저 직독 불가, 퍼블릭·로컬 모두 워커(/news) 단일 경로.
 // core 미주입 호출(ui/web 레거시)은 loadCompanyNews 의 모듈 폴백 코어를 쓴다(govCore 동형).
 export function publicNewsPort(core?: DataCore): NewsPort {
-	return { forCompany: (code) => loadCompanyNews(code, core) };
+	return {
+		forCompany: (code) => loadCompanyNews(code, core), // 종목별 = naver 워커 라이브 read
+		market: () => loadMarketNews(core) // 시장 전체 = public rss 아카이브 최근 shard 직독
+	};
 }
 
 function publicScanPort(shared: PublicRuntimeSharedPorts): ScanPort {

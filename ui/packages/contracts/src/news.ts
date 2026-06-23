@@ -14,7 +14,19 @@ export interface NewsItem {
 	track: NewsTrack; // 소스 트랙 (좌우 분리 키)
 }
 
+// 시장 전체(cross) 뉴스 헤드라인 — 좌측 터미널 패널. 종목별(NewsItem, 우측패널)과 정반대 멘탈모델:
+// 종목 무관·전 시장 시간순·제목+원문링크만(스니펫 없음·stock_code 없음). 클릭=외부 기사 이동.
+// 출처: public rss 아카이브(Google News RSS·재배포 가능). naver(저작권 private)는 우측 라이브 read 전용.
+export interface MarketNews {
+	date: string; // YYYY-MM-DD (발행일)
+	title: string; // 기사 제목
+	source: string; // 언론사/도메인
+	url: string; // 원문 링크 (클릭 시 외부 이동)
+}
+
 export interface NewsPort {
 	/** 종목별 최근 뉴스 (date 내림차순). 해당 없음·미배선·프록시 미설정은 []. */
 	forCompany(code: string): Promise<NewsItem[]>;
+	/** 시장 전체 최근 뉴스 (date 내림차순, 제목+링크). 좌측 cross 피드. 미배선·실패는 []. */
+	market(): Promise<MarketNews[]>;
 }

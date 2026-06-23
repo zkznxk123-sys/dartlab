@@ -1,23 +1,27 @@
 <script lang="ts">
-	// 시장 공시 피드 — 좌측 패널 *전상장사* 최근 3개월 수시공시 시간순. 우측 단일기업(RightStack)과 다른
-	// 멘탈모델: 행마다 회사가 바뀌고(회사명 1순위), 행 클릭 = onPick(회사 점프). market_recent.parquet
-	// 통파일 1 GET(rt.filing.marketFeed). 주가영향 6탭 + 기관 보조칩. 호재/악재 판정 0 — 시간순 사실 나열.
-	import type { MarketFiling } from '@dartlab/ui-contracts';
+	// 시장 공시·뉴스 피드 — 좌측 패널 *전상장사* cross. 우측 단일기업(RightStack)과 다른 멘탈모델:
+	// 행마다 회사/기사가 바뀐다. [공시] 탭 = market_recent.parquet 통파일 1 GET(rt.filing.marketFeed),
+	// 행 클릭=회사 점프. [뉴스] 탭 = public rss 아카이브 최근 shard(rt.news.market), 행 클릭=기사 원문 열기
+	// (제목만·스니펫 없음·종목 무관). 호재/악재 판정 0 — 시간순 사실 나열.
+	import type { MarketFiling, MarketNews } from '@dartlab/ui-contracts';
 	import { useDartLabRuntime } from '@dartlab/ui-runtime';
 	import type { Lang } from '../lib/types';
 	import { Search } from 'lucide-svelte';
 	import { MARKET_FEED_CATS, marketFeedCategory, isInstitutionalFiler } from '../lib/marketFeed';
-	import Panel from '../ui/Panel.svelte';
 
 	interface Props {
 		lang: Lang;
-		active: string; // 현재 선택 종목 — 행 강조
-		onPick: (code: string) => void; // 행 클릭 → 회사 전환(차트+우측 패널 갱신)
-		onFilingSearch?: () => void; // 공시 본문 검색(⌘⇧F) — 시장공시 헤더 아래 배치(읽기↔찾기 한 쌍)
+		active: string; // 현재 선택 종목 — 공시 행 강조
+		onPick: (code: string) => void; // 공시 행 클릭 → 회사 전환(차트+우측 패널 갱신)
+		onFilingSearch?: () => void; // 공시 본문 검색(⌘⇧F) — 공시 탭 헤더 아래 배치(읽기↔찾기 한 쌍)
 	}
 	let { lang, active, onPick, onFilingSearch }: Props = $props();
 	const rt = useDartLabRuntime();
+	const t = (kr: string, en: string) => (lang === 'en' ? en : kr);
 
+	let tab = $state<'filings' | 'news'>('filings');
+
+	// ── 공시 탭 ──
 	const STEP = 200; // 무한스크롤 윈도우 증가 단위 — 스크롤 끝마다 +200. 데이터(38k)는 이미 메모리라 재fetch 0.
 	type FeedState = 'loading' | 'ready' | 'empty' | 'error';
 	let feedState = $state<FeedState>('loading');
@@ -51,7 +55,7 @@
 	const shown = $derived(filtered.slice(0, cap));
 	// 데이터 as-of — bake 가 rcept_dt 내림차순이라 rows[0] 이 최신. 90일 rolling 인데 데이터가 며칠
 	// stale 일 수 있어 '기준일'을 정직 표면화(데이터 max ≠ today 가능). 재정렬 0(rows[0] O(1)).
-	const asOf = $derived(rows.length ? rows[0].rceptDate : '');
+	const filingAsOf = $derived(rows.length ? rows[0].rceptDate : '');
 
 	$effect(() => {
 		let cancelled = false;
@@ -92,86 +96,133 @@
 		return () => io.disconnect();
 	});
 
+	// ── 뉴스 탭 (lazy — 처음 열 때만 fetch) ──
+	type NewsState = 'idle' | 'loading' | 'ready' | 'empty' | 'error';
+	let news = $state<MarketNews[]>([]);
+	let newsState = $state<NewsState>('idle');
+	const newsAsOf = $derived(news.length ? news[0].date : '');
+
+	$effect(() => {
+		if (tab !== 'news' || newsState !== 'idle') return;
+		newsState = 'loading';
+		let cancelled = false;
+		rt.news
+			.market()
+			.then((n) => {
+				if (cancelled) return;
+				news = n;
+				newsState = n.length ? 'ready' : 'empty';
+			})
+			.catch(() => {
+				if (!cancelled) newsState = 'error';
+			});
+		return () => {
+			cancelled = true;
+		};
+	});
+
 	const mmdd = (d: string) => (d.length >= 10 ? d.slice(5).replace('-', '') : d); // YYYY-MM-DD → MMDD
-	const t = (kr: string, en: string) => (lang === 'en' ? en : kr);
 </script>
 
-<Panel
-	{lang}
-	className="eMarketFeed"
-	prov="real"
-	title={{ kr: '시장 공시', en: 'MARKET FILINGS' }}
-	sub={{
-		kr: asOf ? `전상장사 · ~${asOf} 기준` : '전상장사 · 최근 3개월',
-		en: asOf ? `all listed · as-of ${asOf}` : 'all listed · 3mo'
-	}}
-	flush
->
-	<!-- 공시 본문 검색 — 시장공시 헤더 바로 아래(읽기↔찾기 한 쌍). 클릭=⌘⇧F 다이얼로그(FilingSearchDialog). -->
-	{#if onFilingSearch}
-		<button class="feedSearchBar" onclick={() => onFilingSearch?.()} title={t('전역 공시 본문 검색 (⌘⇧F)', 'global filing full-text search (⌘⇧F)')}>
-			<Search class="feedSearchIcon" size={13} />
-			<span class="feedSearchPh">{t('공시 본문 검색', 'Search filing text')}</span>
-			<kbd class="feedSearchKbd">⌘⇧F</kbd>
-		</button>
-	{/if}
+<section class="panel eMarketFeed">
+	<!-- 탭 헤더 = 패널 헤더(하단 스크리너/워치와 동일 leftTabHead 패턴). as-of 는 우측. -->
+	<header class="panelHead leftTabHead">
+		<button class={'leftTab' + (tab === 'filings' ? ' on' : '')} onclick={() => (tab = 'filings')}>{t('공시', 'FILINGS')}</button>
+		<button class={'leftTab' + (tab === 'news' ? ' on' : '')} onclick={() => (tab = 'news')}>{t('뉴스', 'NEWS')}</button>
+		<span class="panelRight">
+			{#if tab === 'filings'}{filingAsOf ? t(`~${filingAsOf}`, `~${filingAsOf}`) : t('전상장사 · 3개월', 'all · 3mo')}
+			{:else}{newsAsOf ? t(`rss · ~${newsAsOf}`, `rss · ~${newsAsOf}`) : t('rss · 최근', 'rss · recent')}{/if}
+		</span>
+	</header>
 
-	<!-- 카테고리 칩 스트립 — 라벨만(컴팩트)이라 좁은 좌측 패널서도 전 탭 노출. 공시 갯수는 hover tooltip. -->
-	<div class="feedCats">
-		{#each MARKET_FEED_CATS as c (c.key)}
-			<button
-				class={'feedCat' + (cat === c.key ? ' on' : '')}
-				onclick={() => (cat = c.key)}
-				title={counts[c.key] != null ? `${c.kr} ${counts[c.key].toLocaleString()}${lang === 'en' ? '' : '건'}` : c.kr}
-			>{c.kr}</button>
-		{/each}
-	</div>
-
-	<!-- 기관 보조칩 — 지분·내부자/전체 탭에서만. flr_nm 기반·근사(약10%)·미식별 다수 정직 라벨 -->
-	{#if showInstChip}
-		<div class="feedSub">
-			<button
-				class={'feedInst' + (instOnly ? ' on' : '')}
-				onclick={() => (instOnly = !instOnly)}
-				title={t(
-					'제출자명(flr_nm) 기반 기관·연금 식별 — 부분식별(약 10%)·미식별 다수. 행 hover 로 제출자 원문 확인',
-					'filer-name based · partial (~10%) · hover row for raw filer'
-				)}>{t('기관·연금', 'Institutional')}{instOnly ? ' ✓' : ''}</button
-			>
-			<span class="feedInstNote">{t('제출자 기준 · 근사', 'by filer · approx')}</span>
-		</div>
-	{/if}
-
-	{#if feedState === 'ready'}
-		<div class="filingList feedList" bind:this={listEl}>
-			{#each shown as x (x.r.rceptNo)}
-				<div
-					class={'filingRow feedRow' + (active === x.r.stockCode ? ' on' : '')}
-					role="button"
-					tabindex="0"
-					onclick={() => onPick(x.r.stockCode)}
-					onkeydown={(e) => e.key === 'Enter' && onPick(x.r.stockCode)}
-					title={x.r.corpName + ' · ' + x.r.reportNm + (x.r.filer ? ' · ' + x.r.filer : '')}
-				>
-					<span class="feedCorp"
-						><span class="feedCorpName">{x.r.corpName}</span>{#if x.inst}<span class="feedInstDot" title={x.r.filer}>●</span>{/if}</span
-					>
-					<span class="flType feedNm">{x.r.reportNm}</span>
-					<span class="flDate mono">{mmdd(x.r.rceptDate)}</span>
-					<a class="flArrow" href={x.r.url} target="_blank" rel="noopener" onclick={(e) => e.stopPropagation()}>↗</a>
-				</div>
-			{/each}
-			{#if cap < filtered.length}
-				<div class="feedCap" bind:this={sentinel}>{t(`${cap.toLocaleString()} / ${filtered.length.toLocaleString()}건 · 스크롤하면 더 보기`, `${cap.toLocaleString()} / ${filtered.length.toLocaleString()} · scroll for more`)}</div>
-			{:else if filtered.length > STEP}
-				<div class="feedCap">{t(`전체 ${filtered.length.toLocaleString()}건`, `all ${filtered.length.toLocaleString()}`)}</div>
+	<div class="panelBody flush">
+		{#if tab === 'filings'}
+			<!-- 공시 본문 검색 — 공시 탭 헤더 아래(읽기↔찾기 한 쌍). 클릭=⌘⇧F 다이얼로그(FilingSearchDialog). -->
+			{#if onFilingSearch}
+				<button class="feedSearchBar" onclick={() => onFilingSearch?.()} title={t('전역 공시 본문 검색 (⌘⇧F)', 'global filing full-text search (⌘⇧F)')}>
+					<Search class="feedSearchIcon" size={13} />
+					<span class="feedSearchPh">{t('공시 본문 검색', 'Search filing text')}</span>
+					<kbd class="feedSearchKbd">⌘⇧F</kbd>
+				</button>
 			{/if}
-		</div>
-	{:else if feedState === 'loading'}
-		<div class="storyEmpty">{t('시장 공시 불러오는 중 …', 'loading market filings …')}</div>
-	{:else if feedState === 'error'}
-		<div class="storyEmpty">{t('시장 공시를 불러오지 못함', 'failed to load market filings')}</div>
-	{:else}
-		<div class="storyEmpty">{t('최근 공시 없음', 'no recent filings')}</div>
-	{/if}
-</Panel>
+
+			<!-- 카테고리 칩 스트립 — 라벨만(컴팩트)이라 좁은 좌측 패널서도 전 탭 노출. 공시 갯수는 hover tooltip. -->
+			<div class="feedCats">
+				{#each MARKET_FEED_CATS as c (c.key)}
+					<button
+						class={'feedCat' + (cat === c.key ? ' on' : '')}
+						onclick={() => (cat = c.key)}
+						title={counts[c.key] != null ? `${c.kr} ${counts[c.key].toLocaleString()}${lang === 'en' ? '' : '건'}` : c.kr}
+					>{c.kr}</button>
+				{/each}
+			</div>
+
+			<!-- 기관 보조칩 — 지분·내부자/전체 탭에서만. flr_nm 기반·근사(약10%)·미식별 다수 정직 라벨 -->
+			{#if showInstChip}
+				<div class="feedSub">
+					<button
+						class={'feedInst' + (instOnly ? ' on' : '')}
+						onclick={() => (instOnly = !instOnly)}
+						title={t(
+							'제출자명(flr_nm) 기반 기관·연금 식별 — 부분식별(약 10%)·미식별 다수. 행 hover 로 제출자 원문 확인',
+							'filer-name based · partial (~10%) · hover row for raw filer'
+						)}>{t('기관·연금', 'Institutional')}{instOnly ? ' ✓' : ''}</button
+					>
+					<span class="feedInstNote">{t('제출자 기준 · 근사', 'by filer · approx')}</span>
+				</div>
+			{/if}
+
+			{#if feedState === 'ready'}
+				<div class="filingList feedList" bind:this={listEl}>
+					{#each shown as x (x.r.rceptNo)}
+						<div
+							class={'filingRow feedRow' + (active === x.r.stockCode ? ' on' : '')}
+							role="button"
+							tabindex="0"
+							onclick={() => onPick(x.r.stockCode)}
+							onkeydown={(e) => e.key === 'Enter' && onPick(x.r.stockCode)}
+							title={x.r.corpName + ' · ' + x.r.reportNm + (x.r.filer ? ' · ' + x.r.filer : '')}
+						>
+							<span class="feedCorp"
+								><span class="feedCorpName">{x.r.corpName}</span>{#if x.inst}<span class="feedInstDot" title={x.r.filer}>●</span>{/if}</span
+							>
+							<span class="flType feedNm">{x.r.reportNm}</span>
+							<span class="flDate mono">{mmdd(x.r.rceptDate)}</span>
+							<a class="flArrow" href={x.r.url} target="_blank" rel="noopener" onclick={(e) => e.stopPropagation()}>↗</a>
+						</div>
+					{/each}
+					{#if cap < filtered.length}
+						<div class="feedCap" bind:this={sentinel}>{t(`${cap.toLocaleString()} / ${filtered.length.toLocaleString()}건 · 스크롤하면 더 보기`, `${cap.toLocaleString()} / ${filtered.length.toLocaleString()} · scroll for more`)}</div>
+					{:else if filtered.length > STEP}
+						<div class="feedCap">{t(`전체 ${filtered.length.toLocaleString()}건`, `all ${filtered.length.toLocaleString()}`)}</div>
+					{/if}
+				</div>
+			{:else if feedState === 'loading'}
+				<div class="storyEmpty">{t('시장 공시 불러오는 중 …', 'loading market filings …')}</div>
+			{:else if feedState === 'error'}
+				<div class="storyEmpty">{t('시장 공시를 불러오지 못함', 'failed to load market filings')}</div>
+			{:else}
+				<div class="storyEmpty">{t('최근 공시 없음', 'no recent filings')}</div>
+			{/if}
+		{:else}
+			<!-- 뉴스 탭 — public rss 헤드라인(제목만). 행 클릭 = 기사 원문 열기(외부). 종목 점프 아님(stock_code 없음). -->
+			{#if newsState === 'ready'}
+				<div class="filingList newsFeedList">
+					{#each news as n (n.url)}
+						<a class="newsFeedRow" href={n.url} target="_blank" rel="noopener" title={n.title + (n.source ? '\n— ' + n.source : '')}>
+							<span class="newsFeedTitle">{n.title}</span>
+							<span class="newsFeedMeta">{#if n.source}<span class="newsFeedSrc">{n.source}</span>{/if}<span class="flDate mono">{mmdd(n.date)}</span></span>
+						</a>
+					{/each}
+					<div class="feedCap">{t(`최근 ${news.length.toLocaleString()}건 · 클릭=원문`, `recent ${news.length.toLocaleString()} · click=article`)}</div>
+				</div>
+			{:else if newsState === 'loading' || newsState === 'idle'}
+				<div class="storyEmpty">{t('시장 뉴스 불러오는 중 …', 'loading market news …')}</div>
+			{:else if newsState === 'error'}
+				<div class="storyEmpty">{t('시장 뉴스를 불러오지 못함', 'failed to load market news')}</div>
+			{:else}
+				<div class="storyEmpty">{t('최근 뉴스 없음', 'no recent news')}</div>
+			{/if}
+		{/if}
+	</div>
+</section>

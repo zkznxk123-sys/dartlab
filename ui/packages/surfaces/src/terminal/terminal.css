@@ -338,7 +338,8 @@
 .dlTerm .feedInst.on { color: var(--amber); border-color: var(--amber); }
 .dlTerm .feedInst:hover:not(.on) { color: var(--txt); }
 .dlTerm .feedInstNote { font-family: var(--cond); font-size: 8px; color: var(--dimmer); }
-.dlTerm .filingList.feedList { flex: 1 1 0; min-height: 0; max-height: none; } /* 고정높이 패널 내부에서 잔여 채우고 스크롤(검색바+칩+sub 와 무관하게 견고) */
+.dlTerm .filingList.feedList,
+.dlTerm .filingList.newsFeedList { flex: 1 1 0; min-height: 0; max-height: none; } /* 고정높이 패널 내부에서 잔여 채우고 스크롤(검색바+칩+sub 와 무관하게 견고) */
 /* 좌측 레일 높이 — 매크로·산업은 고정 시각화(quadrant·scatter)라 166 정렬, 시장공시는 스크롤
    리스트라 분리해 더 키운다(헤더+검색바+칩이 166 안을 잠식해 ~4행만 보이던 문제 해소). 컬럼은
    overflow-y:auto 라 합이 뷰포트를 넘으면 스크롤 흡수 + 하단 스크리너/워치(fillCol)가 잔여 흡수. */
@@ -359,6 +360,12 @@
 .dlTerm .feedNm { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--dim); }
 .dlTerm .feedInstDot { flex: none; color: var(--amber); font-size: 7px; }
 .dlTerm .feedCap { padding: 4px 8px; font-family: var(--cond); font-size: 8px; color: var(--dimmer); text-align: center; }
+/* 뉴스 피드 행(좌측 cross) — 제목 1줄 ellipsis + 우측 메타(출처·날짜). 클릭=기사 원문(<a>). 종목 점프 아님. */
+.dlTerm .newsFeedRow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 7px; padding: 4px 8px; border-bottom: 1px solid var(--dl-line); text-decoration: none; cursor: pointer; }
+.dlTerm .newsFeedRow:hover { background: var(--dl-bg-overlay); }
+.dlTerm .newsFeedTitle { font-family: var(--cond); font-size: 10.5px; font-weight: 500; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.dlTerm .newsFeedMeta { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.dlTerm .newsFeedSrc { font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); max-width: 64px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* 공시 본문 검색 트리거 — 입력처럼 보이는 버튼(클릭=⌘⇧F 다이얼로그). 시장공시 피드 바로 위. */
 .dlTerm .feedSearchBar { display: flex; align-items: center; gap: 6px; width: 100%; padding: 5px 8px; background: var(--panel); border: 1px solid var(--bd); border-radius: 2px; cursor: text; }
 .dlTerm .feedSearchBar:hover { border-color: var(--amber); }
