@@ -85,3 +85,64 @@
 평가가 가장 높이 산 강점: **thesis("보호받고 있다는 믿음과 현실의 간극")가 비-자명·측정가능**하고, P0=가드 배선 정정이 후속 부채감소의 전제라는 순서논리가 CLAUDE.md "Guard Index 우선" 철학과 정합. importlib 우회 봉합을 "금지"가 아니라 "sanctioned 원장화 + 미허가만 발화"로 정공법 설계(R4 교정). god-split를 일괄 안 하고 첫 증명 1건(builders.py)만 본 PRD가 지고 나머지는 기존 루프 백로그로 위임한 스코프 절제. 빌드-후-미배선 유령 ~6-8K LOC를 *배선 or 회수* 2지선다로 명시 처리.
 
 **커버리지 = 전 엔진 + landing + ui-packages 전수(ui/web·blog만 운영자 제외).** 착수 = 운영자 go. P2 UI 제거는 운영자 push 승인 필수.
+
+---
+
+## 5. 구현 (as-built) — 운영자 "정공법으로 끝까지 완성" 지시 실행
+
+> **MUST(P0+P1) 실질 완료 = 14 commit(미push).** 구현 중에도 thesis가 반복 실증됨 — *가드를 실제로 연결/사용하면 숨어있던 breakage가 드러난다*. 아래는 PRD 설계와 다른 **as-built 정정**(구현이 ground-truth를 또 도려냄) + 결정 + 보류.
+
+### 5.1 완료 (commit)
+
+| 항목 | commit | 핵심 |
+|---|---|---|
+| P0-1/2/3 죽은경로 | `60f617e07` | rawCrossScan·measureProgress·stale_references `scripts/·ops/`→실경로 + silent fallback→raise |
+| P0-4 MCP 드리프트 | `890905486` | instructions 거짓 카운트(6종/canonical7/22) 제거·tools/list 정본·advertised 23 |
+| P0-6 문서부 | `07bfe25ff` | 유령 index.json 제거·catalog.json 정본·agent.json=byte동일 alias 라벨 (4 spec) |
+| P0-7 catalog count | `9b006a739` | count 161 정확 명문화 (SD-4 "드리프트"는 오독) |
+| P0-8 sourceDrift | `710267e3e` | `[DRIFT-UNVERIFIED]` 명시 + 거짓 'nightly 게이트' 정정 |
+| P0-9 recipe import | `8fe6a1fe9` | quant.{blackLitterman,meanCVaR}→quant.portfolio.* |
+| P1-3 deprecationAudit | `0eee85474` | **유령 가드 신규저작** + lint 배선 (raw DeprecationWarning ratchet 9 baseline) |
+| P1-7 importlib AST | `3ee193f2c`·`943b99bc9` | L2/L1.5 cross 가드에 import_module 탐지 + baseline ratchet (사각 봉합) |
+| P1-2 staleImports | `b63c474df` | module-level baseline+--check 배선 + **정규식 잠재버그 수정** |
+| P1-4 untrustedWrap | `84ff58af6` | --strict 배선 + wrap 키 보강(html·htmlContent·headline·excerpt) |
+| P1-6 import-linter | `ea685279b` | advisory 결정 확정 + stale ignore 5 제거 + config 정직화 |
+| P1-1 checkAgentBoundary | `35158d818` | **stale allowlist 정정** + 구조검사 strict 배선(FP-0)·keyword advisory 분리 |
+| P1-8B testCoverageGate | `c59436d2a` | carve-out 통째 면제 → [PERMANENT]/[REVIEW] 명시 원장 |
+
+신규 가드 wiring: lint(fast) 게이트에 `deprecationAudit · staleImports --check · untrustedWrapAudit --strict · checkAgentBoundary --strict` 4종 추가. preflight GATES 30 무결성 유지(audit-self OK). 각 가드 inject-test로 *실제로 무는지* 검증.
+
+### 5.2 as-built 정정 — 구현이 또 도려낸 ground-truth (PRD/census가 틀렸던 것)
+
+| # | PRD 가정 | 구현 ground-truth | 처리 |
+|---|---|---|---|
+| 15 | SD-3 AGENTS.md username 누출 = **공개 표면** | `.gitignore:26-27` — **AGENTS.md·CLAUDE.md 둘 다 gitignored(L-local)** = 추적 안 됨 = 외부 노출 0. SD-3 과대평가 | 로컬 정리(커밋 불가). 공개 drift는 4 Skill OS spec에만 있었고 그것만 정정 |
+| 16 | SD-4 catalog 161 vs 243 = **드리프트** | `_builtinSpecPaths()` 발견 recipe **161 = catalog count, lint-drop 0**. 243 = `.archive/`(76)+README/non-spec(6) 포함 raw. **count 정확** | 드리프트 아님 → count 의미 명문화(P0-7) |
+| 17 | P0-6 wheel −1.66MB 즉시 제거 | agent.json은 wheel에 실린 **공개 artifact** → 물리 삭제는 PRD 자체 게이트("공개표면 불변·제거=운영자 결정") 대상 | 문서 honesty만 실행, 물리 dedup 운영자 결정 보류 |
+| 18 | P1-3 raw DeprecationWarning **11** | 11 warn문 = **9 unique 함수**(reportAccessor 5속성·quant `__call__` 2warn→1·credit·profile·story) | baseline 키=relpath::qualname 9 |
+| 19 | P1-7 synth 위반 **4건** | 4 warn = **3 unique 키**(bottomUpBeta:104·277 둘 다 synth→frame.sector 동일) | L1.5 baseline 3 |
+| 20 | P1-6 import-linter "100+ 위반 가시화" | 4 contract BROKEN의 **대부분이 `module→dartlab→…` PEP562 lazy facade transitive noise**(config가 "도구검사 외"라 이미 인정). 진짜 직접위반은 L2→gather raw access 잔존. **layers contract는 facade를 구조적으로 모델 불가 → blocking 불가능** | advisory가 정답(결정 강화) |
+
+### 5.3 구현이 표면화한 **잠재 버그·숨은 위반** (thesis 실증 — 연결하니 드러남)
+
+1. **measureProgress BOM** — 죽은 경로(scripts/)를 실경로(tests/audit/_baselines)로 재연결하자 `testCoverage.json`의 UTF-8 BOM에 `json.loads`(plain utf-8)가 깨짐. 가드가 죽어있던 동안 한 번도 안 읽혀 묻혀 있던 것 → `utf-8-sig` 내성으로 수정. 부채 total 0(거짓)→**656**(정직) 복원.
+2. **staleImports 정규식 `^\s*` 버그** — `\s`가 `\n`도 매칭해 빈 줄 위의 indented import를 cross-line으로 잡아 line 번호·col-0 판정 오염(module-level 15→40 거짓). moduleLevel 추가가 표면화 → `^[ \t]*`(줄-로컬)로 수정.
+3. **import-linter stale ignore 5 + 숨은 L2→L1 위반** — `predictionSignals→scan` 등 5 ignore가 dead. 제거하니 `_signalsCorporate→scan`(L2→L1.5 facade) 등 `|| pass`가 가려온 실위반 드러남 → facade 예외 문서화.
+4. **checkAgentBoundary stale allowlist** — `agent_gateway.py`(snake)가 `agentGateway.py`(camel)로 rename됐는데 allowlist stale → legit WorkbenchLoop 호출 2건 FP. + runWorkbench(sanctioned 러너) 누락. allowlist 정정으로 FP-0.
+
+→ **모두 "가드 환상" thesis의 추가 증거**: 가드가 죽어있거나 미배선이면 그 안의 버그·stale·숨은 위반이 영영 안 드러난다. 연결/배선이 곧 발견.
+
+### 5.4 결정 (좀비 가드 금지 원칙 적용) — 부정확 배선 **거부**가 정공법
+
+- **P1-5 (docstring 9섹션 story/ai/analysis 배선) = 명시 거부.** 측정: 비-underscore 함수 story **286**·ai **293**·analysis **360** vs 실제 공개표면(`__init__ __all__`) **29·5·0**. non-underscore 분모로 배선하면 ~900 내부헬퍼를 baseline = PRD가 명시 경고한 *형식주의 함정*. 설계원칙 2("좀비 가드 금지: 살려서 배선 **or** 명시 폐기")에 따라 부정확 분모 배선을 거부. 정밀 분모(capabilityRefs ∩ __all__)는 L-effort 별도작업으로 명세. **노이즈 가드를 켜는 것보다 안 켜는 것이 정직.**
+- **P1-8A (landing checkUiDataWiring 편입) = 보류.** 동시 세션이 landing/src를 격렬히 churn 중 + landing은 UI라 push 운영자 승인 필요. 충돌·승인 위험으로 트리 안정 후 별도 진행.
+
+### 5.5 push 보류 (확정)
+
+origin/master 대비 15 commit ahead인데 **동시 세션의 UI 커밋이 interleave**(`a4caa1205` /cards 캐러셀·`6dd7e261a`). git push는 브랜치 전체를 보내므로 내 non-UI 커밋만 분리 불가 → 동시 세션 UI를 운영자 승인 없이 push하게 됨(UI push 규칙 위반). **따라서 push 보류** — 운영자 UI 승인 시 내 커밋이 함께 올라감. 내 작업은 master에 커밋되어 안전(reflog 선형).
+
+### 5.6 잔여 (운영자 결정/위임)
+
+- **P2 유령 제거 전부 = 운영자 제품결정 게이트**: edinet 동결격리 · ui/web 운명(폐기 vs 이관) · ai.persistence(부활 vs 박제) · 죽은 MCP 6종 · agent.json 물리 dedup · orphan baseline · flakyAudit 폐기 · README_EN 동기화 · 빌드후미배선 ~6-8K LOC 배선/회수. *모두 공개표면 또는 사상 결정 동반이라 단독 실행 부적합.*
+- **P3 god 분해 = 트랙 박제(이미 PRD/architecture.md에 순서·추적가드 명문)·실행은 기존 루프 위임.** P3-3 builders.py 첫 증명 1건만 본 PRD "do" 대상 — 별도 안전 구간에서 진행.
+- **P1-8A·P1-5 정밀분모**: 위 5.4 사유로 보류/별도.
