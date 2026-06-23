@@ -46,6 +46,18 @@ Line up numbers and you get a dashboard. Connect their causes and you get a stor
 
 Both paths run on the same engines.
 
+## Terminal — A Bloomberg-style Challenger
+
+<div align="center">
+
+<a href="https://eddmpython.github.io/dartlab/terminal"><img alt="DartLab Terminal" src=".github/assets/terminal-main.webp" width="900"></a>
+
+</div>
+
+Read financials, prices, filings, credit, industry, and macro for a single company on one screen — **the DartLab Terminal, a challenger to the Bloomberg-style terminal**. The comparable data the library produces is placed directly on the screen.
+
+> This terminal began with inspiration from [@youngchangjo](https://www.threads.com/@youngchangjo)'s [thread](https://www.threads.com/@youngchangjo/post/DZC_jobCfO6).
+
 ## The Problem
 
 Have you ever tried to compare Samsung's "Revenue" across five years?
@@ -547,6 +559,17 @@ Or auto-generate: `dartlab mcp --config claude-desktop`
 | Company | companyGovernance, companyAudit, companyProfile, companySections, companyGather, companyQuant |
 | Market | macroAnalysis, marketScan, gatherData, quantAnalysis, topdownScreen |
 | Search | searchCompany, dartlabSearch, dartlabListing |
+
+## Skill OS & Skill Market
+
+DartLab has two skill layers.
+
+| Layer | Location | Role |
+|---|---|---|
+| **builtin Skill OS** | `src/dartlab/skills/specs/**` · `/skills` | Official operating, engine, and analysis procedures. Ships with the package; AI searches it first. |
+| **community Skill Market** | GitHub Discussions · `/skills/market` · static `marketIndex.json` | Community skills where DartLab Forge structures the analysis questions users share. Not bundled into the package builtin. |
+
+A skill here is not a card but a contract for a repeatable analysis act. Users post analysis questions in GitHub Discussions; DartLab Forge reads the thread and structures `intent`, `inputs`, `dataSources`, `procedure`, `executionPlan`, `outputs`, `criteria`, and `completionCriteria`. Only when a maintainer confirms the completion criteria (`/market runnable | curated | builtin-candidate`) does a GitHub Action produce an accepted `items/{id}.json` snapshot. The landing [Skill Market](https://eddmpython.github.io/dartlab/skills/market) and the AI tool `ReadSkillMarket` search these static artifacts. A finished shared skill must declare which DartLab engines/recipes it calls, and in what order, in its `executionPlan` — without one, no final snapshot is produced.
 
 ## dartlab-lite — Browser & Excel, No Install (Pyodide)
 
