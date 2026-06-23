@@ -25,6 +25,28 @@
 
 	let finCards = $state<{ card: FinCard; periods: string[] } | null>(null);
 	let finState = $state<'idle' | 'loading' | 'ready' | 'empty'>('idle');
+
+	// 조 단위 카드인데 작은 항목이 0.0조로 반올림돼 표가 무의미해지는 작은 회사 → 전 시리즈 억으로 환산
+	// (×1e4·unit='억'). 차트(MiniFinChart unitScale)·표(finTable)가 같은 단위. 큰 회사는 그대로 조.
+	function demoteUnit(c: FinCard): FinCard {
+		if (c.unit !== '조') return c;
+		// 최근 표시구간(말단 6) 기준 — 역사적 고점이 강등을 막지 않게(현재 매출 0.6조여도 과거 2.2조면 조 유지되던 버그).
+		const recent = c.series.flatMap((s) => s.data.slice(-6)).filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+		const nz = recent.map((v) => Math.abs(v)).filter((v) => v > 1e-9);
+		if (!nz.length) return c;
+		const minNz = Math.min(...nz);
+		const maxAbs = Math.max(...recent.map((v) => Math.abs(v)));
+		// 작은 항목이 0.05조 미만(=0.0 으로 반올림)이고 최근 최대도 1조 미만(=진짜 작은 회사)이면 억으로. 큰 회사는 조 유지.
+		if (minNz < 0.05 && maxAbs < 1.0) {
+			return {
+				...c,
+				unit: '억',
+				series: c.series.map((s) => ({ ...s, data: s.data.map((v) => (typeof v === 'number' && Number.isFinite(v) ? v * 1e4 : v)) }))
+			};
+		}
+		return c;
+	}
+
 	$effect(() => {
 		if (card.kind !== 'finChart') return;
 		finState = 'loading';
@@ -34,9 +56,12 @@
 			.then((b) => {
 				// 분기 우선(밀도 — 데이터 작업대 기본 결) → 없으면 연간 폴백. FY 표지화 금지.
 				const view = b?.views?.quarter ?? b?.views?.annual ?? Object.values(b?.views ?? {}).find(Boolean);
-				const c = view?.cards?.[0];
-				if (c && view) {
-					// 캐러셀 팔레트로 재색(엔진 기본 블루/주황/그린 → 로즈 계열). 데이터·축·구조 불변.
+				const c0 = view?.cards?.[0];
+				if (c0 && view) {
+					// ★작은 회사 단위 강등 — 조 단위인데 작은 항목(영업익·순익)이 0.0조로 뭉개지면 억으로(차트+표
+					// 일괄, 데이터·축 환산만·구조 불변). 매출 0.8조→8,000억, 영업익 0.0조→320억 처럼 읽히게.
+					const c = demoteUnit(c0);
+					// 캐러셀 팔레트로 재색(엔진 기본 블루/주황/그린 → 로즈 계열).
 					const recolored = { ...c, series: c.series.map((s, i) => ({ ...s, color: CARD_SERIES[i % CARD_SERIES.length] })) };
 					finCards = { card: recolored, periods: view.periods };
 					finState = 'ready';
@@ -55,7 +80,10 @@
 		const off = all.length - periods.length;
 		const fmt = (v: unknown): string => {
 			if (typeof v !== 'number' || !Number.isFinite(v)) return '–';
-			return Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : v.toFixed(1);
+			const a = Math.abs(v);
+			if (a >= 100) return Math.round(v).toLocaleString();
+			if (a >= 1) return v.toFixed(1);
+			return v.toFixed(2); // 1 미만(조 유지된 작은 값 0.02 등)도 0.0 으로 안 뭉개지게 2 자리
 		};
 		const rows = finCards.card.series.map((s) => ({
 			name: s.name,
@@ -64,9 +92,9 @@
 		return { unit: finCards.card.unit ?? '', periods, rows };
 	});
 
-	// 표 슬라이드에도 그래프 — 각 행(지표)을 한 선으로 그린 다중 라인 차트(터미널처럼). 단위는 셀 문자열에서
-	// 판별: '%' 포함 행은 비율(우축 그룹), 아니면 금액(좌축 그룹) → 그룹별 자체 min/max 로 정규화(이중축
-	// 효과, 조와 % 가 섞여도 한 선이 바닥에 깔리지 않게). 정확값은 아래 표가 준다.
+	// 표 슬라이드에도 그래프 — 각 행(지표)을 한 선으로. 단위는 셀의 '%' 유무로 금액/비율 그룹 분리.
+	// ★자릿수 차 처리: 그룹 안에서 행들의 스케일 차가 크면(>8배, 예 매출 vs 영업익) 행별 정규화(작은 항목이
+	// 바닥에 안 깔림), 비슷하면(마진·성장) 공유축으로 상대 높이 비교. 정확값은 아래 표가 준다.
 	const tableChart = $derived.by(() => {
 		if (card.kind !== 'table') return null;
 		const periodCols = card.cols.slice(1);
@@ -85,18 +113,13 @@
 		if (!rows.length) return null;
 		const W = 100;
 		const H = 38;
-		const rangeOf = (g: typeof rows) => {
-			const all = g.flatMap((r) => r.vals).filter((n) => Number.isFinite(n));
-			if (!all.length) return null;
-			let lo = Math.min(...all);
-			let hi = Math.max(...all);
+		const rangeOf = (vals: number[]) => {
+			const ok = vals.filter((n) => Number.isFinite(n));
+			let lo = ok.length ? Math.min(...ok) : 0;
+			let hi = ok.length ? Math.max(...ok) : 1;
 			if (lo === hi) hi = lo + Math.abs(lo || 1);
 			return { lo, hi };
 		};
-		const absRows = rows.filter((r) => !r.isPct);
-		const pctRows = rows.filter((r) => r.isPct);
-		const absR = rangeOf(absRows);
-		const pctR = rangeOf(pctRows);
 		const toLine = (r: (typeof rows)[number], rng: { lo: number; hi: number }, color: string) => {
 			const step = W / (r.vals.length - 1);
 			const points = r.vals
@@ -105,11 +128,17 @@
 				.join(' ');
 			return { name: r.name, color, points };
 		};
-		let ci = 0;
-		const lines = [
-			...absRows.map((r) => toLine(r, absR!, CARD_SERIES[ci++ % CARD_SERIES.length])),
-			...pctRows.map((r) => toLine(r, pctR!, CARD_SERIES[ci++ % CARD_SERIES.length]))
-		].filter((l) => l.points);
+		const groupLines = (group: typeof rows, startCi: number) => {
+			if (!group.length) return [] as { name: string; color: string; points: string }[];
+			const scales = group.map((r) => Math.max(0, ...r.vals.filter((n) => Number.isFinite(n)).map(Math.abs)));
+			const nz = scales.filter((s) => s > 1e-9);
+			const spread = nz.length ? Math.max(...nz) / Math.min(...nz) : 1;
+			const shared = spread > 8 ? null : rangeOf(group.flatMap((r) => r.vals)); // 차 크면 행별, 비슷하면 공유축
+			return group.map((r, i) => toLine(r, shared ?? rangeOf(r.vals), CARD_SERIES[(startCi + i) % CARD_SERIES.length]));
+		};
+		const absRows = rows.filter((r) => !r.isPct);
+		const pctRows = rows.filter((r) => r.isPct);
+		const lines = [...groupLines(absRows, 0), ...groupLines(pctRows, absRows.length)].filter((l) => l.points);
 		return lines.length ? { lines, W, H } : null;
 	});
 
