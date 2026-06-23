@@ -1,8 +1,14 @@
-# 공시검색 OS — 정리 + 자동증분 파이프라인 + 터미널 UI/UX (PRD SSOT)
+# 공시검색 OS — 정리 + 자동증분 파이프라인 + 터미널 UI/UX (PRD SSOT) ✅ 완료·_done 이관
 
 > 무게중심: **dartlab 핵심 = "공시를 정말로 빠르게 찾는 것"** — 검색은 간판이다.
 > 전체 깊은 PRD(21 섹션) 정본: `C:\Users\MSI\.claude\plans\calm-painting-mango.md` (승인 2026-06-18).
 > 본 파일 = 요약 + as-built 진행 원장. 근거: engine-cleanup 10-agent 토론(`wf_2784509e-349`) + 파이프라인/배선/UIUX 3-way 실측 + UI/UX 전문가 설계.
+
+## ✅ 종결 상태 (as-built 정정 — 2026-06-23 git/HF 실측)
+- **코드 P0~P3 7커밋 전부 origin/master 배포 완료** — `ef17da7e0·162db241d·1f9cb8d7f·b55003fe6·53e13f60a·d0609517f·578ff6dab` 모두 `merge-base --is-ancestor` PASS. 아래 본문의 "미push 3"은 **STALE**(과거 세션 기록이며 이후 push됨).
+- **검색 기능 라이브 정상** — `FilingSearchDialog`/`filingSearch.ts`는 순수 프론트(PyPI 의존 0), HF contentIndex 직독으로 작동. 라이브 인덱스 builtAt 2026-06-20·allFilings 196k행·sourceDataAsOf 신선.
+- **searchIndexBuild 파이프라인 GREEN** — 2026-06-19~20 self-canary flaky 회귀를 4커밋(`34287b83c·318014849·b2b11b492·e0f1ab493`)으로 결정론화 수정. 일간/월간 cron 정상 실행 중.
+- **유일 잔여 = sidecar/compact 마이그레이션의 PyPI 릴리즈** (운영자·되돌릴 수 없는 발행). 현재 PyPI 0.10.7 = search-os 이전(npz 리더), HF 데이터 = 여전히 npz(main.npz 143MB, sidecar 미flip). 이는 **디스크 −132MB·파일수 절감의 내부 최적화**이고 사용자 기능을 막지 않음 → 운영자 릴리즈 트랙으로 분리. 순서는 아래 "배포 순서" 참조.
 
 ## 결론 (깎는 것 / 못 깎는 것)
 - **delta 세그먼트 폐기 → compact-only**: 병합 로직 2벌(Python+JS) → 0벌. 신규 공시는 매일 catalog compaction(`rebuildMainFromCatalog`, 평문 ~4분)으로 main 반영.
