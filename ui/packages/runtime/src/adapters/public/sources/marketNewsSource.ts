@@ -17,7 +17,8 @@ interface NewsRow extends Record<string, unknown> {
 }
 
 const COLS = ['date', 'title', 'url', 'source'];
-const DAYS = 3; // 최근 N UTC 일 shard (어제부터 역순) — GET 수=속도라 좌측 한눈 피드엔 3일이면 충분(주말 커버)
+const DAYS = 2; // 최근 N UTC 일 shard (어제부터 역순) — 일 shard ~300~580KB(수백 헤드라인)라 2일이면 충분.
+//                GET 수=속도(병렬이라도 가장 느린 콜드 GET 이 전체를 잡음) → 최소화.
 const CAP = 300; // 렌더 상한 — 최근 윈도우라 무한스크롤 불필요
 
 // core 미주입 경로(레거시/어댑터 무인자 호출) 전용 lazy 폴백 — loadCompanyNews(newsSource) 동형.

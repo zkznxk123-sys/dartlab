@@ -96,14 +96,15 @@
 		return () => io.disconnect();
 	});
 
-	// ── 뉴스 탭 (lazy — 처음 열 때만 fetch) ──
+	// ── 뉴스 탭 — mount 시 백그라운드 preload(공시 보는 동안 미리 받아둠 → 탭 클릭 시 즉시 표시). ──
+	// 공시 피드가 빠른 건 1 GET + mount 선로드라서 — 뉴스도 같은 선로드로 콜드 HF 지연을 클릭 전에 흡수.
 	type NewsState = 'idle' | 'loading' | 'ready' | 'empty' | 'error';
 	let news = $state<MarketNews[]>([]);
 	let newsState = $state<NewsState>('idle');
 	const newsAsOf = $derived(news.length ? news[0].date : '');
 
 	$effect(() => {
-		if (tab !== 'news' || newsState !== 'idle') return;
+		if (newsState !== 'idle') return; // 1회만(탭 무관 선로드)
 		newsState = 'loading';
 		let cancelled = false;
 		rt.news
