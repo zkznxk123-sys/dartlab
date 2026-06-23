@@ -142,6 +142,7 @@ GATES: dict[str, Gate] = {
             "python -X utf8 tests/audit/namingConsistency.py && "
             "python -X utf8 tests/audit/checkEngineSpecSchema.py && "
             "python -X utf8 tests/audit/valuationPublishLint.py --strict && "
+            "python -X utf8 tests/audit/dossierVerdictLint.py --strict && "
             "python -X utf8 tests/audit/deprecationAudit.py && "
             "python -X utf8 tests/audit/staleImports.py --check && "
             "python -X utf8 tests/audit/untrustedWrapAudit.py --strict && "

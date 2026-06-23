@@ -22,6 +22,13 @@
 
 ## 상태
 
+- **2026-06-24**: **Phase 1b 완료**(killer 리프레임 잔여) — 커밋 대기(UI surface = 운영자 push 게이트). 구현:
+  - **상세보기 크로스패널 네비 완성**: `finFullEntry.svelte.ts`(requestFinFull pulse, viewerEntry 동형) → CenterStack 이 pulse 구독·`finFullTab` → `FinFullscreen initialTab` 으로 PEOPLE/RETURN 탭 직열기(최초 마운트만 untrack 적용, 회사전환=종합 리셋). 인력 상세보기→PEOPLE·주주환원 상세보기→RETURN.
+  - **인력 자기이력 문장**(`reportSelfHistory.ts::workforceTrend`): 총원 궤적(YYYY→YYYY ±%)+계약직 비중 이동. 새 fetch 0(wf[] 이미 메모리). 백분위/1인당부가가치는 Phase 2 baked(여기 미포함).
+  - **주주환원 자기이력 문장**(`returnTrend`): 최근 연속 배당 연수(가용 window 내, 꼬리 미발표 null skip — 실측 005010)+배당성향 이동+소각(appears-when-clean). 새 fetch 0(srs[]).
+  - **CARD_GUIDE convention**: 비재무 지표 올라가면/내려가면 리프레임 규약 + verdict 금지 주석(cardGuide.ts 상단).
+  - **G3 NEVER-CLAIM grep 게이트 신규**(`tests/audit/dossierVerdictLint.py`, lint 게이트 배선): 회사별 verdict 합성형(우량주·주주친화·매수의견·비중확대 등)만 ban — bare 우량/매수/저평가(교육·백테스터·밸류에이션 정당 중첩)·부정형 면책문 미탐지(allowlist 휴리스틱 불요). 41 surface PASS.
+  - 검증: surfaces svelte-check **0 error**·checkUiDataWiring PASS·reportSelfHistory 단위 11/11(데모 게이트 다년/무배당/첫배당/중간중단/당해미발표/소각)·실데이터 probe(DPS≥2년 42% 커버리지 측정, streak 버그 1건 적발·수정)·ruff·camelcase·audit-self OK.
 - **2026-06-23**: Phase-0 probe 완료(위) → Phase 0 스파인 착수(정공법 구현 goal).
 - **2026-06-19**: PRD v0.1 작성(13인 토론 `wf_c20526bc-bed`) → 확장 v0.2(07, 11인 `wf_c62ab765-ea5`) → **경화 v0.3(08, 4인 `wf_c451d741-93f`)**. 착수 대기(운영자 go).
 - **구현 코드 1건(perf 버그 수정, commit `e801f42f0`)**: 정기보고서 팩트 패널 멈춤 = DuckDB→hyparquet 이관(실측 수십초→4.3초·svelte-check 0err·시각변화 없음). 나머지 feature 구현 0.

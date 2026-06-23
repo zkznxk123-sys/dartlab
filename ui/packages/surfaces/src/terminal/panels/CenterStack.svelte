@@ -19,6 +19,7 @@
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
 	import { requestViewer } from '../lib/viewerEntry.svelte'; // 공시뷰어 전체화면 — 우측 ViewerOverlay 열기 신호
+	import { finFullEntry } from '../lib/finFullEntry.svelte'; // 우측 레일 도시에 섹션 상세보기 → 재무 전체화면 특정 탭(people·shareholder) 열기 신호
 	import { classifyFiling } from '../lib/eventRail'; // 비정기 공시 원문명 → DART 공시그룹 근사 분류(이벤트 레일 필터)
 	import { watchlist } from '../lib/watchlist.svelte'; // 공시 워치 — 종목코드 왼쪽 ☆ 토글(좌측 패널과 공유)
 
@@ -209,6 +210,17 @@
 	const product = $derived(corpInfo?.product ?? '');
 	// 재무제표 분석 전체화면 (FinFullscreen — 버틀러식 탭, ESC 닫기는 컴포넌트 내부)
 	let finFull = $state(false);
+	let finFullTab = $state('all'); // 진입 탭 — 종합 버튼=all, 우측 레일 상세보기=people·shareholder(아래 pulse 구독)
+	// 우측 레일 도시에 섹션(인력·주주환원) 상세보기 신호 구독 — pulse 변할 때만 해당 탭으로 전체화면 연다.
+	// seenFinFullPulse = 비반응 plain let — finFull/finFullTab 쓰기가 effect 를 재발화시키지 않음(viewerEntry 동일 패턴, 루프 없음).
+	let seenFinFullPulse = finFullEntry.pulse;
+	$effect(() => {
+		const p = finFullEntry.pulse;
+		if (p === seenFinFullPulse) return;
+		seenFinFullPulse = p;
+		finFullTab = finFullEntry.tab;
+		finFull = true;
+	});
 	// 차트 출처(공공누리) — PriceChart 가 onSrc 로 올려줌(econ/수정주가/HA 반응). 차트 하단 대신 패널 헤더에 표기.
 	let chartSrcLine = $state('');
 
@@ -562,7 +574,7 @@
 		{#if finBundle && finBundle.modes.length > 1}
 			<span class="segGroup mini">{#each finBundle.modes as m (m)}<button class={finMode === m ? 'seg on' : 'seg'} onclick={() => (finMode = m)}>{lang === 'en' ? m.toUpperCase() : finModeLabel[m]}</button>{/each}</span>
 		{/if}
-		<button class="finFullBtn" onclick={() => (finFull = true)} title={lang === 'en' ? 'fullscreen analysis' : '전체화면 분석'} aria-label="fullscreen">{lang === 'en' ? 'detail' : '상세보기'}</button>
+		<button class="finFullBtn" onclick={() => { finFullTab = 'all'; finFull = true; }} title={lang === 'en' ? 'fullscreen analysis' : '전체화면 분석'} aria-label="fullscreen">{lang === 'en' ? 'detail' : '상세보기'}</button>
 	{/snippet}
 	{#if finState === 'ready' && finData}
 		<div class="finGrid">
@@ -577,7 +589,7 @@
 	{/if}
 </Panel>
 {#if finFull}
-	<FinFullscreen {co} {lang} bundle={finBundle} mode={finMode} onMode={(m) => (finMode = m)} onScope={(s) => (finScope = s)} candles={chartCode === co.code ? candles : null} onClose={() => (finFull = false)} />
+	<FinFullscreen {co} {lang} bundle={finBundle} mode={finMode} onMode={(m) => (finMode = m)} onScope={(s) => (finScope = s)} candles={chartCode === co.code ? candles : null} initialTab={finFullTab} onClose={() => (finFull = false)} />
 {/if}
 
 <!-- VERDICT (종합 판정 — co.verdict 합성, 동기 tier 즉시 렌더) -->

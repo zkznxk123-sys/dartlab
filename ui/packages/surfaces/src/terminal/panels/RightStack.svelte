@@ -35,6 +35,8 @@
 	import { viewerUrl, marketForCode } from '../../viewer/lib/dartUrl'; // 도시에 ↗원문 딥링크(rcept_no → DART 원문, 공개 floor)
 	import { lossSummary, controlShiftSummary, type ControlShift } from '../lib/holdings'; // 타법인출자 lossPct(앵커)·control-shift(지배이동) 순수계산
 	import type { ListedLookup } from '../lib/holdings'; // 피출자사명→상장 종목 해소 hook 타입
+	import { workforceTrend, returnTrend } from '../lib/reportSelfHistory'; // 인력·주주환원 자기이력(self-vs-self) 순수계산 — 다년 배열에서 시간축, 새 fetch 0
+	import { requestFinFull } from '../lib/finFullEntry.svelte'; // 섹션 상세보기 → 중앙 재무 전체화면 특정 탭(people·shareholder) 열기 신호
 
 	interface Props {
 		co: Company;
@@ -346,6 +348,8 @@
 	});
 	const forensic = $derived(forensicSignals({ auditFees, debtProfile, cashLatestWon }));
 	const wfLast = $derived(wf.length ? wf[wf.length - 1] : null);
+	// 인력 자기이력 — 총원 궤적 + 계약직 비중 이동 (스냅샷 격자가 못 보여주는 시간축). 새 fetch 0(wf 이미 메모리).
+	const wfTrend = $derived(workforceTrend(wf));
 	// 연간 매출(조) ÷ 인원 = 1인당 매출(억) — finBundle annual 과 연도 매칭 (추가 fetch 없음)
 	const revByYear = $derived.by<Map<string, number>>(() => {
 		const out = new Map<string, number>();
@@ -365,6 +369,8 @@
 		return rev != null && w.total ? +((rev * 1e12) / w.total / 1e8).toFixed(1) : null; // 억
 	};
 	const srLast = $derived(srs.length ? srs[srs.length - 1] : null);
+	// 주주환원 자기이력 — 최근 연속 배당 연수 + 배당성향 이동 + 소각(appears-when-clean). 새 fetch 0(srs 이미 메모리).
+	const retTrend = $derived(returnTrend(srs));
 	const fmtShares = (v: number | null): string => (v == null ? '—' : v >= 1e8 ? (v / 1e8).toFixed(1) + '억주' : v >= 1e4 ? (v / 1e4).toFixed(0) + '만주' : v.toLocaleString() + '주');
 	// 타법인출자 도시에 섹션 — lossPct(적자 계열 자본, 항상 켜진 앵커) + control-shift(지배 이동). 새 fetch 0(inv·shPeriods 이미 메모리).
 	const invLoss = $derived(inv && inv.rows.length ? lossSummary(inv.rows) : null);
@@ -592,6 +598,18 @@
 <!-- 인력 · 생산성 (정기보고서 임직원 현황 — 인원·급여·근속·1인당매출) -->
 {#if wfLast}
 	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '인력 · 생산성', en: 'WORKFORCE' }} sub={{ kr: 'report · 임직원 ' + wfLast.year, en: 'report · ' + wfLast.year }} flush>
+		{#snippet right()}<button class="finFullBtn" onclick={() => requestFinFull('people')} title={lang === 'en' ? 'workforce & pay timeseries (fullscreen PEOPLE tab)' : '인력·보수 시계열 — 전체화면 인력 탭'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
+		<!-- 자기이력 1줄 — 스냅샷 격자가 못 보여주는 시간축(총원 궤적·계약직 비중 이동). 판정·형용사 0·명시 기간 라벨. -->
+		{#if wfTrend && (wfTrend.headPct != null || (wfTrend.contractFromPct != null && wfTrend.contractToPct != null && Math.abs(wfTrend.contractToPct - wfTrend.contractFromPct) >= 1))}
+			<div class="secSentBox">
+				{#if wfTrend.headPct != null}
+					<div class="secSent">▼ {lang === 'en' ? `headcount ${wfTrend.fromYear}→${wfTrend.toYear} ${sign(wfTrend.headPct, 0)}% (${wfTrend.headFrom.toLocaleString()}→${wfTrend.headTo.toLocaleString()})` : `총원 ${wfTrend.fromYear}→${wfTrend.toYear} ${sign(wfTrend.headPct, 0)}% (${wfTrend.headFrom.toLocaleString()}→${wfTrend.headTo.toLocaleString()}명)`}</div>
+				{/if}
+				{#if wfTrend.contractFromPct != null && wfTrend.contractToPct != null && Math.abs(wfTrend.contractToPct - wfTrend.contractFromPct) >= 1}
+					<div class="secSent">▼ {lang === 'en' ? `contract share ${wfTrend.contractFromPct.toFixed(0)}%→${wfTrend.contractToPct.toFixed(0)}%` : `계약직 비중 ${wfTrend.contractFromPct.toFixed(0)}%→${wfTrend.contractToPct.toFixed(0)}%`}</div>
+				{/if}
+			</div>
+		{/if}
 		<div class="factGrid">
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'headcount' : '총원'}</span><span class="factV mono">{wfLast.total != null ? wfLast.total.toLocaleString() + (lang === 'en' ? '' : '명') : '—'}</span></div>
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'M / F' : '남 / 여'}</span><span class="factV mono">{wfLast.male != null ? wfLast.male.toLocaleString() : '—'} / {wfLast.female != null ? wfLast.female.toLocaleString() : '—'}</span></div>
@@ -606,6 +624,21 @@
 <!-- 주주환원 (배당 + 자사주 — 정기보고서) -->
 {#if srLast}
 	<Panel {lang} className="eValuation" prov="real" title={{ kr: '주주환원', en: 'SHAREHOLDER RETURN' }} sub={{ kr: 'report · 배당 ' + srLast.year + ' · 보통주', en: 'report · ' + srLast.year + ' · common' }} flush>
+		{#snippet right()}<button class="finFullBtn" onclick={() => requestFinFull('shareholder')} title={lang === 'en' ? 'shareholder return & ownership timeseries (fullscreen RETURN tab)' : '주주환원·소유 시계열 — 전체화면 주주환원 탭'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
+		<!-- 환원 자기이력 1줄 — 연속 배당 연수·배당성향 이동·소각(appears-when-clean). 흐름막대는 상세보기(center, 그래프 합법). -->
+		{#if retTrend && (retTrend.streak >= 2 || (retTrend.payoutFromPct != null && retTrend.payoutToPct != null) || retTrend.cancelQty != null)}
+			<div class="secSentBox">
+				{#if retTrend.streak >= 2}
+					<div class="secSent">▼ {lang === 'en' ? `${retTrend.streak}-yr consecutive dividend (~${retTrend.streakToYear})` : `최근 ${retTrend.streak}년 연속 배당 (~${retTrend.streakToYear})`}</div>
+				{/if}
+				{#if retTrend.payoutFromPct != null && retTrend.payoutToPct != null}
+					<div class="secSent">▼ {lang === 'en' ? `payout ${retTrend.payoutFromPct.toFixed(0)}%→${retTrend.payoutToPct.toFixed(0)}% (${retTrend.payoutFromYear}→${retTrend.payoutToYear})` : `배당성향 ${retTrend.payoutFromPct.toFixed(0)}%→${retTrend.payoutToPct.toFixed(0)}% (${retTrend.payoutFromYear}→${retTrend.payoutToYear})`}</div>
+				{/if}
+				{#if retTrend.cancelQty != null}
+					<div class="secSent">▼ {lang === 'en' ? `treasury cancelled ${fmtShares(retTrend.cancelQty)} (${retTrend.cancelYear})` : `자사주 소각 ${fmtShares(retTrend.cancelQty)} (${retTrend.cancelYear})`}</div>
+				{/if}
+			</div>
+		{/if}
 		<div class="factGrid">
 			<div class="factRow"><span class="factL">DPS</span><span class="factV mono">{srLast.dps != null ? srLast.dps.toLocaleString() + (lang === 'en' ? ' KRW' : '원') : '—'}</span></div>
 			<div class="factRow"><span class="factL">{lang === 'en' ? 'div yield' : '배당수익률'}</span><span class="factV mono">{srLast.yieldPct != null ? srLast.yieldPct.toFixed(1) + '%' : '—'}</span></div>

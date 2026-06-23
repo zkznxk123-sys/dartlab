@@ -20,8 +20,9 @@
 		onScope: (s: FinScope) => void; // 연결/별도 전환 — 호출측(CenterStack)이 번들 재조회
 		candles: Candle[] | null; // 가격↔기초체력 오버레이용 (CenterStack 로드분 — 소프트스왑 가드 후 주입)
 		onClose: () => void;
+		initialTab?: string; // 우측 레일 섹션 상세보기가 지정한 진입 탭(people·shareholder) — 미지정/미상은 'all'
 	}
-	let { co, lang, bundle, mode, onMode, onScope, candles, onClose }: Props = $props();
+	let { co, lang, bundle, mode, onMode, onScope, candles, onClose, initialTab }: Props = $props();
 	const finScopeLabel = (s: FinScope): string => (s === 'CFS' ? (lang === 'en' ? 'CONS' : '연결') : lang === 'en' ? 'SEP' : '별도');
 	const rt = useDartLabRuntime();
 	const finModeLabel: Record<FinMode, string> = { ttm: 'TTM', quarter: '분기', annual: '연간' };
@@ -36,10 +37,14 @@
 	// 가격 탭 PER·PBR — EPS(shareholderReturn)·발행주식수(ownership) lazy fetch (연 축). 동일 epoch 가드.
 	let valuationData = $state<{ sr: ShareholderReturnYear[] | null; own: OwnershipYear[] | null } | 'loading' | null>(null);
 	let epoch = 0; // 비반응 — 회사 전환 세대
+	let mounted = false; // 비반응 — 최초 마운트(우측 레일 상세보기 진입탭 존중) vs 이후 회사 전환(종합 리셋) 구분
 	$effect(() => {
 		void co.code;
 		epoch++;
-		tab = 'all';
+		// 최초 마운트만 initialTab(people·shareholder) 적용 — 이후 회사 전환은 '종합'으로. initialTab 은
+		// 마운트당 고정(부모가 열기 직전 세팅)이라 untrack 으로 의존 제거(prop 변동이 effect 재발화 안 하게).
+		tab = untrack(() => (!mounted && initialTab && FS_TABS.some((d) => d.key === initialTab) ? initialTab : 'all'));
+		mounted = true;
 		reportCards = {};
 		auditTrail = null;
 		execTop = null;
