@@ -1,5 +1,6 @@
-// @dartlab/ui-contracts 공개 표면 — 타입 전용, 의존 0.
+// @dartlab/ui-contracts 공개 표면 — 타입 + 순수 선언(presets·라우팅 규칙), 의존 0.
 export * from './runtime';
+export * from './market';
 export * from './company';
 export * from './price';
 export * from './indexPort';
