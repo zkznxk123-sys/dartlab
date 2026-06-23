@@ -193,7 +193,7 @@
   <!-- ── 헤더 = 터미널 top bar 디자인 그대로(.dlTerm 스코프 + terminal.css 재사용). 단일행: brand · 관점탭 · 종목검색 · 테마/인쇄 · SNS ── -->
   <header class="rptHeader dlTerm">
     <div class="topBar">
-      <a class="brand" href="{base}/terminal" title="dartlab terminal">
+      <a class="brand" href="{base}/" title="DartLab 홈">
         <picture>
           <source srcset="{base}/avatar.webp" type="image/webp" />
           <img class="brandLogo" src="{base}/avatar.png" alt="DartLab" width="22" height="22" />

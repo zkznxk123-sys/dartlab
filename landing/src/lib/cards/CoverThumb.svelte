@@ -1,0 +1,139 @@
+<script lang="ts">
+	// 피드 썸네일 = 편집 계약의 첫 슬라이드(표지)만. 인스타 피드처럼 한 장씩 보이고, 클릭하면 포스트 모달
+	// (좌 캐러셀 + 우 캡션)이 열린다. 피드에서는 스와이프/네비 없음 — 첫장만. 가벼움(계약 JSON 1개만 fetch).
+	import type { DartLabRuntime } from '@dartlab/ui-contracts';
+	import CardSlide from './CardSlide.svelte';
+	import { loadContract, contractToCards } from './contract';
+	import type { CarouselCard, CarouselContract, MediaIndex } from './model';
+
+	let {
+		rt,
+		code,
+		corpName,
+		base = '',
+		media,
+		onOpen
+	}: {
+		rt: DartLabRuntime;
+		code: string;
+		corpName: string;
+		base?: string;
+		media: MediaIndex | null;
+		onOpen: () => void;
+	} = $props();
+
+	// 첫 슬라이드(표지) — 계약 로드 후. media 갱신 시 배경 이미지 추종(reactive).
+	let cover = $state<CarouselCard | null>(null);
+	let contract = $state<CarouselContract | null>(null);
+	$effect(() => {
+		loadContract(code).then((c) => {
+			contract = c;
+			if (c) cover = contractToCards(c, media)[0] ?? null;
+		});
+	});
+	// 회사명 = 계약명 우선(미디어 displayName 누락 시 코드만 뜨던 것 교정).
+	const name = $derived(contract?.name ?? corpName);
+</script>
+
+<button class="thumb" onclick={onOpen} aria-label="{name} 카드 캐러셀 열기">
+	<div class="frame">
+		{#if cover}<CardSlide card={cover} {rt} />{/if}
+		<div class="badge">{name}{code ? ` · ${code}` : ''}</div>
+		{#if base}
+			<div class="brand">
+				<img src="{base}/avatar.webp" alt="" width="30" height="30" />
+				<span class="bWrap"><b>dartlab</b><small>COMPANY STORY BY TICKER</small></span>
+			</div>
+		{/if}
+		<span class="hint">카드 열기</span>
+	</div>
+</button>
+
+<style>
+	.thumb {
+		display: block;
+		width: 100%;
+		padding: 0;
+		border: none;
+		background: none;
+		cursor: pointer;
+	}
+	.frame {
+		position: relative;
+		aspect-ratio: 1080 / 1350;
+		width: 100%;
+		border-radius: 16px;
+		overflow: hidden;
+		background: #050811;
+		border: 1px solid #1e2433;
+		transition:
+			transform 0.18s ease,
+			box-shadow 0.18s ease;
+	}
+	.thumb:hover .frame,
+	.thumb:focus-visible .frame {
+		transform: translateY(-3px);
+		box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+	}
+	.badge {
+		position: absolute;
+		top: 14px;
+		right: 16px;
+		font-size: 13px;
+		font-weight: 700;
+		color: #f1f5f9;
+		padding: 6px 13px;
+		background: rgba(5, 8, 17, 0.78);
+		border: 1px solid rgba(232, 234, 237, 0.12);
+		border-radius: 999px;
+		z-index: 3;
+	}
+	.brand {
+		position: absolute;
+		left: 16px;
+		bottom: 16px;
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		z-index: 3;
+		filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+	}
+	.brand img {
+		opacity: 0.92;
+		border-radius: 50%;
+	}
+	.bWrap {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.15;
+	}
+	.bWrap b {
+		font-size: 15px;
+		font-weight: 800;
+		color: #f6f8fb;
+	}
+	.bWrap small {
+		font-size: 8px;
+		letter-spacing: 0.14em;
+		color: #cbd5e1;
+		text-transform: uppercase;
+	}
+	.hint {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 14px;
+		font-weight: 700;
+		color: #fff;
+		background: rgba(3, 5, 9, 0.42);
+		opacity: 0;
+		transition: opacity 0.18s ease;
+		z-index: 4;
+	}
+	.thumb:hover .hint,
+	.thumb:focus-visible .hint {
+		opacity: 1;
+	}
+</style>

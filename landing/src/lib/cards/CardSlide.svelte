@@ -61,7 +61,7 @@
 		<div class="scrim"></div>
 	{/if}
 
-	<div class="content">
+	<div class="content" class:txtSlide={card.kind === 'narrative' || card.kind === 'closing'}>
 		{#if card.kind === 'cover'}
 			<div class="cover">
 				<span class="kicker"><i></i>{card.perspectiveLabel}</span>
@@ -71,7 +71,6 @@
 			</div>
 		{:else if card.kind === 'editorial' || card.kind === 'editorialBeat'}
 			<div class="editorial">
-				{#if card.kind === 'editorial' && card.date}<span class="eyebrow">· {card.date}</span>{/if}
 				{#if card.kind === 'editorialBeat' && card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
 				<h2 class="eLine">{@render accent(card.line)}</h2>
 				{#if card.sub}<p class="eSub">{stripDots(card.sub)}</p>{/if}
@@ -393,16 +392,19 @@
 	.kV.pos {
 		color: #34d399;
 	}
+	/* 텍스트 슬라이드(narrative·closing) = 에디토리얼처럼 좌측 정렬 + 하단 고정(중앙정렬 금지). */
+	.content.txtSlide {
+		justify-content: flex-end;
+	}
 	/* narrative */
 	.narr {
-		flex: 1;
-		display: flex;
-		align-items: center;
 		margin: 0;
 		font-size: clamp(22px, 5.6cqw, 52px);
 		font-weight: 800;
 		line-height: 1.25;
 		letter-spacing: -0.02em;
+		white-space: pre-line; /* 손글 줄바꿈(\n) 보존 */
+		word-break: keep-all;
 	}
 	/* flags */
 	.flags {
@@ -596,21 +598,19 @@
 	}
 	/* closing / empty */
 	.closing {
-		flex: 1;
-		display: flex;
-		align-items: center;
 		margin: 0;
 		font-size: clamp(20px, 5cqw, 44px);
 		font-weight: 700;
 		line-height: 1.3;
+		white-space: pre-line; /* 손글 줄바꿈 보존 */
+		word-break: keep-all;
 	}
 	.empty {
 		flex: 1;
 		display: flex;
 		align-items: center;
-		justify-content: center;
 		color: #94a3b8;
 		font-size: clamp(14px, 3cqw, 24px);
-		text-align: center;
+		text-align: left;
 	}
 </style>

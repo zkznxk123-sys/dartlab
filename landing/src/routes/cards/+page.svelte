@@ -8,9 +8,10 @@
 	import '@dartlab/ui-surfaces/terminal/terminal.css';
 	import { DARTLAB_BRAND_LINKS, SupportDialog, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
 	import { loadMediaIndex, heroUrls } from '$lib/cards/media';
-	import { loadContractCodes } from '$lib/cards/contract';
-	import type { MediaIndex } from '$lib/cards/model';
+	import { loadContractCodes, loadContract } from '$lib/cards/contract';
+	import type { MediaIndex, CarouselContract } from '$lib/cards/model';
 	import Deck from '$lib/cards/Deck.svelte';
+	import CoverThumb from '$lib/cards/CoverThumb.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -29,7 +30,22 @@
 	let searchEl = $state<HTMLInputElement | null>(null);
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let supportOpen = $state(false);
-	let zoom = $state<{ sym: string; corpName: string; heroUrls: string[] } | null>(null); // 확대(전체화면)
+	// 인스타 포스트 모달 — 첫장 클릭 시 좌 캐러셀 + 우 캡션. 계약(caption/title/pinned) 로드 후 오픈.
+	let post = $state<{ code: string; corpName: string; contract: CarouselContract | null } | null>(null);
+
+	function openPost(code: string, corpName: string) {
+		post = { code, corpName, contract: null };
+		loadContract(code).then((c) => {
+			if (post && post.code === code) post = { code, corpName, contract: c };
+		});
+	}
+	// 캡션 산문 → 문단 배열(빈 줄 구분). 문단 내부 \n 은 pre-line 으로 보존.
+	function captionParas(caption?: string): string[] {
+		return String(caption ?? '')
+			.split(/\n\s*\n/)
+			.map((p) => p.trim())
+			.filter(Boolean);
+	}
 
 	loadMediaIndex().then((m) => (media = m));
 	loadContractCodes().then((s) => {
@@ -66,8 +82,8 @@
 		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
 			e.preventDefault();
 			searchEl?.focus();
-		} else if (e.key === 'Escape' && zoom) {
-			zoom = null;
+		} else if (e.key === 'Escape' && post) {
+			post = null;
 		}
 	}
 </script>
@@ -79,7 +95,7 @@
 	<!-- 헤더 = 터미널 top bar 그대로(.dlTerm + terminal.css 재사용). brand · 검색 · SNS 아이콘(터미널 동일 정본). -->
 	<header class="cHeader">
 		<div class="topBar">
-			<a class="brand" href="{base}/terminal" title="dartlab terminal">
+			<a class="brand" href="{base}/" title="DartLab 홈">
 				<picture>
 					<source srcset="{base}/avatar.webp" type="image/webp" />
 					<img class="brandLogo" src="{base}/avatar.png" alt="DartLab" width="22" height="22" />
@@ -126,14 +142,7 @@
 		{:else}
 			<div class="grid">
 				{#each visible as row (row.stockCode)}
-					<Deck
-						{rt}
-						sym={row.stockCode}
-						corpName={row.corpName}
-						{base}
-						heroUrls={heroUrls(media, row.stockCode)}
-						onEnlarge={() => (zoom = { sym: row.stockCode, corpName: row.corpName, heroUrls: heroUrls(media, row.stockCode) })}
-					/>
+					<CoverThumb {rt} code={row.stockCode} corpName={row.corpName} {base} {media} onOpen={() => openPost(row.stockCode, row.corpName)} />
 				{/each}
 			</div>
 			<div bind:this={sentinel} class="sentinel"></div>
@@ -141,13 +150,35 @@
 		{/if}
 	</main>
 
-	{#if zoom}
-		<!-- 확대(전체화면) — 배경 클릭/Esc 닫기 -->
-		<div class="zoom" role="dialog" aria-modal="true" aria-label="{zoom.corpName} 확대" onclick={() => (zoom = null)}>
-			<div class="zoomInner" role="document" onclick={(e) => e.stopPropagation()}>
-				<Deck {rt} sym={zoom.sym} corpName={zoom.corpName} {base} heroUrls={zoom.heroUrls} />
+	{#if post}
+		<!-- 인스타 포스트 모달 — 좌 캐러셀(스와이프) + 우 캡션. 배경 클릭/Esc 닫기. -->
+		<div class="post" role="dialog" aria-modal="true" aria-label="{post.corpName} 포스트" onclick={() => (post = null)}>
+			<div class="postInner" role="document" onclick={(e) => e.stopPropagation()}>
+				<div class="postLeft">
+					<Deck {rt} sym={post.code} corpName={post.corpName} {base} heroUrls={heroUrls(media, post.code)} />
+				</div>
+				<aside class="postRight">
+					<header class="prHead">
+						<picture>
+							<source srcset="{base}/avatar.webp" type="image/webp" />
+							<img src="{base}/avatar.png" alt="DartLab" width="34" height="34" />
+						</picture>
+						<div class="prWho"><b>dartlab</b><small>COMPANY STORY BY TICKER</small></div>
+					</header>
+					<div class="prScroll">
+						<p class="prMeta">{post.contract?.name ?? post.corpName} · {post.code}</p>
+						{#if post.contract?.title}<h2 class="prTitle">{post.contract.title}</h2>{/if}
+						{#if post.contract}
+							{#each captionParas(post.contract.caption) as para (para)}<p class="prPara">{para}</p>{/each}
+							{#if post.contract.pinnedComment}<p class="prPinned">{post.contract.pinnedComment}</p>{/if}
+							{#if !post.contract.caption}<p class="prPara prMuted">캡션이 아직 준비되지 않았습니다.</p>{/if}
+						{:else}
+							<p class="prPara prMuted">불러오는 중…</p>
+						{/if}
+					</div>
+				</aside>
+				<button class="postClose" onclick={() => (post = null)} aria-label="닫기">✕</button>
 			</div>
-			<button class="zoomClose" onclick={() => (zoom = null)} aria-label="닫기">✕</button>
 		</div>
 	{/if}
 </div>
@@ -198,8 +229,8 @@
 	.sentinel {
 		height: 1px;
 	}
-	/* 확대(전체화면) */
-	.zoom {
+	/* 인스타 포스트 모달 — 좌 캐러셀(4:5) + 우 캡션 패널 */
+	.post {
 		position: fixed;
 		inset: 0;
 		z-index: 50;
@@ -210,12 +241,99 @@
 		background: rgba(2, 4, 8, 0.92);
 		backdrop-filter: blur(6px);
 	}
-	.zoomInner {
-		height: min(92vh, 1400px);
-		aspect-ratio: 1080 / 1350;
+	.postInner {
+		display: flex;
+		height: min(90vh, 880px);
 		max-width: 96vw;
+		background: #0b0e14;
+		border: 1px solid #1e2433;
+		border-radius: 14px;
+		overflow: hidden;
 	}
-	.zoomClose {
+	.postLeft {
+		height: 100%;
+		aspect-ratio: 1080 / 1350;
+		flex: 0 0 auto;
+		background: #050811;
+	}
+	.postRight {
+		width: 360px;
+		max-width: 42vw;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		border-left: 1px solid #1e2433;
+	}
+	.prHead {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 16px 18px;
+		border-bottom: 1px solid #161b26;
+		flex: 0 0 auto;
+	}
+	.prHead img {
+		border-radius: 50%;
+	}
+	.prWho {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.2;
+	}
+	.prWho b {
+		font-size: 14px;
+		font-weight: 800;
+		color: #f6f8fb;
+	}
+	.prWho small {
+		font-size: 8px;
+		letter-spacing: 0.14em;
+		color: #94a3b8;
+		text-transform: uppercase;
+	}
+	.prScroll {
+		flex: 1;
+		overflow-y: auto;
+		padding: 18px;
+	}
+	.prMeta {
+		margin: 0 0 6px;
+		font-family: Menlo, Consolas, monospace;
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		color: #ff3f6f;
+		font-weight: 700;
+	}
+	.prTitle {
+		margin: 0 0 14px;
+		font-size: 19px;
+		font-weight: 800;
+		line-height: 1.3;
+		color: #f6f8fb;
+		word-break: keep-all;
+	}
+	.prPara {
+		margin: 0 0 13px;
+		font-size: 14.5px;
+		line-height: 1.62;
+		color: #d8e2f0;
+		white-space: pre-line;
+		word-break: keep-all;
+	}
+	.prPinned {
+		margin: 16px 0 0;
+		padding-top: 14px;
+		border-top: 1px solid #1e2433;
+		font-size: 12.5px;
+		line-height: 1.55;
+		color: #94a3b8;
+		white-space: pre-line;
+		word-break: keep-all;
+	}
+	.prMuted {
+		color: #64748b;
+	}
+	.postClose {
 		position: absolute;
 		top: 18px;
 		right: 22px;
@@ -227,6 +345,27 @@
 		color: #cbd5e1;
 		font-size: 18px;
 		cursor: pointer;
+		z-index: 2;
+	}
+	/* 좁은 화면 — 세로 스택(캐러셀 위, 캡션 아래) */
+	@media (max-width: 820px) {
+		.postInner {
+			flex-direction: column;
+			height: auto;
+			max-height: 92vh;
+			overflow-y: auto;
+		}
+		.postLeft {
+			height: auto;
+			width: 100%;
+			aspect-ratio: 1080 / 1350;
+		}
+		.postRight {
+			width: 100%;
+			max-width: none;
+			border-left: none;
+			border-top: 1px solid #1e2433;
+		}
 	}
 	.feedEmpty {
 		text-align: center;

@@ -93,6 +93,12 @@ export interface CarouselContract {
 	code: string;
 	name: string;
 	sector?: string;
+	/** 인스타 포스트 제목(meta.json title) — 우측 캡션 패널 헤드라인. */
+	title?: string;
+	/** 인스타 캡션(caption.txt) — 포스트 우측 설명 산문(문단=빈 줄 구분). 슬라이드와 별개의 본문. */
+	caption?: string;
+	/** 고정 댓글(comment_pinned.txt) — 근거·면책. 캡션 하단 작게. */
+	pinnedComment?: string;
 	slides: ContractSlide[];
 }
 export interface ContractIndex {
