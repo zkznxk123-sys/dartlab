@@ -5,7 +5,7 @@
 	import type { DartLabRuntime, FinCard } from '@dartlab/ui-contracts';
 	import { MiniFinChart } from '@dartlab/ui-surfaces/terminal';
 	import { CARD, CARD_SERIES, accentParts, stripDots } from './theme';
-	import { cellTone, verdictTone, TXT_COLS, spark, isTimeSeries, lineGeo, wonLabel } from '$lib/report/render';
+	import { cellTone, verdictTone, TXT_COLS, lineGeo, wonLabel } from '$lib/report/render';
 	import type { CarouselCard } from './model';
 
 	let { card, rt }: { card: CarouselCard; rt: DartLabRuntime } = $props();
@@ -62,6 +62,55 @@
 			values: periods.map((_, i) => fmt(s.data[off + i]))
 		}));
 		return { unit: finCards.card.unit ?? '', periods, rows };
+	});
+
+	// 표 슬라이드에도 그래프 — 각 행(지표)을 한 선으로 그린 다중 라인 차트(터미널처럼). 단위는 셀 문자열에서
+	// 판별: '%' 포함 행은 비율(우축 그룹), 아니면 금액(좌축 그룹) → 그룹별 자체 min/max 로 정규화(이중축
+	// 효과, 조와 % 가 섞여도 한 선이 바닥에 깔리지 않게). 정확값은 아래 표가 준다.
+	const tableChart = $derived.by(() => {
+		if (card.kind !== 'table') return null;
+		const periodCols = card.cols.slice(1);
+		if (periodCols.length < 2) return null;
+		const parse = (s: unknown): number => parseFloat(String(s ?? '').replace(/[^0-9.\-]/g, ''));
+		const rows = card.data
+			.map((row) => {
+				const cells = periodCols.map((c) => String(row[c] ?? ''));
+				return {
+					name: String(row[card.cols[0]] ?? ''),
+					isPct: cells.some((s) => s.includes('%')),
+					vals: cells.map((s) => parse(s))
+				};
+			})
+			.filter((r) => r.vals.filter((n) => Number.isFinite(n)).length >= 2);
+		if (!rows.length) return null;
+		const W = 100;
+		const H = 38;
+		const rangeOf = (g: typeof rows) => {
+			const all = g.flatMap((r) => r.vals).filter((n) => Number.isFinite(n));
+			if (!all.length) return null;
+			let lo = Math.min(...all);
+			let hi = Math.max(...all);
+			if (lo === hi) hi = lo + Math.abs(lo || 1);
+			return { lo, hi };
+		};
+		const absRows = rows.filter((r) => !r.isPct);
+		const pctRows = rows.filter((r) => r.isPct);
+		const absR = rangeOf(absRows);
+		const pctR = rangeOf(pctRows);
+		const toLine = (r: (typeof rows)[number], rng: { lo: number; hi: number }, color: string) => {
+			const step = W / (r.vals.length - 1);
+			const points = r.vals
+				.map((v, i) => (Number.isFinite(v) ? `${(i * step).toFixed(1)},${(H - ((v - rng.lo) / (rng.hi - rng.lo)) * H).toFixed(1)}` : null))
+				.filter(Boolean)
+				.join(' ');
+			return { name: r.name, color, points };
+		};
+		let ci = 0;
+		const lines = [
+			...absRows.map((r) => toLine(r, absR!, CARD_SERIES[ci++ % CARD_SERIES.length])),
+			...pctRows.map((r) => toLine(r, pctR!, CARD_SERIES[ci++ % CARD_SERIES.length]))
+		].filter((l) => l.points);
+		return lines.length ? { lines, W, H } : null;
 	});
 
 	const line = $derived(card.kind === 'line' ? lineGeo(card.series, card.markers ?? []) : null);
@@ -147,14 +196,18 @@
 				</div>
 			{:else if card.kind === 'table'}
 				<div class="tWrap">
+						{#if tableChart}
+							<svg viewBox="0 0 {tableChart.W} {tableChart.H}" preserveAspectRatio="none" class="tChart">
+								{#each tableChart.lines as ln (ln.name)}<polyline points={ln.points} style="stroke:{ln.color}" />{/each}
+							</svg>
+							<div class="tLegend">{#each tableChart.lines as ln (ln.name)}<span class="tLi"><i style="background:{ln.color}"></i>{ln.name}</span>{/each}</div>
+						{/if}
 					<table class="cT">
-						<thead><tr>{#each card.cols as c}<th class:num={c !== card.cols[0]}>{c}</th>{/each}{#if isTimeSeries(card.cols)}<th class="num">추이</th>{/if}</tr></thead>
+						<thead><tr>{#each card.cols as c}<th class:num={c !== card.cols[0]}>{c}</th>{/each}</tr></thead>
 						<tbody>
 							{#each card.data as row}
-								{@const sp = spark(row, card.cols.slice(1))}
 								<tr>
 									{#each card.cols as c, ci}<td class:num={ci !== 0} class="{ci === 0 || TXT_COLS.has(c) ? verdictTone(row[c]) : cellTone(row[c])}">{row[c] ?? '-'}</td>{/each}
-									{#if isTimeSeries(card.cols)}<td class="num">{#if sp}<svg viewBox="0 0 64 22" class="spark"><polygon points={sp.area} class="spkA" /><polyline points={sp.points} class="spkL" /></svg>{/if}</td>{/if}
 								</tr>
 							{/each}
 						</tbody>
@@ -485,7 +538,7 @@
 	/* MiniFinChart 가 패널 폭을 꽉 채우게(.mfc 가 content 폭으로 줄어 작은 정사각으로 뜨던 것 교정).
 	   svg 는 width:100%·height:auto(terminal.css) → 폭 = 패널 폭. 차트(h=190) 위 + 수치표 아래 병치. */
 	.finWrap {
-		justify-content: flex-start;
+		justify-content: center; /* 차트+표를 패널 수직 중앙에 */
 		gap: 0.5em;
 	}
 	.finWrap :global(.mfc) {
@@ -639,18 +692,38 @@
 	.cT td.warn {
 		color: #ff9ab0;
 	}
-	.spark {
-		width: 64px;
-		height: 22px;
+	/* 표 위 다중 라인 차트(각 행=한 선) — 행별 정규화(이중축 효과)·로즈 팔레트. 정확값은 아래 표. */
+	.tChart {
+		width: 100%;
+		height: 26%;
+		min-height: 92px;
+		max-height: 150px;
+		flex: 0 0 auto;
 	}
-	.spkA {
-		fill: rgba(255, 63, 111, 0.18);
-	}
-	.spkL {
+	.tChart polyline {
 		fill: none;
-		stroke: #ff3f6f;
-		stroke-width: 1;
+		stroke-width: 1.4;
 		vector-effect: non-scaling-stroke;
+	}
+	.tLegend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3em 0.9em;
+		font-size: clamp(9px, 2cqw, 14px);
+		color: #cdd9e6;
+		margin: 0.3em 0 0.5em;
+		flex: 0 0 auto;
+	}
+	.tLi {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35em;
+	}
+	.tLi i {
+		width: 0.95em;
+		height: 0.18em;
+		border-radius: 1px;
+		display: inline-block;
 	}
 	.muted {
 		color: #64748b;

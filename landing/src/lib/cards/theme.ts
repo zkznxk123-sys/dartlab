@@ -18,8 +18,8 @@ export const CARD = {
 	border: '#1e2433'
 } as const;
 
-/** 차트 시리즈 색(로즈 계열 + 라이트, 엠버/블루/그린 금지). 막대=로즈 hero·선=화이트/라이트로즈. */
-export const CARD_SERIES = ['#ff3f6f', '#f6f8fb', '#ff9ab0', '#9aa7c0', '#d8e2f0'] as const;
+/** 차트 시리즈 색(로즈 계열 + 라이트/슬레이트, 엠버/블루/그린 금지). 다행 표(최대 6 시리즈) 색충돌 방지 7색. */
+export const CARD_SERIES = ['#ff3f6f', '#f6f8fb', '#ff9ab0', '#9aa7c0', '#d8e2f0', '#c77d92', '#7f8aa3'] as const;
 
 /** 인스타 캐러셀 규격(1080×1350 = 4:5). 카드는 이 비율로 반응형. */
 export const CARD_ASPECT = '1080 / 1350';
