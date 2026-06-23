@@ -300,7 +300,7 @@
 		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
 		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
 		separator: { color: '#222b3a', fill: true, activeBackgroundColor: 'rgba(var(--amber-rgb),0.1)' },
-		crosshair: { horizontal: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } }, vertical: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#b45309', family: CHART_FONT } } }
+		crosshair: { horizontal: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#99203f', family: CHART_FONT } }, vertical: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#99203f', family: CHART_FONT } } }
 	});
 
 	// 보조 페인 높이 — 컨테이너 비례(16%) 적응. 전체화면 진입 시 78px 고정 납작 페인 방지.
@@ -816,7 +816,7 @@
 			// 공시 시점 = dartlab 고유 강점. 비정기 material 공시(disclosure)는 cyan, 실적·증자(report·capital)는 orange.
 			// url 보유 마커는 클릭 시 해당 DART 공시를 새 탭으로 — 가격차트가 곧 네비게이션 가능한 공시 타임라인.
 			const disc = ev.kind === 'disclosure';
-			const fg = disc ? '#22d3ee' : '#ec4899';
+			const fg = disc ? '#22d3ee' : '#ff3f6f';
 			const bg = disc ? 'rgba(34,211,238,0.12)' : 'rgba(var(--amber-rgb),0.12)';
 			const bd = disc ? 'rgba(34,211,238,0.5)' : 'rgba(var(--amber-rgb),0.5)';
 			const evUrl = ev.url;

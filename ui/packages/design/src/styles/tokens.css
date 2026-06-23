@@ -80,14 +80,15 @@
 	/* 히트 그라데이션 = 브랜드 레드→시그니처 핑크(accent). 버튼·히어로 강조 표면 통일(SSOT). */
 	--dl-grad-heat: linear-gradient(135deg, var(--dl-red) 0%, var(--dl-accent) 100%);
 
-	/* ── Accent · 시그니처 강조색 (캐러셀 핑크) — 전 surface 강조색 단일 제어점 ──
-	 * --dl-accent-rgb 는 알파 변형용: rgba(var(--dl-accent-rgb), 0.3). 돋보기 로고 붉은톤과 통일.
+	/* ── Accent · 시그니처 강조색 (#ff3f6f 핑크) — 전 surface 강조색 단일 제어점 ──
+	 * 여기 한 곳만 바꾸면 터미널(--amber)·landing·scan·map·viewer 강조색 일괄 변경.
+	 * --dl-accent-rgb 는 알파 변형용: rgba(var(--dl-accent-rgb), 0.3). dim/light 는 같은 hue 음영.
 	 */
-	--dl-accent: var(--p-pink-500);
-	--dl-accent-rgb: var(--p-pink-500-rgb);
-	--dl-accent-dim: var(--p-pink-700);
-	--dl-accent-light: var(--p-pink-300);
-	--dl-accent-soft: rgba(var(--p-pink-500-rgb), 0.12);
+	--dl-accent: #ff3f6f;
+	--dl-accent-rgb: 255, 63, 111;
+	--dl-accent-dim: #cc2a52;
+	--dl-accent-light: #ff8aa3;
+	--dl-accent-soft: rgba(255, 63, 111, 0.12);
 	/* surfaces 레거시 alias 전역 fallback — scan/map/viewer 등 .dlTerm 밖에서도 강조색 var 해석되게. */
 	--amber: var(--dl-accent);
 	--amber-rgb: var(--dl-accent-rgb);

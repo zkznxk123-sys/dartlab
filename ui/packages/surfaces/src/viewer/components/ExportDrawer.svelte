@@ -112,7 +112,7 @@
 
 <aside class="export-drawer">
 	<header class="ed-head">
-		<FileSpreadsheet size={17} color="#ec4899" />
+		<FileSpreadsheet size={17} color="#ff3f6f" />
 		<strong>표 내보내기</strong>
 		<span class="ed-count">{list.length}개</span>
 		<button type="button" class="ed-x" onclick={onclose} aria-label="닫기"><X size={15} /></button>
