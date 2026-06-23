@@ -188,13 +188,13 @@
 
 /* PANEL */
 .dlTerm .panel { background: var(--panel); border: 1px solid var(--bd); border-radius: 2px; display: flex; flex-direction: column; min-height: 0; }
-.dlTerm .panelHead { display: flex; align-items: center; gap: 7px; height: 16px; flex: 0 0 16px; padding: 0 7px; background: linear-gradient(180deg, var(--dl-bg-overlay), var(--dl-bg-raised)); border-bottom: 1px solid var(--bd); overflow: hidden; }
+.dlTerm .panelHead { display: flex; align-items: center; gap: 7px; height: 20px; flex: 0 0 20px; padding: 0 8px; background: linear-gradient(180deg, var(--dl-bg-overlay), var(--dl-bg-raised)); border-bottom: 1px solid var(--bd); overflow: hidden; }
 /* 제목 우선 — 절대 짜부되지 않음(좁은 좌측 레일에서 sub·우측버튼이 제목을 0px 로 밀어내 "주가·재무 스크리너" 가
    완전히 사라지던 회귀 가드). 패널명은 짧아 flex-shrink:0 안전. */
-.dlTerm .panelTitle { font-family: var(--cond); font-weight: 700; font-size: 10px; letter-spacing: 1.2px; color: var(--amberDim); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+.dlTerm .panelTitle { font-family: var(--cond); font-weight: 700; font-size: 12px; letter-spacing: 1.2px; color: var(--amberDim); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
 /* sub(메타)가 먼저 양보 — 좁아지면 제목·우측버튼보다 먼저 말줄임 */
-.dlTerm .panelSub { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
-.dlTerm .panelRight { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--dim); flex-shrink: 0; white-space: nowrap; padding-left: 6px; }
+.dlTerm .panelSub { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
+.dlTerm .panelRight { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--dim); flex-shrink: 0; white-space: nowrap; padding-left: 6px; }
 .dlTerm .panelBody { padding: 5px 6px; flex: 1; min-height: 0; }
 .dlTerm .panelBody.flush { padding: 0; }
 
@@ -855,10 +855,10 @@
 
 /* 좌측 하단 통합 패널 탭 (스크리너 ⇄ 공시 워치) — 패널 헤더 자리를 탭 바로 사용 */
 .dlTerm .leftTabHead { gap: 0; padding: 0; }
-.dlTerm .leftTab { height: 100%; display: inline-flex; align-items: center; font-family: var(--cond); font-weight: 700; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--dimmer); background: transparent; border: none; border-right: 1px solid var(--bd); padding: 0 9px; cursor: pointer; white-space: nowrap; }
+.dlTerm .leftTab { height: 100%; display: inline-flex; align-items: center; font-family: var(--cond); font-weight: 700; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--dimmer); background: transparent; border: none; border-right: 1px solid var(--bd); padding: 0 11px; cursor: pointer; white-space: nowrap; }
 .dlTerm .leftTab.on { color: var(--amber); box-shadow: inset 0 -2px 0 var(--amber); }
 .dlTerm .leftTab:hover:not(.on) { color: var(--txt); }
-.dlTerm .leftTabN { font-family: var(--mono); font-weight: 600; font-size: 8.5px; color: var(--dim); margin-left: 5px; }
+.dlTerm .leftTabN { font-family: var(--mono); font-weight: 600; font-size: 9.5px; color: var(--dim); margin-left: 5px; }
 .dlTerm .finTable { width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.3; }
 .dlTerm .finTable th { font-family: var(--cond); font-size: 8.5px; color: var(--dimmer); letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 7px; text-align: right; border-bottom: 1px solid var(--bd); position: sticky; top: 0; background: var(--panel); }
 .dlTerm .finTable th.finAcct { text-align: left; }
@@ -1008,7 +1008,7 @@
 .dlTerm .sbItem b { font-family: var(--mono); font-size: 9px; }
 .dlTerm .sbSpacer { flex: 1; }
 
-/* 섹션 헤더 통일 — 모든 패널 제목은 amber 단색(엔진별 색상 분기 폐지). 높이 16px·10px 는 .panelHead/.panelTitle 단일 정의가 강제. */
+/* 섹션 헤더 통일 — 모든 패널 제목은 amber 단색(엔진별 색상 분기 폐지). 높이 20px·12px 는 .panelHead/.panelTitle 단일 정의가 강제. */
 
 /* 공시뷰어 인터미널 오버레이 — ViewerStudio(embedded) 호스트. 스튜디오 스타일은 component-scoped 라 충돌 없음 */
 .dlViewerFs { position: fixed; inset: 0; z-index: 120; background: #050811; display: flex; flex-direction: column; }
