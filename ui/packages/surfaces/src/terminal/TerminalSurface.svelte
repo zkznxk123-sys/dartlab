@@ -267,6 +267,7 @@
 				<div class="hdrLinks">
 					{#if co}
 						<a class="hdrLink hdrReport" href="{base}/report?sym={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'Corporate analysis report — printable (PDF)' : '기업분석보고서 — 인쇄 가능 (PDF)'}>{lang === 'en' ? 'Report' : '보고서'}</a>
+						<a class="hdrLink hdrCards" href="{base}/cards?sym={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'Company card stories — Instagram-style feed (browse all)' : '기업 카드뉴스 — 인스타그램형 피드(전체 보기)'}>{lang === 'en' ? 'Cards' : '카드뉴스'}</a>
 					{/if}
 					{#if allowTerminalAsk}
 						<button class="hdrLink hdrAsk" onclick={() => co && runtime.navigation.toAsk({ code: co.code })} title="AI에게 직접 질문 — 로컬 LLM 질의(/ask)" aria-label="AI" style="display:inline-flex;align-items:center;gap:4px">
