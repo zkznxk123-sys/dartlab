@@ -32,6 +32,7 @@
 	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — 셸 주입 lazy 로더, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
+	import { viewerUrl, marketForCode } from '../../viewer/lib/dartUrl'; // 도시에 ↗원문 딥링크(rcept_no → DART 원문, 공개 floor)
 	import type { ListedLookup } from '../lib/holdings'; // 피출자사명→상장 종목 해소 hook 타입
 
 	interface Props {
@@ -162,6 +163,34 @@
 	let factsState = $state<'loading' | 'ready' | 'empty'>('loading');
 	let news = $state<NewsItem[]>([]); // 종목 뉴스(네이버 헤드라인+스니펫) — 워커 /news 서버사이드 read
 	let newsState = $state<'loading' | 'ready' | 'empty'>('loading');
+	// 도시에 헤더 리본 — 6 fact 의 출처(rcept_no)·결산기준일(stlm_dt)에서 단일 as-of 스탬프 파생.
+	// 가장 최근 접수(rcept_no max)를 앵커로 ↗원문·접수일·staleness, stlm_dt 로 사업보고서 as-of, N/6 커버리지.
+	const dossier = $derived.by(() => {
+		if (factsState !== 'ready' || !reportFacts.length) return null;
+		let anchor: LiveCompanyReportFact | null = null;
+		for (const f of reportFacts) if (f.rceptNo && (!anchor || f.rceptNo > (anchor.rceptNo ?? ''))) anchor = f;
+		const rceptNo = anchor?.rceptNo ?? null;
+		const stlmDt = anchor?.stlmDt ?? reportFacts.find((f) => f.stlmDt)?.stlmDt ?? null;
+		let monthsAgo: number | null = null;
+		if (rceptNo && rceptNo.length >= 6) {
+			const y = Number(rceptNo.slice(0, 4));
+			const m = Number(rceptNo.slice(4, 6));
+			if (y && m) {
+				const now = new Date();
+				const diff = (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m);
+				monthsAgo = diff >= 0 ? diff : null;
+			}
+		}
+		return {
+			stlm: stlmDt ? stlmDt.slice(0, 7).replace('-', '.') : null,
+			rceptDate: rceptNo && rceptNo.length >= 8 ? `${rceptNo.slice(0, 4)}.${rceptNo.slice(4, 6)}.${rceptNo.slice(6, 8)}` : null,
+			monthsAgo,
+			coverage: reportFacts.length,
+			url: rceptNo ? viewerUrl(marketForCode(co.code), rceptNo) : null
+		};
+	});
+	// 단일 fact 출처 딥링크 (각 행 ↗) — KR=DART, US=EDGAR. 미상이면 null(링크 미렌더).
+	const factSrcUrl = (rceptNo: string | null | undefined): string | null => (rceptNo ? viewerUrl(marketForCode(co.code), rceptNo) : null);
 	$effect(() => {
 		const code = co.code;
 		factsState = 'loading';
@@ -520,11 +549,23 @@
 <Panel {lang} className="eCredit" prov="real" title={{ kr: 'DART 정기보고서 팩트', en: 'DART REPORT FACTS' }} sub={{ kr: 'report · 공시원문', en: 'report · filings' }} flush>
 	{#snippet right()}<span class="dim">{factsState === 'ready' ? reportFacts.length : ''}</span>{/snippet}
 	{#if factsState === 'ready'}
+		{#if dossier}
+			<div class="dossierRibbon">
+				<span class="drMain">
+					{#if dossier.stlm}{lang === 'en' ? 'report' : '사업보고서'} {dossier.stlm}{/if}
+					{#if dossier.rceptDate}<span class="drSep">·</span>{lang === 'en' ? 'filed' : '접수'} {dossier.rceptDate}{/if}
+					<span class="drSep">·</span>{dossier.coverage}/6 {lang === 'en' ? 'filings' : '공시'}
+					{#if dossier.monthsAgo != null}<span class="drSep">·</span>{lang === 'en' ? `~${dossier.monthsAgo}mo ago` : `약 ${dossier.monthsAgo}개월 전`}{/if}
+				</span>
+				{#if dossier.url}<a class="drSrc" href={dossier.url} target="_blank" rel="noopener" title={lang === 'en' ? 'Source filing (DART)' : '원문 공시(DART)'}>↗{lang === 'en' ? '' : '원문'}</a>{/if}
+			</div>
+		{/if}
 		<div class="factGrid">
 			{#each reportFacts as f (f.key)}
+				{@const fu = factSrcUrl(f.rceptNo)}
 				<div class="factRow">
 					<span class="factL">{f.label}</span>
-					<span class="factV mono">{f.value}</span>
+					<span class="factV mono">{f.value}{#if fu}<a class="factSrc" href={fu} target="_blank" rel="noopener" title={lang === 'en' ? 'source filing' : '원문 공시'}>↗</a>{/if}</span>
 					{#if f.detail}<span class="factD">{f.detail}</span>{/if}
 				</div>
 			{/each}

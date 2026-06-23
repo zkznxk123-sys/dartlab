@@ -6,10 +6,12 @@ import type { LiveCompanyReportFact } from './companyLive';
 // 값은 문자열 셀로 다룬다(value/detail 가 string). readReportFactRows 가 any[] 를 주므로 caller 무영향(경계 격리).
 export interface PeriodicReportRow {
 	year?: string | null;
+	// 도시에 스파인 — 출처 공시 접수번호(↗원문) + 결산 기준일(as-of)
+	rcept_no?: string | null;
+	stlm_dt?: string | null;
 	// 배당
 	thstrm?: string | null;
 	se?: string | null;
-	stlm_dt?: string | null;
 	// 자사주
 	trmend_qy?: string | null;
 	stock_knd?: string | null;
@@ -33,6 +35,13 @@ export interface PeriodicReportRow {
 	evl_grad_instt?: string | null;
 }
 
+// 도시에 스파인 — 출처 공시(rcept_no) + 결산기준일(stlm_dt)을 fact 에 부착(↗원문·as-of). 모든 매퍼 공유.
+function srcOf(row: PeriodicReportRow | null | undefined): { rceptNo: string | null; stlmDt: string | null } {
+	const rc = row?.rcept_no?.trim();
+	const sd = row?.stlm_dt?.trim();
+	return { rceptNo: rc && rc !== '-' ? rc : null, stlmDt: sd && sd !== '-' ? sd : null };
+}
+
 export function toDividendFact(row: PeriodicReportRow | null | undefined): LiveCompanyReportFact | null {
 	if (!row) return null;
 	return {
@@ -40,7 +49,8 @@ export function toDividendFact(row: PeriodicReportRow | null | undefined): LiveC
 		label: '배당',
 		value: row.thstrm ?? row.se ?? '확인',
 		detail: [row.year, row.stlm_dt].filter(Boolean).join(' · '),
-		source: '정기보고서 배당'
+		source: '정기보고서 배당',
+		...srcOf(row)
 	};
 }
 
@@ -53,7 +63,8 @@ export function toTreasuryFact(row: PeriodicReportRow | null | undefined): LiveC
 		detail: [row.year, row.stock_knd, row.change_qy_acqs ? `취득 ${row.change_qy_acqs}` : null]
 			.filter(Boolean)
 			.join(' · '),
-		source: '정기보고서 자사주'
+		source: '정기보고서 자사주',
+		...srcOf(row)
 	};
 }
 
@@ -64,7 +75,8 @@ export function toExecutiveFact(rows: PeriodicReportRow[]): LiveCompanyReportFac
 		label: '임원',
 		value: `${rows.length}명`,
 		detail: rows.map((r) => [r.nm, r.ofcps].filter(Boolean).join(' ')).join(' · '),
-		source: '정기보고서 임원'
+		source: '정기보고서 임원',
+		...srcOf(rows[0])
 	};
 }
 
@@ -75,7 +87,8 @@ export function toAuditFact(row: PeriodicReportRow | null | undefined): LiveComp
 		label: '감사의견',
 		value: row.adt_opinion ?? '확인',
 		detail: [row.year, row.adtor, row.emphs_matter || row.core_adt_matter].filter(Boolean).join(' · '),
-		source: '정기보고서 감사'
+		source: '정기보고서 감사',
+		...srcOf(row)
 	};
 }
 
@@ -86,7 +99,8 @@ export function toMajorHolderFact(row: PeriodicReportRow | null | undefined): Li
 		label: '주요주주',
 		value: row.mxmm_shrholdr_nm ?? '확인',
 		detail: [row.year, row.qota_rt ? `${row.qota_rt}%` : null, row.change_cause].filter(Boolean).join(' · '),
-		source: '정기보고서 주주'
+		source: '정기보고서 주주',
+		...srcOf(row)
 	};
 }
 
@@ -97,6 +111,7 @@ export function toCorporateBondFact(row: PeriodicReportRow | null | undefined): 
 		label: '회사채',
 		value: row.facvalu_totamt ?? row.scrits_knd_nm ?? '확인',
 		detail: [row.year, row.scrits_knd_nm, row.intrt, row.evl_grad_instt].filter(Boolean).join(' · '),
-		source: '정기보고서 회사채'
+		source: '정기보고서 회사채',
+		...srcOf(row)
 	};
 }

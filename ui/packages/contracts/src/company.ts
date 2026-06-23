@@ -45,6 +45,10 @@ export interface LiveCompanyReportFact {
 	value: string;
 	detail: string;
 	source: string;
+	/** 출처 공시 접수번호 — 도시에 ↗원문 딥링크(viewerUrl). 미상은 null/생략(additive). */
+	rceptNo?: string | null;
+	/** 결산 기준일(YYYY-MM-DD) — 도시에 헤더 리본 as-of 스탬프. 미상은 null/생략(additive). */
+	stlmDt?: string | null;
 }
 
 /** profit-pool 격자 원자료 — map/industries/{id}.json 의 stages[].nodes[] (rollup 은 surface 책임). */

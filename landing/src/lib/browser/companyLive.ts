@@ -69,6 +69,9 @@ export interface LiveCompanyReportFact {
 	value: string;
 	detail: string;
 	source: string;
+	// 도시에 스파인 — 출처 공시 접수번호(↗원문) + 결산 기준일(as-of). contracts 와 동기(additive optional).
+	rceptNo?: string | null;
+	stlmDt?: string | null;
 }
 
 export interface LiveCompanyDocExcerpt {
@@ -298,12 +301,12 @@ async function readReportFactRows(path: string, code: string, columns: string[])
 export async function loadLiveCompanyReportFacts(stockCode: string): Promise<LiveCompanyReportFact[]> {
 	try {
 		const [dividend, treasury, executive, audit, holder, bond] = await Promise.all([
-			readReportFactRows('dividend', stockCode, ['stlm_dt', 'se', 'thstrm', 'frmtrm', 'lwfr']),
-			readReportFactRows('treasuryStock', stockCode, ['stock_knd', 'trmend_qy', 'change_qy_acqs', 'change_qy_dsps']),
-			readReportFactRows('executive', stockCode, ['nm', 'ofcps', 'chrg_job']),
-			readReportFactRows('auditOpinion', stockCode, ['adtor', 'adt_opinion', 'emphs_matter', 'core_adt_matter']),
-			readReportFactRows('majorHolder', stockCode, ['mxmm_shrholdr_nm', 'posesn_stock_co', 'qota_rt', 'change_cause']),
-			readReportFactRows('corporateBond', stockCode, ['scrits_knd_nm', 'isu_de', 'facvalu_totamt', 'intrt', 'evl_grad_instt'])
+			readReportFactRows('dividend', stockCode, ['rcept_no', 'stlm_dt', 'se', 'thstrm', 'frmtrm', 'lwfr']),
+			readReportFactRows('treasuryStock', stockCode, ['rcept_no', 'stlm_dt', 'stock_knd', 'trmend_qy', 'change_qy_acqs', 'change_qy_dsps']),
+			readReportFactRows('executive', stockCode, ['rcept_no', 'stlm_dt', 'nm', 'ofcps', 'chrg_job']),
+			readReportFactRows('auditOpinion', stockCode, ['rcept_no', 'stlm_dt', 'adtor', 'adt_opinion', 'emphs_matter', 'core_adt_matter']),
+			readReportFactRows('majorHolder', stockCode, ['rcept_no', 'stlm_dt', 'mxmm_shrholdr_nm', 'posesn_stock_co', 'qota_rt', 'change_cause']),
+			readReportFactRows('corporateBond', stockCode, ['rcept_no', 'stlm_dt', 'scrits_knd_nm', 'isu_de', 'facvalu_totamt', 'intrt', 'evl_grad_instt'])
 		]);
 		// 임원: 최신 연도의 이름 있는 행 최대 3 (DuckDB nm IS NOT NULL ... LIMIT 3 대체).
 		const execTopYear = executive.length ? factYear(executive[0]) : -1;

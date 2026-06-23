@@ -882,6 +882,15 @@
 .dlTerm .factL { font-family: var(--cond); font-weight: 600; font-size: 10px; color: var(--amber); white-space: nowrap; }
 .dlTerm .factV { font-size: 10px; color: var(--txt); font-weight: 600; white-space: nowrap; text-align: right; }
 .dlTerm .factD { grid-column: 1 / -1; font-family: var(--cond); font-size: 9.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .factV .factSrc { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); text-decoration: none; margin-left: 4px; }
+.dlTerm .factV .factSrc:hover { color: var(--amber); }
+
+/* 도시에 헤더 리본 — 정기보고서 팩트 스파인(as-of·접수·N/6 커버리지·↗원문) */
+.dlTerm .dossierRibbon { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--dl-line); background: var(--dl-bg-deep); }
+.dlTerm .drMain { font-family: var(--cond); font-size: 9.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.dlTerm .drSep { color: var(--dimmer); margin: 0 3px; }
+.dlTerm .drSrc { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-decoration: none; white-space: nowrap; flex: none; }
+.dlTerm .drSrc:hover { color: var(--amber); }
 
 /* SUPPLY CHAIN */
 .dlTerm .scWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bd); }
