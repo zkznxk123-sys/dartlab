@@ -6998,7 +6998,7 @@
     },
     {
       "id": "operation.agentBoundaries",
-      "bodyPreview": "## 4 회귀 신호\n\n### 1. graph 회귀 가드 (memory feedback_no_graph_regression 8 번째)\n\n다음 패턴 추가 금지:\n- `BRIEF` / `WORK` / `CRITIQUE` / `COMPOSE` / `GATE` / `HARVEST` 식 고정 노드 이름\n- `*Loop` / `*Graph` / `*Kernel` 클래스 신설\n- `verify 강제` / `GATE 차단` / `requiredEvidence 강제` 표현\n- workbench 흐름 분기 4 번째 추가\n\n본체 `ai/agent.py` = chat-native + LLM 자율 tool calling. graph 노드 추가는 본체 회귀 시도로 분류.\n\n### 2. chat-native 본체 유지\n\n- 본체 변경 최소 — 신규 능력은 `ai/tools/*` 별 파일 추가 + `registry._SPECS` dict 항목.\n- 본체 system prompt 변경 시 → `runtime.promptingPatterns` 동시 갱신.\n\n### 3. Bold leaf 단일 Write\n\n- `SaveArtifact` / `OutcomeLog` 만 Write 권한. 다른 도구 Write 추가 금지.\n\n### 4. workbench 본체화 금지\n\n- workbench (`workbench/runner.py` 등) 의 자율 실행 흐름 분기 추가 금지.\n- 흐름은 `runtime.workbenchEvidenceFlow` SSOT 단일.\n\n## 실행\n\n```bash\n# PR 작성 후 자가 점검\nuv run python -X utf8 tests/audit/checkAgentBoundary.py\n# → 위반 list (0 = pass)\n\n# CI 측 자동 실행 (tests/run.py preflight 일부)\n```\n\n## 강행 룰\n\n1. PR 작성 전 본 lint 통과 확인.\n2. 본 lint 신규 룰 추가 → memory feedback_no_graph_regression 갱신 동시.\n3. workbench 흐름 분기 추가 의도 → 본 spec + memory 양쪽 검토 후 결정.\n\n## 기본 검증\n\n- lint 0 위반 (CI gate).\n- 회귀 사례 발생 시 incidents.md 기록.",
+      "bodyPreview": "## 4 회귀 신호\n\n### 1. graph 회귀 가드 (memory feedback_no_graph_regression 8 번째)\n\n다음 패턴 추가 금지:\n- `BRIEF` / `WORK` / `CRITIQUE` / `COMPOSE` / `GATE` / `HARVEST` 식 고정 노드 이름\n- `*Loop` / `*Graph` / `*Kernel` 클래스 신설\n- `verify 강제` / `GATE 차단` / `requiredEvidence 강제` 표현\n- workbench 흐름 분기 4 번째 추가\n\n본체 `ai/agent.py` = chat-native + LLM 자율 tool calling. graph 노드 추가는 본체 회귀 시도로 분류.\n\n### 2. chat-native 본체 유지\n\n- 본체 변경 최소 — 신규 능력은 `ai/tools/*` 별 파일 추가 + `registry._SPECS` dict 항목.\n- 본체 system prompt 변경 시 → `runtime.promptingPatterns` 동시 갱신.\n\n### 3. Bold leaf 단일 Write\n\n- `SaveArtifact` 만 Write 권한. 다른 도구 Write 추가 금지.\n\n### 4. workbench 본체화 금지\n\n- workbench (`workbench/runner.py` 등) 의 자율 실행 흐름 분기 추가 금지.\n- 흐름은 `runtime.workbenchEvidenceFlow` SSOT 단일.\n\n## 실행\n\n```bash\n# PR 작성 후 자가 점검\nuv run python -X utf8 tests/audit/checkAgentBoundary.py\n# → 위반 list (0 = pass)\n\n# CI 측 자동 실행 (tests/run.py preflight 일부)\n```\n\n## 강행 룰\n\n1. PR 작성 전 본 lint 통과 확인.\n2. 본 lint 신규 룰 추가 → memory feedback_no_graph_regression 갱신 동시.\n3. workbench 흐름 분기 추가 의도 → 본 spec + memory 양쪽 검토 후 결정.\n\n## 기본 검증\n\n- lint 0 위반 (CI gate).\n- 회귀 사례 발생 시 incidents.md 기록.",
       "title": "Agent Boundaries — checkAgentBoundary lint 외부 공개 SSOT",
       "category": "operation",
       "categoryTitle": "Operation",
@@ -7044,7 +7044,7 @@
         "workbench 흐름 분기 4 번째 추가",
         "본체 변경 최소 — 신규 능력은 `ai/tools/*` 별 파일 추가 + `registry._SPECS` dict 항목.",
         "본체 system prompt 변경 시 → `runtime.promptingPatterns` 동시 갱신.",
-        "`SaveArtifact` / `OutcomeLog` 만 Write 권한. 다른 도구 Write 추가 금지.",
+        "`SaveArtifact` 만 Write 권한. 다른 도구 Write 추가 금지.",
         "workbench (`workbench/runner.py` 등) 의 자율 실행 흐름 분기 추가 금지.",
         "흐름은 `runtime.workbenchEvidenceFlow` SSOT 단일.",
         "lint 0 위반 (CI gate).",
@@ -7081,32 +7081,29 @@
     {
       "id": "operation.aiEngine",
       "bodyPreview": "## 엔진 역할\n\n`src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답.\n\nP1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 진입점 — chat-native\nresult = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None)\n\n# 진입점 — workbench (mode=analyze)\nresult = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\")\n\n# MCP 표면\n# ask · run_python · read_skill · read_capability ·\n# web_search · external_reach_doctor · save_artifact · create_user_skill · compile_visual · run_workbench\n```\n\nLLM 이 자율적으로 canonical 도구를 호출한다. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate 한다.\n\n## 호출 동작\n\n### 1. 3 층 능력 모델 — 모두 dartlab 전역 자산, AI 는 소비자\n\n| 층 | 위치 | 표현 | 누가 쓰나 |\n|---|---|---|---|\n| **L1 Capability** | `src/dartlab/<engine>/` | Python 함수·클래스 + docstring | 사람·AI·MCP·UI |\n| **L2 Skill** | `src/dartlab/skills/specs/<engine>/<id>.md` | markdown spec + frontmatter | 사람·AI·MCP·UI·audit |\n| **L3 Tool** | `src/dartlab/ai/tools/` | canonical tool whitelist (LLM 이 손에 쥠) | AI 전용 |\n\n- L1·L2 는 본 SSOT 의 범위 밖. 본 SSOT 는 L3 와 작업대 (workbench) 만 정의.\n- L2 는 AI 안에 두지 않는다. `dartlab.skills.*` 가 단일 SSOT 인프라 (SkillSpec / searchSkills / compiler). AI 는 공식 Skill OS 의 *read-only 소비자* 이며 spec 작성자나 승격자가 아니다. 예외적으로 `CreateUserSkill` 은 사용자 요청 시 `.dartlab/skills` local user draft 만 작성하고, 공식 skill 은 운영자 검토를 거친 `kind: curated` 자산으로 관리한다.\n\n### 2. 작업대 5 패스\n\n```\nBRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST\n```\n\n각 패스는 LLM 호출 가능한 별도 단계. system prompt 는 패스별 분리 (`workb",
-      "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)",
+      "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider)",
       "category": "operation",
       "categoryTitle": "Operation",
       "kind": "curated",
       "status": "observed",
-      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · outcome ground truth 선순환 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'outcome_log', 'provider catalog'.",
+      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'provider catalog'.",
       "whenToUse": [
         "dartlab.ai 내부 구조 이해",
         "workbench 5 패스 (BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST)",
         "canonical 도구 화이트리스트",
         "provider 카탈로그 (oauth-codex / openai / gemini / groq / cerebras / mistral / custom / ollama / codex)",
-        "outcome ground truth 선순환 (pending → resolved + reflection)",
         "chat-native HARVEST bridge",
         "MCP 표면 매핑",
         "회귀 가드 (test_no_core_import / test_tool_whitelist / test_ref_gate ...)"
       ],
       "inputs": [
         "사용자 질문 (chat-native 또는 mode=analyze)",
-        "명시적 RunWorkbench tool 호출 (chat-native → 5 패스 elevate)",
-        "stockCode (outcome_log 작성 조건)"
+        "명시적 RunWorkbench tool 호출 (chat-native → 5 패스 elevate)"
       ],
       "requiredInputs": [],
       "outputs": [
         "답안 + ref 묶음 (dataRef · executionRef · valueRef · dateRef · visualRef · webRef · artifactRef · docRef)",
-        "decisions.jsonl (BM25 recall) + skill_stats.jsonl + outcome_log (per-stockCode markdown)",
-        "reflection (2-4 문장 평문)"
+        "decisions.jsonl (BM25 recall) + skill_stats.jsonl"
       ],
       "apiRefs": [],
       "toolRefs": [
@@ -7147,23 +7144,19 @@
         "2 단계 — chat-native LLM 이 canonical 도구 세트를 자율 호출.",
         "3 단계 — 깊은 분석 필요 시 LLM 이 RunWorkbench tool 호출 → 5 패스 elevate.",
         "4 단계 — GATE 가 ref 검증 (미달 시 차단/회귀).",
-        "5 단계 — HARVEST 가 decisions.jsonl + skill_stats.jsonl + outcome_log 작성.",
-        "6 단계 — 다음 같은 종목 호출 시 outcome_resolver 가 pending → resolved + reflection."
+        "5 단계 — HARVEST 가 decisions.jsonl + skill_stats.jsonl 작성."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
         "mode",
         "stockCode",
         "refKind",
-        "decisionId",
         "executionRef",
         "sourceRef"
       ],
       "expectedOutputs": [
         "chat-native 답안 + ref 검증 통과",
-        "workbench 5 패스 통과 + GATE 통과",
-        "outcome_log per-stockCode markdown (atomic temp+replace)",
-        "reflection (alpha-conditioned)"
+        "workbench 5 패스 통과 + GATE 통과"
       ],
       "visualGuidance": [],
       "failureModes": [
@@ -7172,8 +7165,7 @@
         "ref 없는 숫자/날짜/랭킹 답 (GATE 차단)",
         "AI가 공식 Skill OS spec을 직접 작성하거나 승격하려는 경로 재도입",
         "local user skill 을 builtin/official skill 처럼 취급",
-        "외부 본문 안 지시 따름 (Ref.sourceType=\"external\" untrusted)",
-        "past_context 빈 문자열일 때 placeholder 섹션 작성 (환각 가드)"
+        "외부 본문 안 지시 따름 (Ref.sourceType=\"external\" untrusted)"
       ],
       "forbidden": [
         "anthropic 직접 호출 (ToS 위반, claude_code.py 9eb9d088e 에서 제거)",
@@ -7186,7 +7178,6 @@
       "examples": [
         "dartlab.ask 진입 — kernel.ask → chat-native 또는 workbench",
         "LLM 의 RunWorkbench tool 호출 → 5 패스 elevate",
-        "outcome_log per-stockCode markdown (pending → resolved + reflection)",
         "회귀 가드 9 종 통과 (tests/ai/test_*)"
       ],
       "runtimeCompatibility": {
@@ -9867,7 +9858,7 @@
     },
     {
       "id": "operation.terminal",
-      "bodyPreview": "## 터미널이란 — 계기판이지 문서가 아니다\n\nDartLab 터미널은 전문가가 하루 종일 들여다보는 *살아있는 분석 계기판(instrument)* 이다. 블룸버그·아이코 같은 금융 터미널의 본질은 *읽고 덮는 리포트* 가 아니라, 분석을 시각 원시형(차트·곡선·플롯·게이지)으로 압축해 몇 초 안에 위치를 읽게 하는 계기판이다. 따라서 터미널 surface 의 정답은 긴 텍스트가 아니다. 표와 산문은 계기를 받치는 비계(scaffold)이지 제품의 본체가 아니다.\n\n실패형은 명확하다 — 텍스트 카드의 나열 + 축도 기간도 없는 장식 스파크라인으로 채운 \"정렬된 문서\". 이것은 매크로 뉴스판이지 분석 계기판이 아니다.\n\n## 5 원칙\n\n1. **계기판 ≠ 문서.** 각 패널은 *읽는* 차트·곡선·플롯이지 *해석할* 문단이 아니다. 분석을 시각으로 압축한다.\n2. **밀도 + 속도 (전문가용).** 한눈에 위치를 읽는다. 정보 밀도는 높되 시각 *위계* 로 정렬한다(균일 카드 금지). 초보 온보딩이 아니라 반복 전문 사용 기준으로 설계한다.\n3. **판정하지 않고 시각으로 보여준다.** 판정·점수·매수/매도를 내지 않는 원칙은, 곡선·국면·분포·증거상태를 *그려서 보여주고* 전문가가 판단하게 함으로 달성한다. 이는 시각의 축소가 아니다 — 시각을 체크리스트로 깎는 것은 판정 회피가 아니라 분석의 포기다.\n4. **퍼블릭 바닥 = 로컬 상위집합.** 아래 별도 절.\n5. **시각화는 자격을 증명해야 한다.** 아래 별도 절.\n\n## 퍼블릭 바닥 = 로컬 상위집합\n\n터미널은 두 타깃(퍼블릭·로컬)이 같은 계기다.\n\n- **퍼블릭 터미널** = 모두가 받는 바닥(floor). HF=SSOT 공개 데이터 + 브라우저 연산만으로 *로컬 백엔드 없이* 완전히 돈다. 개발 기준(dev)도 퍼블릭이다.\n- **로컬 터미널** = 같은 계기에 무거운/실시간/AI 연산을 로컬 전용 게이트(`/api`) 뒤에 더 얹는 상위집합(superset)이다.\n\n두 타깃의 **계기 질·시각 수준은 동일** 하며, 설계는 퍼블릭-우선이다. 로컬 연산이 있어야만 계기처럼 보이는 패널은 퍼블릭 바닥을 통과하지 못한 것이다. 데이터층 배선 규칙(단일 작업대 SSOT, 오리진 레지스트리, 로컬 전용 게이트)은 [operation.ui](/skills/operation.ui) 가 SSOT 다.\n\n## 판정하지 않고 시각으로\n\n색은 분석 방향이 아니라 증거/데이터 상태를 나타낸다. 곡선·분포·국면 평면은 근거(축·기간·출처·모델 한계)를 함께 노출한 채로 보여주고, 결론은 사용자가 낸다. 매수/매도·수혜/피해·좋음/나쁨·단일 macro score 는 방향·확신·품질을 뒤섞으므로 쓰지 않는다. 이 원칙은 [operation.philosophy](/skills/operation.philosophy) 의 설계 사상과 일치하며, 화면을 *덜 시각적으로* 만들라는 뜻이 결코 아니다.\n\n## 시각화 채택 게이트\n\n시각화는 다음을 강화할 때만 채택한다.\n\n```text\n무엇이 움직였나  →  어느 재무 채널에 닿나",
+      "bodyPreview": "## 터미널이란 — 계기판이지 문서가 아니다\n\nDartLab 터미널은 전문가가 하루 종일 들여다보는 *살아있는 분석 계기판(instrument)* 이다. 블룸버그·아이코 같은 금융 터미널의 본질은 *읽고 덮는 리포트* 가 아니라, 분석을 시각 원시형(차트·곡선·플롯·게이지)으로 압축해 몇 초 안에 위치를 읽게 하는 계기판이다. 따라서 터미널 surface 의 정답은 긴 텍스트가 아니다. 표와 산문은 계기를 받치는 비계(scaffold)이지 제품의 본체가 아니다.\n\n실패형은 명확하다 — 텍스트 카드의 나열 + 축도 기간도 없는 장식 스파크라인으로 채운 \"정렬된 문서\". 이것은 매크로 뉴스판이지 분석 계기판이 아니다.\n\n## 5 원칙\n\n1. **계기판 ≠ 문서.** 각 패널은 *읽는* 차트·곡선·플롯이지 *해석할* 문단이 아니다. 분석을 시각으로 압축한다.\n2. **밀도 + 속도 (전문가용).** 한눈에 위치를 읽는다. 정보 밀도는 높되 시각 *위계* 로 정렬한다(균일 카드 금지). 초보 온보딩이 아니라 반복 전문 사용 기준으로 설계한다.\n3. **판정하지 않고 시각으로 보여준다.** 판정·점수·매수/매도를 내지 않는 원칙은, 곡선·국면·분포·증거상태를 *그려서 보여주고* 전문가가 판단하게 함으로 달성한다. 이는 시각의 축소가 아니다 — 시각을 체크리스트로 깎는 것은 판정 회피가 아니라 분석의 포기다.\n4. **퍼블릭 바닥 = 로컬 상위집합.** 아래 별도 절.\n5. **시각화는 자격을 증명해야 한다.** 아래 별도 절.\n\n## 퍼블릭 바닥 = 로컬 상위집합\n\n터미널은 두 타깃(퍼블릭·로컬)이 같은 계기다.\n\n- **퍼블릭 터미널** = 모두가 받는 바닥(floor). HF=SSOT 공개 데이터 + 브라우저 연산만으로 *로컬 백엔드 없이* 완전히 돈다. 개발 기준(dev)도 퍼블릭이다.\n- **로컬 터미널** = 같은 계기에 무거운/실시간/AI 연산을 로컬 전용 게이트(`/api`) 뒤에 더 얹는 상위집합(superset)이다.\n\n두 타깃의 **계기 질·시각 수준은 동일** 하며, 설계는 퍼블릭-우선이다. 로컬 연산이 있어야만 계기처럼 보이는 패널은 퍼블릭 바닥을 통과하지 못한 것이다. 데이터층 배선 규칙(단일 작업대 SSOT, 오리진 레지스트리, 로컬 전용 게이트)은 [operation.ui](/skills/operation.ui) 가 SSOT 다.\n\n## 판정하지 않고 시각으로\n\n색은 분석 방향이 아니라 증거/데이터 상태를 나타낸다. 곡선·분포·국면 평면은 근거(축·기간·출처·모델 한계)를 함께 노출한 채로 보여주고, 결론은 사용자가 낸다. 매수/매도·수혜/피해·좋음/나쁨·단일 macro score 는 방향·확신·품질을 뒤섞으므로 쓰지 않는다. 이 원칙은 [operation.philosophy](/skills/operation.philosophy) 의 설계 사상과 일치하며, 화면을 *덜 시각적으로* 만들라는 뜻이 결코 아니다.\n\n## 시각화 채택 게이트\n\n시각화는 다음을 강화할 때만 채택한다.\n\n```text\n무엇이 움직였나  →  어느",
       "title": "터미널 사상 — 전문가 분석 계기판 (instrument, not document)",
       "category": "operation",
       "categoryTitle": "Operation",
@@ -25401,7 +25392,7 @@
     },
     {
       "id": "recipes.quant.portfolio.blackLittermanViewBuild",
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.blackLitterman import blackLittermanPosterior, buildSimpleViews\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nprior = ...   # equilibrium prior (market cap weight)\ncov = ...     # historical covariance\nviews = buildSimpleViews([\"005930 > 000660 by 2%\"])   # relative views\nposterior = blackLittermanPosterior(prior, cov, views)\n```\n\n## 호출 동작\n\nprior (equilibrium) + covariance + views (relative / absolute) → posterior μ, Σ 반환. confidence 매개 (τ).\n\n## 대표 반환 형태\n\ndict — `posteriorReturns + posteriorCov + viewImpact + tau`.\n\n## 연계 절차\n\n1. 본 recipe → posterior estimates.\n2. posterior + meanCVaR 결합 → `recipes.quant.portfolio.meanCvarConstruction`.\n3. view 시계열 backtest → walk-forward.",
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.portfolio.blackLitterman import blackLittermanPosterior, buildSimpleViews\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nprior = ...   # equilibrium prior (market cap weight)\ncov = ...     # historical covariance\nviews = buildSimpleViews([\"005930 > 000660 by 2%\"])   # relative views\nposterior = blackLittermanPosterior(prior, cov, views)\n```\n\n## 호출 동작\n\nprior (equilibrium) + covariance + views (relative / absolute) → posterior μ, Σ 반환. confidence 매개 (τ).\n\n## 대표 반환 형태\n\ndict — `posteriorReturns + posteriorCov + viewImpact + tau`.\n\n## 연계 절차\n\n1. 본 recipe → posterior estimates.\n2. posterior + meanCVaR 결합 → `recipes.quant.portfolio.meanCvarConstruction`.\n3. view 시계열 backtest → walk-forward.",
       "title": "Black-Litterman View Build",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -25471,7 +25462,7 @@
     },
     {
       "id": "recipes.quant.portfolio.meanCvarConstruction",
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.meanCVaR import optimizeMeanCVaR\nimport dartlab\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nreturns = ...   # universe historical returns matrix\nweights = optimizeMeanCVaR(returns, alpha=0.05, target_return=0.001)\n```\n\n## 호출 동작\n\nhistorical returns matrix + alpha (CVaR level) + target return → projected gradient 최적화. weights + CVaR + expected return 반환.\n\n## 대표 반환 형태\n\ndict — `weights (np.array) + cvar + expectedReturn + sharpe`.\n\n## 연계 절차\n\n1. 본 recipe → CVaR-optimal weights.\n2. 결과 vs equal-weight / mean-variance 비교.\n3. `recipes.quant.portfolio.blackLittermanViewBuild` 결합 (views 반영).",
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.portfolio.meanCVaR import optimizeMeanCVaR\nimport dartlab\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nreturns = ...   # universe historical returns matrix\nweights = optimizeMeanCVaR(returns, alpha=0.05, target_return=0.001)\n```\n\n## 호출 동작\n\nhistorical returns matrix + alpha (CVaR level) + target return → projected gradient 최적화. weights + CVaR + expected return 반환.\n\n## 대표 반환 형태\n\ndict — `weights (np.array) + cvar + expectedReturn + sharpe`.\n\n## 연계 절차\n\n1. 본 recipe → CVaR-optimal weights.\n2. 결과 vs equal-weight / mean-variance 비교.\n3. `recipes.quant.portfolio.blackLittermanViewBuild` 결합 (views 반영).",
       "title": "Mean-CVaR Portfolio Construction",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -28906,7 +28897,7 @@
     },
     {
       "id": "runtime.toolComposition",
-      "bodyPreview": "## 분류\n\n### 1. 정보 수집 (parallel 가능)\n\n- `EngineCall` (구체 axis) × N — independent axis 동시 호출.\n- `RunPython` + `gather()` — 데이터 수집 독립적 호출 parallel.\n- `WebSearch` — 외부 search, untrusted wrap 자동.\n\n### 2. 의존 chain (sequential 강제)\n\n- `EngineCall(\"Company.panel\")` → `EngineCall(\"Company.readFiling\")` (rcept_no 의존).\n- `gather()` → `RunPython` (raw 데이터 변환).\n- `EngineCall` → `EvidenceGate` (결과 검증 강제).\n\n### 3. Bold leaf (Write 권한 1 개)\n\nFSI 패턴 — 다음 단일 도구만 Write 가능:\n- `SaveArtifact` (사용자 산출물 저장)\n- `OutcomeLog` (작업 결과 ledger)\n\n다른 도구는 read-only. 데이터 mutation 단일 책임.\n\n### 4. 자율 작업 패턴\n\n- `RunWorkbench` (자율 실행 — `runtime.workbenchEvidenceFlow` SSOT)\n- `ProposeRecipe` (사용자 검토 후 박힘)\n- `CreateUserSkill` (사용자 skill 저장)\n\n### 5. evidence + 신뢰 결합\n\n모든 정보 수집 후 → `EvidenceGate(refs)` 강제 → `GroundingCheck(claims)` 선택. 외부 본문 (web/news) 자동 `wrap_external_in_result` (`runtime.untrustedContent` SSOT).\n\n## 권장 흐름\n\n1. 사용자 질문 분류 (단일 회사 / 횡단 / 매크로 / 시나리오).\n2. axis 결정 — `ReadSkill` + `ListEngineGaps` 가이드.\n3. parallel 도구 동시 호출 (chat-native concurrent — agent.py 본체).\n4. evidence GATE 통과 후 답변 합성.\n\n## 안티패턴\n\n- 도구 호출 → 결과 무시 → 추가 호출 (\"재호출 round\" 회피, `engines.search.disclosureSearch` 가드).\n- Bold leaf 외 다른 도구로 Write (`OutcomeLog` 없이 사용자 산출물 저장 금지).\n- evidence GATE 우회 — 모든 숫자 claim 강행.\n\n## 기본 검증\n\n본 spec 의 5 분류는 ai/tools/registry.py 의 25+ 도구 그대로 매핑. 도구 추가/제거 시 본 spec + agent.py system prompt 동시 갱신.",
+      "bodyPreview": "## 분류\n\n### 1. 정보 수집 (parallel 가능)\n\n- `EngineCall` (구체 axis) × N — independent axis 동시 호출.\n- `RunPython` + `gather()` — 데이터 수집 독립적 호출 parallel.\n- `WebSearch` — 외부 search, untrusted wrap 자동.\n\n### 2. 의존 chain (sequential 강제)\n\n- `EngineCall(\"Company.panel\")` → `EngineCall(\"Company.readFiling\")` (rcept_no 의존).\n- `gather()` → `RunPython` (raw 데이터 변환).\n- `EngineCall` → `EvidenceGate` (결과 검증 강제).\n\n### 3. Bold leaf (Write 권한 1 개)\n\nFSI 패턴 — 다음 단일 도구만 Write 가능:\n- `SaveArtifact` (사용자 산출물 저장)\n\n다른 도구는 read-only. 데이터 mutation 단일 책임.\n\n### 4. 자율 작업 패턴\n\n- `RunWorkbench` (자율 실행 — `runtime.workbenchEvidenceFlow` SSOT)\n- `ProposeRecipe` (사용자 검토 후 박힘)\n- `CreateUserSkill` (사용자 skill 저장)\n\n### 5. evidence + 신뢰 결합\n\n모든 정보 수집 후 → `EvidenceGate(refs)` 강제 → `GroundingCheck(claims)` 선택. 외부 본문 (web/news) 자동 `wrap_external_in_result` (`runtime.untrustedContent` SSOT).\n\n## 권장 흐름\n\n1. 사용자 질문 분류 (단일 회사 / 횡단 / 매크로 / 시나리오).\n2. axis 결정 — `ReadSkill` + `ListEngineGaps` 가이드.\n3. parallel 도구 동시 호출 (chat-native concurrent — agent.py 본체).\n4. evidence GATE 통과 후 답변 합성.\n\n## 안티패턴\n\n- 도구 호출 → 결과 무시 → 추가 호출 (\"재호출 round\" 회피, `engines.search.disclosureSearch` 가드).\n- Bold leaf 외 다른 도구로 Write (`SaveArtifact` 없이 사용자 산출물 저장 금지).\n- evidence GATE 우회 — 모든 숫자 claim 강행.\n\n## 기본 검증\n\n본 spec 의 5 분류는 ai/tools/registry.py 의 25+ 도구 그대로 매핑. 도구 추가/제거 시 본 spec + agent.py system prompt 동시 갱신.",
       "title": "Tool Composition — 11 도구 조합 패턴 SSOT",
       "category": "runtime",
       "categoryTitle": "Runtime",
@@ -28955,11 +28946,11 @@
         "`gather()` → `RunPython` (raw 데이터 변환).",
         "`EngineCall` → `EvidenceGate` (결과 검증 강제).",
         "`SaveArtifact` (사용자 산출물 저장)",
-        "`OutcomeLog` (작업 결과 ledger)",
         "`RunWorkbench` (자율 실행 — `runtime.workbenchEvidenceFlow` SSOT)",
         "`ProposeRecipe` (사용자 검토 후 박힘)",
         "`CreateUserSkill` (사용자 skill 저장)",
-        "도구 호출 → 결과 무시 → 추가 호출 (\"재호출 round\" 회피, `engines.search.disclosureSearch` 가드)."
+        "도구 호출 → 결과 무시 → 추가 호출 (\"재호출 round\" 회피, `engines.search.disclosureSearch` 가드).",
+        "Bold leaf 외 다른 도구로 Write (`SaveArtifact` 없이 사용자 산출물 저장 금지)."
       ],
       "recipeSteps": [],
       "requiredEvidence": [

@@ -690,7 +690,7 @@
     },
     {
       "id": "operation.aiEngine",
-      "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)",
+      "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider)",
       "category": "operation",
       "status": "limited",
       "dataSources": [],

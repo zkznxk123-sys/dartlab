@@ -1534,19 +1534,18 @@
         "operation.architecture",
         "runtime.toolComposition"
       ],
-      "bodyPreview": "## 4 회귀 신호\n\n### 1. graph 회귀 가드 (memory feedback_no_graph_regression 8 번째)\n\n다음 패턴 추가 금지:\n- `BRIEF` / `WORK` / `CRITIQUE` / `COMPOSE` / `GATE` / `HARVEST` 식 고정 노드 이름\n- `*Loop` / `*Graph` / `*Kernel` 클래스 신설\n- `verify 강제` / `GATE 차단` / `requiredEvidence 강제` 표현\n- workbench 흐름 분기 4 번째 추가\n\n본체 `ai/agent.py` = chat-native + LLM 자율 tool calling. graph 노드 추가는 본체 회귀 시도로 분류.\n\n### 2. chat-native 본체 유지\n\n- 본체 변경 최소 — 신규 능력은 `ai/tools/*` 별 파일 추가 + `registry._SPECS` dict 항목.\n- 본체 system prompt 변경 시 → `runtime.promptingPatterns` 동시 갱신.\n\n### 3. Bold leaf 단일 Write\n\n- `SaveArtifact` / `OutcomeLog` 만 Write 권한. 다른 도구"
+      "bodyPreview": "## 4 회귀 신호\n\n### 1. graph 회귀 가드 (memory feedback_no_graph_regression 8 번째)\n\n다음 패턴 추가 금지:\n- `BRIEF` / `WORK` / `CRITIQUE` / `COMPOSE` / `GATE` / `HARVEST` 식 고정 노드 이름\n- `*Loop` / `*Graph` / `*Kernel` 클래스 신설\n- `verify 강제` / `GATE 차단` / `requiredEvidence 강제` 표현\n- workbench 흐름 분기 4 번째 추가\n\n본체 `ai/agent.py` = chat-native + LLM 자율 tool calling. graph 노드 추가는 본체 회귀 시도로 분류.\n\n### 2. chat-native 본체 유지\n\n- 본체 변경 최소 — 신규 능력은 `ai/tools/*` 별 파일 추가 + `registry._SPECS` dict 항목.\n- 본체 system prompt 변경 시 → `runtime.promptingPatterns` 동시 갱신.\n\n### 3. Bold leaf 단일 Write\n\n- `SaveArtifact` 만 Write 권한. 다른 도구 Write 추가 금지.\n\n"
     },
     {
       "id": "operation.aiEngine",
-      "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)",
+      "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider)",
       "category": "operation",
-      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · outcome ground truth 선순환 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'outcome_log', 'provider catalog'.",
+      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'provider catalog'.",
       "whenToUse": [
         "dartlab.ai 내부 구조 이해",
         "workbench 5 패스 (BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST)",
         "canonical 도구 화이트리스트",
         "provider 카탈로그 (oauth-codex / openai / gemini / groq / cerebras / mistral / custom / ollama / codex)",
-        "outcome ground truth 선순환 (pending → resolved + reflection)",
         "chat-native HARVEST bridge",
         "MCP 표면 매핑",
         "회귀 가드 (test_no_core_import / test_tool_whitelist / test_ref_gate ...)"
@@ -2026,7 +2025,7 @@
         "시각화 채택 여부"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 터미널이란 — 계기판이지 문서가 아니다\n\nDartLab 터미널은 전문가가 하루 종일 들여다보는 *살아있는 분석 계기판(instrument)* 이다. 블룸버그·아이코 같은 금융 터미널의 본질은 *읽고 덮는 리포트* 가 아니라, 분석을 시각 원시형(차트·곡선·플롯·게이지)으로 압축해 몇 초 안에 위치를 읽게 하는 계기판이다. 따라서 터미널 surface 의 정답은 긴 텍스트가 아니다. 표와 산문은 계기를 받치는 비계(scaffold)이지 제품의 본체가 아니다.\n\n실패형은 명확하다 — 텍스트 카드의 나열 + 축도 기간도 없는 장식 스파크라인으로 채운 \"정렬된 문서\". 이것은 매크로 뉴스판이지 분석 계기판이 아니다.\n\n## 5 원칙\n\n1. **계기판 ≠ 문서.** 각 패널은 *읽는* 차트·곡선·플롯이지 *해석할* 문단이 아니다. 분석을 시각으로 압축한다.\n2. **밀도 + 속도 (전문가용).** 한눈에 위치를 읽는다. 정보 밀도는 높되 시각 *위계* 로 정렬한다(균일 카드 금지). 초보 온보딩이 아니라 반복 전문 사용 기준으로 설계한다.\n3. **판정하지 않고 시각으로 보여준다.** 판정·점수·매수/매도를 내지 않는 원칙은, 곡선·국면·분포·증거상태를 *그려서 보여주"
+      "bodyPreview": "## 터미널이란 — 계기판이지 문서가 아니다\n\nDartLab 터미널은 전문가가 하루 종일 들여다보는 *살아있는 분석 계기판(instrument)* 이다. 블룸버그·아이코 같은 금융 터미널의 본질은 *읽고 덮는 리포트* 가 아니라, 분석을 시각 원시형(차트·곡선·플롯·게이지)으로 압축해 몇 초 안에 위치를 읽게 하는 계기판이다. 따라서 터미널 surface 의 정답은 긴 텍스트가 아니다. 표와 산문은 계기를 받치는 비계(scaffold)이지 제품의 본체가 아니다.\n\n실패형은 명확하다 — 텍스트 카드의 나열 + 축도 기간도 없는 장식 스파크라인으로 채운 \"정렬된 문서\". 이것은 매크로 뉴스판이지 분석 계기판이 아니다.\n\n## 5 원칙\n\n1. **계기판 ≠ 문서.** 각 패널은 *읽는* 차트·곡선·플롯이지 *해석할* 문단이 아니다. 분석을 시각으로 압축한다.\n2. **밀도 + 속도 (전문가용).** 한눈에 위치를 읽는다. 정보 밀도는 높되 시각 *위계* 로 정렬한다(균일 카드 금지). 초보 온보딩이 아니라 반복 전문 사용 기준으로 설계한다.\n3. **판정하지 않고 시각으로 보여준다.** 판정·점수·매수/매도를 내지 않는 원칙은, 곡선·국면·분포·증거상태를 *그려서"
     },
     {
       "id": "operation.testing",
@@ -4744,7 +4743,7 @@
       "nextSkills": [
         "engines.quant"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.blackLitterman import blackLittermanPosterior, buildSimpleViews\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nprior = ...   # equilibrium prior (market cap weight)\ncov = ...     # historical covariance\nviews = buildSimpleViews([\"005930 > 000660 by 2%\"])   # relative views\nposterior = blackLittermanPosterior(prior, cov, views)\n```\n\n## 호출 동작\n\nprior (equilibrium) + covariance + views (relative / absolute) → posterior μ, Σ 반환. confidence 매개 (τ).\n\n## 대표 반환 형태\n\ndict — `posteriorReturns + posteriorCov + viewImpact + tau`.\n\n## 연계 절차\n\n1. 본 reci"
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.portfolio.blackLitterman import blackLittermanPosterior, buildSimpleViews\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nprior = ...   # equilibrium prior (market cap weight)\ncov = ...     # historical covariance\nviews = buildSimpleViews([\"005930 > 000660 by 2%\"])   # relative views\nposterior = blackLittermanPosterior(prior, cov, views)\n```\n\n## 호출 동작\n\nprior (equilibrium) + covariance + views (relative / absolute) → posterior μ, Σ 반환. confidence 매개 (τ).\n\n## 대표 반환 형태\n\ndict — `posteriorReturns + posteriorCov + viewImpact + tau`.\n\n## 연계 절차\n"
     },
     {
       "id": "recipes.quant.portfolio.meanCvarConstruction",
@@ -4762,7 +4761,7 @@
         "engines.quant",
         "engines.scan"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.meanCVaR import optimizeMeanCVaR\nimport dartlab\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nreturns = ...   # universe historical returns matrix\nweights = optimizeMeanCVaR(returns, alpha=0.05, target_return=0.001)\n```\n\n## 호출 동작\n\nhistorical returns matrix + alpha (CVaR level) + target return → projected gradient 최적화. weights + CVaR + expected return 반환.\n\n## 대표 반환 형태\n\ndict — `weights (np.array) + cvar + expectedReturn + sharpe`.\n\n## 연계 절차\n\n1. 본 recipe → CVaR-optimal weights.\n2. 결과 vs equal-weight / mean-variance 비교.\n3. `recipes.quant.p"
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nfrom dartlab.quant.portfolio.meanCVaR import optimizeMeanCVaR\nimport dartlab\n\nuniverse = [\"005930\", \"000660\", \"035720\", \"207940\", \"035420\"]\nreturns = ...   # universe historical returns matrix\nweights = optimizeMeanCVaR(returns, alpha=0.05, target_return=0.001)\n```\n\n## 호출 동작\n\nhistorical returns matrix + alpha (CVaR level) + target return → projected gradient 최적화. weights + CVaR + expected return 반환.\n\n## 대표 반환 형태\n\ndict — `weights (np.array) + cvar + expectedReturn + sharpe`.\n\n## 연계 절차\n\n1. 본 recipe → CVaR-optimal weights.\n2. 결과 vs equal-weight / mean-variance 비교.\n3. `recip"
     },
     {
       "id": "recipes.quant.qualityFactor",
@@ -5377,7 +5376,7 @@
         "runtime.workbenchEvidenceFlow",
         "runtime.untrustedContent"
       ],
-      "bodyPreview": "## 분류\n\n### 1. 정보 수집 (parallel 가능)\n\n- `EngineCall` (구체 axis) × N — independent axis 동시 호출.\n- `RunPython` + `gather()` — 데이터 수집 독립적 호출 parallel.\n- `WebSearch` — 외부 search, untrusted wrap 자동.\n\n### 2. 의존 chain (sequential 강제)\n\n- `EngineCall(\"Company.panel\")` → `EngineCall(\"Company.readFiling\")` (rcept_no 의존).\n- `gather()` → `RunPython` (raw 데이터 변환).\n- `EngineCall` → `EvidenceGate` (결과 검증 강제).\n\n### 3. Bold leaf (Write 권한 1 개)\n\nFSI 패턴 — 다음 단일 도구만 Write 가능:\n- `SaveArtifact` (사용자 산출물 저장)\n- `OutcomeLog` (작업 결과 ledger)\n\n다른 도구는 read-only. 데이터 mutation 단일 책임.\n\n### 4. 자율 작업 패턴\n\n- `RunWorkbench` (자율 실행 — `r"
+      "bodyPreview": "## 분류\n\n### 1. 정보 수집 (parallel 가능)\n\n- `EngineCall` (구체 axis) × N — independent axis 동시 호출.\n- `RunPython` + `gather()` — 데이터 수집 독립적 호출 parallel.\n- `WebSearch` — 외부 search, untrusted wrap 자동.\n\n### 2. 의존 chain (sequential 강제)\n\n- `EngineCall(\"Company.panel\")` → `EngineCall(\"Company.readFiling\")` (rcept_no 의존).\n- `gather()` → `RunPython` (raw 데이터 변환).\n- `EngineCall` → `EvidenceGate` (결과 검증 강제).\n\n### 3. Bold leaf (Write 권한 1 개)\n\nFSI 패턴 — 다음 단일 도구만 Write 가능:\n- `SaveArtifact` (사용자 산출물 저장)\n\n다른 도구는 read-only. 데이터 mutation 단일 책임.\n\n### 4. 자율 작업 패턴\n\n- `RunWorkbench` (자율 실행 — `runtime.workbenchEvidenceFlow` "
     },
     {
       "id": "runtime.untrustedContent",
