@@ -163,6 +163,7 @@
 		background: #050811;
 		color: #f1f5f9;
 		overflow: hidden;
+		text-align: left; /* 좌측 정렬 못박음 — <button>(CoverThumb) 안에서 text-align:center 상속 차단 */
 		container-type: inline-size; /* cqw = 슬라이드 폭 기준 반응형 타이포(인스타 1080 기준 스케일) */
 		font-family: 'Pretendard Variable', 'Pretendard', system-ui, sans-serif;
 	}
