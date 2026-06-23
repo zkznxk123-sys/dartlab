@@ -55,6 +55,12 @@
 	let root = $state<HTMLElement | null>(null);
 	let tok = 0;
 
+	// 빌드 전에는 미디어(회사명·사진) 비동기 로드에 맞춰 표지 미리보기를 갱신 — 코드("000270")만 뜨고
+	// 사진이 빈 첫 페인트 방지. previewDeck() 이 corpName/heroUrls prop 을 읽으므로 그 갱신을 추종한다.
+	$effect(() => {
+		if (!built) deck = previewDeck();
+	});
+
 	// 관점이 바뀌면(사용자 조작) 재빌드. 첫 진입은 IntersectionObserver 가 트리거.
 	function load() {
 		const t = ++tok;
@@ -146,7 +152,7 @@
 		outline: none;
 	}
 	.deck:focus-visible .frame {
-		box-shadow: 0 0 0 2px #fb923c;
+		box-shadow: 0 0 0 2px #ff3f6f;
 	}
 	.frame {
 		position: relative;
@@ -278,7 +284,7 @@
 		padding: 0;
 	}
 	.dot.on {
-		background: #fb923c;
+		background: #ff3f6f;
 	}
 	.live {
 		position: absolute;

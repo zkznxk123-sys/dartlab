@@ -177,7 +177,11 @@
 		padding: 10px 18px;
 		background: rgba(5, 8, 17, 0.92);
 		backdrop-filter: blur(8px);
-		border-bottom: 1px solid #1e2433;
+	}
+	/* 터미널 topBar 정본은 하단에 amber 보더(.dlTerm .topBar border-bottom: var(--bdAmber))를 긋는다.
+	   /cards 는 그 줄을 원치 않음 → 스코프 우위로 제거(헤더 SNS 마크업은 그대로 재사용). */
+	.cardsPage :global(.topBar) {
+		border-bottom: none;
 	}
 	.feed {
 		flex: 1;

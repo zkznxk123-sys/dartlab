@@ -2,25 +2,38 @@
 // 색감을 그대로 가져온다(새로 짓지 않음·SSOT 동기화). 규격 = 인스타 4:5(1080×1350). 폰트 = Pretendard
 // Variable(landing 전역 --font-sans 이미 배선). 브랜드 마크 = 공통 아바타(landing/static/avatar.webp).
 
-/** colors.ts 미러 — rose-red 임팩트 + 네이비 에디토리얼. drift 시 colors.ts 와 동반 수정. */
+/** 캐러셀 팔레트 — 원본 렌더러(renderEditorialCarouselPng.py ACCENT=#ff3f6f)·계약 accentColor=#fb3f6c
+ *  기준. 단일 강조 = 로즈(엠버 아님). colors.ts 의 orange accent 는 Remotion 내부용이라 카드엔 미사용. */
 export const CARD = {
-	primary: '#ea4647', // 헤드라인 한 구절 강조(rose-red, stop-the-scroll)
+	primary: '#ff3f6f', // 헤드라인 한 구절 강조(rose, stop-the-scroll)
 	primaryDark: '#c83232',
-	accent: '#fb923c', // 키커 점·라벨(orange)
+	accent: '#ff3f6f', // 키커 점·라벨 = 로즈(원본 카드엔 엠버/주황 없음)
 	accentImpact: '#fb3f6c',
+	text: '#f6f8fb', // 원본 WHITE
+	textMuted: '#d8e2f0', // 원본 MUTED
+	textDim: '#9aa3ad', // 원본 SOFT
 	bgDark: '#050811',
 	bgDarker: '#030509',
 	bgCard: '#0f1219',
-	text: '#f1f5f9',
-	textMuted: '#94a3b8',
-	textDim: '#64748b',
 	border: '#1e2433',
 	success: '#34d399',
 	warning: '#fbbf24'
 } as const;
 
+/** 차트 시리즈 색(로즈 계열 + 라이트, 엠버/블루/그린 금지). 막대=로즈 hero·선=화이트/라이트로즈. */
+export const CARD_SERIES = ['#ff3f6f', '#f6f8fb', '#ff9ab0', '#9aa7c0', '#d8e2f0'] as const;
+
 /** 인스타 캐러셀 규격(1080×1350 = 4:5). 카드는 이 비율로 반응형. */
 export const CARD_ASPECT = '1080 / 1350';
+
+/** 캐러셀 카피 톤 — 줄 끝 마침표 제거(단정한 구절·문장부호 최소). 소수점(29.5)·천단위는 줄 중간이라
+ *  보존, 쉼표는 유지. SNS 카드는 문장이 아니라 한 호흡 구절이라 종지부를 찍지 않는다. */
+export function stripDots(text: string): string {
+	return String(text ?? '')
+		.split('\n')
+		.map((ln) => ln.replace(/[.。]+\s*$/u, '').trimEnd())
+		.join('\n');
+}
 
 /** AccentText — `[[구절]]` 을 강조색으로 쪼갠 토막 목록. 기존 AccentText.tsx 와 동일 규약(순수·테스트 가능). */
 export function accentParts(text: string): { text: string; accent: boolean }[] {

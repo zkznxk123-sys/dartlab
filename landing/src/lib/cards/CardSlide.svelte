@@ -4,7 +4,7 @@
 	// 재현 — 새로 짓지 않음. 차트는 $lib/report/render 순수 SVG(klinecharts·백테스트 0), finChart 만 MiniFinChart.
 	import type { DartLabRuntime, FinCard } from '@dartlab/ui-contracts';
 	import { MiniFinChart } from '@dartlab/ui-surfaces/terminal';
-	import { CARD, accentParts } from './theme';
+	import { CARD, CARD_SERIES, accentParts, stripDots } from './theme';
 	import { cellTone, verdictTone, TXT_COLS, spark, isTimeSeries, lineGeo, wonLabel } from '$lib/report/render';
 	import type { CarouselCard } from './model';
 
@@ -32,10 +32,13 @@
 		rt.finance
 			.bundle(code)
 			.then((b) => {
-				const view = b?.views?.annual ?? Object.values(b?.views ?? {}).find(Boolean);
+				// 분기 우선(밀도 — 데이터 작업대 기본 결) → 없으면 연간 폴백. FY 표지화 금지.
+				const view = b?.views?.quarter ?? b?.views?.annual ?? Object.values(b?.views ?? {}).find(Boolean);
 				const c = view?.cards?.[0];
 				if (c && view) {
-					finCards = { card: c, periods: view.periods };
+					// 캐러셀 팔레트로 재색(엔진 기본 블루/주황/그린 → 로즈 계열). 데이터·축·구조 불변.
+					const recolored = { ...c, series: c.series.map((s, i) => ({ ...s, color: CARD_SERIES[i % CARD_SERIES.length] })) };
+					finCards = { card: recolored, periods: view.periods };
 					finState = 'ready';
 				} else finState = 'empty';
 			})
@@ -49,7 +52,7 @@
 </script>
 
 {#snippet accent(text: string, cls = '')}
-	<span class={cls}>{#each accentParts(text) as p}<span class:hl={p.accent}>{p.text}</span>{/each}</span>
+	<span class={cls}>{#each accentParts(stripDots(text)) as p}<span class:hl={p.accent}>{p.text}</span>{/each}</span>
 {/snippet}
 
 <article class="slide pm-{photoMode}">
@@ -71,13 +74,13 @@
 				{#if card.kind === 'editorial' && card.date}<span class="eyebrow">· {card.date}</span>{/if}
 				{#if card.kind === 'editorialBeat' && card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
 				<h2 class="eLine">{@render accent(card.line)}</h2>
-				{#if card.sub}<p class="eSub">{card.sub}</p>{/if}
+				{#if card.sub}<p class="eSub">{stripDots(card.sub)}</p>{/if}
 			</div>
 		{:else if card.kind === 'editorialStat'}
 			<div class="editorial">
 				{#if card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
 				<div class="eStat"><span class="eNum">{card.bigNumber}</span>{#if card.unit}<span class="eUnit">{card.unit}</span>{/if}</div>
-				{#if card.context}<p class="eSub">{card.context}</p>{/if}
+				{#if card.context}<p class="eSub">{stripDots(card.context)}</p>{/if}
 			</div>
 		{:else}
 			{#if card.heading}
@@ -172,37 +175,39 @@
 		object-fit: cover;
 	}
 	.pm-cover .bg {
-		opacity: 0.95;
+		opacity: 1;
 	}
 	.pm-full .bg {
-		opacity: 0.62;
+		opacity: 0.74;
 	}
 	.pm-dim .bg {
-		opacity: 0.5; /* 차트 슬라이드도 회사 사진이 또렷이(모든 슬라이드에 이미지) — 차트는 아래 패널로 가독 확보 */
+		opacity: 0.68; /* 차트 슬라이드도 회사 사진이 또렷이(모든 슬라이드에 이미지) — 차트는 아래 패널로 가독 확보 */
 	}
 	.scrim {
 		position: absolute;
 		inset: 0;
 	}
+	/* 배경 밝게 — 하단만 가독용 어둠, 상·중단은 사진 노출(전체 어둠 금지). */
 	.pm-cover .scrim {
-		background: linear-gradient(180deg, rgba(5, 8, 17, 0.1) 0%, rgba(5, 8, 17, 0.25) 45%, rgba(5, 8, 17, 0.96) 100%);
+		background: linear-gradient(180deg, rgba(5, 8, 17, 0.05) 0%, rgba(5, 8, 17, 0.16) 48%, rgba(5, 8, 17, 0.88) 100%);
 	}
 	.pm-full .scrim {
-		background: linear-gradient(180deg, rgba(5, 8, 17, 0.55) 0%, rgba(5, 8, 17, 0.35) 40%, rgba(5, 8, 17, 0.9) 100%);
+		background: linear-gradient(180deg, rgba(5, 8, 17, 0.4) 0%, rgba(5, 8, 17, 0.24) 42%, rgba(5, 8, 17, 0.8) 100%);
 	}
 	.pm-dim .scrim {
-		background: linear-gradient(180deg, rgba(5, 8, 17, 0.5) 0%, rgba(5, 8, 17, 0.35) 45%, rgba(5, 8, 17, 0.7) 100%);
+		background: linear-gradient(180deg, rgba(5, 8, 17, 0.36) 0%, rgba(5, 8, 17, 0.24) 45%, rgba(5, 8, 17, 0.58) 100%);
 	}
-	/* 편집 카드 = 기존 SNS editorial: 사진 monochrome + 강한 하단 그라데이션(가독). 강조색=accentImpact. */
+	/* 편집 카드 = 기존 SNS editorial: 사진 monochrome(원본 grayscale) + 하단 그라데이션. 원본 brightness
+	   0.48 보다 밝게(사용자 "조금만 밝게") → 1.04. 강조색=로즈. */
 	.pm-editorial .bg {
-		opacity: 0.92;
-		filter: grayscale(0.85) contrast(1.05) brightness(0.92);
+		opacity: 0.96;
+		filter: grayscale(0.82) contrast(1.04) brightness(1.04);
 	}
 	.pm-editorial .scrim {
-		background: linear-gradient(180deg, rgba(3, 5, 9, 0.35) 0%, rgba(3, 5, 9, 0.45) 42%, rgba(3, 5, 9, 0.95) 100%);
+		background: linear-gradient(180deg, rgba(3, 5, 9, 0.22) 0%, rgba(3, 5, 9, 0.32) 44%, rgba(3, 5, 9, 0.86) 100%);
 	}
 	.pm-editorial .content {
-		--hl: #fb3f6c;
+		--hl: #ff3f6f;
 	}
 	.content {
 		position: relative;
@@ -238,7 +243,7 @@
 		align-items: center;
 		gap: 0.6em;
 		font-size: clamp(11px, 2.4cqw, 17px);
-		color: #fb923c;
+		color: #ff3f6f;
 		font-weight: 800;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
@@ -247,10 +252,10 @@
 		width: 0.55em;
 		height: 0.55em;
 		border-radius: 999px;
-		background: #fb923c;
+		background: #ff3f6f;
 	}
 	.hl {
-		color: var(--hl, #ea4647);
+		color: var(--hl, #ff3f6f);
 	}
 	/* editorial (기존 SNS editorial 재현 — 하단 텍스트 블록) */
 	.editorial {
@@ -353,7 +358,7 @@
 		font-size: clamp(13px, 2.8cqw, 22px);
 		line-height: 1.5;
 		color: #cdd9e6;
-		border-left: 2px solid #ea4647;
+		border-left: 2px solid #ff3f6f;
 		padding-left: 0.7em;
 	}
 	/* kpis */
@@ -491,7 +496,7 @@
 	.bF {
 		display: block;
 		height: 100%;
-		background: #fb923c;
+		background: #ff3f6f;
 	}
 	.bF.neg {
 		background: #ea4647;
@@ -577,11 +582,11 @@
 		height: 22px;
 	}
 	.spkA {
-		fill: rgba(251, 146, 60, 0.18);
+		fill: rgba(255, 63, 111, 0.18);
 	}
 	.spkL {
 		fill: none;
-		stroke: #fb923c;
+		stroke: #ff3f6f;
 		stroke-width: 1;
 		vector-effect: non-scaling-stroke;
 	}
