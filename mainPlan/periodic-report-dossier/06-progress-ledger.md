@@ -1,7 +1,28 @@
 # 06 — 진행 원장
 
+## Phase-0 사전점검 probe 결과 (2026-06-23, 실측 — 08 §4.1 SHIP 게이트)
+
+> `/tmp/probe_dossier.py`·`/tmp/probe_cancel.py` (src 미커밋·stdout, polars 직독 `data/dart/scan/report/*.parquet`). 전 ~2,942 filer 측정. **"스키마 존재 ≠ populated" 검증 — SHIP 숫자를 측정값으로 대체.**
+
+| feature | 측정 항목 | 실측 | 판정 |
+|---|---|---|---|
+| **F1 체이닝** | DPS thstrm 대비 frmtrm/lwfr non-null | frmtrm **91.9%** · lwfr **88.0%** (thstrm 조건부) | ✅ |
+| **F1 체이닝** | DPS 종목별 데이터포인트 lift (fy=rcept[:4]−1) | **1.46x** (≥2년 종목 1.43x, 3.8년→5.5년) | ✅ PRD "1.4x" 정확, 간판 유지 |
+| **F3 control-shift** | majorHolder ≥2 기간 보유 종목률 | **96.8%** (2,834/2,928, 중앙값 20기간) | ✅ 가장 보편적 |
+| **workforce 자기이력** | employee ≥2년 보유 종목률 | **96.1%** (2,799/2,914) | ✅ 보편 |
+| **F2 소각(buybackCancel)** | `change_qy_incnr`≠0 종목 (보통주·총계) | **9종목** (필터무관 전체도 30종목) | ❌ 간판 불가 |
+| F2 금고(treasuryEnd) | `trmend_qy`≠0 종목 | 158종목 (5.4%) | 보유사만 |
+
+**F2 대안 추적(probe_cancel)**: capitalChange `isu_dcrs_stle`='소각' 명시 = **0종목**. `감자` = 460종목이나 전부 유상/무상감자(자기주식 소각 아님 — 무상감자=손실성, 혼동 시 NEVER-CLAIM 위반). **결론: 자기주식 소각은 한국 시장에서 진짜로 희소(~30종목) = 데이터 부재이지 배선 실패 아님.**
+
+### ★ 정공법 판정 (probe 반영 — 00/02 F2 프레이밍 정정)
+- **F2 "소각 vs 금고"를 "3간판"에서 강등** → 자사주 보유사(~158) 한정 appears-when-clean 신호. 95% 종목은 빈상태가 default. 무상감자를 소각 환원으로 둔갑 금지(grep 가드 토큰에 '감자'≠'소각' 추가). zero-fetch라 *살려두되* 간판 expectation 제거.
+- **간판 재배치 = 측정 검증된 보편 신호**: F1 체이닝(1.46x) · F3 control-shift(96.8%) · 인력 자기이력(96.1%) · lossPct(전 종목 장부가 존재, 미측정이나 구조상 보편). 이 4개가 Phase 1 무게중심.
+- Phase 0(스파인 리본)·workforce·control-shift·lossPct·F1 체이닝은 probe로 **GREEN**. Phase 2(R&D·인적자본 백분위·costByNature)는 미측정(엔진 bake 의존) — slip 유지.
+
 ## 상태
 
+- **2026-06-23**: Phase-0 probe 완료(위) → Phase 0 스파인 착수(정공법 구현 goal).
 - **2026-06-19**: PRD v0.1 작성(13인 토론 `wf_c20526bc-bed`) → 확장 v0.2(07, 11인 `wf_c62ab765-ea5`) → **경화 v0.3(08, 4인 `wf_c451d741-93f`)**. 착수 대기(운영자 go).
 - **구현 코드 1건(perf 버그 수정, commit `e801f42f0`)**: 정기보고서 팩트 패널 멈춤 = DuckDB→hyparquet 이관(실측 수십초→4.3초·svelte-check 0err·시각변화 없음). 나머지 feature 구현 0.
 - **경화 평결**: "조건부 강함 — 강한 제품, 약한 기반". SHIP 전 정정 필수 6갭(08 §2): F2 도달불가(→NEEDS-PARSING)·F5 경로·grep가드 신규·lossPct lift·공개로컬 패리티·−1 4팩트 드롭. **Phase-0 사전점검 probe**(체이닝 1.4x·6%·shard0 대표성 측정)가 새 SHIP 게이트.
