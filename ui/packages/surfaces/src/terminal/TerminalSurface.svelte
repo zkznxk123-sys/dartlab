@@ -35,9 +35,15 @@
 		hosts: TerminalHosts;
 		/** 헤더 SNS·외부 링크 — 셸이 자기 brand 에서 주입 (surface 가 brand 소유 안 함, 4b). */
 		links: TerminalBrandLinks;
+		/** 카드뉴스(편집 캐러셀) 보유 종목코드 집합 — 셸(landing /terminal)이 carousels/index.json 로드해 주입.
+		 *  회사명 옆 링크 줄에 *해당 종목에 한해* 「카드뉴스」를 노출(개별). 미주입 시 링크 없음(standalone 무해). */
+		cardsCodes?: Set<string>;
+		/** 카드뉴스 클릭 핸들러 — 셸이 인스타식 포스트 다이얼로그(Deck+캡션)를 오버레이로 띄운다. Deck=landing 의존이라
+		 *  surface 는 콜백만 받는다(viewer 포트와 동형 호스트 주입). */
+		onOpenCards?: (code: string) => void;
 		initial?: string;
 	}
-	let { eng, runtime, hosts, links, initial = '005930' }: Props = $props();
+	let { eng, runtime, hosts, links, cardsCodes, onOpenCards, initial = '005930' }: Props = $props();
 	// 하위 패널 전체가 useDartLabRuntime() 컨텍스트로 같은 인스턴스를 본다 (컴포넌트 init 시 1회).
 	setDartLabRuntime(runtime);
 	// base path — $app/paths 대신 runtime 환경 계약 (ui/web 셸에서도 동작)
@@ -261,7 +267,6 @@
 				<div class="hdrLinks">
 					{#if co}
 						<a class="hdrLink hdrReport" href="{base}/report?sym={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'Corporate analysis report — printable (PDF)' : '기업분석보고서 — 인쇄 가능 (PDF)'}>{lang === 'en' ? 'Report' : '보고서'}</a>
-						<a class="hdrLink hdrCards" href="{base}/cards?sym={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'Company card stories — Instagram-style feed' : '기업 카드뉴스 — 인스타그램형 피드'}>{lang === 'en' ? 'Cards' : '카드뉴스'}</a>
 					{/if}
 					{#if allowTerminalAsk}
 						<button class="hdrLink hdrAsk" onclick={() => co && runtime.navigation.toAsk({ code: co.code })} title="AI에게 직접 질문 — 로컬 LLM 질의(/ask)" aria-label="AI" style="display:inline-flex;align-items:center;gap:4px">
@@ -318,7 +323,7 @@
 					<LeftRail {eng} {lang} active={sym} onPick={pick} onIndustry={openIndustry} onFilingSearch={() => (filingSearchOpen = true)} {sectorFilter} {bottomTab} onSectorFilter={handleSectorFilter} onBottomTab={(tab) => (bottomTab = tab)} />
 				{/if}
 			</div>
-			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} /></div>
+			<div class="col colC"><CenterStack {co} {lang} ctl={chartCtl} kpis={macroKpis} suggest={(q, n) => eng.suggest(q, n)} onPick={pick} {cardsCodes} {onOpenCards} /></div>
 			<div class="col colR"><RightStack {co} {lang} {hosts} repoUrl={links.repo} onPick={pick} lookupListed={eng.lookupListed} percentileIn={eng.percentileIn} /></div>
 		</main>
 

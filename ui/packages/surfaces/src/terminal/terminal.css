@@ -151,8 +151,6 @@
 .dlTerm .hdrLink.on { color: var(--amber); border-color: var(--bdAmber); background: rgba(var(--amber-rgb), 0.1); }
 .dlTerm .hdrReport { color: var(--amber); border-color: var(--bdAmber); }
 .dlTerm .hdrReport:hover { color: var(--amber); background: rgba(var(--amber-rgb), 0.16); }
-.dlTerm .hdrCards { color: var(--amber); border-color: var(--bdAmber); }
-.dlTerm .hdrCards:hover { color: var(--amber); background: rgba(var(--amber-rgb), 0.16); }
 
 /* 종목 토론 드로어 (giscus — GitHub Discussions). mount 유지 + 표시 토글로 iframe 보존. */
 .dlTerm .dscDrawer { position: fixed; top: 0; right: 0; bottom: 0; width: clamp(380px, 28vw, 460px); z-index: 120; display: none; flex-direction: column; background: var(--dl-bg-base); border-left: 1px solid var(--bdHi); box-shadow: -18px 0 42px rgba(0, 0, 0, 0.5); }
@@ -396,6 +394,9 @@
 .dlTerm .symLinks { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; flex-shrink: 0; }
 .dlTerm .symLinks a, .dlTerm .symLinks button { font-family: var(--mono); font-size: 8.5px; color: var(--amberDim); text-decoration: none; letter-spacing: 0.2px; background: none; border: 0; padding: 0; cursor: pointer; line-height: 1.35; white-space: nowrap; }
 .dlTerm .symLinks a:hover, .dlTerm .symLinks button:hover { color: var(--amber); }
+/* 카드뉴스 — 인스타식 캐러셀 시그니처 로즈(#ff3f6f). 회사 네비 중 유일하게 콘텐츠(스토리) 진입이라 색으로 구분. */
+.dlTerm .symLinks button.symCards { color: #e0617f; }
+.dlTerm .symLinks button.symCards:hover { color: #ff3f6f; }
 .dlTerm .symPrice { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; }
 .dlTerm .symLast { font-family: var(--mono); font-weight: 700; font-size: 22px; line-height: 1; }
 .dlTerm .symChg { font-family: var(--mono); font-size: 11px; margin-top: 2px; }

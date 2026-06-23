@@ -7,10 +7,10 @@
 	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 	import '@dartlab/ui-surfaces/terminal/terminal.css';
 	import { DARTLAB_BRAND_LINKS, SupportDialog, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
-	import { loadMediaIndex, heroUrls } from '$lib/cards/media';
-	import { loadContractCodes, loadContract } from '$lib/cards/contract';
-	import type { MediaIndex, CarouselContract } from '$lib/cards/model';
-	import Deck from '$lib/cards/Deck.svelte';
+	import { loadMediaIndex } from '$lib/cards/media';
+	import { loadContractCodes } from '$lib/cards/contract';
+	import type { MediaIndex } from '$lib/cards/model';
+	import PostModal from '$lib/cards/PostModal.svelte';
 	import CoverThumb from '$lib/cards/CoverThumb.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -30,21 +30,11 @@
 	let searchEl = $state<HTMLInputElement | null>(null);
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let supportOpen = $state(false);
-	// 인스타 포스트 모달 — 첫장 클릭 시 좌 캐러셀 + 우 캡션. 계약(caption/title/pinned) 로드 후 오픈.
-	let post = $state<{ code: string; corpName: string; contract: CarouselContract | null } | null>(null);
+	// 인스타 포스트 모달 — 첫장 클릭 시 좌 캐러셀 + 우 캡션(PostModal 이 계약 로드·렌더). /terminal 카드뉴스와 공유.
+	let post = $state<{ code: string; corpName: string } | null>(null);
 
 	function openPost(code: string, corpName: string) {
-		post = { code, corpName, contract: null };
-		loadContract(code).then((c) => {
-			if (post && post.code === code) post = { code, corpName, contract: c };
-		});
-	}
-	// 캡션 산문 → 문단 배열(빈 줄 구분). 문단 내부 \n 은 pre-line 으로 보존.
-	function captionParas(caption?: string): string[] {
-		return String(caption ?? '')
-			.split(/\n\s*\n/)
-			.map((p) => p.trim())
-			.filter(Boolean);
+		post = { code, corpName };
 	}
 
 	loadMediaIndex().then((m) => (media = m));
@@ -85,9 +75,8 @@
 		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
 			e.preventDefault();
 			searchEl?.focus();
-		} else if (e.key === 'Escape' && post) {
-			post = null;
 		}
+		// Esc 로 포스트 닫기는 PostModal 이 자체 처리(svelte:window).
 	}
 </script>
 
@@ -154,35 +143,7 @@
 	</main>
 
 	{#if post}
-		<!-- 인스타 포스트 모달 — 좌 캐러셀(스와이프) + 우 캡션. 배경 클릭/Esc 닫기. -->
-		<div class="post" role="dialog" aria-modal="true" aria-label="{post.corpName} 포스트" onclick={() => (post = null)}>
-			<div class="postInner" role="document" onclick={(e) => e.stopPropagation()}>
-				<div class="postLeft">
-					<Deck {rt} sym={post.code} corpName={post.corpName} {base} heroUrls={heroUrls(media, post.code)} />
-				</div>
-				<aside class="postRight">
-					<header class="prHead">
-						<picture>
-							<source srcset="{base}/avatar.webp" type="image/webp" />
-							<img src="{base}/avatar.png" alt="DartLab" width="34" height="34" />
-						</picture>
-						<div class="prWho"><b>dartlab</b><small>COMPANY STORY BY TICKER</small></div>
-					</header>
-					<div class="prScroll">
-						<p class="prMeta">{post.contract?.name ?? post.corpName} · {post.code}</p>
-						{#if post.contract?.title}<h2 class="prTitle">{post.contract.title}</h2>{/if}
-						{#if post.contract}
-							{#each captionParas(post.contract.caption) as para (para)}<p class="prPara">{para}</p>{/each}
-							{#if post.contract.pinnedComment}<p class="prPinned">{post.contract.pinnedComment}</p>{/if}
-							{#if !post.contract.caption}<p class="prPara prMuted">캡션이 아직 준비되지 않았습니다.</p>{/if}
-						{:else}
-							<p class="prPara prMuted">불러오는 중…</p>
-						{/if}
-					</div>
-				</aside>
-				<button class="postClose" onclick={() => (post = null)} aria-label="닫기">✕</button>
-			</div>
-		</div>
+		<PostModal {rt} code={post.code} corpName={post.corpName} {media} {base} onClose={() => (post = null)} />
 	{/if}
 </div>
 
@@ -232,144 +193,7 @@
 	.sentinel {
 		height: 1px;
 	}
-	/* 인스타 포스트 모달 — 좌 캐러셀(4:5) + 우 캡션 패널 */
-	.post {
-		position: fixed;
-		inset: 0;
-		z-index: 50;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 3vh 3vw;
-		background: rgba(2, 4, 8, 0.92);
-		backdrop-filter: blur(6px);
-	}
-	.postInner {
-		display: flex;
-		height: min(90vh, 880px);
-		max-width: 96vw;
-		background: #0b0e14;
-		border: 1px solid #1e2433;
-		border-radius: 14px;
-		overflow: hidden;
-	}
-	.postLeft {
-		height: 100%;
-		aspect-ratio: 1080 / 1350;
-		flex: 0 0 auto;
-		background: #050811;
-	}
-	.postRight {
-		width: 360px;
-		max-width: 42vw;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		border-left: 1px solid #1e2433;
-	}
-	.prHead {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		padding: 16px 18px;
-		border-bottom: 1px solid #161b26;
-		flex: 0 0 auto;
-	}
-	.prHead img {
-		border-radius: 50%;
-	}
-	.prWho {
-		display: flex;
-		flex-direction: column;
-		line-height: 1.2;
-	}
-	.prWho b {
-		font-size: 14px;
-		font-weight: 800;
-		color: #f6f8fb;
-	}
-	.prWho small {
-		font-size: 8px;
-		letter-spacing: 0.14em;
-		color: #94a3b8;
-		text-transform: uppercase;
-	}
-	.prScroll {
-		flex: 1;
-		overflow-y: auto;
-		padding: 18px;
-	}
-	.prMeta {
-		margin: 0 0 6px;
-		font-family: Menlo, Consolas, monospace;
-		font-size: 12px;
-		letter-spacing: 0.08em;
-		color: #ff3f6f;
-		font-weight: 700;
-	}
-	.prTitle {
-		margin: 0 0 14px;
-		font-size: 19px;
-		font-weight: 800;
-		line-height: 1.3;
-		color: #f6f8fb;
-		word-break: keep-all;
-	}
-	.prPara {
-		margin: 0 0 13px;
-		font-size: 14.5px;
-		line-height: 1.62;
-		color: #d8e2f0;
-		white-space: pre-line;
-		word-break: keep-all;
-	}
-	.prPinned {
-		margin: 16px 0 0;
-		padding-top: 14px;
-		border-top: 1px solid #1e2433;
-		font-size: 12.5px;
-		line-height: 1.55;
-		color: #94a3b8;
-		white-space: pre-line;
-		word-break: keep-all;
-	}
-	.prMuted {
-		color: #64748b;
-	}
-	.postClose {
-		position: absolute;
-		top: 18px;
-		right: 22px;
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		border: 1px solid #243244;
-		background: rgba(8, 12, 18, 0.8);
-		color: #cbd5e1;
-		font-size: 18px;
-		cursor: pointer;
-		z-index: 2;
-	}
-	/* 좁은 화면 — 세로 스택(캐러셀 위, 캡션 아래) */
-	@media (max-width: 820px) {
-		.postInner {
-			flex-direction: column;
-			height: auto;
-			max-height: 92vh;
-			overflow-y: auto;
-		}
-		.postLeft {
-			height: auto;
-			width: 100%;
-			aspect-ratio: 1080 / 1350;
-		}
-		.postRight {
-			width: 100%;
-			max-width: none;
-			border-left: none;
-			border-top: 1px solid #1e2433;
-		}
-	}
+	/* 인스타 포스트 모달은 PostModal.svelte 로 분리(스타일 동행). /terminal 카드뉴스와 공유. */
 	.feedEmpty {
 		text-align: center;
 		color: #64748b;

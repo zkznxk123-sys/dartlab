@@ -32,8 +32,11 @@
 		suggest?: (q: string, n: number) => { code: string; name: string; industry: string }[];
 		onPick?: (code: string) => void;
 		onCoMovers?: (rows: CoMover[]) => void;
+		// 카드뉴스(편집 캐러셀) — 셸이 보유 종목 집합 + 클릭 핸들러 주입. 보유 종목에 한해 회사 네비에 「카드뉴스」 노출(개별).
+		cardsCodes?: Set<string>;
+		onOpenCards?: (code: string) => void;
 	}
-	let { co, lang, ctl = new ChartCtl(), kpis = [], suggest, onPick, onCoMovers }: Props = $props();
+	let { co, lang, ctl = new ChartCtl(), kpis = [], suggest, onPick, onCoMovers, cardsCodes, onOpenCards }: Props = $props();
 	const rt = useDartLabRuntime();
 	const localViewerHref = $derived(rt.viewer.urlForCompany(co.code));
 	const localTerminalHref = $derived(`/analysis/${co.code}`);
@@ -457,6 +460,7 @@
 		<nav class="symLinks">
 			{#if localViewerHref}<a href={localTerminalHref}>{lang === 'en' ? 'terminal' : '터미널'}</a>{/if}
 			{#if corpInfo?.homepage}<a href={corpInfo.homepage} target="_blank" rel="noopener">{lang === 'en' ? 'website ↗' : '홈페이지 ↗'}</a>{/if}
+			{#if onOpenCards && cardsCodes?.has(co.code)}<button type="button" class="symCards" onclick={() => onOpenCards?.(co.code)} title={lang === 'en' ? 'Company card story — Instagram-style post' : '기업 카드뉴스 — 인스타그램형 포스트'}>{lang === 'en' ? 'cards ▦' : '카드뉴스 ▦'}</button>{/if}
 			<a href={`https://dart.fss.or.kr/dsab001/main.do?autoSearch=true&textCrpNm=${encodeURIComponent(co.name.kr)}`} target="_blank" rel="noopener" title={lang === 'en' ? 'DART — company filings (auto-search by name)' : '전자공시(DART) — 회사별 공시 자동검색'}>{lang === 'en' ? 'DART ↗' : '전자공시 ↗'}</a>
 			<button type="button" onclick={requestViewer} title={lang === 'en' ? 'disclosure viewer — fullscreen' : '공시뷰어 — 전체화면 (우측 정기공시 ⤢ 동일)'}>{lang === 'en' ? 'viewer ⤢' : '공시뷰어 ⤢'}</button>
 		</nav>
