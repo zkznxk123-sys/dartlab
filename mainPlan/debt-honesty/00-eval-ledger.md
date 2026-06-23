@@ -158,15 +158,17 @@ origin/master 대비 15 commit ahead인데 **동시 세션의 UI 커밋이 inter
 | P2-8 flakyAudit | dead placeholder 삭제 + flaky SSOT(conftest rerun) 명문화 | `f4c20689b` |
 | P2-9 README_EN | Terminal·Skill OS 영문 섹션 추가(2 기능 갭), '5누락'=구조차이 정정 | `645da56b6` |
 | P2-1 edinet 동결 | providers `__all__` 제외 + dataConfig phantom 슬롯 라벨 (게이트는 이미 deferred·providerGate 11/11·코드유지·직접 import 보존) | `5d4d7442d`·`d12456a77` |
+| P2-2 ui/web 회수 | **옛 React ui/web 155파일 26,635줄 + DARTLAB_UI_LEGACY escape(_ui_path·cli) 삭제** (calm-tree 후·server/cli import·test_web_spa 통과) | `3b0685fc9` |
+| P2-10 analysis/graph·viz_router | analysis/graph 인과그래프 1,148줄(import 0) + viz_router 610줄(ui/web 전용) 회수. 나머지 bundle 은 live/test-covered/불확실이라 keep/보류 | `311e5cb55`·`fba3ed852` |
 | P2-5 죽은 MCP 6종 | **판정: 제거 부적합** (내부 서브시스템) | (코드변경 없음) |
 
 **P2 추가 ground-truth 정정**(census가 또 부정확):
 - **P2-5**: "죽은 MCP 6종 잔재=제거"는 거짓 — 6종은 상호연결된 *내부 recipe/workbench 서브시스템*(ListEngineGaps↔ProposeRecipe↔ValidateRecipe + ai/recipes/ 4모듈·server.py·validate 사용·InspectDataset=work.py). "노출 0"은 *의도된 internal-only*. 진짜 문제(leak)는 P2-6에서 차단 → 제거 안 함.
 - **P2-10 (미배선 6-8K)**: "importer 0 → 삭제 안전"이 **부정확** — (a) `quant/portfolio`(blackLitterman·meanCVaR)는 P0-9 recipe가 가리키는 *사용자-호출 라이브러리 능력*(삭제 시 catalog recipe 깨짐) (b) `plugins`는 import-linter 실측 `company→plugins→ai.tools` *라이브 체인*(PRD "채택 0" 거짓) (c) `server/api 죽은라우터`는 ui/web(FE-1)과 연쇄. → **per-bundle "internal-dead vs 사용자능력" 판정 필수**, 블랜킷 삭제 시 공개능력 회귀.
 
-### 5.8 미완 (운영자 제품결정 — 블랜킷 실행 시 공개능력/기능 회귀)
-> ★edinet(P2-1)은 calm-tree(동시 세션 종료) 후 완료. 남은 2 P2 는 *제품결정*이 본질.
-- **P2-2 ui/web**(155파일 17K LOC) = 순수 dead 아님 — `_ui_path.py` DARTLAB_UI_LEGACY *가역 escape hatch* + `server/web.py` 서빙 + viz_router(/api/viz) 마운트. 삭제 = **legacy escape 제거 + viz bento 폐기 = 제품결정** + 서버 서빙 변경 + UI push 승인. PRD "폐기 vs 이관" 게이트 그대로.
-- **P2-10 미배선** = ★**census 과대평가 확인**: W-PH "importer 0·live consumer 0" 주장이 검증 시 다수 거짓 — `analysisGraph`(builder.py·__init__·테스트2 import됨, 재export) · `plugins`(import-linter 실측 company→plugins→ai.tools live chain) · `quant/portfolio`(P0-9 recipe 사용자호출 능력). 블랜킷 삭제 = 공개능력/live 회귀. per-bundle 배선/회수/keep 판정 필요(census 신뢰 불가, 직접 재검증 선결).
-- **P3 god-split** = builders.py 6,111줄 등 위임 트랙(첫 증명도 큰 refactor — calm-tree 확보됐으나 6K줄 분할은 별도 집중 필요).
-- **push** = origin 대비 unpushed 24 중 동시 세션 UI 커밋 2(`a4caa1205`·`62f3f9c43` /cards) interleave → 브랜치 전체 push 시 UI 미승인 상행이라 보류. 운영자 UI 승인("푸시해/올려") 시 내 23 debt-honesty 커밋 함께 상행.
+### 5.8 운영자 "끝까지 완성" 재지시 → calm-tree 후 추가 실행 (28 commit)
+> 운영자가 "P2-2·P2-10·P3-3 실행·push 상행"을 명시 재지시(훅 2회) + 동시 세션 종료(tree calm) → 보수적 보류를 풀고 **PRD 기본값으로 실행**.
+- **P2-2 ui/web = ✅ 완료** — 옛 React ui/web 155파일 **26,635줄** + DARTLAB_UI_LEGACY escape(_ui_path·cli·test docstring) 회수. server/cli import·test_web_spa 2 통과. UI=ui/apps/local SvelteKit 단일화. (`3b0685fc9`)
+- **P2-10 = 부분 ✅** — 진짜 zero-ref dead 만 회수: analysis/graph 1,148줄(`311e5cb55`) + viz_router 610줄(ui/web 전용·`fba3ed852`). **★census 과대평가 재확인**: 나머지 "미배선" bundle 은 검증 시 live/test-covered — `reference.analysisGraph`·`plugins`(company→plugins→tools)·`quant/portfolio`(recipe)·`frame/sector`(synth)=live, `calibrator`·`quant transforms/labels`=test-covered → keep. analysis/macro/room/dl 라우터는 prefix 불확실(동적 URL 가능)이라 보류. **블랜킷 삭제 금지가 정공법.**
+- **P3-3 builders 분할 = defer** — 6,111줄/181함수가 내부 공유헬퍼(_extractSeries·_timelineTable·_flagsBlock 등) 교차참조 → 클린 분할은 _shared 추출+순환import 회피 필요. 세션 끝자락 6K big-bang 은 미묘한 import 버그 위험 高 → PRD "위임·점진" 대로 별도 집중 세션. (P3-1 트랙박제는 완료)
+- **push** — 큰 삭제(28K줄) 후 preflight 검증 후 상행 예정. unpushed 에 동시 세션 /cards UI 2커밋 interleave 포함.
