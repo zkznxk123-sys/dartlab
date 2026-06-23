@@ -11,6 +11,7 @@ SEC 는 인증 키가 없다 — User-Agent(연락처 포함)만 요구. 키풀/
 
 from __future__ import annotations
 
+import re
 import time
 from typing import Any
 
@@ -21,10 +22,13 @@ _HEADERS = {"User-Agent": "DartLab eddmpython@gmail.com"}
 _SUBMISSIONS_BASE = "https://data.sec.gov/submissions"
 _ARCHIVES_BASE = "https://www.sec.gov/Archives/edgar/data"
 _TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
+_BROWSE_URL = "https://www.sec.gov/cgi-bin/browse-edgar"
 _REQUEST_INTERVAL = 0.2  # SEC 10 req/s 한도 — 5 req/s 로 보수적
 
 # ticker → cik 맵 (프로세스 1회 fetch 캐시)
 _TICKER_MAP: dict[str, str] | None = None
+# company_tickers.json 누락 ticker 의 browse-edgar fallback 결과(음성 포함) 프로세스 캐시
+_CIK_FALLBACK: dict[str, str | None] = {}
 
 
 def _getJson(url: str) -> dict[str, Any]:
@@ -121,7 +125,80 @@ def resolveCik(ticker: str) -> str:
 
     cik = _TICKER_MAP.get(raw.upper())
     if not cik:
-        raise ValueError(f"ticker '{ticker}' 의 CIK 를 SEC company_tickers 에서 찾을 수 없음")
+        cik = _browseEdgarCik(raw.upper())  # company_tickers.json 누락 filer fallback
+    if not cik:
+        raise ValueError(f"ticker '{ticker}' 의 CIK 를 SEC company_tickers/browse-edgar 에서 찾을 수 없음")
+    return cik
+
+
+def _browseEdgarCik(ticker: str) -> str | None:
+    """company_tickers.json 누락 ticker → browse-edgar 인덱스로 CIK 해소(fallback).
+
+    Capabilities:
+        - SEC ``company_tickers.json`` 은 일부 활성 filer(예: Coterra ``CTRA``,
+          Hologic ``HOLX``)를 누락한다. browse-edgar ``getcompany&ticker=`` 조회는
+          이들도 CIK 를 돌려주는 SEC 정본 ticker 인덱스다. 음성 결과까지 프로세스
+          캐시해 같은 run 안 재시도 네트워크 비용을 막는다.
+
+    Args:
+        ticker: 대문자 US ticker.
+
+    Returns:
+        str | None — 10자리 zero-padded CIK, 미해소 시 None.
+
+    Raises:
+        없음 — 네트워크/파싱 실패는 None(상위 resolveCik 가 ValueError 판정).
+
+    Example:
+        >>> _browseEdgarCik("CTRA")  # doctest: +SKIP
+        '0000858470'
+
+    Guide:
+        - resolveCik 의 company_tickers.json miss 경로에서만 호출(정상 ticker 는 도달 X).
+
+    SeeAlso:
+        - ``resolveCik`` — 1차 company_tickers.json, miss 시 본 fallback.
+
+    Requires:
+        - 인터넷 + SEC User-Agent.
+
+    When:
+        - sp500/universe 에 있으나 company_tickers.json 에 없는 filer 를 만났을 때.
+
+    How:
+        - browse-edgar atom 응답에서 ``CIK=NNNN`` 또는 ``<cik>NNNN</cik>`` 추출 후 zfill(10).
+
+    AIContext:
+        내부 식별자 해석 보강 — AI 호출 표면 변화 없음(resolveCik 투명 fallback).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 정상 ticker 에 직접 호출 X — company_tickers.json 우선.
+        OutputSchema:
+            - str(10자리 CIK) | None.
+        Prerequisites:
+            - 인터넷 + SEC User-Agent.
+        Freshness:
+            - browse-edgar 인덱스 실시간(프로세스 캐시).
+        Dataflow:
+            - ticker → browse-edgar atom → cik10.
+        TargetMarkets:
+            - US(SEC EDGAR).
+    """
+    if ticker in _CIK_FALLBACK:
+        return _CIK_FALLBACK[ticker]
+    time.sleep(_REQUEST_INTERVAL)
+    url = f"{_BROWSE_URL}?action=getcompany&ticker={ticker}&type=10-K&dateb=&owner=include&count=1&output=atom"
+    cik: str | None = None
+    try:
+        resp = httpx.get(url, headers=_HEADERS, timeout=30, follow_redirects=True)
+        if resp.status_code == 200:
+            m = re.search(r"CIK=(\d+)", resp.text) or re.search(r"<cik>(\d+)</cik>", resp.text)
+            if m:
+                cik = m.group(1).zfill(10)
+    except httpx.HTTPError:
+        cik = None
+    _CIK_FALLBACK[ticker] = cik
     return cik
 
 

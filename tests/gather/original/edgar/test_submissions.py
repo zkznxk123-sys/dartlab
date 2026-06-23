@@ -61,3 +61,77 @@ def test_listAllFilings_limit(monkeypatch: pytest.MonkeyPatch) -> None:
     rows = sub.listAllFilings("0000320193", sinceYear=2009, limit=1)
     assert len(rows) == 1
     assert rows[0]["filing_date"] == "2024-11-01"  # 가장 최신
+
+
+# --- resolveCik: company_tickers.json + browse-edgar fallback (네트워크 0) ---
+
+_COMPANY_TICKERS = {
+    "0": {"cik_str": 320193, "ticker": "AAPL", "title": "Apple Inc."},
+}
+
+
+class _FakeResp:
+    def __init__(self, status_code: int, text: str) -> None:
+        self.status_code = status_code
+        self.text = text
+
+
+def _resetCikCaches(monkeypatch: pytest.MonkeyPatch, sub) -> None:
+    """프로세스 캐시(_TICKER_MAP/_CIK_FALLBACK) 를 테스트마다 초기화 — 격리."""
+    monkeypatch.setattr(sub, "_TICKER_MAP", None)
+    monkeypatch.setattr(sub, "_CIK_FALLBACK", {})
+    monkeypatch.setattr(sub, "_getJson", lambda url: dict(_COMPANY_TICKERS))
+
+
+def test_resolveCik_company_tickers_hit(monkeypatch: pytest.MonkeyPatch) -> None:
+    """company_tickers.json 에 있으면 fast path — browse-edgar 미호출."""
+    from dartlab.gather.original.edgar import submissions as sub
+
+    _resetCikCaches(monkeypatch, sub)
+
+    def _boom(*a, **k):  # browse-edgar 가 호출되면 실패
+        raise AssertionError("browse-edgar fallback 이 불필요하게 호출됨")
+
+    monkeypatch.setattr(sub.httpx, "get", _boom)
+    assert sub.resolveCik("AAPL") == "0000320193"
+    assert sub.resolveCik("aapl") == "0000320193"  # 대소문자 무관
+
+
+def test_resolveCik_browse_edgar_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+    """company_tickers.json 누락(CTRA) → browse-edgar atom 에서 CIK 해소."""
+    from dartlab.gather.original.edgar import submissions as sub
+
+    _resetCikCaches(monkeypatch, sub)
+    atom = "<feed><company-info><CIK=0000858470</company-info></feed>"
+
+    calls = {"n": 0}
+
+    def _fakeGet(url, **k):
+        calls["n"] += 1
+        assert "ticker=CTRA" in url  # browse-edgar 조회 ticker 전달 확인
+        return _FakeResp(200, atom)
+
+    monkeypatch.setattr(sub.httpx, "get", _fakeGet)
+    assert sub.resolveCik("CTRA") == "0000858470"
+    # 음성/양성 모두 캐시 — 재호출 시 네트워크 0
+    assert sub.resolveCik("CTRA") == "0000858470"
+    assert calls["n"] == 1
+
+
+def test_resolveCik_unresolvable_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    """company_tickers.json + browse-edgar 모두 miss → ValueError."""
+    from dartlab.gather.original.edgar import submissions as sub
+
+    _resetCikCaches(monkeypatch, sub)
+    monkeypatch.setattr(sub.httpx, "get", lambda url, **k: _FakeResp(200, "<feed></feed>"))
+    with pytest.raises(ValueError, match="찾을 수 없음"):
+        sub.resolveCik("ZZZZQQ")
+
+
+def test_resolveCik_numeric_passthrough(monkeypatch: pytest.MonkeyPatch) -> None:
+    """숫자 입력은 zfill(10) — 네트워크 0."""
+    from dartlab.gather.original.edgar import submissions as sub
+
+    _resetCikCaches(monkeypatch, sub)
+    monkeypatch.setattr(sub.httpx, "get", lambda *a, **k: (_ for _ in ()).throw(AssertionError))
+    assert sub.resolveCik("858470") == "0000858470"
