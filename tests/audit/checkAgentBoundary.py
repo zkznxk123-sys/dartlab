@@ -135,7 +135,7 @@ def _check_new_workbench_modules(violations: list[str]) -> None:
 def _check_new_loop_classes(violations: list[str]) -> None:
     """ai/ 안 *Loop / *Graph / *Kernel 클래스 새로 추가 감지.
 
-    범위 = ai/ 한정 — analysis/graph (Causal Graph, 자료구조) 등 *AI 강박과 무관* 한 graph 자료구조 제외.
+    범위 = ai/ 한정 — ai/ 밖 graph 자료구조(*AI 강박과 무관*)는 제외.
     """
     ai_dir = SRC / "ai"
     if not ai_dir.is_dir():
