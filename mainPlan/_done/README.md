@@ -18,3 +18,4 @@
 | `ui-platform-refactor/` | 2026-06-13 | public(GitHub Pages)·local(pip) 단일 UI 자산 공유 리팩토링(단계 1~10). ⚠ `08-shared-wiring-parity-maintenance.md` 는 현역 런북. |
 | `scan-grade-explainer/` | 2026-06-15 | 스캔등급 설명 다이얼로그. as-built 는 PRD 확장 — 10~12 종합축 SSOT(`COMPOSITE_AXES`) 통일 + 등급 근거 = 축 자체 동종업종 백분위(midrank)+분포 막대 + 현금흐름 부호 표기. 구현 SSOT=`ui/packages/surfaces/src/terminal/`. |
 | `data-build-workbench-ssot/` | 2026-06-21 | 공동작업대(in-library `dartlab.pipeline`) 데이터빌드 SSOT. MUST(macro 첫 증명) 흡수 완료 — sync 3 + prebuild 1 스크립트를 `stages/{macro,prebuild}.py` 로 흡수, 4스크립트 thin shim(중복 0). 구현 SSOT=`src/dartlab/pipeline/stages/`. ⏭ SHOULD(dart/news/gov)는 별개 후속 웨이브(미착수). |
+| `industry-analysis-lab/` | 2026-06-23 | industry 엔진+양 터미널 세계수준화. 3 killer(profit-pool 격자·공시인용 공급망 evidence·산업 분포 밴드) + 묻어둔 함수 배선(집중도·edges amount/ratio·polarization verb) + 한계 라벨 + 레버A 재빌드(amount 132→1,097) 구현·검증·push 완료. 구현 SSOT=`src/dartlab/industry/`. ⏭ 보너스 2건(집중도 verb 화면배선·RightStack hop walk)은 PRD 본체 외 미착수. |

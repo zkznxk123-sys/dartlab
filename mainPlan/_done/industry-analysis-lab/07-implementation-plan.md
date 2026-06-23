@@ -1,4 +1,4 @@
-# 07. 구현 플랜 — gap-closure (재조사 없이 착수 가능)
+﻿# 07. 구현 플랜 — gap-closure (재조사 없이 착수 가능)
 
 상태: 구현 플랜 v1 (2026-06-17, 5구멍 조사 → 4렌즈 토론 → 적대 critic → 수렴). 00~06 비전 PRD를 *착수 가능* 수준으로 끌어올린다.
 목적: 06-14 비전 PRD의 5개 미완 구멍(로컬 데이터흐름·Skill OS 동기화·테스트/롤백·측정 AC·미해결 선결)을 file:line touchpoint + 테스트 매핑 + 롤백 + 측정 AC로 닫는다.
@@ -82,7 +82,7 @@
 
 **실측**: `edges.py:424-425` docstring "642 precise"는 **1곳·검증 테스트 0건**, 디스크 132는 옛 markdown 세대값. 레버 A는 `_attempts ②까지만`, 레버 C(매출처 표)는 데모 0·customer 엣지 7건 전원 amount/ratio=None.
 
-**★642 vs 132 진단 완료 (2026-06-17 read-only 코드분석, 재빌드 전 선결 충족)**: `extractRawMaterialEdges` 의 supplier 컬럼은 [edges.py:490](../../src/dartlab/industry/build/edges.py#L490) `next(k for k in r.keys() if "매입처" in k)` = **퍼지 substring** 매칭이나, amount/ratio 는 [edges.py:506-507](../../src/dartlab/industry/build/edges.py#L506) `r.get("매입액")`/`r.get("비중")` = **exact** 키. 현재 panel 원재료 표 헤더는 「비율」·합쳐진셀 「제NN기매입액 (비율)」·공백삽입(_attempts 실측)으로 진화해 exact lookup 이 대부분 miss → amount/ratio None. **∴ docstring 642 는 헤더가 exact 였던 시절 stale 값, 디스크 132 = 헤더 드리프트로 exact miss 한 현재값. 원인 = 파서-데이터 헤더 드리프트(데이터 손실 아님, 원재료 표 자체는 잔존).** ★**결정적 함의: 운영자 재빌드 단독으로는 642 복구 안 됨 — ~132 재현이 정상(회귀 아님).** 642 회복은 레버 A(amount/ratio 도 line 490 처럼 퍼지화)가 유일 레버다. 재빌드의 가치 = source 라벨(panel_text/panel_table) 정합 + 현재 카운트 확정이지 커버리지 증가 아님.
+**★642 vs 132 진단 완료 (2026-06-17 read-only 코드분석, 재빌드 전 선결 충족)**: `extractRawMaterialEdges` 의 supplier 컬럼은 [edges.py:490](../../../src/dartlab/industry/build/edges.py#L490) `next(k for k in r.keys() if "매입처" in k)` = **퍼지 substring** 매칭이나, amount/ratio 는 [edges.py:506-507](../../../src/dartlab/industry/build/edges.py#L506) `r.get("매입액")`/`r.get("비중")` = **exact** 키. 현재 panel 원재료 표 헤더는 「비율」·합쳐진셀 「제NN기매입액 (비율)」·공백삽입(_attempts 실측)으로 진화해 exact lookup 이 대부분 miss → amount/ratio None. **∴ docstring 642 는 헤더가 exact 였던 시절 stale 값, 디스크 132 = 헤더 드리프트로 exact miss 한 현재값. 원인 = 파서-데이터 헤더 드리프트(데이터 손실 아님, 원재료 표 자체는 잔존).** ★**결정적 함의: 운영자 재빌드 단독으로는 642 복구 안 됨 — ~132 재현이 정상(회귀 아님).** 642 회복은 레버 A(amount/ratio 도 line 490 처럼 퍼지화)가 유일 레버다. 재빌드의 가치 = source 라벨(panel_text/panel_table) 정합 + 현재 카운트 확정이지 커버리지 증가 아님.
 
 **정공법 결정** (★critic mustFix — 642·7.9x·2%→43%는 **재빌드 전 미검증 추정**):
 - 재빌드 **2단계 강제**: 운영자가 `Industry().build()`(`__init__.py:286→pipeline.buildIndustryMap`, skipDocs=False)를 메모리 가드(병렬 agent≤2·회사 순차) 하 1회 실행 → 산출물 **먼저 검증**(source 라벨 panel_text/panel_table 전환·amount non-null 카운트 642 vs 132 확정·nodes.json 동반 회귀 diff) → **그 후에만** commit. 깨진 부분산출물의 mapBuild/HF landing 전파 차단.

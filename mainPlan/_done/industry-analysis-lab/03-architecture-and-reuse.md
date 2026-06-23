@@ -1,4 +1,4 @@
-# 03. 아키텍처·재사용 — 거처·touchpoint·경계
+﻿# 03. 아키텍처·재사용 — 거처·touchpoint·경계
 
 상태: 비전 PRD v0.2 (2026-06-14, 2차 대대적 조사·적대검증 반영)
 목적: "재조사 없이 구현 가능한" 설계. 자산 인벤토리(REUSE/EXTEND/NEW), 거처(engine·public·local), 영향 파일·함수(file:line), 경계, orphan 능력 배선, stale 정리, 엔진 리팩토링 결정(§8).
@@ -30,22 +30,22 @@ src/dartlab/industry/build/{stage1_ksic,stage2_product,stage3_docs,stage4_review
 ### REUSE (그대로 씀)
 | 자산 | 위치 | 용도 |
 |---|---|---|
-| `buildIndustrySummary` | [financials.py:219](../../src/dartlab/industry/build/financials.py#L219) | Phase A profit-pool 데이터 소스 (stage 매출·영업이익·기업수) |
+| `buildIndustrySummary` | [financials.py:219](../../../src/dartlab/industry/build/financials.py#L219) | Phase A profit-pool 데이터 소스 (stage 매출·영업이익·기업수) |
 | `industries/{id}.json` (stages[].nodes[].revenue/opMargin) | landing static `/map/` | Phase A 브라우저 격자 (신규 fetch 0) |
 | `industryStats.json` (p10~p90 분포) | landing static `/map/` | Phase C 분포 밴드 |
-| `computeHop2` · `calcSupplyInsights` | [hop2.py:32](../../src/dartlab/industry/build/hop2.py#L32) · [insights.py:201](../../src/dartlab/industry/build/insights.py#L201) | Phase B hop2/다양성 (현재 orphan → 배선) |
-| `calcTopNRatio` | [insights.py:136](../../src/dartlab/industry/build/insights.py#L136) | Phase B CR_N evidence (라벨 뗀 raw만) |
+| `computeHop2` · `calcSupplyInsights` | [hop2.py:32](../../../src/dartlab/industry/build/hop2.py#L32) · [insights.py:201](../../../src/dartlab/industry/build/insights.py#L201) | Phase B hop2/다양성 (현재 orphan → 배선) |
+| `calcTopNRatio` | [insights.py:136](../../../src/dartlab/industry/build/insights.py#L136) | Phase B CR_N evidence (라벨 뗀 raw만) |
 | `FreshnessBadge` · `rt.company.relations` · RightStack 패턴 · `PriceChart` 스택 | ui/packages/surfaces | 로컬 재사용 |
-| `compare()` | [providers/dart/panel/compare.py](../../src/dartlab/providers/dart/panel/compare.py) | Phase C funnel 대상 (재구현 금지) |
+| `compare()` | [providers/dart/panel/compare.py](../../../src/dartlab/providers/dart/panel/compare.py) | Phase C funnel 대상 (재구현 금지) |
 
 ### EXTEND (확장 — 새 파일·verb 금지)
 | 자산 | 변경 | Phase |
 |---|---|---|
 | `buildIndustrySummary` | 출력에 `영업이익률(%)`(revenue-weighted 파생) + `coverageRatio` 2컬럼. ★공개 SSOT 동기화 동반(구멍2, [07 §구멍2](07-implementation-plan.md)): SKILL.md 반환 섹션 + financials.py docstring + `syncArtifacts(write=True)` 전수 재생성 | A |
 | `/industry/[id]/+page.svelte` | stage 섹션에 2D(매출규모×영업이익률) 격자 렌더 (브라우저 롤업) | A |
-| `Industry.edges()` DataFrame | [__init__.py:359-371](../../src/dartlab/industry/__init__.py#L359) select에 `의존도(%)`(ratio)·`거래액`(amount) 2컬럼 + `hop`/`insights` 인자. 디스크 필드 `type` 주의. ★공개 SSOT 동기화 동반(구멍2): SKILL.md 반환/args + `__init__.py` docstring + catalog/agent.json 함께 `syncArtifacts(write=True)` 재생성(컷길이별 부분 재생성 가정 폐기) + apiContract forbidden 점검 | B |
+| `Industry.edges()` DataFrame | [__init__.py:359-371](../../../src/dartlab/industry/__init__.py#L359) select에 `의존도(%)`(ratio)·`거래액`(amount) 2컬럼 + `hop`/`insights` 인자. 디스크 필드 `type` 주의. ★공개 SSOT 동기화 동반(구멍2): SKILL.md 반환/args + `__init__.py` docstring + catalog/agent.json 함께 `syncArtifacts(write=True)` 재생성(컷길이별 부분 재생성 가정 폐기) + apiContract forbidden 점검 | B |
 | `/industry/[id]/+page.svelte` 공급망 섹션 | ratio %·confidence/source 칩 (이미 amount top20 有) | B |
-| `engine.ts industryPercentile` | [engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492)·`pctRank`([:179](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L179)) — ★실측상 백분위는 "3갈래 분기"가 아니라 **단일 산식 + 모집단 파라미터화**(cross-universe-percentile이 이미 통일). Phase C = 경계 문서화·compare 범주오류 정정으로 재프레임([07 §구멍5](07-implementation-plan.md)). `marketShare`는 **전 소비처 재라벨**('점유율'→'상장사매출비중', 터미널·map·scan 라벨 문자열만, 키·metric·preset 보존) + `EcoNode.marketShare`(types.ts:120) 필드 **보존** + 로컬 100 날조([localTerminalData.ts:348](../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)) 값 제거. 사유=라벨 사칭([buildIndustryMap.py:816/868](../../.github/scripts/prebuild/buildIndustryMap.py#L816) 상장사 상대비중 실생산을 "점유율"로 표기). "표시 제거"는 토론 정정([07 §구멍5](07-implementation-plan.md)) | C |
+| `engine.ts industryPercentile` | [engine.ts:492](../../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492)·`pctRank`([:179](../../../ui/packages/surfaces/src/terminal/lib/engine.ts#L179)) — ★실측상 백분위는 "3갈래 분기"가 아니라 **단일 산식 + 모집단 파라미터화**(cross-universe-percentile이 이미 통일). Phase C = 경계 문서화·compare 범주오류 정정으로 재프레임([07 §구멍5](07-implementation-plan.md)). `marketShare`는 **전 소비처 재라벨**('점유율'→'상장사매출비중', 터미널·map·scan 라벨 문자열만, 키·metric·preset 보존) + `EcoNode.marketShare`(types.ts:120) 필드 **보존** + 로컬 100 날조([localTerminalData.ts:348](../../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)) 값 제거. 사유=라벨 사칭([buildIndustryMap.py:816/868](../../../.github/scripts/prebuild/buildIndustryMap.py#L816) 상장사 상대비중 실생산을 "점유율"로 표기). "표시 제거"는 토론 정정([07 §구멍5](07-implementation-plan.md)) | C |
 | `/industry/[id]/+page.svelte` | industryStats 분포 밴드 위 회사 마커 + compare funnel 링크 | C |
 | 로컬 CenterStack / RightStack | profit-pool 버블 · hop walk · 회사→산업 점프 | A/B |
 
@@ -71,7 +71,7 @@ src/dartlab/industry/build/{stage1_ksic,stage2_product,stage3_docs,stage4_review
 - **story(L3) = 조합·내러티브.** chainPositionBlock/sectorMetricsBlock/sectorOutlookBlock가 이미 calcChainPosition·calcSectorMetrics·calcSectorCycle 조합 — industry는 데이터만, 조합은 story.
 - **백분위 SSOT(Phase C 선결)**: industry = KSIC섹터 분포(읽기), compare + financial-statement-lab = 큐레이션 peer 정밀. 이 경계를 본 PRD에서 박는다.
 - **scenario-simulator 경계**: 인과·미래예측·driver DAG는 simulate 소유. industry는 static 다양성/hop/lifecycle 라벨만.
-- **profit-pool 영업이익률 dual-source SSOT**: 엔진 `buildIndustrySummary`는 `opIncome.sum()/revenue.sum()`([financials.py:307-308](../../src/dartlab/industry/build/financials.py#L307), panel 소스)로, 브라우저 격자는 `industries/{id}.json`의 per-node `revenue×opMargin/100` Σ/Σ 롤업(prebuild JSON, opMargin 82.4% 커버리지)으로 계산 — 두 경로의 소스·커버리지가 달라 같은 stage 마진이 화면별로 갈릴 수 있다. ★**엔진 파생컬럼=캐논, 브라우저=표시만**으로 고정. coverageRatio 분모(전체노드 vs finance-join노드)도 경로별 명시 고정 + 불일치 회귀테스트 동행.
+- **profit-pool 영업이익률 dual-source SSOT**: 엔진 `buildIndustrySummary`는 `opIncome.sum()/revenue.sum()`([financials.py:307-308](../../../src/dartlab/industry/build/financials.py#L307), panel 소스)로, 브라우저 격자는 `industries/{id}.json`의 per-node `revenue×opMargin/100` Σ/Σ 롤업(prebuild JSON, opMargin 82.4% 커버리지)으로 계산 — 두 경로의 소스·커버리지가 달라 같은 stage 마진이 화면별로 갈릴 수 있다. ★**엔진 파생컬럼=캐논, 브라우저=표시만**으로 고정. coverageRatio 분모(전체노드 vs finance-join노드)도 경로별 명시 고정 + 불일치 회귀테스트 동행.
 
 ---
 
@@ -85,7 +85,7 @@ src/dartlab/industry/build/{stage1_ksic,stage2_product,stage3_docs,stage4_review
 
 ### 5.1 ★이미 live한 recipe 층 — orphan 범위 정정
 
-industry 분석 *능력*은 통째 orphan이 아니다. [recipes/industry/](../../src/dartlab/skills/specs/recipes/industry/)에 8개 curated·validated(2026-05-27) recipe가 RunPython/EngineCall로 런타임 실행되는 *조합 분석*으로 존재한다 — `industryStagePhase`(peer ROIC-WACC spread+CAGR phase)·`marginCompressionScan`(peer GP/OM/NM 3축 z-score)·`peerCapexWave`(capex/매출 wave lead-lag)·`rdIntensityTrend`(R&D/매출 추세+peer rank)·`supplyChainConcentration`(top5 고객/거래처 HHI)·`sectorMomentumLeadership`·`sectorFlowConcentration`·`peerPriceConvergence`.
+industry 분석 *능력*은 통째 orphan이 아니다. [recipes/industry/](../../../src/dartlab/skills/specs/recipes/industry/)에 8개 curated·validated(2026-05-27) recipe가 RunPython/EngineCall로 런타임 실행되는 *조합 분석*으로 존재한다 — `industryStagePhase`(peer ROIC-WACC spread+CAGR phase)·`marginCompressionScan`(peer GP/OM/NM 3축 z-score)·`peerCapexWave`(capex/매출 wave lead-lag)·`rdIntensityTrend`(R&D/매출 추세+peer rank)·`supplyChainConcentration`(top5 고객/거래처 HHI)·`sectorMomentumLeadership`·`sectorFlowConcentration`·`peerPriceConvergence`.
 
 따라서 본 PRD의 **"만들어 묻어둔 엔진" 프레임은 *화면·DataFrame 노출*에 한정**한다. 진짜 orphan은 (a) `build/insights.py`의 `calcHHI`/`calcTopNRatio`/`calcIndustryConcentration`/`computeHop2`/`calcSupplyInsights` *함수가 Industry verb DataFrame·화면으로 안 나오는 것* + (b) `/industry/[id]` static JSON이 profit-pool 격자·분포 밴드를 안 그리는 것 + (c) `Industry.edges()` amount/ratio 컬럼 누락 + (d) marketShare 라벨 사칭(상장사 상대비중을 "점유율"로, 표시층 제거 대상 — [07 §구멍5](07-implementation-plan.md)) 일 뿐, 산업 분석 capability *전체*가 아니다. **recipe 층과 기능 중복 신설 금지** — profit-pool 격자는 화면이지 새 recipe가 아니고, `supplyChainConcentration` recipe가 이미 HHI 교섭력을 RunPython으로 답한다. 신규 능력 착수 전 recipes.industry 중복 여부 확인 의무.
 
@@ -94,7 +94,7 @@ industry 분석 *능력*은 통째 orphan이 아니다. [recipes/industry/](../.
 ## 6. stale 정리 (선결 위생 commit)
 
 별도 "정리: industry stale 청소" commit으로 분리:
-1. **유령 *verb/모듈* 제거 (★recipe는 보존)**: [industry/README.md](../../src/dartlab/industry/README.md)가 광고하는 Python verb `dartlab.industry.sectorMomentumLeadership(...)` 및 모듈 파일 `sectorMomentum.py`·`peerMatrix.py`·`map.py`·`concentration.py`는 실재 0(Glob 확인) → 삭제·재작성. **단 `recipes.industry.sectorMomentumLeadership.md`·`supplyChainConcentration.md`는 curated 라이브 recipe로 실재 → 삭제 금지.** stale은 "verb/모듈 광고"지 "recipe"가 아니다. scan/README·skills `*.json` 카탈로그 전파 점검(검색 cascade 주의 — `generateSkills` 동기화).
+1. **유령 *verb/모듈* 제거 (★recipe는 보존)**: [industry/README.md](../../../src/dartlab/industry/README.md)가 광고하는 Python verb `dartlab.industry.sectorMomentumLeadership(...)` 및 모듈 파일 `sectorMomentum.py`·`peerMatrix.py`·`map.py`·`concentration.py`는 실재 0(Glob 확인) → 삭제·재작성. **단 `recipes.industry.sectorMomentumLeadership.md`·`supplyChainConcentration.md`는 curated 라이브 recipe로 실재 → 삭제 금지.** stale은 "verb/모듈 광고"지 "recipe"가 아니다. scan/README·skills `*.json` 카탈로그 전파 점검(검색 cascade 주의 — `generateSkills` 동기화).
 2. **edges.json 재빌드**: 목적은 *커버리지 증가 아님* — `source` 라벨(코드 panel_text/panel_table vs 디스크 docs/docs_table)·docstring(precise 642 vs 실측 132) 정합. ★642 vs 132 격차 원인(파서 변경 vs 데이터 손실)을 재빌드 *전* 1회 진단이 선결. 빈곤(amount 0.7%·customer 7·ratio 19)은 원천 한계라 재빌드 후에도 안 늘 수 있음 → 1급시민 유지. Phase B 선결.
 3. **README ↔ 코드 정합**: calcs/ 실제 3파일(companyCalcs·lifecycle·peers) + build/ 13파일 + 공개표면(Industry().__call__/edges/map/build/addOverride)으로 재작성. + `enrichCompany.py` docstring Example(L238-240)의 `buildCompanyEgograph` import 거짓 정정(def 없음 → ImportError), `__init__` docstring `data/industry/` → `src/dartlab/industry/` 통일·`deltas.json`/`hop2.json`은 prebuild 산출이라 `build()` 산출물 목록서 제거.
 

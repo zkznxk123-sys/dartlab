@@ -1,7 +1,7 @@
-# 06. 진행 원장 (Progress Ledger)
+﻿# 06. 진행 원장 (Progress Ledger)
 
-상태: 비전 PRD v0.2 (2026-06-14, 2차 대대적 조사·적대검증 반영)
-목적: 현재 결정·토론 출처·문서 상태·NEXT·메모리 포인터. 세션 간 재개 단일 진입점.
+상태: ✅ 완료·`_done` 이관 (2026-06-23) — PRD 정의 범위(3 killer 엔진+표면+한계 라벨) 구현·검증·origin/master push 완료(엔진 코드·레버A 재빌드 데이터·퍼블릭/로컬 프론트 전부). 설계 근거 = 비전 PRD v0.2 (2026-06-14). 잔여 = 보너스 2건(집중도 verb 화면배선·RightStack hop walk, PRD 본체 외). 완료 상세 = §1.05·§1.1.
+목적: 현재 결정·토론 출처·문서 상태·정정 이력·메모리 포인터. 완료 기록 보존.
 
 ---
 
@@ -20,7 +20,7 @@
 
 - **무엇**: `dartlab.industry(id, polarization=True)` — 산업이 *승자독식으로 갈라지나 vs 동질 평준화* 를 **독립 두 자료원 교차검증**으로 판정. ① 마진 렌즈 = 멤버 OPM IQR(p75−p25) 다년 방향 ② 밸류 렌즈 = 멤버 P/B p90/p10 분산. 둘 다 넓음→승자독식·`교차검증=일치`, 갈리면→혼재·`불일치(렌즈 갈림)`.
 - **왜 졸업 1순위였나**: 루트1(마진분산, 발산 8:2)·루트3(밸류괴리, 발산 3.3x) 둘이 robust PASS + **서로 교차검증**(제약이 양 렌즈 극단 일치). 단일 각도보다 교차검증이 folk통계 방어. 실측 일치: 제약 33→78·P/B 22.5 / 반도체 13→26·11.7 / 철강=마진좁음·밸류넓음 → **불일치 명시 포착**(렌즈 갈림 자체가 통찰).
-- **산출 파일**: [polarization.py](../../src/dartlab/industry/calcs/polarization.py)(9섹션 docstring·`_distribution` 재사용) + [__init__.py](../../src/dartlab/industry/__init__.py) verb 배선 + `test_financials_sanity::TestPolarization`(7 테스트: `_crossVerdict` 4 + monkeypatch end-to-end 3) + SKILL.md/web.json 동기.
+- **산출 파일**: [polarization.py](../../../src/dartlab/industry/calcs/polarization.py)(9섹션 docstring·`_distribution` 재사용) + [__init__.py](../../../src/dartlab/industry/__init__.py) verb 배선 + `test_financials_sanity::TestPolarization`(7 테스트: `_crossVerdict` 4 + monkeypatch end-to-end 3) + SKILL.md/web.json 동기.
 - **한계 경계(코드 1급)**: 음수자본 제외수 인용·생존편향(현 멤버십 소급)·5점 윈도(방향신호)·밸류 스냅샷(시점 1)·임계는 `_attempts` 실측 분포 기반 라벨(절대 진리 아님). 점유율·인과 금지. `concentration`(산업이 과점이냐)과 직교.
 - **게이트 통과**: docstring4Section·camelcase strict·industry unit 61·architecture 39(L2→L1 prices import = 방향·cycle 위반 0).
 - **남은 루트(졸업 보류)**: 4 accrual(de-mean 후 PASS, 다음 후보)·2 ΔHHI/7 상대강도(BORDERLINE·가드 선결)·5 수출/8 CAR(약함/보류). 카탈로그 SSOT=`_attempts/industryAnalysisLab/ROUTES.md`.
@@ -34,7 +34,7 @@
 - **engine.ts 인용 드리프트**: cross-universe-percentile(06-15)이 engine.ts 리팩토링 → industryPercentile 301-312→492 이동. 02·03·05·06 정정.
 
 **구현 플랜 세션 2차(11에이전트 워크플로 → [07-implementation-plan.md](07-implementation-plan.md))** — 5구멍 조사·4렌즈 토론·적대 critic이 1차 정정 자체의 사실오류 3건 포함 추가 정정:
-- ★**marketShare "producer 전무 inert dead"는 사실오류**(1차 정정이 틀림): [buildIndustryMap.py:816/868](../../.github/scripts/prebuild/buildIndustryMap.py#L816)이 상장사 상대비중을 실생산해 ecosystem.json에 싣고, [localTerminalData.ts:348](../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)이 로컬 단일사에 `marketShare:100` 날조 → "null→'—' inert"가 아니라 *라벨 사칭 + 로컬 날조 시정*, 제거는 표시층 한정·EcoNode 필드 보존(landing map/compare 공유). 02·03·05 재정정.
+- ★**marketShare "producer 전무 inert dead"는 사실오류**(1차 정정이 틀림): [buildIndustryMap.py:816/868](../../../.github/scripts/prebuild/buildIndustryMap.py#L816)이 상장사 상대비중을 실생산해 ecosystem.json에 싣고, [localTerminalData.ts:348](../../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)이 로컬 단일사에 `marketShare:100` 날조 → "null→'—' inert"가 아니라 *라벨 사칭 + 로컬 날조 시정*, 제거는 표시층 한정·EcoNode 필드 보존(landing map/compare 공유). 02·03·05 재정정.
 - ★**백분위 "3분기 분기" framing 오류**: engine.ts:179 pctRank 단일 산식 + 모집단 파라미터화(이미 통일) — Phase C는 "통일"이 아니라 경계 문서화·compare 범주오류 정정·marketShare 사유 교정. 02·05 재정정.
 - ★**로컬 격자/hop walk = EXTEND 아닌 신규 데이터 채널**: RawData(types.ts:179-189)에 edges 필드 부재·eco.nodes=1·map 포트 throw 게이트 → industries/{id}.json lazy 신규 채널 + industryPool.ts.
 - ★**edges 642·7.9x·2%→43%는 재빌드 전 미검증 추정**(642 docstring 1곳·검증 0건): 04 §1 태그 + `Industry().build()` 2단계 재빌드 선결.
@@ -79,15 +79,15 @@
 - 1차 워크플로(2026-06-14): 조사 4건(세계 프레임워크 11종 + 세계 제품 + industry 엔진 코드실측 + 양 터미널 코드실측) → 4렌즈 토론(엔진강화·퍼블릭·로컬·덕지덕지 적대) → 후보 병합 → 적대검증 → 수렴 → PRD v0.1.
 - 2차 워크플로(2026-06-14): PRD 적대검증 + 엔진 클린코드/리팩토링 감사 + 세계개념 *대대적* 재조사(전략매트릭스·산업경제학·데이터제품/한국) → 흡수설계 → 적대검증 → 개정 spec → PRD v0.2. **산물 = 기능 추가보다 사실오류 정정 + 부정 카탈로그**(강함은 깎아서).
 - 코드실측 확정 사실(이 PRD의 근거):
-  - `buildIndustrySummary` stage 집계 live, 반환 첫 컬럼 `stage`(docstring `공정`은 오기) ([financials.py:219](../../src/dartlab/industry/build/financials.py#L219))
-  - `Industry.edges()` DataFrame amount/ratio 누락 ([__init__.py:359-371](../../src/dartlab/industry/__init__.py#L359)). 디스크 필드 `type`(supplier 3191·affiliate 12980·investor 2240·customer 7), in-memory만 `edgeType`
-  - `computeHop2`/`calcSupplyInsights`/`calcHHI`/`calcTopNRatio`/`calcIndustryConcentration` *함수*는 enrichCompany 빌드+테스트만 호출(Industry verb DataFrame·화면 미노출) ([insights.py](../../src/dartlab/industry/build/insights.py)·[hop2.py:32](../../src/dartlab/industry/build/hop2.py#L32)). ★단 산업 분석 *능력*은 `recipes.industry/` 8 curated(industryStagePhase·marginCompressionScan·supplyChainConcentration·peerCapexWave·rdIntensityTrend 등, validated 2026-05-27)로 RunPython 런타임 live — orphan은 함수/화면/컬럼 한정
+  - `buildIndustrySummary` stage 집계 live, 반환 첫 컬럼 `stage`(docstring `공정`은 오기) ([financials.py:219](../../../src/dartlab/industry/build/financials.py#L219))
+  - `Industry.edges()` DataFrame amount/ratio 누락 ([__init__.py:359-371](../../../src/dartlab/industry/__init__.py#L359)). 디스크 필드 `type`(supplier 3191·affiliate 12980·investor 2240·customer 7), in-memory만 `edgeType`
+  - `computeHop2`/`calcSupplyInsights`/`calcHHI`/`calcTopNRatio`/`calcIndustryConcentration` *함수*는 enrichCompany 빌드+테스트만 호출(Industry verb DataFrame·화면 미노출) ([insights.py](../../../src/dartlab/industry/build/insights.py)·[hop2.py:32](../../../src/dartlab/industry/build/hop2.py#L32)). ★단 산업 분석 *능력*은 `recipes.industry/` 8 curated(industryStagePhase·marginCompressionScan·supplyChainConcentration·peerCapexWave·rdIntensityTrend 등, validated 2026-05-27)로 RunPython 런타임 live — orphan은 함수/화면/컬럼 한정
   - lifecycle은 orphan 아님 — `ai/tools/industryContext.py` getIndustryBadge로 모든 Company.panel/EngineCall 응답에 자동 부착 live. backend 4-phase + 재도약 합성 = surface 5-phase
-  - 퍼블릭 `/industry/[id]`는 라이브 엔진 아닌 static JSON 소비 ([+page.ts](../../landing/src/routes/industry/%5Bid%5D/+page.ts))
+  - 퍼블릭 `/industry/[id]`는 라이브 엔진 아닌 static JSON 소비 ([+page.ts](../../../landing/src/routes/industry/%5Bid%5D/+page.ts))
   - `marketShare`(★2차 정정 — 1차의 "producer 전무 inert dead"는 사실오류): buildIndustryMap.py:816/868이 상장사 상대비중 실생산해 ecosystem.json에 실음 + localTerminalData.ts:348이 로컬 단일사에 `marketShare:100` 날조 → engine.ts에선 이미 제거됐고, 표시는 CenterStack.svelte:194/198·ScreenerModal.svelte:42에 잔존(퍼블릭=실 상대비중 표시·로컬=100 날조). 제거=표시층 한정, EcoNode 필드(types.ts:120)는 landing map/compare 공유라 보존. 사유=라벨 사칭+로컬 날조 시정([07 §구멍5](07-implementation-plan.md))
   - 백분위는 engine.ts:179 pctRank 단일 산식+모집단 파라미터화(industryPercentile:492·percentileIn:501 공유) — "3분기 분기" framing 오류, 이미 통일됨
   - 로컬 RawData는 eco.nodes=1 단일사·edges 필드 부재 → 격자/hop walk는 map/industries/{id}.json lazy 신규 채널(EXTEND 아님). industries edges는 옛 markdown 세대(amount 3/80)라 hop walk는 재빌드 후 게이트
-  - Damodaran 자본효율(sales-to-capital·reinvestment·ROC)은 [synth/damodaranL15.py](../../src/dartlab/synth/damodaranL15.py):390-416에 이미 curated 구현
+  - Damodaran 자본효율(sales-to-capital·reinvestment·ROC)은 [synth/damodaranL15.py](../../../src/dartlab/synth/damodaranL15.py):390-416에 이미 curated 구현
   - 데이터 빈곤: amount 132/18,418(0.7%)·customer 7(전원 ratio=None)·ratio 19(전부 supplier)·opMargin 82.4%·industryStats p10~p90 monotone
   - 유령 *verb/모듈*: `dartlab.industry.sectorMomentumLeadership(...)`·sectorMomentum.py 등 구현 0(README·카탈로그 전파). 단 `recipes.industry.sectorMomentumLeadership.md`는 라이브 recipe(삭제 금지)
 - 적대검증 생존: profit-pool grid(conditional·overlap 없음)·edges ratio/amount(conditional·천장 낮음)·hop2(conditional)·percentile band(conditional·표시층 통일로만). kill: migration·BCG stack-fracturing 3차원·ASC275 인용·Capital Cycle·Damodaran 산업분포·Leontief 명명.
@@ -112,7 +112,9 @@
 
 ## 4. NEXT (재개 포인터)
 
-- **착수 = 운영자 go.** 코딩 아님(현재 = 비전 PRD + 구현 플랜 정착). ★구현 단위 file:line·테스트·롤백·AC SSOT = [07-implementation-plan.md](07-implementation-plan.md). 아래는 요약·07이 정본.
+> ✅ **2026-06-23 완료 — 아래 Phase A/B/C 계획은 전부 실행됨**(실측 결과 = §1.05·§1.1). origin/master push 확인(엔진 코드·레버A 재빌드 데이터·퍼블릭/로컬 프론트 전부 ancestor). 고아 커밋 799ceb18a·e132fbdaf는 멀티세션 sweep으로 내용 흡수됨(손실 0, edges 20,560·supplyFacts 260사 실측 일치). 잔여 = 보너스 2건(집중도 verb 화면배선·RightStack hop walk, PRD 본체 외). 아래는 착수 전 계획 이력으로 보존.
+
+- ~~**착수 = 운영자 go.** 코딩 아님(현재 = 비전 PRD + 구현 플랜 정착).~~ (완료) ★구현 단위 file:line·테스트·롤백·AC SSOT = [07-implementation-plan.md](07-implementation-plan.md). 아래는 요약·07이 정본.
 - **Phase A(선결 0, 신규 데이터 0)**: ① 구멍2 위생+SSOT 동기화(SKILL.md/docstring 정정 + `syncArtifacts(write=True)` — 옛 `generateSkills` 폐기) → ② `buildIndustrySummary` 파생 컬럼 + `test_financials_sanity::TestProfitPoolDerived` → ③ 구멍1 profit-pool 버블(**신규** industryPool.ts 채널 + 양셸 lazy fetch, **edges 무관**) + 퍼블릭 stage 2D 격자 + profitPoolParity.mts(ts 추출 선결) → ④ 구멍5 marketShare 표시 제거 + Phase C 재프레임 문서.
 - **Phase B 선결(구멍3)**: `Industry().build()` **2단계 재빌드**(메모리 가드 하 운영자 실행 → 산출물 검증[source 라벨·amount 카운트·nodes.json diff] → commit, 롤백=git revert 2파일) → 642 vs 132 확정 → 레버 A 졸업 이관(레버 C는 KILL) → Industry.edges() 컬럼/인자 + test_edges.py → **그 후** RightStack hop walk. + `build/insights.py` → `calcs/concentration.py` 승격(import re-point 동행).
 - **Phase C(경계 문서화 — 산식 이미 단일)**: 백분위 SSOT 경계 SKILL.md 박제(band 이원화=의도된 설계) + compare 범주오류 정정(compare.py percentile 0건 → 교차참조로만). "3분기 통일"·"post-06-15 재실측"은 ★실측 완료 — 단일 산식 확정([07 §구멍5](07-implementation-plan.md)).

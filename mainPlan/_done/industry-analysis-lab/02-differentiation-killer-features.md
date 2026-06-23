@@ -1,4 +1,4 @@
-# 02. 차별의 핵 — killer features
+﻿# 02. 차별의 핵 — killer features
 
 상태: 비전 PRD v0.2 (2026-06-14, 2차 대대적 조사·적대검증 반영)
 목적: ★이 PRD의 심장. 세계 제품이 답하지 못하는(또는 컨센서스/점유율 raw로만 답하는) 질문을 우리 자산으로 답하는 killer 3종. 각 가치 + 데이터 지원(file:line) + 가드레일.
@@ -14,13 +14,13 @@
 
 **세계 천장**: McKinsey/Bain은 이걸 컨설팅 deck으로 수작업한다. Bloomberg BI는 컨센서스로 추정한다. 회사별 사일로 제품(iTooza·Koyfin)은 *산업 전체를 한 격자로* 못 봐서 구조적으로 약하다.
 
-**우리 우위**: born-structured 격자. `buildIndustrySummary`([financials.py:303-313](../../src/dartlab/industry/build/financials.py#L303))가 이미 stage별 `매출(조)`·`영업이익(조)`·`기업수`를 group_by(stage)로 산출한다. profit-pool 격자 = 여기에 **stage 영업이익률(= 영업이익 합 / 매출 합, revenue-weighted)**과 **coverageRatio**를 파생으로 더해 2D(x=매출규모, y=영업이익률)로 그리는 것. 신규 fetch·계정·컨센서스 0.
+**우리 우위**: born-structured 격자. `buildIndustrySummary`([financials.py:303-313](../../../src/dartlab/industry/build/financials.py#L303))가 이미 stage별 `매출(조)`·`영업이익(조)`·`기업수`를 group_by(stage)로 산출한다. profit-pool 격자 = 여기에 **stage 영업이익률(= 영업이익 합 / 매출 합, revenue-weighted)**과 **coverageRatio**를 파생으로 더해 2D(x=매출규모, y=영업이익률)로 그리는 것. 신규 fetch·계정·컨센서스 0.
 
 **학술 근거(prose만 — 정량 0)**: McKinsey Profit Pools(이익집중≠매출집중)에 더해 Slywotzky의 *Value Migration*(profit zone·"market share is dead")과 Christensen의 *이익 보존이동*(Conservation of Attractive Profits), BCG의 *Stack Fracturing/Deconstruction*(1998)이 born-structured 이익격자가 회사별 사일로 제품보다 우월한 이유의 학술 토대다. 단 이 인용은 *정적 통찰 강화*(SEO/AI 인용)용이며 **시간축 측정으로 끌면 [04 BLOCKED](04-data-readiness-kill-list.md)(migration) kill 회귀**.
 
 **데이터 지원**:
 - 엔진: `buildIndustrySummary` 출력에 `영업이익률(%)`(파생) + `coverageRatio`(opIncome 보유 노드 / 전체 노드) 2컬럼 추가. ★반환 첫 컬럼은 실명 `stage`(docstring `공정`은 오기 — 구현 시 KeyError 주의).
-- 퍼블릭: `/industry/[id]`가 fetch하는 `/map/industries/{id}.json`의 `stages[].nodes[]`가 이미 `revenue`(2561노드 100%) + `opMargin`(82.4%) 보유 → **브라우저에서 stage 롤업 = 신규 fetch 0**. 현재 페이지는 산업 평균 영업이익률 스칼라 1개만 렌더([+page.svelte](../../landing/src/routes/industry/%5Bid%5D/+page.svelte)) — 2D cross 부재.
+- 퍼블릭: `/industry/[id]`가 fetch하는 `/map/industries/{id}.json`의 `stages[].nodes[]`가 이미 `revenue`(2561노드 100%) + `opMargin`(82.4%) 보유 → **브라우저에서 stage 롤업 = 신규 fetch 0**. 현재 페이지는 산업 평균 영업이익률 스칼라 1개만 렌더([+page.svelte](../../../landing/src/routes/industry/%5Bid%5D/+page.svelte)) — 2D cross 부재.
 - 로컬: 같은 static JSON으로 CenterStack 인터랙티브 버블(호버=stage companyCount·coverageRatio).
 - ★dual-source SSOT: 엔진 파생(panel `opIncome.sum()/revenue.sum()`)과 브라우저 롤업(prebuild JSON per-node `revenue×opMargin` Σ/Σ, opMargin 82.4% 커버리지)은 소스·커버리지가 달라 같은 stage 마진이 갈릴 수 있다 → **엔진 파생=캐논, 브라우저=표시만**, coverageRatio 분모도 경로별 고정 + 불일치 회귀테스트(상세 [03 §4](03-architecture-and-reuse.md)).
 - ★집중도 3차원 인코딩 금지: "이익 큰 단계 = 집중/파편 단계인가"(Stack Fracturing)는 흥미롭지만 stage 버블에 집중도를 색/테두리 *3번째 차원*으로 얹는 것은 축 누적(가드레일 #4 위반) — 집중도는 Phase B/C의 라벨 뗀 CR4 evidence가 소유, Killer #1은 2D 유지.
@@ -39,7 +39,7 @@
 
 **세계 천장**: Bloomberg SPLC·Interos는 100k사 공급망을 *추정 알고리즘*으로 엮는다. 우리는 규모는 발끝에도 못 미치지만 **추정이 아니라 사업보고서 「주요 매출처/매입처」 본문 인용**이다 — 현대모비스→기아 91.4%, 현대글로비스→기아 96.9%가 그 예. ★단 이 ratio들은 `type=supplier`·`source=docs_table`, 즉 *공급사가 신고한 매출처 의존도*다(구매자 교섭력의 한 측면이지 customer 측 데이터가 아님). `type=customer` 엣지는 7건 전원 `ratio=None`이라 인용할 구매자측 ratio는 0건 — 우리가 답할 수 있는 건 "supplier 매출처 의존도"까지다.
 
-**우리 우위**: edges.json이 ratio(매출처 의존도%, 전부 type=supplier 19건)·amount를 confidence/source와 함께 보유. `IndustryEdge` 객체는 amount/ratio를 들고 있는데 **`Industry.edges()` DataFrame이 두 컬럼을 select에서 누락**([__init__.py:359-371](../../src/dartlab/industry/__init__.py#L359)) — 노출이 select 2줄 추가가 전부. 묻어둔 `computeHop2`([hop2.py:32](../../src/dartlab/industry/build/hop2.py#L32))·`calcSupplyInsights`([insights.py:201](../../src/dartlab/industry/build/insights.py#L201)) *함수*를 런타임 인자로 배선(★단 산업 분석 *능력* 자체는 orphan 아님 — `recipes.industry.supplyChainConcentration`가 이미 RunPython으로 HHI 교섭력을 답한다, [03 §5.1](03-architecture-and-reuse.md)). 중복 신설 금지.
+**우리 우위**: edges.json이 ratio(매출처 의존도%, 전부 type=supplier 19건)·amount를 confidence/source와 함께 보유. `IndustryEdge` 객체는 amount/ratio를 들고 있는데 **`Industry.edges()` DataFrame이 두 컬럼을 select에서 누락**([__init__.py:359-371](../../../src/dartlab/industry/__init__.py#L359)) — 노출이 select 2줄 추가가 전부. 묻어둔 `computeHop2`([hop2.py:32](../../../src/dartlab/industry/build/hop2.py#L32))·`calcSupplyInsights`([insights.py:201](../../../src/dartlab/industry/build/insights.py#L201)) *함수*를 런타임 인자로 배선(★단 산업 분석 *능력* 자체는 orphan 아님 — `recipes.industry.supplyChainConcentration`가 이미 RunPython으로 HHI 교섭력을 답한다, [03 §5.1](03-architecture-and-reuse.md)). 중복 신설 금지.
 
 **데이터 지원**:
 - 엔진: `Industry.edges()` DataFrame에 `의존도(%)`(ratio)·`거래액`(amount) 2컬럼 추가. `Industry().edges(hop=2, insights=True)` 인자 확장으로 hop2/다양성 노출(별 verb 금지). ★필드명: 디스크 edges.json은 `type`(supplier 3191·affiliate 12980·investor 2240·customer 7), in-memory `IndustryEdge`만 `edgeType`.
@@ -61,13 +61,13 @@
 
 **질문**: 이 회사가 산업 분포의 어디인가? (★백분위 정의는 "3갈래 분기"로 봤으나 실측상 이미 단일 산식 — 아래 문제 참조.)
 
-**문제**(★[07 §구멍5](07-implementation-plan.md) 정정): PRD는 산업 컨텍스트가 RightStack pctRank / compare / industryStats "3갈래 분기"라 봤으나 실측은 **단일 산식 + 모집단 파라미터화**다 — [engine.ts:179 `pctRank`](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L179)는 모집단 무관 순수함수이고 `industryPercentile`([:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))·`percentileIn`(:501) 둘 다 `buildFundMetrics→pctRank` 공유, industryStats는 band 표시용(순위 무참조). cross-universe-percentile(2026-06-15)이 이미 깐 구조다. 따라서 Phase C는 "3갈래 통일"이 아니라 **경계 문서화·compare 범주오류 정정·marketShare 사유 교정**으로 재프레임된다. ★`marketShare`(`점유율`)는 PRD/06-17 1차 정정이 "producer 전무 inert dead"라 했으나 **사실오류** — [buildIndustryMap.py:816/868](../../.github/scripts/prebuild/buildIndustryMap.py#L816)이 상장사 상대비중을 실생산해 ecosystem.json에 싣고, [localTerminalData.ts:348](../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)은 로컬 단일사에 `marketShare:100`을 날조한다. 즉 *상장사 상대비중을 "점유율"로 표기한 라벨 사칭(04 EXCLUDED·§3-8) + 로컬 100 날조*다(engine.ts에선 이미 제거됨). 제거 대상은 표시 컴포넌트([CenterStack.svelte:194/198](../../ui/packages/surfaces/src/terminal/panels/CenterStack.svelte#L194)·[ScreenerModal.svelte:42](../../ui/packages/surfaces/src/terminal/panels/ScreenerModal.svelte#L42))뿐, `EcoNode.marketShare` 필드(types.ts:120)는 landing map/compare 공유라 **보존**.
+**문제**(★[07 §구멍5](07-implementation-plan.md) 정정): PRD는 산업 컨텍스트가 RightStack pctRank / compare / industryStats "3갈래 분기"라 봤으나 실측은 **단일 산식 + 모집단 파라미터화**다 — [engine.ts:179 `pctRank`](../../../ui/packages/surfaces/src/terminal/lib/engine.ts#L179)는 모집단 무관 순수함수이고 `industryPercentile`([:492](../../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))·`percentileIn`(:501) 둘 다 `buildFundMetrics→pctRank` 공유, industryStats는 band 표시용(순위 무참조). cross-universe-percentile(2026-06-15)이 이미 깐 구조다. 따라서 Phase C는 "3갈래 통일"이 아니라 **경계 문서화·compare 범주오류 정정·marketShare 사유 교정**으로 재프레임된다. ★`marketShare`(`점유율`)는 PRD/06-17 1차 정정이 "producer 전무 inert dead"라 했으나 **사실오류** — [buildIndustryMap.py:816/868](../../../.github/scripts/prebuild/buildIndustryMap.py#L816)이 상장사 상대비중을 실생산해 ecosystem.json에 싣고, [localTerminalData.ts:348](../../../ui/web/src/features/terminalSvelte/localTerminalData.ts#L348)은 로컬 단일사에 `marketShare:100`을 날조한다. 즉 *상장사 상대비중을 "점유율"로 표기한 라벨 사칭(04 EXCLUDED·§3-8) + 로컬 100 날조*다(engine.ts에선 이미 제거됨). 제거 대상은 표시 컴포넌트([CenterStack.svelte:194/198](../../../ui/packages/surfaces/src/terminal/panels/CenterStack.svelte#L194)·[ScreenerModal.svelte:42](../../../ui/packages/surfaces/src/terminal/panels/ScreenerModal.svelte#L42))뿐, `EcoNode.marketShare` 필드(types.ts:120)는 landing map/compare 공유라 **보존**.
 
-**우리 우위**: industryStats.json이 34산업 roe/opMargin/revCagr 각각 p10/p25/median/p75/p90/mean/std/n 분포를 이미 보유(monotone 확인). `/industry/[id]`의 [+page.ts](../../landing/src/routes/industry/%5Bid%5D/+page.ts)가 이미 fetch하나 avgRoe/avgOpMargin/avgCagr만 렌더 — 분포 미사용. **신규 분포 계산 0, 표시층 통일.**
+**우리 우위**: industryStats.json이 34산업 roe/opMargin/revCagr 각각 p10/p25/median/p75/p90/mean/std/n 분포를 이미 보유(monotone 확인). `/industry/[id]`의 [+page.ts](../../../landing/src/routes/industry/%5Bid%5D/+page.ts)가 이미 fetch하나 avgRoe/avgOpMargin/avgCagr만 렌더 — 분포 미사용. **신규 분포 계산 0, 표시층 통일.**
 
 **데이터 지원**:
 - 퍼블릭: 회사값을 industryStats p10~p90 밴드 위 마커로(읽기). compare로 funnel 링크.
-- 로컬: engine.ts industryPercentile([engine.ts:492](../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))를 industryStats 분포로 통일(또는 정의 일치) + `점유율`(marketShare) 전 소비처 재라벨(→'상장사매출비중', 키 보존)·로컬 100 날조 값 제거([07 §구멍5](07-implementation-plan.md)).
+- 로컬: engine.ts industryPercentile([engine.ts:492](../../../ui/packages/surfaces/src/terminal/lib/engine.ts#L492))를 industryStats 분포로 통일(또는 정의 일치) + `점유율`(marketShare) 전 소비처 재라벨(→'상장사매출비중', 키 보존)·로컬 100 날조 값 제거([07 §구멍5](07-implementation-plan.md)).
 
 **가드레일 (4선결)**:
 1. **percentile band만** — mean±std 박스 금지(std가 roe 86.44·opMargin 34.71 heavy outlier까지 = fake precision). mean 마커도 밴드 밖 자주 벗어나므로 percentile만.

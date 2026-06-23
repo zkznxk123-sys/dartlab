@@ -1,4 +1,4 @@
-# 05. 범위·단계·가드레일
+﻿# 05. 범위·단계·가드레일
 
 상태: 비전 PRD v0.2 (2026-06-14, 2차 대대적 조사·적대검증 반영)
 목적: 적대검증(skeptic PM lens)을 박제한다. MUST/SHOULD/WON'T 단두대, 선결조건순 Phase A→B→C, 성공지표·실패모드·단일 최대 리스크. (한계 표기 규칙 SSOT는 [04 §3](04-data-readiness-kill-list.md) — 본 §5는 *Phase 적용 가드* 고유분만.)
@@ -7,7 +7,7 @@
 
 ## 1. "안 해도 되는가" — steelman과 생존 조건
 
-**반론(steelman)**: industry 엔진은 이미 lifecycle·summary·edges·HHI·hop2를 다 가졌다. "강화"는 대부분 *이미 있는 걸 화면에 꺼내는 배선*이지 새 능력이 아니다. 한계 노력은 데이터가 진짜 빈약한 곳(세그먼트 2/10·가동률 미추출·익명 매출처)을 메우는 데 가야 한다. (★공급망 amount 0.7%는 "진짜 빈약"이 아니라 *추출 천장* — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md)로 제조업 한정 7.9x 상향 확인, 보강 ROI 있음.) profit-pool도 "셀 1줄 변환"으로 보이면 덕지덕지다.
+**반론(steelman)**: industry 엔진은 이미 lifecycle·summary·edges·HHI·hop2를 다 가졌다. "강화"는 대부분 *이미 있는 걸 화면에 꺼내는 배선*이지 새 능력이 아니다. 한계 노력은 데이터가 진짜 빈약한 곳(세그먼트 2/10·가동률 미추출·익명 매출처)을 메우는 데 가야 한다. (★공급망 amount 0.7%는 "진짜 빈약"이 아니라 *추출 천장* — [_attempts 레버A](../../../tests/_attempts/industryAnalysisLab/README.md)로 제조업 한정 7.9x 상향 확인, 보강 ROI 있음.) profit-pool도 "셀 1줄 변환"으로 보이면 덕지덕지다.
 
 **생존 조건**: 이 업그레이드는 *세계 메커니즘 매칭*이 아니라 **(a) 못 풀던 질문 1개를 답하거나 (b) 묻어둔 함수를 배선하거나 (c) 분기 통일·inert dead 정리를 하는 곳**에서만 산다.
 - (a) profit-pool 격자 = 회사별 사일로 제품이 구조적으로 못 푸는 "이익은 어느 단계가 버나". 신규 데이터 0이라 싸고, born-structured 격자라 우리만.
@@ -36,7 +36,7 @@
 3. **`marketShare` 표시 컬럼 선제 제거**(표시층 한정 CenterStack.svelte:194/198·ScreenerModal.svelte:42, `EcoNode.marketShare` 필드는 types.ts:120 보존 — landing map:236·compare:82 공유. engine.ts에선 이미 제거됨. Phase C 일부·단독 가치 — ★사유는 "producer 전무 청소"[사실오류]가 아니라 *라벨 사칭(buildIndustryMap.py:816/868 상장사 상대비중을 "점유율"로) + 로컬 marketShare:100 날조(localTerminalData.ts:348) 시정*, [07 §구멍5](07-implementation-plan.md)).
 
 ### SHOULD (MUST 후 — 데이터 천장 인지하고)
-4. **공급망 evidence(Phase B)**: `Industry.edges()` ratio/amount 2컬럼 + hop2/insights 인자 배선 + confidence/source 칩. edges.json 재빌드 선결. *천장은 "낮음"이 아니라 "제조업 한정·추출 보강 여지"* — [_attempts 레버A](../../tests/_attempts/industryAnalysisLab/README.md) 실측: amount 0.7%는 상장필터 드롭+취약헤더 인공물, buyer-centric 미드롭으로 amount 행 7.9x. 단 원재료 매입처 표 보유사 ~21%(제조업 편중)는 진짜 잔존천장.
+4. **공급망 evidence(Phase B)**: `Industry.edges()` ratio/amount 2컬럼 + hop2/insights 인자 배선 + confidence/source 칩. edges.json 재빌드 선결. *천장은 "낮음"이 아니라 "제조업 한정·추출 보강 여지"* — [_attempts 레버A](../../../tests/_attempts/industryAnalysisLab/README.md) 실측: amount 0.7%는 상장필터 드롭+취약헤더 인공물, buyer-centric 미드롭으로 amount 행 7.9x. 단 원재료 매입처 표 보유사 ~21%(제조업 편중)는 진짜 잔존천장.
 5. **백분위 경계(Phase C)**: industryStats 분포 밴드. SSOT 경계 문서화 선결. ★산식은 이미 단일(pctRank+모집단)이라 "통일" 작업은 대부분 문서. compare는 percentile 토큰 0건(셀 정렬)이라 백분위 항목서 분리 → fin-stmt-lab/compare 교차참조로만([07 §구멍5](07-implementation-plan.md)).
 6. **회사→산업 점프**: industryBadge/섹터필터 클릭이 산업뷰 띄움(`/map` 이탈 해소).
 
