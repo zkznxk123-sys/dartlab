@@ -16,15 +16,13 @@ fail 전환 예정 (2026-Q3).
     # warning 만 (default) — fail 차단 트리거 옵션
     uv run python -X utf8 tests/audit/testCoverageGate.py --diff origin/master --fail-on-missing
 
-예외 룰 (테스트 강제 안 함):
-    - _private (언더스코어 prefix)
-    - cli/main.py 진입점 (e2e 으로 간접 검증)
-    - server/api/* (HTTP 핸들러 — realData 간접)
-    - providers/*/openapi/* (네트워크 호출 — VCR 카세트 간접)
-    - viz/charts/*, viz/display/* (시각화 — snapshot 간접)
-    - mcp/* (외부 protocol — 별도 contract test)
-    - ai/audit/* (개발자 전용)
-    - __init__.py
+예외 원장 (debt-honesty P1-8 — 통째 carve-out → 명시 원장 + 점진 해제):
+    면제 prefix 는 ``_EXEMPT_PATH_PREFIXES`` 에 **[PERMANENT]/[REVIEW] 등급 + 간접 커버
+    메커니즘**과 함께 박제한다. PERMANENT(openapi=VCR · viz=snapshot · mcp=contract ·
+    ai/audit=dev) 는 직접 unit 대신 구조적 커버가 정본이라 해제 불필요. REVIEW(cli ·
+    server/api·web · channel · ai/providers)는 간접 커버 *주장* 이 미검증이라 점진 해제 후보 —
+    실제 e2e/realData/mock 존재를 확인하거나 unit 을 추가해 면제에서 뺀다. (통째 면제 = "회귀
+    가드 0" 오인 방지). ``_private`` · ``__init__.py`` · ``_reference/`` · ``_backup/`` 도 면제.
 """
 
 from __future__ import annotations
@@ -44,8 +42,24 @@ _REPO = Path(__file__).resolve().parents[2]
 _SRC = _REPO / "src" / "dartlab"
 _TESTS = _REPO / "tests"
 
-# 테스트 강제 안 하는 경로 prefix (relative to src/dartlab).
+# ── 면제 원장 (debt-honesty P1-8: 통째 carve-out → 명시 원장 + 점진 해제 계획) ──
+# 각 면제는 *간접 커버 메커니즘* 과 *영구/검토* 등급을 명시한다. 통째 면제는 "회귀 가드 0"
+# 으로 보일 수 있으나 대부분 다른 방식으로 커버된다 — 그 메커니즘을 박제해 검증 가능하게 한다.
+#
+# [PERMANENT] 직접 unit 대신 구조적 간접 커버가 정본 (해제 불필요):
+#   providers/*/openapi/  → VCR 카세트 (네트워크 호출)
+#   viz/charts·display·generators·plotly·network  → syrupy snapshot
+#   mcp/                  → 별도 contract test (tests/mcp/)
+#   ai/audit/             → 개발자 전용 tooling (제품 커버 불요)
+#   __init__.py / _reference/ / _backup/  → re-export·격리 (별도 _isExempt)
+#
+# [REVIEW] 간접 커버 주장이 미검증 — 점진 해제 후보 (실제 e2e/realData 존재 확인 또는 unit 추가):
+#   cli/*                 → e2e 간접 *주장* (tests/cli/ 실측 필요)
+#   server/api/·web.py    → realData 간접 *주장* (tests/server/ 실측 필요)
+#   channel/adapters·devtunnel  → 커버 메커니즘 불명 (우선 검토)
+#   ai/providers/         → 외부 모델 라우팅 (mock 커버 확인)
 _EXEMPT_PATH_PREFIXES = (
+    # [REVIEW]
     "cli/main.py",
     "cli/parser.py",
     "cli/rendering.py",
@@ -53,6 +67,10 @@ _EXEMPT_PATH_PREFIXES = (
     "cli/commands/",
     "server/api/",
     "server/web.py",
+    "channel/adapters/",
+    "channel/devtunnel.py",
+    "ai/providers/",
+    # [PERMANENT]
     "providers/dart/openapi/",
     "providers/edgar/openapi/",
     "providers/edinet/openapi/",
@@ -61,11 +79,8 @@ _EXEMPT_PATH_PREFIXES = (
     "viz/generators.py",
     "viz/plotly.py",
     "viz/network.py",
-    "channel/adapters/",
-    "channel/devtunnel.py",
     "mcp/",
     "ai/audit/",
-    "ai/providers/",
 )
 
 
