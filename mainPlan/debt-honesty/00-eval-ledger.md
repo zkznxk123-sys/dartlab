@@ -146,3 +146,26 @@ origin/master 대비 15 commit ahead인데 **동시 세션의 UI 커밋이 inter
 - **P2 유령 제거 전부 = 운영자 제품결정 게이트**: edinet 동결격리 · ui/web 운명(폐기 vs 이관) · ai.persistence(부활 vs 박제) · 죽은 MCP 6종 · agent.json 물리 dedup · orphan baseline · flakyAudit 폐기 · README_EN 동기화 · 빌드후미배선 ~6-8K LOC 배선/회수. *모두 공개표면 또는 사상 결정 동반이라 단독 실행 부적합.*
 - **P3 god 분해 = 트랙 박제(이미 PRD/architecture.md에 순서·추적가드 명문)·실행은 기존 루프 위임.** P3-3 builders.py 첫 증명 1건만 본 PRD "do" 대상 — 별도 안전 구간에서 진행.
 - **P1-8A·P1-5 정밀분모**: 위 5.4 사유로 보류/별도.
+
+### 5.7 P2 진행 (운영자 "끝까지 완성" 지시 → PRD 권고 기본값 실행) — 7/10 완료
+
+| 항목 | 처리 | commit |
+|---|---|---|
+| P2-3 SSOT 정정 | reference_financial_graph_ssot 메모리+인덱스를 라이브 MiniFinChart(`ui/packages/surfaces/src/terminal/charts/`)로 정정, ui/web·ui/shared·charts.ts=죽은경로 명시 (operator-private라 미커밋) | — |
+| P2-4 ai.persistence | storyValidation·publisher 죽은 import 2 silent no-op 제거(L2/L3→L4 역방향이라 부활도 위반) | `22bb5f616` |
+| P2-6 ask_kernel_status | SD-2 leak 제거(12-tuple·5-pass GRAPH_NODES 노출 차단)+상수 폐기 | `d7faf190c` |
+| P2-7 orphan baseline | aiKpiV1·importLinterExceptions 삭제(소비도구0) | `f4c20689b` |
+| P2-8 flakyAudit | dead placeholder 삭제 + flaky SSOT(conftest rerun) 명문화 | `f4c20689b` |
+| P2-9 README_EN | Terminal·Skill OS 영문 섹션 추가(2 기능 갭), '5누락'=구조차이 정정 | `645da56b6` |
+| P2-5 죽은 MCP 6종 | **판정: 제거 부적합** | (코드변경 없음) |
+
+**P2 추가 ground-truth 정정**(census가 또 부정확):
+- **P2-5**: "죽은 MCP 6종 잔재=제거"는 거짓 — 6종은 상호연결된 *내부 recipe/workbench 서브시스템*(ListEngineGaps↔ProposeRecipe↔ValidateRecipe + ai/recipes/ 4모듈·server.py·validate 사용·InspectDataset=work.py). "노출 0"은 *의도된 internal-only*. 진짜 문제(leak)는 P2-6에서 차단 → 제거 안 함.
+- **P2-10 (미배선 6-8K)**: "importer 0 → 삭제 안전"이 **부정확** — (a) `quant/portfolio`(blackLitterman·meanCVaR)는 P0-9 recipe가 가리키는 *사용자-호출 라이브러리 능력*(삭제 시 catalog recipe 깨짐) (b) `plugins`는 import-linter 실측 `company→plugins→ai.tools` *라이브 체인*(PRD "채택 0" 거짓) (c) `server/api 죽은라우터`는 ui/web(FE-1)과 연쇄. → **per-bundle "internal-dead vs 사용자능력" 판정 필수**, 블랜킷 삭제 시 공개능력 회귀.
+
+### 5.8 미완 (운영자 제품결정 / calm-tree 필요 — 블랜킷 실행 시 회귀위험)
+- **P2-1 edinet 동결** = 10+ 가드 파일 조율 수술(`__all__`·providerSymmetry`_EDINET_DEFERRED`·folderMirror 디렉터리기대·folderSize/testCoverage/providerContract baseline). PRD §8 자체가 "4 게이트 걸침" 위험 명시. 동시 churn 중 무리하면 blocking 파리티게이트 회귀. (edinet 소비처는 0 확인 — 동결 자체는 타당, 단 조율이 calm-tree 필요)
+- **P2-2 ui/web**(155파일 17K LOC) = UI 삭제(push 승인 필수) + viz-bento 폐기/이관 *제품결정*.
+- **P2-10 미배선** = 위 5.7 per-bundle 능력판정(공개능력 삭제 위험).
+- **P3 god-split** = builders.py 6,111줄 등 위임 트랙(첫 증명도 큰 refactor·calm-tree).
+- **push** = origin 대비 동시 세션 UI 커밋 interleave로 브랜치 전체 push 불가(운영자 UI 승인 대기).
