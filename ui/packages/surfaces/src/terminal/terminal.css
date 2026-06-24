@@ -851,7 +851,7 @@
 /* FINANCIALS */
 .dlTerm .finCtl { display: flex; gap: 0; border: 1px solid var(--bd); border-radius: 2px; overflow: hidden; }
 .dlTerm .finTabs { display: flex; border-bottom: 1px solid var(--bd); }
-.dlTerm .finTab { flex: 1; background: var(--panel2); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10.5px; letter-spacing: 0.5px; border: none; border-right: 1px solid var(--bd); padding: 5px 4px; cursor: pointer; }
+.dlTerm .finTab { flex: 1; background: var(--panel2); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10.5px; letter-spacing: 0.5px; line-height: 1.2; border: none; border-right: 1px solid var(--bd); padding: 2px 4px; cursor: pointer; }
 .dlTerm .finTab:last-child { border-right: none; }
 /* 선택 버튼 = 솔리드 핑크 채움 단일 언어(.seg.on 과 동일) — 탭/토글이 한 헤더에 섞여도 일관. */
 .dlTerm .finTab.on { background: var(--amber); color: var(--onAccent); font-weight: 700; }
