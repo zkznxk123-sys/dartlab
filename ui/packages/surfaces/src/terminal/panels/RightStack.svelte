@@ -496,7 +496,7 @@
 </script>
 
 <!-- RISK FLAGS — 글랜스는 점등(red/yellow)만. 헤더 '상세보기' → 점검 차원 전체 카탈로그·조건·현상태 다이얼로그. -->
-<Panel {lang} className="eCredit" prov="real" title={{ kr: '리스크 경고등', en: 'RISK FLAGS' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }}>
+<Panel {lang} className="eCredit" prov="real" title={{ kr: '리스크 경고등', en: 'RISK FLAGS' }}>
 	{#snippet right()}<span><b class="tDn">{risks.filter((r) => r.lv === 'red').length}</b> <b class="tWarn">{risks.filter((r) => r.lv === 'yellow').length}</b></span><button class="finFullBtn" onclick={() => (riskDlgOpen = true)} title={lang === 'en' ? 'what each light checks — conditions & this company' : '각 경고등이 점검하는 조건 · 이 회사 현상태'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 	<div class="riskWrap">
 		{#each risks as r, i (i)}
@@ -514,7 +514,7 @@
 
 <!-- 포렌식 적신호 — 풀스크린 재무탭에 묻힌 결정론 위험지표(감사독립성·단기상환벽) 승격. 임계 초과만 표시(정상=무표시). -->
 {#if forensic.length}
-	<Panel {lang} className="eCredit" prov="real" title={{ kr: '포렌식 적신호', en: 'FORENSIC FLAGS' }} sub={{ kr: '감사·부채 기준 · report', en: 'audit·debt · report' }} flush>
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: '포렌식 적신호', en: 'FORENSIC FLAGS' }} sub={{ kr: '감사·부채 기준', en: 'audit·debt' }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => (tablesOpen = true)} title={lang === 'en' ? 'open financials fullscreen' : '재무 전체화면에서 상세 보기'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		<div class="riskWrap">
 			{#each forensic as f (f.id)}
@@ -585,7 +585,7 @@
 {/if}
 
 <!-- FINANCIALS -->
-<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: 'c.panel · ' + finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · ' + finUnit, en: 'c.panel · ' + finMode + ' · ' + finView.periods.length + 'p' } : { kr: 'c.panel', en: 'c.panel' }} flush>
+<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표', en: 'FINANCIAL STATEMENTS' }} sub={finView ? { kr: finModeLabel[finMode] + ' · ' + finView.periods.length + '기 · ' + finUnit, en: finMode + ' · ' + finView.periods.length + 'p' } : undefined} flush>
 	{#snippet right()}
 		{#if finBundle && finBundle.availScopes.length > 1}
 			<span class="segGroup mini">{#each finBundle.availScopes as s (s)}<button class={finBundle.scope === s ? 'seg on' : 'seg'} onclick={() => (finScope = s)} title={s === 'CFS' ? (lang === 'en' ? 'consolidated' : '연결재무제표') : (lang === 'en' ? 'separate' : '별도재무제표')}>{finScopeLabel(s)}</button>{/each}</span>
@@ -614,7 +614,7 @@
 </Panel>
 
 <!-- DART 정기보고서 팩트 (배당·자사주·임원·감사·대주주·회사채 — report parquet) -->
-<Panel {lang} className="eCredit" prov="real" title={{ kr: 'DART 정기보고서 팩트', en: 'DART REPORT FACTS' }} sub={{ kr: 'report · 공시원문', en: 'report · filings' }} flush>
+<Panel {lang} className="eCredit" prov="real" title={{ kr: 'DART 정기보고서 팩트', en: 'DART REPORT FACTS' }} flush>
 	{#snippet right()}<span class="dim">{factsState === 'ready' ? reportFacts.length : ''}</span>{/snippet}
 	{#if factsState === 'ready'}
 		{#if dossier}
@@ -649,7 +649,7 @@
 
 <!-- 인력 · 생산성 (정기보고서 임직원 현황 — 인원·급여·근속·1인당매출) -->
 {#if wfLast}
-	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '인력 · 생산성', en: 'WORKFORCE' }} sub={{ kr: 'report · 임직원 ' + wfLast.year, en: 'report · ' + wfLast.year }} flush>
+	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '인력 · 생산성', en: 'WORKFORCE' }} sub={{ kr: wfLast.year, en: wfLast.year }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => requestFinFull('people')} title={lang === 'en' ? 'workforce & pay timeseries (fullscreen PEOPLE tab)' : '인력·보수 시계열 — 전체화면 인력 탭'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		<!-- 자기이력 1줄 — 스냅샷 격자가 못 보여주는 시간축(총원 궤적·계약직 비중 이동). 판정·형용사 0·명시 기간 라벨. -->
 		{#if wfTrend && (wfTrend.headPct != null || (wfTrend.contractFromPct != null && wfTrend.contractToPct != null && Math.abs(wfTrend.contractToPct - wfTrend.contractFromPct) >= 1))}
@@ -675,7 +675,7 @@
 
 <!-- 주주환원 (배당 + 자사주 — 정기보고서) -->
 {#if srLast}
-	<Panel {lang} className="eValuation" prov="real" title={{ kr: '주주환원', en: 'SHAREHOLDER RETURN' }} sub={{ kr: 'report · 배당 ' + srLast.year + ' · 보통주', en: 'report · ' + srLast.year + ' · common' }} flush>
+	<Panel {lang} className="eValuation" prov="real" title={{ kr: '주주환원', en: 'SHAREHOLDER RETURN' }} sub={{ kr: srLast.year, en: srLast.year }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => requestFinFull('shareholder')} title={lang === 'en' ? 'shareholder return & ownership timeseries (fullscreen RETURN tab)' : '주주환원·소유 시계열 — 전체화면 주주환원 탭'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		<!-- 환원 자기이력 1줄 — 연속 배당 연수·배당성향 이동·소각(appears-when-clean). 흐름막대는 상세보기(center, 그래프 합법). -->
 		{#if retTrend && (retTrend.streak >= 2 || (retTrend.payoutFromPct != null && retTrend.payoutToPct != null) || retTrend.cancelQty != null)}
@@ -704,7 +704,7 @@
 
 <!-- 타법인 출자 (자회사·투자 — 장부가액 상위) -->
 {#if inv && inv.rows.length}
-	<Panel {lang} className="eCredit" prov="real" title={{ kr: '타법인 출자', en: 'HOLDINGS' }} sub={{ kr: 'report · ' + inv.year + ' · 장부가순', en: 'report · ' + inv.year + ' · by book value' }} flush>
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: '타법인 출자', en: 'HOLDINGS' }} sub={{ kr: inv.year, en: inv.year }} flush>
 		{#snippet right()}<span class="dim">{(inv?.rows.length ?? 0) + (inv?.moreCount ?? 0)}{lang === 'en' ? '' : '개사'}</span><button class="finFullBtn" onclick={() => (holdingsOpen = true)} title={lang === 'en' ? 'Relationship analysis (fullscreen)' : '출자 관계 분석 — 전체화면'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		{#if (invLoss && invLoss.lossCount > 0 && invLoss.lossPct != null) || (ctrlShift && ((ctrlShift.fromPct != null && ctrlShift.toPct != null) || ctrlShift.newNamed > 0))}
 			<div class="secSentBox">
@@ -751,7 +751,7 @@
 
 <!-- 정기보고서 주석 — panel 파케 본문 그 자리 렌더(관계기업·종속기업 투자·특수관계자 거래·우발부채·약정·담보).
      ↗링크가 아닌 *실제 주석 내용*을 우측 패널에 표면화(PRD 00 §26). 지연 로드: '본문 보기' 클릭 시에만 read. -->
-<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={{ kr: 'panel · 관계기업·특수관계자·우발부채', en: 'panel · affiliates·related·contingency' }} flush>
+<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={{ kr: '관계기업·특수관계자·우발부채', en: 'affiliates·related·contingency' }} flush>
 	{#if !notesOpen}
 		<button class="noteOpenBtn" onclick={openNotes}>{lang === 'en' ? '▾ show note text in place (affiliates · related-party · contingencies)' : '▾ 주석 본문 그 자리에서 보기 (관계기업·특수관계자·우발부채·담보)'}</button>
 	{:else if notesState === 'loading'}
@@ -785,7 +785,7 @@
 
 <!-- 공급망 (dartlab 고유 — 공급사·고객사 제품·매출비중) -->
 {#if relations && (relations.suppliers.length || relations.customers.length)}
-	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '공급망 · 거래선', en: 'SUPPLY CHAIN' }} sub={{ kr: 'map · ego ' + relations.neighborCount, en: 'ego n=' + relations.neighborCount }} flush>
+	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '공급망 · 거래선', en: 'SUPPLY CHAIN' }} flush>
 		<div class="scWrap">
 			<div class="scCol">
 				<div class="scHd tUp">▼ {lang === 'en' ? 'SUPPLIERS' : '공급사'}</div>
@@ -811,14 +811,14 @@
 
 <div class="rowSplit">
 	<!-- CREDIT -->
-	<Panel {lang} className="eCredit" prov="derived" title={{ kr: 'dartlab 신용 스코어', en: 'dartlab CREDIT' }} sub={{ kr: '비공식 · 자체 피처', en: 'unofficial · own features' }} flush>
+	<Panel {lang} className="eCredit" prov="derived" title={{ kr: 'dartlab 신용 스코어', en: 'dartlab CREDIT' }} sub={{ kr: '비공식', en: 'unofficial' }} flush>
 		{#snippet right()}<span class="dim">{lang === 'en' ? '5-feature' : '5피처'}</span>{/snippet}
 		<div class="creditTop"><div class="creditGrade"><span class="cgVal tCredit">{cr.grade}</span><span class="cgSub">{lang === 'en' ? 'health' : '건전도'} <b class={toneClass(cr.tone)}>{cr.healthScore}</b>/100 · PD <b class="tNeu">{cr.pd}</b></span></div></div>
 		<div class="creditTracks">{#each cr.tracks as t (t.en)}<div class="ctRow"><span class="ctName">{txc(t, lang)}</span><div class="ctTrack"><div class="ctFill" style={`width:${t.score}%`}></div></div><span class="ctVal mono">{t.score}</span></div>{/each}</div>
 		<div class="creditDiv">{lang === 'en' ? `From finance.json: debt ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, current ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. Heuristic dCR — not official.` : `finance.json 기반: 부채비율 ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, 유동비율 ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. 휴리스틱 dCR — 공식등급 아님.`}</div>
 	</Panel>
 	<!-- CHANGES -->
-	<Panel {lang} className="eChanges" prov="derived" title={{ kr: '전년 대비 변화', en: 'YoY CHANGES' }} sub={{ kr: 'finance Δ', en: 'finance Δ' }} flush>
+	<Panel {lang} className="eChanges" prov="derived" title={{ kr: '전년 대비 변화', en: 'YoY CHANGES' }} flush>
 		<div class="chgList">
 			{#each ch as c (c.en)}
 				{@const has = c.v != null}
@@ -837,7 +837,7 @@
 
 <!-- 공시 목록 — 정기 ‖ 비정기(allFilings) 2분할. data-fdate = 주가차트 공시 dot 클릭 시 스크롤·하이라이트 대상 키(YYYYMMDD). -->
 <div class="rowSplit" bind:this={filingWrap}>
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} sub={{ kr: 'panel · 보고서', en: 'reports' }} flush>
+	<Panel {lang} className="eChanges" prov="real" title={{ kr: '정기공시', en: 'REGULAR' }} flush>
 		{#snippet right()}<button class="finFullBtn" onclick={() => (viewerOpen = true)} title="공시뷰어 전체화면 — 터미널 안에서 열기">{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 		{#if regFilings.length}
 			<div class="filingList">
@@ -854,7 +854,7 @@
 			<div class="storyEmpty">{lang === 'en' ? 'no regular filings' : '정기공시 없음'}</div>
 		{/if}
 	</Panel>
-	<Panel {lang} className="eChanges" prov="real" title={{ kr: '비정기공시', en: 'OTHER FILINGS' }} sub={{ kr: 'allFilings · 수시', en: 'allFilings' }} flush>
+	<Panel {lang} className="eChanges" prov="real" title={{ kr: '비정기공시', en: 'OTHER FILINGS' }} sub={{ kr: '수시', en: 'ad-hoc' }} flush>
 		{#snippet right()}<span class="dim">{nonRegState === 'ready' ? nonRegFilings.length : ''}</span>{/snippet}
 		{#if nonRegState === 'ready'}
 			<div class="filingList">
@@ -889,7 +889,7 @@
 	{/each}
 {/snippet}
 <div class={gdeltNews.length ? 'rowSplit' : ''} bind:this={newsWrap}>
-	<Panel {lang} className="eChanges" prov="real" title={gdeltNews.length ? { kr: '네이버', en: 'NAVER' } : { kr: '종목 뉴스', en: 'NEWS' }} sub={{ kr: 'naver · 제목+요약', en: 'naver · title+snippet' }} flush>
+	<Panel {lang} className="eChanges" prov="real" title={gdeltNews.length ? { kr: '네이버', en: 'NAVER' } : { kr: '종목 뉴스', en: 'NEWS' }} flush>
 		{#snippet right()}<span class="dim">{newsState === 'ready' ? naverNews.length : ''}</span>{/snippet}
 		{#if newsState === 'loading'}
 			<div class="storyEmpty">{lang === 'en' ? 'loading news …' : '뉴스 불러오는 중 …'}</div>
@@ -900,7 +900,7 @@
 		{/if}
 	</Panel>
 	{#if gdeltNews.length}
-		<Panel {lang} className="eChanges" prov="real" title={{ kr: 'GDELT', en: 'GDELT' }} sub={{ kr: 'DOC · 제목+링크', en: 'DOC · title+link' }} flush>
+		<Panel {lang} className="eChanges" prov="real" title={{ kr: 'GDELT', en: 'GDELT' }} flush>
 			{#snippet right()}<span class="dim">{gdeltNews.length}</span>{/snippet}
 			<div class="filingList newsList">{@render newsCol(gdeltByDate)}</div>
 		</Panel>
@@ -909,7 +909,7 @@
 
 <div class="rowSplit">
 	<!-- PEERS -->
-	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '동종업종', en: 'INDUSTRY PEERS' }} sub={{ kr: 'industry:peers', en: 'peers' }} flush>
+	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '동종업종', en: 'INDUSTRY PEERS' }} flush>
 		{#snippet right()}<a class="lensScan" href="{base}/map?focus={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'industry map — full ecosystem view' : '산업지도 — 업종 생태계 전체 보기'}>{lang === 'en' ? 'map ↗' : '맵 ↗'}</a>{/snippet}
 		<div class="peerList">
 			{#each peers as p (p.code)}
@@ -924,7 +924,7 @@
 		</div>
 	</Panel>
 	<!-- GOVERNANCE -->
-	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '거버넌스 · 현금흐름', en: 'GOVERNANCE' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
+	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '거버넌스 · 현금흐름', en: 'GOVERNANCE' }} flush>
 		{#if e.cfPattern}<div class="patBig"><div class="pv">{e.cfPattern}</div><div class="ps">{lang === 'en' ? 'cash-flow pattern' : '현금흐름 패턴'}{e.empCount != null ? ' · ' + e.empCount.toLocaleString() + (lang === 'en' ? ' emp' : '명') : ''}</div></div>{/if}
 		<div class="govGrid">{#each govCells as c (c.l)}<div class="govCell"><span>{c.l}</span><b class={tcls(c.t)}>{c.v}</b></div>{/each}</div>
 		<div class="cfRow">
@@ -942,7 +942,7 @@
 
 <div class="rowSplit">
 	<!-- STORY -->
-	<Panel {lang} className="eCredit" prov="real" title={{ kr: 'DART · 스토리', en: 'DART · STORY' }} sub={{ kr: 'story · 공시', en: 'filings' }} flush>
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: 'DART · 스토리', en: 'DART · STORY' }} flush>
 		{#if s}
 			<div class="storyCard"><span class="storyTag">DARTLAB STORY</span><div class="storyTitle">{s.title}</div><div class="storyMeta">{s.date} · {s.readTime ?? ''} · <a class="storyLink" href="{base}/blog/{s.slug}" target="_blank" rel="noopener">read ↗</a></div></div>
 		{:else}
@@ -951,7 +951,7 @@
 		<div class="storyCard" style="border-top:1px solid var(--bd)"><div class="storyMeta">{lang === "en" ? "Company homepage" : "회사 홈페이지"}</div>{#if homepage}<a class="storyLink" href={homepage} target="_blank" rel="noopener noreferrer" style="font-family:var(--mono);font-size:10px">{homepageHost} ↗</a>{:else}<span class="storyLink" style="font-family:var(--mono);font-size:10px;color:var(--dimmer)">{lang === "en" ? "n/a" : "홈페이지 정보 없음"}</span>{/if}</div>
 	</Panel>
 	<!-- SUMMARY (derived, 정직: 가짜 tool-call 제거) -->
-	<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: 'dartlab 요약', en: 'DARTLAB SUMMARY' }} sub={{ kr: 'derived', en: 'derived' }} flush>
+	<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: 'dartlab 요약', en: 'DARTLAB SUMMARY' }} flush>
 		{#snippet right()}<span class="conf">CONF <b class={conf === 'HIGH' ? 'tUp' : 'tWarn'}>{conf}</b></span>{/snippet}
 		<div class="aiQ">▸ {lang === 'en' ? `${co.name.kr} financial health` : `${co.name.kr} 재무건전성`}</div>
 		<div class="aiSteps">
