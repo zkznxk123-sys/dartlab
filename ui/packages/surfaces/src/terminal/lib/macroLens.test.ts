@@ -6,6 +6,8 @@ import {
 	agreementOf,
 	bucketOf,
 	buildExposureMatrixRows,
+	buildMacroEvidenceCards,
+	MACRO_EVIDENCE_SPECS,
 	buildMacroGlanceView,
 	buildMacroLensSnapshot,
 	buildMacroPath,
@@ -743,5 +745,61 @@ describe('macro regime view-model — buildRegimeView (US confluence, KR asymmet
 		const withRegime = buildMarketMacroLensSnapshot({ macro: macroWithRegime(), macroLatest: macroLatest(), sectorTailwinds: sectorTailwinds() });
 		expect(withRegime.regime!.available).toBe(true);
 		expect(withRegime.regime!.us!.tiles).toHaveLength(4);
+	});
+});
+
+describe('buildMacroEvidenceCards', () => {
+	// 합성 시리즈 — 빌더는 순수(now 미사용)라 endYm 을 데이터 최신월에서 유도. d 오름차순.
+	const monthly = (startYm: string, count: number): { d: string; v: number }[] =>
+		Array.from({ length: count }, (_, i) => {
+			let y = Number(startYm.slice(0, 4));
+			let m = Number(startYm.slice(4, 6)) + i;
+			y += Math.floor((m - 1) / 12);
+			m = ((m - 1) % 12) + 1;
+			return { d: `${y}${String(m).padStart(2, '0')}15`, v: i };
+		});
+
+	it('정렬 — 다중 cadence 입력이 동일 길이·오름차순 periods 산출', () => {
+		const out = buildMacroEvidenceCards('US', {
+			INDPRO: monthly('202001', 60),
+			PAYEMS: [{ d: '20230101', v: 1 }, { d: '20240601', v: 2 }] // 희소
+		}, 'kr');
+		expect(out.periods).toHaveLength(48);
+		for (const card of out.cards) for (const s of card.series) expect(s.data).toHaveLength(48);
+		expect(out.periods[0]).toMatch(/^\d{2}\.\d{2}$/);
+		expect(out.periods[47] > out.periods[0]).toBe(true);
+	});
+
+	it('결측 시리즈 제외 — 데이터 있는 시리즈만 카드에 포함', () => {
+		const out = buildMacroEvidenceCards('US', { INDPRO: monthly('202201', 30) }, 'kr');
+		const growth = out.cards.find((c) => c.key === 'usGrowth');
+		expect(growth).toBeDefined();
+		expect(growth!.series.map((s) => s.name)).toEqual(['산업생산 YoY']); // PAYEMS 미주입 → 제외
+		expect(out.cards.find((c) => c.key === 'usInflation')).toBeUndefined(); // 데이터 0 카드 미생성
+	});
+
+	it('빈 seriesMap → cards=[] · periods=[]', () => {
+		const out = buildMacroEvidenceCards('US', {}, 'kr');
+		expect(out.cards).toEqual([]);
+		expect(out.periods).toEqual([]);
+	});
+
+	it('dual-axis spec 보존 — 우축 series 의 axis=r 유지·좌축 미지정', () => {
+		const out = buildMacroEvidenceCards('US', {
+			T10Y2Y: monthly('202201', 30),
+			BAMLH0A0HYM2: monthly('202201', 30),
+			VIXCLS: monthly('202201', 30)
+		}, 'kr');
+		const fin = out.cards.find((c) => c.key === 'usFinancial');
+		expect(fin).toBeDefined();
+		expect(fin!.series.find((s) => s.name.startsWith('VIX'))!.axis).toBe('r');
+		expect(fin!.series.find((s) => s.name.includes('장단기'))!.axis).toBeUndefined();
+	});
+
+	it('스펙 seriesId 는 전부 MACRO_SERIES 화이트리스트 실재', () => {
+		const known = new Set(MACRO_SERIES.map((s) => s.id));
+		for (const market of ['KR', 'US'] as const)
+			for (const spec of MACRO_EVIDENCE_SPECS[market])
+				for (const s of spec.series) expect(known.has(s.id)).toBe(true);
 	});
 });

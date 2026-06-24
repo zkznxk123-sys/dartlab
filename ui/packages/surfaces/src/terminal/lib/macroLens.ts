@@ -1,4 +1,4 @@
-import { MACRO_SERIES, type MacroLatest, type MacroSeriesDef } from '@dartlab/ui-contracts';
+import { MACRO_SERIES, type MacroLatest, type MacroSeriesDef, type FinCard, type FinSeries, type Num, type MacroPoint } from '@dartlab/ui-contracts';
 import type { CoMover } from './coMovement';
 import type { Company, Lang, MacroExposureIndicatorPayload, MacroExposureQualityPayload, MacroFile, MacroRegimeModel, MacroRegimePayload, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
 import { EDGE_SECTOR_TO_TAILWIND, CURRENT_MACRO_EDGE_SECTOR_KEYS, classifyTailwind, hasNegativeTailwind } from './macroMappings';
@@ -2618,4 +2618,134 @@ export function buildRegimeView(
 		kr: regime.kr ? buildKrLens(regime.kr, macro?.kr, krAlignment) : null,
 		us: regime.us ? buildUsLens(regime.us, macro?.us, usAlignment) : null
 	};
+}
+
+// ───────────────────────── 거시 국면 — 근거지표 고밀도 차트 (MacroRegimeDialog 전용) ─────────────────────────
+// 좌측 「거시 국면」 다이얼로그가 보여주는 테마별 복합차트(성장/물가/금리/금융조건) 스펙 + 빌더.
+// 데이터는 rt.macro.getSeries(macro/{src}/observations.parquet) 라이브 — 백엔드·HF 무변경. MiniFinChart(FinCard) SSOT 렌더.
+// 순수함수: end month 를 데이터에서 유도(now 미사용) → 결정론·단위테스트 가능.
+
+interface MacroChartSeriesSpec {
+	id: string; // MACRO_SERIES seriesId
+	nameKr: string;
+	nameEn: string;
+	color: string;
+	type: 'bar' | 'line';
+	axis?: 'r';
+}
+interface MacroChartSpec {
+	key: string;
+	titleKr: string;
+	titleEn: string;
+	unit: string; // 좌축 단위 라벨 (동질 유지 — 우축 series 는 자체 스케일·범례에 '(우)' 표기)
+	series: MacroChartSeriesSpec[];
+}
+
+/** 근거지표 차트 스펙 — 시장별 4 테마. seriesId 는 전부 contracts MACRO_SERIES 화이트리스트 실재. */
+export const MACRO_EVIDENCE_SPECS: Record<'KR' | 'US', MacroChartSpec[]> = {
+	US: [
+		{ key: 'usGrowth', titleKr: '성장 — 산업생산·고용', titleEn: 'Growth — IP & payrolls', unit: '%', series: [
+			{ id: 'INDPRO', nameKr: '산업생산 YoY', nameEn: 'IP YoY', color: '#5b9bf0', type: 'line' },
+			{ id: 'PAYEMS', nameKr: '고용 YoY', nameEn: 'Payrolls YoY', color: '#34d399', type: 'line' }
+		] },
+		{ key: 'usInflation', titleKr: '물가 — CPI·근원·PCE', titleEn: 'Inflation — CPI/core/PCE', unit: '%', series: [
+			{ id: 'CPIAUCSL', nameKr: 'CPI YoY', nameEn: 'CPI YoY', color: '#f0616f', type: 'line' },
+			{ id: 'CPILFESL', nameKr: '근원 CPI', nameEn: 'Core CPI', color: '#fbbf24', type: 'line' },
+			{ id: 'PCEPI', nameKr: 'PCE YoY', nameEn: 'PCE YoY', color: '#a78bfa', type: 'line' }
+		] },
+		{ key: 'usRates', titleKr: '금리·정책 — 연준·2년·10년', titleEn: 'Rates & policy', unit: '%', series: [
+			{ id: 'FEDFUNDS', nameKr: '연준 기준금리', nameEn: 'Fed funds', color: '#f0616f', type: 'line' },
+			{ id: 'DGS2', nameKr: '2년', nameEn: '2Y', color: '#fbbf24', type: 'line' },
+			{ id: 'DGS10', nameKr: '10년', nameEn: '10Y', color: '#5b9bf0', type: 'line' }
+		] },
+		{ key: 'usFinancial', titleKr: '금융조건 — 커브·신용·변동성', titleEn: 'Financial — curve/credit/vol', unit: '%p', series: [
+			{ id: 'T10Y2Y', nameKr: '장단기차(10Y-2Y)', nameEn: '10Y-2Y', color: '#5b9bf0', type: 'bar' },
+			{ id: 'BAMLH0A0HYM2', nameKr: '하이일드 스프레드', nameEn: 'HY spread', color: '#f0616f', type: 'line' },
+			{ id: 'VIXCLS', nameKr: 'VIX(우)', nameEn: 'VIX (R)', color: '#a78bfa', type: 'line', axis: 'r' }
+		] }
+	],
+	KR: [
+		{ key: 'krGrowth', titleKr: '성장 — 산업생산·수출', titleEn: 'Growth — IP & exports', unit: '%', series: [
+			{ id: 'IPI', nameKr: '산업생산 YoY', nameEn: 'IP YoY', color: '#5b9bf0', type: 'line' },
+			{ id: 'EXPORT', nameKr: '수출 YoY', nameEn: 'Exports YoY', color: '#34d399', type: 'line' }
+		] },
+		{ key: 'krInflation', titleKr: '물가 — CPI·제조 PPI', titleEn: 'Inflation — CPI & mfg PPI', unit: '%', series: [
+			{ id: 'CPI', nameKr: '소비자물가 YoY', nameEn: 'CPI YoY', color: '#f0616f', type: 'line' },
+			{ id: 'PPI_MFG', nameKr: '제조업 PPI YoY', nameEn: 'Mfg PPI YoY', color: '#fbbf24', type: 'line' }
+		] },
+		{ key: 'krRates', titleKr: '금리·환율 — 기준금리·원달러', titleEn: 'Rate & FX', unit: '%', series: [
+			{ id: 'BASE_RATE', nameKr: '한은 기준금리', nameEn: 'BOK rate', color: '#f0616f', type: 'line' },
+			{ id: 'USDKRW', nameKr: '원/달러(우)', nameEn: 'USD/KRW (R)', color: '#5b9bf0', type: 'line', axis: 'r' }
+		] },
+		{ key: 'krSentiment', titleKr: '경기·심리 — 선행·소비', titleEn: 'Cycle & sentiment', unit: 'pt', series: [
+			{ id: 'CLI', nameKr: '경기선행지수', nameEn: 'CLI', color: '#5b9bf0', type: 'line' },
+			{ id: 'CSI', nameKr: '소비자심리', nameEn: 'Consumer sentiment', color: '#34d399', type: 'line' }
+		] }
+	]
+};
+
+const MACRO_EVIDENCE_MONTHS = 48;
+
+// 최신월(endYm) 기준 n 개월 월축 ('YYYYMM' 오름차순). now 미사용 — endYm 은 데이터에서 유도.
+function macroMonthsAxis(endYm: string, n: number): string[] {
+	let y = Number(endYm.slice(0, 4));
+	let m = Number(endYm.slice(4, 6));
+	const out: string[] = [];
+	for (let i = 0; i < n; i += 1) {
+		out.push(`${y}${String(m).padStart(2, '0')}`);
+		m -= 1;
+		if (m === 0) { m = 12; y -= 1; }
+	}
+	return out.reverse();
+}
+
+// 월축 정렬 — 각 월에 해당 월 이하 마지막 관측을 carry-forward(ffill). 일/월/분기 혼재 시리즈를 균일화.
+// 첫 관측 이전 월은 null(선두 gap → MiniFinChart pen-up). pts 는 d 오름차순 가정(getSeries 가 정렬).
+function macroAlignToMonths(pts: MacroPoint[], axis: string[]): Num[] {
+	const out: Num[] = [];
+	let j = 0;
+	let last: number | null = null;
+	for (const ym of axis) {
+		while (j < pts.length && pts[j].d.slice(0, 6) <= ym) { last = pts[j].v; j += 1; }
+		out.push(last);
+	}
+	return out;
+}
+
+/**
+ * 시장별 근거지표 복합차트 — MACRO_EVIDENCE_SPECS 를 observations 시계열(seriesMap)로 채워 FinCard[] 산출.
+ * end month 는 데이터 최신월에서 유도(결정론). 결측 시리즈는 제외, 한 카드의 모든 시리즈가 비면 카드 자체 제외.
+ */
+export function buildMacroEvidenceCards(
+	market: 'KR' | 'US',
+	seriesMap: Record<string, MacroPoint[]>,
+	lang: Lang
+): { periods: string[]; cards: FinCard[] } {
+	const specs = MACRO_EVIDENCE_SPECS[market] ?? [];
+	let endYm = '';
+	for (const spec of specs) {
+		for (const s of spec.series) {
+			const pts = seriesMap[s.id];
+			if (pts && pts.length) {
+				const ym = pts[pts.length - 1].d.slice(0, 6);
+				if (ym > endYm) endYm = ym;
+			}
+		}
+	}
+	if (!endYm) return { periods: [], cards: [] };
+	const axis = macroMonthsAxis(endYm, MACRO_EVIDENCE_MONTHS);
+	const periods = axis.map((ym) => `${ym.slice(2, 4)}.${ym.slice(4, 6)}`);
+	const cards: FinCard[] = [];
+	for (const spec of specs) {
+		const series: FinSeries[] = [];
+		for (const s of spec.series) {
+			const pts = seriesMap[s.id];
+			if (!pts || !pts.length) continue;
+			const data = macroAlignToMonths(pts, axis);
+			if (data.every((v) => v == null)) continue;
+			series.push({ name: lang === 'en' ? s.nameEn : s.nameKr, data, color: s.color, type: s.type, ...(s.axis ? { axis: s.axis } : {}) });
+		}
+		if (series.length) cards.push({ key: spec.key, title: lang === 'en' ? spec.titleEn : spec.titleKr, unit: spec.unit, series });
+	}
+	return { periods, cards };
 }

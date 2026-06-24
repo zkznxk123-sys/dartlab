@@ -9,6 +9,9 @@
 	import FinTypeLegendDialog from './FinTypeLegendDialog.svelte'; // 유형 칩 범례 — TYPE 컬럼 ⓘ 에서 연다
 	import Watchlist from './Watchlist.svelte'; // 공시 워치 — 큐레이션 종목 신선도 모니터 (recentMap 공유)
 	import MarketFeed from './MarketFeed.svelte'; // 시장 공시 피드 — 전상장사 3개월 수시공시(워치=내 종목 / 피드=시장 전체)
+	import MacroRegimePanel from './MacroRegimePanel.svelte'; // 거시 국면 글랜스 — 좌측 최상단(깔때기 꼭대기)
+	import MacroRegimeDialog from './MacroRegimeDialog.svelte'; // 거시 국면 상세 — 판정·모델·고밀도 지표차트
+	import { buildMacroGlanceView, buildRegimeView } from '../lib/macroLens'; // 국면 view-model (macro.json 라이브)
 	import { watchlist } from '../lib/watchlist.svelte'; // 워치 카운트 — 하단 탭 라벨 배지
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { chgClass, sign, sparkPts } from '../ui/helpers';
@@ -29,6 +32,14 @@
 	const rt = useDartLabRuntime();
 	const base = rt.env.basePath;
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
+
+	// ── 거시 국면 — 좌측 최상단 글랜스(econoVision 개념: 판정+근거+확신도). 데이터 = macro.json 라이브(이미 산출). ──
+	// 옛 마켓펄스(RegimeQuadrant 2점 격자)가 버린 quadrant·assets·confidence·전이를 살린다. 깊이는 다이얼로그.
+	const macro = $derived(eng.raw.macro);
+	const macroTailwinds = $derived(eng.sectorTailwinds());
+	const macroGlance = $derived(buildMacroGlanceView(macro, macroTailwinds, { mode: 'compact' }));
+	const regimeView = $derived(buildRegimeView(macro, null));
+	let macroOpen = $state(false);
 
 	// scan 와 동일 universe: finance+prices 보유 회사 (eng 불변 → 1 회 산출 후 캐시)
 	const nodes = $derived(
@@ -97,6 +108,16 @@
 	}
 </script>
 
+<!-- 거시 국면 — 깔때기 꼭대기(매크로→산업→종목). 판정 1줄+근거+확신도 글랜스, 깊이는 다이얼로그(모델·고밀도 지표차트). -->
+{#if macro}
+	<Panel {lang} className="eMacro" prov="real" title={{ kr: '거시 국면', en: 'MACRO REGIME' }} sub={{ kr: '국면 · 클릭=상세', en: 'regime · click=detail' }}>
+		{#snippet right()}
+			<button class="finFullBtn" onclick={() => (macroOpen = true)} title={lang === 'en' ? 'detail · models & charts' : '상세보기 · 모델·지표차트'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
+		{/snippet}
+		<MacroRegimePanel regime={macroGlance.regime} {lang} />
+	</Panel>
+{/if}
+
 <!-- 산업 sweep — 거시 깔때기 산업층(매크로→★산업→종목). 패널 = 미니 지형도(읽기 아닌 *시각화*).
      전 산업을 (수익 수준×마진 격차) 점구름으로 — 현재 산업 강조·클릭=스크리너 필터+상세. 상세는 다이얼로그. -->
 <Panel {lang} className="eIndustry" prov="real" title={{ kr: '산업 스윕', en: 'INDUSTRY SWEEP' }} sub={{ kr: '구조 · 클릭=상세', en: 'structure · click=detail' }}>
@@ -162,3 +183,4 @@
 
 <ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {#if finLegendOpen}<FinTypeLegendDialog {lang} onClose={() => (finLegendOpen = false)} />{/if}
+{#if macroOpen && macro}<MacroRegimeDialog {macro} regime={macroGlance.regime} {regimeView} {lang} loadSeries={(id) => rt.macro.getSeries(id)} onClose={() => (macroOpen = false)} />{/if}
