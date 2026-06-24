@@ -21,6 +21,7 @@ def test_full_rebuild_resumable_skips_ledger_batches_and_guards(monkeypatch: pyt
     monkeypatch.setattr(ep, "_priorityTickers", lambda: ["AAA", "BBB", "CCC", "DDD", "EEE"])
     monkeypatch.setattr(ep, "_loadRebuildLedger", lambda token: {"AAA"})  # AAA 이미 완료
     monkeypatch.setattr(ep, "_REBUILD_BATCH", 2)
+    monkeypatch.setattr(ep, "_publishTickers", lambda token: None)  # hermetic — SEC/HF 미접촉
     monkeypatch.setattr(
         "dartlab.core.dataLoader.loadEdgarListedUniverse", lambda *, forceUpdate=False: pl.DataFrame({"ticker": []})
     )
@@ -62,6 +63,7 @@ def test_full_rebuild_time_guard_breaks_before_work(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(ep, "_priorityTickers", lambda: ["AAA", "BBB"])
     monkeypatch.setattr(ep, "_loadRebuildLedger", lambda token: set())
     monkeypatch.setattr(ep, "_REBUILD_DEADLINE_MIN", -1)  # deadline 과거 → 즉시 break
+    monkeypatch.setattr(ep, "_publishTickers", lambda token: None)  # hermetic — SEC/HF 미접촉
     monkeypatch.setattr(
         "dartlab.core.dataLoader.loadEdgarListedUniverse", lambda *, forceUpdate=False: pl.DataFrame({"ticker": []})
     )
@@ -75,3 +77,37 @@ def test_full_rebuild_time_guard_breaks_before_work(monkeypatch: pytest.MonkeyPa
     res = ep._runFullRebuild(StageResult(category="edgarPanel"), upload=True, token=None)
     assert res.report.ok == 1
     assert called == [], "deadline 경과 → SEC fetch 0건(첫 ticker 전 break)"
+
+
+def test_publish_tickers_uploads_to_canonical_path(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """S0.2 — tickers.parquet 을 HF edgar/tickers/tickers.parquet 로 upload(브라우저 기대경로 계약)."""
+    import dartlab.config as cfg
+    import dartlab.pipeline.stages.edgarPanel as ep
+
+    edgardir = tmp_path / "edgar"
+    edgardir.mkdir(parents=True)
+    (edgardir / "tickers.parquet").write_bytes(b"PAR1")  # 존재만 — 내용 무관(업로드 mock)
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
+    monkeypatch.setattr("dartlab.gather.edgar.identity.loadTickers", lambda *, refresh: None)
+    monkeypatch.setattr("dartlab.pipeline.hfUpload._resolveHfToken", lambda token: "tok")
+
+    captured: dict = {}
+    monkeypatch.setattr("dartlab.core.hfRetry.retryHfCall", lambda fn, **kw: captured.update(kw))
+
+    ep._publishTickers(None)
+    assert captured["path_in_repo"] == "edgar/tickers/tickers.parquet", "브라우저 기대 경로 고정"
+    assert captured["repo_type"] == "dataset"
+
+
+def test_publish_tickers_skips_when_file_absent(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """tickers.parquet 부재면 upload 미시도(클린 러너 안전)."""
+    import dartlab.config as cfg
+    import dartlab.pipeline.stages.edgarPanel as ep
+
+    monkeypatch.setattr(cfg, "dataDir", str(tmp_path))  # edgar/tickers.parquet 부재
+    monkeypatch.setattr("dartlab.gather.edgar.identity.loadTickers", lambda *, refresh: None)
+    called: list[int] = []
+    monkeypatch.setattr("dartlab.core.hfRetry.retryHfCall", lambda fn, **kw: called.append(1))
+
+    ep._publishTickers(None)
+    assert called == [], "파일 부재 → upload 0건"

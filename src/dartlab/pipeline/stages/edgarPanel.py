@@ -306,6 +306,47 @@ def _saveRebuildLedger(done: set[str], token: str | None) -> None:
     )
 
 
+def _publishTickers(token: str | None) -> None:
+    """ticker↔CIK 맵(tickers.parquet)을 HF ``edgar/tickers/`` 로 publish (S0.2).
+
+    finance=cik·panel=ticker 이중키라 퍼블릭 브라우저가 ticker→cik 를 해소하려면 이 맵이
+    HF(DATA_RELEASES ``edgarTickers``)에 있어야 한다. 엔진은 로컬 flat 직독, 브라우저는
+    HF range-fetch. 최신 SEC company_tickers.json 반영 후 업로드(idempotent overwrite).
+
+    Args:
+        token: HF 토큰(None=env/.env 해소).
+
+    Raises:
+        없음 — 호출부가 격리(실패는 failures 기록).
+    """
+    from huggingface_hub import HfApi
+
+    import dartlab.config as cfg
+    from dartlab.core.dataConfig import HF_REPO
+    from dartlab.core.hfRetry import retryHfCall
+    from dartlab.pipeline.hfUpload import _resolveHfToken
+
+    try:
+        from dartlab.gather.edgar.identity import loadTickers
+
+        loadTickers(refresh=True)  # 최신 company_tickers.json 반영
+    except Exception:  # noqa: BLE001 — 신선화 실패해도 기존 캐시 업로드
+        pass
+
+    src = Path(cfg.dataDir) / "edgar" / "tickers.parquet"
+    if not src.exists():
+        return
+    retryHfCall(
+        HfApi().upload_file,
+        path_or_fileobj=str(src),
+        path_in_repo="edgar/tickers/tickers.parquet",
+        repo_id=HF_REPO,
+        repo_type="dataset",
+        token=_resolveHfToken(token),
+        commit_message="edgar tickers map publish (S0.2)",
+    )
+
+
 def _flushRebuildBatch(
     uploaded: list[str], processed: list[str], done: set[str], *, upload: bool, token: str | None
 ) -> None:
@@ -356,6 +397,11 @@ def _runFullRebuild(res: StageResult, *, upload: bool, token: str | None) -> Sta
         from dartlab.providers.edgar.panel.build import buildEdgarPanel
 
         loadEdgarListedUniverse(forceUpdate=True)  # 신규 상장 반영 — 이후 _priorityTickers 가 캐시 read
+        if upload:  # S0.2 — ticker↔CIK 맵 publish(브라우저 식별자 해소). run 당 1회.
+            try:
+                _publishTickers(token)
+            except Exception as exc:  # noqa: BLE001 — publish 실패해도 rebuild 진행
+                res.report.failures.append(f"edgar tickers publish: {type(exc).__name__}: {exc}")
         tickers = _priorityTickers()
         done = _loadRebuildLedger(token) if upload else set()
         pending = [t for t in tickers if t not in done]

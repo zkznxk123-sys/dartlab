@@ -94,6 +94,14 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "SEC EDGAR 분기 벌크 메타 (sub/pre/tag)",
         "public": True,
     },
+    "edgarTickers": {
+        # ticker↔CIK 맵 — 퍼블릭 브라우저 식별자 해소(finance=cik·panel=ticker 이중키).
+        # 엔진은 로컬 flat data/edgar/tickers.parquet 직독, 브라우저는 HF edgar/tickers/tickers.parquet
+        # range-fetch. edgarPanel rebuild 가 publish(_publishTickers). (S0.2 edgar-parity-wiring)
+        "dir": "edgar/tickers",
+        "label": "SEC EDGAR ticker↔CIK 맵 (브라우저 식별자 해소)",
+        "public": True,
+    },
     "krxPrices": {
         "dir": "krx/prices",
         "label": "KRX 일별 전종목 OHLCV+시총+발행주식수 (raw, long parquet)",
