@@ -433,3 +433,42 @@ class TestNotchGrade:
 
     def test_unknown_grade_returns_same(self):
         assert notchGrade("XYZ", 2) == "XYZ"
+
+
+class TestMarketGuard:
+    """S1-L4.3 — credit 등급표는 KR(WICS) calibration 전용. 비-KR 은 등급 미산출(None).
+
+    US(EDGAR) 회사를 그대로 태우면 sectorThresholds 가 KR 기본임계를 US-GAAP 숫자에 먹여
+    non-None 가짜 등급을 내던 회귀(확신 오정렬)를 차단한다.
+    """
+
+    def test_us_market_returns_none_before_data(self):
+        """market='US' 면 데이터 접근 전 None — 가짜 등급 차단."""
+        from dartlab.credit.engine import evaluateCompany
+
+        class _FakeUs:
+            market = "US"
+
+            def __getattr__(self, name):  # market 외 접근 = 가드 미작동 증거
+                raise AssertionError(f"US 가드가 데이터 접근({name}) 전 None 반환해야 함")
+
+        assert evaluateCompany(_FakeUs()) is None
+
+    def test_kr_market_passes_guard(self, monkeypatch):
+        """market='KR' 또는 속성부재(기본 KR) 면 가드 통과 — _getSectorInfo 까지 진입."""
+        from dartlab.credit import engine
+
+        def _boom(company):
+            raise RuntimeError("guard-passed")
+
+        monkeypatch.setattr(engine, "_getSectorInfo", _boom)
+
+        class _FakeKr:  # market 명시 KR
+            market = "KR"
+
+        class _FakeDefault:  # market 미정의 → getattr 기본 'KR'
+            pass
+
+        for fake in (_FakeKr(), _FakeDefault()):
+            with pytest.raises(RuntimeError, match="guard-passed"):
+                engine.evaluateCompany(fake)

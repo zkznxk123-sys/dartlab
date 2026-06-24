@@ -279,8 +279,16 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         Dataflow:
             company → _getSectorInfo → Track 분기 → calcAllMetrics →
             가중평균 → calcCHS → notch 7 룰 → mapTo20Grade → dict.
-        TargetMarkets: KR (DART), US (EDGAR). 등급표는 시장별 calibration.
+        TargetMarkets: KR (DART) 만. US (EDGAR) 는 KR(WICS) calibration 미검증이라
+            등급 미산출(None) — US calibration 은 Slice2 (_usDefaultThresholds).
     """
+    # ⛔ 시장 가드 — 등급표·임계값은 KR(WICS 업종·한국 회계) calibration 전용.
+    # US(EDGAR) 회사를 그대로 태우면 sectorThresholds 가 sector=None→_defaultThresholds(KR)
+    # 를 US-GAAP 숫자에 먹여 non-None *가짜 등급* 을 낸다(확신 오정렬). _revenueSelect 의
+    # 정직 None 과 대칭화 — 미검증 시장은 등급 미산출(None). US calibration = Slice2.
+    if str(getattr(company, "market", "KR") or "KR").upper() != "KR":
+        return None
+
     sector, industryGroup = _getSectorInfo(company)
     isFinancialCo = _isFinancial(company)
 
