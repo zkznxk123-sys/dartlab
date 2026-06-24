@@ -9,7 +9,9 @@ let _all: Promise<CarouselContract[]> | null = null;
 
 /** 전 캐러셀 계약 1회 fetch(단일 파일·프로세스 캐시). posts[] 순서 = 발간 최신순(build 가 date 내림차순). */
 export function loadCarousels(): Promise<CarouselContract[]> {
-	_all ??= fetch(originUrl('hfMedia', 'carousels/index.json'))
+	// cache:'no-cache' — index.json 은 콘텐츠해시 파일명이 아니라 in-place 갱신(republish)된다. 브라우저가 옛걸
+	// 캐시하면 다이얼로그가 stale(정리된 pinnedComment 가 옛 누출본으로 보임). etag 재검증 강제로 항상 최신 보장.
+	_all ??= fetch(originUrl('hfMedia', 'carousels/index.json'), { cache: 'no-cache' })
 		.then((r) => (r.ok ? (r.json() as Promise<ContractIndex>) : { posts: [] }))
 		.then((j) => j.posts ?? [])
 		.catch(() => [] as CarouselContract[]);
