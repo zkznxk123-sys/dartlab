@@ -30,6 +30,10 @@ export interface ParquetRowsSpec<T> {
 	path: string;
 	columns?: string[];
 	filter?: ParquetQueryFilter;
+	/** 행 범위 prune — [rowStart, rowEnd). hyparquet 가 겹치는 row-group 만 fetch(컬럼 전량 read 회피).
+	 * filter 는 read 후 JS 술어(prune 아님)라, 정렬·연속 구간(예 panel 최신기 tail)은 이 범위로 잘라야 빠르다. */
+	rowStart?: number;
+	rowEnd?: number;
 	cache?: CachePolicy;
 	cacheKey: string;
 	dedup?: boolean;
@@ -116,7 +120,7 @@ export function createDataCore(opts: DataCoreOptions = {}): DataCore {
 			if (hit !== undefined) return hit as T[];
 		}
 		const exec = async (): Promise<T[]> => {
-			const { rows } = await readParquetRows<T>(spec.path, { columns: spec.columns, filter: spec.filter, fetchFn });
+			const { rows } = await readParquetRows<T>(spec.path, { columns: spec.columns, filter: spec.filter, rowStart: spec.rowStart, rowEnd: spec.rowEnd, fetchFn });
 			if (policy.scope === 'memory') bucket(policy).set(key, rows, now());
 			return rows;
 		};

@@ -722,7 +722,8 @@ export function createReportSource(core: DataCore): ReportPort {
 		{ id: 'relatedParty', re: /특수관계자/ }
 	];
 	async function buildReportNotes(code: string): Promise<ReportNoteBlock[] | null> {
-		// Pass A — period 컬럼만(저비용 단일컬럼) → 최신기 (panel 전체 본문 로드 회피, 08 §4.2 hyparquet)
+		// Pass A — period 컬럼만(경량) → 최신기 + 그 행 범위. panel 최신기는 연속 tail(실측 005930·000030)이라
+		// [lo, hi] 로 잘라 Pass B 가 contentRaw 전량(13~25MB) read 대신 tail row-group 만 fetch(15s 타임아웃 방어).
 		const pr = await core.requestParquetRows<{ period?: unknown }>({
 			origin: 'hfRange',
 			path: `dart/panel/${code}.parquet`,
@@ -733,12 +734,17 @@ export function createReportSource(core: DataCore): ReportPort {
 		let latest = '';
 		for (const r of pr) { const p = str(r.period); if (p > latest) latest = p; }
 		if (!latest) return null;
-		// Pass B — 최신기 본문만(period 필터 row-group pruning, 대용량 가드) + 도시에 주석 컬럼
+		let lo = -1;
+		let hi = -1;
+		for (let i = 0; i < pr.length; i++) if (str(pr[i]!.period) === latest) { if (lo < 0) lo = i; hi = i; }
+		if (lo < 0) return null;
+		// Pass B — 최신기 행 범위만(rowStart/rowEnd → hyparquet row-group prune). filter 는 read 후 술어라 prune 안 됨.
 		const rows = await core.requestParquetRows<Row>({
 			origin: 'hfRange',
 			path: `dart/panel/${code}.parquet`,
 			columns: ['sectionLeaf', 'blockLeaf', 'chapter', 'leafType', 'disclosureKey', 'contentRaw', 'rceptNo', 'period'],
-			filter: { period: { $eq: latest } },
+			rowStart: lo,
+			rowEnd: hi + 1,
 			cacheKey: `panel.notes:${code}:${latest}`,
 			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 64 }
 		});
