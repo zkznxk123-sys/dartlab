@@ -112,7 +112,7 @@
 		}
 	}
 
-	// 자동재생 — 점 좌측 재생버튼 토글. 2초마다 다음 슬라이드(끝이면 처음으로 순환). 다시 누르면 정지.
+	// 자동재생 — 점 좌측 재생버튼 토글. 3초마다 다음 슬라이드(끝이면 처음으로 순환). 다시 누르면 정지.
 	let playing = $state(false);
 	let timer: ReturnType<typeof setInterval> | null = null;
 	function togglePlay() {
@@ -121,7 +121,7 @@
 			clearInterval(timer);
 			timer = null;
 		}
-		if (playing) timer = setInterval(() => go(idx >= total - 1 ? 0 : idx + 1), 2000);
+		if (playing) timer = setInterval(() => go(idx >= total - 1 ? 0 : idx + 1), 3000);
 	}
 	$effect(() => () => {
 		if (timer) clearInterval(timer);
@@ -155,7 +155,7 @@
 			<button class="nav left" onclick={() => go(idx - 1)} disabled={idx === 0} aria-label="이전">‹</button>
 			<button class="nav right" onclick={() => go(idx + 1)} disabled={idx >= total - 1} aria-label="다음">›</button>
 			<div class="dots">
-				<button class="playBtn" class:on={playing} onclick={togglePlay} aria-label={playing ? '자동재생 정지' : '자동재생'} title={playing ? '정지' : '자동재생 (2초)'}>
+				<button class="playBtn" class:on={playing} onclick={togglePlay} aria-label={playing ? '자동재생 정지' : '자동재생'} title={playing ? '정지' : '자동재생 (3초)'}>
 					{#if playing}
 						<svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true"><rect x="1.5" y="1" width="2.5" height="8" /><rect x="6" y="1" width="2.5" height="8" /></svg>
 					{:else}

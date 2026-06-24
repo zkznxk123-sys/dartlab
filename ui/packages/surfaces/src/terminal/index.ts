@@ -10,6 +10,7 @@ export { default as BrandSwitch } from './ui/BrandSwitch.svelte';
 // landing /cards 라이브 카드 캐러셀의 백본 슬라이드가 터미널과 동일한 재무 시각을 재현할 때 재사용.
 // (heatmap/bars 등 백테스트 자본곡선 의존 차트는 백본 아님 → export 보류.)
 export { default as MiniFinChart } from './charts/MiniFinChart.svelte';
+export { CARD_GUIDE, type CardGuide } from './lib/cardGuide';
 export { createEngine } from './lib/engine';
 export type { Engine } from './lib/engine';
 export type {

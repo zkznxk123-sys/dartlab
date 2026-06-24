@@ -3,7 +3,7 @@
 	// AccentText(`[[구절]]`=rose-red). 색감·레이아웃은 기존 SNS 캐러셀(colors.ts/PhotoFrame/InsightCard)
 	// 재현 — 새로 짓지 않음. 차트는 $lib/report/render 순수 SVG(klinecharts·백테스트 0), finChart 만 MiniFinChart.
 	import type { DartLabRuntime, FinCard } from '@dartlab/ui-contracts';
-	import { MiniFinChart } from '@dartlab/ui-surfaces/terminal';
+	import { MiniFinChart, CARD_GUIDE } from '@dartlab/ui-surfaces/terminal';
 	import { pickKrwUnit } from '@dartlab/ui-format/krw';
 	import { CARD, CARD_SERIES, accentParts, stripDots } from './theme';
 	import { cellTone, verdictTone, TXT_COLS, lineGeo, wonLabel } from '$lib/report/render';
@@ -174,6 +174,17 @@
 	// 비중 차트 세그먼트 색 — 캐러셀 팔레트(로즈+그레이)만. 초록/앰버/보라/시안 금지.
 	const SHARE_C = ['var(--dl-accent)', 'var(--dl-accent-light)', '#d8e2f0', '#9aa7c0', '#6b7794', '#c0cad8', '#7f8aa3'];
 	const shareColor = (i: number) => SHARE_C[i % SHARE_C.length];
+
+	// 재무카드 제목 아래 "무엇을 보나" 한 줄 — 터미널 CARD_GUIDE.what(일반 가이드, 회사 판단·환각 0).
+	// what = "[차트요소 구문]. [무엇을보나 문장]." 꼴 → 범례에 이미 있는 차트요소 구문(끝에 마침표라 거슬림)은
+	// 버리고 *마지막 서술 문장만*(본다/있다로 끝나는 문장이라 마침표 정당). 해석은 회사별로 안 쓴다.
+	const finGuide = $derived.by(() => {
+		if (card.kind !== 'finChart' || !card.cardKey) return null;
+		const what = CARD_GUIDE[card.cardKey]?.what;
+		if (!what) return null;
+		const parts = what.split(/\.\s+/);
+		return parts[parts.length - 1]?.trim() || null;
+	});
 </script>
 
 {#snippet accent(text: string, cls = '')}
@@ -211,6 +222,7 @@
 				<header class="sHead">
 					<span class="kicker"><i></i>{card.heading}</span>
 					{#if card.sub}<p class="sSub">{@render accent(card.sub)}</p>{/if}
+					{#if finGuide}<p class="sGuide">{finGuide}</p>{/if}
 				</header>
 			{/if}
 			{#if card.note}<p class="note">{@render accent(card.note)}</p>{/if}
@@ -390,6 +402,18 @@
 	}
 	.note {
 		-webkit-line-clamp: 2;
+	}
+	/* 재무카드 "무엇을 보나" 가이드 — 제목 아래 작고 흐린 2줄(해석 아님·읽는 법). */
+	.sGuide {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		margin-top: 0.35em;
+		font-size: clamp(10px, 2cqw, 13px);
+		line-height: 1.45;
+		color: #9aa7c0;
+		font-weight: 500;
 	}
 	/* kicker (accent dot + label) */
 	.kicker {
