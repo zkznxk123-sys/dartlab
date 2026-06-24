@@ -257,8 +257,7 @@
 								<li>{T('개인주주 익명 집계 · 미해소·null 은 0 대체 없이 분리', 'individuals aggregated · nulls kept separate')}</li>
 								<li>{T('과거 기간 = 출자 구조 변화(시가 아님) · 분기 = 보고된 것만', 'past periods = structure change (not market value) · quarters = reported only')}</li>
 							<li>{T('상호출자는 상장 상호보유만 · 다단계 순환(A→B→C→A)은 미지원', 'cross-holding = listed mutual only · multi-hop cycles unsupported')}</li>
-								<li>{T('판정·목표주가 아님 — 관계 사실 기술', 'not a verdict or price target')}</li>
-							</ul>
+															</ul>
 						</div>
 					{/if}
 				</div>
@@ -456,7 +455,7 @@
 
 			<div class="hdNote dim">
 				{T(
-					'report · 타법인 출자현황 + 최대주주현황. 이익기여=지분법 근사(내부거래·공정가치 미반영), 시가지분=상장 해소 피출자사만, 피출자 순익=최근 1기. 개인주주는 개인정보 보호로 익명 집계. 미해소·null 은 0 대체 없이 분리. 판정·목표주가 아님.',
+					'report · 타법인 출자현황 + 최대주주현황. 이익기여=지분법 근사(내부거래·공정가치 미반영), 시가지분=상장 해소 피출자사만, 피출자 순익=최근 1기. 개인주주는 개인정보 보호로 익명 집계. 미해소·null 은 0 대체 없이 분리.',
 					'report · holdings + major holders. Equity earnings are approximate; market stake covers listed only; target net is latest period. Individual holders are aggregated for privacy. Nulls not coerced to zero. Not a verdict or price target.'
 				)}
 			</div>

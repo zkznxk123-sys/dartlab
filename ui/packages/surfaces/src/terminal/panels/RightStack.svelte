@@ -492,7 +492,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="finNote">{lang === 'en' ? 'breached thresholds only — not a completeness check' : '임계 초과만 표시 · 전체 점검 아님'}</div>
+		<div class="finNote">{lang === 'en' ? 'breached thresholds only' : '임계 초과만 표시'}</div>
 	</Panel>
 {/if}
 

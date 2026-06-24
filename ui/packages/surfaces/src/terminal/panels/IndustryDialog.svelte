@@ -128,7 +128,7 @@
 				<span class="scrTitle">{landView === 'trail' ? (lang === 'en' ? 'INDUSTRY TRAIL' : '산업 궤적') : (lang === 'en' ? 'INDUSTRY MAP' : '산업 지형도')}</span>
 				<span class="indWho">{landView === 'trail' ? (lang === 'en' ? `${trailEndPts.length} industries · ${trailData[0]?.pts.length ?? 0}yr path` : `${trailEndPts.length}개 산업 · ${trailData[0]?.pts.length ?? 0}년 경로`) : (lang === 'en' ? `${industryPts.length} industries` : `${industryPts.length}개 산업`)}<i>{lang === 'en' ? 'click → companies' : '클릭 → 회사 산포'}</i></span>
 			{/if}
-			<span class="indLens">{lang === 'en' ? 'position = structure (not a verdict)' : '위치 = 구조 (판정 아님)'}</span>
+			<span class="indLens">{lang === 'en' ? 'position = structure' : '위치 = 구조'}</span>
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>
 
@@ -200,7 +200,7 @@
 				</div>
 				{#if landView === 'map'}
 					<ScatterMap pts={industryPts} xLabel={lang === 'en' ? 'op-margin median' : '영업이익률 중앙값(수익 수준)'} yLabel={lang === 'en' ? 'rev CAGR median' : '성장(매출 CAGR %)'} showLabels zeroX onPick={(id) => (view = id)}
-						hint={lang === 'en' ? '※ dot = industry · x = margin level · y = revenue growth · size = members · position = observation, not a verdict · click → companies' : '※ 점=산업 · 가로=수익 수준 · 세로=매출 성장 · 크기=멤버수 · 위치=관측이지 판정 아님 · 클릭 → 회사 산포'} />
+						hint={lang === 'en' ? '※ dot = industry · x = margin level · y = revenue growth · size = members · click → companies' : '※ 점=산업 · 가로=수익 수준 · 세로=매출 성장 · 크기=멤버수 · 클릭 → 회사 산포'} />
 				{:else if landView === 'trail'}
 					<ScatterMap pts={trailEndPts} trails={trailPaths} xLabel={lang === 'en' ? 'op-margin median' : '영업이익률 중앙값(수익 수준)'} yLabel={lang === 'en' ? 'rev growth YoY median' : '전년比 매출성장 중앙값(YoY %)'} showLabels zeroX onPick={(id) => (view = id)}
 						hint={lang === 'en' ? `※ trail = industry path over ${trailData[0]?.pts.length ?? 0} yrs · head(dot) = latest · y = YoY growth (≠ snapshot CAGR) · survivorship: today's members back-aggregated · click → companies` : `※ 꼬리 = 산업이 최근 ${trailData[0]?.pts.length ?? 0}년 이동 경로 · 머리(점)=최신 · 세로=전년比 성장(스냅샷 CAGR과 다른 렌즈) · 생존편향: 오늘 멤버 과거집계 · 클릭 → 회사`} />
@@ -231,9 +231,6 @@
 				<div>※ {lang === 'en'
 					? 'Snapshot of current listed members (survivorship: delisted/unlisted excluded) — not a trend; positions shift year to year.'
 					: '현재 상장 멤버 스냅샷(생존편향: 상폐·비상장 제외) — 추세 아님, 위치는 연도별로 바뀜.'}</div>
-				<div>※ {lang === 'en'
-					? 'Position facts only — no buy/sell, no causal/forecast (axes are observed metrics, not a verdict).'
-					: '위치 사실만 — 매수/매도·인과/예측 금지(축은 관측된 지표이지 판정 아님).'}</div>
 			</div>
 		</div>
 	</div>

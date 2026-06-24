@@ -86,7 +86,7 @@
 		<div class="scrHead">
 			<span class="scrTitle">{lang === 'en' ? 'CROSS-UNIVERSE PERCENTILE' : '유니버스 교차 백분위'}</span>
 			<span class="pcxWho">{co.name.kr}<i>{co.marketLabel} · {co.sector.kr}</i></span>
-			<span class="pcxLens">{lang === 'en' ? 'distribution facts · top N% (not a verdict)' : '분포 사실 · 상위 N% (판정 아님)'}</span>
+			<span class="pcxLens">{lang === 'en' ? 'distribution facts · top N%' : '분포 사실 · 상위 N%'}</span>
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>
 
@@ -162,7 +162,7 @@
 
 				<!-- 가격(PER/PBR) — 펀더와 *분리*. 시장 시세 기반(펀더멘털 아님). 톤색·우열 프레이밍 없음(02 KILL#2). -->
 				{#if data.some((d) => d.price.per.v != null || d.price.pbr.v != null)}
-					<div class="pcxPriceHead">{lang === 'en' ? 'price (market quote — not fundamentals · lower = cheaper, not a verdict)' : '가격 지표 — 시장 시세 기반 (펀더멘털 아님 · 낮을수록 저평가, 판정 아님)'} · {co.price.asOf}</div>
+					<div class="pcxPriceHead">{lang === 'en' ? 'price (market quote · lower = cheaper)' : '가격 지표 — 시장 시세 기반 · 낮을수록 저평가'} · {co.price.asOf}</div>
 					<div class="pcxTable">
 						{#each [{ k: 'per', kr: 'PER', en: 'PER' }, { k: 'pbr', kr: 'PBR', en: 'PBR' }] as pr (pr.k)}
 							<div class="pcxRow price">
@@ -198,8 +198,8 @@
 						? 'All-listed mixes sectors (financials · manufacturing) → margin/ROE percentile is sector-dependent (context, not a headline). Industry is the anchor.'
 						: '전체상장 = 금융·제조 혼재 → 마진·ROE 백분위는 섹터 의존(맥락용 잣대, 헤드라인 아님). 업종이 기본 앵커.'}</div>
 					<div>※ {lang === 'en'
-						? '"—" = absent from filings (not 0). "n<10" = sample too small (band/curve hidden). This is distribution facts only — not a buy/sell signal or composite verdict.'
-						: '"—" = 공시에 없음(0 아님). "표본부족" = n<10(띠·곡선 숨김). 분포 사실만 — 매수/매도·종합판정 아님.'}</div>
+						? '"—" = absent from filings (not 0). "n<10" = sample too small (band/curve hidden).'
+						: '"—" = 공시에 없음(0 아님). "표본부족" = n<10(띠·곡선 숨김).'}</div>
 					<div>※ {lang === 'en'
 						? 'Index membership (KOSPI200 · KOSDAQ150) is BLOCKED — constituent data absent. No "top-N by cap ≈ index" approximation (would be fabrication).'
 						: '소속지수(KOSPI200·코스닥150) = BLOCKED — 구성종목 데이터 부재. "시총 상위 N = 지수 근사" 우회 안 함(위조 금지).'}</div>

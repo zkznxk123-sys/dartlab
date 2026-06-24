@@ -88,7 +88,7 @@
 							</div>
 						{/each}
 					</div>
-					{#if chassis}<div class="ndChassis">⟨{chassis}⟩ <span class="dim">{T('최대 항목 기준 · 판정 아님', 'largest item · not a verdict')}</span></div>{/if}
+					{#if chassis}<div class="ndChassis">⟨{chassis}⟩ <span class="dim">{T('최대 항목 기준', 'largest item')}</span></div>{/if}
 				</div>
 			{:else}
 				<div class="storyEmpty">{T('이 회사는 비용 성격별 주석 미공시 (또는 비정형 — 파싱 불가). 0 대체 안 함.', 'no cost-by-nature note disclosed (or non-standard).')}</div>
