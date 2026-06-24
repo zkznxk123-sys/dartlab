@@ -14,12 +14,13 @@
 	/* 강조(핑크) 위 잉크 — 옛 앰버 전제 갈색(#1a1206) 대체. 밝은 핑크엔 근흑이 대비 우위(블랙 6.4:1 > 화이트 3.3:1). */
 	--onAccent: #240810;
 	--credit: var(--dl-red);
-	/* 최초 zip 팔레트 — 상승=초록 / 하락=빨강 / good=파랑 (dartlab 톤 참고, 과하지 않게) */
-	--up: #34d399;               /* 상승 = 초록 */
-	--dn: #f0616f;               /* 하락 = 빨강 */
-	--good: #60a5fa;             /* good = 파랑 */
+	/* 신호 팔레트 = tokens.css SSOT 위임. 터미널은 의도적 green-up 컨벤션(한국 --dl-up/down 빨강-up 과
+	 * 별개·문서화된 분기). data-conv='green-up' 프리셋과 동일 색계. 픽셀 동일(signal-up=#34d399 등). */
+	--up: var(--dl-signal-up);   /* 상승 = 초록 (#34d399) */
+	--dn: var(--dl-signal-down); /* 하락 = 빨강 (#f0616f) */
+	--good: var(--dl-info);      /* good = 파랑 (#60a5fa) */
 	--warn: var(--dl-warn);
-	--industry: #a78bfa;
+	--industry: var(--p-violet-400);
 	--valuation: var(--dl-good);
 	--txt: var(--dl-ink);
 	/* 회색글자 가독성 — 기본 토큰(--dl-ink-mute/-dim)이 너무 어두워 흰색에 가깝게 상향(운영자 요청). */
@@ -407,9 +408,9 @@
 .dlTerm .symLinks { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; flex-shrink: 0; }
 .dlTerm .symLinks a, .dlTerm .symLinks button { font-family: var(--mono); font-size: 8.5px; color: var(--amberDim); text-decoration: none; letter-spacing: 0.2px; background: none; border: 0; padding: 0; cursor: pointer; line-height: 1.35; white-space: nowrap; }
 .dlTerm .symLinks a:hover, .dlTerm .symLinks button:hover { color: var(--amber); }
-/* 카드뉴스 — 인스타식 캐러셀 시그니처 로즈(#ff3f6f). 회사 네비 중 유일하게 콘텐츠(스토리) 진입이라 색으로 구분. */
-.dlTerm .symLinks button.symCards { color: #e0617f; }
-.dlTerm .symLinks button.symCards:hover { color: #ff3f6f; }
+/* 카드뉴스 — 시그니처 accent(SSOT). 회사 네비 중 유일하게 콘텐츠(스토리) 진입이라 강조색으로 구분. */
+.dlTerm .symLinks button.symCards { color: var(--dl-accent-dim); }
+.dlTerm .symLinks button.symCards:hover { color: var(--dl-accent); }
 .dlTerm .symPrice { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; }
 .dlTerm .symLast { font-family: var(--mono); font-weight: 700; font-size: 22px; line-height: 1; }
 .dlTerm .symChg { font-family: var(--mono); font-size: 11px; margin-top: 2px; }
