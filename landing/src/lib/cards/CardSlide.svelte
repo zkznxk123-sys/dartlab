@@ -4,7 +4,7 @@
 	// 재현 — 새로 짓지 않음. 차트는 $lib/report/render 순수 SVG(klinecharts·백테스트 0), finChart 만 MiniFinChart.
 	import type { DartLabRuntime, FinCard } from '@dartlab/ui-contracts';
 	import { MiniFinChart } from '@dartlab/ui-surfaces/terminal';
-	import { fmtKrwFromJo } from '@dartlab/ui-format/krw';
+	import { pickKrwUnit } from '@dartlab/ui-format/krw';
 	import { CARD, CARD_SERIES, accentParts, stripDots } from './theme';
 	import { cellTone, verdictTone, TXT_COLS, lineGeo, wonLabel } from '$lib/report/render';
 	import type { CarouselCard } from './model';
@@ -97,12 +97,15 @@
 		const all = finCards.periods;
 		const periods = all.slice(-6);
 		const off = all.length - periods.length;
-		// 조 카드(금액)는 셀별 자연 단위(fmtKrwFromJo) — 0.0조 원천 차단(0.0864조→"864억"). 그 외(%·배)는
-		// 적응 정밀도 + 단위 헤더. SSOT(@dartlab/ui-format)로 통일, 손수 1e4 강등·toFixed 분기 제거.
+		// 표 전체 단위 1개 — SSOT(pickKrwUnit)가 값 다수의 단위로 통일("억이 지배하면 전부 억"). 매출 조·
+		// 영업익 억 혼합 금지·"0.0조" 차단. 비금액(%·배)은 그대로 + 단위 헤더.
 		const isJo = finCards.card.unit === '조';
+		const sc = isJo
+			? pickKrwUnit(finCards.card.series.flatMap((s) => s.data) as number[], { from: '조' })
+			: null;
 		const fmt = (v: unknown): string => {
 			if (typeof v !== 'number' || !Number.isFinite(v)) return '–';
-			if (isJo) return fmtKrwFromJo(v);
+			if (sc) return sc.fmt(v);
 			const a = Math.abs(v);
 			if (a >= 100) return Math.round(v).toLocaleString();
 			if (a >= 1) return v.toFixed(1);
@@ -112,7 +115,7 @@
 			name: s.name,
 			values: periods.map((_, i) => fmt(s.data[off + i]))
 		}));
-		return { unit: isJo ? '' : (finCards.card.unit ?? ''), periods, rows };
+		return { unit: sc ? sc.unit : (finCards.card.unit ?? ''), periods, rows };
 	});
 
 	// 표 슬라이드에도 그래프 — 각 행(지표)을 한 선으로. 단위는 셀의 '%' 유무로 금액/비율 그룹 분리.
@@ -153,11 +156,10 @@
 		};
 		const groupLines = (group: typeof rows, startCi: number) => {
 			if (!group.length) return [] as { name: string; color: string; points: string }[];
-			const scales = group.map((r) => Math.max(0, ...r.vals.filter((n) => Number.isFinite(n)).map(Math.abs)));
-			const nz = scales.filter((s) => s > 1e-9);
-			const spread = nz.length ? Math.max(...nz) / Math.min(...nz) : 1;
-			const shared = spread > 8 ? null : rangeOf(group.flatMap((r) => r.vals)); // 차 크면 행별, 비슷하면 공유축
-			return group.map((r, i) => toLine(r, shared ?? rangeOf(r.vals), CARD_SERIES[(startCi + i) % CARD_SERIES.length]));
+			// 공유축 — 금액 행을 실제 크기로 비교(손익구조 정직). 행별 정규화(매출·판관비를 똑같은 높이로
+			// 펴 엉키던 실타래)는 폐기: 매출은 위, 영업익·순익은 아래로 크기 그대로 읽히게.
+			const shared = rangeOf(group.flatMap((r) => r.vals));
+			return group.map((r, i) => toLine(r, shared, CARD_SERIES[(startCi + i) % CARD_SERIES.length]));
 		};
 		const absRows = rows.filter((r) => !r.isPct);
 		const pctRows = rows.filter((r) => r.isPct);
@@ -267,7 +269,7 @@
 							<div class="tLegend">{#each tableChart.lines as ln (ln.name)}<span class="tLi"><i style="background:{ln.color}"></i>{ln.name}</span>{/each}</div>
 						{/if}
 					<table class="cT">
-						<thead><tr>{#each card.cols as c}<th class:num={c !== card.cols[0]}>{c}</th>{/each}</tr></thead>
+						<thead><tr>{#each card.cols as c, ci}<th class:num={ci !== 0}>{ci === 0 && card.unit ? `${c} · ${card.unit}` : c}</th>{/each}</tr></thead>
 						<tbody>
 							{#each card.data as row}
 								<tr>

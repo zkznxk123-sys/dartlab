@@ -29,20 +29,27 @@ describe('fmtKrwFromJo — 조 단위 입력은 0.0조로 뭉개지지 않는다
 	});
 });
 
-describe('pickKrwUnit — 시리즈 공통 단위(축/헤더)', () => {
-	it('큰 회사(최대 50조)는 조 유지', () => {
+describe('pickKrwUnit — 시리즈 공통 단위(최빈 단위 통일)', () => {
+	it('전부 조(대기업)는 조 유지', () => {
 		const s = pickKrwUnit([50, 8.64, 6.2], { from: '조' });
 		expect(s.unit).toBe('조');
 		expect(s.scale).toBe(1);
 		expect(s.fmt(50)).toBe('50');
 		expect(s.fmt(8.64)).toBe('8.6');
 	});
-	it('작은 회사(최대 0.8조)는 전체를 억으로 강등 — 0.0 범벅 차단', () => {
+	it('전부 1조 미만이면 억으로 — 0.0 범벅 차단', () => {
 		const s = pickKrwUnit([0.8, 0.03, 0.15], { from: '조' });
 		expect(s.unit).toBe('억');
 		expect(s.scale).toBe(1e4);
 		expect(s.fmt(0.8)).toBe('8,000'); // 8,000억
 		expect(s.fmt(0.03)).toBe('300'); // 300억 — 0.0 아님
+	});
+	it('손익 혼합(매출 조 + 이익 억) — 억이 지배하면 전부 억(매출도 억으로)', () => {
+		// 매출 5.9·4.0(조) + 영업익 0.3·0.9 + 순익 0.4·0.8 + 판관비 0.2·0.3(억) → 억 다수.
+		const s = pickKrwUnit([5.9, 4.0, 0.3, 0.9, 0.4, 0.8, 0.2, 0.3], { from: '조' });
+		expect(s.unit).toBe('억');
+		expect(s.fmt(5.9)).toBe('59,000'); // 매출도 억으로 — 혼합 없음
+		expect(s.fmt(0.3)).toBe('3,000'); // 영업익 3,000억
 	});
 	it('통화 아닌 단위(%·배·일)는 항등', () => {
 		const s = pickKrwUnit([12.3, 4.4], { from: '%' });

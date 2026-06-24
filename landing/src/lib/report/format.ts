@@ -1,6 +1,6 @@
 // 표시 포맷 헬퍼 — 재무 값은 모두 조(兆) KRW 단위(StmtRow.values 계약). 단위는 표별 자동 스케일.
 import type { Num } from '@dartlab/ui-contracts';
-import { fmtKrwFromJo } from '@dartlab/ui-format/krw';
+import { fmtKrwFromJo, pickKrwUnit } from '@dartlab/ui-format/krw';
 
 /** 기간 라벨 → 4자리 연도 컬럼 ('FY23' → '2023'). 분기 라벨은 그대로. */
 export function pYear(label: string): string {
@@ -31,19 +31,19 @@ export function fmtAmt1(v: Num): string {
 	return fmtKrwFromJo(v as number);
 }
 
-/** 조 단위 값 묶음 → 표 전체 단일 스케일 선택. */
+/** 조 단위 값 묶음 → 표 전체 단일 스케일(SSOT pickKrwUnit). "억이 지배하면 전부 억" — 매출(조)·
+ *  영업이익(억)이 섞이면 다수인 억으로 통일해 혼합·"0.0조"를 함께 없앤다. 전부 조면 조 유지. */
 export function scaleAmt(values: Num[]): { unit: string; scale: number } {
-	const nums = values.filter((v): v is number => v != null && Number.isFinite(v)).map(Math.abs);
-	const maxAbs = nums.length ? Math.max(...nums) : 0;
-	if (maxAbs >= 1) return { unit: '조원', scale: 1 };
-	if (maxAbs > 0) return { unit: '억원', scale: 10000 };
-	return { unit: '조원', scale: 1 };
+	const sc = pickKrwUnit(values, { from: '조' });
+	return { unit: `${sc.unit}원`, scale: sc.scale };
 }
 
 export function fmtScaled(v: Num, scale: number): string {
 	if (v == null || !Number.isFinite(v)) return '-';
-	// 천단위 콤마 + 소수 1자리 고정(열 정렬). 억 단위 4자리 값(1,147.3)에 콤마가 가독성 핵심.
-	return ((v as number) * scale).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+	const x = (v as number) * scale;
+	// 억으로 환산돼 커진 값(1,000+)은 정수 천단위 콤마, 조 단위(1,000 미만)는 1자리 소수(열 정렬).
+	if (Math.abs(x) >= 1000) return Math.round(x).toLocaleString('en-US');
+	return x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 /** 주식수 — 억주/만주/주 자동. */

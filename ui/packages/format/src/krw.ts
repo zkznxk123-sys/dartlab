@@ -73,34 +73,43 @@ export function fmtKrwFromJo(jo: number | null | undefined, opts: KrwOptions = {
 
 /** from-단위(조/억/만/원) → 원 환산 계수. 통화 아닌 단위는 매핑 없음(undefined). */
 const UNIT_TO_WON: Record<string, number> = { 조: 1e12, 억: 1e8, 만: 1e4, 원: 1 };
+const WON_TO_UNIT: Record<number, string> = { 1e12: '조', 1e8: '억', 1e4: '만', 1: '원' };
+
+/** 원 값 → 자연 단위의 원 환산 계수(1조↑=1e12, 1억↑=1e8 …). fmtKrw 규약과 동일. */
+function unitFloor(won: number): number {
+	if (won >= 1e12) return 1e12;
+	if (won >= 1e8) return 1e8;
+	if (won >= 1e4) return 1e4;
+	return 1;
+}
 
 /** 시리즈/축 단위 스케일 결정 결과. `fmt(v)` 는 from-단위 값 v 를 표시 단위로 환산·포맷(단위 접미 없음). */
 export type KrwScale = { unit: string; scale: number; fmt: (v: number) => string };
 
 /**
  * 시리즈/축 단위 스케일 SSOT — 차트 축·표 헤더처럼 **여러 값이 단위 하나를 공유**해야 할 때 사용.
- * from-단위(기본 '조') 값들의 *최대 절댓값* 으로 표시 단위(조/억/만/원)를 한 번 고른다 (fmtKrw 와
- * 같은 규약: 1조↑=조, 1억↑=억 …). 작은 회사(최대 0.8조)는 전체를 억(8,000억)으로 내려 "0.0조" 범벅을
- * 막고, 큰 회사(최대 50조)는 조 유지. 반환 scale = from→표시 환산계수, fmt = 그 단위로 포맷(접미 없음).
- * 통화 아닌 단위(%·배·일)는 항등(scale 1)으로 통과.
- *
- * 셀마다 단위가 달라도 되는 표/KPI 는 이 함수 대신 per-value `fmtKrwFromJo` 를 써라(0.0 완전 차단).
+ * from-단위(기본 '조') 값들이 각자 어느 단위(조/억/만/원)로 읽히는지 세어 **최빈 단위 하나로 통일**한다.
+ * "억이 지배하면 전부 억" — 손익 표처럼 매출(조)·영업이익(억)이 섞이면 다수인 억으로 통일해 혼합·"0.0조"
+ * 를 동시에 없앤다(매출 5.9조→59,000, 영업익 0.3조→3,000, 단위는 '억' 하나). 대기업(전부 조)은 조 유지.
+ * 반환 scale = from→표시 환산계수, fmt = 그 단위로 포맷(접미 없음). 통화 아닌 단위(%·배·일)는 항등.
  */
 export function pickKrwUnit(values: ReadonlyArray<number | null | undefined>, opts: { from?: string } = {}): KrwScale {
 	const from = opts.from ?? '조';
 	const base = UNIT_TO_WON[from];
 	if (base == null) return { unit: from, scale: 1, fmt: (v) => fmtUnitValue(v, from) }; // 통화 아님 — 항등
 
-	let maxAbs = 0;
-	for (const v of values) if (typeof v === 'number' && Number.isFinite(v)) maxAbs = Math.max(maxAbs, Math.abs(v));
-	const maxWon = maxAbs * base;
+	// 값마다 자연 단위를 구해 최빈 단위로 통일(동률은 더 큰 단위=더 간결한 쪽). 0·결측은 제외.
+	const counts = new Map<number, number>();
+	for (const v of values) {
+		if (typeof v !== 'number' || !Number.isFinite(v) || v === 0) continue;
+		const u = unitFloor(Math.abs(v) * base);
+		counts.set(u, (counts.get(u) ?? 0) + 1);
+	}
+	let unitWon = 1e12;
+	let best = 0;
+	for (const [u, c] of counts) if (c > best || (c === best && u > unitWon)) { best = c; unitWon = u; }
 
-	let unit = '원';
-	let unitWon = 1;
-	if (maxWon >= 1e12) { unit = '조'; unitWon = 1e12; }
-	else if (maxWon >= 1e8) { unit = '억'; unitWon = 1e8; }
-	else if (maxWon >= 1e4) { unit = '만'; unitWon = 1e4; }
-
+	const unit = WON_TO_UNIT[unitWon] ?? '조';
 	const scale = base / unitWon;
 	return { unit, scale, fmt: (v) => fmtUnitValue(v * scale, unit) };
 }

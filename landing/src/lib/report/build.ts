@@ -379,12 +379,12 @@ function buildEarningsPower(
 				return ic > 0 ? +((nopat / ic) * 100).toFixed(1) : null;
 			});
 			const roicL = lastNonNull(aRoic);
-			const { scale } = scaleAmt(aRev);
+			const { unit: annUnit, scale } = scaleAmt(aRev);
 			const annTbl: ReportBlock = {
 				type: 'table',
 				label: '연간 추세 (사업보고서 기준)',
 				data: [
-					{ '연간 지표': '매출액(조)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtScaled(aRev[i], scale)])) },
+					{ '연간 지표': `매출액(${annUnit.replace('원', '')})`, ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtScaled(aRev[i], scale)])) },
 					{ '연간 지표': '영업이익률(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aOpm[i])])) },
 					{ '연간 지표': '순이익률(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aNpm[i])])) },
 					{ '연간 지표': 'ROE(%)', ...Object.fromEntries(aw.periods.map((p, i) => [p, fmtPct(aRoe[i])])) },
