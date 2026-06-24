@@ -94,15 +94,16 @@ describe('projectReport — 덱 구조 + 정직', () => {
 			{ type: 'flags', kind: 'opportunity', flags: ['신규 라인 가동'] }
 		]
 	};
-	it('cover → kpis → finChart → 섹션카드(시각 우선 1장) → closing 순서', () => {
+	it('cover → kpis → finChart → 섹션카드(시각만 1장) — 자동 종합·산문·신호 없음', () => {
 		const deck = projectReport(model({ sections: [sec] }), { heroUrls: ['https://x/h.webp'] });
 		const kinds = deck.cards.map((c) => c.kind);
 		expect(kinds[0]).toBe('cover');
 		expect(kinds).toContain('kpis');
 		expect(kinds).toContain('finChart');
-		expect(kinds).toContain('line'); // 섹션은 차트(line) 1장만 — flags 는 같은 섹션이라 탈락(시각 우선)
+		expect(kinds).toContain('line'); // 섹션은 차트(line) 1장만 — flags 는 같은 섹션이라 탈락(시각만)
 		expect(kinds).not.toContain('flags');
-		expect(kinds.at(-1)).toBe('closing');
+		expect(kinds).not.toContain('closing'); // 자동 종합 제거 — 종합/서사는 수기 editorial 로
+		expect(kinds).not.toContain('narrative'); // 자동 산문 제거
 		expect(deck.cards.filter((c) => c.kind === 'line')[0]).toMatchObject({ heading: '재무분석', sub: '수익성은 지속되는가' });
 	});
 	it('cover 는 모델값 그대로(신규 숫자 합성 0)', () => {
@@ -136,7 +137,7 @@ describe('큐레이션 오버레이(CarouselSpec) — notes/order', () => {
 		key: 'debt',
 		title: '신용 -- 부채',
 		sourceEngine: 'credit',
-		blocks: [{ type: 'flags', kind: 'warning', flags: ['부채 증가'] }]
+		blocks: [{ type: 'bars', rows: [{ label: '부채', value: 1, display: '1' }] }]
 	};
 	it('notes[섹션key] → 섹션 첫 카드 note 주입', () => {
 		const deck = projectReport(model({ sections: [secA] }), { spec: { notes: { profit: '본업 현금이 받친다' } } });
@@ -146,7 +147,7 @@ describe('큐레이션 오버레이(CarouselSpec) — notes/order', () => {
 	it('order → 섹션 필터/재정렬(미지정 key 제외)', () => {
 		const deck = projectReport(model({ sections: [secA, secB] }), { spec: { order: ['debt'] } });
 		// debt 만 남고 profit(line) 제외.
-		expect(deck.cards.some((c) => c.kind === 'flags')).toBe(true);
+		expect(deck.cards.some((c) => c.kind === 'bars')).toBe(true);
 		expect(deck.cards.some((c) => c.kind === 'line')).toBe(false);
 	});
 	it('spec 없으면 자동 투영 그대로(note 없음)', () => {

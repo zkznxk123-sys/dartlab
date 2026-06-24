@@ -153,7 +153,7 @@
 	const line = $derived(card.kind === 'line' ? lineGeo(card.series, card.markers ?? []) : null);
 	const barMax = $derived(card.kind === 'bars' ? Math.max(1, ...card.rows.map((r) => Math.abs(r.value))) : 1);
 	// 비중 차트 세그먼트 색 — 캐러셀 팔레트(로즈+그레이)만. 초록/앰버/보라/시안 금지.
-	const SHARE_C = ['#ff3f6f', '#ff9ab0', '#d8e2f0', '#9aa7c0', '#6b7794', '#c0cad8', '#7f8aa3'];
+	const SHARE_C = ['var(--dl-accent)', 'var(--dl-accent-light)', '#d8e2f0', '#9aa7c0', '#6b7794', '#c0cad8', '#7f8aa3'];
 	const shareColor = (i: number) => SHARE_C[i % SHARE_C.length];
 </script>
 

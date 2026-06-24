@@ -125,17 +125,20 @@ export function projectReport(
 		}
 	}
 
-	const thesis = clean(model.closing.map((c) => c.line).filter(Boolean).join(' ').trim() || model.conclusion);
-	if (thesis) cards.push({ kind: 'closing', heading: '종합', thesis });
+	// 종합(closing)·자동 산문 제거 — 자동은 표·그래프만. 종합/서사는 수기 editorial 슬라이드(carousel: 블록)로.
 
 	assignHeroes(cards, heroUrls);
 	return { ...base, cards };
 }
 
-// 섹션 대표 카드 — 시각(차트) 우선, 그다음 신호·지표, 텍스트는 최후. 인스타 캐러셀 = 시각 우선.
-const KIND_RANK: Record<string, number> = { line: 0, bars: 0, share: 1, kpis: 2, flags: 3, table: 4, narrative: 5 };
+// 자동 섹션 슬라이드 = **시각(표·그래프)만**. 산문(narrative)·신호(flags)·지표(kpis) 자동 생성 금지
+// (자동 텍스트는 엉망 — 종합/서사는 수기 editorial 슬라이드로). 섹션당 1장(시각 우선·과다 슬라이드 방지).
+const AUTO_VISUAL = new Set(['line', 'bars', 'share', 'table']);
+const KIND_RANK: Record<string, number> = { line: 0, bars: 0, share: 1, table: 2 };
 function pickSectionCard(blocks: ReportBlock[], head: HeadCtx): CarouselCard | null {
-	const cards = blocks.map((b) => projectBlock(b, head)).filter((c): c is CarouselCard => c !== null);
+	const cards = blocks
+		.map((b) => projectBlock(b, head))
+		.filter((c): c is CarouselCard => c !== null && AUTO_VISUAL.has(c.kind));
 	if (!cards.length) return null;
 	return cards.sort((a, b) => (KIND_RANK[a.kind] ?? 9) - (KIND_RANK[b.kind] ?? 9))[0];
 }
