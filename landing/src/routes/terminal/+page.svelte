@@ -5,9 +5,9 @@
 	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 	import { terminalHosts, terminalLinks } from '$lib/terminal-shell/terminalShell';
 	import { loadDartDb } from '$lib/data/duckdb';
-	import { loadContractPosts } from '$lib/cards/contract';
+	import { loadCarousels } from '$lib/cards/contract';
 	import { loadMediaIndex } from '$lib/cards/media';
-	import type { MediaIndex, ContractPost } from '$lib/cards/model';
+	import type { MediaIndex, CarouselContract } from '$lib/cards/model';
 	import PostModal from '$lib/cards/PostModal.svelte';
 
 	// DuckDB-WASM 프리워밍 — JSON 데이터 로드와 병렬로 미리 인스턴스화 (주가 차트 체감속도↑)
@@ -22,10 +22,10 @@
 
 	// 카드뉴스(편집 캐러셀) — 발간된 글 목록(회사당 N편) + 미디어(hero·표시명). 회사 네비「카드뉴스」노출 판단·다이얼로그 데이터.
 	// surface 는 cardsCodes/onOpenCards 콜백만 받고, 포스트 다이얼로그(Deck=landing 의존)는 이 셸이 오버레이로 띄운다.
-	let cardsPosts = $state<ContractPost[]>([]);
+	let cardsPosts = $state<CarouselContract[]>([]);
 	let media = $state<MediaIndex | null>(null);
 	let cardsPost = $state<{ code: string; slug: string; corpName: string } | null>(null);
-	loadContractPosts().then((p) => (cardsPosts = p));
+	loadCarousels().then((p) => (cardsPosts = p));
 	loadMediaIndex().then((m) => (media = m));
 	// 카드 있는 회사 코드 집합(surface 의 「카드뉴스」버튼 노출 판단). 회사당 N편이어도 코드 1개.
 	const cardsCodes = $derived(new Set(cardsPosts.map((p) => p.code)));

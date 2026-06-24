@@ -107,15 +107,10 @@ export interface CarouselContract {
 	/** 자동 덱 오버레이(blog frontmatter `carousel:` hero/order/notes) — 계약에 실어 /cards 가 라이브(blog 번들 비의존). */
 	spec?: CarouselSpec;
 }
-/** 피드 인덱스 1엔트리 — 회사당 N편(같은 code, 다른 slug). date 내림차순 정렬된 발간 순서. */
-export interface ContractPost {
-	code: string;
-	slug: string;
-	title?: string;
-	date?: string;
-}
+/** 단일 파일 carousels/index.json — 전 캐러셀 계약(슬라이드까지) 배열. date 내림차순 발간 순서.
+ *  피드·상세 모두 이 한 번 fetch 로(별도 인덱스 파일·카드별 round-trip 0). 회사당 N편=같은 code 다른 slug. */
 export interface ContractIndex {
-	posts: ContractPost[];
+	posts: CarouselContract[];
 }
 
 // ── 큐레이션 오버레이(P5) — blog frontmatter `carousel:` 선택 블록. 없으면 자동 투영만. ──

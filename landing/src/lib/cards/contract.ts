@@ -1,34 +1,24 @@
-// 편집 카드 캐러셀 계약 클라이언트 — hfMedia `carousels/index.json`(글 목록 posts[]) + `carousels/{slug}.json`
-// (손글 편집 슬라이드)을 로드하고, 슬라이드 image(semantic)를 hfMedia 해시 파일명 URL 로 해석한다.
-// 키 = 글 슬러그(회사당 N편 1:N). 굽지 않음 — 계약을 라이브로 읽어 렌더. 미게시면 graceful(빈 배열 / null).
+// 편집 카드 캐러셀 계약 클라이언트 — hfMedia `carousels/index.json` **한 파일**에 전 계약(슬라이드까지)이
+// 배열로 담겨, 피드·상세 모두 이 1회 fetch 로 해결(별도 인덱스·카드별 round-trip 0). 슬라이드 image(semantic)는
+// hfMedia 해시 파일명 URL 로 해석. 키 = 글 슬러그(회사당 N편 1:N). 굽지 않음. 미게시면 graceful(빈 배열 / null).
 import { originUrl } from '@dartlab/ui-runtime/data/origins/registry';
-import type { CarouselContract, ContractIndex, ContractPost, CarouselCard, MediaIndex } from './model';
+import type { CarouselContract, ContractIndex, CarouselCard, MediaIndex } from './model';
 import { mediaKey, mediaCompany } from './media';
 
-let _posts: Promise<ContractPost[]> | null = null;
+let _all: Promise<CarouselContract[]> | null = null;
 
-/** 발간된 캐러셀 글 목록(피드). index.json posts[] 순서 = 발간 최신순(build 가 date 내림차순). 1회 fetch. */
-export function loadContractPosts(): Promise<ContractPost[]> {
-	_posts ??= fetch(originUrl('hfMedia', 'carousels/index.json'))
+/** 전 캐러셀 계약 1회 fetch(단일 파일·프로세스 캐시). posts[] 순서 = 발간 최신순(build 가 date 내림차순). */
+export function loadCarousels(): Promise<CarouselContract[]> {
+	_all ??= fetch(originUrl('hfMedia', 'carousels/index.json'))
 		.then((r) => (r.ok ? (r.json() as Promise<ContractIndex>) : { posts: [] }))
 		.then((j) => j.posts ?? [])
-		.catch(() => [] as ContractPost[]);
-	return _posts;
+		.catch(() => [] as CarouselContract[]);
+	return _all;
 }
 
-const _cache = new Map<string, Promise<CarouselContract | null>>();
-
-/** 한 글 편집 계약 로드(슬러그 키·프로세스 캐시). 없으면 null. */
+/** 한 글 편집 계약(슬러그) — 캐시된 전체에서 찾기(추가 fetch 0). 없으면 null. */
 export function loadContract(slug: string): Promise<CarouselContract | null> {
-	if (!_cache.has(slug)) {
-		_cache.set(
-			slug,
-			fetch(originUrl('hfMedia', `carousels/${slug}.json`))
-				.then((r) => (r.ok ? (r.json() as Promise<CarouselContract>) : null))
-				.catch(() => null)
-		);
-	}
-	return _cache.get(slug)!;
+	return loadCarousels().then((all) => all.find((c) => c.slug === slug) ?? null);
 }
 
 /** 슬라이드 image(semantic 'cleanroom-engine') → hfMedia 해시 파일명 URL. 매니페스트에 없으면 undefined(폴백). */

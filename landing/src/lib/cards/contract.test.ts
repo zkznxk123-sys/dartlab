@@ -14,43 +14,39 @@ function mockFetch(map: Record<string, unknown>) {
 	});
 }
 
-describe('contract 슬러그-키', () => {
-	beforeEach(() => vi.resetModules()); // 모듈 캐시(_posts/_cache) 리셋
+const POSTS = [
+	{ code: '005930', slug: '005930-samsung', title: '삼성', name: '삼성전자', date: '2026-01-02', slides: [] },
+	{ code: '000660', slug: '000660-skhynix', name: 'SK하이닉스', date: '2026-01-01', slides: [] }
+];
 
-	it('loadContractPosts 는 index.json posts[] 를 순서대로 파싱', async () => {
-		vi.stubGlobal(
-			'fetch',
-			mockFetch({
-				'carousels/index.json': {
-					posts: [
-						{ code: '005930', slug: '005930-samsung', title: '삼성', date: '2026-01-02' },
-						{ code: '000660', slug: '000660-skhynix', date: '2026-01-01' }
-					]
-				}
-			})
-		);
-		const { loadContractPosts } = await import('./contract');
-		const posts = await loadContractPosts();
-		expect(posts.map((p) => p.slug)).toEqual(['005930-samsung', '000660-skhynix']);
-		expect(posts[0].title).toBe('삼성');
+describe('단일 파일 캐러셀 계약', () => {
+	beforeEach(() => vi.resetModules()); // 모듈 캐시(_all) 리셋
+
+	it('loadCarousels 는 index.json posts[](전체 계약)를 1회 fetch·캐시', async () => {
+		const f = mockFetch({ 'carousels/index.json': { posts: POSTS } });
+		vi.stubGlobal('fetch', f);
+		const { loadCarousels } = await import('./contract');
+		const all = await loadCarousels();
+		expect(all.map((c) => c.slug)).toEqual(['005930-samsung', '000660-skhynix']);
+		await loadCarousels();
+		expect(f).toHaveBeenCalledTimes(1); // 두 번 호출해도 fetch 1회
 	});
 
-	it('loadContract 는 슬러그 경로(carousels/{slug}.json)로 fetch', async () => {
-		const f = mockFetch({
-			'carousels/003230-samyang-foods.json': { code: '003230', slug: '003230-samyang-foods', name: '삼양식품', slides: [] }
-		});
+	it('loadContract 는 추가 fetch 없이 캐시된 전체에서 슬러그로 찾는다', async () => {
+		const f = mockFetch({ 'carousels/index.json': { posts: POSTS } });
 		vi.stubGlobal('fetch', f);
 		const { loadContract } = await import('./contract');
-		const c = await loadContract('003230-samyang-foods');
-		expect(c?.code).toBe('003230');
-		expect(c?.slug).toBe('003230-samyang-foods');
-		expect(String(f.mock.calls[0][0])).toContain('carousels/003230-samyang-foods.json');
+		const c = await loadContract('000660-skhynix');
+		expect(c?.code).toBe('000660');
+		expect(f).toHaveBeenCalledTimes(1); // per-slug round-trip 없음 — 단일 파일에서 찾기
+		expect(String(f.mock.calls[0][0])).toContain('carousels/index.json');
+		expect(await loadContract('nope')).toBeNull();
 	});
 
-	it('미게시(404) 면 posts 빈 배열·계약 null(빈 화면 방지)', async () => {
+	it('미게시(404) 면 빈 배열·계약 null(빈 화면 방지)', async () => {
 		vi.stubGlobal('fetch', mockFetch({}));
-		const { loadContractPosts, loadContract } = await import('./contract');
-		expect(await loadContractPosts()).toEqual([]);
-		expect(await loadContract('nope')).toBeNull();
+		const { loadCarousels, loadContract } = await import('./contract');
+		expect(await loadCarousels()).toEqual([]);
+		expect(await loadContract('x')).toBeNull();
 	});
 });

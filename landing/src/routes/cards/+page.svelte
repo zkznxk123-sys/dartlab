@@ -8,8 +8,8 @@
 	import '@dartlab/ui-surfaces/terminal/terminal.css';
 	import { DARTLAB_BRAND_LINKS, SupportDialog, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
 	import { loadMediaIndex } from '$lib/cards/media';
-	import { loadContractPosts } from '$lib/cards/contract';
-	import type { MediaIndex, ContractPost } from '$lib/cards/model';
+	import { loadCarousels } from '$lib/cards/contract';
+	import type { MediaIndex, CarouselContract } from '$lib/cards/model';
 	import PostModal from '$lib/cards/PostModal.svelte';
 	import CoverThumb from '$lib/cards/CoverThumb.svelte';
 
@@ -23,7 +23,7 @@
 	fetchGithubStars(links.repo).then((n) => (ghStars = n));
 
 	let media = $state<MediaIndex | null>(null);
-	let posts = $state<ContractPost[]>([]); // 발간된 편집 캐러셀 글(회사당 N편 1:N) = 피드
+	let posts = $state<CarouselContract[]>([]); // 전 캐러셀 계약(회사당 N편 1:N) = 피드, 단일 fetch
 	let loaded = $state(false);
 	let query = $state(data.sym || '');
 	let visibleCount = $state(12);
@@ -38,7 +38,7 @@
 	}
 
 	loadMediaIndex().then((m) => (media = m));
-	loadContractPosts().then((p) => {
+	loadCarousels().then((p) => {
 		// posts 순서 그대로 = 발간 최신순(build 가 date 내림차순 정렬). 재정렬 금지.
 		posts = p;
 		loaded = true;
@@ -46,13 +46,13 @@
 		if (data.sym && !posts.some((x) => x.code === data.sym)) query = '';
 	});
 
-	// 피드 = 발간된 편집 캐러셀 글(회사당 N편). 이름은 hfMedia 매니페스트에서.
+	// 피드 = 전 캐러셀 계약(회사당 N편). 이름은 계약(name) 우선, 없으면 hfMedia 매니페스트.
 	const feedRows = $derived.by(() => {
 		const rows = posts.map((p) => ({
 			stockCode: p.code,
 			slug: p.slug,
 			title: p.title ?? '',
-			corpName: media?.companies[p.code]?.displayName ?? p.code
+			corpName: p.name || media?.companies[p.code]?.displayName || p.code
 		}));
 		const q = query.trim().toLowerCase();
 		return q
