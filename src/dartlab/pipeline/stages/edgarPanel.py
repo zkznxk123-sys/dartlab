@@ -336,6 +336,10 @@ def _publishTickers(token: str | None) -> None:
     src = Path(cfg.dataDir) / "edgar" / "tickers.parquet"
     if not src.exists():
         return
+    try:
+        _enrichTickerGaps(src)  # company_tickers.json 누락 sp500(BK·CTRA·HOLX) browse-edgar 보강
+    except Exception:  # noqa: BLE001 — 보강 실패해도 기본 맵 업로드
+        pass
     retryHfCall(
         HfApi().upload_file,
         path_or_fileobj=str(src),
@@ -345,6 +349,48 @@ def _publishTickers(token: str | None) -> None:
         token=_resolveHfToken(token),
         commit_message="edgar tickers map publish (S0.2)",
     )
+
+
+def _enrichTickerGaps(src: "Path") -> None:
+    """universe 에 있으나 company_tickers.json 에 없는 ticker 를 browse-edgar CIK 로 보강.
+
+    SEC ``company_tickers.json`` 은 일부 활성 sp500(Coterra CTRA·Hologic HOLX·BNY Mellon BK)을
+    누락한다 → 발행 맵(tickers.parquet)도 그 종목을 빠뜨려 브라우저가 finance(cik-keyed)를 못
+    해소한다. universe gap 을 browse-edgar 정본 인덱스로 채워 발행 맵을 universe-완전하게 한다.
+    gap 은 소수(실측 3종)라 bounded. 해소 실패분은 조용히 skip(원문 맵 유지).
+
+    Args:
+        src: ``data/edgar/tickers.parquet`` 경로(in-place 보강).
+
+    Raises:
+        없음 — 호출부가 격리.
+    """
+    import polars as pl
+
+    from dartlab.gather.original.edgar.submissions import _browseEdgarCik
+
+    df = pl.read_parquet(str(src))
+    if "ticker" not in df.columns or "cik" not in df.columns:
+        return
+    have = set(df["ticker"].cast(pl.Utf8).str.to_uppercase().to_list())
+    gap = [t for t in _priorityTickers() if t not in have]
+    # df 스키마 무관(3-col company_tickers.json or 6-col universe) — 모든 컬럼 null 초기화 후
+    # ticker/cik/title 만 채운다(브라우저는 ticker↔cik 만 소비, 나머지는 null 허용).
+    rows: list[dict] = []
+    for t in gap:
+        cik = _browseEdgarCik(t)
+        if not cik:
+            continue
+        row: dict = {c: None for c in df.columns}
+        row["ticker"] = t
+        row["cik"] = cik
+        if "title" in row:
+            row["title"] = t
+        rows.append(row)
+    if not rows:
+        return
+    extra = pl.DataFrame(rows, schema={c: df.schema[c] for c in df.columns})
+    pl.concat([df, extra], how="vertical").write_parquet(str(src))
 
 
 def _flushRebuildBatch(

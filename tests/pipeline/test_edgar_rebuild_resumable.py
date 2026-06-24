@@ -89,6 +89,7 @@ def test_publish_tickers_uploads_to_canonical_path(monkeypatch: pytest.MonkeyPat
     (edgardir / "tickers.parquet").write_bytes(b"PAR1")  # 존재만 — 내용 무관(업로드 mock)
     monkeypatch.setattr(cfg, "dataDir", str(tmp_path))
     monkeypatch.setattr("dartlab.gather.edgar.identity.loadTickers", lambda *, refresh: None)
+    monkeypatch.setattr(ep, "_enrichTickerGaps", lambda src: None)  # gap 보강은 별도 테스트
     monkeypatch.setattr("dartlab.pipeline.hfUpload._resolveHfToken", lambda token: "tok")
 
     captured: dict = {}
@@ -97,6 +98,33 @@ def test_publish_tickers_uploads_to_canonical_path(monkeypatch: pytest.MonkeyPat
     ep._publishTickers(None)
     assert captured["path_in_repo"] == "edgar/tickers/tickers.parquet", "브라우저 기대 경로 고정"
     assert captured["repo_type"] == "dataset"
+
+
+def test_enrich_ticker_gaps_fills_company_tickers_misses(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """S0.2 — company_tickers.json 누락 universe ticker(CTRA 등)를 browse-edgar CIK 로 보강."""
+    import polars as pl
+
+    import dartlab.pipeline.stages.edgarPanel as ep
+
+    src = tmp_path / "tickers.parquet"
+    # 발행 스키마(cik Utf8 zero-pad) — AAPL 만 있고 CTRA 누락
+    pl.DataFrame({"ticker": ["AAPL"], "cik": ["0000320193"], "title": ["Apple Inc."]}).write_parquet(str(src))
+
+    monkeypatch.setattr(ep, "_priorityTickers", lambda: ["AAPL", "CTRA", "ZZZZQQ"])
+    # CTRA 는 해소, ZZZZQQ 는 미해소(None) → skip
+    resolved = {"CTRA": "0000858470"}
+    monkeypatch.setattr(
+        "dartlab.gather.original.edgar.submissions._browseEdgarCik",
+        lambda t: resolved.get(t),
+    )
+
+    ep._enrichTickerGaps(src)
+
+    df = pl.read_parquet(str(src))
+    by = dict(zip(df["ticker"].to_list(), df["cik"].to_list()))
+    assert by.get("CTRA") == "0000858470", "gap 보강"
+    assert "ZZZZQQ" not in by, "미해소는 skip"
+    assert by.get("AAPL") == "0000320193", "기존 무회귀"
 
 
 def test_publish_tickers_skips_when_file_absent(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
