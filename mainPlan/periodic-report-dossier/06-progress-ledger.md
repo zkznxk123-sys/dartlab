@@ -43,7 +43,7 @@
 5. **Phase 2 (엔진 bake)**: 인적자본 분위 배열 + rndIntensity/costByNature CI parquet(08 G1 NEEDS-PARSING/CI-bake). slip 허용.
 6. **Phase 3 (선택)**: 가동률 원문 발췌(zero 추출 한정).
 
-> Phase 1b 잔여 하드닝(08 §3 상태기계): factsState 'error'+8s 타임아웃+재시도·형제 패널 4-state·고정높이 스켈레톤·a11y role=status — SHIP 전 정정이나 별도 단위(load effect 변경=UI). F1 과 함께 or 선행.
+> Phase 1b 하드닝(08 §3 상태기계): ✅ **facts 패널 'error' 상태 + 8s 타임아웃 race + ↻다시 시도 + role=status** 완료(영원히 '불러오는 중' 멈춤=원래 hang 버그 클래스 차단·reloadToken effect 재발화). 형제 패널(workforce/shareholder/investments)은 `guarded()` 로 이미 graceful degrade(hang→null→패널 부재, spinner 없음). 잔여 폴리시=형제 error-distinct 4-state·고정높이 스켈레톤·prefers-reduced-motion(별도 단위). UI=운영자 눈검수 대기.
 
 ## 열린 결정 (착수 전 확인 가능)
 

@@ -163,7 +163,20 @@
 	let regFilings = $state<RegularFiling[]>([]);
 	let nonRegFilings = $state<NonRegularFiling[]>([]);
 	let nonRegState = $state<'loading' | 'ready' | 'empty'>('loading');
-	let factsState = $state<'loading' | 'ready' | 'empty'>('loading');
+	let factsState = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
+	let reloadToken = $state(0); // 정직 로드 — '다시 시도' 시 증가 → 로드 effect 재발화 (영원히 '불러오는 중' 금지, 08 §3.1)
+	// per-company read 가 hang/실패해도 영원히 '불러오는 중' 금지 — 8s 타임아웃 race 로 error 와 empty 구분.
+	// empty='봤는데 없다' / error='못 봤다'(확신오정렬 가드). 타임아웃 타이머는 settle 시 해제(누수 없음).
+	const FACTS_TIMEOUT_MS = 8000;
+	function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+		return new Promise<T>((resolve, reject) => {
+			const t = setTimeout(() => reject(new Error('timeout')), ms);
+			p.then(
+				(v) => { clearTimeout(t); resolve(v); },
+				(e) => { clearTimeout(t); reject(e); }
+			);
+		});
+	}
 	let news = $state<NewsItem[]>([]); // 종목 뉴스(네이버 헤드라인+스니펫) — 워커 /news 서버사이드 read
 	let newsState = $state<'loading' | 'ready' | 'empty'>('loading');
 	// 도시에 헤더 리본 — 6 fact 의 출처(rcept_no)·결산기준일(stlm_dt)에서 단일 as-of 스탬프 파생.
@@ -196,6 +209,7 @@
 	const factSrcUrl = (rceptNo: string | null | undefined): string | null => (rceptNo ? viewerUrl(marketForCode(co.code), rceptNo) : null);
 	$effect(() => {
 		const code = co.code;
+		void reloadToken; // tracked — '다시 시도' 가 이 effect 를 재발화
 		factsState = 'loading';
 		reportFacts = [];
 		relations = null;
@@ -239,11 +253,18 @@
 			shPeriods = s ?? [];
 			shareholders = s?.at(-1) ?? null; // 최신기 = 인라인/다이얼로그 기본값
 		});
-		rt.company.reportFacts(code).then((f) => {
-			if (cancelled) return;
-			reportFacts = f;
-			factsState = f.length ? 'ready' : 'empty';
-		});
+		withTimeout(rt.company.reportFacts(code), FACTS_TIMEOUT_MS).then(
+			(f) => {
+				if (cancelled) return;
+				reportFacts = f;
+				factsState = f.length ? 'ready' : 'empty';
+			},
+			(err) => {
+				if (cancelled) return;
+				console.warn('[terminal] reportFacts load failed:', err);
+				factsState = 'error'; // empty 와 구분 — '못 봤다'(타임아웃/reject), '다시 시도' 노출
+			}
+		);
 		rt.company.relations(code).then((r) => {
 			if (!cancelled) relations = r;
 		});
@@ -590,6 +611,8 @@
 		</div>
 	{:else if factsState === 'loading'}
 		<div class="storyEmpty">{lang === 'en' ? 'loading report facts …' : '정기보고서 팩트 불러오는 중 …'}</div>
+	{:else if factsState === 'error'}
+		<div class="storyEmpty" role="status">{lang === 'en' ? 'Failed to load · ' : '불러오지 못했습니다 · '}<button class="factRetry" onclick={() => reloadToken++}>↻ {lang === 'en' ? 'retry' : '다시 시도'}</button></div>
 	{:else}
 		<div class="storyEmpty">{lang === 'en' ? 'No periodic-report facts for this company.' : '해당 회사 정기보고서 팩트 없음.'}</div>
 	{/if}

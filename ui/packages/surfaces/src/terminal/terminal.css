@@ -971,6 +971,8 @@
 .dlTerm .storyMeta { font-family: var(--mono); font-size: 9px; color: var(--dimmer); margin-top: 3px; }
 .dlTerm .storyLink { color: var(--amber); text-decoration: none; }
 .dlTerm .storyEmpty { padding: 10px 8px; font-size: 10px; color: var(--dimmer); font-family: var(--mono); line-height: 1.5; }
+.dlTerm .factRetry { background: none; border: none; color: var(--amber); font-family: var(--mono); font-size: 10px; cursor: pointer; padding: 0; text-decoration: underline; }
+.dlTerm .factRetry:hover { opacity: 0.8; }
 
 /* AI */
 .dlTerm .conf { font-family: var(--cond); font-size: 9px; color: var(--dim); letter-spacing: 0.5px; }
