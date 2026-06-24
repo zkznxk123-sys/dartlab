@@ -12,7 +12,6 @@
 		sym,
 		slug,
 		corpName,
-		base = '',
 		heroUrls = [],
 		perspectiveKey = 'earningsPower',
 		onEnlarge
@@ -21,7 +20,6 @@
 		sym: string;
 		slug: string;
 		corpName: string;
-		base?: string;
 		heroUrls?: string[];
 		perspectiveKey?: string;
 		onEnlarge?: () => void;
@@ -144,9 +142,9 @@
 			{/each}
 		</div>
 
-		<!-- 코너 크롬(전 슬라이드 고정) — 회사명·코드 + dartlab 시그니처 + 페이지 + 확대 -->
+		<!-- 코너 크롬(전 슬라이드 고정) — 회사명·코드 + 페이지 + 확대. dartlab 서명은 우측 캡션 패널에 있어
+		     캐러셀 이미지엔 안 얹는다(중복 + 슬라이드 본문과 겹침 방지). -->
 		<div class="badge">{deck.corpName}{sym ? ` · ${sym}` : ''}</div>
-		{#if base}<img class="sig" src="{base}/avatar.webp" alt="DartLab" width="40" height="40" />{/if}
 		{#if total > 1}<div class="pageBadge">{idx + 1} / {total}</div>{/if}
 		{#if onEnlarge}<button class="enlarge" onclick={onEnlarge} title="확대" aria-label="확대">⤢</button>{/if}
 
@@ -216,15 +214,6 @@
 		border: 1px solid rgba(232, 234, 237, 0.12);
 		border-radius: 999px;
 		z-index: 3;
-	}
-	.sig {
-		position: absolute;
-		left: 16px;
-		bottom: 14px;
-		opacity: 0.85;
-		filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
-		z-index: 3;
-		pointer-events: none;
 	}
 	.pageBadge {
 		position: absolute;

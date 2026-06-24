@@ -53,7 +53,7 @@
 <div class="post" role="dialog" aria-modal="true" aria-label="{corpName} 포스트" onclick={onClose}>
 	<div class="postInner" role="document" onclick={(e) => e.stopPropagation()}>
 		<div class="postLeft">
-			<Deck {rt} sym={code} {slug} {corpName} {base} heroUrls={heroUrls(media, code)} />
+			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} />
 		</div>
 		<aside class="postRight">
 			<header class="prHead">
