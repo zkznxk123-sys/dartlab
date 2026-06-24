@@ -4,6 +4,7 @@
 	// 재현 — 새로 짓지 않음. 차트는 $lib/report/render 순수 SVG(klinecharts·백테스트 0), finChart 만 MiniFinChart.
 	import type { DartLabRuntime, FinCard } from '@dartlab/ui-contracts';
 	import { MiniFinChart } from '@dartlab/ui-surfaces/terminal';
+	import { fmtKrwFromJo } from '@dartlab/ui-format/krw';
 	import { CARD, CARD_SERIES, accentParts, stripDots } from './theme';
 	import { cellTone, verdictTone, TXT_COLS, lineGeo, wonLabel } from '$lib/report/render';
 	import type { CarouselCard } from './model';
@@ -67,27 +68,6 @@
 	let finCards = $state<{ card: FinCard; periods: string[] } | null>(null);
 	let finState = $state<'idle' | 'loading' | 'ready' | 'empty'>('idle');
 
-	// 조 단위 카드인데 작은 항목이 0.0조로 반올림돼 표가 무의미해지는 작은 회사 → 전 시리즈 억으로 환산
-	// (×1e4·unit='억'). 차트(MiniFinChart unitScale)·표(finTable)가 같은 단위. 큰 회사는 그대로 조.
-	function demoteUnit(c: FinCard): FinCard {
-		if (c.unit !== '조') return c;
-		// 최근 표시구간(말단 6) 기준 — 역사적 고점이 강등을 막지 않게(현재 매출 0.6조여도 과거 2.2조면 조 유지되던 버그).
-		const recent = c.series.flatMap((s) => s.data.slice(-6)).filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
-		const nz = recent.map((v) => Math.abs(v)).filter((v) => v > 1e-9);
-		if (!nz.length) return c;
-		const minNz = Math.min(...nz);
-		const maxAbs = Math.max(...recent.map((v) => Math.abs(v)));
-		// 작은 항목이 0.05조 미만(=0.0 으로 반올림)이고 최근 최대도 1조 미만(=진짜 작은 회사)이면 억으로. 큰 회사는 조 유지.
-		if (minNz < 0.05 && maxAbs < 1.0) {
-			return {
-				...c,
-				unit: '억',
-				series: c.series.map((s) => ({ ...s, data: s.data.map((v) => (typeof v === 'number' && Number.isFinite(v) ? v * 1e4 : v)) }))
-			};
-		}
-		return c;
-	}
-
 	$effect(() => {
 		if (card.kind !== 'finChart') return;
 		finState = 'loading';
@@ -99,11 +79,9 @@
 				const view = b?.views?.quarter ?? b?.views?.annual ?? Object.values(b?.views ?? {}).find(Boolean);
 				const c0 = view?.cards?.[0];
 				if (c0 && view) {
-					// ★작은 회사 단위 강등 — 조 단위인데 작은 항목(영업익·순익)이 0.0조로 뭉개지면 억으로(차트+표
-					// 일괄, 데이터·축 환산만·구조 불변). 매출 0.8조→8,000억, 영업익 0.0조→320억 처럼 읽히게.
-					const c = demoteUnit(c0);
-					// 캐러셀 팔레트로 재색(엔진 기본 블루/주황/그린 → 로즈 계열).
-					const recolored = { ...c, series: c.series.map((s, i) => ({ ...s, color: CARD_SERIES[i % CARD_SERIES.length] })) };
+					// 단위 스케일은 SSOT 가 책임진다 — 차트 축은 MiniFinChart 내부 pickKrwUnit, 표는 셀별
+					// fmtKrwFromJo(자연 단위, 0.0조 차단). 여기선 raw 조 카드 그대로 넘기고 색만 캐러셀 팔레트로.
+					const recolored = { ...c0, series: c0.series.map((s, i) => ({ ...s, color: CARD_SERIES[i % CARD_SERIES.length] })) };
 					finCards = { card: recolored, periods: view.periods };
 					finState = 'ready';
 				} else finState = 'empty';
@@ -119,18 +97,22 @@
 		const all = finCards.periods;
 		const periods = all.slice(-6);
 		const off = all.length - periods.length;
+		// 조 카드(금액)는 셀별 자연 단위(fmtKrwFromJo) — 0.0조 원천 차단(0.0864조→"864억"). 그 외(%·배)는
+		// 적응 정밀도 + 단위 헤더. SSOT(@dartlab/ui-format)로 통일, 손수 1e4 강등·toFixed 분기 제거.
+		const isJo = finCards.card.unit === '조';
 		const fmt = (v: unknown): string => {
 			if (typeof v !== 'number' || !Number.isFinite(v)) return '–';
+			if (isJo) return fmtKrwFromJo(v);
 			const a = Math.abs(v);
 			if (a >= 100) return Math.round(v).toLocaleString();
 			if (a >= 1) return v.toFixed(1);
-			return v.toFixed(2); // 1 미만(조 유지된 작은 값 0.02 등)도 0.0 으로 안 뭉개지게 2 자리
+			return v.toFixed(2);
 		};
 		const rows = finCards.card.series.map((s) => ({
 			name: s.name,
 			values: periods.map((_, i) => fmt(s.data[off + i]))
 		}));
-		return { unit: finCards.card.unit ?? '', periods, rows };
+		return { unit: isJo ? '' : (finCards.card.unit ?? ''), periods, rows };
 	});
 
 	// 표 슬라이드에도 그래프 — 각 행(지표)을 한 선으로. 단위는 셀의 '%' 유무로 금액/비율 그룹 분리.

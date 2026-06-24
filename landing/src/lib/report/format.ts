@@ -1,5 +1,6 @@
 // 표시 포맷 헬퍼 — 재무 값은 모두 조(兆) KRW 단위(StmtRow.values 계약). 단위는 표별 자동 스케일.
 import type { Num } from '@dartlab/ui-contracts';
+import { fmtKrwFromJo } from '@dartlab/ui-format/krw';
 
 /** 기간 라벨 → 4자리 연도 컬럼 ('FY23' → '2023'). 분기 라벨은 그대로. */
 export function pYear(label: string): string {
@@ -24,14 +25,10 @@ export function fmtMult(v: Num, digits = 2): string {
 	return `${(v as number).toFixed(digits)}배`;
 }
 
-/** 단일 금액(조 단위 값) → 조/억 자동. KPI·문장용. */
+/** 단일 금액(조 단위 값) → 조/억 자연 단위. KPI·문장용. SSOT(@dartlab/ui-format) 위임 — 0.0조 차단. */
 export function fmtAmt1(v: Num): string {
 	if (v == null || !Number.isFinite(v)) return '-';
-	const n = v as number;
-	const a = Math.abs(n);
-	if (a >= 1) return `${n.toFixed(1)}조`;
-	if (a > 0) return `${Math.round(n * 10000).toLocaleString('en-US')}억`;
-	return '0';
+	return fmtKrwFromJo(v as number);
 }
 
 /** 조 단위 값 묶음 → 표 전체 단일 스케일 선택. */

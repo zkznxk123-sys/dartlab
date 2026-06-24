@@ -2,6 +2,7 @@
 	// 재무 분석 차트 — 막대+선·이중축·signed·stacked·refLine·heatmap.
 	// 계정명 범례 + Y축 숫자(좌/우) + X축 기간 + 호버 툴팁 + ! 해석 가이드 → 해석 가능. 크게.
 	import type { FinCard, Num } from '@dartlab/ui-contracts';
+	import { pickKrwUnit } from '@dartlab/ui-format/krw';
 	import { CARD_GUIDE } from '../lib/cardGuide';
 
 	interface Props {
@@ -113,19 +114,20 @@
 		return extent(vals, true);
 	});
 
-	// 조 단위 카드 자동 강등 — 좌축 최대 |값| < 0.5조면 억으로 표시 (중소형사 0.0조 범벅 방지).
-	// 데이터·스케일 불변, 라벨 환산만. 우축(%) 시리즈는 무관.
+	// 조 단위 카드 자동 단위 선택 — SSOT(@dartlab/ui-format pickKrwUnit)가 좌축 값들의 최대 크기로
+	// 표시 단위(조/억…)를 정한다(중소형사 0.0조 범벅 방지). 데이터·스케일 불변, 라벨 환산(k)만. 우축(%) 무관.
 	const unitScale = $derived.by<{ k: number; unit: string }>(() => {
 		if (card.unit !== '조') return { k: 1, unit: card.unit };
-		let m = 0;
+		const vals: number[] = [];
 		if (isWf) {
-			for (const b of wfBars) m = Math.max(m, Math.abs(b.from), Math.abs(b.to));
+			for (const b of wfBars) vals.push(b.from, b.to);
 		} else if (isHeat) {
-			for (const row of heat.vals) for (const v of row) if (fin(v)) m = Math.max(m, Math.abs(v));
+			for (const row of heat.vals) for (const v of row) if (fin(v)) vals.push(v);
 		} else {
-			for (const s of leftSeries) for (const v of s.data) if (fin(v)) m = Math.max(m, Math.abs(v));
+			for (const s of leftSeries) for (const v of s.data) if (fin(v)) vals.push(v);
 		}
-		return m > 0 && m < 0.5 ? { k: 1e4, unit: '억' } : { k: 1, unit: '조' };
+		const sc = pickKrwUnit(vals, { from: '조' });
+		return { k: sc.scale, unit: sc.unit };
 	});
 
 	const x = (i: number) => (n <= 1 ? M.l + plotW / 2 : M.l + (i / (n - 1)) * plotW);
