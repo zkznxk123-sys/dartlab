@@ -512,7 +512,6 @@
 				</div>
 			{/each}
 		</div>
-		<div class="pctNote">{lang === 'en' ? 'percentile across industry peers · ecosystem' : '동종업종 전 종목 대비 위치 · ecosystem'}</div>
 	</Panel>
 {/if}
 
@@ -744,7 +743,7 @@
 		{#snippet right()}<span class="dim">{lang === 'en' ? '5-feature' : '5피처'}</span>{/snippet}
 		<div class="creditTop"><div class="creditGrade"><span class="cgVal tCredit">{cr.grade}</span><span class="cgSub">{lang === 'en' ? 'health' : '건전도'} <b class={toneClass(cr.tone)}>{cr.healthScore}</b>/100 · PD <b class="tNeu">{cr.pd}</b></span></div></div>
 		<div class="creditTracks">{#each cr.tracks as t (t.en)}<div class="ctRow"><span class="ctName">{txc(t, lang)}</span><div class="ctTrack"><div class="ctFill" style={`width:${t.score}%`}></div></div><span class="ctVal mono">{t.score}</span></div>{/each}</div>
-		<div class="creditDiv">{lang === 'en' ? `From finance.json: debt ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, current ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. Heuristic dCR — not official.` : `finance.json 기반: 부채비율 ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, 유동비율 ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. 휴리스틱 dCR — 공식등급 아님.`}</div>
+		<div class="creditDiv">{lang === 'en' ? `Debt ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, current ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. Heuristic dCR — not official.` : `부채비율 ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, 유동비율 ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. 휴리스틱 dCR — 공식등급 아님.`}</div>
 	</Panel>
 	<!-- CHANGES -->
 	<Panel {lang} className="eChanges" prov="derived" title={{ kr: '전년 대비 변화', en: 'YoY CHANGES' }} flush>
@@ -760,7 +759,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="finNote">finance.json · 직전 사업연도 대비</div>
+		<div class="finNote">직전 사업연도 대비</div>
 	</Panel>
 </div>
 

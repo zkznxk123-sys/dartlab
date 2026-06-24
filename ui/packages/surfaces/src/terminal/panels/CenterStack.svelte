@@ -488,7 +488,7 @@
 
 <!-- GRADE STRIP — 백테스트 모드에선 숨김(비-백테스트 company 컨텍스트, 하단 보고서·프리플라이트 above-fold 확보). -->
 {#if !ctl.btReportMode}
-<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} sub={{ kr: 'ecosystem', en: 'ecosystem' }} flush>
+<Panel {lang} className="eAnalysis" prov="real" title={{ kr: '스캔 등급', en: 'SCAN GRADES' }} flush>
 	{#snippet right()}<button class="finFullBtn" onclick={() => (gradeOpen = true)} title={lang === 'en' ? 'analysis detail' : '분석 내용'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/snippet}
 	<div class="ecoMeta">{#each meta as m (m.l)}<div class="em"><span>{m.l}</span><b>{m.v}</b></div>{/each}</div>
 	<div class="gradeStrip" style={`grid-template-columns:repeat(${co.grades.length || 1},minmax(0,1fr))`}>
@@ -593,7 +593,7 @@
 {/if}
 
 <!-- VERDICT (종합 판정 — co.verdict 합성, 동기 tier 즉시 렌더) -->
-<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '종합 판정', en: 'VERDICT' }} sub={{ kr: 'verdict · 합성', en: 'verdict · synth' }} flush>
+<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: '종합 판정', en: 'VERDICT' }} flush>
 	{#snippet right()}<span class="vdRisk">{lang === 'en' ? 'risk' : '위험'} <b class="tDn">{vd.riskRed}</b>·<b class="tWarn">{vd.riskYellow}</b></span>{/snippet}
 	<div class="vdTop">
 		<span class={'vdBand ' + tcls(vd.band.tone)}>{txc(vd.band, lang)}</span>

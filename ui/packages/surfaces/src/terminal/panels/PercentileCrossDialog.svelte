@@ -92,7 +92,7 @@
 
 		<div class="pcxBody">
 			{#if !data.length}
-				<div class="pcxNone">{lang === 'en' ? 'No ecosystem node for this company.' : '이 회사의 ecosystem 노드가 없습니다.'}</div>
+				<div class="pcxNone">{lang === 'en' ? 'No comparison data for this company.' : '이 회사의 비교 데이터가 없습니다.'}</div>
 			{:else}
 				<!-- 정량 격자: 행=지표 × 열=유니버스 *분포곡선*(동종사 밀집 위치 + 이 회사 마커). 막대 아닌 분포가 1차 시각. 업종(앵커) 좌측 강조. -->
 				<div class="pcxLegend">{lang === 'en'
