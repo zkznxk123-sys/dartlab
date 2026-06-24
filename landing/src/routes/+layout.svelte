@@ -21,6 +21,7 @@
 	provideScanDuckDb(loadDartDb);
 	import CloudflareWebAnalytics from '$lib/components/CloudflareWebAnalytics.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -32,6 +33,7 @@
 
 <CloudflareWebAnalytics />
 <CommandPalette />
+<InstallPrompt />
 {@render children()}
 
 <style>
