@@ -18,6 +18,15 @@
 		return m[1] + intPart + (m[3] ?? '') + (m[4] ?? '');
 	}
 
+	// 자유텍스트(line/sub/context) 천단위 콤마 — 4자리+ 순수 정수만(소수·기존콤마 보존, 4자리 연도 19xx/20xx 제외).
+	function commaText(s: string): string {
+		return String(s).replace(/\d[\d,]*\.?\d*/g, (m) => {
+			if (m.includes(',') || m.includes('.') || m.length < 4) return m;
+			if (m.length === 4 && /^(19|20)\d\d$/.test(m)) return m; // 연도 제외(2026 → 그대로)
+			return Number(m).toLocaleString('en-US');
+		});
+	}
+
 	// 선그래프 — y축 값(min/max)·호버 좌표용 기하. valueFmt='won' → 조/억, 아니면 원값(천단위 콤마).
 	const lineStat = $derived.by(() => {
 		if (card.kind !== 'line') return null;
@@ -182,7 +191,7 @@
 </script>
 
 {#snippet accent(text: string, cls = '')}
-	<span class={cls}>{#each accentParts(stripDots(text)) as p}<span class:hl={p.accent}>{p.text}</span>{/each}</span>
+	<span class={cls}>{#each accentParts(stripDots(commaText(text))) as p}<span class:hl={p.accent}>{p.text}</span>{/each}</span>
 {/snippet}
 
 <article class="slide pm-{photoMode}">
@@ -203,13 +212,13 @@
 			<div class="editorial">
 				{#if card.kind === 'editorialBeat' && card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
 				<h2 class="eLine">{@render accent(card.line)}</h2>
-				{#if card.sub}<p class="eSub">{stripDots(card.sub)}</p>{/if}
+				{#if card.sub}<p class="eSub">{stripDots(commaText(card.sub))}</p>{/if}
 			</div>
 		{:else if card.kind === 'editorialStat'}
 			<div class="editorial">
 				{#if card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
 				<div class="eStat"><span class="eNum">{fmtBig(card.bigNumber)}</span>{#if card.unit}<span class="eUnit">{card.unit}</span>{/if}</div>
-				{#if card.context}<p class="eSub">{stripDots(card.context)}</p>{/if}
+				{#if card.context}<p class="eSub">{stripDots(commaText(card.context))}</p>{/if}
 			</div>
 		{:else}
 			{#if card.heading}
