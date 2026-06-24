@@ -45,6 +45,24 @@ describe('parseNoteRows — 표 조각 → (항목,금액) 행', () => {
 		const rows = parseNoteRows(['<TABLE><TR><TD>(단위: 원)</TD></TR></TABLE>', COST_XML, '<TABLE><TR><TD>(주1) 합산 금액</TD></TR></TABLE>']);
 		expect(rows.length).toBe(5);
 	});
+	// 삼성 등 XBRL 태깅 — 셀이 <TD> 아닌 <TE>, 총계행='성격별 비용'(실측 005930)
+	const TE_XML =
+		'<TABLE><THEAD><TR><TH>　</TH><TH>공시금액</TH></TR></THEAD><TBODY>' +
+		'<TR><TE COLSPAN="2">성격별 비용</TE><TE ALIGN="RIGHT">76,640,647</TE></TR>' +
+		'<TR><TE>제품과 재공품의 감소(증가)</TE><TE>(2,633,697)</TE></TR>' +
+		'<TR><TE>원재료 등의 사용액 및 상품 매입액</TE><TE>40,000,000</TE></TR>' +
+		'<TR><TE>종업원급여</TE><TE>15,000,000</TE></TR>' +
+		'<TR><TE>감가상각비</TE><TE>12,000,000</TE></TR></TBODY></TABLE>';
+	it('XBRL <TE> 셀 파싱(삼성식) + 성격별 비용 총계행 제외 + 음수항목(재고증가)은 composition 제외', () => {
+		const rows = parseNoteRows([TE_XML]);
+		const m = new Map(rows.map((r) => [r.name, r.amount]));
+		expect(m.has('성격별 비용')).toBe(false);
+		expect(m.get('원재료 등의 사용액 및 상품 매입액')).toBe(40000000);
+		expect(m.get('종업원급여')).toBe(15000000);
+		const comp = toComposition(rows);
+		expect(comp).not.toBeNull();
+		expect(comp!.items[0]!.name).toBe('원재료 등의 사용액 및 상품 매입액'); // 음수 재고변동 제외, 원재료 최대
+	});
 });
 
 describe('toComposition — 구성 비중', () => {

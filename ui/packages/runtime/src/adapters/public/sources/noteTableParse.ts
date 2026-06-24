@@ -28,7 +28,7 @@ export function toNum(raw: string): number | null {
 	return neg ? -v : v;
 }
 
-const TOTAL_ROW = /합\s*계|총\s*계|소\s*계|공시금액|성격별\s*비용\s*합계/;
+const TOTAL_ROW = /합\s*계|총\s*계|소\s*계|공시금액|성격별\s*비용/;
 
 /** DART XML 표 조각들에서 (항목, 금액=첫 숫자 컬럼) 행을 파싱·항목별 병합. 합계행·헤더행·숫자명행 제외.
  * 당기/전기 분리표는 항목명으로 자연 병합(같은 이름 += , 단 분리표는 보통 같은 항목이라 첫 표 당기만 채택되도록
@@ -39,9 +39,10 @@ export function parseNoteRows(contents: string[]): NoteRow[] {
 		const trMatches = xml.match(/<TR[^>]*>[\s\S]*?<\/TR>/gi);
 		if (!trMatches) continue;
 		for (const tr of trMatches) {
-			const tdMatches = tr.match(/<TD[^>]*>[\s\S]*?<\/TD>/gi);
-			if (!tdMatches || tdMatches.length < 2) continue;
-			const cells = tdMatches.map((td) => stripTags(td.replace(/^<TD[^>]*>/i, '').replace(/<\/TD>$/i, '')));
+			// DART XML 셀 = <TD>(평문) 또는 <TE>(XBRL 태깅 — 삼성 등 대형사 다수). 둘 다 매칭. <TH>(헤더)는 제외.
+			const cellMatches = tr.match(/<T[DE][^>]*>[\s\S]*?<\/T[DE]>/gi);
+			if (!cellMatches || cellMatches.length < 2) continue;
+			const cells = cellMatches.map((c) => stripTags(c.replace(/^<T[DE][^>]*>/i, '').replace(/<\/T[DE]>$/i, '')));
 			const name = cells[0]?.trim() ?? '';
 			if (!name || toNum(name) != null) continue; // 빈/숫자 첫셀 = 데이터 항목 아님
 			if (TOTAL_ROW.test(name)) continue; // 합계행 = 분모로 따로(컴포넌트 아님)
