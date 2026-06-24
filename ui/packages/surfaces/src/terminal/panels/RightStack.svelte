@@ -165,8 +165,8 @@
 	let nonRegFilings = $state<NonRegularFiling[]>([]);
 	let nonRegState = $state<'loading' | 'ready' | 'empty'>('loading');
 	let factsState = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
-	let reloadToken = $state(0); // 정직 로드 — '다시 시도' 시 증가 → 로드 effect 재발화 (영원히 '불러오는 중' 금지, 08 §3.1)
-	// per-company read 가 hang/실패해도 영원히 '불러오는 중' 금지 — 8s 타임아웃 race 로 error 와 empty 구분.
+	// per-company read 가 hang/실패해도 영원히 멈추지 않게 — 8s 타임아웃 race. reportFacts 는 도시에 리본(rcept_no
+	// 앵커) 파생용이라 실패=리본 미표시(graceful)·withTimeout 으로 캐시 hang 방지. notes() 도 동일 가드 공유.
 	// empty='봤는데 없다' / error='못 봤다'(확신오정렬 가드). 타임아웃 타이머는 settle 시 해제(누수 없음).
 	const FACTS_TIMEOUT_MS = 8000;
 	function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
@@ -210,7 +210,6 @@
 	const factSrcUrl = (rceptNo: string | null | undefined): string | null => (rceptNo ? viewerUrl(marketForCode(co.code), rceptNo) : null);
 	$effect(() => {
 		const code = co.code;
-		void reloadToken; // tracked — '다시 시도' 가 이 effect 를 재발화
 		factsState = 'loading';
 		reportFacts = [];
 		relations = null;
@@ -507,8 +506,6 @@
 		if (prod && sec) return `${sec} · ${prod}`;
 		return prod || sec || null;
 	});
-	const lastYr = $derived(co.income.periods[0]);
-	const firstYr = $derived(co.income.periods[co.income.periods.length - 1]);
 	const conf = $derived(cr.healthScore >= 70 ? 'HIGH' : 'MEDIUM');
 </script>
 
@@ -952,11 +949,6 @@
 	<Panel {lang} className="eAnalysis" prov="derived" title={{ kr: 'dartlab 요약', en: 'DARTLAB SUMMARY' }} flush>
 		{#snippet right()}<span class="conf">CONF <b class={conf === 'HIGH' ? 'tUp' : 'tWarn'}>{conf}</b></span>{/snippet}
 		<div class="aiQ">▸ {lang === 'en' ? `${co.name.kr} financial health` : `${co.name.kr} 재무건전성`}</div>
-		<div class="aiSteps">
-			<div class="aiStep"><span class="aiTool">finance</span><span class="aiCall mono">IS/BS/CF · {firstYr}–{lastYr}</span><span class="aiRef">조 KRW</span></div>
-			<div class="aiStep"><span class="aiTool">ecosystem</span><span class="aiCall mono">7축 등급 · 백분위</span><span class="aiRef">n={pc?.n ?? '—'}</span></div>
-			<div class="aiStep"><span class="aiTool">prices</span><span class="aiCall mono">return · 52w · σ</span><span class="aiRef">{co.price.asOf}</span></div>
-		</div>
 		<div class="aiAnswer">{lang === 'en'
 			? `Derived dCR ${cr.grade} (health ${cr.healthScore}/100, PD ${cr.pd}). OP margin ${co.fundamentals.opm != null ? co.fundamentals.opm.toFixed(1) + '%' : '—'}, ROE ${co.fundamentals.roe != null ? co.fundamentals.roe.toFixed(1) + '%' : '—'}, debt ${co.fundamentals.dr != null ? co.fundamentals.dr.toFixed(0) + '%' : '—'}. All from real finance/ecosystem/prices data.`
 			: `dartlab 파생 신용 ${cr.grade} (건전도 ${cr.healthScore}/100, PD ${cr.pd}). 영업이익률 ${co.fundamentals.opm != null ? co.fundamentals.opm.toFixed(1) + '%' : '—'}, ROE ${co.fundamentals.roe != null ? co.fundamentals.roe.toFixed(1) + '%' : '—'}, 부채비율 ${co.fundamentals.dr != null ? co.fundamentals.dr.toFixed(0) + '%' : '—'}. 모두 finance/ecosystem/prices 실데이터 산출.`}</div>
