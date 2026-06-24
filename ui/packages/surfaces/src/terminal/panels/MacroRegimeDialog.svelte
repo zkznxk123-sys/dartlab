@@ -40,6 +40,8 @@
 		return 'tNeu';
 	}
 	const assetTone = (t: string): string => (t === 'ow' ? 'tUp' : t === 'uw' ? 'tDn' : 'tNeu');
+	const wLabel = (t: string): string => (t === 'ow' ? T('확대', 'OW') : t === 'uw' ? T('축소', 'UW') : T('중립', 'NU'));
+	const arrow = (s: string): string => (/(ris|up|상승|확장|↑)/i.test(s) ? '↑' : /(fall|down|하락|둔화|↓)/i.test(s) ? '↓' : '→');
 	const bucketTone = (b: 0 | 1 | 2 | null): string => (b === 2 ? 'tDn' : b === 1 ? 'tWarn' : b === 0 ? 'tGood' : 'tNeu');
 
 	// ── 근거지표 시계열 로드 — 시장 탭별 필요 id 만 누적 캐시(중복 fetch 0). observations 코어 캐시 공유. ──
@@ -86,6 +88,8 @@
 		</div>
 
 		<div class="mrBody">
+			<!-- 상단 2단 — 판정(좌) + 국면 모델 합류(우). 빈 공간 없이 한눈에. -->
+			<div class="mrTop" class:two={!!lens}>
 			<!-- 1. 판정 -->
 			{#if mv}
 				<div class="mrSec">
@@ -95,8 +99,8 @@
 						{#if mv.confidence}<span class="mrConfBig">{T('확신도', 'confidence')} {mv.confidence}</span>{/if}
 					</div>
 					<div class="mrDirRow">
-						{#if mv.growth}<span class="mrDirItem">{T('성장', 'growth')} <b>{mv.growth}</b></span>{/if}
-						{#if mv.inflation}<span class="mrDirItem">{T('물가', 'inflation')} <b>{mv.inflation}</b></span>{/if}
+						{#if mv.growth}<span class="mrDirItem">{T('성장', 'growth')} <b>{arrow(mv.growth)}</b></span>{/if}
+						{#if mv.inflation}<span class="mrDirItem">{T('물가', 'inflation')} <b>{arrow(mv.inflation)}</b></span>{/if}
 					</div>
 					{#if mv.description}<div class="mrDescBig">{mv.description}</div>{/if}
 					{#if mv.transition}
@@ -113,7 +117,7 @@
 					{#if mv.assets.length}
 						<div class="mrAssetsBig">
 							{#each mv.assets as a (a.key)}
-								<span class={'mrAsset ' + assetTone(a.tone)}>{lang === 'en' ? a.labelEn : a.labelKr}<b>{a.weight}</b></span>
+								<span class={'mrAsset ' + assetTone(a.tone)}>{lang === 'en' ? a.labelEn : a.labelKr}<b>{wLabel(a.tone)}</b></span>
 							{/each}
 						</div>
 					{/if}
@@ -167,16 +171,18 @@
 				</div>
 			{/if}
 
-			<!-- 3. 근거지표 — 테마별 고밀도 복합차트 -->
+			</div>
+
+			<!-- 3. 근거지표 — 테마별 고밀도 복합차트 (전폭) -->
 			<div class="mrSec">
 				<div class="mrSecHd">
 					<span class="mrSecTitle">{T('근거 지표', 'EVIDENCE INDICATORS')}</span>
 					<span class="mrSecSub">{T('월 단위 · 최근 4년 · 호버=수치', 'monthly · last 4y · hover for values')}</span>
 				</div>
 				{#if evidence.cards.length}
-					<div class="mrGrid">
+					<div class="finFsGrid">
 						{#each evidence.cards as card (card.key)}
-							<div class="mrChart"><MiniFinChart {card} periods={evidence.periods} h={172} /></div>
+							<div class="finMini"><MiniFinChart {card} periods={evidence.periods} /></div>
 						{/each}
 					</div>
 				{:else if loading}

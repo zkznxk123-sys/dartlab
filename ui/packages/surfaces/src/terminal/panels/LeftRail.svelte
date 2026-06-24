@@ -110,7 +110,7 @@
 
 <!-- 거시 국면 — 깔때기 꼭대기(매크로→산업→종목). 판정 1줄+근거+확신도 글랜스, 깊이는 다이얼로그(모델·고밀도 지표차트). -->
 {#if macro}
-	<Panel {lang} className="eMacro" prov="real" title={{ kr: '거시 국면', en: 'MACRO REGIME' }} sub={{ kr: '국면 · 클릭=상세', en: 'regime · click=detail' }}>
+	<Panel {lang} className="eMacro" title={{ kr: '거시 국면', en: 'MACRO REGIME' }}>
 		{#snippet right()}
 			<button class="finFullBtn" onclick={() => (macroOpen = true)} title={lang === 'en' ? 'detail · models & charts' : '상세보기 · 모델·지표차트'}>{lang === 'en' ? 'detail' : '상세보기'}</button>
 		{/snippet}
