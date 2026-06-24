@@ -795,6 +795,31 @@
 /* 조건검색 모달 (상용급 스크리너) */
 .scrimWrap { position: fixed; inset: 0; z-index: 10050; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
 .scrModal { width: min(960px, 96vw); max-height: 88vh; display: flex; flex-direction: column; background: var(--dl-bg-raised, #0e141f); border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); overflow: hidden; font-family: var(--dl-font-ui); color: var(--dl-ink); }
+/* ── 주석 대시보드 다이얼로그 (nd*) — 파싱된 찐정보 시각화. 색·바 기존 토큰만, 차트엔진 0 ── */
+.scrModal.ndModal { width: min(1180px, 96vw); max-height: 90vh; }
+.dlTerm .ndBody, .ndBody { overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+.ndHero { border: 1px solid var(--bd); border-radius: 4px; background: var(--panel); padding: 10px 12px; }
+.ndCardHd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.ndCardTitle { font-family: var(--cond); font-size: 12px; font-weight: 700; color: var(--txt); }
+.ndCardTitle .dim { font-weight: 400; color: var(--dim); }
+.ndHdRight { display: flex; align-items: baseline; gap: 8px; flex: none; }
+.ndScope { font-family: var(--mono); font-size: 9px; color: var(--dimmer); }
+.ndTotal { font-family: var(--cond); font-size: 10.5px; color: var(--dim); margin-bottom: 6px; }
+.ndStack { display: flex; height: 16px; border-radius: 3px; overflow: hidden; gap: 1px; background: var(--dl-bg-deep); }
+.ndStack .ndSeg { height: 100%; min-width: 1px; }
+.ndLegend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 8px; }
+.ndLeg { font-family: var(--cond); font-size: 9.5px; color: var(--dim); display: inline-flex; align-items: center; gap: 3px; }
+.ndLeg i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex: none; }
+.ndRanks { display: flex; flex-direction: column; gap: 3px; }
+.ndRank { display: grid; grid-template-columns: minmax(0, 1fr) 44px 90px 78px; align-items: center; gap: 6px; }
+.ndRankName { font-family: var(--cond); font-size: 10.5px; color: var(--txt); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ndRankPct { font-size: 10px; color: var(--dim); text-align: right; }
+.ndRankBar { height: 8px; background: var(--dl-bg-deep); border-radius: 2px; overflow: hidden; }
+.ndRankBar i { display: block; height: 100%; }
+.ndRankAmt { font-size: 10px; color: var(--dim); text-align: right; }
+.ndChassis { margin-top: 8px; font-family: var(--cond); font-size: 11px; font-weight: 700; color: var(--amber); }
+.ndChassis .dim { font-weight: 400; font-size: 9px; color: var(--dimmer); }
+.ndFoot { font-family: var(--cond); font-size: 9px; color: var(--dimmer); line-height: 1.4; border-top: 1px solid var(--dl-line); padding-top: 8px; }
 .scrModal .mono { font-family: var(--dl-font-mono); font-variant-numeric: tabular-nums; }
 .scrHead { display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); }
 .scrTitle { font-family: var(--dl-font-mono); font-weight: 700; font-size: 12px; letter-spacing: 0.14em; color: var(--amber, var(--amber)); text-transform: uppercase; }
@@ -891,13 +916,6 @@
 .dlTerm .factV .factSrc { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); text-decoration: none; margin-left: 4px; }
 .dlTerm .factV .factSrc:hover { color: var(--amber); }
 
-/* 도시에 헤더 리본 — 정기보고서 팩트 스파인(as-of·접수·N/6 커버리지·↗원문) */
-.dlTerm .dossierRibbon { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--dl-line); background: var(--dl-bg-deep); }
-.dlTerm .dossierIdentity { padding: 5px 8px; font-family: var(--cond); font-size: 11px; color: var(--txt); border-bottom: 1px solid var(--dl-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dlTerm .drMain { font-family: var(--cond); font-size: 9.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.dlTerm .drSep { color: var(--dimmer); margin: 0 3px; }
-.dlTerm .drSrc { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-decoration: none; white-space: nowrap; flex: none; }
-.dlTerm .drSrc:hover { color: var(--amber); }
 
 /* 도시에 섹션 자기정규화 문장 — 판정 0·형용사 0(lossPct·control-shift·인력 자기이력). 그래프 금지(텍스트만) */
 .dlTerm .secSentBox { padding: 3px 8px 4px; border-bottom: 1px solid var(--dl-line); display: flex; flex-direction: column; gap: 2px; }
@@ -980,17 +998,10 @@
 .dlTerm .storyEmpty { padding: 10px 8px; font-size: 10px; color: var(--dimmer); font-family: var(--mono); line-height: 1.5; }
 .dlTerm .factRetry { background: none; border: none; color: var(--amber); font-family: var(--mono); font-size: 10px; cursor: pointer; padding: 0; text-decoration: underline; }
 .dlTerm .factRetry:hover { opacity: 0.8; }
-/* 정기보고서 주석 — panel 본문 그 자리 렌더(지연). 제목 토글 + 본문(CellContent)은 max-height 스크롤로 레일 보호. */
-.dlTerm .noteOpenBtn { width: 100%; text-align: left; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--dim); font-family: var(--cond); font-size: 10.5px; padding: 7px 8px; cursor: pointer; }
-.dlTerm .noteOpenBtn:hover { color: var(--amber); border-color: var(--amber); }
-.dlTerm .noteList { display: flex; flex-direction: column; }
-.dlTerm .noteBlock { border-top: 1px solid var(--dl-line); }
-.dlTerm .noteBlock:first-child { border-top: none; }
-.dlTerm .noteHd { display: flex; align-items: center; justify-content: space-between; width: 100%; background: none; border: none; padding: 6px 8px; cursor: pointer; gap: 8px; }
-.dlTerm .noteTitle { font-family: var(--cond); font-size: 10.5px; color: var(--txt); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dlTerm .noteTitle .noteOrig { color: var(--dimmer); font-size: 9px; margin-left: 6px; }
-.dlTerm .noteHd:hover .noteTitle { color: var(--amber); }
-.dlTerm .noteBody { max-height: 320px; overflow: auto; padding: 2px 8px 8px; }
+/* 정기보고서 주석 간단 글랜스 — 비용 체질 real digest 한 줄 + 대시보드 토픽. */
+.dlTerm .noteGlance { padding: 6px 8px; font-family: var(--cond); font-size: 10.5px; color: var(--txt); line-height: 1.4; }
+.dlTerm .noteGlance .ngLabel { color: var(--dimmer); font-size: 9px; margin-right: 5px; }
+.dlTerm .noteMore { padding: 0 8px 7px; font-family: var(--cond); font-size: 9.5px; color: var(--dim); }
 
 /* AI */
 .dlTerm .conf { font-family: var(--cond); font-size: 9px; color: var(--dim); letter-spacing: 0.5px; }

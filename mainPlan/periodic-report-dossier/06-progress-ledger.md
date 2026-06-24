@@ -22,6 +22,11 @@
 
 ## 상태
 
+- **2026-06-24 ★★주석 = 파싱→대시보드 재설계 (운영자 verbatim+클릭 격노 → B 아키텍처)**: 운영자 "있는그대로(verbatim 원문표) 보여주랬나·클릭하면 정보? 미친". 핵심 깨달음 = 주석 데이터를 *파싱해 의미로*·*바로 보이게*(verbatim 0·클릭 0). 운영자 지시로 표→대시보드 매커니즘 고안·"테이블 병합" 방법 찾기.
+  - **파서 검증**: panel 주석 조각 테이블(헤딩·단위·당기/전기·각주 분리)에서 데이터행만 골라 항목별 병합→비중%. Python 프로토타입 전 universe 실측(원재료45%·외주15%·인건비10%…·외주중심사 외주72%) → **TS 이식 `noteTableParse.ts` 12/12 단위테스트**(헤더/합계행 제외·당기컬럼·비정형 null 폴백).
+  - **B 아키텍처 확정**(운영자 A/B 질문, 내 추천 B): 우측 rail 좁음→파싱표 5개 넣으면 클러터. 간단 글랜스(real digest 한 줄) + **대시보드 다이얼로그**(rich 파싱 데이터를 넓은 공간에). **7에이전트 UI/UX 토론 `wf_f96886a8-214`**(4렌즈→종합→레드팀 verdict conditional·정직위반0→확정): 단일 스크롤·sticky 점프바·HERO 비용체질(100% 적층바+항목 랭크)+2×2 그리드(부문·자본배분/우발·특수관계). 레드팀 코드 grep 픽스(scoped CSS 재사용불가→nd* 신규·scope 동적·affiliates=investments() 단일소스·특수관계 과밀 단순화).
+  - **첫 슬라이스 구현·커밋**: composition contract + reportSource costNature 파싱주입 + `NotesDashboardDialog.svelte`(비용 체질 HERO 카드, 적층바+랭크+⟨원재료형⟩ 체질태그) + 우측 간단패널(costGlance 한 줄+대시보드 ▸, notes eager 로드) + nd* CSS. 도시에 패널(verbatim+클릭) 제거 + dead 체인(reportFacts/dossier/identity 매전환 낭비read·CSS 18줄) 정리. 검증: contracts·runtime·surfaces·landing 0err·verdict·wiring PASS·파서 12/12. 잔여=나머지 4카드(부문·자본배분·우발·특수관계) 하나씩.
+  - ⚠ 교훈(반복): AI가 "그자체로 봐야지"를 verbatim 원문표+클릭으로 오독→격노. 진짜=파싱·의미·직접표시. 매번 운영자 한마디가 교정.
 - **2026-06-24 ★우측 패널 재설계 (8에이전트 토론 `wf_57dadccf-cd6` + 내 직접 재측정)**: 운영자 "전문에이전트들과 토론해 의미있는 정보 리스트업·우측패널 표현방식 판단". 5렌즈 제안→종합→레드팀 적대검증(verdict conditional)→확정. ★레드팀 critical(비용성격별 6% vs 53% 충돌)을 **내가 직접 300사 측정으로 판정**(에이전트 측정 인용 금지): 실제 browser 경로(blockLeaf/sectionLeaf 정규식+≥40자 게이트) = costNature **58.0%**·segment 69%·contingency 84%·relatedParty 82%·affiliates 57%·정체성발췌(헤더strip) 92.3%. **doc 07/08 "6%"는 엔진 fetchNotesDetail 파싱 도달률(다른 모집단), panel contentRaw 본문 존재율은 58%** — 죽일 게 아니라 간판. 경계침범 0·NEVER-CLAIM 누출 0 확인.
   - **매커니즘 = 표 나열 죽이고 단일 도시에 패널 3층 위계**(운영자 핵심 "표보다 잘 볼 매커니즘"): 의미 글랜스(회사 한 줄 정체+섹션 의미줄) → 접힌 토픽 목록(평어 부제·show-if-present) → 클릭 원문 펼침(CellContent verbatim).
   - **Phase 0+1+2+3 구현·커밋**: ①팩트 6칸 raw 격자 패널 **삭제**(중복, 운영자 1순위) → 리본을 단일 '정기보고서 도시에' 패널로 이전(순 −1). ②회사 한 줄 정체(corpMeta 업종·제품, robust·새 fetch 0). ③costNature·segment 토픽 NOTE_TOPICS 추가(blockLeaf 정규식, NT코드 무관). ④토픽 평어 부제(costNature='돈을 뭐에 쓰나'·segment='사업부문 구성'·contingency='장부 밖 부담'·affiliates='자회사 지분·손상'·relatedParty='계열사와 돈거래'), 원문제목 보조 dim. 헤더 엔진잔재 라벨 전수 제거(`9ebdb3a8d`).

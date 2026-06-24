@@ -182,12 +182,24 @@ export type ValuationSnapshot = Record<string, ValuationRow>;
 /** 정기보고서 주석 블록 — panel 파케 본문(contentRaw, DART XML 표/텍스트)을 *그 자리에서* 렌더하는 단위.
  * ↗원문 링크가 아니라 실제 주석 내용을 우측 패널에 표면화(PRD 00 §26 "갇힌 계산을 있는 그대로 표면화").
  * content = raw DART XML/HTML — 소비측(CellContent)이 sanitize·표/텍스트 분리 렌더. 신규 분석 0, 표면화만. */
+/** 주석 표 파싱 구성요소 — 항목별 금액·비중%. 비용 성격별·부문 같은 *정형 숫자표*(부분합 닫힌 100%) 파싱 결과. */
+export interface CompositionItem {
+	name: string; // 항목명 (원문 그대로 — 예 '원재료 및 상품매입액')
+	amount: number; // 원 (당기 컬럼)
+	pct: number; // % of total (0~100)
+}
+export interface NoteComposition {
+	items: CompositionItem[]; // 금액 desc, 상위 topN + '기타 (N)' 롤업
+	total: number; // 원 — 합계(분모)
+}
+
 export interface ReportNoteBlock {
 	key: string; // 안정 식별자 (disclosureKey + 순서)
 	topic: string; // 토픽 id (costNature·segment·contingency·affiliates·relatedParty) — 소비측 평어 라벨 매핑
 	title: string; // 주석 제목 (blockLeaf 또는 sectionLeaf) — 원문 그대로(보조 표시)
-	section: string; // 상위 섹션 (예 '3. 연결재무제표 주석')
-	content: string; // 본문 raw DART XML/HTML (표·텍스트) — CellContent 가 렌더
+	section: string; // 상위 섹션 (예 '3. 연결재무제표 주석') — scope(연결/별도) 동적 도출 소스
+	content: string; // 본문 raw DART XML/HTML (표·텍스트) — CellContent 가 렌더(서술혼합 폴백)
+	composition?: NoteComposition; // 정형 숫자표 파싱 성공 시(비용성격별·부문). 실패=undefined → content 발췌 폴백
 	rceptNo: string; // 출처 공시 번호 (↗원문)
 	period: string; // 기준 분기 (YYYYQn)
 }

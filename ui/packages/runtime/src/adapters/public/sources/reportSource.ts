@@ -31,6 +31,7 @@ import type {
 	WorkforceYear
 } from '@dartlab/ui-contracts';
 import type { DataCore } from '../../../data/fetch/request';
+import { parseNoteRows, toComposition } from './noteTableParse';
 
 const browser = typeof window !== 'undefined';
 
@@ -751,12 +752,17 @@ export function createReportSource(core: DataCore): ReportPort {
 			if (content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length < 40) continue;
 			const head = pool[0];
 			if (!head) continue;
+			// 정형 숫자표(비용 성격별)는 조각 테이블 파싱→병합→구성요소(항목%). 실패=undefined→content 발췌 폴백.
+			// 부문(segment)은 행렬 구조라 별도 처리(후속) — 지금은 costNature 만 파싱.
+			const composition =
+				topic.id === 'costNature' ? (toComposition(parseNoteRows(pool.map((r) => str(r.contentRaw)))) ?? undefined) : undefined;
 			out.push({
 				key: `${topic.id}:${str(head.disclosureKey) || topic.id}`,
 				topic: topic.id,
 				title: str(head.blockLeaf) || str(head.sectionLeaf),
 				section: str(head.sectionLeaf) || str(head.chapter),
 				content,
+				composition,
 				rceptNo: str(head.rceptNo),
 				period: latest
 			});

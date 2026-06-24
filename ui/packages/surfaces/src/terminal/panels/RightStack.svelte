@@ -8,7 +8,6 @@
 		InvestmentPeriod,
 		InvestmentTrendYear,
 		InvestmentsView,
-		LiveCompanyReportFact,
 		NewsItem,
 		NonRegularFiling,
 		ProductIndexItem,
@@ -33,7 +32,6 @@
 	// 정량재무제표 = 공시뷰어 FinanceDialog 그대로 (한몸두입구) — 셸 주입 lazy 로더, 터미널 청크 무증가
 	import { tx, txc, chgClass, sign, toneClass, fmtNum } from '../ui/helpers';
 	import { fmtKRW } from '../lib/engine';
-	import { viewerUrl, marketForCode } from '../../viewer/lib/dartUrl'; // 도시에 ↗원문 딥링크(rcept_no → DART 원문, 공개 floor)
 	import { lossSummary, controlShiftSummary, type ControlShift } from '../lib/holdings'; // 타법인출자 lossPct(앵커)·control-shift(지배이동) 순수계산
 	import type { ListedLookup } from '../lib/holdings'; // 피출자사명→상장 종목 해소 hook 타입
 	import { workforceTrend, returnTrend } from '../lib/reportSelfHistory'; // 인력·주주환원 자기이력(self-vs-self) 순수계산 — 다년 배열에서 시간축, 새 fetch 0
@@ -158,16 +156,11 @@
 	const externalRel = $derived(localViewerHref ? undefined : 'noopener');
 	const tcls = (t: string) => (({ up: 'tUp', good: 'tGood', neutral: 'tNeu', warn: 'tWarn', down: 'tDn' }) as Record<string, string>)[t] || 'tNeu';
 
-	// DART 정기보고서 팩트 + 공시 변경 (DuckDB report parquet 재사용, 온디맨드)
-	let reportFacts = $state<LiveCompanyReportFact[]>([]);
 	let relations = $state<CompanyRelations | null>(null);
 	let regFilings = $state<RegularFiling[]>([]);
 	let nonRegFilings = $state<NonRegularFiling[]>([]);
 	let nonRegState = $state<'loading' | 'ready' | 'empty'>('loading');
-	let factsState = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
-	// per-company read 가 hang/실패해도 영원히 멈추지 않게 — 8s 타임아웃 race. reportFacts 는 도시에 리본(rcept_no
-	// 앵커) 파생용이라 실패=리본 미표시(graceful)·withTimeout 으로 캐시 hang 방지. notes() 도 동일 가드 공유.
-	// empty='봤는데 없다' / error='못 봤다'(확신오정렬 가드). 타임아웃 타이머는 settle 시 해제(누수 없음).
+	// per-company read(notes 등)가 hang/실패해도 멈추지 않게 — 8s 타임아웃 race. 타이머는 settle 시 해제(누수 없음).
 	const FACTS_TIMEOUT_MS = 8000;
 	function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 		return new Promise<T>((resolve, reject) => {
@@ -180,38 +173,8 @@
 	}
 	let news = $state<NewsItem[]>([]); // 종목 뉴스(네이버 헤드라인+스니펫) — 워커 /news 서버사이드 read
 	let newsState = $state<'loading' | 'ready' | 'empty'>('loading');
-	// 도시에 헤더 리본 — 6 fact 의 출처(rcept_no)·결산기준일(stlm_dt)에서 단일 as-of 스탬프 파생.
-	// 가장 최근 접수(rcept_no max)를 앵커로 ↗원문·접수일·staleness, stlm_dt 로 사업보고서 as-of, N/6 커버리지.
-	const dossier = $derived.by(() => {
-		if (factsState !== 'ready' || !reportFacts.length) return null;
-		let anchor: LiveCompanyReportFact | null = null;
-		for (const f of reportFacts) if (f.rceptNo && (!anchor || f.rceptNo > (anchor.rceptNo ?? ''))) anchor = f;
-		const rceptNo = anchor?.rceptNo ?? null;
-		const stlmDt = anchor?.stlmDt ?? reportFacts.find((f) => f.stlmDt)?.stlmDt ?? null;
-		let monthsAgo: number | null = null;
-		if (rceptNo && rceptNo.length >= 6) {
-			const y = Number(rceptNo.slice(0, 4));
-			const m = Number(rceptNo.slice(4, 6));
-			if (y && m) {
-				const now = new Date();
-				const diff = (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m);
-				monthsAgo = diff >= 0 ? diff : null;
-			}
-		}
-		return {
-			stlm: stlmDt ? stlmDt.slice(0, 7).replace('-', '.') : null,
-			rceptDate: rceptNo && rceptNo.length >= 8 ? `${rceptNo.slice(0, 4)}.${rceptNo.slice(4, 6)}.${rceptNo.slice(6, 8)}` : null,
-			monthsAgo,
-			coverage: reportFacts.length,
-			url: rceptNo ? viewerUrl(marketForCode(co.code), rceptNo) : null
-		};
-	});
-	// 단일 fact 출처 딥링크 (각 행 ↗) — KR=DART, US=EDGAR. 미상이면 null(링크 미렌더).
-	const factSrcUrl = (rceptNo: string | null | undefined): string | null => (rceptNo ? viewerUrl(marketForCode(co.code), rceptNo) : null);
 	$effect(() => {
 		const code = co.code;
-		factsState = 'loading';
-		reportFacts = [];
 		relations = null;
 		regFilings = [];
 		nonRegFilings = [];
@@ -253,18 +216,6 @@
 			shPeriods = s ?? [];
 			shareholders = s?.at(-1) ?? null; // 최신기 = 인라인/다이얼로그 기본값
 		});
-		withTimeout(rt.company.reportFacts(code), FACTS_TIMEOUT_MS).then(
-			(f) => {
-				if (cancelled) return;
-				reportFacts = f;
-				factsState = f.length ? 'ready' : 'empty';
-			},
-			(err) => {
-				if (cancelled) return;
-				console.warn('[terminal] reportFacts load failed:', err);
-				factsState = 'error'; // empty 와 구분 — '못 봤다'(타임아웃/reject), '다시 시도' 노출
-			}
-		);
 		rt.company.relations(code).then((r) => {
 			if (!cancelled) relations = r;
 		});
@@ -355,43 +306,49 @@
 	let shPeriods = $state<ShareholdersView[]>([]); // 최대주주 시계열 — 다이얼로그 기간축
 	let auditFees = $state<AuditFeeYear[] | null>(null); // 포렌식 — 감사/비감사 보수(독립성 비율)
 	let debtProfile = $state<DebtProfileBundle | null>(null); // 포렌식 — 사채 잔존만기(단기 상환벽)
-	// 정기보고서 주석 본문 — panel 파케 contentRaw 그 자리 렌더(관계기업·특수관계자·우발부채). ↗링크 아닌 실제 내용.
-	// 지연 로드: panel 대용량이라 매 전환마다 read 금지 — '본문 보기' 클릭 시에만 report.notes() (캐시·타임아웃 가드).
+	// 정기보고서 주석 — panel 파케 contentRaw 파싱(비용 성격별 등 항목%). B 아키텍처: 우측 글랜스 한 줄(real digest)
+	// + '대시보드 ▸'→ NotesDashboardDialog. eager 로드(글랜스가 진짜 정보 보이려면 데이터 필요) — 타임아웃·캐시 가드,
+	// notes() 2-pass 최신기만이라 효율. dossier.coverage(팩트 수) 아닌 notes 길이로 N/5 산출.
 	let notes = $state<ReportNoteBlock[]>([]);
-	let notesOpen = $state(false);
-	let notesState = $state<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
-	let openNoteKey = $state<string | null>(null);
+	let notesState = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
+	let dashOpen = $state(false); // 주석 대시보드 다이얼로그
 	$effect(() => {
-		void co.code; // 회사 전환 → 주석 접기·리셋 (다음 회사 본문 미리 안 읽음)
-		notes = [];
-		notesOpen = false;
-		notesState = 'idle';
-		openNoteKey = null;
-	});
-	async function openNotes(): Promise<void> {
-		notesOpen = true;
-		if (notesState !== 'idle') return;
 		const code = co.code;
+		notes = [];
 		notesState = 'loading';
-		try {
-			const n = await withTimeout(rt.report.notes(code), FACTS_TIMEOUT_MS);
-			if (co.code !== code) return; // 회사 바뀜 — 옛 결과 폐기
-			notes = n ?? [];
-			notesState = notes.length ? 'ready' : 'empty';
-			openNoteKey = notes.length ? notes[0].key : null; // 첫 블록 자동 펼침
-		} catch {
-			if (co.code === code) notesState = 'error';
-		}
-	}
-	// 주석 토픽 → 평어 유도 부제(개미가 '특수관계자 거래' 제목 안 읽음). 원문 제목(nt.title)은 보조 dim.
-	const NOTE_LABEL: Record<string, { kr: string; en: string }> = {
-		costNature: { kr: '돈을 뭐에 쓰나', en: 'where the money goes' },
-		segment: { kr: '사업부문 구성', en: 'business segments' },
-		contingency: { kr: '장부 밖 부담 — 보증·소송·담보', en: 'off-balance — guarantee·litigation·collateral' },
-		affiliates: { kr: '자회사 지분·손상', en: 'subsidiaries · impairment' },
-		relatedParty: { kr: '계열사와 돈거래', en: 'related-party dealings' }
+		let cancelled = false;
+		withTimeout(rt.report.notes(code), FACTS_TIMEOUT_MS).then(
+			(n) => {
+				if (cancelled) return;
+				notes = n ?? [];
+				notesState = notes.length ? 'ready' : 'empty';
+			},
+			() => {
+				if (!cancelled) notesState = 'error';
+			}
+		);
+		return () => {
+			cancelled = true;
+		};
+	});
+	// 우측 글랜스 — 비용 성격별 composition 상위 항목 한 줄(예 '원재료 45% · 외주 15% · 인건비 10%'). 링크 아닌 진짜 요약.
+	const costNote = $derived(notes.find((n) => n.topic === 'costNature' && n.composition) ?? null);
+	const shortCost = (n: string): string => n.replace(/\s*및\s*/g, '·').replace(/(매입액|사용액|비용|비$)/g, '').trim().slice(0, 5);
+	const costGlance = $derived.by<string | null>(() => {
+		const items = costNote?.composition?.items;
+		if (!items || !items.length) return null;
+		return items.filter((i) => !i.name.startsWith('기타')).slice(0, 3).map((i) => `${shortCost(i.name)} ${i.pct.toFixed(0)}%`).join(' · ');
+	});
+	// 대시보드에 든 토픽 평어명 (rail 2번째 줄 — 뭐가 있는지). costNature 는 글랜스가 대신하니 제외.
+	const NOTE_KR: Record<string, { kr: string; en: string }> = {
+		segment: { kr: '부문', en: 'segments' },
+		contingency: { kr: '우발·담보', en: 'contingency' },
+		affiliates: { kr: '자회사', en: 'affiliates' },
+		relatedParty: { kr: '계열거래', en: 'related-party' }
 	};
-	const noteLabel = (topic: string, l: Lang): string => (NOTE_LABEL[topic] ? (l === 'en' ? NOTE_LABEL[topic].en : NOTE_LABEL[topic].kr) : topic);
+	const noteTopicNames = $derived(
+		notes.filter((n) => n.topic !== 'costNature' && NOTE_KR[n.topic]).map((n) => (lang === 'en' ? NOTE_KR[n.topic]!.en : NOTE_KR[n.topic]!.kr)).join(' · ')
+	);
 	// 최신 연간 현금성자산 (BS 'cash', 조 단위) → 원 환산. 단기 상환벽 신호의 분모.
 	const cashLatestWon = $derived.by<number | null>(() => {
 		const av = finBundle?.views.annual;
@@ -498,14 +455,6 @@
 	rt.company.productIndex().then((m) => (corpMeta = m));
 	const homepage = $derived(corpMeta?.[co.code]?.homepage ?? null);
 	const homepageHost = $derived(homepage ? homepage.replace(/^https?:\/\//, '').replace(/\/$/, '') : '');
-	// 회사 한 줄 정체 — 업종 + 주요제품(corpList, robust·새 fetch 0). "뭐 하는 회사"를 0.5초에.
-	// 둘 다 결측이면 null → 줄 사라짐(show-if-present). 발췌 아닌 구조필드라 환각 0(LLM 금지 정합).
-	const identity = $derived.by(() => {
-		const prod = (corpMeta?.[co.code]?.product ?? '').trim();
-		const sec = co.sector ? tx(co.sector, lang) : '';
-		if (prod && sec) return `${sec} · ${prod}`;
-		return prod || sec || null;
-	});
 	const conf = $derived(cr.healthScore >= 70 ? 'HIGH' : 'MEDIUM');
 </script>
 
@@ -729,54 +678,25 @@
 	{/await}
 {/if}
 
-<!-- 정기보고서 주석 — panel 파케 본문 그 자리 렌더(관계기업·종속기업 투자·특수관계자 거래·우발부채·약정·담보).
-     ↗링크가 아닌 *실제 주석 내용*을 우측 패널에 표면화(PRD 00 §26). 지연 로드: '본문 보기' 클릭 시에만 read. -->
-<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 도시에', en: 'REPORT DOSSIER' }} flush>
-	{#if dossier}
-		<div class="dossierRibbon">
-			<span class="drMain">
-				{#if dossier.stlm}{lang === 'en' ? 'report' : '사업보고서'} {dossier.stlm}{/if}
-				{#if dossier.rceptDate}<span class="drSep">·</span>{lang === 'en' ? 'filed' : '접수'} {dossier.rceptDate}{/if}
-				<span class="drSep">·</span>{dossier.coverage}/6 {lang === 'en' ? 'filings' : '공시'}
-				{#if dossier.monthsAgo != null}<span class="drSep">·</span>{lang === 'en' ? `~${dossier.monthsAgo}mo ago` : `약 ${dossier.monthsAgo}개월 전`}{/if}
-			</span>
-			{#if dossier.url}<a class="drSrc" href={dossier.url} target="_blank" rel="noopener" title={lang === 'en' ? 'Source filing (DART)' : '원문 공시(DART)'}>↗{lang === 'en' ? '' : '원문'}</a>{/if}
-		</div>
-	{/if}
-	{#if identity}
-		<div class="dossierIdentity" title={lang === 'en' ? 'sector · main product (corpList)' : '업종 · 주요제품 (corpList)'}>{identity}</div>
-	{/if}
-	{#if !notesOpen}
+<!-- 정기보고서 주석 — 간단 글랜스(비용 체질 한 줄=real digest) + 대시보드 ▸(파싱 찐정보 다이얼로그). B 아키텍처. -->
+{#if notesState === 'ready' && notes.length}
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={{ kr: notes.length + '/5', en: notes.length + '/5' }} flush>
+		{#snippet right()}<button class="finFullBtn" onclick={() => (dashOpen = true)} title={lang === 'en' ? 'parsed notes dashboard' : '파싱된 주석 대시보드 — 비용 체질·부문·우발·계열'}>{lang === 'en' ? 'dashboard ▸' : '대시보드 ▸'}</button>{/snippet}
+		{#if costGlance}
+			<div class="noteGlance"><span class="ngLabel">{lang === 'en' ? 'cost' : '비용'}</span> {costGlance}</div>
+		{/if}
+		{#if noteTopicNames}
+			<div class="noteMore">+ {noteTopicNames}</div>
+		{/if}
+	</Panel>
+{/if}
 
-		<button class="noteOpenBtn" onclick={openNotes}>{lang === 'en' ? '▾ show note text in place (affiliates · related-party · contingencies)' : '▾ 주석 본문 그 자리에서 보기 (관계기업·특수관계자·우발부채·담보)'}</button>
-	{:else if notesState === 'loading'}
-		<div class="storyEmpty" role="status" aria-busy="true">{lang === 'en' ? 'loading note text …' : '주석 본문 불러오는 중 …'}</div>
-	{:else if notesState === 'error'}
-		<div class="storyEmpty" role="status">{lang === 'en' ? 'Failed to load · ' : '불러오지 못했습니다 · '}<button class="factRetry" onclick={() => { notesState = 'idle'; openNotes(); }}>↻ {lang === 'en' ? 'retry' : '다시 시도'}</button></div>
-	{:else if notesState === 'empty'}
-		<div class="storyEmpty">{lang === 'en' ? 'No surfaceable notes for this company (period not yet filed or non-standard).' : '표면화할 주석 없음 (해당 기간 미공시 또는 비표준).'}</div>
-	{:else}
-		<div class="noteList">
-			{#each notes as nt (nt.key)}
-				{@const noteUrl = factSrcUrl(nt.rceptNo)}
-				<div class="noteBlock">
-					<button class="noteHd" onclick={() => (openNoteKey = openNoteKey === nt.key ? null : nt.key)}>
-						<span class="noteTitle">{openNoteKey === nt.key ? '▾' : '▸'} {noteLabel(nt.topic, lang)}<span class="noteOrig">{nt.title}</span></span>
-						{#if noteUrl}<a class="factSrc" href={noteUrl} target="_blank" rel="noopener" onclick={(e) => e.stopPropagation()} title={lang === 'en' ? 'source filing' : '원문 공시'}>↗</a>{/if}
-					</button>
-					{#if openNoteKey === nt.key}
-						<div class="noteBody">
-							{#await import('../../viewer/components/CellContent.svelte') then { default: CellContent }}
-								<CellContent value={nt.content} />
-							{/await}
-						</div>
-					{/if}
-				</div>
-			{/each}
-		</div>
-		<div class="finNote">{lang === 'en' ? 'verbatim from periodic report · ' + (notes[0]?.period ?? '') : '정기보고서 원문 발췌 · ' + (notes[0]?.period ?? '')}</div>
-	{/if}
-</Panel>
+<!-- 주석 대시보드 다이얼로그 (lazy: 닫혀 있으면 청크 무증가) -->
+{#if dashOpen}
+	{#await import('./NotesDashboardDialog.svelte') then { default: NotesDashboardDialog }}
+		<NotesDashboardDialog {co} {lang} {notes} onClose={() => (dashOpen = false)} />
+	{/await}
+{/if}
 
 <!-- 공급망 (dartlab 고유 — 공급사·고객사 제품·매출비중) -->
 {#if relations && (relations.suppliers.length || relations.customers.length)}
