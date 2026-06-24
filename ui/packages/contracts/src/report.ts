@@ -204,6 +204,22 @@ export interface ReportNoteBlock {
 	period: string; // 기준 분기 (YYYYQn)
 }
 
+// ── 비용의 성격별 분류 시계열 — 매 정기보고서(분기/연간)가 보고한 당기 구성을 전 기간 파싱. snapshot(notes())이
+// 단일점이라면 이건 *분기마다 다 있는* 비용 체질의 변화(원재료 비중 ↑ = 원가압박, 감가상각 비중 ↑ = capex 사이클).
+// 당기 컬럼만(전기 혼입 방지) · 연결 우선 · 단위(백만원/천원) 원 환산 · 라벨+구조적 총계 제거. 분기는 YTD 누적이라
+// 절대액(total)은 사다리꼴(분기리셋); 비중(shares)은 전 기간 비교가능 → 시각화 헤드라인은 100% 적층 믹스. ──
+export interface CostNaturePoint {
+	period: string; // 'YYYYQn'
+	year: string; // 'YYYY'
+	quarter: string; // '1분기'..'4분기' (4분기=사업보고서=연간 누적)
+	total: number; // 원 — 당기 합계(양수 항목 합)
+	shares: number[]; // categories[] 정렬 비중% (합 ~100, 없는 카테고리=0)
+}
+export interface CostNatureSeries {
+	categories: string[]; // 안정 카테고리(표시명) — 전 기간 합계 desc 상위 K + 마지막 '기타'(롤업 있을 때). 색·범례·적층 순서 SSOT
+	points: CostNaturePoint[]; // period 오름차순(분기 포함)
+}
+
 export interface ReportPort {
 	workforce(code: string): Promise<WorkforceYear[] | null>;
 	/** 밸류에이션 스냅샷(전 종목 per/pbr/marketCap, dart/scan/valuation.parquet 통파일 직독). 동종 밸류에이션 좌표용. 미존재는 null. */
@@ -224,4 +240,7 @@ export interface ReportPort {
 	/** 정기보고서 주석 본문 — panel 파케에서 고가치 도시에 주석(관계기업·종속기업 투자·특수관계자 거래·우발부채·약정)의
 	 * 최신기 본문을 그 자리 렌더용으로. 지연 로드 권장(panel 대용량). 미존재/미지원은 null. */
 	notes(code: string): Promise<ReportNoteBlock[] | null>;
+	/** 비용의 성격별 분류 *시계열* — 전 기간(분기 포함) 당기 구성 파싱. panel 전 기간 본문을 읽어 무거우니
+	 * 상세보기(다이얼로그) 열 때만 지연 호출 권장. 단일점이면(시계열 의미 없음) null. 미존재/미지원도 null. */
+	costNatureSeries(code: string): Promise<CostNatureSeries | null>;
 }

@@ -707,7 +707,7 @@
 <!-- 주석 대시보드 다이얼로그 (lazy: 닫혀 있으면 청크 무증가) -->
 {#if dashOpen}
 	{#await import('./NotesDashboardDialog.svelte') then { default: NotesDashboardDialog }}
-		<NotesDashboardDialog {co} {lang} {notes} onClose={() => (dashOpen = false)} />
+		<NotesDashboardDialog {co} {lang} {notes} loadCostSeries={() => rt.report.costNatureSeries(co.code)} onClose={() => (dashOpen = false)} />
 	{/await}
 {/if}
 

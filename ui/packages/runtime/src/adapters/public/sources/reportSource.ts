@@ -9,6 +9,8 @@ import type {
 	AuditYear,
 	CapitalChangeEvent,
 	CapitalChangesBundle,
+	CostNaturePoint,
+	CostNatureSeries,
 	DebtLadder,
 	DebtProfileBundle,
 	DebtProfileYear,
@@ -31,7 +33,7 @@ import type {
 	WorkforceYear
 } from '@dartlab/ui-contracts';
 import type { DataCore } from '../../../data/fetch/request';
-import { parseNoteRows, toComposition } from './noteTableParse';
+import { cleanCostRows, costCategory, COST_SEMANTIC_LABELS, currentPeriodTables, detectUnitMult, parseNoteRows, toComposition } from './noteTableParse';
 
 const browser = typeof window !== 'undefined';
 
@@ -753,9 +755,15 @@ export function createReportSource(core: DataCore): ReportPort {
 			const head = pool[0];
 			if (!head) continue;
 			// 정형 숫자표(비용 성격별)는 조각 테이블 파싱→병합→구성요소(항목%). 실패=undefined→content 발췌 폴백.
+			// 당기 컬럼만(전기 혼입 방지) + 단위(백만원/천원) 원 환산 + 구조적 총계 제거(toComposition 내장).
 			// 부문(segment)은 행렬 구조라 별도 처리(후속) — 지금은 costNature 만 파싱.
-			const composition =
-				topic.id === 'costNature' ? (toComposition(parseNoteRows(pool.map((r) => str(r.contentRaw)))) ?? undefined) : undefined;
+			let composition;
+			if (topic.id === 'costNature') {
+				const mult = detectUnitMult(pool.map((r) => str(r.contentRaw)));
+				const curTables = currentPeriodTables(pool.map((r) => ({ leafType: str(r.leafType), contentRaw: str(r.contentRaw) })));
+				const rowsCN = parseNoteRows(curTables).map((r) => ({ name: r.name, amount: r.amount * mult }));
+				composition = toComposition(rowsCN) ?? undefined;
+			}
 			out.push({
 				key: `${topic.id}:${str(head.disclosureKey) || topic.id}`,
 				topic: topic.id,
@@ -768,6 +776,74 @@ export function createReportSource(core: DataCore): ReportPort {
 			});
 		}
 		return out.length ? out : null;
+	}
+
+	// ── 비용의 성격별 분류 *시계열* — panel 전 기간 본문을 읽어 매 정기보고서가 보고한 당기 구성을 파싱.
+	// notes()(최신 단일점)와 달리 분기마다 다 있는 비용 체질 변화를 보여줌(원재료 비중 ↑ 등). panel 전 기간 본문
+	// 로드라 무거워 상세보기 다이얼로그 열 때만 호출(지연). 카테고리는 회사 자기 명칭을 공백제거 정규화로 묶어
+	// 전 기간 합계 상위 K + 기타 — 산업특수 비용(구입전력비 등)도 보존(의미 버킷팅 안 함). ──
+	async function buildCostNatureSeries(code: string): Promise<CostNatureSeries | null> {
+		const rows = await core.requestParquetRows<Row>({
+			origin: 'hfRange',
+			path: `dart/panel/${code}.parquet`,
+			columns: ['period', 'chapter', 'sectionLeaf', 'blockLeaf', 'leafType', 'contentRaw'],
+			cacheKey: `panel.costSeries:${code}`,
+			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 32 }
+		});
+		const re = NOTE_TOPICS[0]!.re; // costNature
+		const matched = rows.filter((r) => re.test(str(r.blockLeaf)) || re.test(str(r.sectionLeaf)));
+		if (!matched.length) return null;
+		// period 별 그룹 (parquet 반환 순서 = 문서 순서 보존 — currentPeriodTables 의 전기 마커 경계에 필수)
+		const byPeriod = new Map<string, Row[]>();
+		for (const r of matched) {
+			const p = str(r.period);
+			if (!p) continue;
+			let arr = byPeriod.get(p);
+			if (!arr) byPeriod.set(p, (arr = []));
+			arr.push(r);
+		}
+		type PP = { period: string; year: string; quarter: string; items: Map<string, number>; total: number; disp: Map<string, string> };
+		const perPeriod: PP[] = [];
+		for (const [period, prows] of byPeriod) {
+			// 연결('...연결...') 우선, 없으면 별도 — 중복 주제 한쪽만 (notes()와 동일 정책)
+			const consolidated = prows.filter((r) => str(r.sectionLeaf).includes('연결') || str(r.chapter).includes('연결'));
+			const pool = consolidated.length ? consolidated : prows;
+			const mult = detectUnitMult(pool.map((r) => str(r.contentRaw)));
+			const curTables = currentPeriodTables(pool.map((r) => ({ leafType: str(r.leafType), contentRaw: str(r.contentRaw) })));
+			// 당기 표 파싱 → 비용 정제(비-비용 드롭·구조적 총계 제거·재고제외·비용형태만) → 단위 원 환산
+			const parsed = cleanCostRows(parseNoteRows(curTables)).map((r) => ({ name: r.name, amount: r.amount * mult }));
+			if (parsed.length < 3) continue;
+			const total = parsed.reduce((a, r) => a + r.amount, 0);
+			if (total <= 0) continue;
+			// 의미 카테고리(인건비·감가상각 등) 버킷 + 산업특수 passthrough. 표시명: 의미라벨 그대로 / passthrough=원본
+			const items = new Map<string, number>();
+			const disp = new Map<string, string>();
+			for (const r of parsed) {
+				const k = costCategory(r.name);
+				items.set(k, (items.get(k) ?? 0) + r.amount);
+				if (!disp.has(k)) disp.set(k, COST_SEMANTIC_LABELS.has(k) ? k : r.name);
+			}
+			const m = period.match(/^(\d{4})Q(\d)$/);
+			perPeriod.push({ period, year: m ? m[1]! : period.slice(0, 4), quarter: (m ? m[2]! : '') + '분기', items, total, disp });
+		}
+		if (perPeriod.length < 2) return null; // 단일점이면 시계열 의미 없음 — snapshot 이 커버
+		perPeriod.sort((a, b) => a.period.localeCompare(b.period));
+		// 전 기간 카테고리 합계 → '기타' 제외 상위 K 선정. 표시명은 최신 기간 표기 우선(현행 명칭).
+		const gtot = new Map<string, number>();
+		const gdisp = new Map<string, string>();
+		for (const pp of perPeriod) for (const [k, v] of pp.items) gtot.set(k, (gtot.get(k) ?? 0) + v);
+		for (let i = perPeriod.length - 1; i >= 0; i--) for (const [k, name] of perPeriod[i]!.disp) gdisp.set(k, name);
+		const K = 6;
+		const topKeys = [...gtot.entries()].sort((a, b) => b[1] - a[1]).map((e) => e[0]).filter((k) => k !== '기타').slice(0, K);
+		// '기타' = 나머지(보고된 기타 + 비-top 카테고리) — 항상 catch-all 1개로(믹스 100% 닫힘)
+		const categories = topKeys.map((k) => gdisp.get(k) ?? k).concat(['기타']);
+		const points: CostNaturePoint[] = perPeriod.map((pp) => {
+			const shares = topKeys.map((k) => ((pp.items.get(k) ?? 0) / pp.total) * 100);
+			const sumTop = shares.reduce((a, b) => a + b, 0);
+			shares.push(Math.max(0, 100 - sumTop));
+			return { period: pp.period, year: pp.year, quarter: pp.quarter, total: pp.total, shares };
+		});
+		return { categories, points };
 	}
 
 	// ── ReportPort — 각 메서드는 guarded(브라우저 가드 + null 폴백) 로 build 함수를 감싼다.
@@ -786,6 +862,7 @@ export function createReportSource(core: DataCore): ReportPort {
 		auditTrail: (code) => guarded(() => buildAuditTrail(code.trim())),
 		topExecPay: (code) => guarded(() => buildTopExecPay(code.trim())),
 		auditFees: (code) => guarded(() => buildAuditFees(code.trim())),
-		notes: (code) => guarded(() => buildReportNotes(code.trim()))
+		notes: (code) => guarded(() => buildReportNotes(code.trim())),
+		costNatureSeries: (code) => guarded(() => buildCostNatureSeries(code.trim()))
 	};
 }

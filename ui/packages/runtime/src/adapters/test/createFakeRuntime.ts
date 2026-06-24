@@ -331,6 +331,9 @@ function fakeReport(): ReportPort {
 		async notes() {
 			return null;
 		},
+		async costNatureSeries() {
+			return null;
+		},
 		async shareholders() {
 			return null;
 		},
