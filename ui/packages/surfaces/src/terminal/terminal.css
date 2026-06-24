@@ -225,7 +225,7 @@
 /* LEFT LENS (scan 축소판: 경제/주가/재무) */
 .dlTerm .lensBar { display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--bd); border-radius: 2px; padding: 2px; }
 .dlTerm .lensTab { flex: 1; background: transparent; color: var(--dim); font-family: var(--cond); font-weight: 700; font-size: 10.5px; letter-spacing: 0.5px; border: none; border-radius: 2px; padding: 4px 4px; cursor: pointer; }
-.dlTerm .lensTab.on { background: rgba(var(--amber-rgb), 0.14); color: var(--amber); }
+.dlTerm .lensTab.on { background: var(--amber); color: var(--onAccent); }
 .dlTerm .lensTab:hover:not(.on) { color: var(--txt); }
 .dlTerm .lensScan { font-family: var(--mono); font-size: 8.5px; color: var(--dimmer); text-decoration: none; padding: 0 5px; white-space: nowrap; }
 .dlTerm .lensScan:hover { color: var(--amber); }
@@ -337,7 +337,7 @@
 .dlTerm .eMarketFeed .feedCats { display: flex; gap: 0; overflow-x: auto; border-bottom: 1px solid var(--bd); scrollbar-width: none; }
 .dlTerm .eMarketFeed .feedCats::-webkit-scrollbar { display: none; }
 .dlTerm .feedCat { flex: 0 0 auto; font-family: var(--cond); font-size: 9.5px; font-weight: 600; color: var(--dimmer); background: transparent; border: none; padding: 4px 6px; cursor: pointer; white-space: nowrap; }
-.dlTerm .feedCat.on { color: var(--amber); box-shadow: inset 0 -2px 0 var(--amber); }
+.dlTerm .feedCat.on { background: var(--amber); color: var(--onAccent); font-weight: 700; }
 .dlTerm .feedCat:hover:not(.on) { color: var(--txt); }
 .dlTerm .feedCatN { font-family: var(--mono); font-size: 8px; color: var(--dim); margin-left: 3px; }
 .dlTerm .feedSub { display: flex; align-items: center; gap: 6px; padding: 3px 7px; border-bottom: 1px solid var(--dl-line); }
@@ -852,7 +852,8 @@
 .dlTerm .finTabs { display: flex; border-bottom: 1px solid var(--bd); }
 .dlTerm .finTab { flex: 1; background: var(--panel2); color: var(--dim); font-family: var(--cond); font-weight: 600; font-size: 10.5px; letter-spacing: 0.5px; border: none; border-right: 1px solid var(--bd); padding: 5px 4px; cursor: pointer; }
 .dlTerm .finTab:last-child { border-right: none; }
-.dlTerm .finTab.on { background: rgba(var(--amber-rgb), 0.1); color: var(--amber); box-shadow: inset 0 -2px 0 var(--amber); }
+/* 선택 버튼 = 솔리드 핑크 채움 단일 언어(.seg.on 과 동일) — 탭/토글이 한 헤더에 섞여도 일관. */
+.dlTerm .finTab.on { background: var(--amber); color: var(--onAccent); font-weight: 700; }
 .dlTerm .finTab:hover:not(.on) { color: var(--txt); }
 .dlTerm .finScroll { max-height: 248px; overflow-y: auto; }
 
@@ -1026,8 +1027,8 @@
 
 /* PROVENANCE TAG */
 .dlTerm .provTag { font-family: var(--mono); font-size: 8px; font-weight: 600; letter-spacing: 0.4px; padding: 1px 4px; border-radius: 2px; line-height: 1.5; flex-shrink: 0; cursor: help; }
-/* 출처 배지 — 글자색=배경색 hue 일치(과거 파랑글자/초록배경·빨강글자/파랑배경 불일치 정정). real=초록·derived=강조핑크·recon=파랑점선. */
-.dlTerm .provTag.pReal { color: var(--up); background: rgba(52, 211, 153, 0.12); }
+/* 출처 배지 — 기본값(실데이터)은 모든 패널에 깔리므로 조용한 회색(소음 제거), 예외(파생=핑크·재구성=파랑점선)만 유색. 글자=배경 hue 일치. */
+.dlTerm .provTag.pReal { color: var(--dimmer); background: rgba(255, 255, 255, 0.05); }
 .dlTerm .provTag.pDeriv { color: var(--amber); background: rgba(var(--amber-rgb), 0.12); }
 .dlTerm .provTag.pWire { color: var(--good); background: rgba(96, 165, 250, 0.12); border: 1px dashed rgba(96, 165, 250, 0.4); }
 
