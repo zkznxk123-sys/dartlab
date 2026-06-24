@@ -160,8 +160,7 @@
 	let regFilings = $state<RegularFiling[]>([]);
 	let nonRegFilings = $state<NonRegularFiling[]>([]);
 	let nonRegState = $state<'loading' | 'ready' | 'empty'>('loading');
-	// per-company read(notes 등)가 hang/실패해도 멈추지 않게 — 8s 타임아웃 race. 타이머는 settle 시 해제(누수 없음).
-	const FACTS_TIMEOUT_MS = 8000;
+	// per-company read(notes 등)가 hang/실패해도 멈추지 않게 — 타임아웃 race. 타이머는 settle 시 해제(누수 없음).
 	function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 		return new Promise<T>((resolve, reject) => {
 			const t = setTimeout(() => reject(new Error('timeout')), ms);
@@ -317,14 +316,19 @@
 		notes = [];
 		notesState = 'loading';
 		let cancelled = false;
-		withTimeout(rt.report.notes(code), FACTS_TIMEOUT_MS).then(
+		// Promise.resolve().then 으로 감싸 동기 throw(포트 미배선 등)도 rejection 으로 — effect 가 throw 해서
+		// RightStack 전체가 깨지는 것 방지. notes 실패=주석 패널만 error 상태(나머지 패널 정상).
+		// panel 파케 read 는 reportFacts 보다 무거워(13MB·2pass) 타임아웃 15s.
+		withTimeout(Promise.resolve().then(() => rt.report.notes(code)), 15_000).then(
 			(n) => {
 				if (cancelled) return;
 				notes = n ?? [];
 				notesState = notes.length ? 'ready' : 'empty';
 			},
-			() => {
-				if (!cancelled) notesState = 'error';
+			(err) => {
+				if (cancelled) return;
+				console.warn('[terminal] report notes load failed:', err);
+				notesState = 'error';
 			}
 		);
 		return () => {
@@ -678,15 +682,25 @@
 	{/await}
 {/if}
 
-<!-- 정기보고서 주석 — 간단 글랜스(비용 체질 한 줄=real digest) + 대시보드 ▸(파싱 찐정보 다이얼로그). B 아키텍처. -->
-{#if notesState === 'ready' && notes.length}
-	<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={{ kr: notes.length + '/5', en: notes.length + '/5' }} flush>
-		{#snippet right()}<button class="finFullBtn" onclick={() => (dashOpen = true)} title={lang === 'en' ? 'parsed notes dashboard' : '파싱된 주석 대시보드 — 비용 체질·부문·우발·계열'}>{lang === 'en' ? 'dashboard ▸' : '대시보드 ▸'}</button>{/snippet}
-		{#if costGlance}
-			<div class="noteGlance"><span class="ngLabel">{lang === 'en' ? 'cost' : '비용'}</span> {costGlance}</div>
-		{/if}
-		{#if noteTopicNames}
-			<div class="noteMore">+ {noteTopicNames}</div>
+<!-- 정기보고서 주석 — 간단 글랜스(비용 체질 한 줄=real digest) + 상세보기(파싱 찐정보 다이얼로그). B 아키텍처.
+     상태 피드백(loading/error/ready) 항상 렌더 — '아무것도 안뜬다' 방지. 미공시(empty)만 숨김(클러터 회피). -->
+{#if notesState !== 'empty'}
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={notesState === 'ready' ? { kr: notes.length + '/5', en: notes.length + '/5' } : undefined} flush>
+		{#snippet right()}{#if notesState === 'ready' && notes.length}<button class="finFullBtn" onclick={() => (dashOpen = true)} title={lang === 'en' ? 'parsed notes detail (cost·segment·contingency·related-party)' : '파싱된 주석 상세 — 비용 체질·부문·우발·계열'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/if}{/snippet}
+		{#if notesState === 'loading'}
+			<div class="storyEmpty" role="status" aria-busy="true">{lang === 'en' ? 'parsing notes …' : '주석 파싱 중 …'}</div>
+		{:else if notesState === 'error'}
+			<div class="storyEmpty" role="status">{lang === 'en' ? 'failed to load notes' : '주석 불러오지 못함'}</div>
+		{:else}
+			{#if costGlance}
+				<div class="noteGlance"><span class="ngLabel">{lang === 'en' ? 'cost' : '비용'}</span> {costGlance}</div>
+			{/if}
+			{#if noteTopicNames}
+				<div class="noteMore">+ {noteTopicNames}</div>
+			{/if}
+			{#if !costGlance && !noteTopicNames}
+				<div class="noteGlance dim">{lang === 'en' ? `${notes.length} note(s) — detail ▸` : `주석 ${notes.length}개 — 상세보기 ▸`}</div>
+			{/if}
 		{/if}
 	</Panel>
 {/if}
