@@ -10,6 +10,14 @@
 
 	let { card, rt }: { card: CarouselCard; rt: DartLabRuntime } = $props();
 
+	// 큰 숫자 천단위 콤마(editorialStat bigNumber) — 정수부만 그룹화, 소수·부호·기존 콤마 보존(멱등).
+	function fmtBig(s: string): string {
+		const m = String(s).match(/^(-?)([\d,]+)(\.\d+)?(.*)$/);
+		if (!m) return String(s);
+		const intPart = m[2].replace(/,/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+		return m[1] + intPart + (m[3] ?? '') + (m[4] ?? '');
+	}
+
 	// 사진 모드 — 편집 카드=monochrome+강한 하단 그라데이션(기존 SNS editorial), 텍스트=풀, 차트=dim.
 	const CHART_KINDS = new Set(['kpis', 'line', 'bars', 'share', 'table', 'finChart']);
 	const EDITORIAL_KINDS = new Set(['editorial', 'editorialBeat', 'editorialStat']);
@@ -176,7 +184,7 @@
 		{:else if card.kind === 'editorialStat'}
 			<div class="editorial">
 				{#if card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
-				<div class="eStat"><span class="eNum">{card.bigNumber}</span>{#if card.unit}<span class="eUnit">{card.unit}</span>{/if}</div>
+				<div class="eStat"><span class="eNum">{fmtBig(card.bigNumber)}</span>{#if card.unit}<span class="eUnit">{card.unit}</span>{/if}</div>
 				{#if card.context}<p class="eSub">{stripDots(card.context)}</p>{/if}
 			</div>
 		{:else}
@@ -382,7 +390,7 @@
 		font-size: clamp(11px, 2.4cqw, 18px);
 		font-weight: 800;
 		letter-spacing: 0.04em;
-		color: #fb3f6c;
+		color: var(--dl-accent);
 		margin-bottom: 0.5em;
 	}
 	.eLine {
@@ -421,7 +429,7 @@
 		font-size: clamp(56px, 18cqw, 200px);
 		font-weight: 900;
 		line-height: 0.92;
-		color: #fb3f6c;
+		color: var(--dl-accent);
 	}
 	.eUnit {
 		font-size: clamp(20px, 6cqw, 56px);

@@ -4,6 +4,7 @@
 	import type { DartLabRuntime } from '@dartlab/ui-contracts';
 	import CardSlide from './CardSlide.svelte';
 	import { loadContract, contractToCards } from './contract';
+	import { heroUrl } from './media';
 	import type { CarouselCard, CarouselContract, MediaIndex } from './model';
 
 	let {
@@ -28,9 +29,14 @@
 	let cover = $state<CarouselCard | null>(null);
 	let contract = $state<CarouselContract | null>(null);
 	$effect(() => {
+		const m = media; // 동기 읽기로 media 로드 추적(로드 후 재실행 → 이미지 해석)
 		loadContract(slug).then((c) => {
 			contract = c;
-			if (c) cover = contractToCards(c, media)[0] ?? null;
+			if (!c) return;
+			const cov = contractToCards(c, m)[0] ?? null;
+			// 표지 이미지가 안 풀리면(이름 불일치 등) 회사 hero 로 폴백 — 검정 카드 방지.
+			if (cov && !cov.bg) cov.bg = heroUrl(m, code);
+			cover = cov;
 		});
 	});
 	// 회사명 = 계약명 우선(미디어 displayName 누락 시 코드만 뜨던 것 교정).
