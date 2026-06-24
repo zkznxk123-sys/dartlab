@@ -33,6 +33,117 @@ ai:
   weaknesses: ["52주 저점 대비 10배 이상 상승한 가격 부담", "CAPEX/매출 29.4%의 공급 확대 리스크", "매출채권과 재고 증가 경고", "HBM 희소성 프리미엄이 경쟁 심화로 낮아질 가능성", "외국인·ETF 수급 의존"]
   keyMetrics: {price: 2685000, marketCapT: 1913.61, q1RevenueT: 52.5763, q1OpT: 37.6103, q1Opm: 71.54}
   dataAsOf: "2026-06-18"
+carousel:
+  title: 268만원짜리 하이닉스, 더 갈까
+  caption: |-
+    지금 SK하이닉스는 좋은 회사인지보다 HBM 초과이익이 남았는지가 질문입니다.
+
+    268만원대 주가를 보면 이미 너무 오른 것 아닌지 묻게 됩니다. 그런데 1분기 영업이익률 72%라는 비정상적인 이익도 같이 봐야 합니다.
+
+    셋이 버티면 이야기는 이어집니다. 하나라도 빠르게 깨지면 질문은 더 갈까가 아니라 피크였나로 바뀝니다.
+
+    그래서 다음엔 영업이익률 유지, HBM4 실제 물량, 공급 확대 뒤 가격을 봐야 합니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 영업이익률 유지, HBM4 실제 물량, 공급 확대 뒤 가격을 읽는 관점입니다. 금지: 매수, 매도, 더 간다 확정.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 18 기준
+    line: |-
+      268만원짜리
+      [[하이닉스]], 더 갈까
+    sub: |-
+      당시 종가는 268만 5천원.
+      질문은 HBM이 좋으냐가 아닙니다.
+      이미 오른 가격에 남은 숫자가 있느냐입니다.
+    image: memory-everywhere-map
+  - layout: editorialStat
+    kicker: 가격의 속도
+    bigNumber: '11'
+    unit: 배
+    context: |-
+      1년 저점 24만 2천원대에서
+      장중 고점 273만 8천원대까지.
+      좋은 회사라는 말만으로는
+      설명하기 어려운 반응입니다.
+    image: memory-everywhere-map
+  - layout: editorialBeat
+    kicker: 질문 전환
+    line: |-
+      좋은 회사냐는 질문보다
+      [[초과이익이 남았느냐]]입니다
+    sub: |-
+      지금 가격은 좋은 회사 평가보다
+      HBM 초과이익이 더 이어진다는 기대를 담습니다.
+      그래서 봐야 할 것은 이익의 지속성입니다.
+    image: hbm-codevelopment-table
+  - layout: editorialStat
+    kicker: 이익률
+    bigNumber: '72'
+    unit: '%'
+    context: |-
+      1분기 영업이익률입니다.
+      비싸 보이는 주가도
+      비정상적으로 큰 이익을 같이 봐야 합니다.
+    image: hbm-codevelopment-table
+  - layout: editorialBeat
+    kicker: 병목
+    line: |-
+      AI칩이 빨라질수록
+      [[기억장치]]가 목이 됩니다
+    sub: |-
+      AI 서버는 계산만 빠르다고 끝나지 않습니다.
+      데이터를 얼마나 빨리 대고,
+      AI칩 옆에 얼마나 가깝게 붙이느냐가 성능을 가릅니다.
+    image: ai-memory-backbone
+  - layout: editorialBeat
+    kicker: 관전 1
+    line: |-
+      다음 가격표는
+      [[HBM4 물량]]에서 나온다
+    sub: |-
+      HBM4로 넘어가면 단순 수요보다
+      누가 더 많은 물량을 먼저 잡는지가 중요합니다.
+      주가는 결국 실제 주문으로 확인됩니다.
+    image: hbm-codevelopment-table
+  - layout: editorialBeat
+    kicker: 관전 2
+    line: |-
+      부품사가 아니라
+      [[공동 설계자]]로 들어가나
+    sub: |-
+      AI 메모리는 납품만의 문제가 아닙니다.
+      칩 설계와 칩을 묶는 방식에 얼마나 깊이 들어가는지가
+      다음 협상력을 만듭니다.
+    image: hbm-codevelopment-table
+  - layout: editorialStat
+    kicker: 시장 크기
+    bigNumber: '58'
+    unit: '%'
+    context: |-
+      2026년 HBM 시장이 전년 대비
+      58% 커질 수 있다는 전망이 있습니다.
+      중요한 것은 성장률이 실제 주문으로 바뀌는지입니다.
+    image: memory-everywhere-map
+  - layout: editorialBeat
+    kicker: 반대편
+    line: |-
+      공급이 늘면
+      [[가격]]이 먼저 묻습니다
+    sub: |-
+      HBM이 좋아도 반도체는 공급이 늘면 가격을 봐야 합니다.
+      높은 이익률이 유지되는지,
+      증설이 이익률을 갉아먹는지가 다음 리스크입니다.
+    image: autonomous-fab-digital-twin
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      영업이익률 유지.
+      HBM4 실제 물량.
+      공급 확대 뒤 가격.
+    image: autonomous-fab-digital-twin
 ---
 
 <script>

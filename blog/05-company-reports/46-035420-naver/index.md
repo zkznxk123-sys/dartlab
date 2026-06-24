@@ -32,6 +32,127 @@ ai:
   weaknesses: ["비영업자산 55% (투자 성격)", "LINE/Z Holdings 불확실성", "배당 0원 (주주환원 없음)"]
   keyMetrics: {revenue: 12.04, opm: 18.3, roe: 1.8, fcf: 1.87}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 네이버는 검색창 밖으로 나가고 있습니다
+  caption: |-
+    네이버는 검색창 밖으로 나가겠다는 이야기를 하고 있습니다.
+
+    핵심은 새 챗봇이 아닙니다. AI를 돌릴 전력과 자리를 직접 갖겠다는 겁니다. 시작 숫자는 2027년 55MW입니다.
+
+    그래서 질문은 AI가 대단하냐가 아닙니다. 이 공장이 실제로 돈을 버느냐입니다.
+
+    다음엔 세 가지만 보겠습니다. 55MW가 제때 켜지는가, 외부 고객이 붙는가, 전기값과 장비비를 이기는 매출이 나오는가입니다.
+  pinnedComment: 투자 판단이 아닙니다. 네이버 AI 공장은 55MW 가동 시점, 외부 고객, 비용을 이기는 매출을 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      네이버 AI 공장,
+      [[돈이 될까]]
+    sub: |-
+      55MW 전력과 외부 고객이 붙어야 합니다.
+      핵심은 챗봇이 아닙니다.
+      AI를 돌릴 자리로 돈을 벌 수 있느냐입니다.
+    image: ai-factory-exterior
+  - layout: editorialBeat
+    kicker: 먼저 뜻부터
+    line: |-
+      AI 공장은
+      답변이 만들어지는
+      [[데이터센터]]입니다
+    sub: |-
+      모델을 학습시키고,
+      질문에 대한 답을 계산하고,
+      기업 서비스로 내보내는 곳입니다.
+      서버와 전기, 냉각, 운영 경험이 같이 필요합니다.
+    image: search-to-infra-control-room
+  - layout: editorialStat
+    kicker: 첫 시작
+    bigNumber: '55'
+    unit: MW
+    context: |-
+      2027년부터 켜겠다는 첫 전력 규모입니다.
+      메가와트는 전기 용량입니다.
+      검색 화면의 회사가 전력 단위 사업으로 내려왔습니다.
+    image: ai-factory-exterior
+  - layout: editorialBeat
+    kicker: 왜 엔비디아인가
+    line: |-
+      칩만 사는 게 아니라
+      [[설계도와 운영법]]까지
+      받는 셈입니다
+    sub: |-
+      AI 공장은 그래픽카드만 꽂는 사업이 아닙니다.
+      서버 배치, 네트워크, 전력, 운영 방식까지
+      한 번에 맞아야 돌아갑니다.
+    image: search-to-infra-control-room
+  - layout: editorialBeat
+    kicker: 네이버의 무기
+    line: |-
+      검색, 쇼핑, 지도,
+      [[클라우드]]를
+      직접 돌려봤습니다
+    sub: |-
+      네이버는 큰 서비스를 오래 운영해 본 회사입니다.
+      한국어 모델과 데이터센터 경험도 있습니다.
+      이 경험이 공장 사업의 출발점입니다.
+    image: sovereign-ai-map
+  - layout: editorialBeat
+    kicker: 돈 되는 지점
+    line: |-
+      외부 고객이 붙으면
+      검색광고 밖 [[임대료]]가
+      생깁니다
+    sub: |-
+      기업과 정부가 AI를 돌릴 자리를 빌리면
+      네이버는 트래픽만 파는 회사가 아닙니다.
+      계산 자리를 빌려주는 회사가 됩니다.
+    image: sovereign-ai-map
+  - layout: editorialBeat
+    kicker: 반대편
+    line: |-
+      비어 있으면
+      [[비용]]이 먼저
+      보입니다
+    sub: |-
+      전기, 냉각, 장비, 운영 인력이 모두 필요합니다.
+      서버가 놀면 매출보다 비용이 먼저 커집니다.
+      그래서 사용량이 핵심입니다.
+    image: physical-ai-floor
+  - layout: editorialBeat
+    kicker: 첫 번째 확인
+    line: |-
+      55MW가
+      [[제때 켜지는지]]
+      봅니다
+    sub: |-
+      발표보다 중요한 것은 실제 가동입니다.
+      전력, 장비, 고객 준비가 맞아야
+      공장이 돈을 벌기 시작합니다.
+    image: ai-factory-exterior
+  - layout: editorialBeat
+    kicker: 두 번째 확인
+    line: |-
+      외부 고객이
+      [[얼마나 붙는지]]
+      봅니다
+    sub: |-
+      네이버 내부 AI만 돌리면 비용센터에 가깝습니다.
+      기업, 정부, 해외 고객이 붙어야
+      새 사업으로 읽을 수 있습니다.
+    image: search-to-infra-control-room
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지만]]
+      봅니다
+    sub: |-
+      55MW가 제때 켜지는가.
+      외부 고객이 붙는가.
+      전기값과 장비비를 이기는 매출이 나오는가.
+      이 셋이 네이버 AI 공장의 진짜 질문입니다.
+    image: physical-ai-floor
 ---
 
 <script>

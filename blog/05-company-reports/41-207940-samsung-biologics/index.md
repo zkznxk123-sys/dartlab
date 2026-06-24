@@ -34,6 +34,104 @@ ai:
     - "CCC 377일 — 바이오 배양의 구조적 운전자본 부담"
   keyMetrics: {revenue: 4.56, opm: 45.4, roe: 23.7, fcf: 0.77}
   dataAsOf: "2026-04-17"
+carousel:
+  title: 삼성바이오로직스는 신약보다 공장을 본다
+  caption: |-
+    삼성바이오로직스를 신약 기대감으로만 보면 핵심을 놓칩니다. 이 회사의 질문은 어떤 약을 직접 만들었느냐가 아닙니다.
+
+    고객사의 바이오의약품을 대신 개발하고 생산하는 회사에 가깝습니다. 그래서 매출 1조2571억원보다 더 봐야 할 것은 공장이 얼마나 차 있고 새 공장이 비용을 이기는가입니다.
+
+    다음에는 5공장이 얼마나 돌아가는지, 계약이 매출과 남는 이익으로 바뀌는지, 증설 뒤 영업이익률을 봅니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 5공장이 얼마나 돌아가는지, 계약이 매출과 남는 이익으로 바뀌는지, 증설 뒤 영업이익률을 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      바이오 회사인데
+      [[신약보다 공장]]을 본다
+    sub: |-
+      삼성바이오로직스는 직접 만든 신약보다
+      고객사의 약을 대신 만드는 공장을 봐야 합니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 정체
+    line: |-
+      질문은 신약보다
+      [[배양기]]에 가깝다
+    sub: |-
+      글로벌 제약사가 맡긴 바이오의약품을
+      대신 개발하고 생산하는 사업입니다.
+      그래서 질문은 새 약보다 공장입니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 1분기
+    bigNumber: '1.26'
+    unit: 조
+    context: |-
+      매출은 1조2571억원,
+      영업이익은 5808억원이었습니다.
+      매출과 남는 이익을 같이 봐야 합니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 공장
+    line: |-
+      1~4공장이
+      [[풀가동]]이었다
+    sub: |-
+      회사는 1~4공장이 꽉 찼고
+      운영 실행력이 실적을 이끌었다고 설명했습니다.
+      이 회사는 공장이 얼마나 도는지가 중요합니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 생산능력
+    line: |-
+      84만5천 리터는
+      [[자랑보다 분모]]다
+    sub: |-
+      회사가 공개한 총 생산용량입니다.
+      실제로 얼마나 돌아가고 매출로 이어지는지는
+      따로 확인해야 합니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 다음 시험
+    line: |-
+      새 공장은 옵션이자
+      [[고정비]]다
+    sub: |-
+      5공장은 가동 확대가 진행 중입니다.
+      증설은 성장 가능성이지만,
+      덜 돌아가는 기간에는 고정비 부담이 됩니다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 받아둔 계약
+    bigNumber: '214'
+    unit: 억달러
+    context: |-
+      받아둔 계약 규모는 214억달러를 넘었습니다.
+      다만 곧장 매출이라는 뜻은 아닙니다.
+      생산 일정과 남는 이익을 봐야 합니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 미국
+    line: |-
+      미국 고객 가까이에
+      [[공장]]을 둔다
+    sub: |-
+      회사는 미국 생산시설을 3.53억달러에 인수했습니다.
+      가까운 생산 거점과 공급망 대응력을
+      높이려는 움직임입니다.
+    image: research-lab
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      5공장이 얼마나 돌아가는지.
+      계약이 매출과 남는 이익으로 바뀌는지.
+      증설 뒤 영업이익률.
+    image: production-site
 ---
 
 <script>

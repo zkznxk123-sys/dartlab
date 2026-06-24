@@ -33,6 +33,102 @@ ai:
     - "부채비율 129%"
   keyMetrics: {revenue: 17.4, opm: 8.4, roe: 5.0, fcf: 0.3}
   dataAsOf: "2026-04-03"
+carousel:
+  title: 원전 뉴스가 뜨면 터빈 공장을 봅니다
+  caption: |-
+    두산에너빌리티는 원전 뉴스로 자주 움직이지만, 숫자는 공장을 보라고 말합니다.
+
+    1분기 에너빌리티 부문 수주는 2.8조원, 수주잔고는 23.2조원 수준이었습니다. 가스터빈 10기도 따냈습니다. 기대감이 아니라 주문이 먼저 보인 분기입니다.
+
+    다음엔 신규 수주, 수주잔고의 매출 전환, 영업이익률, 현금 유입을 보면 됩니다.
+  pinnedComment: 근거는 두산에너빌리티 2026년 1분기 공식 IR입니다. 수주는 매출과 이익 확정이 아니라 제작·납품·정산 뒤 확인할 숫자입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      원전 뉴스가 뜨면
+      [[터빈 공장]]을 봅니다
+    sub: |-
+      두산에너빌리티는 기대감만 보는 회사가 아닙니다.
+      주문이 공장에서 숫자로 바뀌는지를 봐야 합니다.
+    image: bg-doosan-core
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      수주가 늘면
+      [[바로 이익]]일까
+    sub: |-
+      아닙니다.
+      큰 설비 주문은 만들고 납품하고
+      정산되는 시간이 있습니다.
+    image: bg-factory-dark
+  - layout: editorialStat
+    kicker: 1분기 수주
+    bigNumber: '2.8'
+    unit: 조원
+    context: |-
+      국내외 가스터빈과 증기터빈을 포함한
+      에너빌리티 부문 누적 수주입니다.
+      출발은 좋았습니다.
+    image: bg-changwon-interior
+  - layout: editorialStat
+    kicker: 올해 수주 목표
+    bigNumber: '10.5'
+    unit: 조원
+    context: |-
+      회사가 제시한 2026년 목표입니다.
+      1분기만 보고 끝난 이야기가 아니라
+      남은 주문을 봐야 합니다.
+    image: bg-doosan-core
+  - layout: editorialStat
+    kicker: 수주잔고
+    bigNumber: '23.2'
+    unit: 조원
+    context: |-
+      에너빌리티 부문 수주잔고입니다.
+      이미 받은 주문이 매출로 바뀌는
+      속도를 봐야 합니다.
+    image: bg-factory-dark
+  - layout: editorialStat
+    kicker: 가스터빈 수주
+    bigNumber: '10'
+    unit: 기
+    context: |-
+      북미 데이터센터용 7기,
+      국내 발전소용 3기입니다.
+      전력 설비 주문이 실제로 찍혔습니다.
+    image: bg-changwon-night
+  - layout: editorialBeat
+    kicker: 증기터빈
+    line: |-
+      가스터빈만
+      [[보면 부족]]합니다
+    sub: |-
+      증기터빈 주문도 같이 붙었습니다.
+      발전소 한 건은 여러 장비와
+      서비스로 이어질 수 있습니다.
+    image: bg-changwon-interior
+  - layout: editorialBeat
+    kicker: 읽는 법
+    line: |-
+      뉴스보다
+      [[전환 속도]]입니다
+    sub: |-
+      수주가 매출이 되려면
+      제작, 납품, 서비스 계약을 지나야 합니다.
+      큰 주문 다음은 시간표입니다.
+    image: bg-factory-dark
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[네 가지]]를 봅니다
+    sub: |-
+      신규 수주.
+      수주잔고의 매출 전환.
+      영업이익률.
+      현금 유입.
+    image: bg-doosan-core
 ---
 
 <script>

@@ -32,6 +32,105 @@ ai:
   weaknesses: ["2025 순이익 -26.8%", "카카오·유지류 원가 부담", "중국 성장 둔화", "CAPEX 확대에 따른 단순 OCF+ICF 압박"]
   keyMetrics: {revenue: 3.33, opm: 16.75, roe: 9.98, fcf: -0.027}
   dataAsOf: "2026-04-28"
+carousel:
+  title: 초코파이는 과자가 아니라 생산망입니다
+  caption: |-
+    오리온은 초코파이가 아니라 현지 공장입니다.
+
+    1분기 매출은 9,304억원, 영업이익은 1,655억원입니다. 매출에서 영업이익이 남은 비율은 17.8%였습니다. 식품 회사치고 꽤 높은 숫자입니다.
+
+    핵심은 제품 이름이 아닙니다. 중국, 베트남, 러시아에서 직접 만들고 파는 구조가 이익을 지키는지입니다. 같은 과자라도 재료값, 환율, 유통 경로, 공장 가동률에 따라 남는 돈이 달라집니다.
+
+    결론은 명확합니다. 다음 확인 포인트는 해외 매출이 어느 나라에서 늘어나는지, 지역별 이익 비율이 버티는지, 설비투자 뒤 매출과 현금이 따라오는지입니다.
+  pinnedComment: 오리온은 제품 이름보다 현지 공장이 만든 이익 비율을 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      초코파이가 아니라
+      [[현지 공장]]입니다
+    sub: |-
+      같은 과자도 어디서 만들고 팔리는지가 이익을 바꿉니다.
+      오리온은 그 구조를 봅니다.
+    image: retail-aisle
+  - layout: editorialBeat
+    kicker: 질문 전환
+    line: |-
+      과자 이름보다
+      [[어디서 만드나]]입니다
+    sub: |-
+      한국에서 보내는 제품과
+      현지 공장에서 파는 제품은
+      이익 구조가 다릅니다.
+    image: local-production-line
+  - layout: editorialStat
+    kicker: 1분기 이익 비율
+    bigNumber: '17.8'
+    unit: '%'
+    context: |-
+      매출에서 영업이익이 남은 비율입니다.
+      매출은 9,304억원,
+      영업이익은 1,655억원이었습니다.
+    image: local-production-line
+  - layout: editorialBeat
+    kicker: 핵심
+    line: |-
+      핵심은
+      [[수출보다 현지]]입니다
+    sub: |-
+      오리온은 해외 법인과 현지 공장으로
+      지역별 수요를 직접 받습니다.
+      그래서 어느 나라에서 벌었는지가 중요합니다.
+    image: local-production-line
+  - layout: editorialStat
+    kicker: 중국 이익 비율
+    bigNumber: '19.5'
+    unit: '%'
+    context: |-
+      중국 법인의 1분기 수치입니다.
+      매출 성장보다 중요한 것은
+      지역별 이익 비율이 버티는지입니다.
+    image: distribution-warehouse
+  - layout: editorialBeat
+    kicker: 지역 차이
+    line: |-
+      나라가 바뀌면
+      [[원가도 바뀝니다]]
+    sub: |-
+      재료, 환율, 유통 경로, 공장 가동률이
+      지역마다 다르게 남습니다.
+      식품 회사라도 제조업처럼 읽어야 합니다.
+    image: distribution-warehouse
+  - layout: editorialBeat
+    kicker: 투자
+    line: |-
+      설비투자는
+      [[회수 속도]]를 봅니다
+    sub: |-
+      새 공장과 설비는 성장 준비입니다.
+      하지만 돈을 먼저 쓰고,
+      매출과 현금은 나중에 확인됩니다.
+    image: local-production-line
+  - layout: editorialBeat
+    kicker: 주의점
+    line: |-
+      좋은 구조도
+      [[원가를 탑니다]]
+    sub: |-
+      재료와 환율이 흔들리면
+      현지 공장도 이익 비율을 지키기 어렵습니다.
+      성장은 남는 돈으로 확인해야 합니다.
+    image: distribution-warehouse
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를 봅니다
+    sub: |-
+      해외 매출이 어느 나라에서 늘어나는지.
+      지역별 이익 비율이 버티는지.
+      설비투자 뒤 매출과 현금이 따라오는지.
+    image: retail-aisle
 ---
 
 <script>

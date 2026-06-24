@@ -48,6 +48,123 @@ ai:
     fcf: 0.3
   dataAsOf: "2026-04-16"
 youtubeId: "Sw0bT31D3VY"
+carousel:
+  title: 하이브는 무대 밖 숫자를 봅니다
+  caption: |-
+    하이브는 적자냐 아니냐만 보면 이야기가 너무 짧습니다.
+
+    1분기 매출은 6,983억원으로 늘었습니다. 그런데 영업손실은 1,966억원입니다. 여기서 끝내면 그냥 나쁜 실적으로 보입니다. 하지만 직원 주식 증여 비용 2,550억원을 빼고 보면 영업이익은 585억원입니다. 그래서 질문은 바뀝니다.
+
+    공연이 돌아오면 매출은 회복될 수 있습니다. 더 중요한 건 공연장 밖에서도 팬덤 결제가 남느냐입니다. 굿즈와 사용권, 팬클럽, 앱 결제가 같이 움직여야 합니다.
+
+    결론은 단순합니다. 하이브는 무대가 뜨거운 회사냐가 아니라 그 열기가 반복 결제로 남는 회사냐를 봐야 합니다. 다음 확인 포인트는 공연 매출이 회복되는지, 팬덤 결제가 공연 밖에서도 이어지는지, 한 번 비용을 빼고 본 이익이 반복되는지입니다.
+  pinnedComment: 하이브는 공연 매출만 보면 반쪽입니다. 공연 밖 팬덤 결제가 반복되는지가 다음 실적의 핵심입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      하이브는
+      [[무대 밖 결제]]를 봅니다
+    sub: |-
+      공연 흥행보다 오래 남는 건 팬덤이 반복해서 쓰는 돈입니다.
+      이번 실적은 그걸 묻습니다.
+    image: empty-arena-stage
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: 6,983
+    unit: 억
+    context: |-
+      2026년 1분기 매출입니다.
+      전년 대비 39.5% 늘었습니다.
+      회사가 작아진 이야기는 아닙니다.
+    image: production-studio
+  - layout: editorialStat
+    kicker: 표면 손실
+    bigNumber: -1,966
+    unit: 억
+    context: |-
+      영업손실이 크게 찍혔습니다.
+      이 숫자만 보면
+      이야기가 끝난 것처럼 보입니다.
+    image: artist-operations
+  - layout: editorialBeat
+    kicker: 한 줄을 빼면
+    line: |-
+      큰 손실엔
+      [[한 번 비용]]이 있습니다
+    sub: |-
+      직원 주식 증여 비용 2,550억원.
+      이걸 빼고 본 영업이익은 585억원입니다.
+      그래서 질문이 바뀝니다.
+    image: artist-operations
+  - layout: editorialBeat
+    kicker: 질문 전환
+    line: |-
+      적자냐보다
+      [[반복되느냐]]입니다
+    sub: |-
+      한 번 비용을 걷어내도
+      다음 분기에 돈이 다시 남는지 봐야 합니다.
+      팬덤 열기는 실적표로 확인됩니다.
+    image: empty-arena-stage
+  - layout: editorialStat
+    kicker: 음반 매출
+    bigNumber: 2,715
+    unit: 억
+    context: |-
+      1분기 음반 관련 매출입니다.
+      전년 대비 98.9% 늘었습니다.
+      아티스트 영향력이 먼저 숫자로 보입니다.
+    image: production-studio
+  - layout: editorialStat
+    kicker: 공연 매출
+    bigNumber: '887'
+    unit: 억
+    context: |-
+      전년 대비 42.8% 줄었습니다.
+      투어 일정이 분기 실적을
+      크게 흔든다는 뜻입니다.
+    image: empty-arena-stage
+  - layout: editorialBeat
+    kicker: 공연장 밖
+    line: |-
+      공연장 밖에도
+      [[돈이 남습니다]]
+    sub: |-
+      굿즈와 사용권 매출 1,374억원.
+      팬클럽 등 매출 513억원.
+      공연 없는 분기에도 볼 숫자입니다.
+    image: artist-operations
+  - layout: editorialBeat
+    kicker: 앱의 의미
+    line: |-
+      앱은 구경거리가 아니라
+      [[결제 통로]]입니다
+    sub: |-
+      사용자 수 자랑보다 중요한 건
+      유료 팬덤 활동입니다.
+      무료 관심이 돈으로 바뀌는지를 봅니다.
+    image: production-studio
+  - layout: editorialBeat
+    kicker: 주의할 점
+    line: |-
+      대형 아티스트만 보면
+      [[반쪽]]입니다
+    sub: |-
+      투어가 돌아오면 공연 매출은 커질 수 있습니다.
+      굿즈, 팬클럽, 앱 결제가
+      같이 붙어야 합니다.
+    image: empty-arena-stage
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를 봅니다
+    sub: |-
+      공연 매출이 회복되는지.
+      팬덤 결제가 공연 밖에서도 이어지는지.
+      한 번 비용을 빼고 본 이익이 반복되는지.
+    image: empty-arena-stage
 ---
 
 <script>

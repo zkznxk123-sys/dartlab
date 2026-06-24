@@ -40,6 +40,106 @@ ai:
     - "비상장 HD현대삼호 이익 의존 — 공시 범위 제한"
   keyMetrics: {revenue: 29.93, opm: 13.04, roic: 24.35, roe: 18.8}
   dataAsOf: "2026-04-22"
+carousel:
+  title: 배는 계약서에서 먼저 팔리고 이익은 인도 때 확인됩니다
+  caption: |-
+    배는 계약서에서 먼저 팔립니다.
+
+    HD한국조선해양은 수주 뉴스만 보면 반쪽입니다. 조선은 계약, 건조, 인도가 몇 년에 걸쳐 움직입니다. 수주가 많아도 바로 이익이 되는 것은 아닙니다.
+
+    1분기 영업이익은 1조 3,560억원이었습니다. 최근에는 초대형 가스운반선 8척, 1조 4,161억원 규모 계약도 보도됐습니다. 다만 인도는 2030년 6월까지입니다.
+
+    결론은 단순합니다. 다음 확인 포인트는 배가 실제 인도되는 시점, 배 가격이 이익 비율로 남는지, 강판 가격과 환율이 흔드는지입니다.
+  pinnedComment: 조선주는 수주보다 인도 시점과 이익 비율을 같이 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      수주가 많아도
+      [[바로 이익은 아닙니다]]
+    sub: |-
+      배는 계약서에서 먼저 팔리지만,
+      이익은 인도될 때 장부에 찍힙니다.
+      HD한국조선해양은 그 시간차를 봅니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      수주가 많으면
+      [[바로 돈일까]]
+    sub: |-
+      조선은 계약, 건조, 인도가
+      몇 년에 걸쳐 움직입니다.
+      그래서 수주보다 전환 속도를 봅니다.
+    image: control-room
+  - layout: editorialBeat
+    kicker: 정체
+    line: |-
+      조선소 하나가 아니라
+      [[묶어 보는 회사]]입니다
+    sub: |-
+      HD현대중공업, 삼호, 미포 같은
+      조선 자회사 실적이 같이 들어옵니다.
+      배 한 척보다 묶인 실적을 봅니다.
+    image: control-room
+  - layout: editorialStat
+    kicker: 1분기 영업이익
+    bigNumber: '1.36'
+    unit: 조원
+    context: |-
+      매출은 8조 1,409억원입니다.
+      비싼 선박과 생산성 개선이
+      분기 실적을 밀어 올렸습니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 최근 가스운반선 계약
+    bigNumber: '8'
+    unit: 척
+    context: |-
+      6월 1일 보도된 초대형 가스운반선입니다.
+      계약 규모는 1조 4,161억원.
+      인도는 2030년 6월까지입니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 함정
+    line: |-
+      수주는
+      [[예약에 가깝습니다]]
+    sub: |-
+      오늘 계약해도 건조와 인도까지
+      시간이 걸립니다.
+      좋은 계약인지는 이익 비율로 확인됩니다.
+    image: control-room
+  - layout: editorialBeat
+    kicker: 왜 지금
+    line: |-
+      비싼 배가
+      [[장부에 들어옵니다]]
+    sub: |-
+      예전 낮은 가격 계약이 빠지고
+      비싼 배 비중이 늘면
+      이익 비율이 달라질 수 있습니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 변수
+    line: |-
+      배 값만 보면
+      [[반쪽]]입니다
+    sub: |-
+      강판 가격, 환율, 납기 지연이
+      남는 돈을 바꿉니다.
+      비싼 계약도 원가를 지나야 합니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를 봅니다
+    sub: |-
+      배가 실제 인도되는 시점.
+      배 가격이 이익 비율로 남는지.
+      강판 가격과 환율이 흔드는지.
+    image: control-room
 ---
 
 <script>

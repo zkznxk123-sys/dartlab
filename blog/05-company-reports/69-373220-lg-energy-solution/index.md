@@ -34,6 +34,115 @@ ai:
     netMargin: "0.34%"
     fcf: "-6.57조"
   dataAsOf: "2026-04-23"
+carousel:
+  title: LG에너지솔루션은 수주잔고만 보면 안 된다
+  caption: |-
+    LG에너지솔루션은 주문이 없어서 흔들리는 이야기가 아닙니다. 1분기 원통형 46시리즈 신규 수주는 100GWh 이상, 4월 말 수주잔고는 440GWh 이상입니다.
+
+    그래서 질문은 전기차가 좋냐 나쁘냐가 아닙니다. 주문이 납품되고, 이익으로 남고, 현금 부담으로 번지지 않느냐입니다.
+
+    전력 저장장치도 두 번째 축으로 커졌습니다. 1분기 매출 비중은 20% 중반, 북미 생산능력 목표는 연말 50GWh 이상입니다.
+
+    다음에는 세 가지만 보면 됩니다. 수주가 매출로 바뀌는 속도, 전력 저장장치에서 남는 이익, 영업손실 2,078억원이 현금 부담으로 번지는지입니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 수주가 매출과 이익으로 바뀌는지 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      수주만 보면 안 된다
+      [[돈이 남는지]] 봐야 한다
+    sub: |-
+      주문과 매출 신호는 강했다.
+      그런데 같은 분기에는 영업손실도 있었다.
+      질문은 주문이 실제 돈이 되느냐다.
+    image: cell-production
+  - layout: editorialBeat
+    kicker: 첫 장면
+    line: |-
+      전기차가 식어도
+      [[주문은 남았다]]
+    sub: |-
+      1분기 원통형 46시리즈 신규 수주는
+      100GWh 이상이었다.
+      4월 말 수주잔고는 440GWh를 넘었다.
+    image: cell-production
+  - layout: editorialStat
+    kicker: 수주잔고
+    bigNumber: 440+
+    unit: GWh
+    context: |-
+      4월 말 46시리즈 수주잔고.
+      하지만 수주잔고는 아직
+      매출도, 이익도 아니다.
+    image: cell-production
+  - layout: editorialStat
+    kicker: 1분기 영업손실
+    bigNumber: 2,078
+    unit: 억
+    context: |-
+      같은 분기 매출은 6.6조원이었다.
+      큰 회사여도 비용이 앞서면
+      손실이 날 수 있다.
+    image: quality-lab
+  - layout: editorialBeat
+    kicker: 오해 금지
+    line: |-
+      매출 6.6조보다
+      [[손익]]을 봐야 한다
+    sub: |-
+      매출이 크다는 사실과
+      이익이 남는다는 사실은 다르다.
+      배터리는 공장 가동과 원가가 같이 움직인다.
+    image: quality-lab
+  - layout: editorialStat
+    kicker: 46시리즈 신규 수주
+    bigNumber: 100+
+    unit: GWh
+    context: |-
+      1분기에 새로 잡은 원통형 배터리 수주.
+      다음 질문은 언제 납품되고
+      얼마나 이익으로 남느냐다.
+    image: cell-production
+  - layout: editorialBeat
+    kicker: 두 번째 축
+    line: |-
+      전력 저장장치가
+      [[두 번째 축]]이 됐다
+    sub: |-
+      회사 발표 기준 이 사업은
+      매출의 20% 중반까지 올라왔다.
+      전기차만 보는 시선은 부족하다.
+    image: ess-containers
+  - layout: editorialStat
+    kicker: 북미 생산능력
+    bigNumber: 50+
+    unit: GWh
+    context: |-
+      연말 북미 전력 저장장치 생산능력 목표.
+      성장축은 생겼다.
+      이제 실제 가동이 중요하다.
+    image: ess-containers
+  - layout: editorialBeat
+    kicker: 최근 계약
+    line: |-
+      미국 전력회사와
+      [[6GWh 계약]]도 붙었다
+    sub: |-
+      미시간 8개 프로젝트에
+      저장장치를 공급하는 계약이다.
+      다만 계약은 출발점이고 이익은 나중에 확인된다.
+    image: ess-containers
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      수주가 매출로 바뀌는 속도.
+      전력 저장장치에서 남는 이익.
+      영업손실이 현금 부담으로 번지는지.
+    image: quality-lab
 ---
 
 <script>

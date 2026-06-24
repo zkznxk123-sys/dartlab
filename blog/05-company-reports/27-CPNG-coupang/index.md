@@ -34,6 +34,116 @@ ai:
   keyMetrics: {revenue: 30.27, opm: 1.4, roe: 0.0, fcf: 0.0}
   dataAsOf: "2026-04-13"
 youtubeId: "i_YUs8MbhZg"
+carousel:
+  title: 쿠팡은 유출보다 비용을 본다
+  caption: |-
+    쿠팡 개인정보 유출은 공포 뉴스로만 보면 핵심을 놓칩니다.
+
+    개인정보위는 약 3,755만 명 유출과 6,246억8,100만원 과징금을 밝혔습니다. 이 숫자는 신뢰가 비용으로 바뀌는 순간입니다.
+
+    그런데 쿠팡의 질문은 끝났느냐가 아닙니다. 고객이 다시 주문하는가, 본업 이익률이 버티는가, 과징금이 현금 부담으로 얼마나 남는가, 새 사업 손실이 줄어드는가입니다.
+
+    다음에는 고객 재주문과 본업 이익률, 과징금의 현금 부담, 새 사업 손실 감소를 봅니다.
+  pinnedComment: 투자 판단이 아닙니다. 쿠팡은 고객 재주문과 본업 이익률, 과징금의 현금 부담, 새 사업 손실 감소를 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      3,755만 명 유출 뒤
+      쿠팡은 [[왜 돌아가나]]
+    sub: |-
+      질문은 하나다.
+      개인정보 충격이 지나간 뒤에도
+      이 쇼핑 습관은 얼마나 버틸까.
+    image: imagegen-security-20260619
+  - layout: editorialStat
+    kicker: 유출 규모
+    bigNumber: 3,755
+    unit: 만명
+    context: |-
+      개인정보위는 약 3,755만 명의 개인정보 유출로 결론냈습니다.
+      이건 단순 해프닝이 아니라
+      온라인 쇼핑 신뢰 시험입니다.
+    image: imagegen-security-20260619
+  - layout: editorialBeat
+    kicker: 핵심 원인
+    line: |-
+      문제는 해킹보다
+      [[통제]]였다
+    sub: |-
+      개인정보위는 열쇠 역할을 하는 인증 정보와
+      접근 권한 관리가 소홀했다고 지적했습니다.
+      그래서 이 이슈는 운영의 문제로 남습니다.
+    image: imagegen-security-20260619
+  - layout: editorialBeat
+    kicker: 그런데
+    line: |-
+      사람들은 불안해도
+      [[다시 주문한다]]
+    sub: |-
+      쿠팡의 힘은 가격표 하나가 아니다.
+      새벽배송, 무료반품, 와우 묶음이
+      생활 동선 안에 들어가 있다는 점이다.
+    image: imagegen-delivery-app-20260619
+  - layout: editorialStat
+    kicker: 제재 규모
+    bigNumber: 6,247
+    unit: 억
+    context: |-
+      개인정보위 과징금은 6,246억8,100만원입니다.
+      숫자가 큰 이유는 이 사건이
+      브랜드 문제가 아니라 비용 문제가 되기 때문입니다.
+    image: imagegen-security-20260619
+  - layout: editorialBeat
+    kicker: 사업은
+    line: |-
+      멈춘 게 아니라
+      [[비싸졌다]]
+    sub: |-
+      2026년 1분기 매출은 85억달러였습니다.
+      전년 대비 8% 늘었습니다.
+      하지만 성장 숫자만 보면 비용의 그림자가 빠집니다.
+    image: imagegen-fulfillment-20260619
+  - layout: editorialStat
+    kicker: 1분기 영업손실
+    bigNumber: '2.42'
+    unit: 억달러
+    context: |-
+      쿠팡은 2026년 1분기 영업손실 2.42억달러를 냈습니다.
+      순손실도 2.66억달러였습니다.
+      성장과 손실이 같은 장부에 있습니다.
+    image: imagegen-fulfillment-20260619
+  - layout: editorialBeat
+    kicker: 본업
+    line: |-
+      그래도 본업은
+      [[계속 돈다]]
+    sub: |-
+      본업 쇼핑 매출은 72억달러였습니다.
+      실제 이용 고객은 2,390만 명으로 늘었습니다.
+      쿠팡의 방어력은 여기서 나옵니다.
+    image: imagegen-fulfillment-20260619
+  - layout: editorialBeat
+    kicker: 부담
+    line: |-
+      새 사업은 아직
+      [[돈을 씁니다]]
+    sub: |-
+      새 사업 매출은 13억달러로 커졌습니다.
+      하지만 해당 부문 손실은 3.29억달러였습니다.
+      대만, 파페치, 신사업은 아직 비용입니다.
+    image: imagegen-delivery-app-20260619
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음에는
+      [[세 가지만]]
+      봅니다
+    sub: |-
+      고객 재주문과 본업 이익률.
+      과징금의 현금 부담.
+      새 사업 손실 감소.
+    image: imagegen-fulfillment-20260619
 ---
 
 <script>

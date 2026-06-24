@@ -34,6 +34,101 @@ ai:
     - "디바이스 진입장벽 낮음"
   keyMetrics: {revenue: 1.53, opm: 23.9, roe: 65.0, fcf: 0.25}
   dataAsOf: "2026-04-06"
+carousel:
+  title: 에이피알은 화장품보다 디바이스가 만든 결제 구조를 본다
+  caption: |-
+    에이피알을 단순한 화장품 회사로만 보면 질문이 좁아집니다. 이 회사는 화장품을 팔면서 뷰티기기로 한 번 결제금액을 키우는 구조를 같이 봐야 합니다.
+
+    1분기 매출은 약 5,934억원, 영업이익은 약 1,523억원입니다. 해외 매출 비중은 89%까지 올라왔고, 뷰티기기 매출도 약 1,327억원입니다. 숫자는 강합니다.
+
+    다음에는 뷰티기기 매출 비중, 해외·온라인 판매 경로, 재구매와 판매 비용을 보면 됩니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 뷰티기기 매출 비중, 해외·온라인 판매 경로, 재구매와 판매 비용을 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      화장품 회사가
+      [[가전처럼]] 팔 때
+    sub: |-
+      에이피알의 질문은 제품 하나가 아니라
+      기기가 재구매를 여는가입니다.
+    image: beauty-device-handheld
+  - layout: editorialBeat
+    kicker: 정체
+    line: |-
+      크림보다 먼저
+      [[기기]]를 본다
+    sub: |-
+      뷰티기기는 한 번 결제금액을 키웁니다.
+      다음 질문은 그 뒤에 화장품 재구매가 붙는지입니다.
+    image: beauty-device-handheld
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: 5,934
+    unit: 억
+    context: |-
+      2026년 1분기 매출은 약 5,934억원.
+      영업이익은 약 1,523억원이었다.
+      숫자는 이미 작지 않다.
+    image: skincare-fulfillment-line
+  - layout: editorialStat
+    kicker: 뷰티기기
+    bigNumber: 1,327
+    unit: 억
+    context: |-
+      뷰티기기 매출은 약 1,327억원.
+      중요한 축이지만 최대 매출축은 아니다.
+      재구매는 아직 확인할 문제다.
+    image: beauty-device-handheld
+  - layout: editorialStat
+    kicker: 해외 비중
+    bigNumber: '89'
+    unit: '%'
+    context: |-
+      해외 매출 비중은 71%에서 89%로 올라왔다.
+      핵심은 해외·온라인 판매 경로가
+      이익으로 남는지다.
+    image: global-beauty-shelf
+  - layout: editorialBeat
+    kicker: 판매 경로
+    line: |-
+      매대보다
+      [[해외 온라인]]을 본다
+    sub: |-
+      미국 온라인 수요와 매장 확장이 같이 나옵니다.
+      좋은 매출인지 보려면
+      어디서 팔리는지를 봐야 합니다.
+    image: global-beauty-shelf
+  - layout: editorialBeat
+    kicker: 재구매
+    line: |-
+      기기 뒤엔
+      [[재구매]] 질문이 남는다
+    sub: |-
+      기기가 팔렸다고 반복 구매가 자동으로 생기지는 않습니다.
+      다음에는 후속 화장품 구매가 붙는지 봐야 합니다.
+    image: beauty-device-handheld
+  - layout: editorialBeat
+    kicker: 비용
+    line: |-
+      성장기엔
+      [[판매 비용]]도 본다
+    sub: |-
+      2026년 1분기 판매·관리 비용은 3,113억원대입니다.
+      해외 확장은 매출뿐 아니라
+      물류, 광고, 채널 비용도 키웁니다.
+    image: skincare-fulfillment-line
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      뷰티기기 매출 비중.
+      해외·온라인 판매 경로.
+      재구매와 판매 비용.
+    image: global-beauty-shelf
 ---
 
 <script>

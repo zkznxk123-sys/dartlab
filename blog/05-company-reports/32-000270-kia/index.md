@@ -36,6 +36,104 @@ ai:
     - "관세 25% 연간 3.3조 부담"
   keyMetrics: {revenue: 114.1, opm: 8.0, netCash: 11.9, ocf: 9.1}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 기아는 판매량보다 이익률 방어가 핵심입니다
+  caption: |-
+    기아는 많이 파는 회사가 아니라, 이익률을 방어하는 회사인지 시험받고 있습니다.
+
+    2026년 1분기 매출은 29.5조원으로 사상 최대였습니다. 그런데 영업이익은 2.21조원으로 줄었고, 영업이익률은 7.5%였습니다. 미국 관세, 판매 장려금, 보증비 부담이 눌렀습니다.
+
+    그래서 포인트는 판매 대수 자체가 아닙니다. 하이브리드와 전기차 판매가 늘고, 스포티지와 셀토스 같은 SUV가 버티며, 평균 판매가격과 제품 구성으로 비용 압박을 얼마나 넘기는지가 핵심입니다.
+
+    다음엔 영업이익률, 하이브리드와 전기차 판매 비중, 미국 관세와 판매 장려금, 보증비 부담을 보면 됩니다. 이 셋이 버티면 기아는 물량 회사가 아니라 이익률 회사로 읽힙니다.
+  pinnedComment: '근거: 기아 2026년 1분기 실적, 2026년 5월 판매, 2026 CEO Investor Day. 목표 수치는 확정 실적이 아닙니다.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      기아는 지금
+      [[가격 싸움]] 중입니다
+    sub: |-
+      판매량보다 이익률 방어가 질문입니다.
+      많이 파는 회사인지,
+      비싸게 남기는 회사인지 봅니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      차를 많이 팔면
+      [[끝일까]]
+    sub: |-
+      자동차 회사는 대수만으로 끝나지 않습니다.
+      얼마에 팔고, 비용을 뺀 뒤
+      얼마가 남는지가 더 중요합니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '29.5'
+    unit: 조원
+    context: |-
+      기아는 2026년 1분기
+      사상 최대 분기 매출을 냈습니다.
+      판매 대수도 77만 9,741대였습니다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 영업이익률
+    bigNumber: '7.5'
+    unit: '%'
+    context: |-
+      매출은 늘었지만 영업이익은 줄었습니다.
+      미국 관세, 판매 장려금,
+      보증비 부담이 이익을 눌렀습니다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 전동화 판매
+    bigNumber: '23.2'
+    unit: 만대
+    context: |-
+      1분기 하이브리드, 전기차,
+      플러그인 하이브리드 판매입니다.
+      전년보다 33.1% 늘었습니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 버팀목
+    line: |-
+      스포티지와 셀토스가
+      [[계속 팔립니다]]
+    sub: |-
+      5월 글로벌 판매는 27만 7,715대.
+      스포티지와 셀토스 같은 SUV가
+      판매 흐름을 이끌었습니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 회사의 답
+    line: |-
+      대수보다
+      [[남는 비율]]입니다
+    sub: |-
+      기아는 제품 구성을 좋게 만들고
+      평균 판매가격을 높여
+      수익성을 강화하겠다고 말합니다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 2030 회사 목표
+    bigNumber: '10'
+    unit: '%'
+    context: |-
+      기아가 제시한 2030년 영업이익률 목표입니다.
+      목표일 뿐 확정 실적은 아닙니다.
+      그래서 지금의 7.5%가 더 중요합니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 숫자]]를 봅니다
+    sub: |-
+      영업이익률.
+      하이브리드와 전기차 판매 비중.
+      미국 관세, 판매 장려금, 보증비 부담.
+    image: production-site
 ---
 
 <script>

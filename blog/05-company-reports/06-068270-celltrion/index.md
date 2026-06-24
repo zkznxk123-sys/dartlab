@@ -34,6 +34,104 @@ ai:
     - "제네릭 경쟁"
   keyMetrics: {revenue: 4.16, opm: 28.1, roe: 0.0, fcf: 0.65}
   dataAsOf: "2026-04-08"
+carousel:
+  title: 셀트리온은 약보다 팔리는 길을 봅니다
+  caption: |-
+    셀트리온은 약을 만드는 회사처럼 보이지만, 1분기 숫자는 판매 경로를 보라고 말합니다.
+
+    매출은 1조 1,450억원, 영업이익은 3,219억원이었습니다. 더 중요한 건 신규 제품 매출 비중이 60%까지 올라왔다는 점입니다. 오래된 주력품만으로 버틴 숫자가 아닙니다.
+
+    다음엔 신규 제품 매출 비중, 유럽 입찰과 처방, 미국 보험 등재 뒤 처방, 연구개발비 뒤 영업이익률을 보면 됩니다.
+  pinnedComment: '근거: 셀트리온 2026년 1분기 공식 보도자료와 IR 자료입니다. 투자 판단이 아니라 사업 구조를 읽는 카드입니다.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      셀트리온은
+      [[약보다 판로]]입니다
+    sub: |-
+      좋은 약만으로 끝나지 않습니다.
+      입찰과 보험 문턱을 넘어야
+      매출과 이익으로 찍힙니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      좋은 약이면
+      [[바로 돈]]이 될까
+    sub: |-
+      아닙니다.
+      병원과 보험, 입찰 문턱을 지나야
+      실제 처방과 매출로 바뀝니다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: 1조
+    unit: 1,450억
+    context: |-
+      셀트리온의 1분기 연결 매출입니다.
+      규모보다 중요한 건
+      매출의 구성입니다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: 3,219
+    unit: 억원
+    context: |-
+      전년 동기보다 115.5% 늘었습니다.
+      영업이익률은 28.1%였습니다.
+      이익도 작지 않았습니다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 신규 제품 비중
+    bigNumber: '60'
+    unit: '%'
+    context: |-
+      오래된 주력품만으로 버틴 숫자가 아닙니다.
+      새 제품이 매출 중심으로
+      올라왔는지를 봐야 합니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 유럽
+    line: |-
+      유럽은
+      [[입찰]]을 봅니다
+    sub: |-
+      입찰을 따야 병원에 들어갑니다.
+      처방 비중이 유지되는지,
+      가격 부담이 커지는지 같이 봅니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 미국
+    line: |-
+      미국은
+      [[보험 문턱]]을 봅니다
+    sub: |-
+      보험사 처방집에 들어가야
+      의사가 쓰기 쉬워집니다.
+      등재 뒤 실제 처방이 핵심입니다.
+    image: research-lab
+  - layout: editorialBeat
+    kicker: 읽는 법
+    line: |-
+      제품명보다
+      [[팔리는 길]]입니다
+    sub: |-
+      출시국, 입찰, 보험 등재,
+      처방 증가, 연구개발비 뒤 이익률.
+      이 순서로 보면 됩니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[네 가지]]를 봅니다
+    sub: |-
+      신규 제품 매출 비중.
+      유럽 입찰과 처방.
+      미국 보험 등재 뒤 처방.
+      연구개발비 뒤 영업이익률.
+    image: product-detail
 ---
 
 <script>

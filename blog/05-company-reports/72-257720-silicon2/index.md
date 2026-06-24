@@ -34,6 +34,106 @@ ai:
     netMargin: "15.10%"
     ocf: "11억"
   dataAsOf: "2026-04-23"
+carousel:
+  title: 실리콘투는 화장품보다 K뷰티의 길목을 봅니다
+  caption: |-
+    실리콘투는 화장품을 만드는 회사가 아닙니다. 그런데 K뷰티가 해외로 나갈 때 지나가는 통로를 가진 회사입니다.
+
+    2026년 1분기 매출은 3,466억원으로 전년 대비 41.1% 늘었습니다. 영업이익은 645억원, 매출에서 남은 이익 비율은 18.6%였습니다.
+
+    재미있는 건 유럽입니다. 1분기 유럽 매출은 1,618억원으로 전년 대비 99.0% 늘었습니다. 브랜드 하나의 이야기가 아니라, 해외 유통망이 커지는 이야기입니다.
+
+    다음에는 세 가지만 보면 됩니다. 유럽 매출이 계속 늘어나는지, 매출에서 남는 이익 비율이 버티는지, 재고와 운반비가 커지지 않는지입니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 실리콘투를 브랜드가 아닌 해외 유통 통로로 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      화장품 안 만드는데
+      [[K뷰티 길목]]을 잡았습니다
+    sub: |-
+      실리콘투는 브랜드 회사가 아닙니다.
+      K뷰티가 해외로 나갈 때 지나가는
+      유통망에서 돈을 버는 회사입니다.
+    image: global-logistics
+  - layout: editorialBeat
+    kicker: 첫 해석
+    line: |-
+      질문은 브랜드보다
+      [[해외 통로]]입니다
+    sub: |-
+      어떤 브랜드가 뜨든
+      해외 고객, 창고, 온라인몰을 지나야 합니다.
+      실리콘투 이야기는 여기서 시작됩니다.
+    image: beauty-warehouse
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: 3,466
+    unit: 억원
+    context: |-
+      2026년 1분기 연결 매출.
+      전년 대비 41.1% 늘었습니다.
+      K뷰티 수요가 숫자로 찍혔습니다.
+    image: packing-line
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: '645'
+    unit: 억원
+    context: |-
+      1분기 영업이익.
+      매출에서 남은 이익 비율은 18.6%였습니다.
+      유통사인데 남는 돈도 컸습니다.
+    image: beauty-warehouse
+  - layout: editorialBeat
+    kicker: 그래서
+    line: |-
+      유통사인데
+      [[남는 돈도 컸습니다]]
+    sub: |-
+      단순 배송만 하는 구조라면 어렵습니다.
+      해외 바이어, 창고, 온라인몰을 묶어야
+      길목의 힘이 생깁니다.
+    image: global-logistics
+  - layout: editorialStat
+    kicker: 유럽 매출
+    bigNumber: 1,618
+    unit: 억원
+    context: |-
+      1분기 유럽 매출.
+      전년 대비 99.0% 늘었습니다.
+      성장이 한 지역에만 묶이지 않았습니다.
+    image: beauty-warehouse
+  - layout: editorialBeat
+    kicker: 확장의 모양
+    line: |-
+      매대보다 먼저
+      [[물류 거점]]을 봅니다
+    sub: |-
+      회사는 여러 해외 거점을 바탕으로
+      주문, 보관, 배송을 묶는 구조를 키우고 있습니다.
+      화장품의 길을 직접 깔고 있는 셈입니다.
+    image: global-logistics
+  - layout: editorialBeat
+    kicker: 리스크
+    line: |-
+      잘 팔릴수록
+      [[재고도 커집니다]]
+    sub: |-
+      유통사는 빠르게 커질 수 있습니다.
+      반대로 유행이 식거나 운반비가 흔들리면
+      재고와 비용이 먼저 보입니다.
+    image: packing-line
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      유럽 매출이 계속 늘어나는지.
+      매출에서 남는 이익 비율이 버티는지.
+      재고와 운반비가 커지지 않는지.
+    image: global-logistics
 ---
 
 <script>

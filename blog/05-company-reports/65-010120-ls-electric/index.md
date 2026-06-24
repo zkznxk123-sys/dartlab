@@ -22,6 +22,119 @@ ai:
   weaknesses: ["영업이익률 8.6% 한자릿수 — HD현대일렉트릭 24%의 1/3", "부채비율 131% 높은 편 · 대형 프로젝트 선수금 의존", "2025 영업이익 +9%인데 순이익 -10% 감소 — 금융·법인세 부담", "고마진 제품(초고압 변압기) 비중 낮음 · 중저압·자동화·빌딩 중심"]
   keyMetrics: {revenue: 4.97, opm: 8.60, roe: 10.8, fcf: 0.05}
   dataAsOf: "2026-04-21"
+carousel:
+  title: LS ELECTRIC은 AI보다 전력을 본다
+  caption: |-
+    LS ELECTRIC은 AI 칩 회사가 아닙니다. 그런데 AI 데이터센터가 늘수록 먼저 바뀌는 곳이 있습니다. 전력실입니다.
+
+    서버가 많아지면 전기도 늘어납니다. 그 전기를 나누고 보호하는 장비가 필요합니다. LS ELECTRIC은 그 장비를 파는 회사입니다.
+
+    최근 북미 AI 데이터센터용 3만8천 볼트급 고압 배전 시스템 계약이 나왔고, 북미 데이터센터 누적 주문도 작년 연간 규모를 반년 만에 넘어섰습니다.
+
+    그래서 다음에는 북미 새 주문, 받아둔 주문의 매출 전환, 원자재가 올라도 버티는 이익률을 봅니다.
+  pinnedComment: 투자 판단이 아닙니다. LS ELECTRIC은 AI 뉴스보다 북미 새 주문, 받아둔 주문의 매출 전환, 이익률을 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      LS ELECTRIC은
+      AI 뉴스에서
+      [[왜 같이 뜰까]]
+    sub: |-
+      AI 칩이 들어오기 전,
+      데이터센터에는 전력 장비가 먼저 들어갑니다.
+      질문은 테마가 아니라 주문과 이익입니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 무엇을 파나
+    line: |-
+      전기를 나누고 보호하는
+      [[장비 회사]]입니다
+    sub: |-
+      전기를 나누는 장비, 변압기, 차단기,
+      전력 제어 장비를 팝니다.
+      데이터센터가 멈추지 않게 전기를 지키는 쪽입니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 왜 AI인가
+    line: |-
+      AI는 칩보다 먼저
+      [[전력실]]을 키운다
+    sub: |-
+      서버가 늘면 전기도 늘어납니다.
+      그래서 AI 투자 뒤에는 전기를 나누는 장비와
+      변압기 주문이 따라옵니다.
+    image: control-room
+  - layout: editorialBeat
+    kicker: 최근 주문
+    line: |-
+      북미 AI 데이터센터에
+      3만8천 볼트급
+      [[장비를 넣는다]]
+    sub: |-
+      6월 17일 발표된 계약은 1,064억원 규모입니다.
+      고압 배전 시스템을 8월부터 11월까지
+      공급하는 내용입니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 북미 빅테크 데이터센터
+    bigNumber: '1.2'
+    unit: 조
+    context: |-
+      올해 누적 주문이 1.2조원에 접근했습니다.
+      작년 북미 데이터센터 연간 주문 8,000억원을
+      반년 만에 넘어선 숫자입니다.
+    image: control-room
+  - layout: editorialBeat
+    kicker: 실적
+    line: |-
+      실적도 이미
+      [[주문]]을 따라왔다
+    sub: |-
+      2026년 1분기 매출은 1조3,766억원,
+      영업이익은 1,266억원이었습니다.
+      전력사업 호조와 큰 계약의 이익률 개선이 핵심입니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 제품별 숫자
+    line: |-
+      배전반과 변압기가
+      [[같이 뛰었다]]
+    sub: |-
+      1분기 배전반 매출은 전년 대비 79%,
+      초고압변압기 매출은 83% 늘었습니다.
+      AI 테마가 아니라 제품별 수요가 장부에 찍혔습니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 받아둔 주문
+    bigNumber: '5.6'
+    unit: 조
+    context: |-
+      전력사업 주요 제품의 받아둔 주문은
+      1분기 말 5조6,425억원 수준이었습니다.
+      이 숫자는 매출로 바뀌는 속도를 봐야 합니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 주의점
+    line: |-
+      주문은 끝이 아니라
+      [[납품의 시작]]입니다
+    sub: |-
+      장비는 만들어 납품해야 매출이 됩니다.
+      구리와 은 가격, 생산능력,
+      재고와 외상에 묶이는 돈도 따라와야 합니다.
+    image: control-room
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음에는
+      [[세 숫자만]]
+      봅니다
+    sub: |-
+      북미 새 주문이 이어지는가.
+      받아둔 주문이 매출로 바뀌는가.
+      원자재가 올라도 이익률이 버티는가.
+    image: control-room
 ---
 
 <script>

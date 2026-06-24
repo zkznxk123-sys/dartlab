@@ -33,6 +33,116 @@ ai:
     - "현금 110조 해외 고착"
   keyMetrics: {revenue: 334.0, opm: 13.1, roe: 10.4, fcf: 33.2}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 삼성전자는 스마트폰보다 이익의 출처를 봅니다
+  caption: |-
+    삼성전자의 1분기 숫자는 강했습니다. 그런데 이건 “삼성전자가 좋은 회사냐”보다 “이익을 어디서 벌었느냐”의 문제입니다.
+
+    2026년 1분기 연결 영업이익은 57.2조원이었고, 반도체 부문 영업이익은 53.7조원이었습니다. 전체 이익의 대부분이 반도체에서 나왔다는 뜻입니다.
+
+    그래서 삼성전자는 스마트폰보다 반도체 이익의 질을 봐야 합니다. 메모리 가격과 AI용 제품이 만든 이익이면, 다음 분기에도 그 흐름이 이어지는지가 핵심입니다.
+
+    다음에는 세 가지만 보면 됩니다. 반도체 이익이 유지되는지, AI 메모리 샘플이 고객 매출로 바뀌는지, 칩 위탁생산 손익이 나아지는지입니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 삼성전자 이익의 출처와 다음 확인점을 분리해 보는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      삼성전자는
+      [[폰보다 반도체]]를 봅니다
+    sub: |-
+      1분기 숫자는 강했습니다.
+      하지만 핵심은 삼성전자가 좋은 회사냐가 아닙니다.
+      이익을 어디서 벌었느냐입니다.
+    image: cleanroom-engine
+  - layout: editorialBeat
+    kicker: 첫 해석
+    line: |-
+      이익은
+      [[반도체가 거의 다]] 만들었다
+    sub: |-
+      삼성전자는 여러 사업을 가진 회사입니다.
+      그런데 1분기 이익의 중심은
+      반도체 쪽으로 크게 기울었습니다.
+    image: cleanroom-engine
+  - layout: editorialStat
+    kicker: 전사 영업이익
+    bigNumber: '57.2'
+    unit: 조원
+    context: |-
+      2026년 1분기 연결 영업이익.
+      삼성전자는 분기 기준 최대라고 밝혔다.
+      전체 숫자만 보면 강해 보인다.
+    image: cleanroom-engine
+  - layout: editorialStat
+    kicker: 반도체 부문 영업이익
+    bigNumber: '53.7'
+    unit: 조원
+    context: |-
+      반도체 부문 영업이익.
+      전체 이익 57.2조원에 거의 맞먹는다.
+      그래서 출처를 따로 봐야 한다.
+    image: memory-stack
+  - layout: editorialBeat
+    kicker: 그래서
+    line: |-
+      지금 질문은
+      [[이익의 출처]]입니다
+    sub: |-
+      좋은 회사냐는 답이 아닙니다.
+      메모리 가격과 AI용 제품이 만든 이익이라면
+      다음엔 이 흐름이 이어지는지를 봐야 합니다.
+    image: memory-stack
+  - layout: editorialStat
+    kicker: 반도체 부문 매출
+    bigNumber: '81.7'
+    unit: 조원
+    context: |-
+      2026년 1분기 반도체 부문 매출.
+      매출과 이익이 함께 커졌다.
+      핵심은 다음 분기에도 버티는지다.
+    image: cleanroom-engine
+  - layout: editorialBeat
+    kicker: AI 메모리
+    line: |-
+      샘플 다음은
+      [[고객 매출]]입니다
+    sub: |-
+      삼성전자는 5월 차세대 AI 메모리 샘플을
+      주요 고객에게 보냈다고 밝혔다.
+      이제 볼 것은 실제 매출로 바뀌는 속도입니다.
+    image: memory-stack
+  - layout: editorialBeat
+    kicker: 따로 보기
+    line: |-
+      칩 위탁생산은
+      [[다른 숙제]]입니다
+    sub: |-
+      반도체 이익이 좋아져도
+      칩 위탁생산 손익 개선은 따로 봐야 합니다.
+      같은 반도체 안에서도 답이 다릅니다.
+    image: foundry-wafer
+  - layout: editorialBeat
+    kicker: 리스크
+    line: |-
+      강한 숫자일수록
+      [[섞으면 안 됩니다]]
+    sub: |-
+      스마트폰, 디스플레이, 반도체가
+      한 회사 안에 있습니다.
+      전체 이익만 보면 다음 변곡점을 놓칩니다.
+    image: foundry-wafer
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      반도체 이익이 유지되는지.
+      AI 메모리 샘플이 고객 매출로 바뀌는지.
+      칩 위탁생산 손익이 나아지는지.
+    image: foundry-wafer
 ---
 
 <script>

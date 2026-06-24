@@ -33,6 +33,105 @@ ai:
     - "관세 25%+원가+판관비"
   keyMetrics: {revenue: 186.3, opm: 6.2, roe: 8.0, fcf: 5.0}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 현대차는 많이 파는 것보다 남기는 게 문제입니다
+  caption: |-
+    현대차는 많이 파는 회사입니다. 그런데 이번 숫자는 판매량보다 남기는 힘을 보라고 말합니다.
+
+    2026년 1분기 매출은 45.9조원으로 컸지만, 영업이익은 2.5조원이고 영업이익률은 5.5%였습니다. 하이브리드 비중은 17.8%까지 올라왔습니다.
+
+    다음엔 영업이익률, 하이브리드 비중, 미국 관세 영향, 가격과 비용 방어를 보면 됩니다.
+  pinnedComment: 근거는 현대차 2026년 1분기 공식 실적 발표입니다. 판매량과 매출은 이익 확정이 아니라 가격, 비용, 관세 뒤에 다시 확인할 숫자입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      현대차는
+      [[많이 파는 것]]보다
+      남기는 게 문제입니다
+    sub: |-
+      매출은 커졌습니다.
+      그런데 이익률은 내려갔습니다.
+      지금 질문은 판매량이 아닙니다.
+    image: hm-assembly-line
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      차가 잘 팔리면
+      [[바로 이익]]일까
+    sub: |-
+      아닙니다.
+      차를 얼마에 팔고,
+      어디서 만들고,
+      얼마를 비용으로 쓰는지가 갈립니다.
+    image: hm-night-factory
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '45.9'
+    unit: 조원
+    context: |-
+      현대차의 2026년 1분기 매출입니다.
+      역대 1분기 기준으로 컸지만
+      여기서 끝나면 안 됩니다.
+    image: hm-container-ship
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: '2.5'
+    unit: 조원
+    context: |-
+      전년 동기보다 줄었습니다.
+      많이 팔아도 비용과 가격이 흔들리면
+      남는 돈은 달라집니다.
+    image: hm-assembly-line
+  - layout: editorialStat
+    kicker: 영업이익률
+    bigNumber: '5.5'
+    unit: '%'
+    context: |-
+      이번 분기의 남기는 힘입니다.
+      매출이 커졌는데 이 비율이 내려가면
+      이유를 봐야 합니다.
+    image: hm-night-factory
+  - layout: editorialStat
+    kicker: 하이브리드 비중
+    bigNumber: '17.8'
+    unit: '%'
+    context: |-
+      전체 판매에서 하이브리드가 차지한 비중입니다.
+      전동화 둔화 속에서도
+      방어 카드가 될 수 있습니다.
+    image: hm-santafe-hev
+  - layout: editorialBeat
+    kicker: 미국
+    line: |-
+      관세는
+      [[이익률]]을 건드립니다
+    sub: |-
+      미국에서 팔리는 차가 많을수록
+      어디서 만들고 얼마를 가격에 반영하는지가
+      더 중요해집니다.
+    image: hm-container-ship
+  - layout: editorialBeat
+    kicker: 읽는 법
+    line: |-
+      판매량보다
+      [[남는 구조]]입니다
+    sub: |-
+      하이브리드 비중,
+      미국 생산과 관세,
+      가격과 비용 방어를 같이 봐야 합니다.
+    image: hm-assembly-line
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[네 가지]]를 봅니다
+    sub: |-
+      영업이익률.
+      하이브리드 비중.
+      미국 관세 영향.
+      가격과 비용 방어.
+    image: hm-night-factory
 ---
 
 <script>

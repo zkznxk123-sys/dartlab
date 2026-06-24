@@ -33,6 +33,105 @@ ai:
     - "원재료비 리스크"
   keyMetrics: {revenue: 2.3, opm: 21.83, roe: 30.0, fcf: -0.14}
   dataAsOf: "2026-04-03"
+carousel:
+  title: 삼양식품은 라면보다 해외 매대를 본다
+  caption: |-
+    불닭은 유행으로만 보기엔 이미 너무 커졌습니다.
+
+    누적 판매 100억개, 누적 매출 7조원. 이 숫자는 브랜드 힘을 보여줍니다. 다만 앞으로의 이익을 보장하지는 않습니다.
+
+    삼양식품에서 봐야 할 것은 세 가지입니다. 해외 매대에서 반복해서 팔리는가. 새 공장이 실제로 돌아가는가. 원재료와 환율이 흔들려도 이익이 남는가.
+
+    그래서 다음에는 해외 매대에서 반복 판매되는지, 새 공장이 실제로 돌아가는지, 원재료와 환율 뒤 이익이 남는지를 봅니다.
+  pinnedComment: 투자 판단이 아닙니다. 삼양식품은 해외 매대에서 반복 판매되는지, 새 공장이 실제로 돌아가는지, 원재료와 환율 뒤 이익이 남는지를 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      불닭의 질문은
+      유행에서 [[재주문]]으로 간다
+    sub: |-
+      불닭은 제품 하나가 아니라
+      삼양식품을 해외 매대에서 보게 만든 사건이다.
+    image: imagegen-spicy-noodles
+  - layout: editorialBeat
+    kicker: 원래 정체
+    line: |-
+      국내 라면에서
+      [[해외 매대]]로
+    sub: |-
+      삼양식품은 1963년 국내 최초 라면을 만들었다.
+      하지만 지금 볼 것은 불닭이 해외에서
+      반복 판매로 남는지다.
+    image: imagegen-production-line
+  - layout: editorialBeat
+    kicker: 바뀐 장면
+    line: |-
+      라면 봉지가
+      [[해외 매대]]를 채웠다
+    sub: |-
+      회사는 전 세계 100여개국에 제품을 수출한다고 설명한다.
+      불닭 브랜드가 해외사업 성장의 중심이 됐다.
+    image: imagegen-overseas-shelf
+  - layout: editorialStat
+    kicker: 누적 판매
+    bigNumber: '100'
+    unit: 억개
+    context: |-
+      불닭 시리즈 누적 판매량이 100억개를 넘었다.
+      누적 매출도 7조원을 넘었다.
+      다만 이 숫자는 이익 보장이 아니다.
+    image: imagegen-spicy-noodles
+  - layout: editorialBeat
+    kicker: 속도
+    line: |-
+      10억개에서
+      [[100억개]]까지
+    sub: |-
+      2017년 10억개에서
+      2026년 100억개까지 왔습니다.
+      하지만 속도보다 중요한 질문은 재주문입니다.
+    image: imagegen-production-line
+  - layout: editorialStat
+    kicker: 수출
+    bigNumber: '9'
+    unit: 억달러
+    context: |-
+      연합뉴스 보도 기준,
+      지난해 수출은 9억달러를 넘었습니다.
+      다음 확인점은 반복 판매입니다.
+    image: imagegen-production-line
+  - layout: editorialBeat
+    kicker: 주의점
+    line: |-
+      누적 판매는
+      [[현재 이익]]이 아니다
+    sub: |-
+      100억개는 브랜드의 힘을 보여줍니다.
+      하지만 다음에 볼 것은 가격,
+      원재료와 환율, 새 공장이 실제로 돌아가는지입니다.
+    image: imagegen-overseas-shelf
+  - layout: editorialBeat
+    kicker: 다음 시험
+    line: |-
+      인기 다음에는
+      [[공장]]이 온다
+    sub: |-
+      해외 매대가 늘면 생산, 물류, 원재료가 같이 커진다.
+      많이 파는 것과 남기는 것은
+      서로 다른 질문이다.
+    image: imagegen-production-line
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      해외 매대에서 반복 판매.
+      새 공장이 실제로 돌아가는지.
+      원재료와 환율 뒤 이익.
+    image: imagegen-overseas-shelf
 ---
 
 <script>

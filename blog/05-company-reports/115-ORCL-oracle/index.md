@@ -22,6 +22,115 @@ ai:
   weaknesses: ["영업이익률 30.8%로 2019년 34.3% 및 2021년 고점 37.6%에 여전히 미달(검증 데이터)", "순이익 12.44B$는 2019년(11.08B$)은 넘되 2021년 고점(13.75B$)에 1.31B$ 미달 — 절대 이익도 귀환 미완(검증 데이터)", "매출은 45.3% 늘었으나 OPM은 3.5%p 하락 — 외형과 마진이 반대로(검증 데이터)", "FY2026 공식자료의 FCF -23.7B$ — AI 클라우드 계약과 현금흐름 품질이 동시에 좋아진 것은 아님"]
   keyMetrics: {revenue: 57.40, opm: 30.8, npm: 21.7, ocf: 20.82}
   dataAsOf: "2026-06-20"
+carousel:
+  title: Oracle의 남은 계약은 현금이 아니라 클라우드 약속이다
+  caption: |-
+    오라클의 6380억달러는 현금이 아닙니다. 이미 찍힌 매출도 아닙니다. 앞으로 고객에게 제공해야 할 계약입니다.
+
+    숫자는 엄청 큽니다. 2026 회계연도 말 남은 계약은 전년 대비 363% 늘었고, 연간 매출은 674억달러였습니다.
+
+    하지만 AI 데이터센터는 먼저 지어야 합니다. 영업활동 현금흐름은 320억달러였지만, 투자 뒤 남는 현금은 마이너스 237억달러였습니다.
+
+    다음에는 세 가지만 보면 됩니다. 남은 계약이 매출로 바뀌는 속도, 투자 뒤 현금이 플러스로 돌아서는 시점, 돈을 더 끌어오지 않고 버틸 수 있는지입니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 남은 계약이 매출과 현금으로 바뀌는지 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      6380억달러는
+      [[현금이 아니다]]
+    sub: |-
+      오라클의 남은 계약이 크게 늘었다.
+      하지만 이 돈은 이미 들어온 현금도,
+      이미 찍힌 매출도 아니다.
+    image: cloud-region
+  - layout: editorialBeat
+    kicker: 첫 해석
+    line: |-
+      남은 계약은
+      [[약속]]에 가깝다
+    sub: |-
+      고객과 맺은 계약에서
+      앞으로 제공해야 할 몫이다.
+      그래서 매출로 바뀌는 속도가 중요하다.
+    image: cloud-region
+  - layout: editorialStat
+    kicker: 남은 계약
+    bigNumber: '6380'
+    unit: 억달러
+    context: |-
+      2026 회계연도 말 숫자.
+      전년 대비 363% 늘었다.
+      규모는 크지만 아직 매출은 아니다.
+    image: cloud-region
+  - layout: editorialBeat
+    kicker: 비용 구조
+    line: |-
+      AI 데이터센터는
+      [[먼저 지어야]] 한다
+    sub: |-
+      계약이 커지면 데이터센터, 서버,
+      전력 설비 투자가 먼저 따라온다.
+      주문이 커질수록 돈도 먼저 나간다.
+    image: cloud-region
+  - layout: editorialStat
+    kicker: 2026 회계연도 매출
+    bigNumber: '674'
+    unit: 억달러
+    context: |-
+      연간 매출은 674억달러였다.
+      남은 계약 6380억달러와 비교하면
+      앞으로 풀어야 할 약속이 훨씬 크다.
+    image: cloud-region
+  - layout: editorialStat
+    kicker: 클라우드 인프라
+    bigNumber: '77'
+    unit: '%'
+    context: |-
+      2026 회계연도 클라우드 인프라 매출 증가율.
+      성장 자체는 이미 숫자로 찍혔다.
+      다음은 현금 전환이다.
+    image: cloud-region
+  - layout: editorialBeat
+    kicker: 현금
+    line: |-
+      성장은 보이는데
+      [[현금은 먼저 나간다]]
+    sub: |-
+      영업활동 현금흐름은 320억달러였다.
+      하지만 투자 뒤 남는 현금은
+      마이너스 237억달러였다.
+    image: cloud-region
+  - layout: editorialStat
+    kicker: 투자 뒤 남는 현금
+    bigNumber: '-237'
+    unit: 억달러
+    context: |-
+      2026 회계연도 투자하고 남은 현금.
+      성장이 없다는 뜻이 아니라,
+      클라우드를 짓는 돈이 먼저 나간다는 뜻이다.
+    image: cloud-region
+  - layout: editorialBeat
+    kicker: 자금
+    line: |-
+      투자가 커지면
+      [[돈을 더 끌어온다]]
+    sub: |-
+      오라클은 2026 회계연도에
+      부채로 430억달러, 주식으로 50억달러를
+      끌어왔다고 밝혔다.
+    image: cloud-region
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      남은 계약이 매출로 바뀌는 속도.
+      투자 뒤 현금이 플러스로 돌아서는 시점.
+      돈을 더 끌어오지 않고 버틸 수 있는지.
+    image: cloud-region
 ---
 
 <script>

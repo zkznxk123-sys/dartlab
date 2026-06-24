@@ -33,6 +33,125 @@ ai:
     netMargin: "-29.20%"
     netIncome: "-1,328억"
   dataAsOf: "2026-04-23"
+carousel:
+  title: 두산퓨얼셀은 어떤 회사인가
+  caption: |-
+    두산퓨얼셀은 수소 테마처럼 보이지만, 실제로는 발전소에 들어가는 연료전지 설비와 장기정비를 파는 회사입니다.
+
+    제품과 고객은 있습니다. 문제는 원가입니다. 2025년에는 매출 100원을 만들 때 원가가 약 114원 들었습니다.
+
+    2026년 1분기에는 원가율이 92.8%로 내려왔습니다. 손실은 남았지만, 볼 지점은 선명해졌습니다.
+
+    다음엔 입찰 가격, 원가를 뺀 이익, 새 제품 안정성과 정비 매출을 봐야 합니다.
+  pinnedComment: 투자 판단이 아닙니다. 두산퓨얼셀은 입찰 가격, 원가를 뺀 이익, 새 제품 안정성과 정비 매출을 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      두산퓨얼셀은
+      수소 테마가
+      [[아닙니다]]
+    sub: |-
+      발전소에 들어가는 연료전지 설비와
+      장기정비를 파는 회사입니다.
+      그래서 핵심은 꿈이 아니라 원가입니다.
+    image: fuel-cell-stack
+  - layout: editorialBeat
+    kicker: 판매 구조
+    line: |-
+      전기를 만드는
+      [[상자]]를 팝니다
+    sub: |-
+      연료전지는 수소를 이용해 전기를 만드는 설비입니다.
+      두산퓨얼셀은 이 장비를 발전소와
+      큰 전력 수요처에 납품합니다.
+    image: fuel-cell-stack
+  - layout: editorialBeat
+    kicker: 누가 사나
+    line: |-
+      매출은 뉴스가 아니라
+      [[입찰]]에서
+      시작됩니다
+    sub: |-
+      발전사업자가 물량을 따내고 장비를 삽니다.
+      얼마에 낙찰됐는지가
+      이 회사 이익의 출발점입니다.
+    image: fuel-cell-power-plant
+  - layout: editorialBeat
+    kicker: 돈 버는 방식
+    line: |-
+      설치하면 끝이 아니라
+      [[정비]]가
+      따라옵니다
+    sub: |-
+      장비는 오래 쓰입니다.
+      안에 들어가는 부품 교체와 장기서비스가 붙습니다.
+      그래서 설치된 장비 수가 중요합니다.
+    image: control-room-maintenance
+  - layout: editorialBeat
+    kicker: 현재 크기
+    line: |-
+      작은 실험 회사는
+      [[아닙니다]]
+    sub: |-
+      2025년 매출은 4,549억원입니다.
+      제품과 고객, 설치 기반은 있습니다.
+      문제는 매출이 아니라 원가였습니다.
+    image: fuel-cell-power-plant
+  - layout: editorialStat
+    kicker: 2025년
+    bigNumber: '114'
+    unit: '%'
+    context: |-
+      매출원가율입니다.
+      매출 100원을 만들 때 원가가 약 114원이 들었습니다.
+      팔수록 손실이 나는 구조였습니다.
+    image: fuel-cell-stack
+  - layout: editorialBeat
+    kicker: 그런데 변화
+    line: |-
+      1분기엔 원가율이
+      [[92.8%]]로
+      내려왔습니다
+    sub: |-
+      2026년 1분기 별도 기준 매출은 1,449억원,
+      영업적자는 8억원입니다.
+      손실은 남았지만 구조는 달라졌습니다.
+    image: fuel-cell-stack
+  - layout: editorialBeat
+    kicker: 왜 줄었나
+    line: |-
+      새 제품 매출과
+      [[납품 증가]]가
+      같이 움직였습니다
+    sub: |-
+      회사 자료는 새 연료전지 매출 발생,
+      기존 제품 납품 증가,
+      쌓아둔 비용 부담 감소를 이유로 들었습니다.
+    image: control-room-maintenance
+  - layout: editorialBeat
+    kicker: 그래서
+    line: |-
+      수소 뉴스보다
+      [[입찰 가격과]]
+      원가를 봅니다
+    sub: |-
+      물량이 있어도 가격이 낮고
+      만드는 비용이 높으면 이익이 사라집니다.
+      원가가 잡히면 같은 매출도 다르게 보입니다.
+    image: fuel-cell-power-plant
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지만]]
+      봅니다
+    sub: |-
+      입찰 가격.
+      원가를 뺀 이익.
+      새 제품 안정성과 정비 매출.
+      두산퓨얼셀은 테마보다 원가가 먼저입니다.
+    image: control-room-maintenance
 ---
 
 <script>

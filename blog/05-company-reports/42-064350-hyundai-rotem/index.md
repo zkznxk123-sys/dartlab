@@ -34,6 +34,113 @@ ai:
     - "매출채권 3.39조 — 회수 지연 리스크"
   keyMetrics: {revenue: 5.84, opm: 17.2, roe: 25.7, fcf: 0.75}
   dataAsOf: "2026-04-17"
+carousel:
+  title: 현대로템은 기차보다 이익의 출처를 봅니다
+  caption: |-
+    현대로템은 철도 차량 회사로 기억하기 쉽습니다. 그런데 2026년 1분기 숫자를 보면 이익의 중심은 방산 쪽에 훨씬 가깝습니다.
+
+    1분기 매출은 1조 4,575억원, 영업이익은 2,242억원이었습니다. 이 중 방산 부문 영업이익은 2,188억원이었습니다. 전체 이익 대부분이 여기서 나왔다는 뜻입니다.
+
+    수주잔고는 29.8조원입니다. 숫자는 크지만 잔고는 아직 매출이 아닙니다. 납품 일정, 원가, 환율을 지나야 실제 이익으로 바뀝니다.
+
+    다음에는 세 가지만 보면 됩니다. 수주잔고가 매출로 바뀌는 속도, 방산에서 남는 이익 비율이 유지되는지, 새 주문이 다시 붙는지입니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 현대로템의 이익 출처와 수주잔고 전환을 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      기차 회사인 줄 알았는데
+      [[이익은 방산]]입니다
+    sub: |-
+      현대로템 1분기 숫자는
+      매출보다 이익의 출처가 더 중요합니다.
+      질문은 잔고가 실제 이익으로 바뀌느냐입니다.
+    image: armored-line
+  - layout: editorialBeat
+    kicker: 첫 해석
+    line: |-
+      이미지는 철도
+      [[숫자는 방산]]입니다
+    sub: |-
+      철도 차량 회사로 기억하기 쉽습니다.
+      하지만 1분기 이익의 중심은
+      방산 쪽으로 크게 기울었습니다.
+    image: rail-factory
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '1.46'
+    unit: 조원
+    context: |-
+      1분기 매출은 1조 4,575억원.
+      전년 대비 23.9% 늘었습니다.
+      분기 기준 최대 실적입니다.
+    image: export-yard
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: 2,242
+    unit: 억원
+    context: |-
+      1분기 영업이익.
+      매출에서 남은 이익 비율은 15.4%였습니다.
+      성장보다 이익의 질이 먼저 보입니다.
+    image: armored-line
+  - layout: editorialStat
+    kicker: 방산 영업이익
+    bigNumber: 2,188
+    unit: 억원
+    context: |-
+      방산 부문 영업이익.
+      전체 영업이익 대부분이 여기서 나왔습니다.
+      그래서 출처를 따로 봐야 합니다.
+    image: armored-line
+  - layout: editorialStat
+    kicker: 철도 영업이익
+    bigNumber: '29'
+    unit: 억원
+    context: |-
+      철도 부문 영업이익.
+      철도가 사라진 게 아닙니다.
+      이번 분기 이익 기여도가 달랐다는 뜻입니다.
+    image: rail-factory
+  - layout: editorialStat
+    kicker: 수주잔고
+    bigNumber: '29.8'
+    unit: 조원
+    context: |-
+      1분기 말 남은 주문.
+      철도와 방산이 함께 쌓여 있습니다.
+      핵심은 매출로 바뀌는 속도입니다.
+    image: export-yard
+  - layout: editorialStat
+    kicker: 폴란드 전차 계약
+    bigNumber: '8.98'
+    unit: 조원
+    context: |-
+      주요 프로젝트 표의 계약가.
+      큰 계약은 이미 보입니다.
+      다음은 일정과 원가입니다.
+    image: export-yard
+  - layout: editorialBeat
+    kicker: 주의할 점
+    line: |-
+      잔고는 매출이 아니라
+      [[기다리는 숫자]]입니다
+    sub: |-
+      남은 주문이 크다는 말은 끝이 아닙니다.
+      납품 일정, 원가, 환율이 맞아야
+      매출과 이익으로 바뀝니다.
+    image: export-yard
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      수주잔고가 매출로 바뀌는 속도.
+      방산에서 남는 이익 비율이 유지되는지.
+      새 주문이 다시 붙는지.
+    image: armored-line
 ---
 
 <script>

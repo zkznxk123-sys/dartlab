@@ -39,6 +39,104 @@ ai:
     - "credit dCR-A, outlook 부정적 (이전보다 하향)"
   keyMetrics: {revenue: 13.27, opm: -12.98, roic: -5.75, roe: -2.5}
   dataAsOf: "2026-04-22"
+carousel:
+  title: 삼성SDI는 성장보다 손실 축소를 먼저 봅니다
+  caption: |-
+    삼성SDI는 성장 기대보다 손실 축소를 먼저 봐야 합니다.
+
+    2026년 1분기 매출은 3.58조원으로 전년보다 늘었습니다. 하지만 영업손실은 1,556억원입니다. 손실은 크게 줄었지만, 아직 흑자 전환은 아닙니다.
+
+    좋게 볼 부분도 있습니다. 전력 저장 배터리 주문, 데이터센터 예비 배터리, 벤츠 공급 계약, 하이브리드용 원통형 배터리 프로젝트가 있습니다. 다만 계약과 주문이 바로 이익은 아닙니다.
+
+    그래서 다음엔 영업손실률, 전력 저장 배터리 주문, 재고가 줄어드는 속도, 공장 가동률 회복을 보면 됩니다. 이 넷이 맞아야 삼성SDI는 성장 기대가 아니라 실제 이익 전환으로 읽힙니다.
+  pinnedComment: '근거: 삼성SDI 2026년 1분기 실적 보도자료와 IR 자료. 회사 전망은 확정 실적이 아닙니다.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      삼성SDI는
+      [[손실 축소]]가 먼저입니다
+    sub: |-
+      성장 기대보다,
+      공장 가동률과 재고가 먼저입니다.
+      1분기 숫자는 아직 흑자가 아닙니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      수요가 살아나면
+      [[바로 이익일까]]
+    sub: |-
+      배터리는 주문만으로 끝나지 않습니다.
+      재고가 줄고 공장이 돌아야
+      손실률이 낮아집니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '3.58'
+    unit: 조원
+    context: |-
+      전년보다 12.6% 늘었습니다.
+      매출만 보면 회복처럼 보입니다.
+      하지만 이익은 아직 아닙니다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 영업손실
+    bigNumber: 1,556
+    unit: 억원
+    context: |-
+      손실은 전년보다 크게 줄었습니다.
+      그래도 흑자는 아닙니다.
+      그래서 손실 축소 속도를 봅니다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 영업손실률
+    bigNumber: '4.4'
+    unit: '%'
+    context: |-
+      작년 1분기에는 13.7% 손실률이었습니다.
+      방향은 좋아졌지만,
+      남은 부담은 아직 확인 전입니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 버팀목
+    line: |-
+      전력 저장 배터리가
+      [[손실을 줄였습니다]]
+    sub: |-
+      미국 전력 저장 프로젝트와
+      데이터센터 예비 배터리 주문이
+      배터리 사업 개선을 도왔습니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 계약
+    line: |-
+      고객이 늘어도
+      [[이익은 따로]] 봅니다
+    sub: |-
+      벤츠 공급 계약과 하이브리드용 원통형 배터리 프로젝트는 좋습니다.
+      하지만 계약은 이익 확정이 아닙니다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 재고
+    bigNumber: '3.3'
+    unit: 조원
+    context: |-
+      1분기 말 재고입니다.
+      전분기보다 늘었습니다.
+      수요 회복은 재고가 줄 때 더 분명해집니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[네 가지]]를 봅니다
+    sub: |-
+      영업손실률.
+      전력 저장 배터리 주문.
+      재고가 줄어드는 속도.
+      공장 가동률 회복.
+    image: production-site
 ---
 
 <script>

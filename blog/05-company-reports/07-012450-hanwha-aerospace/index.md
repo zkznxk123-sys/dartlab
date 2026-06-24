@@ -34,6 +34,122 @@ ai:
     - "정치적 리스크"
   keyMetrics: {revenue: 26.7, opm: 11.6, roe: 0.0, fcf: 0.0}
   dataAsOf: "2026-04-09"
+carousel:
+  title: 한화에어로스페이스는 수주보다 납품과 이익을 봅니다
+  caption: |-
+    한화에어로스페이스는 수주잔고 숫자만 보면 이야기가 너무 쉽습니다. 수주가 아니라 납품과 이익입니다.
+
+    1분기 매출은 5조 7,510억원, 영업이익은 6,389억원입니다. 전체로 보면 강합니다. 그런데 전차·장갑차 쪽 영업이익은 2,087억원으로 줄었습니다.
+
+    반대로 한화오션 영업이익은 4,411억원이었습니다. 그래서 이번 실적은 방산이냐 조선이냐가 아니라, 어디서 이익이 남았는지를 봐야 합니다.
+
+    결론은 명확합니다. 큰 수주잔고는 시작일 뿐입니다. 다음 확인 포인트는 전차·장갑차 수출 물량이 회복되는지, 수주잔고가 매출로 바뀌는 속도, 한화오션의 남는 이익 비율이 유지되는지입니다.
+  pinnedComment: 수주잔고는 시작입니다. 납품과 원가를 지나 매출과 이익으로 바뀌는지가 핵심입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      수주가 아니라
+      [[납품과 이익]]입니다
+    sub: |-
+      잔고가 커도 바로 돈이 아닙니다.
+      매출로 바뀌고 이익이 남아야 합니다.
+    image: aerospace-engine-line
+  - layout: editorialBeat
+    kicker: 정체성 반전
+    line: |-
+      방산주로만 보면
+      [[반쪽]]입니다
+    sub: |-
+      연결 실적에는 전차·장갑차,
+      항공우주, 한화시스템,
+      한화오션이 같이 들어옵니다.
+    image: shipyard-hull-blocks
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '5.75'
+    unit: 조원
+    context: |-
+      1분기 매출은 5조 7,510억원입니다.
+      전년 대비 5% 늘었습니다.
+      덩치가 줄어든 이야기는 아닙니다.
+    image: aerospace-engine-line
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: 6,389
+    unit: 억
+    context: |-
+      영업이익은 전년 대비 21% 늘었습니다.
+      매출에서 남은 비율은 11.1%였습니다.
+      전체 숫자만 보면 강합니다.
+    image: precision-inspection
+  - layout: editorialBeat
+    kicker: 그런데 방산
+    line: |-
+      전차·장갑차 이익은
+      [[줄었습니다]]
+    sub: |-
+      영업이익은 2,087억원입니다.
+      전년 대비 31% 감소했습니다.
+      수출 물량 기여가 낮아졌습니다.
+    image: precision-inspection
+  - layout: editorialStat
+    kicker: 전차·장갑차 이익 비율
+    bigNumber: '17.1'
+    unit: '%'
+    context: |-
+      매출에서 남은 비율입니다.
+      아직 높지만 1분기에는 낮아졌습니다.
+      방산도 어떤 물량이 팔렸는지가 중요합니다.
+    image: precision-inspection
+  - layout: editorialStat
+    kicker: 전차·장갑차 수주잔고
+    bigNumber: '38.2'
+    unit: 조원
+    context: |-
+      강한 숫자입니다.
+      하지만 아직 매출도,
+      확정 이익도 아닙니다.
+    image: aerospace-engine-line
+  - layout: editorialBeat
+    kicker: 이번 분기 반전
+    line: |-
+      이익 1등은
+      [[한화오션]]입니다
+    sub: |-
+      한화오션 영업이익은 4,411억원.
+      매출에서 남은 비율은 13.7%였습니다.
+      연결 실적에서 조선소가 크게 보였습니다.
+    image: shipyard-hull-blocks
+  - layout: editorialBeat
+    kicker: 질문 전환
+    line: |-
+      질문은
+      [[어디서 벌었나]]입니다
+    sub: |-
+      전차·장갑차 수출 물량.
+      한화오션의 선가와 원가.
+      항공 엔진 공동사업 손실을 같이 봅니다.
+    image: precision-inspection
+  - layout: editorialBeat
+    kicker: 주의할 점
+    line: |-
+      수주잔고는
+      [[기다리는 숫자]]입니다
+    sub: |-
+      납기, 현지 생산, 원가, 환율을 지나야
+      매출과 이익으로 바뀝니다.
+    image: aerospace-engine-line
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를 봅니다
+    sub: |-
+      전차·장갑차 수출 물량이 회복되는지.
+      수주잔고가 매출로 바뀌는 속도.
+      한화오션의 남는 이익 비율이 유지되는지.
+    image: shipyard-hull-blocks
 ---
 
 <script>

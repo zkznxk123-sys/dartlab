@@ -22,6 +22,109 @@ ai:
   weaknesses: ["OPM 5.8~9% 한 자릿수 고정", "SM 인수 후 순차입금 4.2조"]
   keyMetrics: {revenue: 8.10, opm: 9.0, roe: 3.4, fcf: 0}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 카카오는 ChatGPT보다 카톡 안의 숫자를 본다
+  caption: |-
+    카톡방 안으로 ChatGPT가 들어왔습니다. 뉴스는 큽니다. 다만 카카오를 볼 때 질문은 AI를 한다가 아닙니다.
+
+    카카오톡은 국내 월간 이용자 4,900만명 규모의 입구입니다. 5월 기준 ChatGPT for Kakao 누적 가입자도 1,100만명을 넘었습니다. 여기까지는 사용될 가능성입니다.
+
+    다음에는 채팅방 안 실제 사용 빈도, 유료 서비스 전환, 톡비즈 광고와 메시지 매출을 보면 됩니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 카톡 안의 AI가 반복 사용, 유료 전환, 톡비즈 매출로 이어지는지 보는 관점입니다. 금지: 매수, 매도, 목표가.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      카톡방 안으로
+      [[ChatGPT]]가 들어왔다
+    sub: |-
+      하지만 질문은 AI 발표가 아니다.
+      매일 쓰는 톡이 실제 숫자로
+      바뀌는지가 핵심이다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 새 기능
+    line: |-
+      새 앱을 까는 게 아니라
+      [[채팅방]]에 붙였다
+    sub: |-
+      카카오는 6월 16일 카카오톡 채팅방에서 쓰는 ChatGPT 챗봇을 출시했다.
+      입력창에서 부르고, 답변을 대화 안에서 받는 구조다.
+    image: user-context
+  - layout: editorialStat
+    kicker: 누적 가입자
+    bigNumber: 1,100
+    unit: 만명
+    context: |-
+      5월 기준 ChatGPT for Kakao 누적 가입자는 1,100만명을 넘었다.
+      숫자는 크다.
+      하지만 가입자는 아직 매출이 아니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 카톡 입구
+    bigNumber: 4,900
+    unit: 만명
+    context: |-
+      회사 자료는 카카오톡 국내 월간 이용자를 4,900만명으로 제시한다.
+      AI의 힘보다 먼저 볼 것은
+      이 거대한 입구다.
+    image: user-context
+  - layout: editorialBeat
+    kicker: 오해 금지
+    line: |-
+      AI 발표와 매출 성장은
+      [[같은 말]]이 아니다
+    sub: |-
+      ChatGPT 기능은 새 진입점이다.
+      그 자체가 톡비즈 매출을 증명한 것은 아니다.
+      사용이 반복돼야 숫자가 된다.
+    image: operations-center
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '1.94'
+    unit: 조
+    context: |-
+      2026년 1분기 연결 매출은 1조9420억원대였다.
+      카카오는 작은 AI 실험 회사가 아니라
+      이미 거대한 플랫폼 회사다.
+    image: operations-center
+  - layout: editorialStat
+    kicker: 1분기 영업이익
+    bigNumber: 2,114
+    unit: 억
+    context: |-
+      영업이익은 2114억원이었다.
+      AI 이야기가 강해져도
+      실적은 광고, 커머스, 콘텐츠에서 나온다.
+    image: operations-center
+  - layout: editorialStat
+    kicker: 톡비즈
+    bigNumber: 6,090
+    unit: 억
+    context: |-
+      1분기 톡비즈 매출은 6090억원 수준이었다.
+      카카오의 돈은 아직
+      메신저 안의 광고와 비즈니스 메시지에서 먼저 보인다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 돈의 위치
+    line: |-
+      톡비즈 광고는
+      [[16%]] 늘었다
+    sub: |-
+      회사 자료는 톡비즈 광고 +16%, 비즈니스 메시지 +27%, 화면 광고 +10%를 제시했다.
+      이 숫자는 AI가 아니라 톡비즈의 현재 체력이다.
+    image: operations-center
+  - layout: editorialBeat
+    kicker: 어디를 보나
+    line: |-
+      다음에는
+      [[세 숫자]]만 본다
+    sub: |-
+      채팅방 안 실제 사용 빈도.
+      유료 서비스 전환.
+      톡비즈 광고와 메시지 매출.
+    image: user-context
 ---
 
 <script>

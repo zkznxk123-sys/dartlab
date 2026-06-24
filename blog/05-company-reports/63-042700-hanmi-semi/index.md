@@ -22,6 +22,104 @@ ai:
   weaknesses: ["매출 변동성 극단 — 2023년 -51% 반토막의 재발 가능성", "SK하이닉스·마이크론 상위 2개 고객이 매출 70%+ 집중", "ASMPT·Besi·삼성 자체 개발 3중 위협", "시가총액 2023 2조→2024 30조→2025 18조 — 밸류에이션 변동성 극심"]
   keyMetrics: {revenue: 0.58, opm: 43.60, roe: 27.0, fcf: 0.15}
   dataAsOf: "2026-04-21"
+carousel:
+  title: AI 메모리는 본더를 먼저 부릅니다
+  caption: |-
+    AI 메모리는 붙이는 장비를 부릅니다.
+
+    메모리 회사만 보면 이야기가 반쪽입니다. 여러 칩을 쌓고 붙여야 제품이 되기 때문에, 장비 주문서가 먼저 움직일 때가 있습니다.
+
+    한미반도체는 2026년 6월 SK하이닉스와 442억원 규모 공급계약을 공시했습니다. 최근 매출 대비 7.66%입니다. 다만 주문, 납품, 매출로 잡히는 시점은 서로 다릅니다.
+
+    결론은 단순합니다. 다음 확인 포인트는 AI 메모리 장비 추가 발주, 한 고객 의존이 줄어드는지, 납품 뒤 이익 비율이 회복되는지입니다.
+  pinnedComment: 장비주는 주문, 납품, 매출 시점이 다릅니다. 한미반도체는 추가 발주와 납품 뒤 이익 비율을 같이 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      AI 메모리는
+      [[붙이는 장비]]를 부릅니다
+    sub: |-
+      메모리를 쌓아도 붙이지 못하면 제품이 아닙니다.
+      한미반도체는 그 주문서를 봅니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      이번 이야기는
+      [[메모리 회사]]가 아닙니다
+    sub: |-
+      AI 메모리를 팔려면
+      칩을 쌓고 붙이는 장비가 필요합니다.
+      그 주문서를 보는 이야기입니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 작동 방식
+    line: |-
+      본더는
+      [[칩을 붙이는 장비]]입니다
+    sub: |-
+      여러 메모리 칩을 위로 쌓고,
+      정렬, 열, 압력을 맞춰
+      하나의 제품으로 만듭니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 공급계약
+    bigNumber: '442'
+    unit: 억원
+    context: |-
+      2026년 6월 공시 기준입니다.
+      최근 매출 대비 7.66% 규모.
+      계약 상대는 SK하이닉스입니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 장비주의 리듬
+    line: |-
+      좋은 뉴스는
+      [[실적보다 먼저]] 옵니다
+    sub: |-
+      장비주는 주문, 납품,
+      매출로 잡히는 시점이 다릅니다.
+      그래서 주문서가 먼저 움직입니다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 1분기 이익 비율
+    bigNumber: '16.6'
+    unit: '%'
+    context: |-
+      1분기 매출 509억원.
+      영업이익 84.56억원 기준입니다.
+      장비 매출 타이밍의 공백이 보입니다.
+    image: research-lab
+  - layout: editorialBeat
+    kicker: 강점의 반대편
+    line: |-
+      집중은
+      [[속도이자 위험]]입니다
+    sub: |-
+      큰 고객 일정과 맞으면 빠릅니다.
+      반대로 전환이 늦으면
+      실적도 같이 미뤄질 수 있습니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 검증 포인트
+    line: |-
+      차세대 AI 메모리는
+      [[말보다 주문서]]입니다
+    sub: |-
+      기대가 아니라 추가 발주,
+      납기, 매출로 바뀌는 속도를 봅니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를 봅니다
+    sub: |-
+      AI 메모리 장비 추가 발주.
+      한 고객 의존이 줄어드는지.
+      납품 뒤 이익 비율이 회복되는지.
+    image: research-lab
 ---
 
 <script>

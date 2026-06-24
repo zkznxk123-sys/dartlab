@@ -34,6 +34,113 @@ ai:
     capex: "1.50조"
     fcf: "-1.53조"
   dataAsOf: "2026-04-29"
+carousel:
+  title: 포스코퓨처엠은 공장보다 남는 돈을 봅니다
+  caption: |-
+    포스코퓨처엠은 전기차 수요보다 공장이 돈을 남기는 속도를 봐야 합니다.
+
+    2026년 1분기 매출은 7,575억원으로 전분기보다 늘었고, 전사는 흑자로 돌아섰습니다. 그런데 영업이익률은 2.3%였고, 에너지소재 쪽은 11억원 적자였습니다.
+
+    다음엔 에너지소재 손익, 소재 가격, 설비투자 부담, 차입금을 보면 됩니다.
+  pinnedComment: '근거: 포스코퓨처엠 2026년 1분기 공식 IR 자료. 회사 제공 분기 자료이므로 이후 공시와 실적에서 숫자가 갱신될 수 있습니다. 투자 판단이 아니라 사업 구조를 읽는 포인트입니다.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      포스코퓨처엠은
+      [[공장보다 이익]]을 봅니다
+    sub: |-
+      배터리 소재 회사는
+      공장을 크게 짓는 것만으로
+      돈이 바로 남지 않습니다.
+    image: plant-expansion-site
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      전기차가 살아나면
+      [[이익도 바로]] 살아날까
+    sub: |-
+      아닙니다.
+      소재 가격, 공장 가동률,
+      차입금 부담이 같이 따라옵니다.
+    image: cathode-powder
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: 7,575
+    unit: 억원
+    context: |-
+      전분기보다 1,999억원 늘었습니다.
+      수요가 완전히 죽은 숫자는 아닙니다.
+      하지만 이익은 따로 봐야 합니다.
+    image: materials-factory-line
+  - layout: editorialStat
+    kicker: 영업이익률
+    bigNumber: '2.3'
+    unit: '%'
+    context: |-
+      흑자로 돌아섰지만
+      남는 폭은 아직 얇습니다.
+      성장 산업과 이익률은 다른 문제입니다.
+    image: cathode-powder
+  - layout: editorialStat
+    kicker: 에너지소재 손익
+    bigNumber: '-11'
+    unit: 억원
+    context: |-
+      배터리 소재 쪽은 아직 적자였습니다.
+      전사 흑자만 보면
+      가장 중요한 사업부를 놓칩니다.
+    image: materials-factory-line
+  - layout: editorialStat
+    kicker: 유형자산
+    bigNumber: '6.64'
+    unit: 조원
+    context: |-
+      공장과 설비의 무게입니다.
+      이 자산이 돌아야
+      감가상각과 고정비를 버팁니다.
+    image: plant-expansion-site
+  - layout: editorialStat
+    kicker: 총차입금
+    bigNumber: '4.1'
+    unit: 조원
+    context: |-
+      큰 투자는 돈을 먼저 묶습니다.
+      좋은 공장도 가동률과 가격이 약하면
+      부담으로 남습니다.
+    image: plant-expansion-site
+  - layout: editorialBeat
+    kicker: 사업 포인트
+    line: |-
+      양극재만 아니라
+      [[음극재도]] 봅니다
+    sub: |-
+      회사 자료는 음극재 판매량 감소를
+      해외 고객 재고조정 영향으로 설명했습니다.
+      소재별 흐름이 다릅니다.
+    image: graphite-anode-material
+  - layout: editorialBeat
+    kicker: 읽는 법
+    line: |-
+      크게 짓는 회사보다
+      [[돌아가는 공장]]입니다
+    sub: |-
+      에너지소재 손익,
+      소재 가격,
+      설비투자 부담,
+      차입금을 같이 봐야 합니다.
+    image: materials-factory-line
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음 분기엔
+      [[네 숫자]]를 봅니다
+    sub: |-
+      에너지소재 손익.
+      소재 가격.
+      설비투자 부담.
+      차입금.
+    image: plant-expansion-site
 ---
 
 <script>

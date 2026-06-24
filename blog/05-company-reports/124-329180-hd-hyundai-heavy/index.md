@@ -22,6 +22,114 @@ ai:
   weaknesses: ["장부 손익이 2~3년 전 수주가·후판값에 종속 — '지금 실력'과 시차로 어긋남(2021~22 적자)", "OPM 11.6%는 순이익률(NPM 약 8.1%)과 다름 — 격차 -0.62조는 영업 아래 단(내부 분해 불가)", "2021 이전 단독 데이터 부재(재상장 흔적) — 5년 창이 한 사이클 전체가 아닐 수 있음", "한계 영업이익률 43%는 단일 연도 1점 — 구조적 마진으로 일반화 불가, 합병 편입분 가능성(외부)"]
   keyMetrics: {revenue: 17.58, opm: 11.6, roe: 12, fcf: 3.5}
   dataAsOf: "2026-06-20"
+carousel:
+  title: HD현대중공업은 배보다 이익률을 봅니다
+  caption: |-
+    HD현대중공업은 조선소가 바쁘다는 말보다 이익률을 먼저 봐야 합니다.
+
+    2026년 1분기 매출은 5조 9,163억원, 영업이익은 9,054억원이었습니다. 영업이익률은 15.3%였습니다.
+
+    포인트는 배를 많이 만들었느냐가 아닙니다. 인도되는 배의 가격, 엔진 이익률, 후판가와 인건비, 영업이익률이 버티느냐입니다.
+
+    다음엔 인도되는 배의 가격, 엔진 이익률, 후판가와 인건비, 영업이익률을 보면 됩니다.
+  pinnedComment: HD현대중공업은 수주 뉴스보다 인도되는 배의 가격, 엔진 이익률, 후판가와 인건비, 영업이익률을 같이 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      HD현대중공업은
+      [[배보다 이익률]]을 봅니다
+    sub: |-
+      조선소가 바쁘다는 말보다
+      비싼 배와 엔진이
+      얼마나 남기는지를 봐야 합니다.
+    image: shipyard-drydock
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      많이 만들면
+      [[이익도 바로]] 커질까
+    sub: |-
+      아닙니다.
+      조선업은 계약, 건조, 인도 사이에 시간이 있습니다.
+      이익은 인도와 원가에서 확인됩니다.
+    image: night-shipyard-delivery
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '5.9'
+    unit: 조원
+    context: |-
+      정확히는 5조 9,163억원입니다.
+      전분기보다 13.9% 늘었습니다.
+      조선소가 바쁜 숫자는 맞습니다.
+    image: shipyard-drydock
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: 9,054
+    unit: 억원
+    context: |-
+      전분기보다 57.5% 늘었습니다.
+      매출만 큰 회사가 아니라
+      남는 돈도 커진 분기였습니다.
+    image: night-shipyard-delivery
+  - layout: editorialStat
+    kicker: 영업이익률
+    bigNumber: '15.3'
+    unit: '%'
+    context: |-
+      조선업에서 이 숫자가 핵심입니다.
+      배를 많이 짓는지보다
+      배 한 척이 얼마나 남기는지의 문제입니다.
+    image: ship-blocks-steel
+  - layout: editorialStat
+    kicker: 조선 부문
+    bigNumber: '15.9'
+    unit: '%'
+    context: |-
+      조선 부문 영업이익률입니다.
+      주력 사업 자체가
+      돈을 남기고 있는지 보여줍니다.
+    image: shipyard-drydock
+  - layout: editorialStat
+    kicker: 엔진·기계
+    bigNumber: '21.1'
+    unit: '%'
+    context: |-
+      엔진과 기계 부문 영업이익률입니다.
+      배만 보는 순간
+      이 회사의 또 다른 이익 엔진을 놓칩니다.
+    image: marine-engine
+  - layout: editorialBeat
+    kicker: 왜 남았나
+    line: |-
+      비싼 배와
+      [[엔진]]입니다
+    sub: |-
+      회사 자료는 제품 구성 개선,
+      엔진 부문 매출 증가,
+      생산성 개선을 이익 증가 이유로 들었습니다.
+    image: marine-engine
+  - layout: editorialBeat
+    kicker: 읽는 법
+    line: |-
+      수주 뉴스보다
+      [[인도될 때]]입니다
+    sub: |-
+      배는 계약 뒤 바로 돈이 되는 상품이 아닙니다.
+      인도되는 배의 가격과 원가가
+      실제 이익률을 만듭니다.
+    image: ship-blocks-steel
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음 분기엔
+      [[네 숫자]]를 봅니다
+    sub: |-
+      인도되는 배의 가격.
+      엔진 이익률.
+      후판가와 인건비.
+      영업이익률.
+    image: night-shipyard-delivery
 ---
 
 <script>

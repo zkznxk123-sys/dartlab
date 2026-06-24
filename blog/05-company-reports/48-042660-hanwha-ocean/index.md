@@ -32,6 +32,103 @@ ai:
   weaknesses: ["부채비율 226%", "ICR 1.52배 (안전마진 부족)", "DOL 20배 (업황 민감)"]
   keyMetrics: {revenue: 12.78, opm: 9.1, roe: 2.4, fcf: 0.59}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 한화오션은 바쁜 조선소보다 어디서 이익이 나는지를 봅니다
+  caption: |-
+    한화오션은 바쁜 조선소입니다. 그런데 1분기 숫자를 나눠 보면 돈은 방산 기대보다 상선에서 먼저 나왔습니다.
+
+    전체 영업이익률은 13.7%였습니다. 상선 이익률은 18.0%였고, 특수선 이익률은 -6.5%였습니다. 수주잔고가 크다는 말만으로는 부족합니다.
+
+    질문은 수주가 많으냐가 아닙니다. 선가 높은 배가 매출로 바뀌고, 특수선 비용이 언제 줄어드느냐입니다. 다음엔 상선 이익률, 특수선 손익 전환, 수주잔고의 매출 전환, 고정비와 원가 절감을 보면 됩니다.
+  pinnedComment: 근거는 한화오션 2026년 1분기 실적발표 자료입니다. 수주잔고와 방산 기대를 바로 이익으로 해석하지 않습니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      한화오션은
+      [[바쁜 조선소]]입니다
+    sub: |-
+      그런데 돈은 배마다 다릅니다.
+      1분기 이익은 방산 기대보다
+      상선에서 먼저 나왔습니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      방산 기대는
+      [[언제 장부에]] 찍힐까
+    sub: |-
+      특수선 이야기는 큽니다.
+      하지만 1분기 숫자에서는
+      비용 부담이 먼저 보였습니다.
+    image: control-room
+  - layout: editorialStat
+    kicker: 전체 영업이익
+    bigNumber: 4,411
+    unit: 억원
+    context: |-
+      전년보다 71% 늘었습니다.
+      조선 회복은 숫자로 보입니다.
+      다만 출처를 나눠 봐야 합니다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 상선 이익률
+    bigNumber: '18.0'
+    unit: '%'
+    context: |-
+      상선에서 이익이 먼저 나왔습니다.
+      회사는 선가 높은 배의 매출 반영이
+      이익 증가를 만들었다고 설명했습니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 특수선 이익률
+    bigNumber: '-6.5'
+    unit: '%'
+    context: |-
+      잠수함과 수상함 기대는 큽니다.
+      하지만 1분기에는 비용 부담과
+      해외 수주 준비 비용이 먼저였습니다.
+    image: control-room
+  - layout: editorialStat
+    kicker: 수주잔고
+    bigNumber: '348.6'
+    unit: 억달러
+    context: |-
+      일감은 큽니다.
+      문제는 수주가 언제 매출로 바뀌고,
+      어느 정도 이익으로 남느냐입니다.
+    image: production-site
+  - layout: editorialBeat
+    kicker: 방산
+    line: |-
+      기대는 크지만
+      [[시간표]]가 있습니다
+    sub: |-
+      함정은 계약, 설계, 건조, 인도까지 깁니다.
+      필라델피아 조선소도 바로 이익보다
+      해외 생산 거점에 가깝습니다.
+    image: control-room
+  - layout: editorialBeat
+    kicker: 읽는 법
+    line: |-
+      주문보다
+      [[매출 전환]]을 봅니다
+    sub: |-
+      계약 뉴스가 먼저 오고,
+      손익은 나중에 찍힙니다.
+      선가 높은 배가 얼마나 섞이는지가 핵심입니다.
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[네 가지]]를 봅니다
+    sub: |-
+      상선 이익률.
+      특수선 손익 전환.
+      수주잔고의 매출 전환.
+      고정비와 원가 절감.
+    image: production-site
 ---
 
 <script>

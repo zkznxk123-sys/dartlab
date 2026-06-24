@@ -42,6 +42,104 @@ ai:
     netIncome: 0
     capex: 0.4382
   dataAsOf: "2025-12-31"
+carousel:
+  title: 에코프로비엠은 매출보다 재고를 봅니다
+  caption: |-
+    에코프로비엠은 배터리 성장보다 재고와 원가를 같이 봐야 합니다.
+
+    2026년 1분기 매출은 6,054억원으로 전분기보다 늘었고, 영업이익은 209억원이었습니다. 그런데 재고자산은 6,767억원으로 1분기 매출보다 컸습니다.
+
+    다음엔 판매 단가, 원재료 가격, 재고자산, 빚 부담을 보면 됩니다.
+  pinnedComment: 근거는 에코프로비엠 2026년 1분기 공식 실적발표자료입니다. 재고 증가는 부실 확정이 아니라 다음 분기 판매 단가와 원가로 확인할 항목입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 20
+    line: |-
+      에코프로비엠은
+      [[매출보다 재고]]를 봅니다
+    sub: |-
+      배터리 소재 수요는 돌아왔습니다.
+      그런데 돈이 남으려면
+      쌓인 재고와 원가를 같이 봐야 합니다.
+    image: cathode-powder
+  - layout: editorialBeat
+    kicker: 오늘의 질문
+    line: |-
+      성장 산업이면
+      [[바로 이익]]일까
+    sub: |-
+      아닙니다.
+      소재 회사는 팔리는 양보다
+      단가와 원가, 재고가 먼저 흔들립니다.
+    image: rotary-calciner
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: 6,054
+    unit: 억원
+    context: |-
+      전분기보다 22% 늘었습니다.
+      수요가 완전히 죽은 숫자는 아닙니다.
+      하지만 여기서 끝나면 안 됩니다.
+    image: ev-battery-pack
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: '209'
+    unit: 억원
+    context: |-
+      흑자는 냈습니다.
+      다만 영업이익률은 3.5%였습니다.
+      많이 팔아도 남는 폭은 따로 봐야 합니다.
+    image: rotary-calciner
+  - layout: editorialStat
+    kicker: 재고자산
+    bigNumber: 6,767
+    unit: 억원
+    context: |-
+      1분기 매출보다 큽니다.
+      팔릴 재료인지,
+      가격 부담으로 남을 재고인지 봐야 합니다.
+    image: cathode-powder
+  - layout: editorialStat
+    kicker: 빚 부담
+    bigNumber: '106'
+    unit: '%'
+    context: |-
+      순차입금 비율입니다.
+      공장과 재고를 버티는 힘도
+      이 숫자에서 봐야 합니다.
+    image: rotary-calciner
+  - layout: editorialBeat
+    kicker: 가격
+    line: |-
+      소재주는
+      [[단가]]가 중요합니다
+    sub: |-
+      전기차 수요가 회복돼도
+      판매 단가와 원재료 가격이 어긋나면
+      이익률은 쉽게 눌립니다.
+    image: ev-battery-pack
+  - layout: editorialBeat
+    kicker: 읽는 법
+    line: |-
+      수요보다
+      [[남는 구조]]입니다
+    sub: |-
+      판매 단가,
+      원재료 가격,
+      재고자산,
+      빚 부담을 같이 봐야 합니다.
+    image: cathode-powder
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[네 가지]]를 봅니다
+    sub: |-
+      판매 단가.
+      원재료 가격.
+      재고자산.
+      빚 부담.
+    image: rotary-calciner
 ---
 
 <script>

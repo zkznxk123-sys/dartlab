@@ -35,6 +35,102 @@ ai:
     - "무형자산 1.8조 리스크"
   keyMetrics: {revenue: 3.33, opm: 35.0, roe: 20.0, fcf: 0.6}
   dataAsOf: "2026-04-07"
+carousel:
+  title: 크래프톤은 PUBG가 낡은 게임인지 돈 버는 엔진인지 본다
+  caption: |-
+    오래된 게임은 시간이 지나면 끝이라는 말은 부족합니다. 크래프톤은 신작 기대보다 오래된 PUBG가 아직 반복해서 돈을 버는지를 먼저 봐야 합니다.
+
+    1분기 매출은 1.3714조원, 영업이익은 5,616억원이었습니다. 회사 자료 기준 PUBG 관련 매출은 분기 처음으로 1조원을 넘었습니다.
+
+    다음에는 PUBG 매출이 계속 이어지는지, 모바일 접속이 결제로 이어지는지, 신작 비용이 이익을 누르는지 보면 됩니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 PUBG 매출이 계속 이어지는지, 모바일 접속이 결제로 이어지는지, 신작 비용이 이익을 누르는지를 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      PUBG는 낡은 게임인가
+      [[돈 버는 엔진]]인가
+    sub: |-
+      크래프톤의 질문은 신작 기대보다
+      오래된 PUBG가 아직 돈을 버는가입니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 1분기 매출
+    bigNumber: '1.37'
+    unit: 조
+    context: |-
+      2026년 1분기 매출은 1.3714조원.
+      전년 대비 56.9% 늘었다.
+      낡은 게임이라는 말과 다른 숫자다.
+    image: operations-center
+  - layout: editorialStat
+    kicker: 영업이익
+    bigNumber: 5,616
+    unit: 억
+    context: |-
+      영업이익은 5,616억원.
+      영업이익률은 40.9%였다.
+      비용을 빼고도 큰 돈이 남았다.
+    image: operations-center
+  - layout: editorialBeat
+    kicker: 핵심
+    line: |-
+      PUBG 관련 매출이
+      [[분기 1조]]를 넘었다
+    sub: |-
+      회사 자료 기준,
+      PUBG 관련 매출은
+      분기 처음으로 1조원을 넘었다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 모바일
+    bigNumber: 7,027
+    unit: 억
+    context: |-
+      1분기 모바일 매출은 7,027억원.
+      PC 매출 3,639억원보다 컸다.
+      다음 질문은 결제가 이어지는지다.
+    image: user-context
+  - layout: editorialBeat
+    kicker: 운영
+    line: |-
+      게임은 팔고 끝나는
+      [[제품이 아니다]]
+    sub: |-
+      시즌 콘텐츠, 이벤트, 아이템, 지역 운영이
+      매출을 다시 만듭니다.
+      그래서 접속과 결제를 같이 봐야 합니다.
+    image: operations-center
+  - layout: editorialBeat
+    kicker: 다음 변수
+    line: |-
+      신작은 기대이자
+      [[비용]]이다
+    sub: |-
+      서브노티카 2는 2026년 사전 체험 버전을 준비 중입니다.
+      하지만 새 게임은 흥행보다 먼저
+      개발비와 홍보비를 씁니다.
+    image: product-detail
+  - layout: editorialStat
+    kicker: 비용
+    bigNumber: 8,099
+    unit: 억
+    context: |-
+      1분기 영업비용은 8,099억원.
+      매출이 커도 비용이 같이 커지면
+      이익률은 흔들릴 수 있다.
+    image: operations-center
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      PUBG 매출이 계속 이어지는지.
+      모바일 접속이 결제로 이어지는지.
+      신작 비용이 이익을 누르는지.
+    image: user-context
 ---
 
 <script>

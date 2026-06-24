@@ -33,6 +33,116 @@ ai:
     - "대당 3~4년 생산"
   keyMetrics: {revenue: 4.08, opm: 24.4, roe: 36.0, fcf: 0.8}
   dataAsOf: "2026-04-05"
+carousel:
+  title: HD현대일렉트릭은 AI보다 전력 장비 납품을 본다
+  caption: |-
+    HD현대일렉트릭은 AI 뉴스만 보고 판단할 회사가 아닙니다. 이 회사는 전기를 만드는 곳이 아니라, 전기를 옮기는 장비를 파는 회사입니다.
+
+    1분기 신규 수주는 17.97억달러, 수주잔고는 78.88억달러였습니다. 같은 기간 매출은 1조365억원, 영업이익은 2,583억원입니다.
+
+    흥미로운 건 주문만 큰 게 아니라는 점입니다. 1분기 영업이익률은 24.9%였습니다. 다만 수주잔고는 아직 납품 전이고, 변압기는 빨리 찍어내는 제품이 아닙니다.
+
+    다음에는 세 가지만 보면 됩니다. 새 주문이 계속 늘어나는지, 수주잔고가 매출로 바뀌는지, 24.9% 이익률이 버티는지입니다.
+  pinnedComment: '근거와 금지 주장은 source_report.md에 남겼습니다. 이 캐러셀은 투자 판단이 아니라 전력 장비 수주가 매출과 이익으로 바뀌는지 읽는 관점입니다. 금지: 목표가, 매수, 매도.'
+  slides:
+  - layout: editorial
+    date: 2026. 06. 19
+    line: |-
+      AI 서버보다 먼저
+      [[전력 장비]]가 필요하다
+    sub: |-
+      칩이 늘어도 전기가 오지 않으면 서버는 못 돈다.
+      HD현대일렉트릭은 그 전기를 옮기는
+      장비 회사다.
+    image: transformer-yard
+  - layout: editorialBeat
+    kicker: 무엇을 파나
+    line: |-
+      전기를 만드는 곳이 아니라
+      [[옮기는 장비]] 회사다
+    sub: |-
+      변압기와 차단기처럼
+      발전소와 데이터센터 사이에 필요한
+      무거운 전력 장비를 판다.
+    image: copper-winding
+  - layout: editorialBeat
+    kicker: 왜 지금인가
+    line: |-
+      데이터센터가 커지면
+      [[전력망]]도 커진다
+    sub: |-
+      회사는 AI 데이터센터 확산과
+      노후 전력망 교체 수요가
+      수주 증가를 이끌고 있다고 설명했다.
+    image: substation-datacenter
+  - layout: editorialStat
+    kicker: 1분기 신규 수주
+    bigNumber: '18'
+    unit: 억달러
+    context: |-
+      신규 수주는 17.97억달러였다.
+      전년 대비 34.6% 늘었고,
+      분기 기준 역대 최대였다.
+    image: transformer-yard
+  - layout: editorialStat
+    kicker: 수주잔고
+    bigNumber: '79'
+    unit: 억달러
+    context: |-
+      1분기 말 수주잔고는 78.88억달러.
+      숫자는 크다.
+      하지만 아직 납품 전이다.
+    image: substation-datacenter
+  - layout: editorialBeat
+    kicker: 장부
+    line: |-
+      주문만 큰 회사는
+      [[아니다]]
+    sub: |-
+      1분기 매출은 1조365억원,
+      영업이익은 2,583억원이었다.
+      주문 이야기가 이미 실적에 들어왔다.
+    image: copper-winding
+  - layout: editorialStat
+    kicker: 영업이익률
+    bigNumber: '24.9'
+    unit: '%'
+    context: |-
+      1분기 영업이익률.
+      전력 장비 호황이 진짜인지 보려면
+      이 숫자가 버티는지 봐야 한다.
+    image: copper-winding
+  - layout: editorialBeat
+    kicker: 북미
+    line: |-
+      북미 전력망이
+      [[실적을 밀었다]]
+    sub: |-
+      북미 매출은 전년 대비 26.6% 증가했다.
+      전력변압기 실적 확대가
+      성장을 끌었다는 설명이다.
+    image: substation-datacenter
+  - layout: editorialBeat
+    kicker: 주의점
+    line: |-
+      수주는 끝이 아니라
+      [[납품의 시작]]이다
+    sub: |-
+      변압기는 빨리 찍어내는 제품이 아니다.
+      증설, 원재료, 납품 일정이 흔들리면
+      좋은 주문도 무거워진다.
+    image: transformer-yard
+  - layout: editorialBeat
+    kicker: 마무리
+    line: |-
+      다음엔
+      [[세 가지]]를
+      봅니다
+    sub: |-
+      새 주문이 계속 늘어나는지.
+      수주잔고가 매출로 바뀌는지.
+      24.9% 이익률이 버티는지.
+    image: substation-datacenter
 ---
 
 <script>
