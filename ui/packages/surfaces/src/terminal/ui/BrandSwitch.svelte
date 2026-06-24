@@ -142,14 +142,14 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--dl-ink-dim, #8a93a3);
+		color: inherit; /* SNS 이웃 아이콘과 동일 톤 — 문맥 텍스트색 상속(터미널 밝음). 회색 처리 안 함. */
 		background: transparent;
 		border: 0;
 		cursor: pointer;
 		transition: color 0.15s, background 0.15s;
 	}
 	.bswIcon:hover {
-		color: var(--dl-ink, #e8eaef);
+		color: var(--dl-ink-print, #ffffff);
 		background: rgba(255, 255, 255, 0.08);
 	}
 	.bswDot {
