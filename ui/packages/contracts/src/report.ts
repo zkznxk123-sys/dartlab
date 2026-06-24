@@ -184,7 +184,8 @@ export type ValuationSnapshot = Record<string, ValuationRow>;
  * content = raw DART XML/HTML — 소비측(CellContent)이 sanitize·표/텍스트 분리 렌더. 신규 분석 0, 표면화만. */
 export interface ReportNoteBlock {
 	key: string; // 안정 식별자 (disclosureKey + 순서)
-	title: string; // 주석 제목 (blockLeaf 또는 sectionLeaf)
+	topic: string; // 토픽 id (costNature·segment·contingency·affiliates·relatedParty) — 소비측 평어 라벨 매핑
+	title: string; // 주석 제목 (blockLeaf 또는 sectionLeaf) — 원문 그대로(보조 표시)
 	section: string; // 상위 섹션 (예 '3. 연결재무제표 주석')
 	content: string; // 본문 raw DART XML/HTML (표·텍스트) — CellContent 가 렌더
 	rceptNo: string; // 출처 공시 번호 (↗원문)

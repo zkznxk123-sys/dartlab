@@ -708,10 +708,15 @@ export function createReportSource(core: DataCore): ReportPort {
 	// 고가치 도시에 주석만 선별: 관계·종속기업 투자(타법인출자 detail)·특수관계자 거래(소유/관계)·우발부채·약정
 	// (PRD §11 "필드 없어 침묵"이라던 담보/보증 — 주석 본문엔 존재). blockLeaf 키워드 매칭이라 회사별 NT 코드
 	// 변동(08 G1: 우발부채=827580 OR 822320)에 강건. 연결 우선. panel 대용량 → 최신기만 2-pass(period→필터).
+	// 토픽 = blockLeaf/sectionLeaf 정규식 매칭(NT 코드/disclosureKey 무관 — 회사별 코드 분산[08 G1: 우발부채
+	// 827580 OR 822320]에 강건, 실측 이 행들 disclosureKey=null). 표시 순서 = 배열 순서(costNature 먼저).
+	// 실측 커버리지(300사): costNature 58%·segment 69%·contingency 84%·affiliates 57%·relatedParty 82%.
 	const NOTE_TOPICS: { id: string; re: RegExp }[] = [
+		{ id: 'costNature', re: /비용의\s*성격별|성격별\s*분류|성격별\s*비용|영업비용의\s*성격별/ },
+		{ id: 'segment', re: /부문정보|영업부문|부문별\s*정보|부문별\s*보고/ },
+		{ id: 'contingency', re: /우발부채|약정사항|약정/ },
 		{ id: 'affiliates', re: /관계기업|종속기업|공동기업/ },
-		{ id: 'relatedParty', re: /특수관계자/ },
-		{ id: 'contingency', re: /우발부채|약정사항|약정/ }
+		{ id: 'relatedParty', re: /특수관계자/ }
 	];
 	async function buildReportNotes(code: string): Promise<ReportNoteBlock[] | null> {
 		// Pass A — period 컬럼만(저비용 단일컬럼) → 최신기 (panel 전체 본문 로드 회피, 08 §4.2 hyparquet)
@@ -748,6 +753,7 @@ export function createReportSource(core: DataCore): ReportPort {
 			if (!head) continue;
 			out.push({
 				key: `${topic.id}:${str(head.disclosureKey) || topic.id}`,
+				topic: topic.id,
 				title: str(head.blockLeaf) || str(head.sectionLeaf),
 				section: str(head.sectionLeaf) || str(head.chapter),
 				content,

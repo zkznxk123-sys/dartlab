@@ -384,6 +384,15 @@
 			if (co.code === code) notesState = 'error';
 		}
 	}
+	// 주석 토픽 → 평어 유도 부제(개미가 '특수관계자 거래' 제목 안 읽음). 원문 제목(nt.title)은 보조 dim.
+	const NOTE_LABEL: Record<string, { kr: string; en: string }> = {
+		costNature: { kr: '돈을 뭐에 쓰나', en: 'where the money goes' },
+		segment: { kr: '사업부문 구성', en: 'business segments' },
+		contingency: { kr: '장부 밖 부담 — 보증·소송·담보', en: 'off-balance — guarantee·litigation·collateral' },
+		affiliates: { kr: '자회사 지분·손상', en: 'subsidiaries · impairment' },
+		relatedParty: { kr: '계열사와 돈거래', en: 'related-party dealings' }
+	};
+	const noteLabel = (topic: string, l: Lang): string => (NOTE_LABEL[topic] ? (l === 'en' ? NOTE_LABEL[topic].en : NOTE_LABEL[topic].kr) : topic);
 	// 최신 연간 현금성자산 (BS 'cash', 조 단위) → 원 환산. 단기 상환벽 신호의 분모.
 	const cashLatestWon = $derived.by<number | null>(() => {
 		const av = finBundle?.views.annual;
@@ -490,6 +499,14 @@
 	rt.company.productIndex().then((m) => (corpMeta = m));
 	const homepage = $derived(corpMeta?.[co.code]?.homepage ?? null);
 	const homepageHost = $derived(homepage ? homepage.replace(/^https?:\/\//, '').replace(/\/$/, '') : '');
+	// 회사 한 줄 정체 — 업종 + 주요제품(corpList, robust·새 fetch 0). "뭐 하는 회사"를 0.5초에.
+	// 둘 다 결측이면 null → 줄 사라짐(show-if-present). 발췌 아닌 구조필드라 환각 0(LLM 금지 정합).
+	const identity = $derived.by(() => {
+		const prod = (corpMeta?.[co.code]?.product ?? '').trim();
+		const sec = co.sector ? tx(co.sector, lang) : '';
+		if (prod && sec) return `${sec} · ${prod}`;
+		return prod || sec || null;
+	});
 	const lastYr = $derived(co.income.periods[0]);
 	const firstYr = $derived(co.income.periods[co.income.periods.length - 1]);
 	const conf = $derived(cr.healthScore >= 70 ? 'HIGH' : 'MEDIUM');
@@ -613,40 +630,6 @@
 	{/if}
 </Panel>
 
-<!-- DART 정기보고서 팩트 (배당·자사주·임원·감사·대주주·회사채 — report parquet) -->
-<Panel {lang} className="eCredit" prov="real" title={{ kr: 'DART 정기보고서 팩트', en: 'DART REPORT FACTS' }} flush>
-	{#snippet right()}<span class="dim">{factsState === 'ready' ? reportFacts.length : ''}</span>{/snippet}
-	{#if factsState === 'ready'}
-		{#if dossier}
-			<div class="dossierRibbon">
-				<span class="drMain">
-					{#if dossier.stlm}{lang === 'en' ? 'report' : '사업보고서'} {dossier.stlm}{/if}
-					{#if dossier.rceptDate}<span class="drSep">·</span>{lang === 'en' ? 'filed' : '접수'} {dossier.rceptDate}{/if}
-					<span class="drSep">·</span>{dossier.coverage}/6 {lang === 'en' ? 'filings' : '공시'}
-					{#if dossier.monthsAgo != null}<span class="drSep">·</span>{lang === 'en' ? `~${dossier.monthsAgo}mo ago` : `약 ${dossier.monthsAgo}개월 전`}{/if}
-				</span>
-				{#if dossier.url}<a class="drSrc" href={dossier.url} target="_blank" rel="noopener" title={lang === 'en' ? 'Source filing (DART)' : '원문 공시(DART)'}>↗{lang === 'en' ? '' : '원문'}</a>{/if}
-			</div>
-		{/if}
-		<div class="factGrid">
-			{#each reportFacts as f (f.key)}
-				{@const fu = factSrcUrl(f.rceptNo)}
-				<div class="factRow">
-					<span class="factL">{f.label}</span>
-					<span class="factV mono">{f.value}{#if fu}<a class="factSrc" href={fu} target="_blank" rel="noopener" title={lang === 'en' ? 'source filing' : '원문 공시'}>↗</a>{/if}</span>
-					{#if f.detail}<span class="factD">{f.detail}</span>{/if}
-				</div>
-			{/each}
-		</div>
-	{:else if factsState === 'loading'}
-		<div class="storyEmpty">{lang === 'en' ? 'loading report facts …' : '정기보고서 팩트 불러오는 중 …'}</div>
-	{:else if factsState === 'error'}
-		<div class="storyEmpty" role="status">{lang === 'en' ? 'Failed to load · ' : '불러오지 못했습니다 · '}<button class="factRetry" onclick={() => reloadToken++}>↻ {lang === 'en' ? 'retry' : '다시 시도'}</button></div>
-	{:else}
-		<div class="storyEmpty">{lang === 'en' ? 'No periodic-report facts for this company.' : '해당 회사 정기보고서 팩트 없음.'}</div>
-	{/if}
-</Panel>
-
 <!-- 인력 · 생산성 (정기보고서 임직원 현황 — 인원·급여·근속·1인당매출) -->
 {#if wfLast}
 	<Panel {lang} className="eIndustry" prov="real" title={{ kr: '인력 · 생산성', en: 'WORKFORCE' }} sub={{ kr: wfLast.year, en: wfLast.year }} flush>
@@ -751,8 +734,23 @@
 
 <!-- 정기보고서 주석 — panel 파케 본문 그 자리 렌더(관계기업·종속기업 투자·특수관계자 거래·우발부채·약정·담보).
      ↗링크가 아닌 *실제 주석 내용*을 우측 패널에 표면화(PRD 00 §26). 지연 로드: '본문 보기' 클릭 시에만 read. -->
-<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={{ kr: '관계기업·특수관계자·우발부채', en: 'affiliates·related·contingency' }} flush>
+<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 도시에', en: 'REPORT DOSSIER' }} flush>
+	{#if dossier}
+		<div class="dossierRibbon">
+			<span class="drMain">
+				{#if dossier.stlm}{lang === 'en' ? 'report' : '사업보고서'} {dossier.stlm}{/if}
+				{#if dossier.rceptDate}<span class="drSep">·</span>{lang === 'en' ? 'filed' : '접수'} {dossier.rceptDate}{/if}
+				<span class="drSep">·</span>{dossier.coverage}/6 {lang === 'en' ? 'filings' : '공시'}
+				{#if dossier.monthsAgo != null}<span class="drSep">·</span>{lang === 'en' ? `~${dossier.monthsAgo}mo ago` : `약 ${dossier.monthsAgo}개월 전`}{/if}
+			</span>
+			{#if dossier.url}<a class="drSrc" href={dossier.url} target="_blank" rel="noopener" title={lang === 'en' ? 'Source filing (DART)' : '원문 공시(DART)'}>↗{lang === 'en' ? '' : '원문'}</a>{/if}
+		</div>
+	{/if}
+	{#if identity}
+		<div class="dossierIdentity" title={lang === 'en' ? 'sector · main product (corpList)' : '업종 · 주요제품 (corpList)'}>{identity}</div>
+	{/if}
 	{#if !notesOpen}
+
 		<button class="noteOpenBtn" onclick={openNotes}>{lang === 'en' ? '▾ show note text in place (affiliates · related-party · contingencies)' : '▾ 주석 본문 그 자리에서 보기 (관계기업·특수관계자·우발부채·담보)'}</button>
 	{:else if notesState === 'loading'}
 		<div class="storyEmpty" role="status" aria-busy="true">{lang === 'en' ? 'loading note text …' : '주석 본문 불러오는 중 …'}</div>
@@ -766,7 +764,7 @@
 				{@const noteUrl = factSrcUrl(nt.rceptNo)}
 				<div class="noteBlock">
 					<button class="noteHd" onclick={() => (openNoteKey = openNoteKey === nt.key ? null : nt.key)}>
-						<span class="noteTitle">{openNoteKey === nt.key ? '▾' : '▸'} {nt.title}</span>
+						<span class="noteTitle">{openNoteKey === nt.key ? '▾' : '▸'} {noteLabel(nt.topic, lang)}<span class="noteOrig">{nt.title}</span></span>
 						{#if noteUrl}<a class="factSrc" href={noteUrl} target="_blank" rel="noopener" onclick={(e) => e.stopPropagation()} title={lang === 'en' ? 'source filing' : '원문 공시'}>↗</a>{/if}
 					</button>
 					{#if openNoteKey === nt.key}

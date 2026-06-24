@@ -892,6 +892,7 @@
 
 /* 도시에 헤더 리본 — 정기보고서 팩트 스파인(as-of·접수·N/6 커버리지·↗원문) */
 .dlTerm .dossierRibbon { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--dl-line); background: var(--dl-bg-deep); }
+.dlTerm .dossierIdentity { padding: 5px 8px; font-family: var(--cond); font-size: 11px; color: var(--txt); border-bottom: 1px solid var(--dl-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .drMain { font-family: var(--cond); font-size: 9.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .dlTerm .drSep { color: var(--dimmer); margin: 0 3px; }
 .dlTerm .drSrc { font-family: var(--mono); font-size: 9px; color: var(--dimmer); text-decoration: none; white-space: nowrap; flex: none; }
@@ -986,6 +987,7 @@
 .dlTerm .noteBlock:first-child { border-top: none; }
 .dlTerm .noteHd { display: flex; align-items: center; justify-content: space-between; width: 100%; background: none; border: none; padding: 6px 8px; cursor: pointer; gap: 8px; }
 .dlTerm .noteTitle { font-family: var(--cond); font-size: 10.5px; color: var(--txt); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dlTerm .noteTitle .noteOrig { color: var(--dimmer); font-size: 9px; margin-left: 6px; }
 .dlTerm .noteHd:hover .noteTitle { color: var(--amber); }
 .dlTerm .noteBody { max-height: 320px; overflow: auto; padding: 2px 8px 8px; }
 
