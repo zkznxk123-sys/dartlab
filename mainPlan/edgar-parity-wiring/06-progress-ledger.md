@@ -38,6 +38,9 @@
 - **analysis/story 계산정합 = Slice 2(S2-L1.2 census)** 명시 분류 — KR 계정명/WICS 의존. Slice 1 라이브러리 가드 대상 아님(surface 배지 + Slice2 캘리브).
 - **결론**: S1-L4.3 *라이브러리* 필수 가드 = credit 단일로 완결. 나머지 회색지대 = surface 배지(S1-L4 프론트, UI push 승인)·Slice2.
 
+### ★★census 대정정 (2026-06-24, "터미널서 AAPL 검색하면 도나?" 직접검증)
+HF 실측(`list_repo_files`): **`edgar/finance/` = 0 파일** (dart/finance/ 3,141 대비). **PRD 03/01 의 "Slice1 = 이미 baked 된 finance" 가정이 틀림** — US 회사별 재무제표는 HF 미발행(EdgarCompany 는 SEC companyfacts API *직다운로드*라 백엔드만 작동, 브라우저=불가). `edgar/scan/finance.parquet`(집계 1파일)만 200. **즉 AAPL 미동작은 2겹**: ① **배선**(source 전부 `dart/` 하드코딩·resolveMarket 소비자 0: financeSource:59·regularFilingsSource:22·reportSource:725/736·annual:184·annual:181 `!/^\d{6}$/→null`) ② **데이터**(edgar/finance 0파일). panel(공시)만 데이터 준비(`edgar/panel/AAPL.parquet` 200·6,294파일). **정정된 슬라이싱**: Slice1 = panel/filings 배선(데이터 OK) / **finance 는 Slice2 로 강등**(2차 백필 발행 = edgar/finance/{cik}.parquet, dart/finance 미러) / price = Slice3(라이선스). "그대로 완전 동작"엔 finance 발행 백필이 선결.
+
 ## NEXT (운영자 go 받아 실집행 중 — 2026-06-24)
 1. **S0.1 backfill 완주** — run4~ resumable, 잔여 ~1,627 → 100% (자율 진행).
 2. **S1-L2.3 6포트 market 차원** — [재검토] 블랭킷 `market?` 전포트 추가는 over-engineering 가능. 실라우팅은 L3 source 의 resolveMarket(code). 최소 = 필요 포트만 + source 라우팅. 착수 전 granularity 결정.
