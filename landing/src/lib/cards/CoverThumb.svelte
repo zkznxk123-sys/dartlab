@@ -47,10 +47,11 @@
 	<div class="frame">
 		{#if cover}<CardSlide card={cover} {rt} />{/if}
 		<div class="badge">{name}{code ? ` · ${code}` : ''}</div>
-		<!-- dartlab 서명 — base 무관 항상 노출(dev=퍼블릭 기준). avatar.webp 는 정적(/avatar.webp), base 있으면 접두. -->
+		<!-- dartlab 서명 — base 무관 항상 노출(dev=퍼블릭 기준). 아바타+dartlab 만 작게(부제 'COMPANY STORY BY
+		     TICKER' 제거 — 상단 헤더에 이미 dartlab. 캡처·공유 대비 최소 서명만). avatar.webp=정적(/avatar.webp). -->
 		<div class="brand">
-			<img src="{base}/avatar.webp" alt="" width="30" height="30" />
-			<span class="bWrap"><b>dartlab</b><small>COMPANY STORY BY TICKER</small></span>
+			<img src="{base}/avatar.webp" alt="" width="22" height="22" />
+			<b class="bName">dartlab</b>
 		</div>
 		<span class="hint">카드 열기</span>
 	</div>
@@ -82,9 +83,9 @@
 		transform: translateY(-3px);
 		box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
 	}
-	/* 표지 본문 하단에 dartlab 서명 띠(56px) 확보 — 헤드라인/설명이 좌하단 브랜드와 겹치지 않게(서명은 본문 아래로). */
+	/* 표지 본문 하단에 dartlab 서명 띠(44px) 확보 — 헤드라인/설명이 좌하단 브랜드와 겹치지 않게(서명은 본문 아래로). */
 	.frame :global(.content) {
-		padding-bottom: 56px;
+		padding-bottom: 44px;
 	}
 	.badge {
 		position: absolute;
@@ -102,10 +103,10 @@
 	.brand {
 		position: absolute;
 		left: 16px;
-		bottom: 16px;
+		bottom: 14px;
 		display: flex;
 		align-items: center;
-		gap: 9px;
+		gap: 6px;
 		z-index: 3;
 		filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
 	}
@@ -113,21 +114,11 @@
 		opacity: 0.92;
 		border-radius: 50%;
 	}
-	.bWrap {
-		display: flex;
-		flex-direction: column;
-		line-height: 1.15;
-	}
-	.bWrap b {
-		font-size: 15px;
+	.bName {
+		font-size: 12.5px;
 		font-weight: 800;
 		color: #f6f8fb;
-	}
-	.bWrap small {
-		font-size: 8px;
-		letter-spacing: 0.14em;
-		color: #cbd5e1;
-		text-transform: uppercase;
+		letter-spacing: -0.01em;
 	}
 	.hint {
 		position: absolute;
