@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -20,36 +20,8 @@ if (oldVersion !== version) {
 } else {
 	console.log(`  -> brand.ts version: ${version} (unchanged)`);
 }
-const colorBlock = brandSrc.match(/color:\s*\{([^}]+)\}/s)?.[1];
-if (!colorBlock) { console.error('brand.ts color block not found'); process.exit(1); }
 
-const colors = {};
-for (const m of colorBlock.matchAll(/(\w+):\s*'(#[0-9a-fA-F]+)'/g)) {
-	colors[m[1]] = m[2];
-}
-
-const cssVars = Object.entries(colors).map(([k, v]) => {
-	const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
-	return `\t--color-dl-${cssKey}: ${v};`;
-}).join('\n');
-
-const appCss = `@import "tailwindcss";
-
-@theme {
-${cssVars}
-
-\t--font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
-\t--font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
-\t--animate-float: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-\t0%, 100% { transform: translateY(0); }
-\t50% { transform: translateY(-8px); }
-}
-`;
-
-writeFileSync(resolve(__dirname, '..', 'src', 'app.css'), appCss);
-
-console.log('Brand synced:');
-console.log('  -> landing/src/app.css');
+// 색 SSOT = ui/packages/design/src/styles/tokens.css 한 곳. app.css 는 손수 소유하는 @theme inline 브리지로,
+// 더 이상 brand.ts hex 에서 생성하지 않는다(옛 생성기가 오렌지 accent #fb923c 를 찍어 SSOT 발산 원인이었음).
+// 본 스크립트는 pyproject 버전을 brand.ts 에 동기화하는 책임만 남긴다.
+console.log('Brand version synced (색은 tokens.css SSOT — app.css 생성 안 함).');

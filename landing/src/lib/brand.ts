@@ -28,24 +28,9 @@ export const brand = {
 		edgar: { dir: 'edgar/finance', label: 'SEC EDGAR 재무 데이터' },
 	},
 
-	color: {
-		primary: '#ea4647',
-		primaryDark: '#c83232',
-		primaryLight: '#f87171',
-		accent: '#fb923c',
-		accentLight: '#fdba74',
-		bgDark: '#050811',
-		bgDarker: '#030509',
-		bgCard: '#0f1219',
-		bgCardHover: '#1a1f2b',
-		text: '#f1f5f9',
-		textMuted: '#94a3b8',
-		textDim: '#64748b',
-		border: '#1e2433',
-		success: '#34d399',
-		warning: '#fbbf24',
-		coffee: '#ffdd00'
-	}
+	// ⛔ 색은 여기서 정의하지 않는다 — 색 SSOT = ui/packages/design/src/styles/tokens.css (--p-*/--dl-*).
+	// Tailwind 유틸은 landing/src/app.css 의 @theme inline 이 var(--dl-*) 로 브리지한다.
+	// (옛 color:{} 블록이 syncBrand.js 로 app.css 를 생성해 오렌지 accent #fb923c 발산 원인이었음 → 폐기.)
 } as const;
 
 export type Brand = typeof brand;

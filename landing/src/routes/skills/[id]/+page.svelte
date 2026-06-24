@@ -368,7 +368,7 @@
 	.recipe-badge {
 		padding: 0.1rem 0.5rem;
 		border-radius: 999px;
-		background: linear-gradient(135deg, #ea4647, #fb923c);
+		background: var(--dl-grad-heat);
 		color: var(--dl-ink-print);
 		font-size: 0.66rem;
 		font-weight: 700;

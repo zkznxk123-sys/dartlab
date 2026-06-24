@@ -1722,7 +1722,7 @@
 		font-weight: 800;
 	}
 	.brand-gradient {
-		background: linear-gradient(135deg, #ea4647, #fb923c);
+		background: var(--dl-grad-heat);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;

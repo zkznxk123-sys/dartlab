@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
-	/* 색상 SSOT — 정본은 tokens.css(--dl-*). 여기 Tailwind @theme 는 *별칭*만 둬서
-	 * 한 곳(tokens.css)에서 전 제품(랜딩·터미널·scan·map·viewer) 색을 제어한다.
-	 * 강조색=캐러셀 핑크(--dl-accent)로 통일. 브랜드 레드(--dl-red)·신호색은 토큰 공유.
-	 * bg/text/border 는 랜딩 고유 톤(더 깊은 마케팅 다크) — 후속 단계서 토큰 수렴 검토. */
-@theme {
+/* ── Tailwind 유틸 네임스페이스 → CSS-var SSOT(tokens.css) 브리지 ──
+ * `@theme inline` 이 `text-dl-accent` 를 `color: var(--dl-accent)` 로 발행(런타임 cascade),
+ * 빌드시 hex 인라인이 아님. 그래서 tokens.css 의 --dl-* 한 곳(또는 data-brand 프리셋)을 바꾸면
+ * Tailwind 유틸 세계(랜딩)와 CSS-var 세계(터미널·뷰어·카드)가 *동시에* 리테마된다.
+ * ⚠ 색 정의 금지 — 값은 반드시 var(--dl-*). 색 SSOT = ui/packages/design/src/styles/tokens.css.
+ * (옛 syncBrand.js 가 brand.ts hex 로 이 파일을 생성했었음 → 오렌지 accent 발산 원인. 생성 폐기, 손수 소유.) */
+@theme inline {
 	--color-dl-primary: var(--dl-red);
 	--color-dl-primary-dark: var(--dl-red-deep);
 	--color-dl-primary-light: var(--p-red-400);
 	--color-dl-accent: var(--dl-accent);
 	--color-dl-accent-light: var(--dl-accent-light);
-	--color-dl-orange: var(--dl-orange); /* 옛 accent(오렌지) — 보조색 명시(브랜드 그라데이션용) */
 	--color-dl-bg-dark: var(--dl-mkt-bg);
 	--color-dl-bg-darker: var(--dl-mkt-bg-0);
 	--color-dl-bg-card: var(--dl-mkt-card);
 	--color-dl-bg-card-hover: var(--dl-mkt-card-2);
-	--color-dl-text: var(--dl-ink-print);
+	--color-dl-text: var(--dl-ink);
 	--color-dl-text-muted: var(--dl-ink-mute);
 	--color-dl-text-dim: var(--dl-ink-dim);
 	--color-dl-border: var(--dl-mkt-border);
