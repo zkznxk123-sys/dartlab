@@ -34,6 +34,71 @@ ai:
     - "FCF 음수 2년"
   keyMetrics: {revenue: 1.5, opm: 9.54, roe: 0.0, fcf: -0.06}
   dataAsOf: "2026-04-10"
+carousel:
+  title: "경동나비엔 — 민둥산의 연탄회사가 미국 온수기 시장 절반을 먹었다"
+  caption: |
+    1951년 한국전쟁 한복판, 손도익이 민둥산을 보고 무산연탄을 세웠다. '산이 다시 무성해지길'이라는 뜻이다. 연탄 → 보일러 → 온수기 → 퍼네스. 70년간 난방의 다음 카테고리로 점프해온 이 회사는 지금 미국 가정의 온수를 책임진다.
+
+    보일러 회사인데 매출총이익률이 42.5%다. 제조업 평균의 두 배. 비밀은 콘덴싱 기술 — 1998년 세계 최초로 스테인리스 열교환기를 양산해 열효율 98%를 뽑았다. 그런데 미국을 연 건 기술이 아니라 PVC 파이프였다. 콘덴싱은 배기온도가 낮아 plumber가 매일 다루는 PVC로 설치된다. '설치하는 사람의 편의'를 설계한 것이다.
+
+    2006년 연 2만 대에서 16년 만에 연 60만 대, 누적 500만 대. 콘덴싱 탱크리스 점유율 50%. 한국 보일러 회사가 아니라 미국 온수기 회사가 됐다.
+
+    그런데 이익은 나는데 현금이 없다. 영업이익 1,434억인데 잉여현금흐름은 2년 연속 마이너스(-910억). 설비투자가 410억에서 1,622억으로 3년 만에 2.5배 뛰었기 때문이다. SK매직 인수 1,700억과 텍사스 공장 1,500~2,000억이 동시에 터지며 차입금은 3,423억으로 늘었다.
+
+    무너지는 게 아니라 70년 역사상 가장 큰 카테고리에 올인하는 중이다. 온수기 연 100만 대의 5배인 퍼네스 470만 대 시장 — 온수기와 퍼네스를 둘 다 가진 회사는 경동뿐이다. 모든 답은 텍사스 양산일에 수렴한다. 관세 25%가 0%로 바뀌고, 음수였던 현금흐름이 플러스로 뒤집히는 그날.
+  pinnedComment: |
+    원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
+    github.com/eddmpython/dartlab
+  slides:
+    - layout: editorial
+      date: "2026.04.10"
+      line: "민둥산의 연탄회사가\n미국 온수기 시장 [[절반]]을 먹었다"
+      sub: "1951년 무산연탄에서 시작해 콘덴싱 탱크리스로 미국 1위. 그런데 이익은 나는데 현금이 없다."
+      image: navien-boiler-unit
+    - layout: editorialStat
+      kicker: "보일러인데"
+      bigNumber: "42.5"
+      unit: "% 매출총이익률"
+      context: "제조업 평균의 두 배. 현대차 18%, 삼성 반도체 36%, 철강 14%. 콘덴싱 기술이 만든 마진이다."
+      image: bg-blueprint-detailed
+    - layout: editorialBeat
+      kicker: "70년의 카테고리 점프"
+      line: "연탄 → 보일러 → 온수기\n다음은 [[퍼네스]]"
+      sub: "에너지원이 바뀔 때마다 사라지는 대신 진화했다. 1951년 민둥산에서 시작해 지금은 미국 가정의 온수를 책임진다."
+      image: bg-us-suburb-rooftops-dusk
+    - layout: editorialStat
+      kicker: "미국 침투"
+      bigNumber: "30"
+      unit: "배 · 16년 만에"
+      context: "2006년 연 2만 대로 시작해 지금 연 60만 대, 누적 500만 대. 콘덴싱 탱크리스 점유율 50%다."
+      image: plumber
+    - layout: editorialBeat
+      kicker: "혁신의 정체"
+      line: "기술이 아니라\n[[설치업자의 편의]]를 설계했다"
+      sub: "콘덴싱은 배기온도가 40~60도라 PVC 파이프로 배기된다. 미국 plumber가 매일 다루는 소재 — 용접 없이 설치된다."
+      image: us-plumber-tankless
+    - layout: editorialStat
+      kicker: "잘 버는데"
+      bigNumber: "-910"
+      unit: "억 잉여현금흐름 · 2년째 음수"
+      context: "영업이익 1,434억인데 현금이 없다. 설비투자가 410억에서 1,622억으로 3년 만에 2.5배 뛰었다."
+      image: bg-terminal-dark-glow
+    - layout: editorialBeat
+      kicker: "돈은 어디로 갔나"
+      line: "70년 역사상 가장 큰\n[[카테고리에 올인]]했다"
+      sub: "SK매직 인수 1,700억, 미국 퍼네스용 텍사스 공장 1,500~2,000억. 두 건이 동시에 터지며 차입금이 3,423억으로."
+      image: us-furnace-building
+    - layout: editorialStat
+      kicker: "베팅의 크기"
+      bigNumber: "5"
+      unit: "배 큰 시장 · 퍼네스"
+      context: "탱크리스 온수기 연 100만 대 vs 퍼네스 470만 대. 둘 다 가진 회사는 경동뿐 — 유일한 풀라인업이다."
+      image: furnace
+    - layout: editorialBeat
+      kicker: "분기점"
+      line: "모든 답은\n[[텍사스 양산일]]에 수렴한다"
+      sub: "공장이 돌면 관세 25%가 0%, 음수였던 잉여현금흐름이 플러스로. PER 10배가 Rinnai 15배로 리레이팅되는 날이다."
+      image: bg-red-texas-alert
 ---
 
 <script>

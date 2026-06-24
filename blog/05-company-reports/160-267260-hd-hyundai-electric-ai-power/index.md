@@ -33,6 +33,71 @@ ai:
   weaknesses: ["PER 49.74배의 가격 부담", "52주 고점 143만원 이후 변동성", "수주가 매출로 인식되는 속도 차이", "매출채권·재고 증가 점검 필요", "구리·전기강판·환율 등 원가 변수"]
   keyMetrics: {price: 1087000, marketCapT: 39.18, pe: 49.74, q1RevenueT: 1.0365, q1Opm: 24.9}
   dataAsOf: "2026-06-18"
+carousel:
+  title: "HD현대일렉트릭 — AI 전력난의 두 번째 주도주인가"
+  caption: |
+    2026년 6월 18일, HD현대일렉트릭 주가는 108만원, PER 49.74배, 시가총액 39.18조원. 52주 저점 41만원에서 2.6배 오른 자리다. 시장은 이미 이 회사를 평범한 산업재로 보지 않는다.
+
+    숫자는 그 평가를 받쳐준다. 2025년 매출 4.0795조, 영업이익 9,953억, 영업이익률 24.4%. 2026년 1분기에도 OPM 24.9%. 전력기기 회사가 소프트웨어 같은 마진을 찍는다. 수주잔고는 67.31억달러에서 78.88억달러로 — 한화 10조를 넘는 미래 매출이다.
+
+    다만 변압기는 오늘 만들어지지 않는다. 수주가 매출이 되기까지 몇 년, 인증·숙련공·시험·운송이 모두 병목이다. 그래서 실적은 주문 뉴스보다 한 박자 느리게 움직인다. 좋은 얼굴은 가시성, 나쁜 얼굴은 속도다.
+
+    그래도 이익의 질은 진짜다. 2025년 영업현금흐름 9,595억, FCF 7,176억 — 높은 이익이 실제 현금으로 이어졌다. AI 서버가 첫 장면이라면 변압기는 전기를 공급하는 병목, 반도체 랠리의 후행 인프라다.
+
+    그러나 좋은 회사라는 설명은 이미 가격에 들어갔다. PER 50배가 버티려면 OPM 20%대 중반, 고마진 수주의 매출 전환, 북미 수요, 운전자본 품질이 동시에 유지돼야 한다. 두 번째 주도주 자리는 테마가 아니라 매 분기 숫자로 지키는 자리다 — 비싼데도 계속 들여다봐야 하는 종목인 이유다.
+  pinnedComment: |
+    원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
+    github.com/eddmpython/dartlab
+  slides:
+    - layout: editorial
+      date: "2026.06.18"
+      line: "AI 전력난의\n[[두 번째 주도주]]인가"
+      sub: "주가 108만원, PER 49.74배. 좋은 회사라는 설명은 이미 가격에 들어갔다. 이제 숫자가 이야기를 앞서야 한다."
+      image: ai-data-center-substation
+    - layout: editorialStat
+      kicker: "이미 들어간 기대"
+      bigNumber: "49.74"
+      unit: "배 PER · 산업재인데"
+      context: "주가 108만원, 시가총액 39.18조. 좋은 회사라는 설명만으로는 부족한 구간에 들어와 있다."
+      image: substation-datacenter
+    - layout: editorialBeat
+      kicker: "소프트웨어 같은 숫자"
+      line: "전력기기 회사가\n영업이익률 [[24.9%]]"
+      sub: "2025년 매출 4.0795조에 영업이익 9,953억. 2026년 1분기에도 OPM 24.9%로 고마진 체력이 살아 있다."
+      image: transformer-factory
+    - layout: editorialStat
+      kicker: "공장을 채울 일감"
+      bigNumber: "78.88"
+      unit: "억달러 수주잔고"
+      context: "2025년 말 67.31억달러에서 2026년 1분기 78.88억달러로. 한화로 10조원을 훌쩍 넘는 미래 매출이다."
+      image: grid-bottleneck
+    - layout: editorialBeat
+      kicker: "느리지만 무겁다"
+      line: "변압기는\n[[오늘 만들어지지 않는다]]"
+      sub: "수주가 매출이 되기까지 몇 년. 인증·숙련공·시험·운송이 모두 병목이다. 그래서 실적은 주문 뉴스보다 한 박자 느리다."
+      image: transformer-yard
+    - layout: editorialStat
+      kicker: "이익의 질"
+      bigNumber: "7,176.6"
+      unit: "억 FCF · 2025"
+      context: "영업현금흐름 9,595.7억, 순이익 7,318억. 높은 이익이 실제 현금으로 이어졌다 — 단순 테마주와 다른 점이다."
+      image: copper-winding
+    - layout: editorialBeat
+      kicker: "AI 사슬의 끝"
+      line: "칩이 첫 장면이라면\n변압기는 [[전기를 공급하는 병목]]"
+      sub: "AI 서버가 늘면 데이터센터, 데이터센터가 늘면 변전 설비. 반도체 랠리의 후행 인프라가 검증대에 올랐다."
+      image: data-center
+    - layout: editorialStat
+      kicker: "50배가 버티려면"
+      bigNumber: "24.4"
+      unit: "% 영업이익률 유지"
+      context: "OPM 20%대 중반 지속, 수주잔고의 고마진 매출 전환, 북미 수요, 운전자본 품질 — 다섯 조건이 동시에 맞아야 한다."
+      image: power-grid
+    - layout: editorialBeat
+      kicker: "결론"
+      line: "비싼데도 계속\n[[들여다봐야 하는 종목]]"
+      sub: "두 번째 주도주 자리는 테마로 얻는 게 아니라 매 분기 숫자로 지키는 자리다. 숫자가 이야기를 앞설 때만 높은 가격이 설명된다."
+      image: hook-industrial
 ---
 
 <script>

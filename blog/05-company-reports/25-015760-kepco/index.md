@@ -33,6 +33,71 @@ ai:
     - "LNG+석탄 가격 변동"
   keyMetrics: {revenue: 97.4, opm: 13.8, roe: 10.0, fcf: 2.4}
   dataAsOf: "2026-04-12"
+carousel:
+  title: "한국전력 — 전기요금 1원이 5,600억을 만드는 회사"
+  caption: |
+    2022년 한국전력은 매출 71.3조를 올리고 영업적자 32.7조를 냈다. 삼성전자 반도체가 1년에 번 것보다 큰 돈을 1년에 날렸다. 경영 실패가 아니다. 매출원가율 141.6% — 팔수록 적자였다.
+
+    원가의 70%는 LNG·석탄이다. 2022년 전쟁으로 3배 뛰었다. 그런데 전기요금은 11분기 연속 동결. 원가는 국제시세가 정하고, 매출은 정치가 정한다. 그 차이가 적자로 쌓였다. kWh당 1원이 연 5,600억 — 이 한 숫자가 한전 재무제표의 전부다.
+
+    적자를 메우려 130조를 빌렸다. 2022년 한전채 31.8조는 한국 역사상 최대였다. 부채비율 497%, 이자보상배율 0.92x — 부도 직전 지표인데 신용등급은 AA+. 정부가 51.1% 주주라 한전채가 사실상 준국채이기 때문이다.
+
+    프랑스 EDF는 같은 구조의 끝을 보여줬다. 정부 지분·요금 상한·부채비율 550% — 2023년 완전 국유화, 소액주주는 €12에 쫓겨났다. 한전은 497%, 50%p 차이다.
+
+    2025년 영업이익 13.5조, 역대 최대 흑자에 영업이익률 스윙 59.6%p. 하지만 부채 130조는 그대로고, 잉여현금 2.4조로 갚으면 54년이다. 다음 재무제표를 쓸 사람은 CEO가 아니라 정부다.
+  pinnedComment: |
+    원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
+    github.com/eddmpython/dartlab
+  slides:
+    - layout: editorial
+      date: "2026.04.12"
+      line: "전기요금 [[1원]]이\n5,600억을 만드는 회사"
+      sub: "매출 97.4조에서 영업적자 32.7조까지 오간 회사. 재무제표를 쓰는 건 CEO가 아니라 정부였다."
+      image: bg-electricity-bill-closeup
+    - layout: editorialStat
+      kicker: "팔수록 적자"
+      bigNumber: "141.6"
+      unit: "% 매출원가율"
+      context: "2022년 매출 71.3조에 원가 100.9조. 연료비는 국제시세가 정하고, 요금은 정치가 정한다."
+      image: bg-scissor-graph-dark
+    - layout: editorialBeat
+      kicker: "구조의 뿌리"
+      line: "원가는 [[시장]]이 정하고\n매출은 [[정치]]가 정한다"
+      sub: "LNG가 3배 뛰어도 요금은 11분기 동결. 그 벌어진 차이가 고스란히 적자로 쌓였다."
+      image: bg-frozen-meter
+    - layout: editorialStat
+      kicker: "적자의 크기"
+      bigNumber: "32.7"
+      unit: "조 영업적자 · 2022"
+      context: "삼성전자 반도체가 1년에 번 21조보다 크다. 경영이 아니라 정책이 만든 적자다."
+      image: bg-cost-scale-dark
+    - layout: editorialBeat
+      kicker: "빚으로 메운 적자"
+      line: "130조를 빌려\n[[전기를 파는 법]]"
+      sub: "2022년 한전채 31.8조 — 한국 역사상 최대. 한전이 채권시장을 통째로 삼켰다."
+      image: bg-bond-stack-dark
+    - layout: editorialStat
+      kicker: "부도지표인데 초우량"
+      bigNumber: "AA+"
+      unit: "신용등급 · 부채비율 497%"
+      context: "이자보상배율 0.92x, 번 돈으로 이자도 못 갚는 상태. 그래도 AA+ — 정부가 51.1% 주주라서."
+      image: bg-dual-face-dark
+    - layout: editorialBeat
+      kicker: "같은 구조의 끝"
+      line: "EDF도 똑같이 망했다\n[[2023년 완전 국유화]]"
+      sub: "정부 지분·요금 상한·부채비율 550%. 소액주주는 €12에 쫓겨났다. 한전은 497% — 50%p 차이."
+      image: bg-edf-nationalize-dark
+    - layout: editorialStat
+      kicker: "극적인 턴어라운드"
+      bigNumber: "59.6"
+      unit: "%p 영업이익률 스윙"
+      context: "-45.8%(2022) → +13.8%(2025). 원가가 떨어지고 요금이 오르자 그 차이가 그대로 이익이 됐다."
+      image: bg-opm-swing-dark
+    - layout: editorialBeat
+      kicker: "결론"
+      line: "다음 재무제표를 쓸 사람은\nCEO가 아니라 [[정부]]다"
+      sub: "13.5조 흑자에도 부채 130조는 그대로. 잉여현금 2.4조로 갚으면 54년. 그 1원을 정하는 건 정치다."
+      image: bg-govt-building-dark
 ---
 
 <script>
