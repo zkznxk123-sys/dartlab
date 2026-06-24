@@ -76,6 +76,29 @@ def _parsePeriodCol(col: str) -> tuple[int, int] | None:
         return None
 
 
+def _stmtWide(company, stmt: str):
+    """표준 재무 wide(snakeId/항목/period) 1 표 — EDGAR ``_finance`` accessor(companyfacts 직독) 우선.
+
+    ``c.panel("IS")`` 는 Panel 객체 구성 시 disclosure panel(edgar/panel)을 fetch 하는데, panel 없는
+    회사는 snapshot_download 가 60s×4 재시도로 스톨한다. 재무는 companyfacts 만 필요하므로
+    ``company._finance.<stmt>``(= panel 대문자 위임 대상, buildTimeseries 직독)을 직접 호출해 panel
+    로드를 우회한다. ``_finance`` 부재(테스트 mock·비표준 company)면 ``panel(stmt)`` 폴백.
+
+    Returns:
+        pl.DataFrame(snakeId/항목/period) 또는 None(데이터 없음·실패).
+    """
+    fin = getattr(company, "_finance", None)
+    if fin is not None:
+        try:
+            return getattr(fin, stmt, None)
+        except Exception:  # noqa: BLE001 — 그 표만 결측 처리
+            return None
+    try:
+        return company.panel(stmt)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def bakeTerminalFinance(ticker: str, *, company=None) -> pl.DataFrame | None:
     """파사드 panel(IS/BS/CF) → 터미널 ``edgar/financeStmt/{ticker}`` long 행 bake.
 
@@ -124,7 +147,8 @@ def bakeTerminalFinance(ticker: str, *, company=None) -> pl.DataFrame | None:
         Freshness:
             - companyfacts 최신 분기 기준(파사드 panel 시점).
         Dataflow:
-            - companyfacts → Company.panel(wide 표준) → unpivot long → account_id 정확매칭 → FINANCE_COLUMNS.
+            - companyfacts → _finance.<stmt>(buildTimeseries 직독·panel fetch 회피) wide 표준 → unpivot
+              long → account_id 정확매칭 → FINANCE_COLUMNS.
         TargetMarkets:
             - US (EDGAR) 터미널 재무.
     """
@@ -138,11 +162,8 @@ def bakeTerminalFinance(ticker: str, *, company=None) -> pl.DataFrame | None:
     ordCounter = 0
 
     for stmt in _STMTS:
-        try:
-            wide = company.panel(stmt)
-        except Exception:  # noqa: BLE001 — 명세별 격리(개별 표 실패 → 그 표만 skip)
-            continue
-        if not hasattr(wide, "columns") or "항목" not in wide.columns:
+        wide = _stmtWide(company, stmt)
+        if wide is None or not hasattr(wide, "columns") or "항목" not in wide.columns:
             continue
         periodCols = [c for c in wide.columns if c not in ("snakeId", "항목")]
 
