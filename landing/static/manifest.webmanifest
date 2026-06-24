@@ -1,0 +1,15 @@
+{
+  "name": "DartLab — 금융 데이터 터미널",
+  "short_name": "DartLab",
+  "description": "전자공시(DART·EDGAR) 데이터로 시세·재무·공시를 한 화면에 모은 금융 연구 터미널·리포트·블로그.",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050811",
+  "theme_color": "#050811",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
