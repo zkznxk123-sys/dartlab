@@ -21,7 +21,6 @@
 	provideScanDuckDb(loadDartDb);
 	import CloudflareWebAnalytics from '$lib/components/CloudflareWebAnalytics.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
-	import BrandSwitcher from '$lib/components/dev/BrandSwitcher.svelte'; // dev 전용 — 전 표면 색 시도(프로덕션 제거)
 
 	let { children }: { children: Snippet } = $props();
 
@@ -33,7 +32,6 @@
 
 <CloudflareWebAnalytics />
 <CommandPalette />
-<BrandSwitcher />
 {@render children()}
 
 <style>

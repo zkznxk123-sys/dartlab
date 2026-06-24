@@ -3,6 +3,7 @@
 	import { Search, Menu, X, Construction, Heart, Sun, Moon } from 'lucide-svelte';
 	import { themePref, toggleTheme, isContentPath } from '$lib/theme';
 	import GithubIcon from '$lib/components/GithubIcon.svelte';
+	import BrandSwitcher from '$lib/components/dev/BrandSwitcher.svelte'; // 브랜드 색 테마 — SNS 행에 붙는 아이콘
 	// SNS·후원 = dartlab 공통 SSOT(DARTLAB_BRAND_LINKS) + 후원·기여 다이얼로그(터미널과 동일 정본 재사용).
 	import { SupportDialog, DARTLAB_BRAND_LINKS } from '@dartlab/ui-surfaces/terminal';
 	import { page } from '$app/state';
@@ -98,6 +99,7 @@
 					{#if $themePref === 'light'}<Moon class="w-[15px] h-[15px]" />{:else}<Sun class="w-[15px] h-[15px]" />{/if}
 				</button>
 			{/if}
+			<BrandSwitcher />
 			<a href={DARTLAB_BRAND_LINKS.repo} target="_blank" rel="noopener"
 				class="w-7 h-7 rounded-md flex items-center justify-center text-dl-text-dim hover:text-dl-text hover:bg-white/5 transition-colors no-underline"
 				title="GitHub">
