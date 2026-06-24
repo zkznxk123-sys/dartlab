@@ -530,6 +530,12 @@
   /* 관점 탭 = 터미널 .hdrLink(amber active) 그대로. 한 줄, 넘치면 가로 스크롤(스크롤바 숨김). */
   .perspLinks { overflow-x: auto; scrollbar-width: none; }
   .perspLinks::-webkit-scrollbar { display: none; }
+  /* 모바일 — topBar wrap(terminal.css 640) 정렬: brand+SNS=1줄, 검색=2줄(order3·full), 관점탭=3줄(order4·full·가로스크롤).
+     데스크톱 고정폭(300px)·우측정렬은 해제. */
+  @media (max-width: 640px) {
+    .rptHeader .cmdBar { flex: 1 1 100%; }
+    .rptHeader .perspLinks { order: 4; flex: 1 1 100%; margin-left: 0; }
+  }
 
   .main { min-width: 0; }
 

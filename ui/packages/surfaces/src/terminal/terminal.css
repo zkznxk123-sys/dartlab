@@ -138,6 +138,13 @@
 	background: var(--dl-bg-deep); border: 1px solid var(--bdAmber); padding: 1px 6px; border-radius: 2px;
 }
 .dlTerm .topRight { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+/* 모바일 — topBar 3단(brand·검색·SNS)이 한 줄에 안 들어가 가로 overflow 로 깨지던 것: 줄바꿈 허용 + 검색(cmdBar)을
+   전용 줄(full-width)로 내려 윗줄엔 brand+SNS 만. cards·report·terminal 공용(.dlTerm SSOT). 데스크톱(>640) 무변경. */
+@media (max-width: 640px) {
+	.dlTerm .topBar { flex-wrap: wrap; height: auto; flex: 0 0 auto; row-gap: 8px; column-gap: 8px; padding: 8px 10px; }
+	.dlTerm .cmdBar { order: 3; flex: 1 1 100%; }
+	.dlTerm .cmdInput { font-size: 16px; } /* iOS 입력 포커스 줌 방지(16px 미만이면 확대) */
+}
 .dlTerm .langSwitch { display: flex; border: 1px solid var(--bd); border-radius: 3px; overflow: hidden; }
 .dlTerm .langBtn {
 	background: var(--dl-bg-deep); color: #f1f5f9; font-family: var(--cond); font-weight: 600; font-size: 10.5px;
