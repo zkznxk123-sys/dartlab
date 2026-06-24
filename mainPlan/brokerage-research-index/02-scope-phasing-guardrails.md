@@ -11,6 +11,8 @@
 
 P0~P2 = 이 PRD 의 핵심 영토(링크 인덱스). P3 = 차별화의 본체지만 자기 게이트로 분리(인덱스 없이 채점 불가 → 순서 고정).
 
+> **운영 자동화 상세 = [03-operations-automation.md](03-operations-automation.md)** (pipeline stage·cron·증분 manifest·셀렉터 깨짐 감지·freshness·알림). **액션 확대(데이터→자동갱신→헬스→사용자액션→채점→경계) = [04-action-expansion-ladder.md](04-action-expansion-ladder.md)** L0~L5. Phase 와 L 매핑: P1=L0, P2=L1+L2, P2.5=L3, P3=L4, L5=경계.
+
 ## 2. 경계 (다른 영토 — 침범 금지)
 
 - **본문 콘텐츠(PDF·전문) 생산·호스팅** = **영원히 비영토**. 우리는 메타+링크만. (00 §4·§6)

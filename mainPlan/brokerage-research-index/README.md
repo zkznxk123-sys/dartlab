@@ -14,15 +14,19 @@
 - **3 호출 = 1 스키마**: `report_id`(url 해시 PK)·`ticker`·`pub_date` 가 날짜순/종목별/검색을 파생.
 - **관리 SSOT** = `config.py::BROKERS` dict 한 곳(url+selector+type+enabled).
 - **gather 직행 금지** → `tests/_attempts/brokerageIndex/` 졸업게이트부터(5~6개사 + ticker 커버리지 실측).
-- **별도 제3엔진(증권사 거래 API·BYO 토큰 자동투자)** 은 이 PRD 아님 — 경계 포인터만.
+- **운영 자동화** = `dartlab.pipeline` 새 stage 1개 + cron(일 2회) + 증분 manifest. 신규 인프라는 **셀렉터 깨짐 감지(수율 가드)** 하나뿐 — 깨진 증권사 자동 강등·운영자 요약(스크래핑 제품이 죽는 이유를 시스템이 먼저 잡음).
+- **액션 사다리 L0~L5**: 데이터 → 자동갱신 → 운영헬스 → 사용자액션(알림/레일/MCP) → 채점 → (경계)에이전트/거래. L 건너뛰기 금지.
+- **별도 제3엔진(증권사 거래 API·BYO 토큰 자동투자)** 은 이 PRD 아님 — 경계 포인터만(L5).
 
-## 작업 산출 (3문서)
+## 작업 산출 (5문서)
 
 | 파일 | 내용 |
 |---|---|
 | [00-product-prd.md](00-product-prd.md) | 무게중심·비전·문제·**법적 기반**·차별화·NEVER-CLAIM·성공기준 (제품 정본) |
 | [01-architecture-and-schema.md](01-architecture-and-schema.md) | **스키마·폴더구조·관리 SSOT·Query API·재사용 지도** (기술 정본) |
 | [02-scope-phasing-guardrails.md](02-scope-phasing-guardrails.md) | Phase P0~P3·경계(제3엔진·채점레이어·FnGuide)·가드레일 |
+| [03-operations-automation.md](03-operations-automation.md) | **운영 자동화 정본** — pipeline stage·cron·증분·**셀렉터 깨짐 감지(신규)**·freshness·알림 |
+| [04-action-expansion-ladder.md](04-action-expansion-ladder.md) | **액션 확대 사다리 L0~L5** — 데이터→자동갱신→헬스→사용자액션→채점→경계 |
 
 ## 출처
 
