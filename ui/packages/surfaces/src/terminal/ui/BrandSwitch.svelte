@@ -10,12 +10,15 @@
 
 	const hasDoc = typeof document !== 'undefined';
 
-	// 프리셋 = primary(메인 랜딩 지배색)+accent 동시. tokens.css :root[data-brand=...] 와 1:1.
+	// 프리셋 8 = primary(메인 랜딩 지배색)+accent 동시. tokens.css :root[data-brand=...] 와 1:1 (색상환 순).
 	const PRESETS = [
 		{ id: '', name: '핑크', hex: '#ff3f6f' },
+		{ id: 'red', name: '레드', hex: '#ef4444' },
 		{ id: 'amber', name: '앰버', hex: '#fb923c' },
 		{ id: 'gold', name: '골드', hex: '#f5b301' },
+		{ id: 'lime', name: '라임', hex: '#22c55e' },
 		{ id: 'teal', name: '틸', hex: '#2dd4bf' },
+		{ id: 'blue', name: '블루', hex: '#3b82f6' },
 		{ id: 'violet', name: '바이올렛', hex: '#a78bfa' }
 	];
 
@@ -58,6 +61,9 @@
 	}
 	function pickPreset(id: string) {
 		brand = id;
+		// 커스텀 입력도 선택색으로 시작 — 프리셋에서 미세조정 출발점.
+		const p = PRESETS.find((x) => x.id === id);
+		if (p) custom = p.hex;
 		applyAccent();
 		persist();
 	}
@@ -115,11 +121,11 @@
 			<div class="bswHead">브랜드색 — 한 곳에서 전 화면(메인 랜딩 포함) 적용</div>
 			<div class="bswRow">
 				{#each PRESETS as p (p.id)}
-					<button class="bswChip" class:on={brand === p.id} style="--sw:{p.hex}" onclick={() => pickPreset(p.id)}>{p.name}</button>
+					<button class="bswSwatch" class:on={brand === p.id} style="background:{p.hex}" title={p.name} aria-label={p.name} onclick={() => pickPreset(p.id)}></button>
 				{/each}
 			</div>
 			<label class="bswCustom">
-				<span>커스텀</span>
+				<span>커스텀 (선택색에서 시작)</span>
 				<input type="color" value={custom} oninput={(e) => pickCustom(e.currentTarget.value)} />
 			</label>
 			<button class="bswConv" class:on={greenUp} onclick={toggleConv}>
@@ -183,31 +189,25 @@
 	}
 	.bswRow {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 5px;
-	}
-	.bswChip {
-		display: inline-flex;
+		justify-content: space-between;
 		align-items: center;
-		gap: 5px;
-		padding: 3px 8px 3px 6px;
-		border-radius: 6px;
-		font-size: 11px;
-		color: var(--dl-ink, #e8eaef);
-		background: transparent;
-		border: 1px solid var(--dl-line, rgba(255, 255, 255, 0.08));
-		cursor: pointer;
 	}
-	.bswChip::before {
-		content: '';
-		width: 10px;
-		height: 10px;
+	.bswSwatch {
+		width: 22px;
+		height: 22px;
 		border-radius: 50%;
-		background: var(--sw);
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		padding: 0;
+		cursor: pointer;
+		transition: transform 0.1s;
 	}
-	.bswChip.on {
-		border-color: var(--sw);
-		background: color-mix(in srgb, var(--sw) 14%, transparent);
+	.bswSwatch:hover {
+		transform: scale(1.14);
+	}
+	.bswSwatch.on {
+		box-shadow:
+			0 0 0 2px var(--dl-bg-modal, #25272d),
+			0 0 0 3.5px var(--dl-ink, #e8eaef);
 	}
 	.bswCustom {
 		display: flex;

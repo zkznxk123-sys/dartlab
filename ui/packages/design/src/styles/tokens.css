@@ -273,6 +273,30 @@
 	--p-accent-400: #ffce4d;
 	--p-accent-300: #ffe08a;
 }
+:root[data-brand='red'] {
+	--p-red-500: #dc2626;
+	--p-red-500-rgb: 220, 38, 38;
+	--p-accent-500: #ef4444;
+	--p-accent-500-rgb: 239, 68, 68;
+	--p-accent-400: #f87171;
+	--p-accent-300: #fca5a5;
+}
+:root[data-brand='lime'] {
+	--p-red-500: #16a34a;
+	--p-red-500-rgb: 22, 163, 74;
+	--p-accent-500: #22c55e;
+	--p-accent-500-rgb: 34, 197, 94;
+	--p-accent-400: #4ade80;
+	--p-accent-300: #86efac;
+}
+:root[data-brand='blue'] {
+	--p-red-500: #2563eb;
+	--p-red-500-rgb: 37, 99, 235;
+	--p-accent-500: #3b82f6;
+	--p-accent-500-rgb: 59, 130, 246;
+	--p-accent-400: #60a5fa;
+	--p-accent-300: #93c5fd;
+}
 /* 컨벤션 프리셋(강조와 직교, 별도 속성 data-conv) — KR 빨강-up 표면(scan/map/viewer)을 green-up 으로 flip 비교 */
 :root[data-conv='green-up'] {
 	--dl-up: var(--p-green-400);
