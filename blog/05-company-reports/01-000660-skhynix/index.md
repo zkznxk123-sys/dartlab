@@ -62,7 +62,7 @@ carousel:
       2025년 영업이익 47조원.
       2026년 1분기 영업이익률 72%.
       이제 질문은 이 이익이 얼마나 오래 가느냐입니다.
-    image: '000660'
+    image: bg-empty-wafer-question
   - layout: editorialBeat
     kicker: 옛날 이야기
     line: |-
@@ -74,7 +74,7 @@ carousel:
       그리고 SK하이닉스로 이름이 바뀌었습니다.
       부도 위기까지 갔던 회사가
       지금은 한국 증시의 가장 뜨거운 숫자가 됐습니다.
-    image: 000660-waferq
+    image: bg-cheongju-m15x-night
   - layout: editorialStat
     kicker: 2025년
     bigNumber: '47.2'
@@ -83,7 +83,7 @@ carousel:
       영업이익입니다.
       전년보다 두 배 넘게 늘었습니다.
       이 숫자가 주가 이야기의 출발점입니다.
-    image: 000660-wafersig
+    image: bg-computex-wafer-signature
   - layout: editorialStat
     kicker: 2026년 1분기
     bigNumber: '72'
@@ -92,7 +92,7 @@ carousel:
       영업이익률입니다.
       100원을 팔아 72원이 남은 셈입니다.
       메모리 회사에서 흔한 숫자가 아닙니다.
-    image: 000660-dram
+    image: skhynix-dram-chip
   - layout: editorialBeat
     kicker: 왜 이렇게 벌었나
     line: |-
@@ -103,7 +103,7 @@ carousel:
       엔비디아 같은 고객은 더 빠른 메모리를 원합니다.
       하이닉스는 HBM3E와 HBM4를 앞세워
       비싼 가격을 받을 수 있었습니다.
-    image: 000660-computex
+    image: bg-computex-booth-wide
   - layout: editorialBeat
     kicker: 그래서 더 갈까
     line: |-
@@ -114,7 +114,7 @@ carousel:
       그래서 다음 질문은 실적이 좋았느냐가 아닙니다.
       이 초과이익이 아직 끝나지 않았다는
       증거가 남아 있느냐입니다.
-    image: 000660-ddr5
+    image: skhynix-ddr5-mrdimm
   - layout: editorialBeat
     kicker: 첫째
     line: |-
@@ -125,7 +125,7 @@ carousel:
       개발했다는 말보다 중요한 것은
       고객 주문과 출하입니다.
       말보다 납품 일정이 먼저입니다.
-    image: 000660-h5tc
+    image: hynix-hbm-cleanroom
   - layout: editorialBeat
     kicker: 둘째
     line: |-
@@ -135,7 +135,7 @@ carousel:
     sub: |-
       내려가도 천천히 내려가면 이야기는 유지됩니다.
       급하게 꺾이면 시장은 피크를 묻기 시작합니다.
-    image: 000660-wafersig
+    image: hbm-codevelopment-table
   - layout: editorialBeat
     kicker: 셋째
     line: |-
@@ -146,7 +146,7 @@ carousel:
       공장을 늘린 뒤에도 가격이 버티면 강합니다.
       공급이 늘고 가격이 꺾이면
       이익은 생각보다 빨리 식습니다.
-    image: 000660-dram
+    image: hynix-ai-server-memory
   - layout: editorialBeat
     kicker: 마무리
     line: |-
@@ -159,7 +159,7 @@ carousel:
       서버 메모리 가격.
       셋이 버티면 이야기는 이어집니다.
       하나라도 깨지면 질문은 피크로 바뀝니다.
-    image: '000660'
+    image: memory-everywhere-map
 ---
 
 <script>
