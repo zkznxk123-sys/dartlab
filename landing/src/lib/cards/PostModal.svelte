@@ -68,8 +68,14 @@
 				{#if contract?.title}<h2 class="prTitle">{contract.title}</h2>{/if}
 				{#if contract}
 					{#each captionParas(contract.caption) as para (para)}<p class="prPara">{para}</p>{/each}
-					{#if contract.pinnedComment}<p class="prPinned">{contract.pinnedComment}</p>{/if}
 					{#if !contract.caption}<p class="prPara prMuted">캡션이 아직 준비되지 않았습니다.</p>{/if}
+					<!-- 블로그 이어 읽기 — 이 캐러셀의 원문 글(같은 slug=blog [slug]). 제목을 카드로 노출, 새 탭. -->
+					<a class="prBlog" href="{base}/blog/{slug}" target="_blank" rel="noopener">
+						<span class="prBlogIco" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg></span>
+						<span class="prBlogTxt"><small>블로그에서 이어 읽기</small><b>{contract.title ?? contract.name}</b></span>
+						<span class="prBlogArr" aria-hidden="true">↗</span>
+					</a>
+					{#if contract.pinnedComment}<p class="prPinned">{contract.pinnedComment}</p>{/if}
 				{:else}
 					<p class="prPara prMuted">불러오는 중…</p>
 				{/if}
@@ -184,6 +190,70 @@
 	}
 	.prMuted {
 		color: #64748b;
+	}
+	/* 블로그 이어 읽기 CTA — 캡션 아래, 면책 위. 테마색(--dl-accent) 배선(캐러셀 점·재생버튼과 동색). */
+	.prBlog {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		margin: 18px 0 2px;
+		padding: 11px 13px;
+		border: 1px solid rgba(var(--dl-accent-rgb), 0.34);
+		border-radius: 11px;
+		background: rgba(var(--dl-accent-rgb), 0.08);
+		text-decoration: none;
+		transition:
+			border-color 0.15s,
+			background 0.15s,
+			transform 0.12s;
+	}
+	.prBlog:hover {
+		border-color: rgba(var(--dl-accent-rgb), 0.7);
+		background: rgba(var(--dl-accent-rgb), 0.14);
+		transform: translateY(-1px);
+	}
+	.prBlogIco {
+		flex: 0 0 auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+		background: rgba(var(--dl-accent-rgb), 0.16);
+		color: var(--dl-accent);
+	}
+	.prBlogTxt {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+	.prBlogTxt small {
+		font-size: 9.5px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		font-weight: 700;
+		color: var(--dl-accent);
+	}
+	.prBlogTxt b {
+		font-size: 13px;
+		font-weight: 700;
+		line-height: 1.35;
+		color: #e8f0fb;
+		word-break: keep-all;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.prBlogArr {
+		flex: 0 0 auto;
+		margin-left: auto;
+		font-size: 15px;
+		color: var(--dl-accent);
+		opacity: 0.85;
 	}
 	.postClose {
 		position: absolute;
