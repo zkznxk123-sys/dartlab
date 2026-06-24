@@ -144,6 +144,7 @@
 	.dlTerm .topBar { flex-wrap: wrap; height: auto; flex: 0 0 auto; row-gap: 8px; column-gap: 8px; padding: 8px 10px; }
 	.dlTerm .cmdBar { order: 3; flex: 1 1 100%; }
 	.dlTerm .cmdInput { font-size: 16px; } /* iOS 입력 포커스 줌 방지(16px 미만이면 확대) */
+	.dlTerm .ghStars { display: none; } /* 스타수 배지(가장 덜 핵심) 숨김 → brand+SNS 가 한 행에 줄바꿈 없이 들어감 */
 }
 .dlTerm .langSwitch { display: flex; border: 1px solid var(--bd); border-radius: 3px; overflow: hidden; }
 .dlTerm .langBtn {
