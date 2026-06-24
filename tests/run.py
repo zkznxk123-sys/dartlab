@@ -146,7 +146,10 @@ GATES: dict[str, Gate] = {
             "python -X utf8 tests/audit/deprecationAudit.py && "
             "python -X utf8 tests/audit/staleImports.py --check && "
             "python -X utf8 tests/audit/untrustedWrapAudit.py --strict && "
-            "python -X utf8 tests/audit/checkAgentBoundary.py --strict"
+            "python -X utf8 tests/audit/checkAgentBoundary.py --strict && "
+            # 색상 SSOT 가드 — 브랜드색(#ff3f6f/#fb923c/#ec4899/#ea4647) 토큰 우회 하드코딩 회귀 차단(baseline-ratchet).
+            # node 는 CI 러너 기본 제공, 가드는 readdirSync 라 node 버전 무관.
+            "node tests/audit/checkColorSsot.mjs"
         ),
     ),
     "architecture-l0-l15": Gate(
