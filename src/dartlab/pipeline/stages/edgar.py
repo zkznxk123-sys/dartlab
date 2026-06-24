@@ -24,6 +24,88 @@ def _fourQuarters(year: int, quarter: int) -> list[tuple[int, int]]:
     return out
 
 
+def _cikToTicker() -> dict[str, str]:
+    """universe ticker↔CIK 맵 — CIK(zero-pad 10) → ticker(대문자). 부재 시 빈 dict.
+
+    Returns:
+        dict[str, str] — {cik10: ticker}. 한 CIK 다중 ticker 면 첫 행(보통주 우선).
+    """
+    try:
+        from pathlib import Path
+
+        import polars as pl
+
+        import dartlab.config as cfg
+
+        tk = pl.read_parquet(Path(cfg.dataDir) / "edgar" / "tickers.parquet")
+        out: dict[str, str] = {}
+        for row in tk.iter_rows(named=True):
+            cik = str(row.get("cik", "")).strip().zfill(10)
+            ticker = str(row.get("ticker", "")).strip().upper()
+            if cik and ticker and cik not in out:
+                out[cik] = ticker
+        return out
+    except Exception:  # noqa: BLE001 — 맵 부재 → 빈 dict(stmt 발행 skip, raw 빌드는 진행)
+        return {}
+
+
+def _bakeTerminalFinanceStmt(changedFin: list[str], *, upload: bool, token) -> int:
+    """changed-universe CIK 의 companyfacts → 터미널 financeStmt(DART 동형) bake + HF 증분 발행.
+
+    raw companyfacts(edgar/finance)는 백엔드 파사드용. 본 스텝은 파사드 ``Company.panel`` 표준화를
+    빌드타임에 ``edgar/financeStmt/{ticker}.parquet`` 으로 구워 브라우저 터미널이 KR=dart/finance 와
+    동일 reader 로 직독하게 한다(16 카드 동일 배선).
+
+    Args:
+        changedFin: 변경된 "{cik}.parquet" 목록(universe 필터 후).
+        upload: True 면 변경분만 ``edgar/financeStmt`` 로 HF 증분 발행.
+        token: HF 토큰(None=env).
+
+    Returns:
+        int — bake 성공한 회사 수.
+    """
+    if not changedFin:
+        return 0
+    from pathlib import Path
+
+    import dartlab.config as cfg
+    from dartlab.providers.edgar.finance.terminalStmt import bakeTerminalFinance
+
+    cik2tk = _cikToTicker()
+    if not cik2tk:
+        print("[pipeline] edgar financeStmt: ticker 맵 부재 → bake skip", flush=True)
+        return 0
+    outDir = Path(cfg.dataDir) / "edgar" / "financeStmt"
+    outDir.mkdir(parents=True, exist_ok=True)
+    changedStmt: list[str] = []
+    nOk = 0
+    for fn in changedFin:
+        cik = fn.removesuffix(".parquet").strip().zfill(10)
+        ticker = cik2tk.get(cik)
+        if not ticker:
+            continue
+        try:
+            df = bakeTerminalFinance(ticker)
+        except Exception as exc:  # noqa: BLE001 — 개별 회사 실패 격리(나머지 진행)
+            print(f"[pipeline] edgar financeStmt bake 실패({ticker}): {exc}", flush=True)
+            continue
+        if df is None or df.height == 0:
+            continue
+        df.write_parquet(outDir / f"{ticker}.parquet", compression="zstd", statistics=True)
+        changedStmt.append(f"{ticker}.parquet")
+        nOk += 1
+    if changedStmt:
+        from dartlab.pipeline.changed import writeChanged
+
+        writeChanged("edgarFinanceStmt", changedStmt)
+        if upload:
+            from dartlab.pipeline.hfUpload import uploadCategoryToHf
+
+            n = uploadCategoryToHf("edgarFinanceStmt", changedFiles=changedStmt, token=token)
+            print(f"[pipeline] edgar financeStmt HF 발행: {n}개 (universe 변경분)", flush=True)
+    return nOk
+
+
 def _universeCiks() -> set[str]:
     """edgar/finance HF 발행 대상 universe CIK(10-pad) 집합.
 
@@ -109,6 +191,13 @@ def runEdgar(
 
                 n = uploadCategoryToHf("edgar", changedFiles=changedFin, token=token)
                 print(f"[pipeline] edgar finance HF 발행: {n}개 (universe 변경분)", flush=True)
+            # 터미널 financeStmt bake — 변경분 companyfacts → 파사드 표준화 → DART 동형 발행.
+            # raw(위)는 백엔드 파사드용·financeStmt(여기)는 브라우저 터미널 직독용(동일 배선).
+            try:
+                _bakeTerminalFinanceStmt(changedFin, upload=upload, token=token)
+            except Exception as exc:  # noqa: BLE001 — financeStmt bake 실패 격리(raw 발행은 성공 유지)
+                res.report.failures.append(f"financeStmt: {type(exc).__name__}: {exc}")
+                print(f"[pipeline] edgar financeStmt 실패(격리): {exc}", flush=True)
         res.report.ok += 1
     except Exception as exc:  # noqa: BLE001 — bulk 실패 격리(quarterly 진행)
         res.report.err += 1

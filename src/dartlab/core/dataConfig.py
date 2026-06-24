@@ -89,6 +89,15 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "SEC EDGAR 재무 데이터 (companyfacts.zip 벌크 파생)",
         "public": True,
     },
+    "edgarFinanceStmt": {
+        # 터미널 재무 artifact — 파사드 Company.panel(IS/BS/CF) 표준화 산출을 DART dart/finance 동형
+        # long(FINANCE_COLUMNS)으로 bake. 브라우저 터미널이 KR=dart/finance·US=edgar/financeStmt 를
+        # 같은 financeSource reader 로 직독(16 카드 동일 배선). raw edgar/finance(companyfacts)는 백엔드
+        # 파사드용으로 별도 유지. flat: data/edgar/financeStmt/{ticker}.parquet.
+        "dir": "edgar/financeStmt",
+        "label": "SEC EDGAR 터미널 재무 artifact (파사드 표준화 → DART finance 동형, 회사당 flat)",
+        "public": True,
+    },
     "edgarMeta": {
         "dir": "edgar/meta",
         "label": "SEC EDGAR 분기 벌크 메타 (sub/pre/tag)",
