@@ -455,7 +455,11 @@ class TestMarketGuard:
         assert evaluateCompany(_FakeUs()) is None
 
     def test_kr_market_passes_guard(self, monkeypatch):
-        """market='KR' 또는 속성부재(기본 KR) 면 가드 통과 — _getSectorInfo 까지 진입."""
+        """KR/KR하위시장(KOSPI·KOSDAQ)/미지정/비-str(mock) 은 가드 통과 — _getSectorInfo 진입.
+
+        DartCompany.market 은 'KR' 상수지만 일부 mock 은 'KOSPI' 등 KR 하위시장 라벨을 쓴다
+        (test_calcs CreditMockCompany). 이들·비-str mock 을 막으면 KR 평가가 깨진다(회귀).
+        """
         from dartlab.credit import engine
 
         def _boom(company):
@@ -463,12 +467,21 @@ class TestMarketGuard:
 
         monkeypatch.setattr(engine, "_getSectorInfo", _boom)
 
-        class _FakeKr:  # market 명시 KR
+        class _FakeKr:
             market = "KR"
+
+        class _FakeKospi:  # KR 하위시장 라벨(test_calcs mock 형)
+            market = "KOSPI"
+
+        class _FakeKosdaq:
+            market = "KOSDAQ"
 
         class _FakeDefault:  # market 미정의 → getattr 기본 'KR'
             pass
 
-        for fake in (_FakeKr(), _FakeDefault()):
+        class _FakeMock:  # 비-str market(MagicMock 류) → KR 로 통과
+            market = object()
+
+        for fake in (_FakeKr(), _FakeKospi(), _FakeKosdaq(), _FakeDefault(), _FakeMock()):
             with pytest.raises(RuntimeError, match="guard-passed"):
                 engine.evaluateCompany(fake)

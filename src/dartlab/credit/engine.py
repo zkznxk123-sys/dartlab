@@ -285,8 +285,10 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     # ⛔ 시장 가드 — 등급표·임계값은 KR(WICS 업종·한국 회계) calibration 전용.
     # US(EDGAR) 회사를 그대로 태우면 sectorThresholds 가 sector=None→_defaultThresholds(KR)
     # 를 US-GAAP 숫자에 먹여 non-None *가짜 등급* 을 낸다(확신 오정렬). _revenueSelect 의
-    # 정직 None 과 대칭화 — 미검증 시장은 등급 미산출(None). US calibration = Slice2.
-    if str(getattr(company, "market", "KR") or "KR").upper() != "KR":
+    # 정직 None 과 대칭화 — 비-KR 시장은 등급 미산출(None). US calibration = Slice2.
+    # KR 하위시장(KOSPI/KOSDAQ/KONEX)·미지정·비-str(mock)은 KR 로 통과 — US/JP 등 외화회계만 차단.
+    _market = getattr(company, "market", "KR")
+    if isinstance(_market, str) and _market.strip().upper() not in ("", "KR", "KOSPI", "KOSDAQ", "KONEX"):
         return None
 
     sector, industryGroup = _getSectorInfo(company)
