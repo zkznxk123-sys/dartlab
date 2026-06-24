@@ -333,22 +333,25 @@
 			cancelled = true;
 		};
 	});
-	// 글랜스 한 줄 — series 최신점 상위 카테고리(비중%). 링크 아닌 진짜 요약.
-	const shortCat = (n: string): string => n.replace(/\s*및\s*/g, '·').replace(/(매입액|사용액|비용|비$)/g, '').replace(/([a-z])([A-Z])/g, '$1 $2').trim().slice(0, 7);
-	const glanceOf = (s: NoteSeriesBundle['cost']): string | null => {
+	// 글랜스 = 비율 적층 막대(바로 보임) + 상위 칩. series 최신점 비중%. design 카테고리 팔레트 색.
+	const NOTE_PAL = ['var(--dl-cat-start)', 'var(--dl-cat-operation)', 'var(--dl-cat-engines)', 'var(--dl-cat-runtime)', 'var(--dl-cat-recipes)', 'var(--dl-accent)', 'var(--up)', 'var(--warn)'];
+	const niceCat = (n: string): string => {
+		const t = n.replace(/\s*및\s*/g, '·').replace(/(매입액|사용액|비용|비$)/g, '').trim();
+		if (/^[A-Za-z]{1,4}$/.test(t)) return t.toUpperCase();
+		return t.replace(/([a-z])([A-Z])/g, '$1 $2').slice(0, 8);
+	};
+	const barSegsOf = (s: NoteSeriesBundle['cost']): { segs: { name: string; pct: number; color: string }[] } | null => {
 		const pts = s?.points;
 		if (!pts || !pts.length || !s) return null;
 		const last = pts[pts.length - 1]!;
-		return s.categories
-			.map((name, i) => ({ name, pct: last.shares[i] ?? 0 }))
-			.filter((r) => r.name !== '기타' && r.pct > 0)
-			.sort((a, b) => b.pct - a.pct)
-			.slice(0, 3)
-			.map((r) => `${shortCat(r.name)} ${r.pct.toFixed(0)}%`)
-			.join(' · ');
+		const segs = s.categories
+			.map((name, i) => ({ name, pct: last.shares[i] ?? 0, color: name === '기타' ? 'var(--dimmer)' : (NOTE_PAL[i % NOTE_PAL.length] ?? 'var(--dim)') }))
+			.filter((r) => r.pct > 0.05);
+		return segs.length ? { segs } : null;
 	};
-	const costGlance = $derived(glanceOf(noteBundle?.cost ?? null));
-	const segGlance = $derived(glanceOf(noteBundle?.segment ?? null));
+	const costBar = $derived(barSegsOf(noteBundle?.cost ?? null));
+	const segBar = $derived(barSegsOf(noteBundle?.segment ?? null));
+	const topChips = (segs: { name: string; pct: number; color: string }[]): { name: string; pct: number; color: string }[] => segs.filter((s) => s.name !== '기타').sort((a, b) => b.pct - a.pct).slice(0, 3);
 	// 최신 연간 현금성자산 (BS 'cash', 조 단위) → 원 환산. 단기 상환벽 신호의 분모.
 	const cashLatestWon = $derived.by<number | null>(() => {
 		const av = finBundle?.views.annual;
@@ -687,13 +690,21 @@
 		{:else if notesState === 'error'}
 			<div class="storyEmpty" role="status">{lang === 'en' ? 'failed to load notes' : '주석 불러오지 못함'}</div>
 		{:else}
-			{#if costGlance}
-				<div class="noteGlance"><span class="ngLabel">{lang === 'en' ? 'cost' : '비용'}</span> {costGlance}</div>
+			{#if costBar}
+				<div class="noteSeg">
+					<div class="noteSegHd"><span class="ngLabel">{lang === 'en' ? 'cost' : '비용'}</span></div>
+					<div class="noteBar">{#each costBar.segs as s (s.name)}<i style={`width:${s.pct}%;background:${s.color}`} title={`${niceCat(s.name)} ${s.pct.toFixed(0)}%`}></i>{/each}</div>
+					<div class="noteKeys">{#each topChips(costBar.segs) as s (s.name)}<span><i style={`background:${s.color}`}></i>{niceCat(s.name)} {s.pct.toFixed(0)}</span>{/each}</div>
+				</div>
 			{/if}
-			{#if segGlance}
-				<div class="noteGlance"><span class="ngLabel">{lang === 'en' ? 'seg' : '부문'}</span> {segGlance}</div>
+			{#if segBar}
+				<div class="noteSeg">
+					<div class="noteSegHd"><span class="ngLabel">{lang === 'en' ? 'seg' : '부문'}</span></div>
+					<div class="noteBar">{#each segBar.segs as s (s.name)}<i style={`width:${s.pct}%;background:${s.color}`} title={`${niceCat(s.name)} ${s.pct.toFixed(0)}%`}></i>{/each}</div>
+					<div class="noteKeys">{#each topChips(segBar.segs) as s (s.name)}<span><i style={`background:${s.color}`}></i>{niceCat(s.name)} {s.pct.toFixed(0)}</span>{/each}</div>
+				</div>
 			{/if}
-			{#if !costGlance && !segGlance}
+			{#if !costBar && !segBar}
 				<div class="noteGlance dim">{lang === 'en' ? 'detail ▸' : '상세보기 ▸'}</div>
 			{/if}
 		{/if}
