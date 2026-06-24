@@ -47,12 +47,11 @@
 	<div class="frame">
 		{#if cover}<CardSlide card={cover} {rt} />{/if}
 		<div class="badge">{name}{code ? ` · ${code}` : ''}</div>
-		{#if base}
-			<div class="brand">
-				<img src="{base}/avatar.webp" alt="" width="30" height="30" />
-				<span class="bWrap"><b>dartlab</b><small>COMPANY STORY BY TICKER</small></span>
-			</div>
-		{/if}
+		<!-- dartlab 서명 — base 무관 항상 노출(dev=퍼블릭 기준). avatar.webp 는 정적(/avatar.webp), base 있으면 접두. -->
+		<div class="brand">
+			<img src="{base}/avatar.webp" alt="" width="30" height="30" />
+			<span class="bWrap"><b>dartlab</b><small>COMPANY STORY BY TICKER</small></span>
+		</div>
 		<span class="hint">카드 열기</span>
 	</div>
 </button>
@@ -82,6 +81,10 @@
 	.thumb:focus-visible .frame {
 		transform: translateY(-3px);
 		box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+	}
+	/* 표지 본문 하단에 dartlab 서명 띠(56px) 확보 — 헤드라인/설명이 좌하단 브랜드와 겹치지 않게(서명은 본문 아래로). */
+	.frame :global(.content) {
+		padding-bottom: 56px;
 	}
 	.badge {
 		position: absolute;
