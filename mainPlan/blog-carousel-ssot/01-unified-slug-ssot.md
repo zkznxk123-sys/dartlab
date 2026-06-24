@@ -3,6 +3,13 @@
 > **상태**: 설계 확정·구현 착수. 00-prd 의 code-키 1:1 계약을 **글(=회사+주제) 슬러그 키 1:N** 로 전환하고, 손글 SSOT 를 `sns/carousels/E*` 분리본에서 **블로그 글 frontmatter `carousel:` 단일 계약**으로 통합.
 > **승인**: 운영자 2026-06-24 — "ssot를 어떻게 둘것인가 / 블로그 산문도 같은회사 다른내용으로 발행할수있는데 / 원래는 같이 가려고 / 해라 운영까지 완벽하게."
 
+## ⭐ as-built 정정 (구현 최종 — 본문 설계 대비 변경)
+> 본문(아래)은 설계 기록. 구현 중 운영자 피드백으로 정정된 **최종 상태**는 이것:
+1. **serve = 단일 파일** `carousels/index.json = {posts:[전 계약(슬라이드까지)]}`. per-slug `{slug}.json` **폐기**(운영자 "또 인덱스 필요하잖아 비효율" 반영) — 피드·상세 **1회 fetch**, 별도 인덱스 없음, 발행 시 옛 carousels/*.json 전부 삭제. 커밋 `34fce4eb5`.
+2. **도구 = `blog/_scripts/`** (tracked·blog 도메인): `build_carousel_contracts.py`(발행)·`migrate_carousels_to_blog.py`(1회 이관·완료)·`test_carousel_contracts.py`. (옛 sns/scripts gitignore 위치에서 이동.)
+3. **★ 운영 절차서 = [`blog/_scripts/CARDS.md`](../../blog/_scripts/CARDS.md)** — 앞으로 카드 배포는 이거 따라. (블로그 frontmatter `carousel:` 쓰기 → audit → `build_carousel_contracts.py` 발행. 데이터만 올림·사이트 무-rebuild.)
+4. **발행 완료** — hfMedia `carousels/index.json` 31편 라이브(2026-06-24). 마이그레이션 31편(27 자동 + 4 토픽배치) blog frontmatter 주입 완료. landing 코드 push(공개 배포)만 운영자 눈검수 대기.
+
 ## Context (왜 — 00-prd 대비 정정)
 
 00-prd 가 만든 라이브 캐러셀은 두 결함이 있다(코드 대조 확인):
