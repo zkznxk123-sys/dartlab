@@ -163,7 +163,10 @@
 <style>
 	/* 자기완결 모달 크롬 — terminal.css 없는 셸(landing 헤더 등)에서도 동작하도록 베이스 포함(var 폴백 필수).
 	   터미널 안에선 global terminal.css 와 값 동일(중복 무해). */
-	.scrimWrap { position: fixed; inset: 0; z-index: 200; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
+	/* 호스트(라이트/다크) 테마와 무관하게 모달은 자기 다크 팔레트로 고정 — 랜딩 라이트모드가 --dl-bg-raised·
+	   --dl-ink 만 라이트로 덮고 --dl-bg(칩·후원박스)는 다크 폴백이라 흰배경+검은박스로 깨지던 것 차단. 값은
+	   terminal.css 다크와 동일(터미널 안에선 재선언=무해). amber=accent(브랜드색 추종). */
+	.scrimWrap { position: fixed; inset: 0; z-index: 200; background: rgba(4, 7, 13, 0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; --dl-bg: #0a0e16; --dl-bg-raised: #0e141f; --dl-ink: #e2e8f0; --dl-ink-mute: #8a93a3; --dl-ink-dim: #5b6473; --dl-line: #1b2130; --dl-line-strong: #2a3142; --amber: var(--dl-accent); }
 	.scrModal { width: min(960px, 96vw); max-height: 88vh; display: flex; flex-direction: column; background: var(--dl-bg-raised, #0e141f); border: 1px solid var(--dl-line-strong, #2a3142); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); overflow: hidden; font-family: var(--dl-font-ui, 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif); color: var(--dl-ink, #e2e8f0); }
 	.scrHead { display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--dl-line, #1b2130); }
 	.scrTitle { font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-weight: 700; font-size: 12px; letter-spacing: 0.14em; color: var(--amber, var(--amber)); text-transform: uppercase; }
@@ -172,7 +175,9 @@
 
 	/* 좁은 편지형 — 폭만 560 으로 좁힘(.scrModal 뒤 선언 → 우선) */
 	.supModal { width: min(560px, 94vw); }
-	.supBody { padding: 16px 18px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+	/* flex:1+min-height:0 — 88vh 모달 안에서 본문이 줄어들어 내부 스크롤되게(헤더 고정). 없으면 본문이
+	   콘텐츠 높이로 안 줄고 모달 overflow:hidden 에 잘려 헤더까지 밀리며 클립되던 것 교정. */
+	.supBody { flex: 1 1 auto; min-height: 0; padding: 16px 18px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
 
 	.supHero { display: flex; gap: 12px; align-items: flex-start; }
 	.supHero picture img { border-radius: 50%; flex: 0 0 auto; }
