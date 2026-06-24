@@ -1220,6 +1220,8 @@
 .dlTerm .mrColConf { font-family: var(--cond); font-size: 8px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
 .dlTerm .mrColDir { display: flex; gap: 8px; font-family: var(--cond); font-size: 10px; color: var(--dim); }
 .dlTerm .mrColQuad { font-family: var(--cond); font-size: 9.5px; font-weight: 700; color: var(--amberDim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlTerm .mrColAssets { display: flex; flex-wrap: wrap; gap: 1px 7px; font-family: var(--cond); font-size: 9px; line-height: 1.35; margin-top: 1px; }
+.dlTerm .mrColAssets span { white-space: nowrap; }
 .dlTerm .mrEmpty { font-family: var(--cond); font-size: 10px; color: var(--dimmer); padding: 8px 4px; }
 /* 다이얼로그 자산 칩 (mrAssetsBig 에서 사용) */
 .dlTerm .mrAsset { font-family: var(--cond); font-size: 10px; padding: 2px 7px; border: 1px solid var(--bd); border-radius: 9px; display: inline-flex; align-items: center; gap: 4px; color: var(--dim); }
