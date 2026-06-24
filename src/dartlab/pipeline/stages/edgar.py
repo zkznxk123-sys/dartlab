@@ -24,6 +24,32 @@ def _fourQuarters(year: int, quarter: int) -> list[tuple[int, int]]:
     return out
 
 
+def _universeCiks() -> set[str]:
+    """edgar/finance HF 발행 대상 universe CIK(10-pad) 집합.
+
+    HF 는 디렉터리당 10,000 파일 한도가 있어 전 SEC filer(~17k)를 flat 으로 못 올린다. panel 과
+    동일하게 *상장 universe*(sp500 + Nasdaq/NYSE/CBOE)로 scope — 터미널 표시 종목 전부 커버하며
+    한도 밑(~6k). 비-universe filer 는 로컬엔 변환돼 있고(백엔드 직독) HF 미러만 제외.
+
+    Returns:
+        set[str] — universe CIK(zero-pad 10). tickers/universe 부재 시 빈 set(상위가 발행 skip).
+    """
+    try:
+        from pathlib import Path
+
+        import polars as pl
+
+        import dartlab.config as cfg
+        from dartlab.pipeline.stages.edgarPanel import _priorityTickers
+
+        uni = {str(t).upper() for t in _priorityTickers()}
+        tk = pl.read_parquet(Path(cfg.dataDir) / "edgar" / "tickers.parquet")
+        hit = tk.filter(pl.col("ticker").cast(pl.Utf8).str.to_uppercase().is_in(list(uni)))
+        return {str(c).strip().zfill(10) for c in hit["cik"].to_list()}
+    except Exception:  # noqa: BLE001 — universe 산출 실패 → 빈 set(발행 skip, 빌드는 진행)
+        return set()
+
+
 def runEdgar(
     *, category: str = "edgar", mode: PipelineMode = "recent", codes=None, upload: bool = True, token=None
 ) -> StageResult:
@@ -70,14 +96,19 @@ def runEdgar(
         print(f"[pipeline] edgar convert: {stat}", flush=True)
         changedFin = stat.get("changed") or []
         if changedFin:
+            # HF 디렉터리당 10k 파일 한도 + panel 과 동일 scope 일관 → universe(상장 universe)만 발행.
+            # 비-universe(무명·상폐) filer 는 로컬엔 있으나(백엔드 _loadFacts 직독) HF 미러 제외.
+            uniCiks = _universeCiks()
+            if uniCiks:
+                changedFin = [f for f in changedFin if f.removesuffix(".parquet") in uniCiks]
             from dartlab.pipeline.changed import writeChanged
 
             writeChanged("edgar", changedFin)
-            if upload:
+            if upload and changedFin:
                 from dartlab.pipeline.hfUpload import uploadCategoryToHf
 
                 n = uploadCategoryToHf("edgar", changedFiles=changedFin, token=token)
-                print(f"[pipeline] edgar finance HF 발행: {n}개 (변경분)", flush=True)
+                print(f"[pipeline] edgar finance HF 발행: {n}개 (universe 변경분)", flush=True)
         res.report.ok += 1
     except Exception as exc:  # noqa: BLE001 — bulk 실패 격리(quarterly 진행)
         res.report.err += 1
