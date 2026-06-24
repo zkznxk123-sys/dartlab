@@ -1210,23 +1210,23 @@
 /* ───────── 거시 국면 (MacroRegimePanel 글랜스 + MacroRegimeDialog 상세) ───────── */
 /* 좌측 최상단 글랜스 — 콘텐츠 높이(판정 1줄+근거+확신도). 산업/공시 패널과 달리 고정높이 미강제. */
 .dlTerm .colL > .panel.eMacro { flex: 0 0 auto; }
-.dlTerm .mrPanel { display: flex; flex-direction: column; gap: 3px; }
-.dlTerm .mrLine { display: flex; align-items: baseline; gap: 6px; font-family: var(--cond); font-size: 10.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dlTerm .mrPhase { font-weight: 800; font-size: 14px; letter-spacing: 0.3px; }
-.dlTerm .mrConf { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
-.dlTerm .mrQuad { color: var(--amberDim); font-weight: 700; }
-.dlTerm .mrDim { color: var(--dim); }
-.dlTerm .mrDimmer { color: var(--dimmer); }
-.dlTerm .mrSecLbl { color: var(--dimmer); text-transform: uppercase; font-size: 9px; letter-spacing: 0.4px; }
-.dlTerm .mrW { font-weight: 700; font-size: 9px; letter-spacing: 0.3px; min-width: 20px; }
-.dlTerm .mrWv { color: var(--txt); overflow: hidden; text-overflow: ellipsis; }
+/* 좌측 글랜스 — 한국 | 미국 세로 2분할. 각 칸: 국면·확신도·방향·사분면. */
+.dlTerm .mrSplit { display: grid; grid-template-columns: 1fr 1fr; }
+.dlTerm .mrCol { display: flex; flex-direction: column; gap: 2px; padding: 0 7px; min-width: 0; }
+.dlTerm .mrCol + .mrCol { border-left: 1px solid var(--bd); }
+.dlTerm .mrColHd { font-family: var(--cond); font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--dimmer); }
+.dlTerm .mrColPhaseRow { display: flex; align-items: baseline; gap: 5px; }
+.dlTerm .mrColPhase { font-family: var(--cond); font-weight: 800; font-size: 15px; letter-spacing: 0.3px; }
+.dlTerm .mrColConf { font-family: var(--cond); font-size: 8px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.4px; }
+.dlTerm .mrColDir { display: flex; gap: 8px; font-family: var(--cond); font-size: 10px; color: var(--dim); }
+.dlTerm .mrColQuad { font-family: var(--cond); font-size: 9.5px; font-weight: 700; color: var(--amberDim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dlTerm .mrEmpty { font-family: var(--cond); font-size: 10px; color: var(--dimmer); padding: 8px 4px; }
 /* 다이얼로그 자산 칩 (mrAssetsBig 에서 사용) */
 .dlTerm .mrAsset { font-family: var(--cond); font-size: 10px; padding: 2px 7px; border: 1px solid var(--bd); border-radius: 9px; display: inline-flex; align-items: center; gap: 4px; color: var(--dim); }
 .dlTerm .mrAsset b { font-family: var(--mono); font-weight: 700; }
 
 /* 다이얼로그 — 판정 + 모델 타일 + 고밀도 차트 */
-.dlTerm .scrModal.mrModal { width: min(1120px, 96vw); }
+.dlTerm .scrModal.mrModal { width: min(860px, 96vw); max-height: 94vh; }
 .dlTerm .mrTabs { display: flex; gap: 0; margin-left: 14px; }
 .dlTerm .mrTab { font-family: var(--cond); font-size: 10px; font-weight: 700; letter-spacing: 0.6px; padding: 3px 11px; background: var(--dl-bg-deep); border: 1px solid var(--bd); color: var(--dim); cursor: pointer; text-transform: uppercase; }
 .dlTerm .mrTab:first-child { border-radius: 3px 0 0 3px; }
@@ -1235,13 +1235,8 @@
 .dlTerm .mrBody { padding: 12px 14px 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 .dlTerm .mrTop { display: grid; gap: 12px; }
 .dlTerm .mrTop.two { grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); align-items: stretch; }
-/* 근거 차트 — 4테마 한 행(4열)으로 스크롤 없이 한 화면. finMini(재무 SSOT) 카드 크롬 유지, 열수만 재정의. */
-.dlTerm .finFsGrid.mrCharts4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.dlTerm .finFsGrid.mrCharts4 .finMini { padding: 6px 6px 5px; }
-.dlTerm .finFsGrid.mrCharts4 .mfcTitle { font-size: 11px; }
-.dlTerm .finFsGrid.mrCharts4 .mfcVal { font-size: 11.5px; }
-.dlTerm .finFsGrid.mrCharts4 .mfcLg { font-size: 8.5px; }
-.dlTerm .finFsGrid.mrCharts4 .mfcAx { font-size: 6px; }
+/* 근거 차트 — 4테마 2×2. finMini(재무 SSOT) 카드 크롬·폰트 유지(폭 ~410px = 재무와 동일), 2열로만 재정의. */
+.dlTerm .finFsGrid.mrCharts2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .dlTerm .mrSec { border: 1px solid var(--bd); border-radius: 5px; background: var(--panel); padding: 10px 12px; }
 .dlTerm .mrSecHd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .dlTerm .mrSecTitle { font-family: var(--cond); font-weight: 700; font-size: 11px; letter-spacing: 1px; color: var(--amberDim); text-transform: uppercase; }
@@ -1262,7 +1257,7 @@
 .dlTerm .mrTransPct, .dlTerm .mrTransSig { font-size: 9.5px; color: var(--dim); }
 .dlTerm .mrAssetsBig { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .dlTerm .mrAssetsBig .mrAsset { font-size: 10px; padding: 2px 7px; }
-.dlTerm .mrTiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 7px; }
+.dlTerm .mrTiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .dlTerm .mrTile { border: 1px solid var(--bd); border-radius: 4px; background: var(--dl-bg-deep); padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; }
 .dlTerm .mrTile.off { opacity: 0.72; }
 .dlTerm .mrTile.na { opacity: 0.42; }

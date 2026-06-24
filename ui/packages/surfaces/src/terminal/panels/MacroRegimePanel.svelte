@@ -1,8 +1,8 @@
 <script lang="ts">
-	// 거시 국면 — 좌측 최상단 글랜스 (판정 + 근거 + 확신도). 한 줄씩 간결.
-	// 데이터 = buildMacroGlanceView(macro).regime (macro.json 라이브). 깊이는 다이얼로그.
+	// 거시 국면 — 좌측 최상단 글랜스. 한국 | 미국 세로 2분할로 두 시장 국면을 동시에.
+	// 데이터 = buildMacroGlanceView(macro).regime (macro.json 라이브). 깊이·근거·차트는 다이얼로그.
 	import type { Lang } from '../lib/types';
-	import type { RegimeQuadrantView } from '../lib/macroLens';
+	import type { RegimeQuadrantView, RegimeMarketView } from '../lib/macroLens';
 
 	interface Props {
 		regime: RegimeQuadrantView;
@@ -11,10 +11,14 @@
 	let { regime, lang }: Props = $props();
 	const T = (kr: string, en: string): string => (lang === 'en' ? en : kr);
 
-	const primary = $derived(regime.markets.find((m) => m.market === 'KR') ?? regime.markets[0] ?? null);
-	const secondary = $derived(regime.markets.find((m) => m.market === 'US') ?? null);
-	const ow = $derived(primary ? primary.assets.filter((a) => a.tone === 'ow') : []);
-	const uw = $derived(primary ? primary.assets.filter((a) => a.tone === 'uw') : []);
+	const kr = $derived(regime.markets.find((m) => m.market === 'KR') ?? null);
+	const us = $derived(regime.markets.find((m) => m.market === 'US') ?? null);
+	const cols = $derived(
+		[
+			{ m: kr, label: T('한국', 'KR') },
+			{ m: us, label: T('미국', 'US') }
+		].filter((c): c is { m: RegimeMarketView; label: string } => !!c.m)
+	);
 
 	function phaseTone(phase: string): string {
 		const p = (phase || '').toLowerCase();
@@ -24,29 +28,24 @@
 		return 'tNeu';
 	}
 	const arrow = (s: string): string => (/(ris|up|상승|확장|↑)/i.test(s) ? '↑' : /(fall|down|하락|둔화|↓)/i.test(s) ? '↓' : '→');
-	const names = (arr: { labelKr: string; labelEn: string }[]): string => arr.map((a) => (lang === 'en' ? a.labelEn : a.labelKr)).join('·');
 </script>
 
-{#if primary}
-	<div class="mrPanel">
-		<div class="mrLine">
-			<span class={'mrPhase ' + phaseTone(primary.phase)}>{primary.phaseLabel || primary.phase}</span>
-			{#if primary.confidence}<span class="mrConf">{primary.confidence}</span>{/if}
-		</div>
-		<div class="mrLine mrDim">
-			{#if primary.quadrantLabel}<span class="mrQuad">{primary.quadrantLabel}</span>{/if}
-			{#if primary.growth}<span>{T('성장', 'growth')} {arrow(primary.growth)}</span>{/if}
-			{#if primary.inflation}<span>{T('물가', 'infl')} {arrow(primary.inflation)}</span>{/if}
-		</div>
-		{#if ow.length}<div class="mrLine"><span class="mrW tUp">{T('확대', 'OW')}</span><span class="mrWv">{names(ow)}</span></div>{/if}
-		{#if uw.length}<div class="mrLine"><span class="mrW tDn">{T('축소', 'UW')}</span><span class="mrWv">{names(uw)}</span></div>{/if}
-		{#if secondary}
-			<div class="mrLine mrDim">
-				<span class="mrSecLbl">{T('미국', 'US')}</span>
-				<span class={phaseTone(secondary.phase)}>{secondary.phaseLabel || secondary.phase}</span>
-				{#if secondary.confidence}<span class="mrDimmer">{secondary.confidence}</span>{/if}
+{#if cols.length}
+	<div class="mrSplit">
+		{#each cols as c (c.label)}
+			<div class="mrCol">
+				<div class="mrColHd">{c.label}</div>
+				<div class="mrColPhaseRow">
+					<span class={'mrColPhase ' + phaseTone(c.m.phase)}>{c.m.phaseLabel || c.m.phase}</span>
+					{#if c.m.confidence}<span class="mrColConf">{c.m.confidence}</span>{/if}
+				</div>
+				<div class="mrColDir">
+					{#if c.m.growth}<span>{T('성장', 'G')} {arrow(c.m.growth)}</span>{/if}
+					{#if c.m.inflation}<span>{T('물가', 'P')} {arrow(c.m.inflation)}</span>{/if}
+				</div>
+				{#if c.m.quadrantLabel}<div class="mrColQuad">{c.m.quadrantLabel}</div>{/if}
 			</div>
-		{/if}
+		{/each}
 	</div>
 {:else}
 	<div class="mrEmpty">{T('국면 데이터 미산출', 'no regime data')}</div>
