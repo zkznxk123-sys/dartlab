@@ -64,7 +64,7 @@
 			{#if isDashboard}
 				<span
 					class="hidden sm:inline-flex items-center gap-1.5 ml-2 px-3 h-6 rounded-md text-[11px] font-semibold tracking-tight whitespace-nowrap"
-					style="background: rgba(251,146,60,.12); color: #fb923c; border: 1px solid rgba(251,146,60,.4);"
+					style="background: rgba(var(--dl-accent-rgb), .12); color: var(--dl-accent); border: 1px solid rgba(var(--dl-accent-rgb), .4);"
 					title="이 페이지는 개발 중 — 데이터·기능 검증 중, 정확성 보장 안 함"
 				>
 					<Construction class="w-3 h-3" />

@@ -120,7 +120,7 @@
 		border-color: rgba(248, 113, 113, 0.22);
 	}
 	.rule.public {
-		border-color: rgba(251, 146, 60, 0.32);
+		border-color: rgba(var(--dl-accent-rgb), 0.32);
 	}
 	.flow-row {
 		display: grid;
@@ -134,7 +134,7 @@
 	}
 	.flow-key,
 	.roll-index {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-family: monospace;
 		font-size: 11px;
 		font-weight: 700;

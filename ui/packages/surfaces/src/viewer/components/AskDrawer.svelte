@@ -951,13 +951,13 @@
 	.ob-guide-toggle:hover { color: #94a3b8; }
 	.ollama-on { display: inline-flex; align-items: center; gap: 5px; color: #34d399; font-size: 11px; }
 	.ollama-warn { color: #94a3b8; font-size: 11.5px; line-height: 1.55; text-align: center; }
-	.ollama-diag { color: #fdba74; font-size: 10.5px; line-height: 1.5; text-align: center; }
+	.ollama-diag { color: var(--dl-accent-light); font-size: 10.5px; line-height: 1.5; text-align: center; }
 	.retry {
 		padding: 5px 12px;
 		border: 1px solid rgba(var(--amber-rgb), 0.4);
 		border-radius: 7px;
 		background: rgba(var(--amber-rgb), 0.08);
-		color: #fdba74;
+		color: var(--dl-accent-light);
 		font: inherit;
 		font-size: 11px;
 		font-weight: 600;

@@ -815,7 +815,7 @@
 		color: #cbd5e1;
 	}
 	.add-hint b {
-		color: #fdba74;
+		color: var(--dl-accent-light);
 		font-weight: 700;
 	}
 	.add-eg {
@@ -883,7 +883,7 @@
 		color: #cbd5e1;
 	}
 	.cmp-hint b {
-		color: #fdba74;
+		color: var(--dl-accent-light);
 		font-weight: 700;
 	}
 	.cmp-hint-x {

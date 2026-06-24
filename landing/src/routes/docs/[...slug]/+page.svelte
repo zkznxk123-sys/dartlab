@@ -47,7 +47,7 @@
 	}
 
 	.redirect-page a {
-		color: #fb923c;
+		color: var(--dl-accent);
 		text-decoration: underline;
 		margin: 0 0.25rem;
 	}

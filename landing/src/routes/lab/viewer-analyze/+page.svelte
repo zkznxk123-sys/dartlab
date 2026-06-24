@@ -416,7 +416,7 @@
 	}
 	.viewer-link {
 		justify-self: end;
-		color: #fb923c;
+		color: var(--dl-accent);
 	}
 	.company-slot {
 		min-width: 0;
@@ -488,7 +488,7 @@
 		outline: none;
 	}
 	.querybox input:focus {
-		border-color: #fb923c;
+		border-color: var(--dl-accent);
 	}
 	button {
 		font: inherit;
@@ -516,9 +516,9 @@
 	.samples button.active,
 	.view-controls button.active,
 	.fin-kinds button.active {
-		border-color: rgba(251, 146, 60, 0.55);
-		color: #fb923c;
-		background: rgba(251, 146, 60, 0.09);
+		border-color: rgba(var(--dl-accent-rgb), 0.55);
+		color: var(--dl-accent);
+		background: rgba(var(--dl-accent-rgb), 0.09);
 	}
 	.fin-kinds .run {
 		margin-left: auto;
@@ -586,7 +586,7 @@
 		text-transform: uppercase;
 	}
 	.panel-title span {
-		color: #fb923c;
+		color: var(--dl-accent);
 	}
 	.group + .group {
 		margin-top: 12px;
@@ -615,7 +615,7 @@
 		font-size: 12px;
 	}
 	.constraint-head strong {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-size: 14px;
 	}
 	.constraint-head small {
@@ -644,7 +644,7 @@
 		border-color: rgba(248, 113, 113, 0.4);
 	}
 	.hit:hover:not(.fin) {
-		border-color: rgba(251, 146, 60, 0.55);
+		border-color: rgba(var(--dl-accent-rgb), 0.55);
 	}
 	.hit-head {
 		display: flex;
@@ -655,7 +655,7 @@
 		font-size: 10px;
 	}
 	.hit-head span:not(.badge) {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-weight: 700;
 		font-size: 12px;
 	}
@@ -751,7 +751,7 @@
 		width: 24px;
 		height: 24px;
 		border: 2px solid #1e2433;
-		border-top-color: #fb923c;
+		border-top-color: var(--dl-accent);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}

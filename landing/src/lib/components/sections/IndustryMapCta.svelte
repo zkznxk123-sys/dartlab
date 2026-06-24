@@ -36,7 +36,7 @@
 						<span class="bubble" style="width:72px;height:72px;background:#f97316;left:34%;top:22%"></span>
 						<span class="bubble" style="width:48px;height:48px;background:#10b981;left:58%;top:10%"></span>
 						<span class="bubble" style="width:60px;height:60px;background:#8b5cf6;left:70%;top:48%"></span>
-						<span class="bubble" style="width:40px;height:40px;background:#ec4899;left:20%;top:60%"></span>
+						<span class="bubble" style="width:40px;height:40px;background:var(--dl-accent);left:20%;top:60%"></span>
 						<span class="bubble" style="width:52px;height:52px;background:#fbbf24;left:46%;top:62%"></span>
 						<span class="bubble small" style="width:20px;height:20px;background:#60a5fa;left:82%;top:22%"></span>
 						<span class="bubble small" style="width:18px;height:18px;background:#34d399;left:8%;top:38%"></span>
@@ -44,7 +44,7 @@
 							<path d="M 60 40 Q 140 80 150 70" stroke="#fbbf24" stroke-width="2" fill="none" opacity="0.6" />
 							<path d="M 170 70 Q 230 40 250 30" stroke="#fbbf24" stroke-width="3" fill="none" opacity="0.75" />
 							<path d="M 265 35 Q 280 100 310 120" stroke="#fbbf24" stroke-width="2" fill="none" opacity="0.5" />
-							<path d="M 150 70 Q 130 140 110 160" stroke="#fb923c" stroke-width="2" fill="none" opacity="0.4" />
+							<path d="M 150 70 Q 130 140 110 160" stroke="var(--dl-accent)" stroke-width="2" fill="none" opacity="0.4" />
 						</svg>
 					</div>
 					<div class="preview-chips">

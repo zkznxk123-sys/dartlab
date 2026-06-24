@@ -179,7 +179,7 @@
 		border-bottom: 1px solid #1e2433;
 	}
 	.eyebrow {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-size: 11px;
 		font-weight: 700;
 		text-transform: uppercase;
@@ -191,10 +191,10 @@
 		letter-spacing: 0;
 	}
 	button {
-		border: 1px solid #fb923c;
+		border: 1px solid var(--dl-accent);
 		border-radius: 5px;
-		background: rgba(251, 146, 60, 0.08);
-		color: #fb923c;
+		background: rgba(var(--dl-accent-rgb), 0.08);
+		color: var(--dl-accent);
 		padding: 8px 12px;
 		font: inherit;
 		cursor: pointer;
@@ -216,8 +216,8 @@
 		color: #cbd5e1;
 	}
 	.targets button.active {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--dl-accent);
+		color: var(--dl-accent);
 	}
 	.targets strong,
 	.targets span {

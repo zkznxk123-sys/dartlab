@@ -1370,10 +1370,10 @@
 		gap: 6px;
 		height: 32px;
 		padding: 0 12px;
-		border: 1px solid rgba(251, 146, 60, 0.45);
+		border: 1px solid rgba(var(--dl-accent-rgb), 0.45);
 		border-radius: 5px;
-		background: rgba(251, 146, 60, 0.08);
-		color: #fb923c;
+		background: rgba(var(--dl-accent-rgb), 0.08);
+		color: var(--dl-accent);
 		font-size: 12px;
 		font-weight: 600;
 		font-family: inherit;
@@ -1382,8 +1382,8 @@
 		white-space: nowrap;
 	}
 	.explore-btn:hover {
-		border-color: rgba(251, 146, 60, 0.85);
-		background: rgba(251, 146, 60, 0.13);
+		border-color: rgba(var(--dl-accent-rgb), 0.85);
+		background: rgba(var(--dl-accent-rgb), 0.13);
 	}
 	.search-input {
 		width: 260px;
@@ -1431,7 +1431,7 @@
 	}
 	.search-input:focus {
 		outline: none;
-		border-color: #fb923c;
+		border-color: var(--dl-accent);
 	}
 	.cmdk-btn {
 		display: inline-flex;
@@ -1449,8 +1449,8 @@
 		line-height: 1;
 	}
 	.cmdk-btn:hover {
-		border-color: #fb923c;
-		color: #fb923c;
+		border-color: var(--dl-accent);
+		color: var(--dl-accent);
 	}
 	.cmdk-btn span:first-child {
 		font-family: monospace;
@@ -1473,9 +1473,9 @@
 		flex-shrink: 0;
 		padding: 4px 10px;
 		font-size: 11px;
-		color: #fb923c;
-		background: rgba(251, 146, 60, 0.08);
-		border: 1px solid rgba(251, 146, 60, 0.3);
+		color: var(--dl-accent);
+		background: rgba(var(--dl-accent-rgb), 0.08);
+		border: 1px solid rgba(var(--dl-accent-rgb), 0.3);
 		border-radius: 4px;
 		cursor: pointer;
 		font-family: inherit;
@@ -1506,8 +1506,8 @@
 		color: #cbd5e1;
 	}
 	.ind-chip.active {
-		background: rgba(251, 146, 60, 0.08);
-		border-color: rgba(251, 146, 60, 0.5);
+		background: rgba(var(--dl-accent-rgb), 0.08);
+		border-color: rgba(var(--dl-accent-rgb), 0.5);
 		color: #f1f5f9;
 	}
 	.ind-chip-dot {
@@ -1522,7 +1522,7 @@
 		color: #475569;
 	}
 	.ind-chip.active .ind-chip-count {
-		color: #fb923c;
+		color: var(--dl-accent);
 	}
 
 	.active-preset {
@@ -1530,7 +1530,7 @@
 		align-items: baseline;
 		gap: 8px;
 		padding: 8px 12px;
-		background: linear-gradient(135deg, rgba(234, 70, 71, 0.08), rgba(251, 146, 60, 0.04));
+		background: linear-gradient(135deg, rgba(234, 70, 71, 0.08), rgba(var(--dl-accent-rgb), 0.04));
 		border: 1px solid rgba(234, 70, 71, 0.3);
 		border-radius: 5px;
 		font-size: 11px;
@@ -1547,7 +1547,7 @@
 		font-size: 12px;
 	}
 	.ap-sub {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-family: monospace;
 	}
 	.ap-x {
@@ -1559,7 +1559,7 @@
 		font-size: 11px;
 	}
 	.ap-x:hover {
-		color: #fb923c;
+		color: var(--dl-accent);
 	}
 
 	.filter-strip {
@@ -1584,9 +1584,9 @@
 		gap: 6px;
 		height: 24px;
 		padding: 0 8px;
-		border: 1px solid rgba(251, 146, 60, 0.35);
+		border: 1px solid rgba(var(--dl-accent-rgb), 0.35);
 		border-radius: 4px;
-		background: rgba(251, 146, 60, 0.08);
+		background: rgba(var(--dl-accent-rgb), 0.08);
 		color: #cbd5e1;
 		font-size: 11px;
 		font-family: inherit;
@@ -1594,11 +1594,11 @@
 		cursor: pointer;
 	}
 	.filter-chip:hover {
-		border-color: rgba(251, 146, 60, 0.7);
-		color: #fb923c;
+		border-color: rgba(var(--dl-accent-rgb), 0.7);
+		color: var(--dl-accent);
 	}
 	.filter-chip span {
-		color: #fb923c;
+		color: var(--dl-accent);
 	}
 
 	.studio {
@@ -1647,7 +1647,7 @@
 	}
 	.ph-current {
 		font-size: 11px;
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-family: monospace;
 		margin-top: 4px;
 	}
@@ -1690,7 +1690,7 @@
 		padding: 4px 6px;
 	}
 	.d-close:hover {
-		color: #fb923c;
+		color: var(--dl-accent);
 	}
 	.detail-body {
 		padding: 24px;

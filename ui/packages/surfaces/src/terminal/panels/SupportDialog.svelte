@@ -189,7 +189,7 @@
 	.supPerson { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border: 1px solid var(--dl-line, #1b2130); border-radius: 999px; background: var(--dl-bg, #0a0e16); color: var(--dl-ink, #e2e8f0); text-decoration: none; transition: border-color 0.15s, background 0.15s; }
 	.supPerson:hover { border-color: var(--dl-line-strong, #2a3142); background: rgba(255, 255, 255, 0.04); }
 	.supAv { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; object-fit: cover; }
-	.supMono { display: flex; align-items: center; justify-content: center; font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 13px; font-weight: 700; color: #0a0e16; background: linear-gradient(135deg, #fdba74, #fb7185); }
+	.supMono { display: flex; align-items: center; justify-content: center; font-family: var(--dl-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 13px; font-weight: 700; color: #0a0e16; background: linear-gradient(135deg, var(--dl-accent-light), #fb7185); }
 	.supHandle { font-size: 12.5px; display: inline-flex; align-items: center; gap: 4px; }
 	.supRole { font-size: 11px; line-height: 1; }
 	.supRoleInsp { color: var(--amber, var(--amber)); }

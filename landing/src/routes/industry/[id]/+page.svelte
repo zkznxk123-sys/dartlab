@@ -759,7 +759,7 @@
 		font-weight: 500;
 	}
 	.c-rev {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-size: 10px;
 	}
 	.more {
@@ -836,7 +836,7 @@
 		color: #60a5fa;
 	}
 	.rank-rev {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-size: 11px;
 	}
 
@@ -880,7 +880,7 @@
 		font-size: 12px;
 	}
 	td.amount {
-		color: #fb923c;
+		color: var(--dl-accent);
 		font-weight: 600;
 	}
 	.e-link {

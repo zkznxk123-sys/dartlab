@@ -41,7 +41,7 @@
 	.redirect-avatar {
 		border-radius: 50%;
 		opacity: 0.95;
-		filter: drop-shadow(0 4px 16px rgba(251, 146, 60, 0.18));
+		filter: drop-shadow(0 4px 16px rgba(var(--dl-accent-rgb), 0.18));
 	}
 	.redirect p {
 		margin: 0;
@@ -50,7 +50,7 @@
 		width: 28px;
 		height: 28px;
 		border: 2px solid #1e2433;
-		border-top-color: #fb923c;
+		border-top-color: var(--dl-accent);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}

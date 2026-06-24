@@ -33,7 +33,7 @@
 	}
 	.kicker {
 		font-size: 11px;
-		color: #fb923c;
+		color: var(--dl-accent);
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
 		font-weight: 700;

@@ -164,7 +164,7 @@
 		color: #64748b;
 	}
 	.company-search:focus-within {
-		border-color: #fb923c;
+		border-color: var(--dl-accent);
 	}
 	.results {
 		position: absolute;
@@ -199,7 +199,7 @@
 	}
 	.row:hover,
 	.row.selected {
-		background: rgba(251, 146, 60, 0.11);
+		background: rgba(var(--dl-accent-rgb), 0.11);
 		color: #f8fafc;
 	}
 	.name {
@@ -221,7 +221,7 @@
 	.row:hover .go,
 	.row.selected .code,
 	.row.selected .go {
-		color: #fb923c;
+		color: var(--dl-accent);
 	}
 	.hint {
 		padding: 12px;

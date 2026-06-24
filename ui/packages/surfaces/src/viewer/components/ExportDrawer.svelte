@@ -112,7 +112,7 @@
 
 <aside class="export-drawer">
 	<header class="ed-head">
-		<FileSpreadsheet size={17} color="#ff3f6f" />
+		<FileSpreadsheet size={17} color="var(--dl-accent)" />
 		<strong>표 내보내기</strong>
 		<span class="ed-count">{list.length}개</span>
 		<button type="button" class="ed-x" onclick={onclose} aria-label="닫기"><X size={15} /></button>
@@ -322,7 +322,7 @@
 		color: #94a3b8;
 	}
 	.ob-sub b {
-		color: #fdba74;
+		color: var(--dl-accent-light);
 	}
 
 	.sheet-list {
@@ -508,7 +508,7 @@
 		cursor: pointer;
 	}
 	.export-btn:hover:not(:disabled) {
-		background: #fdba74;
+		background: var(--dl-accent-light);
 	}
 	.export-btn:disabled {
 		opacity: 0.45;
