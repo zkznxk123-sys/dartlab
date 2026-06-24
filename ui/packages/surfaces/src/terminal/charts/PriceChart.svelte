@@ -300,7 +300,7 @@
 		xAxis: { axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
 		yAxis: { type: ctl.yMode, axisLine: { color: '#222b3a' }, tickLine: { color: '#222b3a' }, tickText: { color: '#8b919e', size: 10, family: CHART_FONT } },
 		separator: { color: '#222b3a', fill: true, activeBackgroundColor: 'rgba(var(--amber-rgb),0.1)' },
-		crosshair: { horizontal: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#99203f', family: CHART_FONT } }, vertical: { line: { color: 'rgba(var(--amber-rgb),0.45)' }, text: { backgroundColor: '#99203f', family: CHART_FONT } } }
+		crosshair: { horizontal: { line: { color: 'rgba(var(--amber-rgb),0.9)' }, text: { backgroundColor: '#99203f', family: CHART_FONT } }, vertical: { line: { color: 'rgba(var(--amber-rgb),0.9)' }, text: { backgroundColor: '#99203f', family: CHART_FONT } } }
 	});
 
 	// 보조 페인 높이 — 컨테이너 비례(16%) 적응. 전체화면 진입 시 78px 고정 납작 페인 방지.

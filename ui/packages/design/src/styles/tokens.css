@@ -86,7 +86,7 @@
 	 */
 	--dl-accent: #ff3f6f;
 	--dl-accent-rgb: 255, 63, 111;
-	--dl-accent-dim: #cc2a52;
+	--dl-accent-dim: #ff6f8f;
 	--dl-accent-light: #ff8aa3;
 	--dl-accent-soft: rgba(255, 63, 111, 0.12);
 	/* surfaces 레거시 alias 전역 fallback — scan/map/viewer 등 .dlTerm 밖에서도 강조색 var 해석되게. */
