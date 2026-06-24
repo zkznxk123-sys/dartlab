@@ -33,6 +33,71 @@ ai:
     - "매출 반토막"
   keyMetrics: {revenue: 3.1, opm: -4.0, roe: 0.0, fcf: 0.0}
   dataAsOf: "2026-04-12"
+carousel:
+  title: "에코프로 — 시총 78조를 찍은 회사의 영업이익은 864억이었다"
+  caption: |
+    2023년 7월, 에코프로 그룹 시총 78.5조. 그런데 그해 기준 영업이익은 864억이었다. PER 903배 — 지금 이익을 903년 벌어야 시총이 정당화되는 숫자다.
+
+    에코프로는 양극재 회사가 아니다. 원가의 85%가 리튬·니켈 같은 원자재라, 리튬이 오르면 매출이 오르고 떨어지면 매출이 반토막 난다. 2024년 매출원가율은 102.5% — 팔수록 적자였다.
+
+    이익도 이상하다. 2021년 영업이익 864억인데 순이익은 2,789억. 물적분할 일회성 이익 8,520억이 적자 회사를 흑자로 바꿨다. 2022년엔 순이익 2,206억인데 영업현금흐름은 -5,186억. 이익과 현금이 정반대다.
+
+    창업주는 감옥에 있는데 주가는 153만원 신고가. 개인투자자 73%가 산 건 숫자가 아니라 '리튬의 미래'라는 서사였다.
+
+    에코프로는 회사가 아니라 리튬에 레버리지를 건 옵션이다. 재무제표는 이미 그 답을 말하고 있었다.
+  pinnedComment: |
+    원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
+    github.com/eddmpython/dartlab
+  slides:
+    - layout: editorial
+      date: "2026.04.12"
+      line: "시총 [[78조]]를 찍은 회사의\n영업이익은 864억이었다"
+      sub: "2차전지 대장주 에코프로. 재무제표를 뜯어보면, 시장이 산 건 숫자가 아니라 서사였다."
+      image: ecopro-valuation-gap
+    - layout: editorialStat
+      kicker: "괴리"
+      bigNumber: "903"
+      unit: "배 · PER"
+      context: "78조 ÷ 864억. 지금 이익을 903년 벌어야 시총이 정당화된다."
+      image: ecopro-financial-statement
+    - layout: editorialBeat
+      kicker: "원래 정체"
+      line: "양극재 회사가 아니라\n[[리튬 가격]]에 레버리지를 건 구조"
+      sub: "원가의 85%가 원자재. 리튬이 오르면 매출이 오르고, 떨어지면 반토막 난다."
+      image: ecopro-lithium-mine
+    - layout: editorialStat
+      kicker: "리튬이 쓴 재무제표"
+      bigNumber: "102.5"
+      unit: "% 매출원가율"
+      context: "2024년, 팔수록 적자. 비싸게 산 재료를 싸게 파는 역래깅 손실."
+      image: ecopro-warning-gauge
+    - layout: editorialBeat
+      kicker: "회계의 마법"
+      line: "영업이익 864억인데\n순이익 [[2,789억]]"
+      sub: "물적분할 일회성 이익 8,520억이 계속사업 적자 회사를 흑자로 바꿨다."
+      image: ecopro-corporate-split
+    - layout: editorialStat
+      kicker: "이익과 현금이 정반대"
+      bigNumber: "-5,186"
+      unit: "억 · 영업현금흐름"
+      context: "2022년 순이익 2,206억. 그런데 현금은 5천억 넘게 빠졌다 — 재고에 묶인 돈."
+      image: ecopro-cash-flow
+    - layout: editorialBeat
+      kicker: "서사가 만든 주가"
+      line: "창업주는 [[감옥]],\n주가는 153만원 신고가"
+      sub: "이동채 구속에도 주가는 올랐다. 개인투자자 73%가 산 건 '리튬의 미래'였다."
+      image: ecopro-courthouse
+    - layout: editorialStat
+      kicker: "사이클의 숙명"
+      bigNumber: "5,068"
+      unit: "억 스윙"
+      context: "2024년 영업이익 -2,930억 → 2025년 +2,138억. 1년에 5천억이 뒤집힌다."
+      image: ecopro-lithium-cycle
+    - layout: editorialBeat
+      kicker: "결론"
+      line: "에코프로는 회사가 아니라\n[[리튬 옵션]]이다"
+      sub: "리튬이 오르면 5배, 떨어지면 반토막. 재무제표는 이미 답을 말하고 있었다."
+      image: ecopro-stock-crash
 ---
 
 <script>
