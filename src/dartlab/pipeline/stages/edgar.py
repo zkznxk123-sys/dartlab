@@ -69,6 +69,7 @@ def _bakeTerminalFinanceStmt(changedFin: list[str], *, upload: bool, token) -> i
     from pathlib import Path
 
     import dartlab.config as cfg
+    from dartlab.company import Company
     from dartlab.providers.edgar.finance.terminalStmt import bakeTerminalFinance
 
     cik2tk = _cikToTicker()
@@ -85,7 +86,8 @@ def _bakeTerminalFinanceStmt(changedFin: list[str], *, upload: bool, token) -> i
         if not ticker:
             continue
         try:
-            df = bakeTerminalFinance(ticker)
+            # facade Company 를 pipeline 에서 만들어 주입(provider 는 상향 facade import 불가).
+            df = bakeTerminalFinance(ticker, company=Company(ticker))
         except Exception as exc:  # noqa: BLE001 — 개별 회사 실패 격리(나머지 진행)
             print(f"[pipeline] edgar financeStmt bake 실패({ticker}): {exc}", flush=True)
             continue

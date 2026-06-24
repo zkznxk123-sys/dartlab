@@ -103,18 +103,20 @@ def bakeTerminalFinance(ticker: str, *, company=None) -> pl.DataFrame | None:
     """파사드 panel(IS/BS/CF) → 터미널 ``edgar/financeStmt/{ticker}`` long 행 bake.
 
     Args:
-        ticker: US 종목 ticker (예: "AAPL"). company 미지정 시 ``dartlab.Company(ticker)`` 생성.
-        company: 사전 생성 Company(수명 관리·재사용). None 이면 내부 생성.
+        ticker: US 종목 ticker (예: "AAPL") — 식별·에러 라벨용.
+        company: 사전 생성 Company(facade) — **주입 필수**. provider 는 root facade(``dartlab.Company``)를
+            import 할 수 없어(상향 의존 금지) 호출자(pipeline)가 만들어 넘긴다.
 
     Returns:
         pl.DataFrame(`FINANCE_COLUMNS` 스키마) — 분기 standalone(Q1~Q3) + 연간(11011). 데이터 없으면
         None(터미널은 정직 폴백으로 카드 비표시).
 
     Raises:
-        없음 — panel 호출 실패는 명세별 격리(빈 결과 → None).
+        ValueError: company 미주입(None) 시 — provider 는 facade 를 생성할 수 없다.
 
     Example:
-        >>> bakeTerminalFinance("AAPL")  # doctest: +SKIP
+        >>> from dartlab.company import Company  # doctest: +SKIP
+        >>> bakeTerminalFinance("AAPL", company=Company("AAPL"))  # doctest: +SKIP
         shape: (…, 11)
 
     SeeAlso:
@@ -153,9 +155,9 @@ def bakeTerminalFinance(ticker: str, *, company=None) -> pl.DataFrame | None:
             - US (EDGAR) 터미널 재무.
     """
     if company is None:
-        import dartlab
-
-        company = dartlab.Company(ticker)
+        # provider 는 root facade(dartlab.Company)를 import 할 수 없다(상향 의존·lazy import 금지).
+        # 호출자(pipeline.stages.edgar)가 facade Company 를 만들어 주입한다.
+        raise ValueError(f"bakeTerminalFinance({ticker!r}): company 주입 필요 — provider 는 facade 생성 불가")
 
     idx = _stdIdIndex()
     rows: list[dict] = []
