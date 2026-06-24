@@ -179,45 +179,25 @@ export interface ValuationRow {
 // stockCode → ValuationRow. 전 종목 1파일(소형) — 동종 분포·주체 위치를 조회 시점 계산.
 export type ValuationSnapshot = Record<string, ValuationRow>;
 
-/** 정기보고서 주석 블록 — panel 파케 본문(contentRaw, DART XML 표/텍스트)을 *그 자리에서* 렌더하는 단위.
- * ↗원문 링크가 아니라 실제 주석 내용을 우측 패널에 표면화(PRD 00 §26 "갇힌 계산을 있는 그대로 표면화").
- * content = raw DART XML/HTML — 소비측(CellContent)이 sanitize·표/텍스트 분리 렌더. 신규 분석 0, 표면화만. */
-/** 주석 표 파싱 구성요소 — 항목별 금액·비중%. 비용 성격별·부문 같은 *정형 숫자표*(부분합 닫힌 100%) 파싱 결과. */
-export interface CompositionItem {
-	name: string; // 항목명 (원문 그대로 — 예 '원재료 및 상품매입액')
-	amount: number; // 원 (당기 컬럼)
-	pct: number; // % of total (0~100)
-}
-export interface NoteComposition {
-	items: CompositionItem[]; // 금액 desc, 상위 topN + '기타 (N)' 롤업
-	total: number; // 원 — 합계(분모)
-}
-
-export interface ReportNoteBlock {
-	key: string; // 안정 식별자 (disclosureKey + 순서)
-	topic: string; // 토픽 id (costNature·segment·contingency·affiliates·relatedParty) — 소비측 평어 라벨 매핑
-	title: string; // 주석 제목 (blockLeaf 또는 sectionLeaf) — 원문 그대로(보조 표시)
-	section: string; // 상위 섹션 (예 '3. 연결재무제표 주석') — scope(연결/별도) 동적 도출 소스
-	content: string; // 본문 raw DART XML/HTML (표·텍스트) — CellContent 가 렌더(서술혼합 폴백)
-	composition?: NoteComposition; // 정형 숫자표 파싱 성공 시(비용성격별·부문). 실패=undefined → content 발췌 폴백
-	rceptNo: string; // 출처 공시 번호 (↗원문)
-	period: string; // 기준 분기 (YYYYQn)
-}
-
-// ── 비용의 성격별 분류 시계열 — 매 정기보고서(분기/연간)가 보고한 당기 구성을 전 기간 파싱. snapshot(notes())이
-// 단일점이라면 이건 *분기마다 다 있는* 비용 체질의 변화(원재료 비중 ↑ = 원가압박, 감가상각 비중 ↑ = capex 사이클).
-// 당기 컬럼만(전기 혼입 방지) · 연결 우선 · 단위(백만원/천원) 원 환산 · 라벨+구조적 총계 제거. 분기는 YTD 누적이라
-// 절대액(total)은 사다리꼴(분기리셋); 비중(shares)은 전 기간 비교가능 → 시각화 헤드라인은 100% 적층 믹스. ──
-export interface CostNaturePoint {
+// ── 주석 구성 시계열 — 정기보고서가 분기마다 보고한 당기 구성(비용 성격별·부문별 매출)의 변화.
+// 데이터 원천 = panel contentRaw 의 정부 XBRL <TE ACODE ACONTEXT> 태그 *런타임 직독*(별도 bake 0).
+// 비용 = acode(IFRS 택소노미가 곧 카테고리), 부문 = axisPath 세그먼트 멤버. 최근 분기(ACONTEXT 2025-03+)만.
+// 분기는 YTD 누적이라 절대액(total)은 분기리셋 사다리꼴; 비중(shares)은 전 기간 비교가능 → 헤드라인은 100% 적층 믹스. ──
+export interface CompositionPoint {
 	period: string; // 'YYYYQn'
 	year: string; // 'YYYY'
 	quarter: string; // '1분기'..'4분기' (4분기=사업보고서=연간 누적)
-	total: number; // 원 — 당기 합계(양수 항목 합)
+	total: number; // 원 — 당기 합계
 	shares: number[]; // categories[] 정렬 비중% (합 ~100, 없는 카테고리=0)
 }
-export interface CostNatureSeries {
-	categories: string[]; // 안정 카테고리(표시명) — 전 기간 합계 desc 상위 K + 마지막 '기타'(롤업 있을 때). 색·범례·적층 순서 SSOT
-	points: CostNaturePoint[]; // period 오름차순(분기 포함)
+export interface CompositionSeries {
+	categories: string[]; // 안정 카테고리(표시명) — 전 기간 합계 desc 상위 K (비용은 마지막 '기타' 롤업). 색·범례·적층 순서 SSOT
+	points: CompositionPoint[]; // period 오름차순
+}
+// 비용 체질 + 부문별 매출 — 둘 다 없으면(미공시/단일부문) 각각 null.
+export interface NoteSeriesBundle {
+	cost: CompositionSeries | null; // 비용 성격별(acode 카테고리)
+	segment: CompositionSeries | null; // 부문별 매출(axisPath 세그먼트). 단일부문/미태깅이면 null
 }
 
 export interface ReportPort {
@@ -237,10 +217,7 @@ export interface ReportPort {
 	auditTrail(code: string): Promise<AuditYear[] | null>;
 	topExecPay(code: string): Promise<TopExecPay | null>;
 	auditFees(code: string): Promise<AuditFeeYear[] | null>;
-	/** 정기보고서 주석 본문 — panel 파케에서 고가치 도시에 주석(관계기업·종속기업 투자·특수관계자 거래·우발부채·약정)의
-	 * 최신기 본문을 그 자리 렌더용으로. 지연 로드 권장(panel 대용량). 미존재/미지원은 null. */
-	notes(code: string): Promise<ReportNoteBlock[] | null>;
-	/** 비용의 성격별 분류 *시계열* — 전 기간(분기 포함) 당기 구성 파싱. panel 전 기간 본문을 읽어 무거우니
-	 * 상세보기(다이얼로그) 열 때만 지연 호출 권장. 단일점이면(시계열 의미 없음) null. 미존재/미지원도 null. */
-	costNatureSeries(code: string): Promise<CostNatureSeries | null>;
+	/** 주석 구성 시계열 — 비용 성격별(acode) + 부문별 매출(axisPath). panel contentRaw 의 정부 XBRL 태그 런타임 직독
+	 * (별도 bake 0). 최근 분기(ACONTEXT 2025-03+)만. 우측 글랜스·상세 다이얼로그 공용. 둘 다 없으면 null. */
+	noteSeries(code: string): Promise<NoteSeriesBundle | null>;
 }

@@ -328,10 +328,7 @@ function fakeReport(): ReportPort {
 		async valuationSnapshot() {
 			return null;
 		},
-		async notes() {
-			return null;
-		},
-		async costNatureSeries() {
+		async noteSeries() {
 			return null;
 		},
 		async shareholders() {

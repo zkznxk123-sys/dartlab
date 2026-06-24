@@ -10,9 +10,9 @@
 		InvestmentsView,
 		NewsItem,
 		NonRegularFiling,
+		NoteSeriesBundle,
 		ProductIndexItem,
 		RegularFiling,
-		ReportNoteBlock,
 		ShareholderReturnYear,
 		ShareholdersView,
 		StmtKind,
@@ -305,29 +305,27 @@
 	let shPeriods = $state<ShareholdersView[]>([]); // 최대주주 시계열 — 다이얼로그 기간축
 	let auditFees = $state<AuditFeeYear[] | null>(null); // 포렌식 — 감사/비감사 보수(독립성 비율)
 	let debtProfile = $state<DebtProfileBundle | null>(null); // 포렌식 — 사채 잔존만기(단기 상환벽)
-	// 정기보고서 주석 — panel 파케 contentRaw 파싱(비용 성격별 등 항목%). B 아키텍처: 우측 글랜스 한 줄(real digest)
-	// + '대시보드 ▸'→ NotesDashboardDialog. eager 로드(글랜스가 진짜 정보 보이려면 데이터 필요) — 타임아웃·캐시 가드,
-	// notes() 2-pass 최신기만이라 효율. dossier.coverage(팩트 수) 아닌 notes 길이로 N/5 산출.
-	let notes = $state<ReportNoteBlock[]>([]);
+	// 정기보고서 주석 — panel contentRaw 의 정부 XBRL 태그 런타임 직독(reportSource.noteSeries). 비용 체질·부문별 매출.
+	// 우측 글랜스 한 줄(real digest) + '상세보기'→ NotesDashboardDialog(분기 시계열). 별도 bake 0. 최근 분기만.
+	let noteBundle = $state<NoteSeriesBundle | null>(null);
 	let notesState = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
-	let dashOpen = $state(false); // 주석 대시보드 다이얼로그
+	let dashOpen = $state(false); // 주석 상세 다이얼로그
 	$effect(() => {
 		const code = co.code;
-		notes = [];
+		noteBundle = null;
 		notesState = 'loading';
 		let cancelled = false;
-		// Promise.resolve().then 으로 감싸 동기 throw(포트 미배선 등)도 rejection 으로 — effect 가 throw 해서
-		// RightStack 전체가 깨지는 것 방지. notes 실패=주석 패널만 error 상태(나머지 패널 정상).
-		// panel 파케 read 는 reportFacts 보다 무거워(13MB·2pass) 타임아웃 15s.
-		withTimeout(Promise.resolve().then(() => rt.report.notes(code)), 15_000).then(
-			(n) => {
+		// Promise.resolve().then 으로 감싸 동기 throw 도 rejection 으로(effect throw 로 RightStack 깨짐 방지).
+		// panel tail-prune read 라 가벼움 — 타임아웃 15s 여유.
+		withTimeout(Promise.resolve().then(() => rt.report.noteSeries(code)), 15_000).then(
+			(b) => {
 				if (cancelled) return;
-				notes = n ?? [];
-				notesState = notes.length ? 'ready' : 'empty';
+				noteBundle = b;
+				notesState = b && (b.cost || b.segment) ? 'ready' : 'empty';
 			},
 			(err) => {
 				if (cancelled) return;
-				console.warn('[terminal] report notes load failed:', err);
+				console.warn('[terminal] report noteSeries load failed:', err);
 				notesState = 'error';
 			}
 		);
@@ -335,24 +333,22 @@
 			cancelled = true;
 		};
 	});
-	// 우측 글랜스 — 비용 성격별 composition 상위 항목 한 줄(예 '원재료 45% · 외주 15% · 인건비 10%'). 링크 아닌 진짜 요약.
-	const costNote = $derived(notes.find((n) => n.topic === 'costNature' && n.composition) ?? null);
-	const shortCost = (n: string): string => n.replace(/\s*및\s*/g, '·').replace(/(매입액|사용액|비용|비$)/g, '').trim().slice(0, 5);
-	const costGlance = $derived.by<string | null>(() => {
-		const items = costNote?.composition?.items;
-		if (!items || !items.length) return null;
-		return items.filter((i) => !i.name.startsWith('기타')).slice(0, 3).map((i) => `${shortCost(i.name)} ${i.pct.toFixed(0)}%`).join(' · ');
-	});
-	// 대시보드에 든 토픽 평어명 (rail 2번째 줄 — 뭐가 있는지). costNature 는 글랜스가 대신하니 제외.
-	const NOTE_KR: Record<string, { kr: string; en: string }> = {
-		segment: { kr: '부문', en: 'segments' },
-		contingency: { kr: '우발·담보', en: 'contingency' },
-		affiliates: { kr: '자회사', en: 'affiliates' },
-		relatedParty: { kr: '계열거래', en: 'related-party' }
+	// 글랜스 한 줄 — series 최신점 상위 카테고리(비중%). 링크 아닌 진짜 요약.
+	const shortCat = (n: string): string => n.replace(/\s*및\s*/g, '·').replace(/(매입액|사용액|비용|비$)/g, '').replace(/([a-z])([A-Z])/g, '$1 $2').trim().slice(0, 7);
+	const glanceOf = (s: NoteSeriesBundle['cost']): string | null => {
+		const pts = s?.points;
+		if (!pts || !pts.length || !s) return null;
+		const last = pts[pts.length - 1]!;
+		return s.categories
+			.map((name, i) => ({ name, pct: last.shares[i] ?? 0 }))
+			.filter((r) => r.name !== '기타' && r.pct > 0)
+			.sort((a, b) => b.pct - a.pct)
+			.slice(0, 3)
+			.map((r) => `${shortCat(r.name)} ${r.pct.toFixed(0)}%`)
+			.join(' · ');
 	};
-	const noteTopicNames = $derived(
-		notes.filter((n) => n.topic !== 'costNature' && NOTE_KR[n.topic]).map((n) => (lang === 'en' ? NOTE_KR[n.topic]!.en : NOTE_KR[n.topic]!.kr)).join(' · ')
-	);
+	const costGlance = $derived(glanceOf(noteBundle?.cost ?? null));
+	const segGlance = $derived(glanceOf(noteBundle?.segment ?? null));
 	// 최신 연간 현금성자산 (BS 'cash', 조 단위) → 원 환산. 단기 상환벽 신호의 분모.
 	const cashLatestWon = $derived.by<number | null>(() => {
 		const av = finBundle?.views.annual;
@@ -681,33 +677,33 @@
 	{/await}
 {/if}
 
-<!-- 정기보고서 주석 — 간단 글랜스(비용 체질 한 줄=real digest) + 상세보기(파싱 찐정보 다이얼로그). B 아키텍처.
-     상태 피드백(loading/error/ready) 항상 렌더 — '아무것도 안뜬다' 방지. 미공시(empty)만 숨김(클러터 회피). -->
+<!-- 정기보고서 주석 — 글랜스 한 줄(비용·부문 비중=real digest) + 상세보기(분기 시계열 다이얼로그). 정부 XBRL 직독.
+     상태 피드백(loading/error/ready) 항상 렌더. 미공시(empty)만 숨김(클러터 회피). -->
 {#if notesState !== 'empty'}
-	<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={notesState === 'ready' ? { kr: notes.length + '/5', en: notes.length + '/5' } : undefined} flush>
-		{#snippet right()}{#if notesState === 'ready' && notes.length}<button class="finFullBtn" onclick={() => (dashOpen = true)} title={lang === 'en' ? 'parsed notes detail (cost·segment·contingency·related-party)' : '파싱된 주석 상세 — 비용 체질·부문·우발·계열'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/if}{/snippet}
+	<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} flush>
+		{#snippet right()}{#if notesState === 'ready'}<button class="finFullBtn" onclick={() => (dashOpen = true)} title={lang === 'en' ? 'cost chassis · segment revenue (quarterly)' : '비용 체질 · 부문별 매출 (분기 시계열)'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/if}{/snippet}
 		{#if notesState === 'loading'}
-			<div class="storyEmpty" role="status" aria-busy="true">{lang === 'en' ? 'parsing notes …' : '주석 파싱 중 …'}</div>
+			<div class="storyEmpty" role="status" aria-busy="true">{lang === 'en' ? 'reading notes …' : '주석 읽는 중 …'}</div>
 		{:else if notesState === 'error'}
 			<div class="storyEmpty" role="status">{lang === 'en' ? 'failed to load notes' : '주석 불러오지 못함'}</div>
 		{:else}
 			{#if costGlance}
 				<div class="noteGlance"><span class="ngLabel">{lang === 'en' ? 'cost' : '비용'}</span> {costGlance}</div>
 			{/if}
-			{#if noteTopicNames}
-				<div class="noteMore">+ {noteTopicNames}</div>
+			{#if segGlance}
+				<div class="noteGlance"><span class="ngLabel">{lang === 'en' ? 'seg' : '부문'}</span> {segGlance}</div>
 			{/if}
-			{#if !costGlance && !noteTopicNames}
-				<div class="noteGlance dim">{lang === 'en' ? `${notes.length} note(s) — detail ▸` : `주석 ${notes.length}개 — 상세보기 ▸`}</div>
+			{#if !costGlance && !segGlance}
+				<div class="noteGlance dim">{lang === 'en' ? 'detail ▸' : '상세보기 ▸'}</div>
 			{/if}
 		{/if}
 	</Panel>
 {/if}
 
-<!-- 주석 대시보드 다이얼로그 (lazy: 닫혀 있으면 청크 무증가) -->
+<!-- 주석 상세 다이얼로그 (lazy) -->
 {#if dashOpen}
 	{#await import('./NotesDashboardDialog.svelte') then { default: NotesDashboardDialog }}
-		<NotesDashboardDialog {co} {lang} {notes} loadCostSeries={() => rt.report.costNatureSeries(co.code)} onClose={() => (dashOpen = false)} />
+		<NotesDashboardDialog {co} {lang} cost={noteBundle?.cost ?? null} segment={noteBundle?.segment ?? null} onClose={() => (dashOpen = false)} />
 	{/await}
 {/if}
 

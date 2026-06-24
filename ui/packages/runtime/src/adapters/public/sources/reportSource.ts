@@ -9,8 +9,7 @@ import type {
 	AuditYear,
 	CapitalChangeEvent,
 	CapitalChangesBundle,
-	CostNaturePoint,
-	CostNatureSeries,
+	NoteSeriesBundle,
 	DebtLadder,
 	DebtProfileBundle,
 	DebtProfileYear,
@@ -23,7 +22,6 @@ import type {
 	InvestmentTrendYear,
 	Num,
 	OwnershipYear,
-	ReportNoteBlock,
 	ReportPort,
 	ShareholderReturnYear,
 	ShareholderRow,
@@ -33,7 +31,8 @@ import type {
 	WorkforceYear
 } from '@dartlab/ui-contracts';
 import type { DataCore } from '../../../data/fetch/request';
-import { cleanCostRows, costCategory, COST_SEMANTIC_LABELS, currentPeriodTables, detectUnitMult, parseNoteRows, toComposition } from './noteTableParse';
+import { detectUnit, xbrlCellsFromContent } from './xbrlCells';
+import { buildSeries, costCells, segmentCells, type PeriodComposition } from './noteSeries';
 
 const browser = typeof window !== 'undefined';
 
@@ -707,23 +706,16 @@ export function createReportSource(core: DataCore): ReportPort {
 		return Object.keys(out).length ? out : null;
 	}
 
-	// ── 정기보고서 주석 본문 (panel 파케 contentRaw 그 자리 렌더 — ↗링크 아닌 실제 내용 표면화) ──
-	// 고가치 도시에 주석만 선별: 관계·종속기업 투자(타법인출자 detail)·특수관계자 거래(소유/관계)·우발부채·약정
-	// (PRD §11 "필드 없어 침묵"이라던 담보/보증 — 주석 본문엔 존재). blockLeaf 키워드 매칭이라 회사별 NT 코드
-	// 변동(08 G1: 우발부채=827580 OR 822320)에 강건. 연결 우선. panel 대용량 → 최신기만 2-pass(period→필터).
-	// 토픽 = blockLeaf/sectionLeaf 정규식 매칭(NT 코드/disclosureKey 무관 — 회사별 코드 분산[08 G1: 우발부채
-	// 827580 OR 822320]에 강건, 실측 이 행들 disclosureKey=null). 표시 순서 = 배열 순서(costNature 먼저).
-	// 실측 커버리지(300사): costNature 58%·segment 69%·contingency 84%·affiliates 57%·relatedParty 82%.
-	const NOTE_TOPICS: { id: string; re: RegExp }[] = [
-		{ id: 'costNature', re: /비용의\s*성격별|성격별\s*분류|성격별\s*비용|영업비용의\s*성격별/ },
-		{ id: 'segment', re: /부문정보|영업부문|부문별\s*정보|부문별\s*보고/ },
-		{ id: 'contingency', re: /우발부채|약정사항|약정/ },
-		{ id: 'affiliates', re: /관계기업|종속기업|공동기업/ },
-		{ id: 'relatedParty', re: /특수관계자/ }
-	];
-	async function buildReportNotes(code: string): Promise<ReportNoteBlock[] | null> {
-		// Pass A — period 컬럼만(경량) → 최신기 + 그 행 범위. panel 최신기는 연속 tail(실측 005930·000030)이라
-		// [lo, hi] 로 잘라 Pass B 가 contentRaw 전량(13~25MB) read 대신 tail row-group 만 fetch(15s 타임아웃 방어).
+	// ── 주석 구성 시계열 (비용 성격별·부문별 매출) — panel contentRaw 의 정부 XBRL <TE ACODE ACONTEXT> 런타임 직독.
+	// 별도 bake 0(공동 데이터 작업대 굽기 금지) — 런타임이 이미 받는 panel 본문에서 태그 직독. 비용=acode(IFRS 택소노미
+	// 가 곧 카테고리), 부문=axisPath 세그먼트 멤버. ACONTEXT 는 2025-03 사업보고서+라 최근 분기만 자연 포착(상세는 viewer).
+	// panel 최신기들은 연속 tail → 최근 N분기 행 범위만 rowStart/rowEnd prune(대용량 read 회피). ──
+	const COST_BLK = /비용의\s*성격별|성격별\s*분류|성격별\s*비용|영업비용의\s*성격별/;
+	const SEG_BLK = /부문정보|영업부문|부문별\s*정보|부문별\s*보고|사업부문/;
+	const RECENT_N = 8; // 최근 N분기 (ACONTEXT XBRL 범위 커버)
+
+	async function buildNoteSeries(code: string): Promise<NoteSeriesBundle | null> {
+		// Pass A — period 컬럼만(경량) → 최근 N분기 + 그 행 범위(연속 tail).
 		const pr = await core.requestParquetRows<{ period?: unknown }>({
 			origin: 'hfRange',
 			path: `dart/panel/${code}.parquet`,
@@ -731,125 +723,57 @@ export function createReportSource(core: DataCore): ReportPort {
 			cacheKey: `panel.periods:${code}`,
 			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 128 }
 		});
-		let latest = '';
-		for (const r of pr) { const p = str(r.period); if (p > latest) latest = p; }
-		if (!latest) return null;
+		const periodsSorted = [...new Set(pr.map((r) => str(r.period)).filter(Boolean))].sort();
+		if (!periodsSorted.length) return null;
+		const recent = new Set(periodsSorted.slice(-RECENT_N));
 		let lo = -1;
 		let hi = -1;
-		for (let i = 0; i < pr.length; i++) if (str(pr[i]!.period) === latest) { if (lo < 0) lo = i; hi = i; }
+		for (let i = 0; i < pr.length; i++) if (recent.has(str(pr[i]!.period))) { if (lo < 0) lo = i; hi = i; }
 		if (lo < 0) return null;
-		// Pass B — 최신기 행 범위만(rowStart/rowEnd → hyparquet row-group prune). filter 는 read 후 술어라 prune 안 됨.
-		const rows = await core.requestParquetRows<Row>({
-			origin: 'hfRange',
-			path: `dart/panel/${code}.parquet`,
-			columns: ['sectionLeaf', 'blockLeaf', 'chapter', 'leafType', 'disclosureKey', 'contentRaw', 'rceptNo', 'period'],
-			rowStart: lo,
-			rowEnd: hi + 1,
-			cacheKey: `panel.notes:${code}:${latest}`,
-			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 64 }
-		});
-		const out: ReportNoteBlock[] = [];
-		for (const topic of NOTE_TOPICS) {
-			const matched = rows.filter((r) => topic.re.test(str(r.blockLeaf)) || topic.re.test(str(r.sectionLeaf)));
-			if (!matched.length) continue;
-			// 연결('3. 연결재무제표 주석') 우선, 없으면 별도 — 중복(연결/별도 동일 주제) 한쪽만
-			const consolidated = matched.filter((r) => str(r.sectionLeaf).includes('연결') || str(r.chapter).includes('연결'));
-			const pool = consolidated.length ? consolidated : matched;
-			// 문서 순서(parquet 반환 순)로 본문 연결 — [text]제목+[table]내용 한 블록. 빈 본문 스킵.
-			const content = pool.map((r) => str(r.contentRaw)).filter((c) => c.trim()).join('\n');
-			if (content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length < 40) continue;
-			const head = pool[0];
-			if (!head) continue;
-			// 정형 숫자표(비용 성격별)는 조각 테이블 파싱→병합→구성요소(항목%). 실패=undefined→content 발췌 폴백.
-			// 당기 컬럼만(전기 혼입 방지) + 단위(백만원/천원) 원 환산 + 구조적 총계 제거(toComposition 내장).
-			// 부문(segment)은 행렬 구조라 별도 처리(후속) — 지금은 costNature 만 파싱.
-			let composition;
-			if (topic.id === 'costNature') {
-				const mult = detectUnitMult(pool.map((r) => str(r.contentRaw)));
-				const curTables = currentPeriodTables(pool.map((r) => ({ leafType: str(r.leafType), contentRaw: str(r.contentRaw) })));
-				const rowsCN = parseNoteRows(curTables).map((r) => ({ name: r.name, amount: r.amount * mult }));
-				composition = toComposition(rowsCN) ?? undefined;
-			}
-			out.push({
-				key: `${topic.id}:${str(head.disclosureKey) || topic.id}`,
-				topic: topic.id,
-				title: str(head.blockLeaf) || str(head.sectionLeaf),
-				section: str(head.sectionLeaf) || str(head.chapter),
-				content,
-				composition,
-				rceptNo: str(head.rceptNo),
-				period: latest
-			});
-		}
-		return out.length ? out : null;
-	}
-
-	// ── 비용의 성격별 분류 *시계열* — panel 전 기간 본문을 읽어 매 정기보고서가 보고한 당기 구성을 파싱.
-	// notes()(최신 단일점)와 달리 분기마다 다 있는 비용 체질 변화를 보여줌(원재료 비중 ↑ 등). panel 전 기간 본문
-	// 로드라 무거워 상세보기 다이얼로그 열 때만 호출(지연). 카테고리는 회사 자기 명칭을 공백제거 정규화로 묶어
-	// 전 기간 합계 상위 K + 기타 — 산업특수 비용(구입전력비 등)도 보존(의미 버킷팅 안 함). ──
-	async function buildCostNatureSeries(code: string): Promise<CostNatureSeries | null> {
+		// Pass B — 최근 N분기 행 범위만(rowStart/rowEnd → row-group prune).
 		const rows = await core.requestParquetRows<Row>({
 			origin: 'hfRange',
 			path: `dart/panel/${code}.parquet`,
 			columns: ['period', 'chapter', 'sectionLeaf', 'blockLeaf', 'leafType', 'contentRaw'],
-			cacheKey: `panel.costSeries:${code}`,
-			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 32 }
+			rowStart: lo,
+			rowEnd: hi + 1,
+			cacheKey: `panel.noteCells:${code}`,
+			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 64 }
 		});
-		const re = NOTE_TOPICS[0]!.re; // costNature
-		const matched = rows.filter((r) => re.test(str(r.blockLeaf)) || re.test(str(r.sectionLeaf)));
-		if (!matched.length) return null;
-		// period 별 그룹 (parquet 반환 순서 = 문서 순서 보존 — currentPeriodTables 의 전기 마커 경계에 필수)
+		// period 별 그룹
 		const byPeriod = new Map<string, Row[]>();
-		for (const r of matched) {
+		for (const r of rows) {
 			const p = str(r.period);
-			if (!p) continue;
+			if (!recent.has(p)) continue;
 			let arr = byPeriod.get(p);
 			if (!arr) byPeriod.set(p, (arr = []));
 			arr.push(r);
 		}
-		type PP = { period: string; year: string; quarter: string; items: Map<string, number>; total: number; disp: Map<string, string> };
-		const perPeriod: PP[] = [];
+		// 한 기간 블록(cost|segment)의 연결 우선 table 본문 → XBRL 셀. 단위는 블록 전체(text+table)에서 1회 검출
+		// — '단위 : 천원' 마커가 표 본문 아닌 헤더 text 프래그먼트에 있는 경우 방어(CJ대한통운 등). 연결 없으면 별도 폴백.
+		const cellsFor = (prows: Row[], blk: RegExp) => {
+			const matched = prows.filter((r) => blk.test(str(r.blockLeaf)) || blk.test(str(r.sectionLeaf)));
+			if (!matched.length) return [];
+			const cons = matched.filter((r) => str(r.sectionLeaf).includes('연결') || str(r.chapter).includes('연결'));
+			const group = cons.length ? cons : matched;
+			const mult = detectUnit(group.map((r) => str(r.contentRaw)).join(' '));
+			return group.filter((r) => str(r.leafType) === 'table').flatMap((r) => xbrlCellsFromContent(str(r.contentRaw), mult));
+		};
+		const costP: PeriodComposition[] = [];
+		const segP: PeriodComposition[] = [];
 		for (const [period, prows] of byPeriod) {
-			// 연결('...연결...') 우선, 없으면 별도 — 중복 주제 한쪽만 (notes()와 동일 정책)
-			const consolidated = prows.filter((r) => str(r.sectionLeaf).includes('연결') || str(r.chapter).includes('연결'));
-			const pool = consolidated.length ? consolidated : prows;
-			const mult = detectUnitMult(pool.map((r) => str(r.contentRaw)));
-			const curTables = currentPeriodTables(pool.map((r) => ({ leafType: str(r.leafType), contentRaw: str(r.contentRaw) })));
-			// 당기 표 파싱 → 비용 정제(비-비용 드롭·구조적 총계 제거·재고제외·비용형태만) → 단위 원 환산
-			const parsed = cleanCostRows(parseNoteRows(curTables)).map((r) => ({ name: r.name, amount: r.amount * mult }));
-			if (parsed.length < 3) continue;
-			const total = parsed.reduce((a, r) => a + r.amount, 0);
-			if (total <= 0) continue;
-			// 의미 카테고리(인건비·감가상각 등) 버킷 + 산업특수 passthrough. 표시명: 의미라벨 그대로 / passthrough=원본
-			const items = new Map<string, number>();
-			const disp = new Map<string, string>();
-			for (const r of parsed) {
-				const k = costCategory(r.name);
-				items.set(k, (items.get(k) ?? 0) + r.amount);
-				if (!disp.has(k)) disp.set(k, COST_SEMANTIC_LABELS.has(k) ? k : r.name);
-			}
 			const m = period.match(/^(\d{4})Q(\d)$/);
-			perPeriod.push({ period, year: m ? m[1]! : period.slice(0, 4), quarter: (m ? m[2]! : '') + '분기', items, total, disp });
+			const year = m ? Number(m[1]) : Number(period.slice(0, 4));
+			const meta = { period, year: m ? m[1]! : period.slice(0, 4), quarter: (m ? m[2]! : '') + '분기' };
+			const ci = costCells(cellsFor(prows, COST_BLK), year);
+			if (ci.size >= 3) costP.push({ ...meta, items: ci });
+			const si = segmentCells(cellsFor(prows, SEG_BLK), year);
+			if (si.size >= 2) segP.push({ ...meta, items: si }); // 단일부문은 자동 배제
 		}
-		if (perPeriod.length < 2) return null; // 단일점이면 시계열 의미 없음 — snapshot 이 커버
-		perPeriod.sort((a, b) => a.period.localeCompare(b.period));
-		// 전 기간 카테고리 합계 → '기타' 제외 상위 K 선정. 표시명은 최신 기간 표기 우선(현행 명칭).
-		const gtot = new Map<string, number>();
-		const gdisp = new Map<string, string>();
-		for (const pp of perPeriod) for (const [k, v] of pp.items) gtot.set(k, (gtot.get(k) ?? 0) + v);
-		for (let i = perPeriod.length - 1; i >= 0; i--) for (const [k, name] of perPeriod[i]!.disp) gdisp.set(k, name);
-		const K = 6;
-		const topKeys = [...gtot.entries()].sort((a, b) => b[1] - a[1]).map((e) => e[0]).filter((k) => k !== '기타').slice(0, K);
-		// '기타' = 나머지(보고된 기타 + 비-top 카테고리) — 항상 catch-all 1개로(믹스 100% 닫힘)
-		const categories = topKeys.map((k) => gdisp.get(k) ?? k).concat(['기타']);
-		const points: CostNaturePoint[] = perPeriod.map((pp) => {
-			const shares = topKeys.map((k) => ((pp.items.get(k) ?? 0) / pp.total) * 100);
-			const sumTop = shares.reduce((a, b) => a + b, 0);
-			shares.push(Math.max(0, 100 - sumTop));
-			return { period: pp.period, year: pp.year, quarter: pp.quarter, total: pp.total, shares };
-		});
-		return { categories, points };
+		const cost = buildSeries(costP, { topK: 6, rollupOther: true });
+		const segment = buildSeries(segP, { topK: 8, rollupOther: false });
+		if (!cost && !segment) return null;
+		return { cost, segment };
 	}
 
 	// ── ReportPort — 각 메서드는 guarded(브라우저 가드 + null 폴백) 로 build 함수를 감싼다.
@@ -868,7 +792,6 @@ export function createReportSource(core: DataCore): ReportPort {
 		auditTrail: (code) => guarded(() => buildAuditTrail(code.trim())),
 		topExecPay: (code) => guarded(() => buildTopExecPay(code.trim())),
 		auditFees: (code) => guarded(() => buildAuditFees(code.trim())),
-		notes: (code) => guarded(() => buildReportNotes(code.trim())),
-		costNatureSeries: (code) => guarded(() => buildCostNatureSeries(code.trim()))
+		noteSeries: (code) => guarded(() => buildNoteSeries(code.trim()))
 	};
 }
