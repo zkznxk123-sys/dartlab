@@ -25,6 +25,7 @@ LLM Specifications:
 
 from __future__ import annotations
 
+import math
 import re
 
 _FACT_RE = re.compile(
@@ -79,8 +80,16 @@ def _resolveValue(inner: str, *, sign: str | None, scale: str | None, nil: bool)
             val *= 10 ** int(scale)
         except ValueError:
             pass
+        except OverflowError:
+            # 거대 scale(10^n, n 비정상) × float → int-too-large. 표현 불가 → inf 로 두고
+            # 아래 isfinite 가드가 원문 보존(int 변환 크래시 회피).
+            val = math.inf
     if neg:
         val = -abs(val)
+    if not math.isfinite(val):
+        # inf/-inf/nan — "Infinity" 텍스트 or scale 오버플로(10^거대)로 표현 불가.
+        # int(inf) 는 OverflowError 로 ticker 전체 빌드를 깨뜨린다 → 원문 보존(무손실 skip).
+        return text
     return str(int(val)) if val == int(val) else repr(val)
 
 
