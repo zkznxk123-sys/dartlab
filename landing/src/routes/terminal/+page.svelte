@@ -5,9 +5,9 @@
 	import { getPublicRuntime } from '$lib/runtime/publicRuntime';
 	import { terminalHosts, terminalLinks } from '$lib/terminal-shell/terminalShell';
 	import { loadDartDb } from '$lib/data/duckdb';
-	import { loadContractCodes } from '$lib/cards/contract';
+	import { loadContractPosts } from '$lib/cards/contract';
 	import { loadMediaIndex } from '$lib/cards/media';
-	import type { MediaIndex } from '$lib/cards/model';
+	import type { MediaIndex, ContractPost } from '$lib/cards/model';
 	import PostModal from '$lib/cards/PostModal.svelte';
 
 	// DuckDB-WASM 프리워밍 — JSON 데이터 로드와 병렬로 미리 인스턴스화 (주가 차트 체감속도↑)
@@ -20,17 +20,22 @@
 	const eng = $derived(createEngine(data.raw as RawData));
 	const ready = $derived(!!data.raw.finance.years.length && Object.keys(data.raw.prices.data).length > 0);
 
-	// 카드뉴스(편집 캐러셀) — 발간된 종목 집합 + 미디어(hero·표시명). 회사 네비「카드뉴스」노출 판단·다이얼로그 데이터.
+	// 카드뉴스(편집 캐러셀) — 발간된 글 목록(회사당 N편) + 미디어(hero·표시명). 회사 네비「카드뉴스」노출 판단·다이얼로그 데이터.
 	// surface 는 cardsCodes/onOpenCards 콜백만 받고, 포스트 다이얼로그(Deck=landing 의존)는 이 셸이 오버레이로 띄운다.
-	let cardsCodes = $state<Set<string>>(new Set());
+	let cardsPosts = $state<ContractPost[]>([]);
 	let media = $state<MediaIndex | null>(null);
-	let cardsPost = $state<{ code: string; corpName: string } | null>(null);
-	loadContractCodes().then((c) => (cardsCodes = new Set(c)));
+	let cardsPost = $state<{ code: string; slug: string; corpName: string } | null>(null);
+	loadContractPosts().then((p) => (cardsPosts = p));
 	loadMediaIndex().then((m) => (media = m));
+	// 카드 있는 회사 코드 집합(surface 의 「카드뉴스」버튼 노출 판단). 회사당 N편이어도 코드 1개.
+	const cardsCodes = $derived(new Set(cardsPosts.map((p) => p.code)));
 
 	function openCards(code: string) {
+		// posts 는 발간 최신순(date 내림차순) → 그 회사 최신 글을 연다.
+		const latest = cardsPosts.find((p) => p.code === code);
+		if (!latest) return;
 		const corpName = media?.companies[code]?.displayName ?? eng.nameOf(code) ?? code;
-		cardsPost = { code, corpName };
+		cardsPost = { code, slug: latest.slug, corpName };
 	}
 </script>
 
@@ -50,7 +55,7 @@
 
 {#if cardsPost}
 	<!-- 카드뉴스 다이얼로그 — 터미널 회사 네비「카드뉴스」클릭 시. /cards 피드와 동일 PostModal(Deck+캡션). -->
-	<PostModal rt={runtime} code={cardsPost.code} corpName={cardsPost.corpName} {media} {base} onClose={() => (cardsPost = null)} />
+	<PostModal rt={runtime} code={cardsPost.code} slug={cardsPost.slug} corpName={cardsPost.corpName} {media} {base} onClose={() => (cardsPost = null)} />
 {/if}
 
 <style>

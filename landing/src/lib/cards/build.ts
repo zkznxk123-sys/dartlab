@@ -6,7 +6,6 @@ import type { CarouselDeck, CarouselSpec, MediaIndex } from './model';
 import { projectResult } from './project';
 import { buildReport } from '$lib/report/build';
 import { findPerspective, PERSPECTIVES } from '$lib/report/perspectives';
-import { getPostByStockCode } from '$lib/blog/posts';
 import { loadMediaIndex, heroUrls as allHeroUrls, mediaKey, mediaCompany } from './media';
 import { loadContract, contractToCards } from './contract';
 
@@ -25,21 +24,26 @@ function resolveHeroes(media: MediaIndex | null, code: string, spec?: CarouselSp
 	return all;
 }
 
-/** 종목+관점 → 라이브 슬라이드 덱. 편집 계약(carousels/{code}.json 손글)이 있으면 그 슬라이드가 서사 표지,
- *  그 뒤에 핵심 차트(kpis·재무추이·섹션 차트·종합)를 덧붙인다. 굽지 않음. skip/pending 도 정직 카드로. */
-export async function buildDeck(rt: DartLabRuntime, code: string, perspectiveKey: string): Promise<CarouselDeck> {
+/** 글(회사 code + 글 slug)+관점 → 라이브 슬라이드 덱. 편집 계약(carousels/{slug}.json 손글)이 있으면 그
+ *  슬라이드가 서사 표지, 그 뒤에 핵심 차트(kpis·재무추이·섹션 차트·종합)를 덧붙인다. 굽지 않음.
+ *  큐레이션 오버레이(spec=hero/order/notes)는 계약에 실려 와 blog 번들 비의존. skip/pending 도 정직 카드로. */
+export async function buildDeck(
+	rt: DartLabRuntime,
+	post: { code: string; slug: string },
+	perspectiveKey: string
+): Promise<CarouselDeck> {
 	const persp = findPerspective(perspectiveKey);
-	const spec = getPostByStockCode(code)?.carousel;
 	const [result, media, contract] = await Promise.all([
-		buildReport(rt, code, perspectiveKey),
+		buildReport(rt, post.code, perspectiveKey),
 		loadMediaIndex(),
-		loadContract(code)
+		loadContract(post.slug)
 	]);
+	const spec = contract?.spec;
 	const lead = contract ? contractToCards(contract, media) : [];
 	// 차트 슬라이드 배경은 **편집 계약의 큐레이션 이미지만** 순환(엉뚱한 자산[generic bg·타사 오배치] 끼우지 않게).
 	// 계약이 없으면(자동 덱) 회사 hero 전체로 폴백.
 	const curated = [...new Set(lead.map((c) => c.bg).filter((u): u is string => !!u))];
-	const heroUrls = curated.length ? curated : resolveHeroes(media, code, spec);
+	const heroUrls = curated.length ? curated : resolveHeroes(media, post.code, spec);
 	return projectResult(result, persp.label, { heroUrls, spec, lead });
 }
 

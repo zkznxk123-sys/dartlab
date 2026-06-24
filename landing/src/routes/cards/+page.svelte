@@ -8,8 +8,8 @@
 	import '@dartlab/ui-surfaces/terminal/terminal.css';
 	import { DARTLAB_BRAND_LINKS, SupportDialog, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
 	import { loadMediaIndex } from '$lib/cards/media';
-	import { loadContractCodes } from '$lib/cards/contract';
-	import type { MediaIndex } from '$lib/cards/model';
+	import { loadContractPosts } from '$lib/cards/contract';
+	import type { MediaIndex, ContractPost } from '$lib/cards/model';
 	import PostModal from '$lib/cards/PostModal.svelte';
 	import CoverThumb from '$lib/cards/CoverThumb.svelte';
 
@@ -23,7 +23,7 @@
 	fetchGithubStars(links.repo).then((n) => (ghStars = n));
 
 	let media = $state<MediaIndex | null>(null);
-	let contractCodes = $state<string[]>([]); // 편집 계약(손글 카피) 있는 회사 = 피드(이미지 있는 것만)
+	let posts = $state<ContractPost[]>([]); // 발간된 편집 캐러셀 글(회사당 N편 1:N) = 피드
 	let loaded = $state(false);
 	let query = $state(data.sym || '');
 	let visibleCount = $state(12);
@@ -31,26 +31,38 @@
 	let sentinel = $state<HTMLDivElement | null>(null);
 	let supportOpen = $state(false);
 	// 인스타 포스트 모달 — 첫장 클릭 시 좌 캐러셀 + 우 캡션(PostModal 이 계약 로드·렌더). /terminal 카드뉴스와 공유.
-	let post = $state<{ code: string; corpName: string } | null>(null);
+	let post = $state<{ code: string; slug: string; corpName: string } | null>(null);
 
-	function openPost(code: string, corpName: string) {
-		post = { code, corpName };
+	function openPost(code: string, slug: string, corpName: string) {
+		post = { code, slug, corpName };
 	}
 
 	loadMediaIndex().then((m) => (media = m));
-	loadContractCodes().then((s) => {
-		// index.json 순서 그대로 = 발간 최신순(build 가 meta date 내림차순 정렬). 재정렬 금지.
-		contractCodes = [...s];
+	loadContractPosts().then((p) => {
+		// posts 순서 그대로 = 발간 최신순(build 가 date 내림차순 정렬). 재정렬 금지.
+		posts = p;
 		loaded = true;
-		// 터미널 카드 버튼이 sym 으로 들어왔는데 그 회사 카드가 없으면 전체 피드로(빈 화면 방지).
-		if (data.sym && !contractCodes.includes(data.sym)) query = '';
+		// 터미널 카드 버튼이 sym(코드)으로 들어왔는데 그 회사 글이 없으면 전체 피드로(빈 화면 방지).
+		if (data.sym && !posts.some((x) => x.code === data.sym)) query = '';
 	});
 
-	// 피드 = 편집 계약 있는 회사(=큐레이션·이미지 있는 것만). 이름은 hfMedia 매니페스트에서.
+	// 피드 = 발간된 편집 캐러셀 글(회사당 N편). 이름은 hfMedia 매니페스트에서.
 	const feedRows = $derived.by(() => {
-		const rows = contractCodes.map((code) => ({ stockCode: code, corpName: media?.companies[code]?.displayName ?? code }));
+		const rows = posts.map((p) => ({
+			stockCode: p.code,
+			slug: p.slug,
+			title: p.title ?? '',
+			corpName: media?.companies[p.code]?.displayName ?? p.code
+		}));
 		const q = query.trim().toLowerCase();
-		return q ? rows.filter((r) => r.corpName.toLowerCase().includes(q) || r.stockCode.toLowerCase().includes(q)) : rows;
+		return q
+			? rows.filter(
+					(r) =>
+						r.corpName.toLowerCase().includes(q) ||
+						r.stockCode.toLowerCase().includes(q) ||
+						r.title.toLowerCase().includes(q)
+				)
+			: rows;
 	});
 	const visible = $derived(feedRows.slice(0, visibleCount));
 
@@ -133,8 +145,8 @@
 			<p class="feedEmpty">캐러셀 불러오는 중…</p>
 		{:else}
 			<div class="grid">
-				{#each visible as row (row.stockCode)}
-					<CoverThumb {rt} code={row.stockCode} corpName={row.corpName} {base} {media} onOpen={() => openPost(row.stockCode, row.corpName)} />
+				{#each visible as row (row.slug)}
+					<CoverThumb {rt} code={row.stockCode} slug={row.slug} corpName={row.corpName} {base} {media} onOpen={() => openPost(row.stockCode, row.slug, row.corpName)} />
 				{/each}
 			</div>
 			<div bind:this={sentinel} class="sentinel"></div>
@@ -143,7 +155,7 @@
 	</main>
 
 	{#if post}
-		<PostModal {rt} code={post.code} corpName={post.corpName} {media} {base} onClose={() => (post = null)} />
+		<PostModal {rt} code={post.code} slug={post.slug} corpName={post.corpName} {media} {base} onClose={() => (post = null)} />
 	{/if}
 </div>
 

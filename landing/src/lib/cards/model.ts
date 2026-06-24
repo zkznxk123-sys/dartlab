@@ -91,20 +91,31 @@ export interface ContractSlide {
 }
 export interface CarouselContract {
 	code: string;
+	/** 글 슬러그(`003230-samyang-foods`) — serve 키(carousels/{slug}.json). 회사당 N편 구분(1:N). */
+	slug: string;
 	name: string;
 	sector?: string;
-	/** 인스타 포스트 제목(meta.json title) — 우측 캡션 패널 헤드라인. */
+	/** 인스타 포스트 제목(blog title / meta.json title) — 우측 캡션 패널 헤드라인. */
 	title?: string;
-	/** 인스타 캡션(caption.txt) — 포스트 우측 설명 산문(문단=빈 줄 구분). 슬라이드와 별개의 본문. */
+	/** 인스타 캡션(caption) — 포스트 우측 설명 산문(문단=빈 줄 구분). 슬라이드와 별개의 본문. */
 	caption?: string;
-	/** 고정 댓글(comment_pinned.txt) — 근거·면책. 캡션 하단 작게. */
+	/** 고정 댓글(pinnedComment) — 근거·면책. 캡션 하단 작게. */
 	pinnedComment?: string;
-	/** 발간일(meta.json date, YYYY-MM-DD) — 피드 최신순 정렬·표시용. */
+	/** 발간일(blog date, YYYY-MM-DD) — 피드 최신순 정렬·표시용. */
 	date?: string;
 	slides: ContractSlide[];
+	/** 자동 덱 오버레이(blog frontmatter `carousel:` hero/order/notes) — 계약에 실어 /cards 가 라이브(blog 번들 비의존). */
+	spec?: CarouselSpec;
+}
+/** 피드 인덱스 1엔트리 — 회사당 N편(같은 code, 다른 slug). date 내림차순 정렬된 발간 순서. */
+export interface ContractPost {
+	code: string;
+	slug: string;
+	title?: string;
+	date?: string;
 }
 export interface ContractIndex {
-	codes: string[];
+	posts: ContractPost[];
 }
 
 // ── 큐레이션 오버레이(P5) — blog frontmatter `carousel:` 선택 블록. 없으면 자동 투영만. ──

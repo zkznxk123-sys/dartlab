@@ -10,6 +10,7 @@
 	let {
 		rt,
 		sym,
+		slug,
 		corpName,
 		base = '',
 		heroUrls = [],
@@ -18,6 +19,7 @@
 	}: {
 		rt: DartLabRuntime;
 		sym: string;
+		slug: string;
 		corpName: string;
 		base?: string;
 		heroUrls?: string[];
@@ -64,7 +66,7 @@
 	// 관점이 바뀌면(사용자 조작) 재빌드. 첫 진입은 IntersectionObserver 가 트리거.
 	function load() {
 		const t = ++tok;
-		buildDeck(rt, sym, perspectiveKey)
+		buildDeck(rt, { code: sym, slug }, perspectiveKey)
 			.then((d) => {
 				if (t === tok) {
 					deck = d;

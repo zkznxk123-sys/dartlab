@@ -9,6 +9,7 @@
 	let {
 		rt,
 		code,
+		slug,
 		corpName,
 		base = '',
 		media,
@@ -16,17 +17,18 @@
 	}: {
 		rt: DartLabRuntime;
 		code: string;
+		slug: string;
 		corpName: string;
 		base?: string;
 		media: MediaIndex | null;
 		onOpen: () => void;
 	} = $props();
 
-	// 첫 슬라이드(표지) — 계약 로드 후. media 갱신 시 배경 이미지 추종(reactive).
+	// 첫 슬라이드(표지) — 계약 로드 후(슬러그 키). media 갱신 시 배경 이미지 추종(reactive).
 	let cover = $state<CarouselCard | null>(null);
 	let contract = $state<CarouselContract | null>(null);
 	$effect(() => {
-		loadContract(code).then((c) => {
+		loadContract(slug).then((c) => {
 			contract = c;
 			if (c) cover = contractToCards(c, media)[0] ?? null;
 		});
