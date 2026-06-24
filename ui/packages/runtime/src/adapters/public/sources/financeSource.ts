@@ -4,6 +4,7 @@
 // 핵심 10 카드 spec 을 클라이언트에서 계산 (ui/web viz/catalog/finance.py 의 dashboard 핵심).
 // 타입 정본 = contracts (옛 로컬 재정의는 contracts 로 승격 완료 — 중복 정의 금지).
 import type { FinCard, FinMode, FinScope, FinSeries, Num, StmtKind, StmtRow, TerminalFinance, TerminalFinanceBundle } from '@dartlab/ui-contracts';
+import { resolveMarket } from '@dartlab/ui-contracts';
 import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 // 28 표준계정·계정매칭·파싱 primitive 는 data/finance/accounts.ts 단일 SSOT (블로그 annual.ts 와 공유).
 import { buildGrid, FINANCE_COLUMNS, isStock, num, Q_BY_CODE, type Parsed, type RawRow } from '../../../data/finance/accounts';
@@ -51,12 +52,21 @@ const TRILLION = 1e12; // 조 KRW 환산
 // 캐시(60분 TTL·LRU 256)·dedup 한다(데이터 워크벤치 SSOT 이관 P1). transform(번들 빌드)은 재실행되어도
 // read 는 공유되며, 연결(CFS)·별도(OFS)·차트·표가 같은 cacheKey(finance.rows:{code}) read 1회를 나눠 쓴다.
 
+// 재무 parquet 경로 — KR=dart/finance/{code}·US=edgar/financeStmt/{ticker}. 둘 다 FINANCE_COLUMNS
+// 동형 스키마(US 는 파사드 Company.panel 표준화를 빌드타임 bake — edgar stage). 같은 reader·집계.
+// resolveMarket SSOT 로 분기 (6자리=KR·영문=US ticker). US CIK 만 있는 경우는 ticker 부재 → dart 경로
+// 폴백(미존재 → null, 정직 비표시).
+function financeParquetPath(code: string): string {
+	const m = resolveMarket(code);
+	return m.market === 'US' && m.ticker ? `edgar/financeStmt/${m.ticker}.parquet` : `dart/finance/${code}.parquet`;
+}
+
 // 회사 parquet raw 행 — core 가 read 레벨 캐시·dedup. 미존재/실패 = null(정직 폴백).
 function loadRows(core: DataCore, code: string): Promise<RawRow[] | null> {
 	return core
 		.requestParquetRows<RawRow>({
 			origin: 'hfRange',
-			path: `dart/finance/${code}.parquet`,
+			path: financeParquetPath(code),
 			columns: FINANCE_COLUMNS,
 			cacheKey: `finance.rows:${code}`,
 			cache: { scope: 'memory', ttlMs: 3_600_000, maxEntries: 256 }

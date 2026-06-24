@@ -26,6 +26,7 @@ export const brand = {
 		scan: { dir: 'dart/scan', label: '전종목 횡단분석 프리빌드 데이터' },
 		edgarPanel: { dir: 'edgar/panel', label: 'SEC EDGAR 공시 panel 수평화 데이터' },
 		edgar: { dir: 'edgar/finance', label: 'SEC EDGAR 재무 데이터' },
+		edgarFinanceStmt: { dir: 'edgar/financeStmt', label: 'SEC EDGAR 터미널 재무 (파사드 표준화)' },
 	},
 
 	// ⛔ 색은 여기서 정의하지 않는다 — 색 SSOT = ui/packages/design/src/styles/tokens.css (--p-*/--dl-*).
