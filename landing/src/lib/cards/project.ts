@@ -136,10 +136,20 @@ export function projectReport(
 // 재무 백본 관점 카드 — 터미널 중간패널 재무 그리드(financeSource) 키를 보는 순서대로(손익→현금→효율→체력).
 // 각 키가 MiniFinChart 한 장으로 렌더된다(그래프+표 세트). 관점 대표 카드 하나씩.
 const FIN_PERSPECTIVES: { key: string; heading: string; sub: string }[] = [
-	{ key: 'incomeBreakdown', heading: '손익구조', sub: '얼마나 버나' },
-	{ key: 'cashflowSigned', heading: '현금흐름', sub: '이익이 진짜 현금인가' },
-	{ key: 'returnTrend', heading: '자본효율', sub: '자본을 잘 굴리나' },
-	{ key: 'leverageTrend', heading: '재무체력', sub: '버틸 수 있나' }
+	// 손익 — 얼마나 버나
+	{ key: 'incomeBreakdown', heading: '손익구조', sub: '매출에서 이익까지' },
+	{ key: 'costStructure', heading: '비용구조', sub: '원가·판관비가 매출을 먹는 정도' },
+	{ key: 'marginTrend', heading: '이익률', sub: 'GPM·OPM·NPM 추이' },
+	// 현금 — 이익이 진짜인가
+	{ key: 'cashflowSigned', heading: '현금흐름', sub: '영업·투자·재무 현금' },
+	{ key: 'cashConversion', heading: '이익의 현금화', sub: '순이익이 진짜 현금인가' },
+	{ key: 'fcfTrend', heading: '잉여현금 FCF', sub: '쓰고 남는 진짜 현금' },
+	// 효율 — 자본을 잘 굴리나
+	{ key: 'returnTrend', heading: '자본수익', sub: 'ROE·ROA' },
+	{ key: 'dupont', heading: 'ROE 분해', sub: '마진·회전·레버리지' },
+	// 체력 — 버틸 수 있나
+	{ key: 'assetComposition', heading: '자산구조', sub: '무엇으로 구성됐나' },
+	{ key: 'leverageTrend', heading: '레버리지·유동', sub: '버틸 수 있나' }
 ];
 
 // 자동 섹션 슬라이드 = **시각 그래프만**(line/bars/share). 표(table)는 스파크라인이 손익구조를 못 보여줘

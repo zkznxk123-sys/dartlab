@@ -111,6 +111,21 @@
 			go(idx - 1);
 		}
 	}
+
+	// 자동재생 — 점 좌측 재생버튼 토글. 2초마다 다음 슬라이드(끝이면 처음으로 순환). 다시 누르면 정지.
+	let playing = $state(false);
+	let timer: ReturnType<typeof setInterval> | null = null;
+	function togglePlay() {
+		playing = !playing;
+		if (timer) {
+			clearInterval(timer);
+			timer = null;
+		}
+		if (playing) timer = setInterval(() => go(idx >= total - 1 ? 0 : idx + 1), 2000);
+	}
+	$effect(() => () => {
+		if (timer) clearInterval(timer);
+	});
 </script>
 
 <section
@@ -140,6 +155,13 @@
 			<button class="nav left" onclick={() => go(idx - 1)} disabled={idx === 0} aria-label="이전">‹</button>
 			<button class="nav right" onclick={() => go(idx + 1)} disabled={idx >= total - 1} aria-label="다음">›</button>
 			<div class="dots">
+				<button class="playBtn" class:on={playing} onclick={togglePlay} aria-label={playing ? '자동재생 정지' : '자동재생'} title={playing ? '정지' : '자동재생 (2초)'}>
+					{#if playing}
+						<svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true"><rect x="1.5" y="1" width="2.5" height="8" /><rect x="6" y="1" width="2.5" height="8" /></svg>
+					{:else}
+						<svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true"><path d="M2 1 L9 5 L2 9 Z" /></svg>
+					{/if}
+				</button>
 				{#each deck.cards as _, i (i)}
 					<button class="dot" class:on={i === idx} onclick={() => go(i)} aria-label="{i + 1}번" aria-current={i === idx}></button>
 				{/each}
@@ -270,11 +292,34 @@
 		left: 50%;
 		transform: translateX(-50%);
 		display: flex;
+		align-items: center;
 		gap: 5px;
 		flex-wrap: wrap;
 		justify-content: center;
-		max-width: 60%;
+		max-width: 64%;
 		z-index: 3;
+	}
+	/* 재생/정지 — 점 행 맨 좌측 작은 토글. 켜지면 테마색. */
+	.playBtn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 14px;
+		height: 14px;
+		margin-right: 3px;
+		border-radius: 50%;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		background: rgba(255, 255, 255, 0.4);
+		color: #050811;
+	}
+	.playBtn svg {
+		fill: currentColor;
+	}
+	.playBtn.on,
+	.playBtn:hover {
+		background: var(--dl-accent);
 	}
 	.dot {
 		width: 6px;
