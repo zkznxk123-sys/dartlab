@@ -240,14 +240,8 @@
 		}
 		return { last: lastK.c, prev: s.length >= 2 ? s[s.length - 2].c : null, date: lastK.t, hi, lo };
 	});
-	// 상태 피드백 1줄 — 자동 tf 상향·과거 백필 침묵 동작을 리본에 노출 ("버그처럼 보이는 정상동작" 제거)
+	// 상태 피드백 1줄 — 과거 백필 진행 동작을 리본에 노출 (침묵 로딩 = 버그처럼 보임 방지)
 	let notice = $state<string | null>(null);
-	let noticeTimer: ReturnType<typeof setTimeout> | null = null;
-	function setNotice(msg: string, ms = 2400) {
-		notice = msg;
-		if (noticeTimer) clearTimeout(noticeTimer);
-		noticeTimer = setTimeout(() => (notice = null), ms);
-	}
 	// 전체화면 오버레이 2종 — 심볼 점프 팔레트(⌘K·/) + 단축키 도움말(?)
 	let jumpOpen = $state(false);
 	let jumpQ = $state('');
@@ -542,16 +536,11 @@
 		}
 		const N = Math.min(Math.ceil((PERIOD_N[ctl.period] ?? len) / TF_DIV[tfv]), len);
 		const space = w / Math.max(1, N);
-		// 백테스트 중(전략 슬롯 보유 또는 보고서 모드) = 일봉 고정. 자동 tf 상향을 막는다 — 상향되면 일봉 ts 정렬
-		// 마커·에쿼티·보유밴드가 끊기고(btLayer ts 매칭 실패) 검증 창이 깨진다(과거 회귀: clearBtAll 래칫). 대신
-		// sub-1px 까지 허용해 선택 구간 전체를 일봉으로(촘촘한 가격 리본 + 에쿼티/밴드는 어떤 밀도에서도 가독).
-		if (space < 1 && (tfv === 'D' || tfv === 'W') && !btActive) {
-			const next = tfv === 'D' ? 'W' : 'M';
-			setNotice(T(`봉 ${N.toLocaleString()}개 — 1px 미달, ${next === 'W' ? '주봉' : '월봉'} 자동 전환`, `${N.toLocaleString()} bars — auto ${next} timeframe`));
-			ctl.tf = next; // tf effect 가 재적용+재배치 이어받음 (분기·년은 수동 전용 — 자동 상향 제외)
-			return;
-		}
-		const floor = btActive ? 0.12 : 1; // 백테스트는 창 전체 일봉 표시 우선(0.12px 까지 허용 — MAX 도 일봉 유지)
+		// 봉 주기는 사용자가 고른 그대로 유지한다 — 긴 기간에서 일/주봉이 1px 미만이 되어도 자동 상향(일→주→월)
+		// 하지 않는다(HTS·TradingView 관행: tf = 집계 선택일 뿐, 과거는 드래그/스크롤로 이동). 1px 미만이면 최근
+		// 구간만 화면에 들어오고 나머지는 좌측으로 스크롤된다.
+		// 일반 1px 하한(그 이하는 좌측 스크롤). 백테스트는 0.12px 까지 허용해 선택 구간 전체를 한 화면에(에쿼티/밴드 ts 정합).
+		const floor = btActive ? 0.12 : 1;
 		try { c.setBarSpace(Math.max(floor, Math.min(30, space))); c.scrollToRealTime(0); } catch { /* */ }
 	}
 
