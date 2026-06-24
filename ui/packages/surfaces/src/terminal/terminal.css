@@ -975,6 +975,16 @@
 .dlTerm .storyEmpty { padding: 10px 8px; font-size: 10px; color: var(--dimmer); font-family: var(--mono); line-height: 1.5; }
 .dlTerm .factRetry { background: none; border: none; color: var(--amber); font-family: var(--mono); font-size: 10px; cursor: pointer; padding: 0; text-decoration: underline; }
 .dlTerm .factRetry:hover { opacity: 0.8; }
+/* 정기보고서 주석 — panel 본문 그 자리 렌더(지연). 제목 토글 + 본문(CellContent)은 max-height 스크롤로 레일 보호. */
+.dlTerm .noteOpenBtn { width: 100%; text-align: left; background: var(--dl-bg-deep); border: 1px solid var(--bd); border-radius: 2px; color: var(--dim); font-family: var(--cond); font-size: 10.5px; padding: 7px 8px; cursor: pointer; }
+.dlTerm .noteOpenBtn:hover { color: var(--amber); border-color: var(--amber); }
+.dlTerm .noteList { display: flex; flex-direction: column; }
+.dlTerm .noteBlock { border-top: 1px solid var(--dl-line); }
+.dlTerm .noteBlock:first-child { border-top: none; }
+.dlTerm .noteHd { display: flex; align-items: center; justify-content: space-between; width: 100%; background: none; border: none; padding: 6px 8px; cursor: pointer; gap: 8px; }
+.dlTerm .noteTitle { font-family: var(--cond); font-size: 10.5px; color: var(--txt); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dlTerm .noteHd:hover .noteTitle { color: var(--amber); }
+.dlTerm .noteBody { max-height: 320px; overflow: auto; padding: 2px 8px 8px; }
 
 /* AI */
 .dlTerm .conf { font-family: var(--cond); font-size: 9px; color: var(--dim); letter-spacing: 0.5px; }

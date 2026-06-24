@@ -22,6 +22,12 @@
 
 ## 상태
 
+- **2026-06-24 ★주석 본문 표면화 (07 F4-CUT 결정 번복 — 운영자 직접 지시)**: 운영자 "panel 파케 주석으로 우측패널에 진짜 정보를 채우자, 원문 링크뿐이면 안 되고 그 자체로 봐야지". doc 07 F4 가 23 주석을 "뷰어 원문 ↗링크 전속(CUT)"으로 잘랐는데, **PRD 00 §26 명제("데이터는 있다·못 쓰는 건 표면화의 얕음→갇힌 계산을 있는 그대로 표면화")와 정면 모순** → 번복. **panel 파케 `contentRaw`(주석 본문)를 우측 패널에 *그 자리* 렌더**(↗링크 아님):
+  - contract `ReportNoteBlock` + `ReportPort.notes(code)` 신설. `reportSource.buildReportNotes` — **08 §4.2 정합 hyparquet 2-pass**(period 컬럼→최신기 → period 필터 row-group pruning, panel 13.4MB 전체로드 회피). DuckDB(`loadLiveCompanyPanelExcerpts` 휴면지뢰) 미사용.
+  - 토픽 3종 blockLeaf 키워드 매칭(회사별 NT코드 변동에 강건, 08 G1): 관계·종속기업 투자(타법인출자 detail)·특수관계자 거래·우발부채·약정(**§11 "필드 없어 침묵"이라던 담보/보증 — 주석 본문엔 존재**). 연결 우선.
+  - UI: 우측 '정기보고서 주석' 패널 — **지연 로드**('본문 보기' 클릭 시에만, panel 대용량 가드·타임아웃·에러·캐시). 뷰어 `CellContent` 재사용(DART XML→sanitize 표/텍스트), 블록 토글, ↗원문 보조. max-height 스크롤로 레일 보호.
+  - 검증: contracts·runtime·surfaces·landing tsc/svelte-check **0err** · checkUiDataWiring PASS · dossierVerdictLint PASS · 실데이터 4개사(삼성·기아·동화·셀트리온) 주석 본문 추출 확인(관계기업 장부금액 표·특수관계자 거래·담보/보증/약정 실재). UI push=운영자 눈검수 대기.
+  - ⚠ 교훈: AI 가 PRD 명제 안 읽고 07 F4-CUT 그대로 ↗링크만 깔아 "완성" 오판 → 운영자 교정. 잔여=토픽 확장(차입금/사채 등) 여부·자동로드 여부(pruning 실측 후) 운영자 결정.
 - **2026-06-24**: **Phase 1b 완료**(killer 리프레임 잔여) — 커밋 대기(UI surface = 운영자 push 게이트). 구현:
   - **상세보기 크로스패널 네비 완성**: `finFullEntry.svelte.ts`(requestFinFull pulse, viewerEntry 동형) → CenterStack 이 pulse 구독·`finFullTab` → `FinFullscreen initialTab` 으로 PEOPLE/RETURN 탭 직열기(최초 마운트만 untrack 적용, 회사전환=종합 리셋). 인력 상세보기→PEOPLE·주주환원 상세보기→RETURN.
   - **인력 자기이력 문장**(`reportSelfHistory.ts::workforceTrend`): 총원 궤적(YYYY→YYYY ±%)+계약직 비중 이동. 새 fetch 0(wf[] 이미 메모리). 백분위/1인당부가가치는 Phase 2 baked(여기 미포함).

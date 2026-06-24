@@ -13,6 +13,7 @@
 		NonRegularFiling,
 		ProductIndexItem,
 		RegularFiling,
+		ReportNoteBlock,
 		ShareholderReturnYear,
 		ShareholdersView,
 		StmtKind,
@@ -355,6 +356,34 @@
 	let shPeriods = $state<ShareholdersView[]>([]); // 최대주주 시계열 — 다이얼로그 기간축
 	let auditFees = $state<AuditFeeYear[] | null>(null); // 포렌식 — 감사/비감사 보수(독립성 비율)
 	let debtProfile = $state<DebtProfileBundle | null>(null); // 포렌식 — 사채 잔존만기(단기 상환벽)
+	// 정기보고서 주석 본문 — panel 파케 contentRaw 그 자리 렌더(관계기업·특수관계자·우발부채). ↗링크 아닌 실제 내용.
+	// 지연 로드: panel 대용량이라 매 전환마다 read 금지 — '본문 보기' 클릭 시에만 report.notes() (캐시·타임아웃 가드).
+	let notes = $state<ReportNoteBlock[]>([]);
+	let notesOpen = $state(false);
+	let notesState = $state<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
+	let openNoteKey = $state<string | null>(null);
+	$effect(() => {
+		void co.code; // 회사 전환 → 주석 접기·리셋 (다음 회사 본문 미리 안 읽음)
+		notes = [];
+		notesOpen = false;
+		notesState = 'idle';
+		openNoteKey = null;
+	});
+	async function openNotes(): Promise<void> {
+		notesOpen = true;
+		if (notesState !== 'idle') return;
+		const code = co.code;
+		notesState = 'loading';
+		try {
+			const n = await withTimeout(rt.report.notes(code), FACTS_TIMEOUT_MS);
+			if (co.code !== code) return; // 회사 바뀜 — 옛 결과 폐기
+			notes = n ?? [];
+			notesState = notes.length ? 'ready' : 'empty';
+			openNoteKey = notes.length ? notes[0].key : null; // 첫 블록 자동 펼침
+		} catch {
+			if (co.code === code) notesState = 'error';
+		}
+	}
 	// 최신 연간 현금성자산 (BS 'cash', 조 단위) → 원 환산. 단기 상환벽 신호의 분모.
 	const cashLatestWon = $derived.by<number | null>(() => {
 		const av = finBundle?.views.annual;
@@ -719,6 +748,40 @@
 		<HoldingsDialog {co} year={inv.year} rows={inv.rows} trend={invTrend} periods={invPeriods} {shareholders} shPeriods={shPeriods} {lang} {lookupListed} {onPick} onClose={() => (holdingsOpen = false)} />
 	{/await}
 {/if}
+
+<!-- 정기보고서 주석 — panel 파케 본문 그 자리 렌더(관계기업·종속기업 투자·특수관계자 거래·우발부채·약정·담보).
+     ↗링크가 아닌 *실제 주석 내용*을 우측 패널에 표면화(PRD 00 §26). 지연 로드: '본문 보기' 클릭 시에만 read. -->
+<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} sub={{ kr: 'panel · 관계기업·특수관계자·우발부채', en: 'panel · affiliates·related·contingency' }} flush>
+	{#if !notesOpen}
+		<button class="noteOpenBtn" onclick={openNotes}>{lang === 'en' ? '▾ show note text in place (affiliates · related-party · contingencies)' : '▾ 주석 본문 그 자리에서 보기 (관계기업·특수관계자·우발부채·담보)'}</button>
+	{:else if notesState === 'loading'}
+		<div class="storyEmpty" role="status" aria-busy="true">{lang === 'en' ? 'loading note text …' : '주석 본문 불러오는 중 …'}</div>
+	{:else if notesState === 'error'}
+		<div class="storyEmpty" role="status">{lang === 'en' ? 'Failed to load · ' : '불러오지 못했습니다 · '}<button class="factRetry" onclick={() => { notesState = 'idle'; openNotes(); }}>↻ {lang === 'en' ? 'retry' : '다시 시도'}</button></div>
+	{:else if notesState === 'empty'}
+		<div class="storyEmpty">{lang === 'en' ? 'No surfaceable notes for this company (period not yet filed or non-standard).' : '표면화할 주석 없음 (해당 기간 미공시 또는 비표준).'}</div>
+	{:else}
+		<div class="noteList">
+			{#each notes as nt (nt.key)}
+				{@const noteUrl = factSrcUrl(nt.rceptNo)}
+				<div class="noteBlock">
+					<button class="noteHd" onclick={() => (openNoteKey = openNoteKey === nt.key ? null : nt.key)}>
+						<span class="noteTitle">{openNoteKey === nt.key ? '▾' : '▸'} {nt.title}</span>
+						{#if noteUrl}<a class="factSrc" href={noteUrl} target="_blank" rel="noopener" onclick={(e) => e.stopPropagation()} title={lang === 'en' ? 'source filing' : '원문 공시'}>↗</a>{/if}
+					</button>
+					{#if openNoteKey === nt.key}
+						<div class="noteBody">
+							{#await import('../../viewer/components/CellContent.svelte') then { default: CellContent }}
+								<CellContent value={nt.content} />
+							{/await}
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</div>
+		<div class="finNote">{lang === 'en' ? 'verbatim from periodic report · ' + (notes[0]?.period ?? '') : '정기보고서 원문 발췌 · ' + (notes[0]?.period ?? '')}</div>
+	{/if}
+</Panel>
 
 <!-- 공급망 (dartlab 고유 — 공급사·고객사 제품·매출비중) -->
 {#if relations && (relations.suppliers.length || relations.customers.length)}

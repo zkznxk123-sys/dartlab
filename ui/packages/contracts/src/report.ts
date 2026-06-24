@@ -179,6 +179,18 @@ export interface ValuationRow {
 // stockCode → ValuationRow. 전 종목 1파일(소형) — 동종 분포·주체 위치를 조회 시점 계산.
 export type ValuationSnapshot = Record<string, ValuationRow>;
 
+/** 정기보고서 주석 블록 — panel 파케 본문(contentRaw, DART XML 표/텍스트)을 *그 자리에서* 렌더하는 단위.
+ * ↗원문 링크가 아니라 실제 주석 내용을 우측 패널에 표면화(PRD 00 §26 "갇힌 계산을 있는 그대로 표면화").
+ * content = raw DART XML/HTML — 소비측(CellContent)이 sanitize·표/텍스트 분리 렌더. 신규 분석 0, 표면화만. */
+export interface ReportNoteBlock {
+	key: string; // 안정 식별자 (disclosureKey + 순서)
+	title: string; // 주석 제목 (blockLeaf 또는 sectionLeaf)
+	section: string; // 상위 섹션 (예 '3. 연결재무제표 주석')
+	content: string; // 본문 raw DART XML/HTML (표·텍스트) — CellContent 가 렌더
+	rceptNo: string; // 출처 공시 번호 (↗원문)
+	period: string; // 기준 분기 (YYYYQn)
+}
+
 export interface ReportPort {
 	workforce(code: string): Promise<WorkforceYear[] | null>;
 	/** 밸류에이션 스냅샷(전 종목 per/pbr/marketCap, dart/scan/valuation.parquet 통파일 직독). 동종 밸류에이션 좌표용. 미존재는 null. */
@@ -196,4 +208,7 @@ export interface ReportPort {
 	auditTrail(code: string): Promise<AuditYear[] | null>;
 	topExecPay(code: string): Promise<TopExecPay | null>;
 	auditFees(code: string): Promise<AuditFeeYear[] | null>;
+	/** 정기보고서 주석 본문 — panel 파케에서 고가치 도시에 주석(관계기업·종속기업 투자·특수관계자 거래·우발부채·약정)의
+	 * 최신기 본문을 그 자리 렌더용으로. 지연 로드 권장(panel 대용량). 미존재/미지원은 null. */
+	notes(code: string): Promise<ReportNoteBlock[] | null>;
 }

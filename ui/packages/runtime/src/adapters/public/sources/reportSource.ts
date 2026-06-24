@@ -21,6 +21,7 @@ import type {
 	InvestmentTrendYear,
 	Num,
 	OwnershipYear,
+	ReportNoteBlock,
 	ReportPort,
 	ShareholderReturnYear,
 	ShareholderRow,
@@ -703,6 +704,60 @@ export function createReportSource(core: DataCore): ReportPort {
 		return Object.keys(out).length ? out : null;
 	}
 
+	// ── 정기보고서 주석 본문 (panel 파케 contentRaw 그 자리 렌더 — ↗링크 아닌 실제 내용 표면화) ──
+	// 고가치 도시에 주석만 선별: 관계·종속기업 투자(타법인출자 detail)·특수관계자 거래(소유/관계)·우발부채·약정
+	// (PRD §11 "필드 없어 침묵"이라던 담보/보증 — 주석 본문엔 존재). blockLeaf 키워드 매칭이라 회사별 NT 코드
+	// 변동(08 G1: 우발부채=827580 OR 822320)에 강건. 연결 우선. panel 대용량 → 최신기만 2-pass(period→필터).
+	const NOTE_TOPICS: { id: string; re: RegExp }[] = [
+		{ id: 'affiliates', re: /관계기업|종속기업|공동기업/ },
+		{ id: 'relatedParty', re: /특수관계자/ },
+		{ id: 'contingency', re: /우발부채|약정사항|약정/ }
+	];
+	async function buildReportNotes(code: string): Promise<ReportNoteBlock[] | null> {
+		// Pass A — period 컬럼만(저비용 단일컬럼) → 최신기 (panel 전체 본문 로드 회피, 08 §4.2 hyparquet)
+		const pr = await core.requestParquetRows<{ period?: unknown }>({
+			origin: 'hfRange',
+			path: `dart/panel/${code}.parquet`,
+			columns: ['period'],
+			cacheKey: `panel.periods:${code}`,
+			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 128 }
+		});
+		let latest = '';
+		for (const r of pr) { const p = str(r.period); if (p > latest) latest = p; }
+		if (!latest) return null;
+		// Pass B — 최신기 본문만(period 필터 row-group pruning, 대용량 가드) + 도시에 주석 컬럼
+		const rows = await core.requestParquetRows<Row>({
+			origin: 'hfRange',
+			path: `dart/panel/${code}.parquet`,
+			columns: ['sectionLeaf', 'blockLeaf', 'chapter', 'leafType', 'disclosureKey', 'contentRaw', 'rceptNo', 'period'],
+			filter: { period: { $eq: latest } },
+			cacheKey: `panel.notes:${code}:${latest}`,
+			cache: { scope: 'memory', ttlMs: 30 * 60_000, maxEntries: 64 }
+		});
+		const out: ReportNoteBlock[] = [];
+		for (const topic of NOTE_TOPICS) {
+			const matched = rows.filter((r) => topic.re.test(str(r.blockLeaf)) || topic.re.test(str(r.sectionLeaf)));
+			if (!matched.length) continue;
+			// 연결('3. 연결재무제표 주석') 우선, 없으면 별도 — 중복(연결/별도 동일 주제) 한쪽만
+			const consolidated = matched.filter((r) => str(r.sectionLeaf).includes('연결') || str(r.chapter).includes('연결'));
+			const pool = consolidated.length ? consolidated : matched;
+			// 문서 순서(parquet 반환 순)로 본문 연결 — [text]제목+[table]내용 한 블록. 빈 본문 스킵.
+			const content = pool.map((r) => str(r.contentRaw)).filter((c) => c.trim()).join('\n');
+			if (content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length < 40) continue;
+			const head = pool[0];
+			if (!head) continue;
+			out.push({
+				key: `${topic.id}:${str(head.disclosureKey) || topic.id}`,
+				title: str(head.blockLeaf) || str(head.sectionLeaf),
+				section: str(head.sectionLeaf) || str(head.chapter),
+				content,
+				rceptNo: str(head.rceptNo),
+				period: latest
+			});
+		}
+		return out.length ? out : null;
+	}
+
 	// ── ReportPort — 각 메서드는 guarded(브라우저 가드 + null 폴백) 로 build 함수를 감싼다.
 	// shareholders 는 shareholderPeriods 의 최신기로 파생(단일 read 공유, 코어가 dedup). ──
 	return {
@@ -718,6 +773,7 @@ export function createReportSource(core: DataCore): ReportPort {
 		capitalChanges: (code) => guarded(() => buildCapitalChanges(code.trim())),
 		auditTrail: (code) => guarded(() => buildAuditTrail(code.trim())),
 		topExecPay: (code) => guarded(() => buildTopExecPay(code.trim())),
-		auditFees: (code) => guarded(() => buildAuditFees(code.trim()))
+		auditFees: (code) => guarded(() => buildAuditFees(code.trim())),
+		notes: (code) => guarded(() => buildReportNotes(code.trim()))
 	};
 }
