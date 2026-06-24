@@ -4,6 +4,8 @@
 export { default as TerminalSurface } from './TerminalSurface.svelte';
 // 후원·기여 센터 — 자기완결(terminal.css 불필요) 라 landing 헤더 등 다른 셸에서도 재사용.
 export { default as SupportDialog } from './panels/SupportDialog.svelte';
+// 브랜드 색 테마 아이콘 — 자기완결(document 직접). 터미널 topbar·카드·랜딩 Header 가 *동일* 컨트롤 공유.
+export { default as BrandSwitch } from './ui/BrandSwitch.svelte';
 // 재무 추이 미니차트 — finance.bundle 의 FinCard 를 경량 SVG 렌더(klinecharts·백테스트 0 의존).
 // landing /cards 라이브 카드 캐러셀의 백본 슬라이드가 터미널과 동일한 재무 시각을 재현할 때 재사용.
 // (heatmap/bars 등 백테스트 자본곡선 의존 차트는 백본 아님 → export 보류.)

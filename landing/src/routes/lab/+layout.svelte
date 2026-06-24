@@ -1,14 +1,14 @@
 <script lang="ts">
 	import '@dartlab/ui-design/styles/tokens.css';
 	import '@dartlab/ui-design/styles/typography.css';
-	import BrandSwitcher from '$lib/components/dev/BrandSwitcher.svelte'; // 브랜드 색 테마 — 터미널 우상단(SNS 영역)
+	import { BrandSwitch } from '@dartlab/ui-surfaces/terminal'; // 브랜드 색 테마 — 공유 컨트롤(터미널 topbar 와 동일)
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
 </script>
 
 <div class="lab-shell">
-	<div class="lab-brandswitch"><BrandSwitcher /></div>
+	<div class="lab-brandswitch"><BrandSwitch /></div>
 	{@render children()}
 </div>
 

@@ -153,7 +153,7 @@
 		font-family: Menlo, Consolas, monospace;
 		font-size: 12px;
 		letter-spacing: 0.08em;
-		color: #ff3f6f;
+		color: var(--dl-accent);
 		font-weight: 700;
 	}
 	.prTitle {

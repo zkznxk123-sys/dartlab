@@ -154,7 +154,7 @@
 		outline: none;
 	}
 	.deck:focus-visible .frame {
-		box-shadow: 0 0 0 2px #ff3f6f;
+		box-shadow: 0 0 0 2px var(--dl-accent);
 	}
 	.frame {
 		position: relative;
@@ -286,7 +286,7 @@
 		padding: 0;
 	}
 	.dot.on {
-		background: #ff3f6f;
+		background: var(--dl-accent);
 	}
 	.live {
 		position: absolute;

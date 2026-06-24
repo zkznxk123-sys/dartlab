@@ -39,7 +39,7 @@ const TOKEN_FILES = [
 ];
 // 정당한 리터럴 정의처 — dev 색 시도 위젯 프리셋 정의 + 카드 SNS PNG export parity 상수(Remotion 렌더 일치).
 const ALLOW_FILES = [
-	'landing/src/lib/components/dev/BrandSwitcher.svelte',
+	'ui/packages/surfaces/src/terminal/ui/BrandSwitch.svelte',
 	'landing/src/lib/cards/theme.ts'
 ];
 // 브랜드 색 리터럴(이것만 토큰 강제) — 대소문자 무시. 데이터-viz 신호색은 의도적으로 제외.

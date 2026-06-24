@@ -322,7 +322,7 @@
 		background: linear-gradient(180deg, rgba(3, 5, 9, 0.22) 0%, rgba(3, 5, 9, 0.32) 44%, rgba(3, 5, 9, 0.86) 100%);
 	}
 	.pm-editorial .content {
-		--hl: #ff3f6f;
+		--hl: var(--dl-accent);
 	}
 	.content {
 		position: relative;
@@ -358,7 +358,7 @@
 		align-items: center;
 		gap: 0.6em;
 		font-size: clamp(11px, 2.4cqw, 17px);
-		color: #ff3f6f;
+		color: var(--dl-accent);
 		font-weight: 800;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
@@ -367,10 +367,10 @@
 		width: 0.55em;
 		height: 0.55em;
 		border-radius: 999px;
-		background: #ff3f6f;
+		background: var(--dl-accent);
 	}
 	.hl {
-		color: var(--hl, #ff3f6f);
+		color: var(--hl, var(--dl-accent));
 	}
 	/* editorial (기존 SNS editorial 재현 — 하단 텍스트 블록) */
 	.editorial {
@@ -473,7 +473,7 @@
 		font-size: clamp(13px, 2.8cqw, 22px);
 		line-height: 1.5;
 		color: #cdd9e6;
-		border-left: 2px solid #ff3f6f;
+		border-left: 2px solid var(--dl-accent);
 		padding-left: 0.7em;
 	}
 	/* kpis */
@@ -640,7 +640,7 @@
 	.bF {
 		display: block;
 		height: 100%;
-		background: #ff3f6f;
+		background: var(--dl-accent);
 	}
 	.bF.neg {
 		background: #ea4647;
