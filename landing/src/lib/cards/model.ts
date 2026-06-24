@@ -58,7 +58,7 @@ export type CarouselCard =
 			legend: { label: string; key: string }[];
 	  })
 	| (CardHead & { kind: 'table'; cols: string[]; data: Record<string, string>[]; unit?: string })
-	| (CardHead & { kind: 'finChart'; stockCode: string }) // MiniFinChart 백본(finance.bundle)
+	| (CardHead & { kind: 'finChart'; stockCode: string; cardKey?: string }) // MiniFinChart 백본(finance.bundle) — cardKey=관점 카드 선택(없으면 cards[0])
 	| (CardHead & { kind: 'closing'; thesis: string })
 	| (CardHead & { kind: 'empty'; reason: string }) // pending/skip 정직 카드(broken img 아님)
 	// ── 편집 카드(기존 SNS 캐러셀 계약 carousels/{code}.json 손글 카피) — `[[강조]]`=accentImpact ──

@@ -77,7 +77,9 @@
 			.then((b) => {
 				// 분기 우선(밀도 — 데이터 작업대 기본 결) → 없으면 연간 폴백. FY 표지화 금지.
 				const view = b?.views?.quarter ?? b?.views?.annual ?? Object.values(b?.views ?? {}).find(Boolean);
-				const c0 = view?.cards?.[0];
+				// 관점 카드(cardKey) 선택 — 터미널 재무 그리드의 그 카드. 없으면 첫 카드.
+				const list = view?.cards ?? [];
+				const c0 = (card.cardKey ? list.find((c) => c.key === card.cardKey) : null) ?? list[0];
 				if (c0 && view) {
 					// 단위 스케일은 SSOT 가 책임진다 — 차트 축은 MiniFinChart 내부 pickKrwUnit, 표는 셀별
 					// fmtKrwFromJo(자연 단위, 0.0조 차단). 여기선 raw 조 카드 그대로 넘기고 색만 캐러셀 팔레트로.

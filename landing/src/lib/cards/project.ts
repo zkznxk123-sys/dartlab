@@ -105,7 +105,9 @@ export function projectReport(
 	}
 
 	if (model.headlineKpis.length) cards.push({ kind: 'kpis', heading: '핵심 지표', metrics: model.headlineKpis });
-	cards.push({ kind: 'finChart', heading: '재무 추이', stockCode: model.stockCode });
+	// 재무 백본 = 터미널 중간패널 재무 그리드를 **보는 관점 순서** 그대로 한 장씩(각 장 = MiniFinChart 그래프
+	// + 표 한 세트). 손익→현금→효율→체력. cardKey 로 번들 카드 선택. 스파크라인(table) 금지.
+	for (const p of FIN_PERSPECTIVES) cards.push({ kind: 'finChart', heading: p.heading, sub: p.sub, stockCode: model.stockCode, cardKey: p.key });
 
 	// 큐레이션 order: 섹션 key 화이트리스트로 필터/재정렬(없으면 원순서). 미지정 key 는 무시(누락 surface 는 audit).
 	let sections = model.sections;
@@ -131,10 +133,19 @@ export function projectReport(
 	return { ...base, cards };
 }
 
-// 자동 섹션 슬라이드 = **시각(표·그래프)만**. 산문(narrative)·신호(flags)·지표(kpis) 자동 생성 금지
-// (자동 텍스트는 엉망 — 종합/서사는 수기 editorial 슬라이드로). 섹션당 1장(시각 우선·과다 슬라이드 방지).
-const AUTO_VISUAL = new Set(['line', 'bars', 'share', 'table']);
-const KIND_RANK: Record<string, number> = { line: 0, bars: 0, share: 1, table: 2 };
+// 재무 백본 관점 카드 — 터미널 중간패널 재무 그리드(financeSource) 키를 보는 순서대로(손익→현금→효율→체력).
+// 각 키가 MiniFinChart 한 장으로 렌더된다(그래프+표 세트). 관점 대표 카드 하나씩.
+const FIN_PERSPECTIVES: { key: string; heading: string; sub: string }[] = [
+	{ key: 'incomeBreakdown', heading: '손익구조', sub: '얼마나 버나' },
+	{ key: 'cashflowSigned', heading: '현금흐름', sub: '이익이 진짜 현금인가' },
+	{ key: 'returnTrend', heading: '자본효율', sub: '자본을 잘 굴리나' },
+	{ key: 'leverageTrend', heading: '재무체력', sub: '버틸 수 있나' }
+];
+
+// 자동 섹션 슬라이드 = **시각 그래프만**(line/bars/share). 표(table)는 스파크라인이 손익구조를 못 보여줘
+// 금지 — 재무는 위 FIN_PERSPECTIVES(MiniFinChart)로 그린다. 산문·신호·지표 자동 생성도 금지(수기 editorial).
+const AUTO_VISUAL = new Set(['line', 'bars', 'share']);
+const KIND_RANK: Record<string, number> = { line: 0, bars: 0, share: 1 };
 function pickSectionCard(blocks: ReportBlock[], head: HeadCtx): CarouselCard | null {
 	const cards = blocks
 		.map((b) => projectBlock(b, head))
