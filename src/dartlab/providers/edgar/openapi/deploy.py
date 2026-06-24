@@ -29,7 +29,9 @@ from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
 _log = logging.getLogger(__name__)
 
 # HF 에 업로드 허용된 카테고리 — dartlab 파생물만.
-# finance / meta 는 SEC 벌크가 원본이므로 사용자 PC 에서 자동 다운로드 (HF 미러링 없음).
+# finance 는 본 deploy 가 아니라 **edgar stage(pipeline.stages.edgar)** 가 detectChanged 증분으로
+# edgar/finance 에 발행한다(브라우저 터미널 HF 직독 패리티). 여기서는 중복 방지로 계속 제외.
+# meta 는 SEC 벌크가 원본(사용자 PC 자동 다운로드) — 미러링 없음.
 _CATEGORY_MAP = {
     "scan": "edgarScan",
     "docs": "edgarDocs",

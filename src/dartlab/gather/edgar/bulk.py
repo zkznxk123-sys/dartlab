@@ -15,6 +15,7 @@ URL: https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import zipfile
@@ -207,7 +208,8 @@ def convertBulkToParquets(
     onlyCiks: set[str] | None = None,
     progress: bool = True,
     force: bool = False,
-) -> dict[str, int]:
+    detectChanged: bool = False,
+) -> dict:
     """companyfacts.zip → `data/edgar/finance/{cik}.parquet` 일괄 생성.
 
     Parameters
@@ -224,10 +226,15 @@ def convertBulkToParquets(
         True 면 stamp 무시하고 항상 재변환 (CI 강제 리빌드 용).
         기본 False: zip mtime 이 `companyfacts.converted` 스탬프보다 최신이거나
         스탬프 없을 때만 변환 (3분+/16,600 CIK 중복 작업 회피).
+    detectChanged : bool
+        True 면 fact 해시 매니페스트(`_factHash.json`)로 *변경된 CIK 만* 재변환하고
+        ``changed`` 리스트(``{cik}.parquet`` 파일명)를 반환 — HF 증분 업로드용(daily
+        파이프라인이 16,600 전체 대신 그날 공시한 회사만 올린다). 미변경은 skip.
+        매니페스트 부재(최초 run)면 전부 changed.
 
     Returns
     -------
-    dict {"converted": N, "skipped": M, "failed": K, "stampSkipped": bool}
+    dict {"converted": N, "skipped": M, "failed": K, "stampSkipped": bool, "changed": list[str]}
 
     Raises:
         FileNotFoundError: zip 경로 부재.
@@ -259,11 +266,23 @@ def convertBulkToParquets(
     stamp = zipPath.parent / "companyfacts.converted"
     if not force and onlyCiks is None and stamp.exists() and zipPath.stat().st_mtime <= stamp.stat().st_mtime:
         _log.info("companyfacts.zip 변환 최신 상태 (stamp=%s) — skip", stamp)
-        return {"converted": 0, "skipped": 0, "failed": 0, "stampSkipped": True}
+        return {"converted": 0, "skipped": 0, "failed": 0, "stampSkipped": True, "changed": []}
 
     converted = 0
     skipped = 0
     failed = 0
+    changed: list[str] = []
+
+    # 변경 감지용 fact 해시 매니페스트 — daily 증분 업로드 SSOT(미변경 CIK 재변환·업로드 skip).
+    hashManifest: dict[str, str] = {}
+    manifestPath = target / "_factHash.json"
+    if detectChanged and manifestPath.exists():
+        try:
+            loaded = json.loads(manifestPath.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                hashManifest = loaded
+        except (OSError, json.JSONDecodeError):
+            hashManifest = {}
 
     with zipfile.ZipFile(zipPath, "r") as zf:
         entries = [i for i in zf.infolist() if i.filename.endswith(".json")]
@@ -277,16 +296,29 @@ def convertBulkToParquets(
                 if bar is not None:
                     bar.update(1)
                 continue
+            outPath = target / f"{cik}.parquet"
+            factHash = ""
+            if detectChanged:
+                factHash = hashlib.sha1(
+                    json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                ).hexdigest()
+                if hashManifest.get(cik) == factHash and outPath.exists():
+                    skipped += 1  # 미변경(공시 없음) — 재변환·업로드 skip
+                    if bar is not None:
+                        bar.update(1)
+                    continue
             try:
                 df = companyFactsToRows(payload)
                 if df.height == 0:
                     skipped += 1
                 else:
-                    outPath = target / f"{cik}.parquet"
                     tmpPath = outPath.with_suffix(".parquet.tmp")
                     df.write_parquet(tmpPath, compression="zstd")
                     tmpPath.replace(outPath)
                     converted += 1
+                    if detectChanged:
+                        hashManifest[cik] = factHash
+                        changed.append(f"{cik}.parquet")
             except (
                 ValueError,
                 TypeError,
@@ -300,6 +332,12 @@ def convertBulkToParquets(
     finally:
         if bar is not None:
             bar.close()
+
+    if detectChanged:
+        try:
+            manifestPath.write_text(json.dumps(hashManifest), encoding="utf-8")
+        except OSError as exc:
+            _log.warning("_factHash.json 저장 실패: %s", exc)
 
     # 변환 완료 시각 기록 (다운스트림 스크립트 용).
     # skip 가드가 이 파일 mtime 을 zip mtime 과 비교하므로 touch 이후 작성.
@@ -317,6 +355,7 @@ def convertBulkToParquets(
         "skipped": skipped,
         "failed": failed,
         "stampSkipped": False,
+        "changed": changed,
     }
 
 

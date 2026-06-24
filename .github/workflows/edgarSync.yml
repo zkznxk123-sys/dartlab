@@ -98,11 +98,14 @@ jobs:
       # ── 1+2. daily 벌크(companyfacts.zip) + 분기 벌크(sub/pre/tag, 최신 4분기) ──
       # 통합 진입점(dartlab.pipeline) — edgar stage 가 두 inline 스텝을 byte 동형 호출.
       # force 플래그는 EDGAR_FORCE_* env 로 전달.
+      # HF_TOKEN: edgar stage 가 companyfacts 변경분(detectChanged)만 edgar/finance 로 증분 발행
+      # (브라우저 터미널 HF 직독 패리티 — 그날 공시한 회사만, 16,600 전체 재업로드 회피).
       - name: Download + convert EDGAR bulk (companyfacts + quarterly)
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
           EDGAR_FORCE_COMPANYFACTS: ${{ github.event.inputs.forceCompanyfacts }}
           EDGAR_FORCE_QUARTERLY: ${{ github.event.inputs.forceQuarterly }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: uv run python -X utf8 -m dartlab.pipeline edgar
 
       # ── 3. docs (10-K/10-Q HTML) — 선택, 일요일 전체 정산 때만 ──
