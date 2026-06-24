@@ -26,6 +26,11 @@
 	--p-pink-500: #ec4899;
 	--p-pink-700: #be185d;
 	--p-pink-500-rgb: 236, 72, 153;
+	/* 시그니처 accent seed (#ff3f6f) — 브랜드 swap이 건드리는 유일한 hex. data-brand 프리셋이 여기만 re-pin. */
+	--p-accent-500: #ff3f6f;
+	--p-accent-500-rgb: 255, 63, 111;
+	--p-accent-400: #ff6f8f;
+	--p-accent-300: #ff8aa3;
 	--p-red-300: #ff5757;
 	--p-red-400: #f87171;
 	--p-red-500: #ea4647;
@@ -39,6 +44,7 @@
 	--p-blue-400: #60a5fa;
 	--p-violet-400: #a78bfa;
 	--p-coral-500: #ef4444;
+	--p-red-soft: #f0616f; /* 터미널/리포트 신호 down-red (green-up 컨벤션) */
 	--p-gold-400: #ffdd00;
 	/* 한국 금융 컨벤션 (상승 빨강 / 하락 파랑) */
 	--p-up: #e43f3f;
@@ -84,11 +90,11 @@
 	 * 여기 한 곳만 바꾸면 터미널(--amber)·landing·scan·map·viewer 강조색 일괄 변경.
 	 * --dl-accent-rgb 는 알파 변형용: rgba(var(--dl-accent-rgb), 0.3). dim/light 는 같은 hue 음영.
 	 */
-	--dl-accent: #ff3f6f;
-	--dl-accent-rgb: 255, 63, 111;
-	--dl-accent-dim: #ff6f8f;
-	--dl-accent-light: #ff8aa3;
-	--dl-accent-soft: rgba(255, 63, 111, 0.12);
+	--dl-accent: var(--p-accent-500);
+	--dl-accent-rgb: var(--p-accent-500-rgb);
+	--dl-accent-dim: var(--p-accent-400);
+	--dl-accent-light: var(--p-accent-300);
+	--dl-accent-soft: rgba(var(--p-accent-500-rgb), 0.12);
 	/* surfaces 레거시 alias 전역 fallback — scan/map/viewer 등 .dlTerm 밖에서도 강조색 var 해석되게. */
 	--amber: var(--dl-accent);
 	--amber-rgb: var(--dl-accent-rgb);
@@ -111,6 +117,10 @@
 	--dl-warn: var(--p-amber-400);
 	--dl-bad: var(--p-coral-500);
 	--dl-info: var(--p-blue-400);
+	/* 신호 up/down — 터미널·리포트가 의도적으로 쓰는 green-up 컨벤션(한국 --dl-up/down 빨강-up 과 별개의 *문서화된* 분기).
+	 * data-brand='green-up' 프리셋으로 KR 표면도 이 컨벤션으로 flip 비교 가능. */
+	--dl-signal-up: var(--p-green-400);
+	--dl-signal-down: var(--p-red-soft);
 
 	/* ── Surface · 4단계 elevation (theme 의존 · dark 기본) ── */
 	--dl-bg-base: var(--p-gray-900);
@@ -222,4 +232,41 @@
 	--dl-mkt-card: var(--p-white);
 	--dl-mkt-card-2: #f2f4f7;
 	--dl-mkt-border: rgba(15, 23, 42, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Brand 프리셋 — data-brand 한 속성으로 SEED 만 re-pin (파생·전 표면 동시 따라옴)
+   기본(속성 없음) = 핑크(#ff3f6f). dev BrandSwitcher 또는 <html data-brand="…"> 로
+   랜딩+터미널+scan+map+viewer+report+카드를 리빌드 없이 실시간 비교한다.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root[data-brand='amber'] {
+	--p-accent-500: #fb923c;
+	--p-accent-500-rgb: 251, 146, 60;
+	--p-accent-400: #fdba74;
+	--p-accent-300: #ffd6a8;
+}
+:root[data-brand='teal'] {
+	--p-accent-500: #2dd4bf;
+	--p-accent-500-rgb: 45, 212, 191;
+	--p-accent-400: #5eead4;
+	--p-accent-300: #99f6e4;
+}
+:root[data-brand='violet'] {
+	--p-accent-500: #a78bfa;
+	--p-accent-500-rgb: 167, 139, 250;
+	--p-accent-400: #c4b5fd;
+	--p-accent-300: #ddd6fe;
+}
+:root[data-brand='gold'] {
+	--p-accent-500: #f5b301;
+	--p-accent-500-rgb: 245, 179, 1;
+	--p-accent-400: #ffce4d;
+	--p-accent-300: #ffe08a;
+}
+/* 컨벤션 프리셋(강조와 직교, 별도 속성 data-conv) — KR 빨강-up 표면(scan/map/viewer)을 green-up 으로 flip 비교 */
+:root[data-conv='green-up'] {
+	--dl-up: var(--p-green-400);
+	--dl-up-soft: rgba(52, 211, 153, 0.1);
+	--dl-down: var(--p-coral-500);
+	--dl-down-soft: rgba(239, 68, 68, 0.1);
 }
