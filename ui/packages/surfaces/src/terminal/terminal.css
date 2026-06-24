@@ -23,9 +23,11 @@
 	/* 회색글자 가독성 — 기본 토큰(--dl-ink-mute/-dim)이 너무 어두워 흰색에 가깝게 상향(운영자 요청). */
 	--dim: #c4ccd8;
 	--dimmer: #a7b2c2;
-	--bg: var(--dl-bg-base);
-	--panel: var(--dl-bg-raised);
-	--panel2: var(--dl-bg-overlay);
+	/* 터미널 배경 톤업(운영자 "전체적으로 어둡다") — 근원 토큰(#0f0f10 OLED블랙)보다 한 단 밝은 슬레이트로.
+	   .dlTerm 스코프 override 라 landing 등 다른 surface 무영향. */
+	--bg: #121419;
+	--panel: #1b1e25;
+	--panel2: #262a33;
 	--bd: rgba(255, 255, 255, 0.08);
 	--bdHi: var(--dl-line-strong);
 	--bdAmber: rgba(var(--amber-rgb), 0.28);
