@@ -10,6 +10,22 @@
 				document.documentElement.dataset.theme = t;
 				document.documentElement.style.colorScheme = t;
 			} catch (e) {}
+			/* 브랜드 초기화 — paint 전 data-brand/data-conv/커스텀 accent 선세팅. BrandSwitch 와 동일 규약
+			   (dl-brand·dl-conv localStorage). BrandSwitch 미마운트 라우트(/report 등 새 탭)도 사용자가 고른
+			   브랜드 색을 따르게 — 전역 SSOT(그동안 BrandSwitch 있는 화면만 리테마되던 누락 보정). */
+			try {
+				var el = document.documentElement;
+				var b = localStorage.getItem('dl-brand') || '';
+				if (b.indexOf('custom:') === 0) {
+					var hex = b.slice(7);
+					var n = parseInt(hex.replace('#', ''), 16);
+					el.style.setProperty('--p-accent-500', hex);
+					el.style.setProperty('--p-accent-500-rgb', ((n >> 16) & 255) + ', ' + ((n >> 8) & 255) + ', ' + (n & 255));
+				} else if (b) {
+					el.dataset.brand = b;
+				}
+				if (localStorage.getItem('dl-conv') === 'green-up') el.dataset.conv = 'green-up';
+			} catch (e) {}
 		</script>
 		<meta name="theme-color" content="#050811" />
 		<meta name="color-scheme" content="dark" />
