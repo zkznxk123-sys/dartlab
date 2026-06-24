@@ -180,7 +180,7 @@
 					<span class="mrSecSub">{T('월 단위 · 최근 4년 · 호버=수치', 'monthly · last 4y · hover for values')}</span>
 				</div>
 				{#if evidence.cards.length}
-					<div class="finFsGrid">
+					<div class="finFsGrid mrCharts4">
 						{#each evidence.cards as card (card.key)}
 							<div class="finMini"><MiniFinChart {card} periods={evidence.periods} /></div>
 						{/each}
