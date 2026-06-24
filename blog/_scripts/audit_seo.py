@@ -88,6 +88,51 @@ def validate_carousel(folder_path: str) -> list:
                     issues.append(
                         ("warn", f"carousel.notes[{key}] 본문에 없는 숫자 {sorted(novel)} — no-new-number 위반 의심")
                     )
+
+    # 인스타 포스트 텍스트(제목·캡션·고정댓글) 타입.
+    title = spec.get("title")
+    if title is not None and not isinstance(title, str):
+        issues.append(("error", "carousel.title 은 문자열이어야 함"))
+    for key in ("caption", "pinnedComment"):
+        val = spec.get(key)
+        if val is not None and not isinstance(val, str):
+            issues.append(("error", f"carousel.{key} 는 문자열이어야 함"))
+
+    # 손글 편집 슬라이드 — layout enum·필수필드·image 타입·no-new-number(슬라이드 숫자⊆본문).
+    slides = spec.get("slides")
+    if slides is not None:
+        if not isinstance(slides, list):
+            issues.append(("error", "carousel.slides 는 리스트여야 함"))
+        else:
+            slide_required = {"editorial": ("line",), "editorialBeat": ("line",), "editorialStat": ("bigNumber",)}
+            slide_text = ("kicker", "line", "sub", "bigNumber", "unit", "context")
+            for i, sl in enumerate(slides):
+                if not isinstance(sl, dict):
+                    issues.append(("error", f"carousel.slides[{i}] 는 매핑이어야 함"))
+                    continue
+                layout = sl.get("layout")
+                if layout not in slide_required:
+                    issues.append(
+                        (
+                            "error",
+                            f"carousel.slides[{i}].layout 은 editorial|editorialBeat|editorialStat 여야 함: {layout!r}",
+                        )
+                    )
+                    continue
+                for req in slide_required[layout]:
+                    if not str(sl.get(req, "")).strip():
+                        issues.append(("error", f"carousel.slides[{i}]({layout}) 필수 필드 '{req}' 누락"))
+                img = sl.get("image")
+                if img is not None and not isinstance(img, str):
+                    issues.append(("error", f"carousel.slides[{i}].image 는 semantic 파일명(문자열)이어야 함"))
+                novel = set()
+                for f in slide_text:
+                    if sl.get(f) is not None:
+                        novel |= _numbers(sl[f]) - body_numbers
+                if novel:
+                    issues.append(
+                        ("warn", f"carousel.slides[{i}] 본문에 없는 숫자 {sorted(novel)} — no-new-number 위반 의심")
+                    )
     return issues
 
 
