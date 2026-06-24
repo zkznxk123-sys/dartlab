@@ -18,6 +18,30 @@
 		return m[1] + intPart + (m[3] ?? '') + (m[4] ?? '');
 	}
 
+	// 선그래프 — y축 값(min/max)·호버 좌표용 기하. valueFmt='won' → 조/억, 아니면 원값(천단위 콤마).
+	const lineStat = $derived.by(() => {
+		if (card.kind !== 'line') return null;
+		const v = card.series.filter((n): n is number => Number.isFinite(n));
+		if (v.length < 2) return null;
+		const mv = (card.markers ?? []).map((m) => m.v).filter((n): n is number => Number.isFinite(n));
+		const min = Math.min(...v, ...mv);
+		const max = Math.max(...v, ...mv);
+		const range = max - min || 1;
+		const n = card.series.length;
+		return { min, max, n, step: 100 / (n - 1), yOf: (x: number) => 30 - ((x - min) / range) * 30 };
+	});
+	/** 값 포맷 — won 이면 조/억(wonLabel), 아니면 천단위 콤마. */
+	function fmtNum(v: number, won: boolean): string {
+		if (!Number.isFinite(v)) return '–';
+		return won ? wonLabel(v) : v.toLocaleString('ko-KR');
+	}
+	let hoverIdx = $state(-1);
+	function onLineMove(e: MouseEvent) {
+		const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / (r.width || 1)));
+		hoverIdx = lineStat ? Math.round(pct * (lineStat.n - 1)) : -1;
+	}
+
 	// 사진 모드 — 편집 카드=monochrome+강한 하단 그라데이션(기존 SNS editorial), 텍스트=풀, 차트=dim.
 	const CHART_KINDS = new Set(['kpis', 'line', 'bars', 'share', 'table', 'finChart']);
 	const EDITORIAL_KINDS = new Set(['editorial', 'editorialBeat', 'editorialStat']);
@@ -206,14 +230,26 @@
 				<p class="narr">{@render accent(card.text)}</p>
 			{:else if card.kind === 'flags'}
 				<ul class="flags {card.tone}">{#each card.items as f}<li>{@render accent(f)}</li>{/each}</ul>
-			{:else if card.kind === 'line' && line}
+			{:else if card.kind === 'line' && line && lineStat}
 				<div class="chart">
-					<svg viewBox="0 0 100 30" preserveAspectRatio="none" class="lineChart">
-						<polygon points={line.area} class="lArea" />
-						<polyline points={line.pts} class="lLine" />
-						{#each line.mk as m}<line x1="0" x2="100" y1={m.y} y2={m.y} class="lMark" />{/each}
-						<circle cx={line.lastX} cy={line.lastY} r="0.9" class="lDot" />
-					</svg>
+					<div class="lPlot" role="img" aria-label="추이 차트" onmousemove={onLineMove} onmouseleave={() => (hoverIdx = -1)}>
+						<svg viewBox="0 0 100 30" preserveAspectRatio="none" class="lineChart">
+							<polygon points={line.area} class="lArea" />
+							<polyline points={line.pts} class="lLine" />
+							{#each line.mk as m}<line x1="0" x2="100" y1={m.y} y2={m.y} class="lMark" />{/each}
+							<circle cx={line.lastX} cy={line.lastY} r="0.9" class="lDot" />
+							{#if hoverIdx >= 0}
+								<line x1={hoverIdx * lineStat.step} x2={hoverIdx * lineStat.step} y1="0" y2="30" class="lHair" />
+								<circle cx={hoverIdx * lineStat.step} cy={lineStat.yOf(card.series[hoverIdx])} r="1.2" class="lHairDot" />
+							{/if}
+						</svg>
+						<span class="lY lYmax">{fmtNum(lineStat.max, card.valueFmt === 'won')}</span>
+						<span class="lY lYmin">{fmtNum(lineStat.min, card.valueFmt === 'won')}</span>
+						{#if hoverIdx >= 0}
+							<div class="lTip" style="left:{(hoverIdx / (lineStat.n - 1)) * 100}%">{fmtNum(card.series[hoverIdx], card.valueFmt === 'won')}</div>
+						{/if}
+					</div>
+					<div class="lXax"><span>{card.xLabels?.[0] ?? ''}</span><span>{card.xLabels?.[1] ?? ''}</span></div>
 					{#if card.markers?.length}
 						<div class="lMarkers">{#each card.markers as m}<span>{m.label} {card.valueFmt === 'won' ? wonLabel(m.v) : m.v}</span>{/each}</div>
 					{/if}
@@ -603,17 +639,24 @@
 		font-weight: 600;
 		font-size: 0.9em;
 	}
+	.lPlot {
+		position: relative;
+		flex: 1;
+		min-height: 180px;
+		display: flex;
+		cursor: crosshair;
+	}
 	.lineChart {
 		width: 100%;
-		height: 40%;
-		min-height: 180px;
+		height: 100%;
 	}
 	.lArea {
-		fill: rgba(234, 70, 71, 0.16);
+		fill: var(--dl-accent);
+		fill-opacity: 0.14;
 	}
 	.lLine {
 		fill: none;
-		stroke: #ea4647;
+		stroke: var(--dl-accent);
 		stroke-width: 0.7;
 		vector-effect: non-scaling-stroke;
 	}
@@ -624,7 +667,64 @@
 		vector-effect: non-scaling-stroke;
 	}
 	.lDot {
-		fill: #ea4647;
+		fill: var(--dl-accent);
+	}
+	/* y축 값(min/max) — 단위 보이게(won=조/억). 우상단·우하단 고정. */
+	.lY {
+		position: absolute;
+		right: 0.3em;
+		font-size: clamp(10px, 2cqw, 15px);
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		color: #cbd5e1;
+		background: rgba(5, 8, 17, 0.62);
+		padding: 0 0.35em;
+		border-radius: 4px;
+		pointer-events: none;
+	}
+	.lYmax {
+		top: 0.1em;
+	}
+	.lYmin {
+		bottom: 0.1em;
+	}
+	/* x축 라벨(시작·끝 기간) */
+	.lXax {
+		display: flex;
+		justify-content: space-between;
+		font-size: clamp(10px, 2cqw, 15px);
+		color: #94a3b8;
+		font-variant-numeric: tabular-nums;
+	}
+	/* 마우스 호버 — 세로 크로스헤어 + 값 툴팁 */
+	.lHair {
+		stroke: rgba(255, 255, 255, 0.55);
+		stroke-width: 0.4;
+		stroke-dasharray: 1 0.8;
+		vector-effect: non-scaling-stroke;
+	}
+	.lHairDot {
+		fill: var(--dl-accent);
+		stroke: #fff;
+		stroke-width: 0.3;
+		vector-effect: non-scaling-stroke;
+	}
+	.lTip {
+		position: absolute;
+		top: -0.1em;
+		transform: translateX(-50%);
+		max-width: 90%;
+		background: rgba(5, 8, 17, 0.95);
+		border: 1px solid var(--dl-accent);
+		border-radius: 7px;
+		padding: 0.15em 0.55em;
+		font-size: clamp(12px, 2.4cqw, 18px);
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+		color: #f6f8fb;
+		white-space: nowrap;
+		pointer-events: none;
+		z-index: 2;
 	}
 	.lMarkers {
 		display: flex;
