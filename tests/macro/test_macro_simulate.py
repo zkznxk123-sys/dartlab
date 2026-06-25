@@ -17,6 +17,7 @@ from dartlab.macro.simulate import (
     maxCompanionModulus,
     simulateRegimePath,
 )
+from dartlab.macro.simulate.calibration import measureCoverage
 
 pytestmark = pytest.mark.unit
 
@@ -108,3 +109,13 @@ def test_regimePathAbsorbingLimit():
     """완전 지속(1,1)이면 현재 분포 유지."""
     rp = simulateRegimePath(1.0, 1.0, [0.3, 0.7], horizon=6)
     assert abs(rp["forward"][-1]["pContraction"] - 0.7) < 1e-9
+
+
+def test_measureCoverageSane():
+    """합성 VAR held-out coverage — 잘 명세된 모델이라 명목 80% 근방(보수적 허용)."""
+    panel = _synthPanel(t=300, seed=11)
+    cov, hits, tot = measureCoverage(panel, SPECS, horizon=6, minTrain=150, step=12, draws=200, lag=4)
+    assert tot > 0
+    overall = hits / tot
+    assert 0.6 <= overall <= 0.98  # under-coverage(거짓확신) 아님 + 합성이라 과대피복 허용
+    assert set(cov.keys()) == {s.label for s in SPECS}

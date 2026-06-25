@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dartlab.macro.simulate._types import BvarFit, MacroSimResult, VarSpec
 from dartlab.macro.simulate.bvar import estimateBvar, maxCompanionModulus
+from dartlab.macro.simulate.calibration import fanCalibration
 from dartlab.macro.simulate.fan import forwardFan
 from dartlab.macro.simulate.irf import impulseResponse
 from dartlab.macro.simulate.regimePath import simulateRegimePath
@@ -18,6 +19,7 @@ __all__ = [
     "MacroSimResult",
     "VarSpec",
     "estimateBvar",
+    "fanCalibration",
     "forwardFan",
     "impulseResponse",
     "maxCompanionModulus",
