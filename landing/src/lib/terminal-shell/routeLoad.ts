@@ -44,27 +44,41 @@ export async function loadTerminalRaw(fetchFn: typeof fetch): Promise<{ raw: Raw
 		warmCompany(getPublicRuntime(), last);
 	}
 	const opt = { fetchFn, preferLocal: true };
-	const [finance, macro, meta, prices, index, eco, quarters, industryStats] = await Promise.all([
-		loadJson<FinanceFile>('dashboards/finance.json', opt),
-		// macro 는 HF-first freshness 유지. 단, HF 산출물이 transmission 없는 구버전이면 local v19 전파 경로만 보강.
-		loadMacroWithTransmission(fetchFn),
-		loadJson<MetaFile>('dashboards/meta.json', opt),
-		// 시세 스냅샷만 HF-first — 일배치(buildPricesSnapshot.py)가 매 영업일 HF 를 갱신하는데
-		// preferLocal 이면 배포 시점 정적 사본이 영원히 이겨 asOf 가 동결된다 (4/24 사고).
-		loadJson<PricesFile>('map/prices-snapshot.json', { fetchFn }),
-		loadJson<IndexRow[]>('map/search-index.json', opt),
-		loadJson<EcosystemFile>('map/ecosystem.json', opt),
-		loadJson<QuartersFile>('dashboards/quarters.json', opt),
-		// 업종 분포 밴드 — map 이 쓰던 자산(p10~p90), 스캔등급 다이얼로그 분포 컨텍스트용. 정적 동결 OK(일배치 무관).
-		loadJson<IndustryStatsFile>('map/industryStats.json', opt)
-	]);
+	const [finance, macro, meta, prices, index, eco, quarters, industryStats, financeUs, pricesUs, searchUs] =
+		await Promise.all([
+			loadJson<FinanceFile>('dashboards/finance.json', opt),
+			// macro 는 HF-first freshness 유지. 단, HF 산출물이 transmission 없는 구버전이면 local v19 전파 경로만 보강.
+			loadMacroWithTransmission(fetchFn),
+			loadJson<MetaFile>('dashboards/meta.json', opt),
+			// 시세 스냅샷만 HF-first — 일배치(buildPricesSnapshot.py)가 매 영업일 HF 를 갱신하는데
+			// preferLocal 이면 배포 시점 정적 사본이 영원히 이겨 asOf 가 동결된다 (4/24 사고).
+			loadJson<PricesFile>('map/prices-snapshot.json', { fetchFn }),
+			loadJson<IndexRow[]>('map/search-index.json', opt),
+			loadJson<EcosystemFile>('map/ecosystem.json', opt),
+			loadJson<QuartersFile>('dashboards/quarters.json', opt),
+			// 업종 분포 밴드 — map 이 쓰던 자산(p10~p90), 스캔등급 다이얼로그 분포 컨텍스트용. 정적 동결 OK(일배치 무관).
+			loadJson<IndustryStatsFile>('map/industryStats.json', opt),
+			// ── US(EDGAR) 번들 — 별도 산출물(finance=companyfacts·prices=gather·search=tickers)을 같은
+			// raw 위에 추가 병합(KR 무영향). currency='USD' 태그로 엔진/표시가 통화 분기. 없으면 빈값(KR-only). ──
+			loadJson<FinanceFile>('dashboards/finance-us.json', opt),
+			loadJson<PricesFile>('map/prices-snapshot-us.json', opt),
+			loadJson<IndexRow[]>('map/search-index-us.json', opt)
+		]);
+	// US 회사를 KR 생태계 raw 에 합류 — buildCompany 는 finance+prices 가 있어야 co 를 만든다(둘 다 병합).
+	const mergedFinance: FinanceFile = finance
+		? { ...finance, companies: { ...finance.companies, ...(financeUs?.companies ?? {}) } }
+		: (financeUs ?? { years: [], companies: {} });
+	const mergedPrices: PricesFile = prices
+		? { ...prices, data: { ...prices.data, ...(pricesUs?.data ?? {}) } }
+		: (pricesUs ?? { data: {} });
+	const mergedIndex: IndexRow[] = [...(index ?? []), ...(searchUs ?? [])];
 	return {
 		raw: {
-			finance: finance ?? { years: [], companies: {} },
+			finance: mergedFinance,
 			macro: macro ?? null,
 			meta: meta ?? null,
-			prices: prices ?? { data: {} },
-			index: index ?? [],
+			prices: mergedPrices,
+			index: mergedIndex,
 			eco: eco ?? null,
 			quarters: quarters ?? null,
 			industryStats: industryStats ?? null
