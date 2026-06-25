@@ -102,4 +102,18 @@ describe('buildSeries — 기간별 → 시계열(상위 K + 기타 롤업)', ()
 		expect(last.shares.reduce((a, b) => a + b, 0)).toBeCloseTo(100, 1);
 		expect(s!.categories).toContain('기타');
 	});
+	// 회귀 — 서로 다른 acode 가 같은 표시명('급여')이면 categories 중복 → 다이얼로그/패널 keyed {#each (name)} 가
+	// each_key_duplicate 로 렌더 throw·마운트 실패(상세보기 안 뜸). 표시명 병합으로 유일·값 합산 보장.
+	it('표시명 중복 acode 병합 → categories 유일·값 합산(each_key_duplicate 방지)', () => {
+		const items = new Map([
+			['ifrs-full_EmployeeBenefitsExpense', { name: '급여', value: 30 }],
+			['dart_EmployeeBenefitsExpense', { name: '급여', value: 20 }],
+			['ifrs-full_RawMaterialsAndConsumablesUsed', { name: '원재료', value: 50 }]
+		]);
+		const s = buildSeries([{ period: '2026Q1', year: '2026', quarter: '1분기', items }], { topK: 6, rollupOther: true });
+		expect(s).not.toBeNull();
+		expect(s!.categories.filter((c) => c === '급여').length).toBe(1); // 중복 0
+		const gi = s!.categories.indexOf('급여');
+		expect(s!.points[0]!.shares[gi]).toBeCloseTo(50, 1); // 30+20=50 / 100
+	});
 });

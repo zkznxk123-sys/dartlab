@@ -63,7 +63,18 @@ export interface PeriodComposition {
 
 /** 기간별 구성 → 시계열(CompositionSeries). 전 기간 합계 상위 K 카테고리(+비용은 '기타' 롤업) 안정 정렬. */
 export function buildSeries(perPeriod: PeriodComposition[], { topK, rollupOther }: { topK: number; rollupOther: boolean }): CompositionSeries | null {
-	const valid = perPeriod.filter((p) => p.items.size > 0);
+	// 표시명을 정체성으로 재키잉(병합) — 서로 다른 acode 가 같은 한글 라벨(예 '급여')을 가지면 categories 에
+	// 중복명이 생겨 다이얼로그·패널의 keyed {#each (name)} 가 each_key_duplicate 로 렌더 throw → 마운트 실패.
+	// 같은 표시명은 같은 경제 카테고리이므로 값 합산이 정합. (부문은 이미 name-key 라 무변.)
+	const merged: PeriodComposition[] = perPeriod.map((p) => {
+		const m = new Map<string, { name: string; value: number }>();
+		for (const v of p.items.values()) {
+			const prev = m.get(v.name);
+			m.set(v.name, { name: v.name, value: (prev?.value ?? 0) + v.value });
+		}
+		return { ...p, items: m };
+	});
+	const valid = merged.filter((p) => p.items.size > 0);
 	if (valid.length < 1) return null;
 	valid.sort((a, b) => a.period.localeCompare(b.period));
 	// 전 기간 카테고리 합계 → 상위 K. 표시명 = 최신 기간 표기.
