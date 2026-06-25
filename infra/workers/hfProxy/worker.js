@@ -32,9 +32,10 @@ function cacheControlFor(path) {
 	return 'public, max-age=3600';
 }
 
-// ── Google News RSS 라이브 파싱 (gather/sources/news.py::_parseRss 와 규칙 동일) ──
-// CF Workers 는 DOMParser/XML 파서가 없어 정규식 추출. title 은 HTML unescape, source 태그 그대로,
-// url=link(구글 리다이렉트, HF 누적본과 동형이라 dedup 일관). 숫자→named→&amp; 순(이중 unescape 방지).
+// ── 네이버 검색 API 라이브 파싱 (gather/sources/naverNews.py 규칙 동일) ──
+// Google News RSS 는 CF Workers outbound IP 에서 503(데이터센터 봇 차단)이라 라이브 소스로 못 씀(실측 확인).
+// 라이브 = 네이버 검색 API: byCompany 아카이브와 동일 소스(naver)·스니펫 O. fchart(/naver 라우트)처럼
+// 네이버 outbound 는 CF 에서 동작(인증 헤더로 식별돼 IP 차단 없음). 화면 표시 스키마는 클라와 동일 필드.
 function htmlUnescape(s) {
 	return s
 		.replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCodePoint(parseInt(n, 16)))
@@ -46,42 +47,39 @@ function htmlUnescape(s) {
 		.replace(/&amp;/g, '&');
 }
 
-function rssTag(block, name) {
-	const m = block.match(new RegExp('<' + name + '(?:\\s[^>]*)?>([\\s\\S]*?)</' + name + '>', 'i'));
-	if (!m) return '';
-	let v = m[1];
-	const cdata = v.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
-	if (cdata) v = cdata[1];
-	return htmlUnescape(v.trim());
-}
+const NAVER_TAG_RE = /<[^>]+>/g;
+const naverClean = (s) => htmlUnescape(String(s || '').replace(NAVER_TAG_RE, '')).trim(); // <b> 하이라이트·HTML 엔티티 제거
+const naverDate = (s) => { const d = new Date(s); return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10); }; // RFC822 +0900
+const naverSource = (link) => { try { const h = new URL(link).hostname; return h.startsWith('www.') ? h.slice(4) : h; } catch { return ''; } };
 
-function rssDate(s) {
-	const d = new Date(s); // V8 가 RFC822("Tue, 24 Jun 2026 01:23:00 GMT") 파싱
-	return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
-}
-
-// RSS XML → [{date,title,source,url}] (link dedup, 빈 title/link 제외). 화면 표시 스키마는
-// marketNewsSource.normalizeMarketNews 와 동일 4필드 — 클라가 HF 누적본과 그대로 머지한다.
-function parseRssItems(xml) {
+// 네이버 검색 응답 → [{date,title,source,url,description}] (원문링크 dedup, 빈 title/url 제외).
+function parseNaverNews(json) {
 	const out = [];
 	const seen = new Set();
-	for (const m of xml.matchAll(/<item\b[\s\S]*?<\/item>/gi)) {
-		const block = m[0];
-		const title = rssTag(block, 'title');
-		const link = rssTag(block, 'link');
-		if (!title || !link || seen.has(link)) continue;
-		seen.add(link);
-		out.push({ date: rssDate(rssTag(block, 'pubDate')), title, source: rssTag(block, 'source'), url: link });
+	for (const it of (json && json.items) || []) {
+		const url = it.originallink || it.link || '';
+		const title = naverClean(it.title);
+		if (!url || !title || seen.has(url)) continue;
+		seen.add(url);
+		out.push({ date: naverDate(it.pubDate), title, source: naverSource(url), url, description: naverClean(it.description) });
 	}
 	return out;
 }
 
-// market 별 "시장 전반" 라이브 쿼리 — 종목 단위(HF 누적본이 150쿼리로 넓게 커버)가 아니라 cron 사이
-// 갭을 메울 최신 시장 헤드라인용. OR 단일 쿼리 1 fetch(워커 CPU·Google rate 보호), when:2d=오늘+어제.
-const MARKET_RSS = {
-	KR: 'https://news.google.com/rss/search?q=' + encodeURIComponent('코스피 OR 코스닥 OR 증시 OR 환율 OR 금리 when:2d') + '&hl=ko&gl=KR&ceid=KR:ko',
-	US: 'https://news.google.com/rss/search?q=' + encodeURIComponent('stock market OR S&P 500 OR Nasdaq OR Federal Reserve when:2d') + '&hl=en-US&gl=US&ceid=US:en'
-};
+// 네이버 검색 1회 — 시크릿 미설정([])·실패(throw). display 최신순(sort=date). id/secret 은 워커 시크릿.
+async function naverSearch(env, query, display) {
+	const id = env.NAVER_CLIENT_ID || '';
+	const secret = env.NAVER_CLIENT_SECRET || '';
+	if (!id || !secret) return [];
+	const u = `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=${display}&sort=date`;
+	const r = await fetch(u, { headers: { 'X-Naver-Client-Id': id, 'X-Naver-Client-Secret': secret } });
+	if (!r.ok) throw new Error(`naver ${r.status}`);
+	return parseNaverNews(await r.json());
+}
+
+// market 별 "시장 전반" 라이브 검색어 — 종목 단위(HF 누적본이 넓게 커버)가 아니라 cron 사이 갭 메울 최신
+// 시장 헤드라인용. 소수 키워드 fan-out 후 머지(네이버는 OR 약해 단일 쿼리보다 분리 검색이 정확).
+const MARKET_QUERIES = { KR: ['증시', '코스피', '환율'], US: ['뉴욕증시', '나스닥', '미국증시'] };
 
 export default {
 	async fetch(req, env, ctx) {
@@ -147,8 +145,8 @@ export default {
 			const code = (url.searchParams.get('code') || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 12);
 			if (!code) return new Response(JSON.stringify({ error: 'code required' }), { status: 400, headers: jsonHeaders });
 			const q = (url.searchParams.get('q') || '').trim().slice(0, 40); // 회사명(라이브 RSS 검색어, 옵션)
-			// 캐시 키 = code+q(회사명 다르면 라이브분도 다름). auth 헤더 비포함 — 우리 데이터·우리 사용자 엣지 캐시.
-			const cacheKey = new Request(`https://dl-news.cache/${code}?q=${encodeURIComponent(q)}`);
+			// 캐시 키 = code+q+10분 버킷(회사명 다르면 라이브분도 다름·버킷 회전으로 일시실패 고착 방지). auth 비포함 엣지 캐시.
+			const cacheKey = new Request(`https://dl-news.cache/${code}?q=${encodeURIComponent(q)}&b=${Math.floor(Date.now() / 600000)}`);
 			const hit = await caches.default.match(cacheKey);
 			if (hit) {
 				const h2 = new Headers(hit.headers);
@@ -168,13 +166,11 @@ export default {
 					} // 404(시총 상위 외) → []
 				} catch (e) { /* 아카이브 실패해도 라이브로 진행 */ }
 			}
-			// live: Google News RSS(회사명 q) 무인증 라이브 — byCompany cron(일 1회)이 못 채운 조회시점 최신.
+			// live: 네이버 검색 API(회사명 q) — byCompany cron(일 1회)이 못 채운 조회시점 최신(아카이브와 동일 소스·스니펫 O).
 			let liveItems = [];
 			if (q) {
 				try {
-					const rssUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(`${q} when:3d`) + '&hl=ko&gl=KR&ceid=KR:ko';
-					const fr2 = await fetch(rssUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-					if (fr2.ok) liveItems = parseRssItems(await fr2.text()).slice(0, 40).map((it) => ({ ...it, description: '', track: 'google' }));
+					liveItems = (await naverSearch(env, q, 40)).map((it) => ({ ...it, track: 'naver' }));
 				} catch (e) { /* 라이브 실패해도 base 로 진행 */ }
 			}
 			// 머지: 라이브(최신) 우선 + base(스니펫), url dedup keep-first, date desc, 상한 60.
@@ -190,7 +186,7 @@ export default {
 			const resp = new Response(JSON.stringify({ code, items: items.slice(0, 60) }), {
 				headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
 			});
-			if (ctx) ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
+			if (ctx && items.length) ctx.waitUntil(caches.default.put(cacheKey, resp.clone())); // 빈 결과는 캐시 안 함
 			return resp;
 		}
 		// /market-news?market=KR|US — 시장 전반 최신 헤드라인 라이브 오버레이. HF rss 아카이브(일 2회 cron)가
@@ -200,8 +196,8 @@ export default {
 		if (url.pathname === '/market-news') {
 			const jsonHeaders = { ...cors, 'Content-Type': 'application/json; charset=utf-8' };
 			const market = (url.searchParams.get('market') || 'KR').toUpperCase() === 'US' ? 'US' : 'KR';
-			const rssUrl = MARKET_RSS[market];
-			const cacheKey = new Request(rssUrl); // when:2d 고정 + market 별 → 안정 키
+			// 10분 버킷으로 캐시 키 회전 — 일시 실패(빈 결과)가 캐시에 고착되지 않게 자동 무효화.
+			const cacheKey = new Request(`https://dl-market-news.cache/${market}/${Math.floor(Date.now() / 600000)}`);
 			const hit = await caches.default.match(cacheKey);
 			if (hit) {
 				const h2 = new Headers(hit.headers);
@@ -211,16 +207,18 @@ export default {
 			}
 			let items = [];
 			try {
-				const fr = await fetch(rssUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-				if (!fr.ok) throw new Error(`rss ${fr.status}`);
-				items = parseRssItems(await fr.text()).slice(0, 80); // 렌더 상한 충분(클라 CAP=300 과 머지)
+				const lists = await Promise.all(MARKET_QUERIES[market].map((kw) => naverSearch(env, kw, 30).catch(() => [])));
+				const seen = new Set();
+				for (const it of lists.flat()) { if (!it.url || seen.has(it.url)) continue; seen.add(it.url); items.push(it); }
+				items.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+				items = items.slice(0, 80); // 렌더 상한 충분(클라 CAP=300 과 머지)
 			} catch (e) {
 				return new Response(JSON.stringify({ market, items: [], error: String(e) }), { status: 502, headers: jsonHeaders });
 			}
 			const resp = new Response(JSON.stringify({ market, asOf: items[0]?.date ?? '', items }), {
 				headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
 			});
-			if (ctx) ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
+			if (ctx && items.length) ctx.waitUntil(caches.default.put(cacheKey, resp.clone())); // 빈 결과(일시 실패)는 캐시 안 함
 			return resp;
 		}
 		// /media/<path> — dartlab-media(이미지) 엣지 캐시 프록시. 불변 파일명(콘텐츠해시) → 1년 immutable.

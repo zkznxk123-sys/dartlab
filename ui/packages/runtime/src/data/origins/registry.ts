@@ -12,7 +12,7 @@ const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefi
 
 // 워커 프록시 base URL(가역 빌드-env 게이트). 비우면 미설정 — 호출측이 originConfigured 로 미동작([]) 판정.
 //   news = CF 워커 /news 라우트(전 환경 동일, dev 폴백 없음 — /__news 미들웨어는 구현된 적 없음).
-//   marketNews = CF 워커 /market-news 라우트(전 환경 동일, Google News RSS 라이브 — newsWorker 동형 게이트).
+//   marketNews = CF 워커 /market-news 라우트(전 환경 동일, 네이버 검색 라이브 — newsWorker 동형 게이트).
 //   naver = dev 는 Vite /__naver 미들웨어(브라우저 CORS 우회), 프로덕션은 CF 프록시 /naver 라우트.
 const NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const MARKET_NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_MARKET_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');

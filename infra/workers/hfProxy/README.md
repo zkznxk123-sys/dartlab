@@ -11,24 +11,29 @@ HF URL 을 단일 SSOT 로 묶는 경량 프록시.
 - CORS + `Access-Control-Expose-Headers`(range 헤더) 부착.
 - `GET /naver?code=XXXXXX` → 네이버 fchart 일별 OHLCV(가격 fresh-tail). 키 불필요(공개 차트 API).
 - `GET /news?code=XXXXXX[&q=회사명]` → 종목 뉴스 헤드라인. byCompany 아카이브(private
-  `dartlab-news-private`, 네이버 스니펫)를 read-only 토큰으로 서버사이드 read + (q 있으면) Google News
-  RSS 회사명 라이브 헤드라인(`track:'google'`)을 url-dedup 머지(조회시점 최신). 가드: code 형식검증
-  (영숫자 ≤12) + code+q 10분 엣지 캐시. 토큰 미설정이어도 q 있으면 라이브 RSS 만으로 동작(아카이브 없이도 표시).
-- `GET /market-news?market=KR|US` → 시장 전반 최신 헤드라인 라이브 오버레이. Google News RSS 를
-  **무인증** 서버사이드 fetch + 정규식 파싱(`gather/sources/news.py::_parseRss` 규칙 동일) 해
-  `{market, asOf, items:[{date,title,source,url}]}` 반환. 프런트(`marketNewsSource`)가 HF 누적
-  shard 위에 url-dedup 머지 → cron(일 2회) 사이 갭을 10분급으로 메움. 가드: market 검증(KR/US) +
-  10분 엣지 캐시 + RSS 실패 시 빈배열. 시크릿 불필요(공개 RSS).
+  `dartlab-news-private`, 네이버 스니펫)를 read-only 토큰으로 서버사이드 read + (q 있으면) 네이버 검색 API
+  회사명 라이브 헤드라인(`track:'naver'`, 스니펫 O)을 url-dedup 머지(조회시점 최신). 가드: code 형식검증
+  (영숫자 ≤12) + code+q 10분 엣지 캐시. HF_NEWS_TOKEN 없어도 q + 네이버 시크릿 있으면 라이브만으로 동작.
+- `GET /market-news?market=KR|US` → 시장 전반 최신 헤드라인 라이브 오버레이. 네이버 검색 API 를 시장
+  키워드(증시·코스피·환율 등) fan-out fetch + 파싱(`gather/sources/naverNews.py` 규칙 동일) 해
+  `{market, asOf, items:[{date,title,source,url,description}]}` 반환. 프런트(`marketNewsSource`)가 HF
+  누적 shard 위에 url-dedup 머지 → cron(일 2회) 사이 갭을 10분급으로 메움. 가드: market 검증(KR/US) +
+  10분 엣지 캐시 + 실패 시 빈배열. 네이버 시크릿(아래) 필요.
+  ※ Google News RSS 는 CF Workers outbound IP 에서 503(데이터센터 봇 차단)이라 라이브로 못 씀 — 네이버로 전환.
 
-### /news 시크릿 (private 데이터셋 read)
+### 뉴스 시크릿 (byCompany read + 네이버 라이브)
 ```bash
 cd infra/workers/hfProxy
+# byCompany 아카이브(private 데이터셋) read — /news 의 base 레이어
 CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put HF_NEWS_TOKEN
-# → dartlab-news-private 에 대한 read-only 토큰 입력 (피해 범위 최소화)
+# 네이버 검색 API 라이브(/news?q= · /market-news 오버레이) — id·secret 2개
+CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put NAVER_CLIENT_ID
+CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put NAVER_CLIENT_SECRET
 ```
-시크릿 없이 배포해도 `/news` 는 빈배열 noop 으로 안전(배선 먼저, 토큰은 나중). 프런트 전환 env:
+모두 graceful — HF_NEWS_TOKEN 없으면 byCompany base 생략, 네이버 시크릿 없으면 라이브 생략(프런트는 HF 누적 base 유지). 프런트 전환 env:
 ```
 VITE_DARTLAB_NEWS_PROXY=https://dartlab-hf-proxy.<subdomain>.workers.dev/news
+VITE_DARTLAB_MARKET_NEWS_PROXY=https://dartlab-hf-proxy.<subdomain>.workers.dev/market-news
 ```
 
 ## 무엇을 안 하나 (의도적)

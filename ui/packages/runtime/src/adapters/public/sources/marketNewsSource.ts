@@ -5,7 +5,7 @@
 //   기존 일별 cron 산출물(gather writeDailyParquet)을 그대로 직독하는 게 별도빌드 0 의 정공법. 오늘(UTC)
 //   shard 는 cron(어제까지) 직후라 보통 미존재이므로 어제부터 역순으로 읽어 불필요한 404 를 피한다.
 //   미존재일(404)은 requestParquetWholeFile 이 null + 음성캐시 → 반복 GET 0.
-//   ★라이브 오버레이: cron(일 2회)이 못 채우는 사이 갭은 marketNewsWorker(Google News RSS 라이브)가 메운다.
+//   ★라이브 오버레이: cron(일 2회)이 못 채우는 사이 갭은 marketNewsWorker(네이버 검색 라이브)가 메운다.
 //   HF 누적 shard + 라이브 헤드라인을 url-dedup 머지 → 넓이(HF) + 10분급 신선도(라이브). 워커 미배선/실패 시 HF base 만.
 // 제목+원문링크만(스니펫 없음) — 클릭=외부 기사 이동. rss 는 스키마상 description 이 null 이라 본디 제목만.
 import type { MarketNews } from '@dartlab/ui-contracts';

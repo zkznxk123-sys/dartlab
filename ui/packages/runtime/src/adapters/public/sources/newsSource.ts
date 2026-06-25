@@ -22,7 +22,7 @@ interface NewsFile {
 }
 
 /** 종목별 최근 뉴스 (date 내림차순). [] = 미지원·실패·미배선·해당없음.
- *  name(회사명) 주입 시 워커가 Google News RSS 라이브 헤드라인을 byCompany 아카이브 위에 머지(조회시점 최신). */
+ *  name(회사명) 주입 시 워커가 네이버 검색 라이브 헤드라인을 byCompany 아카이브 위에 머지(조회시점 최신). */
 export function loadCompanyNews(code: string, core?: DataCore, name?: string): Promise<NewsItem[]> {
 	if (!browser) return Promise.resolve([]);
 	if (!originConfigured('newsWorker')) return Promise.resolve([]); // 프록시 미설정 → 빈 섹션(코어 호출 생략)
