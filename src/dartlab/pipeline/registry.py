@@ -98,6 +98,11 @@ def buildRegistry() -> dict[str, StageSpec]:
             label="거시 FRED/ECOS/관세청",
         ),
         StageSpec(
+            "macroSim",
+            run=macro.runMacroSim,
+            label="거시 forward 시뮬 (BVAR 팬+IRF+국면경로 → macro/sim/{kr,us}.json)",
+        ),
+        StageSpec(
             "macroJson",
             run=prebuild.runMacroJson,
             online=False,

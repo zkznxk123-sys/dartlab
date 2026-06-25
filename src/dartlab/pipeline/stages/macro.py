@@ -773,6 +773,82 @@ def runMacroRegime(*, upload: bool = True, token: str | None = None) -> StageRes
 
 
 # ──────────────────────────────────────────────────────────────────────────
+# sim — BVAR forward 시뮬(팬+IRF+국면경로) → macro/sim/{kr,us}.json
+# ──────────────────────────────────────────────────────────────────────────
+
+
+def _buildSim(outDir: Path) -> dict[str, Path]:
+    """KR + US forward 시뮬 payload JSON 빌드 — simulateMacro().toPayload()."""
+    from dartlab.macro.simulate import simulateMacro
+
+    outDir.mkdir(parents=True, exist_ok=True)
+    written: dict[str, Path] = {}
+
+    for market in ("KR", "US"):
+        t0 = time.time()
+        print(f"[macroSim] {market} simulating …", flush=True)
+        try:
+            result = simulateMacro(market, horizon=12).toPayload()
+        except Exception as e:  # noqa: BLE001 — 시장 단위 실패 격리(다른 시장 진행)
+            print(f"[macroSim] {market} 실패: {type(e).__name__}: {e}", flush=True)
+            continue
+        path = outDir / f"{market.lower()}.json"
+        path.write_text(json.dumps(result, ensure_ascii=False, indent=0), encoding="utf-8")
+        kb = path.stat().st_size / 1024
+        rp = result.get("regimePath", {})
+        print(
+            f"[macroSim] {market}: status={result.get('status')} "
+            f"fan={len(result.get('fan', {}))} regimePath={rp.get('status') or 'ok'} "
+            f"→ {path} ({kb:.1f}KB, {time.time() - t0:.0f}s)",
+            flush=True,
+        )
+        written[market.lower()] = path
+
+    return written
+
+
+def runMacroSim(*, upload: bool = True, token: str | None = None) -> StageResult:
+    """KR/US BVAR forward 시뮬(변수 팬+IRF+국면경로) JSON 빌드 + HF push.
+
+    ``simulateMacro`` for KR/US → ``data/macro/sim/{kr,us}.json`` write → HF
+    ``macro/sim/{kr,us}.json`` push. 결과 0건이면 ``report.err``. 시장 단위 실패는
+    격리(다른 시장 진행) — fail-closed payload 도 status 와 함께 정상 ship.
+
+    Args:
+        upload: HF 업로드 여부(False 면 push skip).
+        token: HF 토큰(인자>env>.env).
+
+    Returns:
+        StageResult (report.ok=≥1 시장 산출, report.err=0건, report.fail=push 실패).
+
+    Raises:
+        없음 (빌드/업로드 예외는 StageResult 로 격리).
+
+    Example:
+        >>> runMacroSim(upload=False)  # doctest: +SKIP
+        StageResult(category='macroSim', ...)
+    """
+    res = StageResult(category="macroSim")
+    outDir = Path(os.environ.get("DARTLAB_DATA_DIR", "data")) / "macro" / "sim"
+    written = _buildSim(outDir)
+    if not written:
+        res.report.err = 1
+        res.report.failures.append("macroSim: 결과 0 건")
+        print("[macroSim] 결과 0 건 — report.err", flush=True)
+        return res
+    res.report.ok = 1
+    res.rows = len(written)
+    if upload:
+        try:
+            _deployJson(written, subdir="sim", token=token)
+        except Exception as exc:  # noqa: BLE001 — 업로드 실패 격리
+            res.report.fail = 1
+            res.report.failures.append(f"macroSim push: {type(exc).__name__}: {exc}")
+            print(f"[pipeline] macroSim push 실패(격리): {exc}", flush=True)
+    return res
+
+
+# ──────────────────────────────────────────────────────────────────────────
 # orchestrator — runMacro (runScript 제거, in-library 호출)
 # ──────────────────────────────────────────────────────────────────────────
 
@@ -805,17 +881,21 @@ def runMacro(
     source = os.environ.get("MACRO_SOURCE", "all")
     res = StageResult(category="macro")
     rData = runMacroData(source=source, upload=upload, token=token)
-    cycleOk = regimeOk = True
+    cycleOk = regimeOk = simOk = True
     if rData.report.err == 0:  # rc1==0 게이트 (FRED bulk 캐시 공유)
-        rCycle = runMacroCycle(upload=upload, token=token)  # cycle·regime 상호 독립
+        rCycle = runMacroCycle(upload=upload, token=token)  # cycle·regime·sim 상호 독립
         rRegime = runMacroRegime(upload=upload, token=token)
+        rSim = runMacroSim(upload=upload, token=token)
         cycleOk = rCycle.report.err == 0
         regimeOk = rRegime.report.err == 0
+        simOk = rSim.report.err == 0
     else:
-        cycleOk = regimeOk = False
-    if rData.report.err or rData.report.fail or not cycleOk or not regimeOk:
+        cycleOk = regimeOk = simOk = False
+    if rData.report.err or rData.report.fail or not cycleOk or not regimeOk or not simOk:
         res.report.err = 1
-        res.report.failures.append(f"macro data:{rData.report.err}/cycle:{int(not cycleOk)}/regime:{int(not regimeOk)}")
+        res.report.failures.append(
+            f"macro data:{rData.report.err}/cycle:{int(not cycleOk)}/regime:{int(not regimeOk)}/sim:{int(not simOk)}"
+        )
     else:
         res.report.ok = 1
     return res
