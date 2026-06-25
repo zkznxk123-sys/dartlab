@@ -57,6 +57,7 @@ def forwardFan(
     draws: int = 2000,
     seed: int = 20260624,
     quantiles: tuple[int, ...] = (5, 25, 50, 75, 95),
+    histMonths: int = 18,
 ) -> dict:
     """forward 분위 팬.
 
@@ -67,9 +68,10 @@ def forwardFan(
         draws: 사후·충격 draw 수.
         seed: 결정론 시드(로컬 rng).
         quantiles: 산출 분위(%).
+        histMonths: 차트 연결용 과거 실적 개월(변환 단위).
 
     Returns:
-        dict[varLabel → {transform, label, seriesId, q5.., mean, level_q5..(logdiff100 한정)}].
+        dict[varLabel → {transform, label, seriesId, history, q5.., mean, level_q5..(logdiff100 한정)}].
     """
     rng = np.random.default_rng(seed)
     n, p = fit.n, fit.p
@@ -85,6 +87,7 @@ def forwardFan(
     for i, spec in enumerate(fit.specs):
         vi = paths[:, :, i]
         rec: dict = {"transform": spec.transform, "label": spec.label, "seriesId": spec.seriesId}
+        rec["history"] = history[-histMonths:, i].tolist()  # 변환 단위 과거 실적(차트 연결)
         for q in quantiles:
             rec[f"q{q}"] = np.percentile(vi, q, axis=0).tolist()
         rec["mean"] = vi.mean(axis=0).tolist()

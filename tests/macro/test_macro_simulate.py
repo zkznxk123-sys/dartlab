@@ -74,11 +74,14 @@ def test_fanQuantileMonotone(fit):
 
 def test_fanLevelCumulation(fit):
     panel = _synthPanel()
-    fan = forwardFan(fit, panel, horizon=6, draws=200, seed=3)
+    fan = forwardFan(fit, panel, horizon=6, draws=200, seed=3, histMonths=18)
     assert "level_q50" in fan["성장"]
     assert len(fan["성장"]["level_q50"]) == 6
     assert all(np.isfinite(fan["성장"]["level_q50"]))
     assert "level_q50" not in fan["금리"]  # level 변수는 누적 환산 없음
+    # 차트 연결용 과거 실적(변환 단위) 동봉
+    assert len(fan["성장"]["history"]) == 18
+    assert fan["성장"]["history"] == panel[-18:, 0].tolist()
 
 
 def test_irfShape(fit):
