@@ -34,6 +34,82 @@ ai:
     - "베타 0.37 시장 무상관"
   keyMetrics: {revenue: 10.89, opm: 15.0, roe: 10.0, fcf: 2.0}
   dataAsOf: "2026-04-04"
+carousel:
+  title: 시장이 아니라 사이클이 주가를 정하는 회사
+  caption: |-
+    HMM은 한진해운 파산 이후 한국에 단 하나 남은 글로벌 컨테이너 선사입니다. dartlab의 quant 엔진이 본 이 회사의 베타는 0.37, R²는 10%. 즉 코스피가 HMM 주가의 10%만 설명하고, 나머지 90%는 시장과 무관한 자기 사이클입니다.
+
+    그 사이클의 진폭이 어마어마합니다. 9년 영업이익이 −8,300억에서 +9.95조까지 회전했고, 2021·2022년엔 영업이익률 53%를 2년 연속 찍었습니다. 그 2년 호황으로 자본이 0.9조에서 27.86조로 31배가 됐습니다.
+
+    회사가 사이클이 아니라 사이클이 회사입니다. 주가를 정하는 운임·홍해·신조선·정부 지분 매각 — 전부 외부 변수라, 분기마다 직접 추적해야 합니다.
+  pinnedComment: 투자 판단이 아닙니다. SCFI 운임지수, 홍해 정상화, 글로벌 신조선 인도(선복 증가), 정부 지분 매각 — 이 네 외부 변수가 주가의 90%를 정합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      시장이 아니라
+      [[사이클]]이 주가를 정한다
+    sub: |-
+      같은 배, 같은 항로인데
+      영업이익이 한 해 −8,300억에서 +9.95조까지.
+      주가의 90%는 컨테이너 운임이 결정한다.
+    image: hmm-algeciras
+  - layout: editorialStat
+    kicker: dartlab quant
+    bigNumber: '10'
+    unit: '% (R²)'
+    context: |-
+      베타 0.37, R² 10.3%.
+      코스피가 HMM 주가의 10%만 설명한다.
+      나머지 90%는 자기 사이클 — 변동성은 코스피의 4배.
+    image: bg-ocean-dark
+  - layout: editorialBeat
+    kicker: 2016년
+    line: |-
+      한진해운은 무너지고
+      [[하나만]] 남았다
+    sub: |-
+      글로벌 7위 한진해운이 파산하던 해,
+      HMM도 매출원가가 매출보다 컸다.
+      4년 연속 적자, 누적 −2.1조. 정부 자금으로 버텼다.
+    image: bg-busan-port
+  - layout: editorialStat
+    kicker: 코로나 운임 폭발
+    bigNumber: '53'
+    unit: '% 영업이익률'
+    context: |-
+      2021·2022 2년 연속 OPM 53.5%.
+      운임지수(SCFI)가 800에서 5,000으로 6배.
+      한국 상장사 역사에 2년 연속 53%는 없었다.
+    image: hmm-algeciras-side
+  - layout: editorialStat
+    kicker: 사이클 한 번의 곳간
+    bigNumber: '31'
+    unit: 배
+    context: |-
+      자본총계 0.9조(2017) → 27.86조(2024).
+      2년 호황 영업이익 17조가 9년 적자 회사를 바꿨다.
+      같은 사람, 같은 배 — 외부 운임 하나가.
+    image: bg-container-ship
+  - layout: editorialBeat
+    kicker: 그리고 정상화
+    line: |-
+      한 해에
+      [[9.4조가 증발]]
+    sub: |-
+      2023년 운임이 −84% 빠지자 영업이익 −94%.
+      회사가 사이클이 아니라, 사이클이 회사다.
+      대신 자본 27조가 부채의 4배라 안 무너진다.
+    image: hmm-rotterdam
+  - layout: editorial
+    line: |-
+      다음 사이클은
+      [[신조선·홍해·매각]]
+    sub: |-
+      주가의 90%를 정하는 건 전부 외부 변수다.
+      운임지수, 홍해 정상화, 신조선 공급, 정부 지분 매각 —
+      이 넷을 분기마다 직접 봐야 한다.
+    image: hmm-algeciras
 ---
 
 <script>

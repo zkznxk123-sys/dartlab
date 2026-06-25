@@ -34,6 +34,81 @@ ai:
     - "매출 기저 낮음"
   keyMetrics: {revenue: 0.22, opm: 49.52, roe: 0.0, fcf: 0.12}
   dataAsOf: "2026-04-08"
+carousel:
+  title: 9년 적자 바이오텍이 한 건으로 영업이익 1,069억을 찍기까지
+  caption: |-
+    알테오젠은 2025년 영업이익 1,069억, 영업이익률 49.5%를 찍었습니다. 매출은 9년 만에 31배가 됐습니다. 8년간 쌓인 적자를 단 한 해 이익으로 다 메우고도 남았습니다.
+
+    이 숫자의 출발점은 머크와 맺은 라이선스 한 건입니다. 머크 매출의 40%를 책임지는 키트루다를 정맥주사에서 피하주사로 바꾸는 효소(ALT-B4)를 알테오젠이 만들었습니다.
+
+    봐야 할 건 매출이 이 한 건에 쏠려 있다는 점입니다. 키트루다 SC 분기 매출, 실제 로열티율, 머크 외 두 번째 빅파마 계약 — 이 세 가지가 '일회성'과 '새 시대'를 가릅니다.
+  pinnedComment: 투자 판단이 아닙니다. 매출이 머크 키트루다 한 건에 집중돼 있어, 두 번째 라이선스와 키트루다 SC 분기 매출을 분기마다 확인해야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      9년을 적자로 버틴 바이오텍이
+      한 건으로 [[영업이익 +1,069억]]
+    sub: |-
+      2008년 창업, 11년간 매년 적자.
+      그 사이 효소 하나를 17년간 만들고 있었다.
+    image: research-lab
+  - layout: editorialBeat
+    kicker: 기술 한 가지
+    line: |-
+      정맥주사를
+      [[피하주사로]] 바꾼다
+    sub: |-
+      항암제를 1시간 IV에서 5분 SC로.
+      이 효소를 만들 수 있는 회사는
+      전 세계 단 두 곳, 그중 하나가 알테오젠.
+    image: pembrolizumab-structure
+  - layout: editorialStat
+    kicker: 2020년 머크 계약
+    bigNumber: '1,600'
+    unit: 만 달러
+    context: |-
+      머크와 라이선스를 맺었지만 적용 대상은 비공개.
+      시장은 '일회성이겠지' 하고 지나갔다.
+      주가는 며칠 만에 제자리로 돌아왔다.
+    image: merck-office
+  - layout: editorialBeat
+    kicker: 비공개의 정체
+    line: |-
+      그 약은
+      [[키트루다]]였다
+    sub: |-
+      머크 매출의 40%를 책임지는 글로벌 1위 항암제.
+      2028년 특허 만료를 앞두고
+      머크는 SC 전환에 회사 명운을 걸었다.
+    image: merck-research
+  - layout: editorialStat
+    kicker: 2025년 폭발
+    bigNumber: '49.5'
+    unit: '% 영업이익률'
+    context: |-
+      매출은 9년 만에 31배(68억 → 2,159억).
+      매출총이익률 76.7%는 글로벌 빅파마 수준.
+      한국 상장사 중 OPM 49%를 연평균으로 찍는 회사는 손에 꼽는다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 17년의 회수
+    bigNumber: '1,069'
+    unit: 억
+    context: |-
+      8년 누적 영업손실 −730억.
+      2025년 한 해 영업이익이 그 적자를 다 메우고도 339억이 남았다.
+      박순재 대표가 기다린 17년이 한 해에 돌아왔다.
+    image: research-lab
+  - layout: editorial
+    line: |-
+      남은 질문은
+      [[두 번째 라이선스]]
+    sub: |-
+      매출이 머크 키트루다 한 건에 쏠려 있다.
+      신용등급도 이 단일 의존이 누른다.
+      다음 빅파마 계약이 나오는가 — 그게 분기마다 볼 숫자다.
+    image: merck-beijing
 ---
 
 <script>

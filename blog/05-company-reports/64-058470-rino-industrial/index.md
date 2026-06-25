@@ -22,6 +22,81 @@ ai:
   weaknesses: ["글로벌 반도체 설계·테스트 사이클에 매출 직접 연동", "제품 단가 $1~2의 소모품 — 대체재 개발 시 가격 협상력 취약", "2세 승계 준비 단계 — 창업자 이채윤 회장 80세", "Smiths Interconnect · Yokowo 글로벌 2~3사의 선행 연구 추격"]
   keyMetrics: {revenue: 0.37, opm: 48.30, roe: 22.8, fcf: 0.08}
   dataAsOf: "2026-04-21"
+carousel:
+  title: 길이 5mm 금속 핀 하나로 10년 연속 영업이익률 40%
+  caption: |-
+    리노공업은 길이 5mm짜리 금속 핀(포고핀)을 만듭니다. 반도체 칩이 완성되면 하나하나 불량을 검사하는데, 그때 칩과 시험장비를 잇는 부품입니다. 엔비디아·삼성·TSMC·퀄컴·인텔 — 글로벌 반도체 설계사 거의 전부가 이 핀을 씁니다.
+
+    이 핀은 10,000번 쓰면 버리는 '소모품'입니다. 그래서 경기가 좋든 나쁘든 기존 라인이 돌아가는 한 계속 주문됩니다. 반도체 사이클이 바닥이던 2024년, 경쟁사가 적자를 낼 때 리노는 영업이익률 44.8%를 지켰습니다.
+
+    10년간 영업이익률이 30% 아래로 내려간 적이 한 번도 없습니다. 다음 관문은 AI 칩 테스트 수요 — 그게 이 독점을 키울지를 시험합니다.
+  pinnedComment: 투자 판단이 아닙니다. 영업이익률 45% 유지, AI·HBM 포고핀 매출 비중, 글로벌 경쟁사의 AI 제품 출시 — 이 셋을 분기마다 봐야 합니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      길이 5mm 금속 핀 하나로
+      [[10년 연속 영업이익률 40%+]]
+    sub: |-
+      부산 강서구 변두리 공장에서 만드는 이 핀이
+      엔비디아·삼성·TSMC 칩 검사에 전부 쓰인다.
+    image: pogopin-macro
+  - layout: editorialBeat
+    kicker: 장비가 아니라
+    line: |-
+      [[소모품]]을
+      판다
+    sub: |-
+      포고핀은 10,000번 쓰면 버린다.
+      고객이 설비투자를 멈춰도
+      기존 라인을 돌리는 한 매달 다시 주문된다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 2025 영업이익률
+    bigNumber: '48.3'
+    unit: '%'
+    context: |-
+      반도체 장비 1위 ASML(33%)·KLA(39%)·삼성전자(15~20%)를
+      전부 넘는다. 매출 3,725억 회사가 시가총액 4조,
+      매출 대비 11배 평가를 받는 이유다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 10년간 OPM 30% 아래
+    bigNumber: '0'
+    unit: 번
+    context: |-
+      2016~2025 매출이 3.3배 커지는 동안
+      영업이익률이 30% 밑으로 내려간 적이 단 한 번도 없다.
+      최악의 해(2024)도 44.8%를 지켰다.
+    image: busan-factory
+  - layout: editorialBeat
+    kicker: 사이클 바닥에서도
+    line: |-
+      경쟁사는 적자,
+      리노는 [[35.5%]]
+    sub: |-
+      반도체 사이클 저점이던 2024년 1분기,
+      한미반도체는 영업이익률 −8.2% 적자.
+      같은 분기 리노는 35.5%였다.
+    image: pogopin-macro
+  - layout: editorialStat
+    kicker: 무차입 48년
+    bigNumber: '8.3'
+    unit: '% 부채비율'
+    context: |-
+      자본 7,312억, 금융차입금은 거의 0.
+      매출을 3.3배 키우면서도 부채를 늘리지 않았다.
+      성장에 빚이 필요 없는 드문 사업이다.
+    image: busan-factory
+  - layout: editorial
+    line: |-
+      작은 회사의
+      [[큰 마진]]
+    sub: |-
+      소모품 독점 + 재인증 장벽 + 저판관비 + 저자본.
+      이 네 가지가 48년 독점을 만들었다.
+      다음 관문은 AI 칩 테스트 수요다.
+    image: pogopin-macro
 ---
 
 <script>

@@ -34,6 +34,82 @@ ai:
     - "마진 3% 악화"
   keyMetrics: {revenue: 2.21, opm: 3.0, roe: 0.0, fcf: 0.0}
   dataAsOf: "2026-04-12"
+carousel:
+  title: 애플 카메라를 독점하는데 왜 마진이 3%인가
+  caption: |-
+    LG이노텍은 아이폰 카메라 모듈의 70%를 독점 공급합니다. 매출의 80%가 애플에서 나오고, 경쟁사 둘은 제재와 코로나로 알아서 사라졌습니다. 그런데 영업이익률이 3%입니다. 독점인데 왜 을일까요.
+
+    답은 가치사슬 위치입니다. 모듈에서 가장 비싼 건 소니 센서(원가의 40%), 설계는 애플이 BOM으로 단가를 정합니다. LG이노텍은 그 사이에서 조립 마진을 받습니다. 매출원가율이 92%까지 올라 100원 벌면 3원이 남습니다.
+
+    대체는 불가능합니다 — 잠망경·Face ID·반도체 기판이라는 세 겹 해자 덕분입니다. 구조를 바꿀 열쇠는 애플 밖의 FC-BGA(영업이익률 15%). 전사 영업이익률 5%가 보이면 재평가 신호입니다.
+  pinnedComment: 투자 판단이 아닙니다. 전사 영업이익률 5%, 비모바일 매출 비중 30%, FC-BGA(반도체 기판) 성장 — 이 셋이 '애플 조립업체'에서 '기술 부품사'로의 전환을 가립니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      애플 카메라를 독점하는데
+      [[마진은 3%]]
+    sub: |-
+      아이폰 카메라 모듈의 70%, 매출의 80%가 애플.
+      경쟁사는 사라졌다. 그런데 100원 벌면 3원 남는다.
+    image: camera-module
+  - layout: editorialBeat
+    kicker: 어떻게 독점이 됐나
+    line: |-
+      싸워서가 아니라
+      [[경쟁사가 자멸]]
+    sub: |-
+      오필름은 미국 제재로, 샤프는 코로나 공장 셧다운으로.
+      2년 만에 둘이 사라지자 점유율이 50%→70%로.
+      기술이 아니라 상대의 불운이었다.
+    image: production-site
+  - layout: editorialStat
+    kicker: 독점의 역설
+    bigNumber: '80'
+    unit: '% 애플'
+    context: |-
+      매출의 80%가 애플 한 곳에서 나온다.
+      독점할수록 의존도가 올라가고,
+      의존도가 올라갈수록 가격 교섭력이 떨어진다.
+    image: assembly-line
+  - layout: editorialStat
+    kicker: 누가 단가를 정하나
+    bigNumber: '92'
+    unit: '% 원가율'
+    context: |-
+      애플이 BOM(부품 단가)을 직접 설계한다.
+      100원 중 92원이 이미 정해진 원가.
+      영업이익률은 8.5%(2021)에서 3.0%(2025)로 반토막 났다.
+    image: camera-module
+  - layout: editorialBeat
+    kicker: 독점인데 왜 을인가
+    line: |-
+      가치사슬에서
+      [[조립 위치]]
+    sub: |-
+      모듈 원가의 40%는 소니 센서 몫.
+      설계 IP는 애플, 핵심 부품은 소니.
+      LG이노텍은 그 사이에서 조립 마진을 받는다.
+    image: periscope
+  - layout: editorialBeat
+    kicker: 그래도 대체 불가
+    line: |-
+      세 겹의
+      [[기술 해자]]
+    sub: |-
+      테트라프리즘 잠망경, Face ID 3D 센싱, AI 반도체 기판(FC-BGA).
+      설계도를 줘도 수율 90%로 양산하는 건 별개의 능력.
+      마진 3%라 새 경쟁자도 안 들어온다.
+    image: research-lab
+  - layout: editorial
+    line: |-
+      탈출구는
+      [[애플 밖]]
+    sub: |-
+      카메라 모듈 마진은 3~5%가 천장.
+      설계 주도권이 있는 FC-BGA(OPM 15%)가 전사 마진을 끌어올려야 한다.
+      영업이익률 5%가 보이면 구조가 바뀌는 신호.
+    image: research-lab
 ---
 
 <script>
