@@ -183,4 +183,4 @@
 
 <ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {#if finLegendOpen}<FinTypeLegendDialog {lang} onClose={() => (finLegendOpen = false)} />{/if}
-{#if macroOpen && macro}<MacroRegimeDialog {macro} regime={macroGlance.regime} {regimeView} {lang} loadSeries={(id) => rt.macro.getSeries(id)} onClose={() => (macroOpen = false)} />{/if}
+{#if macroOpen && macro}<MacroRegimeDialog {macro} regime={macroGlance.regime} {regimeView} {lang} loadSeries={(id) => rt.macro.getSeries(id)} loadSim={(m) => rt.macro.getSim(m)} onClose={() => (macroOpen = false)} />{/if}

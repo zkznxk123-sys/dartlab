@@ -2,8 +2,8 @@
 // (seriesId, date, value) 가 seriesId+date 정렬이라 seriesId 필터로 row-group pruning.
 // 차트 오버레이(ECON)·KPI 티커가 공유하는 단일 로더. 전체 파일 1.5MB 이하 — 시리즈당 첫 로드 수백 ms.
 // 화이트리스트·출처표시 정본은 contracts (MACRO_SERIES·MACRO_ATTRIBUTION).
-import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort, type MacroTransmissionEdge, type MacroTransmissionQuery, type MacroTransmissionResult } from '@dartlab/ui-contracts';
-import { loadJson } from '../../../data/dartlabData';
+import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort, type MacroSimFile, type MacroTransmissionEdge, type MacroTransmissionQuery, type MacroTransmissionResult } from '@dartlab/ui-contracts';
+import { loadHfJson, loadJson } from '../../../data/dartlabData';
 import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
@@ -175,6 +175,13 @@ async function loadMacroTransmission(query: MacroTransmissionQuery = {}): Promis
 	return payload ? filterTransmission(payload, query) : null;
 }
 
+/** 거시 forward 시뮬 — macro/sim/{market}.json (HF dataset 직독, runMacroSim 빌드). null = 미배선/실패.
+ *  빌드 publish 전엔 null → UI 피처게이트(섹션 미렌더). dev=퍼블릭 기준이라 HF 직독으로 동일. */
+export async function loadMacroSim(market: 'KR' | 'US'): Promise<MacroSimFile | null> {
+	if (!browser) return null;
+	return loadHfJson<MacroSimFile>(`macro/sim/${market.toLowerCase()}.json`, { fetchFn: fetch, required: false });
+}
+
 /** HF 공개 데이터 기반 MacroPort — 거시 시계열은 회사·앱 무관이라 local 셸도 본 포트를 명시적으로 재사용한다.
  *  core 는 어댑터(createXRuntime)가 주입(전역 싱글턴 금지). 미주입(ui/web 레거시 직접 호출)은 모듈 폴백 코어. */
 export function createHfMacroPort(core?: DataCore): MacroPort {
@@ -185,6 +192,7 @@ export function createHfMacroPort(core?: DataCore): MacroPort {
 		},
 		getSeries: (id) => loadMacroSeries(id, c),
 		getLatest: () => loadMacroLatest(c),
-		getTransmission: (query) => loadMacroTransmission(query)
+		getTransmission: (query) => loadMacroTransmission(query),
+		getSim: (market) => loadMacroSim(market)
 	};
 }

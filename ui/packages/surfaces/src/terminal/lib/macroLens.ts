@@ -1,4 +1,4 @@
-import { MACRO_SERIES, type MacroLatest, type MacroSeriesDef, type FinCard, type FinSeries, type Num, type MacroPoint } from '@dartlab/ui-contracts';
+import { MACRO_SERIES, type MacroLatest, type MacroSeriesDef, type FinCard, type FinSeries, type Num, type MacroPoint, type MacroSimFile } from '@dartlab/ui-contracts';
 import type { CoMover } from './coMovement';
 import type { Company, Lang, MacroExposureIndicatorPayload, MacroExposureQualityPayload, MacroFile, MacroRegimeModel, MacroRegimePayload, MacroSide, MacroTransmissionEdge, MacroTransmissionPayload, Tailwind, Tone } from './types';
 import { EDGE_SECTOR_TO_TAILWIND, CURRENT_MACRO_EDGE_SECTOR_KEYS, classifyTailwind, hasNegativeTailwind } from './macroMappings';
@@ -2748,4 +2748,111 @@ export function buildMacroEvidenceCards(
 		if (series.length) cards.push({ key: spec.key, title: lang === 'en' ? spec.titleEn : spec.titleKr, unit: spec.unit, series });
 	}
 	return { periods, cards };
+}
+
+// ───────────────────────── 거시 forward 시뮬 — BVAR 팬·IRF·국면경로 (MacroRegimeDialog 전망 섹션) ─────────────────────────
+// macro/sim/{market}.json (rt.macro.getSim) → 뷰모델. 팬 = 과거 실적(실선) + 미래 p50/p5/p95(밴드) FinCard.
+// 결정론: JSON 이 seed 고정 precompute 라 렌더 순수. fail-closed: status≠'ok'·regimePath.status 면 표시 보류.
+
+export interface MacroSimRegimePathView {
+	forward: { h: number; p: number }[];
+	history: number[];
+	current: number;
+	ergodic: number;
+}
+export interface MacroSimIrfView {
+	shockLabel: string;
+	caveat: string;
+	vars: { label: string; data: number[] }[];
+}
+export interface MacroSimView {
+	status: 'ok' | 'holdback';
+	asOf: string;
+	horizon: number;
+	periods: string[];
+	fanCards: FinCard[];
+	regimePath: MacroSimRegimePathView | null;
+	irf: MacroSimIrfView | null;
+	honesty: { sampleN: number | null; seed: number; calibrated: boolean; note: string };
+}
+
+// asOf('YYYY-MM') 기준 back 개월 과거 + fwd 개월 미래 월축 라벨('YY.MM'). asOf 는 마지막 실적월.
+function simMonthAxis(asOf: string, back: number, fwd: number): string[] {
+	let y = Number(asOf.slice(0, 4));
+	let m = Number(asOf.slice(5, 7));
+	if (!y || !m) return [];
+	const out: string[] = [];
+	// 과거: asOf-(back-1) .. asOf
+	let sy = y;
+	let sm = m - (back - 1);
+	while (sm <= 0) { sm += 12; sy -= 1; }
+	for (let i = 0; i < back; i += 1) {
+		out.push(`${String(sy).slice(2, 4)}.${String(sm).padStart(2, '0')}`);
+		sm += 1;
+		if (sm > 12) { sm = 1; sy += 1; }
+	}
+	// 미래: asOf+1 .. asOf+fwd
+	y = Number(asOf.slice(0, 4));
+	m = Number(asOf.slice(5, 7));
+	for (let i = 0; i < fwd; i += 1) {
+		m += 1;
+		if (m > 12) { m = 1; y += 1; }
+		out.push(`${String(y).slice(2, 4)}.${String(m).padStart(2, '0')}`);
+	}
+	return out;
+}
+
+const SIM_HIST = 18;
+const SIM_COLORS = { hist: '#7d8ea0', mid: '#5b9bf0', band: '#9ec5f5' };
+
+/** macro/sim 파일 → 전망 시뮬 뷰. status≠'ok' 또는 fan 비면 holdback(섹션 미렌더). */
+export function buildMacroSimView(sim: MacroSimFile | null, lang: Lang): MacroSimView {
+	const empty: MacroSimView = { status: 'holdback', asOf: sim?.asOf ?? '', horizon: sim?.horizon ?? 0, periods: [], fanCards: [], regimePath: null, irf: null, honesty: { sampleN: null, seed: sim?.seed ?? 0, calibrated: false, note: '' } };
+	if (!sim || sim.status !== 'ok' || !sim.fan || !Object.keys(sim.fan).length) return empty;
+
+	const horizon = sim.horizon || 12;
+	const periods = simMonthAxis(sim.asOf, SIM_HIST, horizon);
+	const T = (kr: string, en: string): string => (lang === 'en' ? en : kr);
+
+	// 팬 FinCard — 변수당 1장: 과거 실적(실선) + 현재 anchor 에서 p50/p5/p95(밴드) 미래로.
+	// 원유는 모델 control(물가퍼즐 해소용)이라 헤드라인 팬에서 제외 → 깔끔한 2×2.
+	const fanCards: FinCard[] = [];
+	for (const [label, v] of Object.entries(sim.fan)) {
+		if (v.seriesId === 'DCOILWTICO') continue;
+		const hist = (v.history ?? []).slice(-SIM_HIST);
+		const padHist = new Array(Math.max(0, SIM_HIST - hist.length)).fill(null);
+		const histData: Num[] = [...padHist, ...hist, ...new Array(horizon).fill(null)];
+		const anchorIdx = SIM_HIST - 1; // 마지막 실적 인덱스
+		const anchor = hist.length ? hist[hist.length - 1] : null;
+		const fanOf = (q: number[]): Num[] => {
+			const out: Num[] = new Array(SIM_HIST + horizon).fill(null);
+			out[anchorIdx] = anchor; // 밴드를 현재에서 emanate
+			for (let i = 0; i < q.length && i < horizon; i += 1) out[SIM_HIST + i] = q[i];
+			return out;
+		};
+		const series: FinSeries[] = [
+			{ name: T('실적', 'actual'), data: histData, color: SIM_COLORS.hist, type: 'line' },
+			{ name: T('상위90', 'p90'), data: fanOf(v.q95), color: SIM_COLORS.band, type: 'line' },
+			{ name: T('중앙', 'median'), data: fanOf(v.q50), color: SIM_COLORS.mid, type: 'line' },
+			{ name: T('하위10', 'p10'), data: fanOf(v.q5), color: SIM_COLORS.band, type: 'line' }
+		];
+		const unit = v.transform === 'logdiff100' ? '%' : '%';
+		fanCards.push({ key: v.seriesId, title: `${label} · ${T(v.transform === 'logdiff100' ? '월간 변화' : '수준', v.transform === 'logdiff100' ? 'MoM' : 'level')}`, unit, series });
+	}
+
+	// 국면경로 — status 있으면 보류(null).
+	const rp = sim.regimePath;
+	const regimePath: MacroSimRegimePathView | null = rp && !rp.status && rp.forward?.length
+		? { forward: rp.forward.map((f) => ({ h: f.h, p: f.pContraction })), history: rp.history ?? [], current: rp.current ?? 0, ergodic: rp.ergodic ?? 0 }
+		: null;
+
+	// IRF — 변수 경로만(문자열 키 제외).
+	const irfVars = Object.entries(sim.irf).filter(([k, val]) => Array.isArray(val) && k !== 'caveat' && k !== 'shockLabel').map(([k, val]) => ({ label: k, data: val as number[] }));
+	const irf: MacroSimIrfView | null = irfVars.length
+		? { shockLabel: typeof sim.irf.shockLabel === 'string' ? sim.irf.shockLabel : T('정책금리 충격', 'policy-rate shock'), caveat: typeof sim.irf.caveat === 'string' ? sim.irf.caveat : '', vars: irfVars }
+		: null;
+
+	const nObs = typeof sim.model?.nObs === 'number' ? sim.model.nObs : null;
+	const note = T(`표본 ${nObs ?? '?'}개월 · seed ${sim.seed} · BVAR · 추정 ${sim.asOf} · scenario≠forecast`, `N=${nObs ?? '?'} · seed ${sim.seed} · BVAR · as of ${sim.asOf} · scenario≠forecast`);
+	return { status: 'ok', asOf: sim.asOf, horizon, periods, fanCards, regimePath, irf, honesty: { sampleN: nObs, seed: sim.seed, calibrated: false, note } };
 }

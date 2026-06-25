@@ -7,6 +7,7 @@ import {
 	bucketOf,
 	buildExposureMatrixRows,
 	buildMacroEvidenceCards,
+	buildMacroSimView,
 	MACRO_EVIDENCE_SPECS,
 	buildMacroGlanceView,
 	buildMacroLensSnapshot,
@@ -801,5 +802,62 @@ describe('buildMacroEvidenceCards', () => {
 		for (const market of ['KR', 'US'] as const)
 			for (const spec of MACRO_EVIDENCE_SPECS[market])
 				for (const s of spec.series) expect(known.has(s.id)).toBe(true);
+	});
+});
+
+describe('buildMacroSimView', () => {
+	const fanVar = (seriesId: string, transform: string) => ({
+		transform, label: seriesId, seriesId,
+		history: Array.from({ length: 18 }, (_, i) => i * 0.1),
+		q5: Array.from({ length: 12 }, () => 0), q25: Array.from({ length: 12 }, () => 1),
+		q50: Array.from({ length: 12 }, () => 2), q75: Array.from({ length: 12 }, () => 3),
+		q95: Array.from({ length: 12 }, () => 4), mean: Array.from({ length: 12 }, () => 2)
+	});
+	const okSim = (regimePath: Record<string, unknown>) => ({
+		market: 'US', status: 'ok', asOf: '2026-05', seed: 20260624, horizon: 12,
+		model: { kind: 'BVAR', nObs: 483, status: 'ok' },
+		fan: {
+			산업생산: fanVar('INDPRO', 'logdiff100'), 소비자물가: fanVar('CPIAUCSL', 'logdiff100'),
+			원유: fanVar('DCOILWTICO', 'logdiff100'), 정책금리: fanVar('FEDFUNDS', 'level'), '10년금리': fanVar('DGS10', 'level')
+		},
+		irf: { 산업생산: [0, -0.1, -0.2], 정책금리: [1, 0.9, 0.8], shockLabel: '정책금리 +100bp', caveat: 'recursive-identification·illustrative' },
+		regimePath, missing: []
+	});
+
+	it('status ok → 팬 4장(원유 제외)·periods 30(과거18+미래12)·IRF·honesty', () => {
+		const v = buildMacroSimView(okSim({ status: '레짐 분리 약함·표시 보류' }) as never, 'kr');
+		expect(v.status).toBe('ok');
+		expect(v.fanCards.length).toBe(4); // 원유(DCOILWTICO) 제외
+		expect(v.fanCards.some((c) => c.key === 'DCOILWTICO')).toBe(false);
+		expect(v.periods.length).toBe(30);
+		expect(v.irf?.shockLabel).toContain('정책금리');
+		expect(v.honesty.sampleN).toBe(483);
+		expect(v.regimePath).toBeNull(); // status 있으면 보류
+	});
+
+	it('팬 카드 = 실적 1 + 밴드 3(p50/p90/p10), 미래는 anchor 에서 emanate', () => {
+		const v = buildMacroSimView(okSim({ status: 'x' }) as never, 'kr');
+		const card = v.fanCards[0];
+		expect(card.series.length).toBe(4);
+		const mid = card.series.find((s) => s.name === '중앙')!;
+		// 과거 17 null + anchor + 미래 12 = 30
+		expect(mid.data.length).toBe(30);
+		expect(mid.data.slice(0, 17).every((x) => x == null)).toBe(true);
+		expect(mid.data[17]).not.toBeNull(); // anchor
+		expect(mid.data[18]).toBe(2); // q50 첫값
+	});
+
+	it('regimePath status 없음 → forward 경로 채움', () => {
+		const v = buildMacroSimView(okSim({ forward: [{ h: 1, pContraction: 0.3 }, { h: 2, pContraction: 0.32 }], history: [0.2, 0.25], current: 0.25, ergodic: 0.33 }) as never, 'kr');
+		expect(v.regimePath).not.toBeNull();
+		expect(v.regimePath!.forward.length).toBe(2);
+		expect(v.regimePath!.forward[0].p).toBe(0.3);
+		expect(v.regimePath!.current).toBe(0.25);
+	});
+
+	it('status ≠ ok 또는 null → holdback(빈 카드)', () => {
+		expect(buildMacroSimView(null, 'kr').status).toBe('holdback');
+		expect(buildMacroSimView({ status: '표본 부족·표시 보류', fan: {} } as never, 'kr').status).toBe('holdback');
+		expect(buildMacroSimView(null, 'kr').fanCards.length).toBe(0);
 	});
 });

@@ -152,10 +152,59 @@ export const MACRO_SERIES: MacroSeriesDef[] = [
 /** 출처표시 — 거시 시계열을 표시하는 surface 가 노출해야 하는 계약 상수. */
 export const MACRO_ATTRIBUTION = '출처: 한국은행 ECOS · FRED (St. Louis Fed)';
 
+/** 거시 forward 시뮬(BVAR 팬) 단일 변수 분위 경로. macro/sim/{market}.json. */
+export interface MacroSimFanVar {
+	transform: string;
+	label: string;
+	seriesId: string;
+	/** 변환 단위 과거 실적(차트 연결, 최근 N개월). */
+	history?: number[];
+	q5: number[];
+	q25: number[];
+	q50: number[];
+	q75: number[];
+	q95: number[];
+	mean: number[];
+	/** logdiff100 변수의 레벨 누적 환산(존재 시). */
+	level_q5?: number[];
+	level_q25?: number[];
+	level_q50?: number[];
+	level_q75?: number[];
+	level_q95?: number[];
+}
+
+/** 국면 forward 경로 — status 있으면 표시 보류(fail-closed). */
+export interface MacroSimRegimePath {
+	status?: string;
+	forward?: { h: number; pContraction: number }[];
+	history?: number[];
+	current?: number;
+	ergodic?: number;
+	separation?: number;
+	converged?: boolean;
+}
+
+/** 거시 시뮬 산출 파일 — macro/sim/{kr,us}.json (runMacroSim 빌드). */
+export interface MacroSimFile {
+	market: string;
+	status: string;
+	asOf: string;
+	seed: number;
+	horizon: number;
+	model: Record<string, unknown>;
+	fan: Record<string, MacroSimFanVar>;
+	/** 변수별 IRF 경로 + 'shockLabel'/'caveat' 문자열 키. */
+	irf: Record<string, number[] | string>;
+	regimePath: MacroSimRegimePath;
+	missing: { id: string; status: string; reason: string }[];
+}
+
 export interface MacroPort {
 	/** 화이트리스트 시리즈 정의 (출처 attribution 포함 메타). */
 	listSeries(): Promise<MacroSeriesDef[]>;
 	getSeries(id: string): Promise<MacroPoint[] | null>;
 	getLatest(): Promise<MacroLatest[]>;
 	getTransmission(query?: MacroTransmissionQuery): Promise<MacroTransmissionResult | null>;
+	/** 거시 forward 시뮬(BVAR 팬+IRF+국면경로). macro/sim/{market}.json. 미배선/실패 null. */
+	getSim(market: 'KR' | 'US'): Promise<MacroSimFile | null>;
 }

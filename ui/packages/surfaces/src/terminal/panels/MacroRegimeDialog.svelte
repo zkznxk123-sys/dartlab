@@ -2,11 +2,11 @@
 	// 거시 국면 상세 — 판정 + 자산함의 + 전이 + 모델 합류(probit/sahm/lei/hamilton·금리커브·GaR·Hamilton밴드)
 	// + 테마별 고밀도 복합차트(성장/물가/금리/금융조건). KR/US 탭. 차트 = MiniFinChart SSOT(손수 차트 0).
 	// 데이터: 판정·타일 = macro.json(라이브) / 시계열 = observations.parquet via loadSeries(rt.macro.getSeries).
-	import type { MacroPoint } from '@dartlab/ui-contracts';
+	import type { MacroPoint, MacroSimFile } from '@dartlab/ui-contracts';
 	import { MACRO_ATTRIBUTION } from '@dartlab/ui-contracts';
 	import type { Lang, MacroFile } from '../lib/types';
-	import type { RegimeQuadrantView, MacroRegimeView } from '../lib/macroLens';
-	import { buildMacroEvidenceCards, MACRO_EVIDENCE_SPECS } from '../lib/macroLens';
+	import type { RegimeQuadrantView, MacroRegimeView, MacroSimView } from '../lib/macroLens';
+	import { buildMacroEvidenceCards, buildMacroSimView, MACRO_EVIDENCE_SPECS } from '../lib/macroLens';
 	import MiniFinChart from '../charts/MiniFinChart.svelte';
 
 	interface Props {
@@ -15,9 +15,11 @@
 		regimeView: MacroRegimeView;
 		lang: Lang;
 		loadSeries: (id: string) => Promise<MacroPoint[] | null>;
+		loadSim: (market: 'KR' | 'US') => Promise<MacroSimFile | null>;
 		onClose: () => void;
 	}
-	let { macro, regime, regimeView, lang, loadSeries, onClose }: Props = $props();
+	let { macro, regime, regimeView, lang, loadSeries, loadSim, onClose }: Props = $props();
+	let view = $state<'current' | 'forecast'>('current');
 	const T = (kr: string, en: string): string => (lang === 'en' ? en : kr);
 	const R = (t: { kr: string; en: string }): string => (lang === 'en' ? t.en : t.kr);
 
@@ -74,6 +76,35 @@
 	// Hamilton 수축확률 밴드 → 가로 스파크 polyline (0~1 고정축).
 	const bandPoly = (pts: number[]): string =>
 		pts.map((v, i) => `${((i / Math.max(1, pts.length - 1)) * 100).toFixed(1)},${(24 - Math.max(0, Math.min(1, v)) * 24).toFixed(1)}`).join(' ');
+
+	// ── 전망 시뮬(BVAR 팬) 로드 — 시장별 1회 캐시. macro/sim/{market}.json via getSim. ──
+	let simCache = $state<Record<string, MacroSimFile | null>>({});
+	let simLoading = $state(false);
+	$effect(() => {
+		if (view !== 'forecast') return;
+		const mk = market;
+		if (mk in simCache) return;
+		simLoading = true;
+		let cancelled = false;
+		loadSim(mk).then((file) => {
+			if (cancelled) return;
+			simCache = { ...simCache, [mk]: file };
+			simLoading = false;
+		});
+		return () => { cancelled = true; };
+	});
+	const simView = $derived<MacroSimView>(buildMacroSimView(simCache[market] ?? null, lang));
+
+	// 국면경로 과거+미래 연속 polyline — 과거 history + 미래 forward P(수축), 0~1 고정축.
+	const regimePoly = (hist: number[], fwd: { h: number; p: number }[]): { past: string; future: string; boundary: number } => {
+		const all = [...hist, ...fwd.map((f) => f.p)];
+		const n = Math.max(1, all.length - 1);
+		const pt = (v: number, i: number): string => `${((i / n) * 100).toFixed(1)},${(24 - Math.max(0, Math.min(1, v)) * 24).toFixed(1)}`;
+		const past = hist.map((v, i) => pt(v, i)).join(' ');
+		const future = fwd.map((f, i) => pt(f.p, hist.length - 1 + (i + 1))).join(' ');
+		const lastPast = hist.length ? pt(hist[hist.length - 1], hist.length - 1) : '';
+		return { past, future: lastPast ? `${lastPast} ${future}` : future, boundary: (Math.max(0, hist.length - 1) / n) * 100 };
+	};
 </script>
 
 <div class="scrimWrap" role="presentation" onclick={onClose}>
@@ -84,10 +115,15 @@
 				<button class={'mrTab' + (market === 'KR' ? ' on' : '')} onclick={() => (market = 'KR')}>{T('한국', 'KOREA')}</button>
 				<button class={'mrTab' + (market === 'US' ? ' on' : '')} onclick={() => (market = 'US')}>{T('미국', 'US')}</button>
 			</div>
+			<div class="mrTabs mrViewTabs">
+				<button class={'mrTab' + (view === 'current' ? ' on' : '')} onclick={() => (view = 'current')}>{T('현황', 'NOW')}</button>
+				<button class={'mrTab' + (view === 'forecast' ? ' on' : '')} onclick={() => (view = 'forecast')}>{T('전망', 'OUTLOOK')}</button>
+			</div>
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>
 
 		<div class="mrBody">
+		{#if view === 'current'}
 			<!-- 상단 2단 — 판정(좌) + 국면 모델 합류(우). 빈 공간 없이 한눈에. -->
 			<div class="mrTop" class:two={!!lens}>
 			<!-- 1. 판정 -->
@@ -191,6 +227,46 @@
 					<div class="mrEmpty">{T('지표 시계열 미존재', 'no indicator series')}</div>
 				{/if}
 			</div>
+		{:else}
+			<!-- 전망 시뮬레이션 — BVAR 팬 + 국면경로 (macro/sim/{market}.json via getSim) -->
+			{#if simView.status === 'ok'}
+				{#if simView.regimePath}
+					{@const rp = regimePoly(simView.regimePath.history, simView.regimePath.forward)}
+					<div class="mrSec">
+						<div class="mrSecHd">
+							<span class="mrSecTitle">{T('국면 경로 — 수축확률', 'REGIME PATH — P(contraction)')}</span>
+							<span class="mrSecSub mono">{T('현재', 'now')} {(simView.regimePath.current * 100).toFixed(0)}% → {simView.horizon}M {((simView.regimePath.forward.at(-1)?.p ?? 0) * 100).toFixed(0)}%</span>
+						</div>
+						<svg class="mrPathSvg" viewBox="0 0 100 24" preserveAspectRatio="none" role="img" aria-label={T('국면 경로', 'regime path')}>
+							<line x1="0" y1="12" x2="100" y2="12" class="mrBandMid" />
+							<line x1={rp.boundary} y1="0" x2={rp.boundary} y2="24" class="mrPathNow" />
+							<polyline points={rp.past} class="mrPathPast" />
+							<polyline points={rp.future} class="mrPathFuture" />
+						</svg>
+					</div>
+				{/if}
+				<div class="mrSec">
+					<div class="mrSecHd">
+						<span class="mrSecTitle">{T('전망 — BVAR 팬', 'OUTLOOK — BVAR fan')}</span>
+						<span class="mrSecSub">{T(`향후 ${simView.horizon}개월 · 80% 밴드 · 호버=분위`, `next ${simView.horizon}m · 80% band · hover for quantiles`)}</span>
+					</div>
+					{#if simView.fanCards.length}
+						<div class="finFsGrid mrCharts2">
+							{#each simView.fanCards as card (card.key)}
+								<div class="finMini"><MiniFinChart {card} periods={simView.periods} /></div>
+							{/each}
+						</div>
+					{:else}
+						<div class="mrEmpty">{T('팬 미산출', 'no fan')}</div>
+					{/if}
+				</div>
+				<div class="mrSimNote">{simView.honesty.note}</div>
+			{:else if simLoading}
+				<div class="mrLoading"><span class="mrSpinner"></span>{T('전망 시뮬 불러오는 중', 'loading outlook simulation')}</div>
+			{:else}
+				<div class="mrEmpty">{T('전망 시뮬 표시 보류 — 빌드 publish 후 표시', 'outlook simulation pending — shown after build publishes')}</div>
+			{/if}
+		{/if}
 
 			<div class="mrFoot">{macro.asOf ? `${T('기준', 'as of')} ${macro.asOf} · ` : ''}{MACRO_ATTRIBUTION}</div>
 		</div>

@@ -320,6 +320,9 @@ function fakeMacro(): MacroPort {
 				sourceRefs: ['dartlab://macro/transmission'],
 				missing: []
 			};
+		},
+		async getSim() {
+			return null; // fake — 시뮬 JSON 미배선(피처게이트 null)
 		}
 	};
 }

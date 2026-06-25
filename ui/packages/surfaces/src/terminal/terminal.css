@@ -1298,3 +1298,11 @@
 .dlTerm .mrSpinner { width: 13px; height: 13px; border: 2px solid var(--bd); border-top-color: var(--amber); border-radius: 50%; animation: mrSpin 0.8s linear infinite; }
 @keyframes mrSpin { to { transform: rotate(360deg); } }
 .dlTerm .mrFoot { font-family: var(--cond); font-size: 9px; color: var(--dimmer); text-align: right; }
+
+/* 전망 시뮬 — 현황|전망 토글 + 국면경로 SVG + 정직 note */
+.dlTerm .mrViewTabs { margin-left: 10px; }
+.dlTerm .mrPathSvg { width: 100%; height: 30px; display: block; margin-top: 3px; }
+.dlTerm .mrPathNow { stroke: var(--amber); stroke-width: 0.7; stroke-dasharray: 1.5 1.5; opacity: 0.7; }
+.dlTerm .mrPathPast { fill: none; stroke: var(--dim); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.dlTerm .mrPathFuture { fill: none; stroke: var(--dn); stroke-width: 1.6; stroke-dasharray: 3 2; vector-effect: non-scaling-stroke; }
+.dlTerm .mrSimNote { font-family: var(--cond); font-size: 9px; color: var(--dimmer); margin-top: 7px; padding-top: 5px; border-top: 1px dashed var(--bd); }
