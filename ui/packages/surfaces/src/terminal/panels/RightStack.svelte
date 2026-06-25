@@ -308,16 +308,39 @@
 	// 정기보고서 주석 — panel contentRaw 의 정부 XBRL 태그 런타임 직독(reportSource.noteSeries). 비용 체질·부문별 매출.
 	// 우측 글랜스 한 줄(real digest) + '상세보기'→ NotesDashboardDialog(분기 시계열). 별도 bake 0. 최근 분기만.
 	let noteBundle = $state<NoteSeriesBundle | null>(null);
-	let notesState = $state<'loading' | 'ready' | 'empty' | 'error'>('loading');
+	let notesState = $state<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
 	let dashOpen = $state(false); // 주석 상세 다이얼로그
+	// 순수 런타임 lazy — 주석은 panel contentRaw(재청크 전 13~16MB 단일 청크) 직독이라 무겁다. 회사 전환 콜드 버스트
+	// (가격·재무·공시·뉴스·16MB 출자…)와 경쟁시키지 않도록, 주석 패널 sentinel 이 뷰포트 근처(800px)에 올 때만 read.
+	// notesWanted 는 sticky — 한 번 주석을 본 사용자는 이후 회사에서도 바로 로드(관심 신호). 별도 bake/재빌드 0.
+	let notesSentinel = $state<HTMLElement | null>(null);
+	let notesWanted = $state(false);
+	$effect(() => {
+		if (!notesSentinel || notesWanted) return;
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((e) => e.isIntersecting)) {
+					notesWanted = true;
+					io.disconnect();
+				}
+			},
+			{ rootMargin: '800px' }
+		);
+		io.observe(notesSentinel);
+		return () => io.disconnect();
+	});
 	$effect(() => {
 		const code = co.code;
+		const wanted = notesWanted; // tracked — 스크롤로 wanted 되면 재실행하며 fetch
 		noteBundle = null;
+		if (!wanted) {
+			notesState = 'idle'; // 아직 미요청 — 패널은 '스크롤하면 로드' 힌트만(13MB 보류)
+			return;
+		}
 		notesState = 'loading';
 		let cancelled = false;
 		// Promise.resolve().then 으로 감싸 동기 throw 도 rejection 으로(effect throw 로 RightStack 깨짐 방지).
-		// panel row-group 재청크 전엔 contentRaw 단일 청크(13~16MB) 통째 다운로드라 콜드 read 가 무겁다 —
-		// 타임아웃 25s(재청크 후엔 tail-prune 으로 ~3MB → 수 초). 콜드 single-group 에서 버튼 사라짐 방지.
+		// 타임아웃 25s — 재청크 전 단일 청크 13~16MB 콜드 read 흡수(재청크 후엔 tail-prune ~0.9MB → 1s 내).
 		withTimeout(Promise.resolve().then(() => rt.report.noteSeries(code)), 25_000).then(
 			(b) => {
 				if (cancelled) return;
@@ -686,7 +709,11 @@
 {#if notesState !== 'empty'}
 	<Panel {lang} className="eCredit" prov="real" title={{ kr: '정기보고서 주석', en: 'REPORT NOTES' }} flush>
 		{#snippet right()}{#if notesState === 'ready'}<button class="finFullBtn" onclick={() => (dashOpen = true)} title={lang === 'en' ? 'cost chassis · segment revenue (quarterly)' : '비용 체질 · 부문별 매출 (분기 시계열)'}>{lang === 'en' ? 'detail' : '상세보기'}</button>{/if}{/snippet}
-		{#if notesState === 'loading'}
+		<!-- lazy sentinel — 뷰포트 근처(800px) 진입 시 noteSeries read 트리거. panel contentRaw 무거워 콜드 버스트 회피. -->
+		<div bind:this={notesSentinel} aria-hidden="true" style="height:0;margin:0"></div>
+		{#if notesState === 'idle'}
+			<div class="storyEmpty dim" role="status">{lang === 'en' ? 'scroll to load notes' : '스크롤하면 주석 로드'}</div>
+		{:else if notesState === 'loading'}
 			<div class="storyEmpty" role="status" aria-busy="true">{lang === 'en' ? 'reading notes …' : '주석 읽는 중 …'}</div>
 		{:else if notesState === 'error'}
 			<div class="storyEmpty" role="status">{lang === 'en' ? 'failed to load notes' : '주석 불러오지 못함'}</div>
@@ -720,7 +747,7 @@
 		<NotesDashboardDialog {co} {lang} cost={noteBundle?.cost ?? null} segment={noteBundle?.segment ?? null} onClose={() => (dashOpen = false)} />
 	{:catch err}
 		<div class="scrimWrap" role="presentation" onclick={() => (dashOpen = false)}>
-			<div class="scrModal" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
+			<div class="scrModal" role="dialog" aria-modal="true" tabindex="-1" aria-label={lang === 'en' ? 'notes' : '주석'} onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.key === 'Escape' && (dashOpen = false)}>
 				<div class="scrHead"><span class="scrTitle">{lang === 'en' ? 'NOTES' : '주석'}</span><button class="scrClose" onclick={() => (dashOpen = false)} aria-label="close">✕</button></div>
 				<div class="ndBody"><div class="storyEmpty">{lang === 'en' ? 'failed to open detail' : '상세 열기 실패'} — {String((err as Error)?.message ?? err)}</div></div>
 			</div>
