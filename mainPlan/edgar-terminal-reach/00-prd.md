@@ -23,17 +23,25 @@ AAPL 같은 US(EDGAR) 종목이 터미널에서 **검색→열림→주가→재
 
 ### 2.2 바닥 배선 (왜 아직 도달 못 하나) — SSOT
 - 터미널 엔진 `createEngine(raw)` 는 **7 baked JSON**(`landing/.../routeLoad.ts`)에서 회사 모델을 만든다:
-  `search-index`(검색)·`finance.json`(엔진재무)·`prices-snapshot`(주가)·`ecosystem`·meta·quarters·industryStats.
+  `search-index`(검색)·`finance.json`(엔진재무)·`prices-snapshot`(주가요약)·`ecosystem`·meta·quarters·industryStats.
   전부 **KR scan 생태계** 집계.
 - **결정적 게이트**: `engine.buildCompanyImpl` 은 `raw.finance.companies[code]` **AND** `raw.prices.data[code]`
-  둘 다 없으면 `null`. → US 가 검색·열림 되려면 search-index+finance+prices 3 집계에 있어야 한다.
+  둘 다 없으면 `null`. → US 가 검색·열림 되려면 search-index+finance+prices-snapshot 3 집계에 있어야 한다.
+- **★ 주가 스냅샷 ≠ 주가 그래프 — 출처가 다르다 (놓치기 쉬운 구멍).**
+  - **스냅샷**(현재가·시총·수익률·52주): `prices-snapshot.json` 1파일 → buildCompany 게이트. 종가 요약이면 충분.
+  - **그래프**(`PriceChart`/klinecharts): 7 baked JSON 이 아니라 **런타임 `rt.price` 포트**가 회사별 **일별 OHLCV
+    전체이력(~10년)** 을 lazy 백필(`priceSource`=`gov/prices/date/{year}.parquet` range-read·`govPriceSource`=
+    `gov/prices/company/{code}.parquet` 통파일). 수정주가·캔들·거래량 페인·turnover·백테스트가 이 OHLCV 를 먹는다.
+    **`rt.price` 포트(`candles/older/loaded/govCandles`)는 전부 KRX 스키마(ISU_CD 'A'+코드·gov 경로) KR 전용** — US 브랜치 0.
+    → 스냅샷만 채우면 US 가 "열리지만 그래프는 빈 화면". **종가-only spark 로는 그래프 불가.**
 - 엔진/표시 전체가 **KRW 조원에 결합**(`조`/`억` 리터럴이 수십 파일 분산). 통화 개념은 방금 기초만 깔림.
 - 검증된 US 데이터 소스: 검색=`edgar/tickers`(ticker·title·exchange), 재무=`buildAnnual(cik)`(AAPL FY2024
-  $391.04B=실측 일치, DART canonical snakeId 동일 vocabulary), 주가=`gather.price(t,market="US")`(yahoo, $293 실측).
+  $391.04B=실측 일치, DART canonical snakeId 동일 vocabulary), **그래프 OHLCV**=`gather` US history
+  (`yahooChart.fetchHistory`, Yahoo v8 `period1/period2·interval=1d·adjclose`, 일별 o/h/l/c/v ~10년 실측).
 
-### 2.3 막힌 것 (블로커)
-- **프로덕션 주가 bulk 소스 없음**: 헤드리스 무료 전부 막힘 — Yahoo 429·Stooq JS PoW·FMP free 250/day·FDR=Yahoo래퍼.
-  → **결정 필요**(§6).
+### 2.3 막힌 것 (블로커) — 해소됨(§6)
+- **프로덕션 주가 라이브 불가**: Yahoo v8 chart 가 **429(per-IP rate limit)·CORS** 라 런타임/브라우저 직호출 불가
+  (KR 도 동일 이유로 라이브 안 하고 HF 에 굽는다). → **bake-to-HF 로 해소**(§6). 스냅샷·그래프 둘 다 같은 OHLCV 에서.
 
 ## 3. 덕지덕지 위험 → 깨끗한 원칙
 
@@ -48,13 +56,18 @@ AAPL 같은 US(EDGAR) 종목이 터미널에서 **검색→열림→주가→재
 
 ## 4. 아키텍처
 
-### 4.1 데이터 흐름 (도달 3집계)
+### 4.1 데이터 흐름 (도달 = 3 baked 집계 + 1 런타임 포트)
 ```
-edgar/tickers ──────────────► search-index(+currency,market=US)  → raw.index   → suggest/buildCompany
-EDGAR companyfacts(buildAnnual)► finance-us(+currency=USD)         → raw.finance → buildCompany(필수)
-gather/소스(§6) ───────────────► prices-us(+currency=USD)           → raw.prices  → buildCompany(필수)
-routeLoad: KR aggregate + US 동형 엔트리 병합(1곳) → raw → createEngine
+edgar/tickers ──────────────► search-index(+currency,market=US)  → raw.index    → suggest/buildCompany
+EDGAR companyfacts(buildAnnual)► finance-us(+currency=USD)         → raw.finance  → buildCompany(게이트)
+[A] gather US OHLCV bake ──────► prices-snapshot-us(+currency=USD)  → raw.prices   → buildCompany(게이트)
+routeLoad: KR aggregate + US 동형 엔트리 병합(1곳) → raw → createEngine     ┐ 검색→열림
+                                                                            ┘
+[A] 같은 OHLCV ──► edgar/prices/company/{ticker}.parquet ─(HF read-only)─► rt.price US 브랜치 → PriceChart 그래프
 ```
+**[A] 단일 OHLCV 소스가 둘을 동시 생산**: gather US history(Yahoo v8) → 회사별 OHLCV parquet(그래프) + 그 마지막
+행들에서 스냅샷(현재가·수익률·52주·변동성) 파생. KR 의 `gov/prices/company`(그래프)+`prices-snapshot`(요약) 쌍과 동형.
+**그래프 도달의 핵심 = `rt.price` 포트에 resolveMarket SSOT US 브랜치 1곳** (govPriceSource 미러). PriceChart 무변경.
 
 ### 4.2 통화 처리 = 소스 2곳 (덕지덕지 차단점)
 1. **`engine.buildCompany`**: `co.currency = fin.currency ?? 'KRW'`. co 의 금액(price.mktcap·income/balance/cashflow
@@ -67,23 +80,34 @@ routeLoad: KR aggregate + US 동형 엔트리 병합(1곳) → raw → createEng
 ## 5. 단계 (도달 우선)
 
 - **P0 통화 소스화** (표시 무패치): buildCompany 재무시리즈 + buildBundle currency. KR 무회귀 가드. → US 값이 $ 로.
-- **P1 프로덕션 데이터**: ① finance-us(buildAnnual 6437, 오프라인) ② search-us(tickers) ③ prices-us(§6 결정 후).
-  빌더는 도메인 위임(`별도빌드 금지`)·offline 가드.
-- **P2 병합·발행·검증**: routeLoad 병합 + HF/CI 발행. **dev 5173 AAPL 검색→열림→USD 정상** 눈검수(시각).
+- **P1 프로덕션 데이터** (빌더는 도메인 위임 `별도빌드 금지`·offline 가드):
+  ① finance-us(buildAnnual 6437, 오프라인) ② search-us(tickers)
+  ③ **주가 OHLCV bake**(§6) — gather US history → `edgar/prices/company/{ticker}.parquet`(그래프) +
+     마지막행 파생 `prices-snapshot-us`(게이트). **한 빌더가 둘 생산.** 429 페이싱·증분(recent tail + 1회 전이력).
+  ④ **런타임 `rt.price` US 브랜치** — `priceSource`/`govPriceSource` 미러로 `edgar/prices/company` 읽는 US 소스 신설,
+     `createPublicRuntime` price 포트(`candles/older/loaded`)를 resolveMarket SSOT 로 분기. PriceChart·엔진 무변경.
+- **P2 병합·발행·검증**: routeLoad 병합 + HF/CI 발행. **dev 5173 AAPL 검색→열림→USD 재무 + 주가그래프 렌더** 눈검수(시각).
 - **P3 확장**: panel/filings(edgar/panel 있음)·scan(edgar/scan)·map·eco US.
 
-## 6. 주가 소스 — 확정: 무료 Yahoo spark 배치 (비용 결정 불필요)
+## 6. 주가 소스 — 확정: 회사별 OHLCV bake (그래프+스냅샷 단일 파이프라인)
 
 US 정부 오픈 주가 데이터는 **없다**(EDGAR=공시만, 주가=거래소 상업데이터·Stooq bulk=401/PoW·FMP free=250/day).
-그러나 **429 는 per-ticker 호출 탓**이었고, Yahoo **멀티심볼 spark** 가 해법:
-- `query1.finance.yahoo.com/v7/finance/spark?symbols=A,B,…&range=1y&interval=1d` — **무인증, 한 요청 ~20 티커**
-  1년 일별 종가. (v7/quote 는 Unauthorized, spark 는 열림 — 실측.)
-- 6437 개 = **~322 배치 요청 ≈ 수분** → 일배치 cron(GHA) 충분. **무료·비용 0.**
-- 산출: currentPrice=최신종가, return1m/3m/1y·volatility1y=종가 계산, 52w hi/lo=종가 근사(거래량은 spark 부재 → null·minor).
-  **marketCap = currentPrice × shares(EDGAR dei `EntityCommonStockSharesOutstanding`)** — KR 무관 자급.
-- 신규 gather 도메인(`yahooSpark` 배치) 또는 prebuild 온라인 스텝. 페이싱+백오프 가드.
+그래프는 **회사별 일별 OHLCV 전체이력**이 필수(§2.2 ★) — 종가-only spark 로는 그래프를 못 그린다.
 
-→ **블로커 해소.** P1③ 진행 가능.
+**확정 소스 = gather US history**(`yahooChart.fetchHistory`, Yahoo v8 `period1/period2·interval=1d·adjclose`):
+- date·open·high·low·close·volume 일봉 **~10년**(KR `gov/prices/company` 와 동형 schema). 무인증 실측 확인.
+- **429·CORS 라 런타임 라이브 불가** → KR 과 동일하게 **HF 에 bake**, 런타임은 read-only 로 읽는다.
+
+**단일 파이프라인이 그래프 + 스냅샷 둘 다 생산** (덕지덕지 차단 — 소스 1개):
+- 회사별 `edgar/prices/company/{ticker}.parquet`(전체 OHLCV) = **그래프**(`rt.price` US 브랜치가 읽음).
+- 각 파일 마지막 행들에서 파생 → `prices-snapshot-us`(현재가·return1m/3m/1y·volatility1y·52w hi/lo·**marketCap=
+  currentPrice × shares**[EDGAR dei `EntityCommonStockSharesOutstanding`]) = **스냅샷**(buildCompany 게이트).
+- 빌더 = 신규 gather/prebuild 스텝(도메인 위임). 페이싱+백오프, 증분(recent tail 일배치 + 전이력 1회 백필).
+- 규모: 6437 회사별 history 호출 = KR `gov/prices/company`(~2555) 과 동급의 주기 cron. 라이브 아님(read-only HF).
+- **spark 는 불필요**: 종가-only 라 그래프 불가. (스냅샷 부트스트랩 가속이 굳이 필요하면 멀티심볼 spark 를 *선택적*
+  초기 채움으로 쓸 수 있으나 설계 본류 아님 — OHLCV bake 가 스냅샷도 자급.)
+
+→ **블로커 해소** (라이브→bake 로). P1③④ 진행 가능.
 
 ## 7. 검증 게이트
 - vitest `engineUsReach`(도달 계약, 통과중) 유지.
