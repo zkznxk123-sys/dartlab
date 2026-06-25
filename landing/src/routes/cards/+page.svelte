@@ -12,7 +12,7 @@
 	import { loadCarousels } from '$lib/cards/contract';
 	import type { MediaIndex, CarouselContract } from '$lib/cards/model';
 	import PostModal from '$lib/cards/PostModal.svelte';
-	import CoverThumb from '$lib/cards/CoverThumb.svelte';
+	import FeedCard from '$lib/cards/FeedCard.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -136,7 +136,7 @@
 		{:else}
 			<div class="grid">
 				{#each visible as row (row.slug)}
-					<CoverThumb {rt} code={row.stockCode} slug={row.slug} corpName={row.corpName} {base} {media} onOpen={() => openPost(row.stockCode, row.slug, row.corpName)} />
+					<FeedCard {rt} code={row.stockCode} slug={row.slug} corpName={row.corpName} title={row.title} {base} {media} onOpen={() => openPost(row.stockCode, row.slug, row.corpName)} />
 				{/each}
 			</div>
 			<div bind:this={sentinel} class="sentinel"></div>

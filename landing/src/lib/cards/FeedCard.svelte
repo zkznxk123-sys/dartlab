@@ -1,0 +1,158 @@
+<script lang="ts">
+	// 피드 카드 — 인스타식 반응형. 모바일(≤640px): 풀폭 카드가 그 자리에서 좌우 스와이프되는 *인라인 캐러셀*
+	// (Deck 재사용 — 점 인디케이터·스냅·페이지카운터, 화살표는 hover 없으니 자동 숨김=스와이프만). 캡션은
+	// 이미지 아래(이름·공유·제목 더보기→모달). 데스크톱(>640px): 기존 그리드 커버 썸네일(CoverThumb) 탭→모달.
+	// 둘 다 가벼움 — Deck/CoverThumb 가 뷰포트 진입 시에만 라이브 빌드(지연).
+	import type { DartLabRuntime } from '@dartlab/ui-contracts';
+	import Deck from './Deck.svelte';
+	import CoverThumb from './CoverThumb.svelte';
+	import { cardShareUrl } from './share';
+	import { heroUrls } from './media';
+	import type { MediaIndex } from './model';
+
+	let {
+		rt,
+		code,
+		slug,
+		corpName,
+		title = '',
+		base = '',
+		media,
+		onOpen
+	}: {
+		rt: DartLabRuntime;
+		code: string;
+		slug: string;
+		corpName: string;
+		title?: string;
+		base?: string;
+		media: MediaIndex | null;
+		onOpen: () => void;
+	} = $props();
+
+	// 뷰포트 분기 — matchMedia(반응형). 모바일=인라인 스와이프, 데스크톱=그리드 썸네일.
+	let mobile = $state(false);
+	$effect(() => {
+		const mq = window.matchMedia('(max-width: 640px)');
+		const apply = () => (mobile = mq.matches);
+		apply();
+		mq.addEventListener('change', apply);
+		return () => mq.removeEventListener('change', apply);
+	});
+
+	// 공유 — cardShare 워커 링크(첫 슬라이드 OG + 딥링크) 복사.
+	let copied = $state(false);
+	async function share() {
+		try {
+			await navigator.clipboard.writeText(cardShareUrl(slug, base));
+			copied = true;
+			setTimeout(() => (copied = false), 1500);
+		} catch {
+			/* clipboard 차단 환경 무시 */
+		}
+	}
+</script>
+
+{#if mobile}
+	<!-- 인스타 피드식 — 풀폭 인라인 스와이프 캐러셀 + 아래 캡션 바. -->
+	<article class="fc">
+		<div class="fcDeck">
+			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} />
+		</div>
+		<div class="fcBar">
+			<picture>
+				<source srcset="{base}/avatar.webp" type="image/webp" />
+				<img class="fcAva" src="{base}/avatar.png" alt="" width="26" height="26" />
+			</picture>
+			<b class="fcName">{corpName}{code ? ` · ${code}` : ''}</b>
+			<button class="fcShare" onclick={share} aria-label="공유 링크 복사" title="공유">
+				{#if copied}
+					복사됨 ✓
+				{:else}
+					<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.6" y1="13.5" x2="15.4" y2="17.5" /><line x1="15.4" y1="6.5" x2="8.6" y2="10.5" /></svg>
+					공유
+				{/if}
+			</button>
+		</div>
+		{#if title}
+			<button class="fcTitle" onclick={onOpen}>{title} <span class="fcMore">더보기</span></button>
+		{/if}
+	</article>
+{:else}
+	<CoverThumb {rt} {code} {slug} {corpName} {base} {media} {onOpen} />
+{/if}
+
+<style>
+	/* 모바일 인라인 피드 카드 — 풀폭, 캐러셀 + 캡션 바. */
+	.fc {
+		display: flex;
+		flex-direction: column;
+	}
+	.fcDeck {
+		width: 100%;
+	}
+	/* 캡션 바 — 아바타 · 이름 · 공유(우측). 인스타 포스트 헤더/액션 줄 역할. */
+	.fcBar {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		padding: 11px 4px 6px;
+	}
+	.fcAva {
+		border-radius: 50%;
+		flex: 0 0 auto;
+	}
+	.fcName {
+		font-size: 14px;
+		font-weight: 800;
+		color: #f1f5f9;
+		letter-spacing: -0.01em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.fcShare {
+		margin-left: auto;
+		flex: 0 0 auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 6px 12px;
+		border-radius: 999px;
+		border: 1px solid rgba(var(--dl-accent-rgb), 0.4);
+		background: rgba(var(--dl-accent-rgb), 0.1);
+		color: var(--dl-accent);
+		font-size: 12.5px;
+		font-weight: 700;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.fcShare:active {
+		background: rgba(var(--dl-accent-rgb), 0.2);
+	}
+	/* 제목(훅) 한 줄 + 더보기 → 모달(전체 캡션·블로그). 인스타 캡션 truncate 역할. */
+	.fcTitle {
+		display: block;
+		width: 100%;
+		text-align: left;
+		border: none;
+		background: none;
+		padding: 0 4px 2px;
+		margin: 0;
+		font-size: 14.5px;
+		font-weight: 600;
+		line-height: 1.45;
+		color: #cdd9e6;
+		cursor: pointer;
+		word-break: keep-all;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.fcMore {
+		color: #64748b;
+		font-weight: 700;
+	}
+</style>
