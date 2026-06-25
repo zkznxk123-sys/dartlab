@@ -226,7 +226,7 @@
 			nonRegFilings = f;
 			nonRegState = f.length ? 'ready' : 'empty';
 		});
-		rt.news.forCompany(code).then((n) => {
+		rt.news.forCompany(code, co.name?.kr).then((n) => {
 			if (cancelled) return;
 			news = n;
 			newsState = n.length ? 'ready' : 'empty';

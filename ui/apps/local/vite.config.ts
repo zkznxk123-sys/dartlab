@@ -15,6 +15,8 @@ const apiTarget = process.env.DARTLAB_API_BASE || 'http://127.0.0.1:8400';
 // 로컬도 공개와 "공통 배선"으로 워커 /news 를 쓰게 한다(??= 라 operator 명시값 우선·가역).
 // ⚠ HF_RESOLVE/NAVER 는 안 건드린다 — fallback(HF 직독) 있어 불필요, dev 데이터 흐름 보존.
 process.env.VITE_DARTLAB_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/news';
+// 시장 전반 뉴스 라이브 RSS 오버레이 워커(/market-news) — HF 누적 위 머지, 공통 배선 기본값(가역).
+process.env.VITE_DARTLAB_MARKET_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/market-news';
 
 export default defineConfig({
 	plugins: [sveltekit()],

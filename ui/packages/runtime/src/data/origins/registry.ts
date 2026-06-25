@@ -12,8 +12,10 @@ const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefi
 
 // 워커 프록시 base URL(가역 빌드-env 게이트). 비우면 미설정 — 호출측이 originConfigured 로 미동작([]) 판정.
 //   news = CF 워커 /news 라우트(전 환경 동일, dev 폴백 없음 — /__news 미들웨어는 구현된 적 없음).
+//   marketNews = CF 워커 /market-news 라우트(전 환경 동일, Google News RSS 라이브 — newsWorker 동형 게이트).
 //   naver = dev 는 Vite /__naver 미들웨어(브라우저 CORS 우회), 프로덕션은 CF 프록시 /naver 라우트.
 const NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
+const MARKET_NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_MARKET_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const NAVER_PROXY = ((viteEnv?.VITE_DARTLAB_NAVER_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const naverDev = Boolean(viteEnv?.DEV);
 // gov 주가 dev 라이브 fill 게이트(naverDev 동형) — dev 만 /__gov 미들웨어 존재, 프로덕션은 읽기 전용.
@@ -25,6 +27,7 @@ export type OriginId =
 	| 'hfMedia'
 	| 'localApi'
 	| 'newsWorker'
+	| 'marketNewsWorker'
 	| 'naverWorker'
 	| 'duckdbHf'
 	| 'govDev';
@@ -48,7 +51,16 @@ interface OriginDef {
 const MIN = 60_000;
 
 // 워커 라우트 URL 조립 — path = 종목 코드. 둘 다 `?code=<encoded>` 쿼리(옛 newsEndpoint/naverEndpoint 동일).
-const newsWorkerUrl = (code: string): string => `${NEWS_PROXY}?code=${encodeURIComponent(code)}`;
+// path 는 종목코드, 또는 "코드\t회사명"(회사명 있으면 라이브 RSS 검색어 q 로 워커에 전달). resolve(path) 시그니처 유지.
+const newsWorkerUrl = (spec: string): string => {
+	const tab = spec.indexOf('\t');
+	const code = tab >= 0 ? spec.slice(0, tab) : spec;
+	const name = tab >= 0 ? spec.slice(tab + 1) : '';
+	const q = name ? `&q=${encodeURIComponent(name)}` : '';
+	return `${NEWS_PROXY}?code=${encodeURIComponent(code)}${q}`;
+};
+// market-news 워커 — path = 시장 코드(KR/US). 종목 워커와 달리 라이브 RSS 검색이라 code 대신 market 쿼리.
+const marketNewsWorkerUrl = (market: string): string => `${MARKET_NEWS_PROXY}?market=${encodeURIComponent(market)}`;
 const naverWorkerUrl = (code: string): string => {
 	const q = `code=${encodeURIComponent(code)}`;
 	return naverDev ? `/__naver?${q}` : `${NAVER_PROXY}?${q}`;
@@ -66,6 +78,12 @@ const ORIGINS: Partial<Record<OriginId, OriginDef>> = {
 		resolve: newsWorkerUrl,
 		defaultCache: { scope: 'memory', ttlMs: 10 * MIN, maxEntries: 64 },
 		configured: () => Boolean(NEWS_PROXY) // 프록시 미설정 → 미동작(빈 섹션), dev 폴백 없음
+	},
+	// market-news 라이브 RSS 워커 — HF 누적 shard 위에 머지되는 오버레이라, 미설정/실패해도 HF base 는 보임.
+	marketNewsWorker: {
+		resolve: marketNewsWorkerUrl,
+		defaultCache: { scope: 'memory', ttlMs: 10 * MIN, maxEntries: 8 },
+		configured: () => Boolean(MARKET_NEWS_PROXY)
 	},
 	naverWorker: {
 		resolve: naverWorkerUrl,

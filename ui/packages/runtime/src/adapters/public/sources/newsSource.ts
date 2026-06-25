@@ -21,15 +21,18 @@ interface NewsFile {
 	items?: NewsItem[];
 }
 
-/** 종목별 최근 뉴스 (date 내림차순). [] = 미지원·실패·미배선·해당없음. */
-export function loadCompanyNews(code: string, core?: DataCore): Promise<NewsItem[]> {
+/** 종목별 최근 뉴스 (date 내림차순). [] = 미지원·실패·미배선·해당없음.
+ *  name(회사명) 주입 시 워커가 Google News RSS 라이브 헤드라인을 byCompany 아카이브 위에 머지(조회시점 최신). */
+export function loadCompanyNews(code: string, core?: DataCore, name?: string): Promise<NewsItem[]> {
 	if (!browser) return Promise.resolve([]);
 	if (!originConfigured('newsWorker')) return Promise.resolve([]); // 프록시 미설정 → 빈 섹션(코어 호출 생략)
 	const c = code.trim();
+	const nm = (name ?? '').trim();
+	const spec = nm ? `${c}\t${nm}` : c; // newsWorkerUrl 이 \t 로 code|회사명 분리(라이브 RSS q)
 	return newsCore(core)
 		.request<NewsFile>({
 			origin: 'newsWorker',
-			path: c,
+			path: spec,
 			parse: (r) => (r.ok ? (r.json() as Promise<NewsFile>) : Promise.resolve({ code: c } as NewsFile))
 		})
 		.then((j) => (Array.isArray(j.items) ? j.items : []))

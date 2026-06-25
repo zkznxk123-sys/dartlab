@@ -44,4 +44,13 @@ describe('normalizeMarketNews', () => {
 		const out = normalizeMarketNews([row({ date: '2026-06-12', title: '  제목  ', url: 'art-x', source: '  연합  ' })]);
 		expect(out[0]).toEqual({ date: '2026-06-12', title: '제목', source: '연합', url: 'art-x' });
 	});
+
+	it('라이브 오버레이 + HF shard 머지 — 최신 라이브가 상단, url 중복은 live keep-first', () => {
+		// loadMarketNews 가 [...live, ...hf] 순으로 넘기는 계약 — 같은 기사(dup)는 라이브분 유지, 날짜순 재정렬.
+		const live = [row({ date: '2026-06-25', title: '라이브 최신', url: 'live-1' }), row({ date: '2026-06-24', title: '공통기사(라이브)', url: 'dup' })];
+		const hf = [row({ date: '2026-06-24', title: '공통기사(HF)', url: 'dup' }), row({ date: '2026-06-23', title: 'HF 과거', url: 'hf-1' })];
+		const out = normalizeMarketNews([...live, ...hf]);
+		expect(out.map((n) => n.url)).toEqual(['live-1', 'dup', 'hf-1']);
+		expect(out.find((n) => n.url === 'dup')?.title).toBe('공통기사(라이브)');
+	});
 });

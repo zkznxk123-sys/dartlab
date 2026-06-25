@@ -22,6 +22,9 @@ const dartlabVersion = versionMatch[1];
 // ⚠ HF_RESOLVE/NAVER 는 여기서 안 건드린다 — dev 는 원래 HF 직독 + /__gov·/__naver dev 플러그인 경로라,
 //    워커로 강제하면 dev 데이터 로드 흐름이 바뀐다. news 만 fallback 부재라 기본값이 필요하다.
 process.env.VITE_DARTLAB_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/news';
+// 시장 전반 뉴스 라이브 RSS 오버레이 워커(/market-news). HF 누적 shard 위에 머지되는 오버레이라 미설정/실패 시
+// HF base 만 — fallback 부재 아님(news 와 다름). 공통 배선으로 dev/직접빌드도 워커를 그대로 쓰게 기본값 부여(가역).
+process.env.VITE_DARTLAB_MARKET_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/market-news';
 
 function contentType(filePath: string): string {
 	const ext = path.extname(filePath).toLowerCase();

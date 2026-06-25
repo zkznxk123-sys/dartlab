@@ -122,6 +122,9 @@ jobs:
           # 종목 뉴스 헤드라인 프록시(같은 hfProxy 워커 /news 라우트). private 데이터셋을 read 토큰으로
           # 서버사이드 read 해 표시(라이브 표시 = 의도된 용도). 워커 시크릿 HF_NEWS_TOKEN 미설정 시 빈배열 noop, 가역.
           VITE_DARTLAB_NEWS_PROXY: https://dartlab-hf-proxy.eddmpython.workers.dev/news
+          # 시장 전반 뉴스 라이브 RSS 오버레이 프록시(같은 hfProxy 워커 /market-news 라우트). Google News RSS 를
+          # 무인증 서버사이드 fetch → HF 누적 shard 위에 머지. cron(일 2회) 사이 갭을 10분급으로 메움. 비우면 HF base 만, 가역.
+          VITE_DARTLAB_MARKET_NEWS_PROXY: https://dartlab-hf-proxy.eddmpython.workers.dev/market-news
           # Cloudflare Web Analytics 공개 beacon site token 또는 Cloudflare 제공 script snippet.
           # 비우면 analytics beacon 을 로드하지 않음.
           VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}

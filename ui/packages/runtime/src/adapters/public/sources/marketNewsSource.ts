@@ -5,9 +5,12 @@
 //   기존 일별 cron 산출물(gather writeDailyParquet)을 그대로 직독하는 게 별도빌드 0 의 정공법. 오늘(UTC)
 //   shard 는 cron(어제까지) 직후라 보통 미존재이므로 어제부터 역순으로 읽어 불필요한 404 를 피한다.
 //   미존재일(404)은 requestParquetWholeFile 이 null + 음성캐시 → 반복 GET 0.
+//   ★라이브 오버레이: cron(일 2회)이 못 채우는 사이 갭은 marketNewsWorker(Google News RSS 라이브)가 메운다.
+//   HF 누적 shard + 라이브 헤드라인을 url-dedup 머지 → 넓이(HF) + 10분급 신선도(라이브). 워커 미배선/실패 시 HF base 만.
 // 제목+원문링크만(스니펫 없음) — 클릭=외부 기사 이동. rss 는 스키마상 description 이 null 이라 본디 제목만.
 import type { MarketNews } from '@dartlab/ui-contracts';
 import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
+import { originConfigured } from '../../../data/origins/registry';
 
 interface NewsRow extends Record<string, unknown> {
 	date?: unknown;
@@ -60,25 +63,48 @@ export function normalizeMarketNews(rows: NewsRow[]): MarketNews[] {
 	return out.slice(0, CAP);
 }
 
-/** 시장 전체 최근 뉴스 — rss 공개 아카이브 최근 N일 shard 직독·합침. 실패/미배선은 []. */
+interface LiveNewsFile extends Record<string, unknown> {
+	market?: string;
+	items?: NewsRow[];
+}
+
+/** marketNewsWorker 라이브 RSS 헤드라인 — 미배선/실패는 []. 워커 응답 {market,asOf,items:[{date,title,source,url}]}. */
+function loadLiveMarketNews(c: DataCore, market: string): Promise<NewsRow[]> {
+	if (!originConfigured('marketNewsWorker')) return Promise.resolve([]); // 워커 미배선 → HF base 만(코어 호출 생략)
+	return c
+		.request<LiveNewsFile>({
+			origin: 'marketNewsWorker',
+			path: market, // marketNewsWorkerUrl 이 ?market= 로 조립
+			parse: (r) => (r.ok ? (r.json() as Promise<LiveNewsFile>) : Promise.resolve({} as LiveNewsFile))
+		})
+		.then((j) => (Array.isArray(j.items) ? j.items : []))
+		.catch(() => []);
+}
+
+/** 시장 전체 최근 뉴스 — HF 공개 rss 아카이브 최근 N일 shard + 라이브 RSS 오버레이 머지. 실패/미배선은 []. */
 export async function loadMarketNews(core?: DataCore, market = 'KR', now: Date = new Date()): Promise<MarketNews[]> {
 	const c = marketCore(core);
 	const days = recentDays(now, DAYS);
 	try {
-		const perDay = await Promise.all(
-			days.map((day) =>
-				c
-					.requestParquetWholeFile<NewsRow>({
-						origin: 'hf',
-						path: `news/public/rss/${market}/${day}.parquet`,
-						columns: COLS,
-						cacheKey: `news.market:${market}:${day}`,
-						cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 8 } // 신선도 — 짧은 TTL
-					})
-					.catch(() => null)
-			)
-		);
-		return normalizeMarketNews(perDay.flatMap((r) => r ?? []));
+		// HF 누적 shard(넓이) + 라이브 헤드라인(신선도) 동시 fetch — 둘 다 실패해도 normalizeMarketNews 가 [] 안전.
+		const [perDay, live] = await Promise.all([
+			Promise.all(
+				days.map((day) =>
+					c
+						.requestParquetWholeFile<NewsRow>({
+							origin: 'hf',
+							path: `news/public/rss/${market}/${day}.parquet`,
+							columns: COLS,
+							cacheKey: `news.market:${market}:${day}`,
+							cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 8 } // 신선도 — 짧은 TTL
+						})
+						.catch(() => null)
+				)
+			),
+			loadLiveMarketNews(c, market)
+		]);
+		// live 를 앞에 — url-dedup keep-first 에서 라이브분 우선(동일 기사면 내용 동일이라 무관, 의미상 자연).
+		return normalizeMarketNews([...live, ...perDay.flatMap((r) => r ?? [])]);
 	} catch {
 		return [];
 	}

@@ -32,6 +32,57 @@ function cacheControlFor(path) {
 	return 'public, max-age=3600';
 }
 
+// ── Google News RSS 라이브 파싱 (gather/sources/news.py::_parseRss 와 규칙 동일) ──
+// CF Workers 는 DOMParser/XML 파서가 없어 정규식 추출. title 은 HTML unescape, source 태그 그대로,
+// url=link(구글 리다이렉트, HF 누적본과 동형이라 dedup 일관). 숫자→named→&amp; 순(이중 unescape 방지).
+function htmlUnescape(s) {
+	return s
+		.replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+		.replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&apos;/g, "'")
+		.replace(/&amp;/g, '&');
+}
+
+function rssTag(block, name) {
+	const m = block.match(new RegExp('<' + name + '(?:\\s[^>]*)?>([\\s\\S]*?)</' + name + '>', 'i'));
+	if (!m) return '';
+	let v = m[1];
+	const cdata = v.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
+	if (cdata) v = cdata[1];
+	return htmlUnescape(v.trim());
+}
+
+function rssDate(s) {
+	const d = new Date(s); // V8 가 RFC822("Tue, 24 Jun 2026 01:23:00 GMT") 파싱
+	return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+}
+
+// RSS XML → [{date,title,source,url}] (link dedup, 빈 title/link 제외). 화면 표시 스키마는
+// marketNewsSource.normalizeMarketNews 와 동일 4필드 — 클라가 HF 누적본과 그대로 머지한다.
+function parseRssItems(xml) {
+	const out = [];
+	const seen = new Set();
+	for (const m of xml.matchAll(/<item\b[\s\S]*?<\/item>/gi)) {
+		const block = m[0];
+		const title = rssTag(block, 'title');
+		const link = rssTag(block, 'link');
+		if (!title || !link || seen.has(link)) continue;
+		seen.add(link);
+		out.push({ date: rssDate(rssTag(block, 'pubDate')), title, source: rssTag(block, 'source'), url: link });
+	}
+	return out;
+}
+
+// market 별 "시장 전반" 라이브 쿼리 — 종목 단위(HF 누적본이 150쿼리로 넓게 커버)가 아니라 cron 사이
+// 갭을 메울 최신 시장 헤드라인용. OR 단일 쿼리 1 fetch(워커 CPU·Google rate 보호), when:2d=오늘+어제.
+const MARKET_RSS = {
+	KR: 'https://news.google.com/rss/search?q=' + encodeURIComponent('코스피 OR 코스닥 OR 증시 OR 환율 OR 금리 when:2d') + '&hl=ko&gl=KR&ceid=KR:ko',
+	US: 'https://news.google.com/rss/search?q=' + encodeURIComponent('stock market OR S&P 500 OR Nasdaq OR Federal Reserve when:2d') + '&hl=en-US&gl=US&ceid=US:en'
+};
+
 export default {
 	async fetch(req, env, ctx) {
 		// CORS allowlist: 프로덕션 origin(env.ALLOW_ORIGIN) + 로컬 dev(localhost/127.0.0.1). 일치 시 그 origin echo.
@@ -95,15 +146,9 @@ export default {
 			const jsonHeaders = { ...cors, 'Content-Type': 'application/json; charset=utf-8' };
 			const code = (url.searchParams.get('code') || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 12);
 			if (!code) return new Response(JSON.stringify({ error: 'code required' }), { status: 400, headers: jsonHeaders });
-			const token = env.HF_NEWS_TOKEN || '';
-			if (!token) {
-				// 시크릿 미설정 = 그레이스풀 noop(프론트는 빈 섹션). naver 키 미설정 green-noop 과 동형.
-				return new Response(JSON.stringify({ code, items: [], note: 'news proxy not configured' }), {
-					headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
-				});
-			}
-			const newsUrl = `${NEWS_UPSTREAM}/news/private/naver/byCompany/${code}.json`;
-			const cacheKey = new Request(newsUrl); // auth 헤더 비포함 키 — 우리 데이터·우리 사용자 대상 엣지 캐시
+			const q = (url.searchParams.get('q') || '').trim().slice(0, 40); // 회사명(라이브 RSS 검색어, 옵션)
+			// 캐시 키 = code+q(회사명 다르면 라이브분도 다름). auth 헤더 비포함 — 우리 데이터·우리 사용자 엣지 캐시.
+			const cacheKey = new Request(`https://dl-news.cache/${code}?q=${encodeURIComponent(q)}`);
 			const hit = await caches.default.match(cacheKey);
 			if (hit) {
 				const h2 = new Headers(hit.headers);
@@ -111,21 +156,70 @@ export default {
 				h2.set('x-dl-edge', 'HIT');
 				return new Response(hit.body, { status: hit.status, headers: h2 });
 			}
-			let payload;
-			try {
-				const fr = await fetch(newsUrl, { headers: { Authorization: `Bearer ${token}` } });
-				if (fr.status === 404) {
-					// 뉴스 없는 종목(시총 상위 외) — 정직한 빈배열.
-					payload = JSON.stringify({ code, items: [] });
-				} else if (!fr.ok) {
-					return new Response(JSON.stringify({ code, items: [], error: `upstream ${fr.status}` }), { status: 502, headers: jsonHeaders });
-				} else {
-					payload = await fr.text(); // byCompany json 그대로 — {code, asOf, items:[{date,title,source,url,description}]}
-				}
-			} catch (e) {
-				return new Response(JSON.stringify({ code, items: [], error: String(e) }), { status: 502, headers: jsonHeaders });
+			// base: byCompany 아카이브(네이버 스니펫, private). 토큰 있을 때만 — 없으면 라이브 RSS 만으로 동작.
+			let baseItems = [];
+			const token = env.HF_NEWS_TOKEN || '';
+			if (token) {
+				try {
+					const fr = await fetch(`${NEWS_UPSTREAM}/news/private/naver/byCompany/${code}.json`, { headers: { Authorization: `Bearer ${token}` } });
+					if (fr.ok) {
+						const j = JSON.parse(await fr.text()); // {code, asOf, items:[{date,title,source,url,description,track}]}
+						if (Array.isArray(j.items)) baseItems = j.items;
+					} // 404(시총 상위 외) → []
+				} catch (e) { /* 아카이브 실패해도 라이브로 진행 */ }
 			}
-			const resp = new Response(payload, { headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' } });
+			// live: Google News RSS(회사명 q) 무인증 라이브 — byCompany cron(일 1회)이 못 채운 조회시점 최신.
+			let liveItems = [];
+			if (q) {
+				try {
+					const rssUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(`${q} when:3d`) + '&hl=ko&gl=KR&ceid=KR:ko';
+					const fr2 = await fetch(rssUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+					if (fr2.ok) liveItems = parseRssItems(await fr2.text()).slice(0, 40).map((it) => ({ ...it, description: '', track: 'google' }));
+				} catch (e) { /* 라이브 실패해도 base 로 진행 */ }
+			}
+			// 머지: 라이브(최신) 우선 + base(스니펫), url dedup keep-first, date desc, 상한 60.
+			const seen = new Set();
+			const items = [];
+			for (const it of [...liveItems, ...baseItems]) {
+				const u = String(it.url || '');
+				if (!u || seen.has(u)) continue;
+				seen.add(u);
+				items.push(it);
+			}
+			items.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+			const resp = new Response(JSON.stringify({ code, items: items.slice(0, 60) }), {
+				headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
+			});
+			if (ctx) ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
+			return resp;
+		}
+		// /market-news?market=KR|US — 시장 전반 최신 헤드라인 라이브 오버레이. HF rss 아카이브(일 2회 cron)가
+		// 못 채우는 cron 사이 갭을 Google News RSS 라이브 fetch 로 메운다(가격 /naver fresh-tail 과 동형 패턴).
+		// 무인증·CORS 무관(서버측 fetch). 10분 엣지 캐시로 같은 분 반복 호출이 Google 을 두드리지 않게(남용 방어).
+		// 클라(marketNewsSource)가 HF 누적 shard 위에 url-dedup 머지 → 넓이(HF)+신선도(라이브) 동시.
+		if (url.pathname === '/market-news') {
+			const jsonHeaders = { ...cors, 'Content-Type': 'application/json; charset=utf-8' };
+			const market = (url.searchParams.get('market') || 'KR').toUpperCase() === 'US' ? 'US' : 'KR';
+			const rssUrl = MARKET_RSS[market];
+			const cacheKey = new Request(rssUrl); // when:2d 고정 + market 별 → 안정 키
+			const hit = await caches.default.match(cacheKey);
+			if (hit) {
+				const h2 = new Headers(hit.headers);
+				for (const [k, v] of Object.entries(jsonHeaders)) h2.set(k, v);
+				h2.set('x-dl-edge', 'HIT');
+				return new Response(hit.body, { status: hit.status, headers: h2 });
+			}
+			let items = [];
+			try {
+				const fr = await fetch(rssUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+				if (!fr.ok) throw new Error(`rss ${fr.status}`);
+				items = parseRssItems(await fr.text()).slice(0, 80); // 렌더 상한 충분(클라 CAP=300 과 머지)
+			} catch (e) {
+				return new Response(JSON.stringify({ market, items: [], error: String(e) }), { status: 502, headers: jsonHeaders });
+			}
+			const resp = new Response(JSON.stringify({ market, asOf: items[0]?.date ?? '', items }), {
+				headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
+			});
 			if (ctx) ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
 			return resp;
 		}

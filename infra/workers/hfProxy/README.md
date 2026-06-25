@@ -10,9 +10,15 @@ HF URL 을 단일 SSOT 로 묶는 경량 프록시.
 - 403/429/5xx 시 서버측 재시도(최대 4회, 지수 백오프).
 - CORS + `Access-Control-Expose-Headers`(range 헤더) 부착.
 - `GET /naver?code=XXXXXX` → 네이버 fchart 일별 OHLCV(가격 fresh-tail). 키 불필요(공개 차트 API).
-- `GET /news?code=XXXXXX` → 종목 뉴스 헤드라인(제목+스니펫+원문링크). private 데이터셋
-  (`dartlab-news-private`)을 read-only 토큰으로 서버사이드 read 해 반환(라이브 표시 = 의도된 용도,
-  공개 벌크 재배포 아님). 가드: code 형식검증(영숫자 ≤12) + 10분 엣지 캐시 + 토큰 미설정 시 빈배열 noop.
+- `GET /news?code=XXXXXX[&q=회사명]` → 종목 뉴스 헤드라인. byCompany 아카이브(private
+  `dartlab-news-private`, 네이버 스니펫)를 read-only 토큰으로 서버사이드 read + (q 있으면) Google News
+  RSS 회사명 라이브 헤드라인(`track:'google'`)을 url-dedup 머지(조회시점 최신). 가드: code 형식검증
+  (영숫자 ≤12) + code+q 10분 엣지 캐시. 토큰 미설정이어도 q 있으면 라이브 RSS 만으로 동작(아카이브 없이도 표시).
+- `GET /market-news?market=KR|US` → 시장 전반 최신 헤드라인 라이브 오버레이. Google News RSS 를
+  **무인증** 서버사이드 fetch + 정규식 파싱(`gather/sources/news.py::_parseRss` 규칙 동일) 해
+  `{market, asOf, items:[{date,title,source,url}]}` 반환. 프런트(`marketNewsSource`)가 HF 누적
+  shard 위에 url-dedup 머지 → cron(일 2회) 사이 갭을 10분급으로 메움. 가드: market 검증(KR/US) +
+  10분 엣지 캐시 + RSS 실패 시 빈배열. 시크릿 불필요(공개 RSS).
 
 ### /news 시크릿 (private 데이터셋 read)
 ```bash

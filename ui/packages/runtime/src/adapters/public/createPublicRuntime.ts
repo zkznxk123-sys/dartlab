@@ -128,7 +128,7 @@ function publicFinancePort(core: DataCore): FinancePort {
 // core 미주입 호출(ui/web 레거시)은 loadCompanyNews 의 모듈 폴백 코어를 쓴다(govCore 동형).
 export function publicNewsPort(core?: DataCore): NewsPort {
 	return {
-		forCompany: (code) => loadCompanyNews(code, core), // 종목별 = naver 워커 라이브 read
+		forCompany: (code, name) => loadCompanyNews(code, core, name), // 종목별 = byCompany 아카이브 + RSS 라이브 머지
 		market: () => loadMarketNews(core) // 시장 전체 = public rss 아카이브 최근 shard 직독
 	};
 }
