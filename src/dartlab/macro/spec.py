@@ -88,6 +88,8 @@ SPEC = {
         "scan_parquet": "DART/EDGAR 전종목 재무제표 (기업집계용)",
     },
     "methods": {
+        "BVAR": "Litterman(1986)+BGR(2010) — 자연켤레 Minnesota prior dummy-obs. forward 분위 팬·IRF",
+        "Minnesota prior": "lag 감쇠+cross shrinkage 로 짧은 거시패널 정규화(과적합 차단)",
         "Hamilton RS": "Hamilton(1989) — numpy EM+Kim smoother. 2-regime Markov Switching",
         "GDP Nowcasting": "Banbura(2011) — numpy Kalman+EM. Dynamic Factor Model",
         "Nelson-Siegel": "NS(1987) — numpy grid λ + OLS. 수익률곡선 Level/Slope/Curvature",
@@ -102,6 +104,7 @@ SPEC = {
         "FCI": "Hatzius(2010) — 5변수 z-score 금융환경지수 (US+KR)",
     },
     "features": {
+        "simulate": "simulateMacro() — BVAR 변수 팬(분위 경로)+IRF+국면 forward. macro('시뮬레이션')",
         "scenario": "overrides 파라미터 — 전체 14축 시나리오 시뮬레이션",
         "backtest": "as_of 파라미터 — 전체 14축 과거 시점 재현",
         "walkForward": "walkForwardBacktest() — NBER 침체 기준 precision/recall",

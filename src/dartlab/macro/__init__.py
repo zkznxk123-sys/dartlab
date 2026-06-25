@@ -204,6 +204,14 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         example='macro("시나리오", "2008 금융위기")',
         act=6,
     ),
+    "simulate": _AxisEntry(
+        module="dartlab.macro.simulate.simulate",
+        fn="analyzeSimulation",
+        label="전망시뮬",
+        description="BVAR 변수 팬(분위 경로) + 충격반응 IRF + 국면 forward — 미래 확률 시뮬",
+        example='macro("시뮬레이션", market="US")',
+        act=6,
+    ),
     # ── 종합 ──
     "summary": _AxisEntry(
         module="dartlab.macro.summary",
@@ -237,6 +245,11 @@ _ALIASES: dict[str, str] = {
     "GDP": "forecast",
     "경제전망": "forecast",
     "nowcast": "forecast",
+    "시뮬레이션": "simulate",
+    "전망시뮬": "simulate",
+    "시뮬": "simulate",
+    "팬차트": "simulate",
+    "bvar": "simulate",
     "위기": "crisis",
     "위기감지": "crisis",
     "금융안정": "crisis",
