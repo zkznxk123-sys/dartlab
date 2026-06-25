@@ -24,10 +24,21 @@
   + 국면경로 연속 SVG(조건부) + 정직 footer. 배선 `rt.macro.getSim`→`macro/sim` JSON(loadHfJson 단일진입). 무스크롤.
 - **테스트**: 엔진 9 unit + macroLens vitest 53 + architecture/camelCase/svelte-check 0err/tsc 0. 시각 눈검수(KR/US 전망 팬 렌더 확인).
 
+### ★2026-06-25 (이어서) — 런타임 전환 (운영자: "별도 데이터 배선 금지·런타임으로")
+- **거부**: CI precompute → `macro/sim/{kr,us}.json` HF publish → `getSim`(loadHfJson) 방식이 운영자가 막아둔
+  *별도 데이터 배선/아티팩트*. publish 게이트도 거부.
+- **정정 = 브라우저 런타임 계산**(커밋 백엔드 `74671ee25`·UI `d7453dccc`):
+  ① **fan MC → 해석적 예측오차 분산**(Lütkepohl §2.2) — 난수 0 → 결정론·byte 재현 → TS 포팅 가능. seed/draws 제거. 보정 US 0.85 유지.
+  ② `runMacroSim` 빌드 stage·`macroSim` StageSpec·`getSim` HF origin·`loadMacroSim`(loadHfJson) **제거**. macro/sim 아티팩트 폐기.
+  ③ `ui/.../terminal/lib/macroSimCompute.ts` — Python 엔진 *동일수식 mirror*(matInv/cholesky/Minnesota dummies/companion/해석적 분산/_Z).
+     `rt.macro.getSeriesRaw`(yoy 미적용 원시 index = Python 입력 일치, 같은 observations.parquet)로 런타임 계산.
+  ④ `macroSimCompute.test.ts` **golden parity** — 고정 패널서 Python forwardFan 값 byte 일치(drift 차단). loadSource null→0 오변환 수정.
+  ⑤ pyodide 기각 — 휠 재발행(=발행) 필요 + 16MB 로드. 해석적 TS 가 발행 0·즉시.
+- **검증**: Python 10 · parity 4 · macroLens 53 · runtime 53 · svelte-check 0err · tsc 0. 시각 확인(US 483·KR 315행 팬 2×2 렌더·무스크롤·footer "런타임 계산").
+
 ### 게이트 (운영자 승인 대기)
-- **UI git push 보류** — 공개 터미널이라 운영자 시각 눈검수 후 push("푸시해"). 커밋만 완료(엔진/빌드/UI 스택).
-- **sim 데이터 HF publish 보류** — auto-mode 가 "공개 기능 활성화"로 차단. 운영자 승인("발간해") 후 publish → dev/공개 전망뷰 라이브.
-  (그 전엔 getSim null → 피처게이트로 섹션 미렌더 = 무해.)
+- **UI git push 보류** — 공개 터미널이라 운영자 시각 눈검수 후 push("푸시해"). 커밋만 완료.
+- **데이터 publish 불요** — 런타임 계산이라 HF 아티팩트 없음(별도 배선 0). 미배선/표본부족 = 피처게이트(섹션 미렌더).
 
 ## NEXT (Phase 3~4 — 후순위, PRD 05 가 명시한 선택/후순위)
 
