@@ -16,8 +16,6 @@ from dartlab.macro.simulate.fan import forwardFan
 from dartlab.macro.simulate.irf import impulseResponse
 from dartlab.macro.simulate.regimePath import simulateRegimePath
 
-_SEED = 20260624
-
 # 시장별 변수 사양(개념검증 GO 셋). policyIdx=충격 변수, gdpSeries=Hamilton 입력.
 # HY스프레드(신용축)는 데이터 백필 후 편입 — 그 전엔 본 셋(원유=물가퍼즐 해소 + 장기이력).
 _US_SPECS = (
@@ -76,8 +74,6 @@ def simulateMacro(
     horizon: int = 12,
     *,
     asOf: str | None = None,
-    draws: int = 2000,
-    seed: int = _SEED,
     lag: int = 6,
     lam: float = 0.2,
 ) -> MacroSimResult:
@@ -85,15 +81,13 @@ def simulateMacro(
 
     Capabilities:
         시장 핵심 거시 5변수 BVAR(자연켤레 Minnesota)를 추정해 향후 horizon 개월의 분위 팬
-        (p5~p95), 정책금리 충격 IRF(재귀식별·예시), 국면 forward 경로(Hamilton Markov)를
-        결정론으로 산출. 거시 엔진의 '예측' 축을 점추정에서 *분포·경로*로 확장.
+        (해석적 예측오차 분산 밴드), 정책금리 충격 IRF(재귀식별·예시), 국면 forward 경로
+        (Hamilton Markov)를 *결정론*으로 산출. 거시 '예측' 축을 점추정에서 분포·경로로 확장.
 
     Args:
         market: 'US' | 'KR'.
         horizon: 예측 개월(기본 12).
         asOf: 기준일 'YYYY-MM-DD'. None 이면 최신. look-ahead 차단.
-        draws: fan 사후·충격 draw 수.
-        seed: 결정론 시드(로컬 rng).
         lag: VAR lag 차수.
         lam: Minnesota tightness.
 
@@ -110,16 +104,16 @@ def simulateMacro(
         ('ok', ['산업생산', '소비자물가'])
 
     Guide:
-        밴드는 파라미터 불확실성 포함(좁은 밴드=거짓확신 가드). IRF 방향부호는 재귀식별
-        아티팩트(price/output puzzle)라 구조 truth 아님 — caveat 동반. 보정(coverage)은
-        빌드 stage 가 측정·동봉(본 함수는 미포함).
+        해석적 밴드(난수 0)라 byte 수준 결정론 — 터미널 TS 런타임이 같은 수식으로 재현(parity).
+        IRF 방향부호는 재귀식별 아티팩트(price/output puzzle)라 구조 truth 아님 — caveat 동반.
+        보정(coverage)은 fanCalibration 으로 측정(본 함수 미포함).
 
     When:
-        터미널 거시 다이얼로그 전망 섹션·macro/sim JSON 빌드 진입점.
+        dartlab.macro('시뮬레이션') · 터미널 전망 뷰 TS 포팅의 Python 정본·parity 기준.
 
     How:
         getGather(asOf) → buildPanel(월말 리샘플·변환) → estimateBvar →
-        maxCompanionModulus 안정성 게이트 → forwardFan + impulseResponse +
+        maxCompanionModulus 안정성 게이트 → forwardFan(해석적) + impulseResponse +
         Hamilton regimePath → MacroSimResult.
 
     Requires:
@@ -139,10 +133,10 @@ def simulateMacro(
 
     g = getGather(asOf)
     panel, missing = buildPanel(g, specs)
-    base = {"kind": "BVAR", "lag": lag, "prior": "minnesota", "draws": draws, "vars": [s.seriesId for s in specs]}
+    base = {"kind": "BVAR", "lag": lag, "prior": "minnesota", "vars": [s.seriesId for s in specs]}
     if panel is None:
         return MacroSimResult(
-            mk, "표본 부족·표시 보류", asOf or "", seed, horizon, {**base, "status": "표시 보류"}, {}, {}, {}, missing
+            mk, "표본 부족·표시 보류", asOf or "", horizon, {**base, "status": "표시 보류"}, {}, {}, {}, missing
         )
 
     fit = estimateBvar(panel.panel, specs, p=lag, lam=lam, lastLevels=panel.lastLevels, endYm=panel.endYm)
@@ -152,7 +146,6 @@ def simulateMacro(
             mk,
             "불안정(비정상)·표시 보류",
             panel.endYm,
-            seed,
             horizon,
             {**base, "nObs": fit.nObs, "companionEig": round(eig, 4), "status": "표시 보류"},
             {},
@@ -161,13 +154,13 @@ def simulateMacro(
             [{"id": "stability", "status": "표시 보류", "reason": f"eig {eig:.3f}>=1"}],
         )
 
-    fan = forwardFan(fit, panel.panel, horizon=horizon, draws=draws, seed=seed)
+    fan = forwardFan(fit, panel.panel, horizon=horizon)
     irf = impulseResponse(fit, horizon=24, shockVar=cfg["policyIdx"], shockSize=1.0)
     irf["shockLabel"] = "정책금리 +100bp"
     regimePath = _regimePathBlock(cfg["gdpSeries"], g, horizon)
 
     model = {**base, "nObs": fit.nObs, "companionEig": round(eig, 4), "endYm": panel.endYm, "status": "ok"}
-    return MacroSimResult(mk, "ok", panel.endYm, seed, horizon, model, fan, irf, regimePath, [])
+    return MacroSimResult(mk, "ok", panel.endYm, horizon, model, fan, irf, regimePath, [])
 
 
 def analyzeSimulation(market: str = "US", **kwargs) -> dict:

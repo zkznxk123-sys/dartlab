@@ -56,9 +56,10 @@ def test_companionStable(fit):
 
 
 def test_fanDeterminism(fit):
+    """해석적 fan = 난수 0 → 두 번 호출 byte 동일(결정론)."""
     panel = _synthPanel()
-    a = forwardFan(fit, panel, horizon=12, draws=300, seed=20260624)
-    b = forwardFan(fit, panel, horizon=12, draws=300, seed=20260624)
+    a = forwardFan(fit, panel, horizon=12)
+    b = forwardFan(fit, panel, horizon=12)
     for s in SPECS:
         assert a[s.label]["q50"] == b[s.label]["q50"]
         assert a[s.label]["q5"] == b[s.label]["q5"]
@@ -66,16 +67,26 @@ def test_fanDeterminism(fit):
 
 def test_fanQuantileMonotone(fit):
     panel = _synthPanel()
-    fan = forwardFan(fit, panel, horizon=12, draws=500, seed=7)
+    fan = forwardFan(fit, panel, horizon=12)
     for s in SPECS:
         r = fan[s.label]
         for h in range(12):
             assert r["q5"][h] <= r["q25"][h] <= r["q50"][h] <= r["q75"][h] <= r["q95"][h]
 
 
+def test_fanBandWidensWithHorizon(fit):
+    """예측오차 분산 누적 → 밴드 폭이 horizon 따라 단조 증가(축소 금지)."""
+    panel = _synthPanel()
+    fan = forwardFan(fit, panel, horizon=12)
+    for s in SPECS:
+        r = fan[s.label]
+        widths = [r["q95"][h] - r["q5"][h] for h in range(12)]
+        assert all(widths[h + 1] >= widths[h] - 1e-9 for h in range(11))
+
+
 def test_fanLevelCumulation(fit):
     panel = _synthPanel()
-    fan = forwardFan(fit, panel, horizon=6, draws=200, seed=3, histMonths=18)
+    fan = forwardFan(fit, panel, horizon=6, histMonths=18)
     assert "level_q50" in fan["성장"]
     assert len(fan["성장"]["level_q50"]) == 6
     assert all(np.isfinite(fan["성장"]["level_q50"]))
@@ -114,7 +125,7 @@ def test_regimePathAbsorbingLimit():
 def test_measureCoverageSane():
     """합성 VAR held-out coverage — 잘 명세된 모델이라 명목 80% 근방(보수적 허용)."""
     panel = _synthPanel(t=300, seed=11)
-    cov, hits, tot = measureCoverage(panel, SPECS, horizon=6, minTrain=150, step=12, draws=200, lag=4)
+    cov, hits, tot = measureCoverage(panel, SPECS, horizon=6, minTrain=150, step=12, lag=4)
     assert tot > 0
     overall = hits / tot
     assert 0.6 <= overall <= 0.98  # under-coverage(거짓확신) 아님 + 합성이라 과대피복 허용

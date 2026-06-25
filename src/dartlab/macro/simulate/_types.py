@@ -70,7 +70,6 @@ class MacroSimResult:
     market: str
     status: str
     asOf: str
-    seed: int
     horizon: int
     model: dict[str, Any]
     fan: dict[str, Any]
@@ -84,7 +83,6 @@ class MacroSimResult:
             "market": self.market,
             "status": self.status,
             "asOf": self.asOf,
-            "seed": self.seed,
             "horizon": self.horizon,
             "model": self.model,
             "fan": self.fan,

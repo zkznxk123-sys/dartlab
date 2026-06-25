@@ -24,10 +24,8 @@ def measureCoverage(
     horizon: int = 6,
     minTrain: int = 180,
     step: int = 6,
-    draws: int = 500,
     lag: int = 6,
     lam: float = 0.2,
-    seed: int = 20260624,
     lastLevels: np.ndarray | None = None,
     endYm: str = "",
 ) -> tuple[dict[str, float], int, int]:
@@ -42,7 +40,7 @@ def measureCoverage(
         fit = estimateBvar(x[: c + 1], specs, p=lag, lam=lam, lastLevels=lastLevels, endYm=endYm)
         if maxCompanionModulus(fit) >= 1.0:
             continue
-        fan = forwardFan(fit, x[: c + 1], horizon=horizon, draws=draws, seed=seed, quantiles=(10, 50, 90))
+        fan = forwardFan(fit, x[: c + 1], horizon=horizon, quantiles=(10, 50, 90))
         for i, s in enumerate(specs):
             lo = fan[s.label]["q10"][horizon - 1]
             hi = fan[s.label]["q90"][horizon - 1]
@@ -62,20 +60,17 @@ def fanCalibration(
     horizon: int = 6,
     minTrain: int = 180,
     step: int = 6,
-    draws: int = 500,
     lag: int = 6,
     lam: float = 0.2,
-    seed: int = 20260624,
 ) -> dict:
-    """held-out walk-forward 80% 밴드 coverage 측정.
+    """held-out walk-forward 80% 밴드 coverage 측정(해석적 fan·결정론).
 
     Args:
         market: 'US' | 'KR'.
         horizon: 평가 예측 개월(기본 6).
         minTrain: 최소 학습 관측(기본 180 ≈ 15년).
         step: cutoff 간격(개월).
-        draws: cutoff 당 fan draw(속도 타협).
-        lag: VAR lag. lam: Minnesota tightness. seed: 결정론 시드.
+        lag: VAR lag. lam: Minnesota tightness.
 
     Returns:
         dict — status('calibrated'|'...표시 보류') · coverage80(overall) · byVar · minVar ·
@@ -109,10 +104,8 @@ def fanCalibration(
         horizon=horizon,
         minTrain=minTrain,
         step=step,
-        draws=draws,
         lag=lag,
         lam=lam,
-        seed=seed,
         lastLevels=panel.lastLevels,
         endYm=panel.endYm,
     )
