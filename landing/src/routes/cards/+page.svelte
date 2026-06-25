@@ -45,6 +45,11 @@
 		loaded = true;
 		// 터미널 카드 버튼이 sym(코드)으로 들어왔는데 그 회사 글이 없으면 전체 피드로(빈 화면 방지).
 		if (data.sym && !posts.some((x) => x.code === data.sym)) query = '';
+		// 공유/딥링크 ?post=<슬러그> — 해당 캐러셀 포스트 모달 바로 열기(cardShare 워커가 사람을 여기로 보냄).
+		if (data.post) {
+			const hit = posts.find((x) => x.slug === data.post);
+			if (hit) openPost(hit.code, hit.slug, hit.name || media?.companies[hit.code]?.displayName || hit.code);
+		}
 	});
 
 	// 피드 = 전 캐러셀 계약(회사당 N편). 이름은 계약(name) 우선, 없으면 hfMedia 매니페스트.

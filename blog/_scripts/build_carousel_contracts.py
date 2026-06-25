@@ -1,12 +1,17 @@
-"""편집 카드 캐러셀 계약 빌드 — 블로그 글 frontmatter `carousel:` → 단일 `carousels/index.json`.
+"""편집 카드 캐러셀 계약 빌드 — 두 소스 → 단일 `carousels/index.json`.
 
-SSOT = 블로그 글(`blog/05-company-reports/{NN}-{code}-{slug}/index.md`) frontmatter 의 `carousel:` 블록.
-한 글 = 한 스토리(회사+주제) = 산문(본문) + 캐러셀(frontmatter). 손글 편집 카피(editorial/editorialBeat/
-editorialStat)가 캐러셀의 *중심점(계약)* 이고, landing /cards 가 **굽지 않고** 라이브 렌더한다. 차트·핵심
-지표는 그 뒤에 ReportModel 에서 덧붙인다. (옛 `sns/carousels/E*/hook.json` 분리 SSOT 폐기 →
-`migrate_carousels_to_blog.py` 로 frontmatter 에 이관됨.)
+소스 2갈래(저작), 서브 1개(발행):
+  1. 회사 — 블로그 글(`blog/05-company-reports/{NN}-{code}-{slug}/index.md`) frontmatter `carousel:` 블록.
+     한 글 = 한 스토리(회사+주제) = 산문(본문) + 캐러셀(frontmatter). 차트·핵심 지표는 /cards 가
+     ReportModel 에서 덧붙인다(code 기반 라이브 조회).
+  2. 이슈(standalone) — `blog/_issues/<slug>/carousel.yaml`. **블로그 글 없이 카드만** 발간(경제/시국 등
+     그때그때 이슈). code 없음 → /cards 가 회사 report 조회 안 하고 손글 editorial 슬라이드만 렌더.
+     슬라이드 image 는 `blog/_issues/<slug>/assets/<name>.webp`(FLUX 생성) → hfMedia `issues/<slug>/` 업로드.
 
-키 = **글 슬러그**(`003230-samyang-foods`) → 회사당 N편(1:N). 같은 회사 다른 주제 글이 각자 계약.
+손글 편집 카피(editorial/editorialBeat/editorialStat)가 캐러셀의 *중심점(계약)* 이고, landing /cards 가
+**굽지 않고** 라이브 렌더한다. (옛 `sns/carousels/E*/hook.json` 분리 SSOT 폐기 → frontmatter 이관됨.)
+
+키 = **슬러그**(회사 `003230-samyang-foods` · 이슈 `2026-06-korea-macro`). 회사당 N편(1:N).
 
 계약(글당 1파일):
   { code, slug, name, sector?, title?, caption?, pinnedComment?, date?,
@@ -28,6 +33,7 @@ Usage(운영자 로컬·HF_TOKEN=.env):
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -43,7 +49,9 @@ from dartlab.pipeline.hfUpload import _resolveHfToken
 
 ROOT = Path(__file__).resolve().parents[2]
 BLOG_DIR = ROOT / "blog" / "05-company-reports"
+ISSUES_DIR = ROOT / "blog" / "_issues"  # standalone 이슈 캐러셀(블로그 글 없음) — code 없는 경제/시국 카드
 MEDIA_PREFIX = "carousels"
+ISSUE_MEDIA_PREFIX = "issues"  # 이슈 이미지 hfMedia 네임스페이스(companies/ 와 병렬, 콘텐츠해시 파일명)
 
 _SLIDE_LAYOUTS = ("editorial", "editorialBeat", "editorialStat")
 # 슬라이드가 채택하는 필드(나머지 키는 무시). image=semantic 파일명(해시 없음).
@@ -154,13 +162,91 @@ def build_contracts(blog_dir: Path = BLOG_DIR) -> dict[str, dict]:
     return contracts
 
 
-def _existing_carousel_jsons(api: HfApi, repo: str) -> set[str]:
-    """repo 의 carousels/*.json 현재 목록(best-effort·공개 repo 는 토큰 없이도 list 가능)."""
+def _content_hash(path: Path) -> str:
+    """파일 콘텐츠 sha256 앞 8자 — served 파일명 캐시버스트(companies/ 의 hash8 동형)."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:8]
+
+
+def build_issue_contracts(
+    issues_dir: Path, existing_files: set[str]
+) -> tuple[dict[str, dict], list[CommitOperationAdd]]:
+    """blog/_issues/<slug>/carousel.yaml → standalone 이슈 계약(code 없음). 블로그 글 없이 카드만.
+
+    회사 계약과 동일 슬라이드 스키마(editorial 3종)지만 키 = 폴더 슬러그, code="" (경제/시국 이슈).
+    슬라이드 image(semantic 'cover') → 로컬 `assets/<image>.webp` 콘텐츠해시해서 hfMedia
+    `issues/<slug>/<image>.<hash8>.webp` 경로로 치환(렌더가 originUrl('hfMedia', path) 로 해석).
+    반환: (슬러그별 계약, 업로드할 이미지 CommitOperationAdd 리스트 — 이미 올라간 해시는 스킵).
+    """
+    contracts: dict[str, dict] = {}
+    ops: list[CommitOperationAdd] = []
+    if not issues_dir.exists():
+        return contracts, ops
+    for yml in sorted(issues_dir.glob("*/carousel.yaml")):
+        slug = yml.parent.name
+        try:
+            data = yaml.safe_load(yml.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            sys.stderr.write(f"  bad issue yaml {slug}: {exc}\n")
+            continue
+        if not isinstance(data, dict):
+            continue
+        assets_dir = yml.parent / "assets"
+        slides: list[dict] = []
+        for raw in data.get("slides") or []:
+            s = _normalize_slide(raw)
+            if not s:
+                continue
+            img = s.get("image")
+            if img:
+                local = assets_dir / f"{img}.webp"
+                if local.exists():
+                    remote = f"{ISSUE_MEDIA_PREFIX}/{slug}/{img}.{_content_hash(local)}.webp"
+                    s["image"] = remote  # hfMedia 상대경로(슬래시 포함 → 렌더가 직접 해석)
+                    if remote not in existing_files:
+                        ops.append(CommitOperationAdd(path_in_repo=remote, path_or_fileobj=str(local)))
+                else:
+                    sys.stderr.write(f"  issue {slug}: 이미지 없음 {local.name} (배경 없이 렌더)\n")
+                    s.pop("image", None)
+            slides.append(s)
+        if not slides:
+            sys.stderr.write(f"  skip issue(no slides): {slug}\n")
+            continue
+        contract: dict = {
+            "code": "",  # 경제/시국 이슈 — 종목코드 없음(렌더가 회사 report 조회 안 함)
+            "slug": slug,
+            "name": str(data.get("name") or data.get("title") or slug),
+            "standalone": True,  # 블로그 글 없음 → PostModal '블로그 이어 읽기' CTA 숨김
+            "slides": slides,
+        }
+        for key in ("sector", "title"):
+            if data.get(key):
+                contract[key] = str(data[key])
+        if data.get("caption"):
+            contract["caption"] = str(data["caption"]).strip()
+        if data.get("pinnedComment"):
+            contract["pinnedComment"] = str(data["pinnedComment"]).strip()
+        if data.get("date"):
+            contract["date"] = str(data["date"]).strip()
+        spec = _spec_from(data)
+        if spec:
+            contract["spec"] = spec
+        contracts[slug] = contract
+    return contracts, ops
+
+
+def _list_repo_files(api: HfApi, repo: str) -> set[str]:
+    """repo 전체 파일 목록(best-effort·공개 repo 는 토큰 없이도 list 가능)."""
     try:
-        files = api.list_repo_files(repo_id=repo, repo_type="dataset")
+        return set(api.list_repo_files(repo_id=repo, repo_type="dataset"))
     except Exception:
         return set()
-    return {f for f in files if f.startswith(f"{MEDIA_PREFIX}/") and f.endswith(".json")}
+
+
+def _stale_carousel_jsons(files: set[str]) -> set[str]:
+    """carousels/*.json 중 단일 index.json 외 옛 파일(삭제 대상)."""
+    return {f for f in files if f.startswith(f"{MEDIA_PREFIX}/") and f.endswith(".json")} - {
+        f"{MEDIA_PREFIX}/index.json"
+    }
 
 
 def build_index(contracts: dict[str, dict]) -> list[dict]:
@@ -179,27 +265,37 @@ def main() -> None:
     parser.add_argument("--repo", default=HF_MEDIA_REPO)
     args = parser.parse_args()
 
-    contracts = build_contracts()
+    # 발간 전 repo 파일 목록 1회(옛 json 삭제 + 이미 올라간 이슈 이미지 해시 스킵 양쪽에 씀).
+    repo_files = _list_repo_files(HfApi(), args.repo)
+
+    contracts = build_contracts()  # 회사 계약(블로그 frontmatter)
+    issue_contracts, image_ops = build_issue_contracts(ISSUES_DIR, repo_files)  # standalone 이슈
+    for slug, c in issue_contracts.items():
+        if slug in contracts:
+            sys.stderr.write(f"  dup slug(이슈↔회사 충돌, 회사 우선): {slug}\n")
+            continue
+        contracts[slug] = c
+
     posts = build_index(contracts)
     n_slides = sum(len(c["slides"]) for c in contracts.values())
-    n_companies = len({c["code"] for c in contracts.values()})
-    print(f"계약: {len(contracts)}편(글) · {n_companies}개 회사 · {n_slides}개 편집 슬라이드 (+ index.json)")
+    n_companies = len({c["code"] for c in contracts.values() if c.get("code")})
+    n_issues = len(issue_contracts)
+    print(
+        f"계약: {len(contracts)}편 · {n_companies}개 회사 · {n_issues}개 이슈 · "
+        f"{n_slides}개 편집 슬라이드 · 이슈 이미지 {len(image_ops)}장 업로드 예정 (+ index.json)"
+    )
 
     if args.dry_run:
         for p in posts[:8]:
             c = contracts[p["slug"]]
             layouts = ", ".join(s["layout"] for s in c["slides"][:4])
-            print(f"  {c['code']} {p['slug']} · {len(c['slides'])}장 [{layouts}…] {p.get('date', '')}")
+            tag = "ISSUE" if c.get("standalone") else c["code"]
+            print(f"  {tag} {p['slug']} · {len(c['slides'])}장 [{layouts}…] {p.get('date', '')}")
         if len(posts) > 8:
             print(f"  … 총 {len(posts)}편")
-        # 회사당 다편(1:N) 확인 표시
-        by_code: dict[str, list[str]] = {}
-        for c in contracts.values():
-            by_code.setdefault(c["code"], []).append(c["slug"])
-        multi = {k: v for k, v in by_code.items() if len(v) > 1}
-        if multi:
-            print(f"  회사당 N편(1:N): {', '.join(f'{k}={len(v)}편' for k, v in multi.items())}")
-        stale = _existing_carousel_jsons(HfApi(), args.repo) - {f"{MEDIA_PREFIX}/index.json"}
+        if image_ops:
+            print(f"  이슈 이미지 업로드: {', '.join(op.path_in_repo for op in image_ops[:6])} …")
+        stale = _stale_carousel_jsons(repo_files)
         if stale:
             print(f"  옛 파일 {len(stale)}개 삭제 예정(단일 index.json 만 유지): {', '.join(sorted(stale)[:6])} …")
         print("dry-run — 게시 안 함.")
@@ -210,18 +306,25 @@ def main() -> None:
         # 단일 파일 — 전 계약(슬라이드까지)을 index.json 하나에. per-slug 파일 안 만듦.
         idx = Path(td) / "index.json"
         idx.write_text(json.dumps({"posts": posts}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        ops = [CommitOperationAdd(path_in_repo=f"{MEDIA_PREFIX}/index.json", path_or_fileobj=str(idx))]
+        ops: list = [CommitOperationAdd(path_in_repo=f"{MEDIA_PREFIX}/index.json", path_or_fileobj=str(idx))]
+        ops += image_ops  # 이슈 이미지(issues/<slug>/...) 동시 업로드 — 같은 commit
         # 그 외 carousels/*.json(옛 code-키·옛 per-slug) 전부 삭제 — 단일 index.json 만 유지(폴더 청결).
-        stale = sorted(_existing_carousel_jsons(api, args.repo) - {f"{MEDIA_PREFIX}/index.json"})
+        stale = sorted(_stale_carousel_jsons(repo_files))
         ops += [CommitOperationDelete(path_in_repo=p) for p in stale]
         retryHfCall(
             api.create_commit,
             repo_id=args.repo,
             repo_type="dataset",
             operations=ops,
-            commit_message=f"carousels single index: {len(contracts)} posts ({n_companies} companies), -{len(stale)} stale",
+            commit_message=(
+                f"carousels: {len(contracts)} posts ({n_companies} companies, {n_issues} issues), "
+                f"+{len(image_ops)} issue imgs, -{len(stale)} stale"
+            ),
         )
-    print(f"완료 — {args.repo} carousels/index.json 단일 파일 게시({len(contracts)}편, 옛 {len(stale)}개 삭제).")
+    print(
+        f"완료 — {args.repo} carousels/index.json 게시({len(contracts)}편, 이슈 {n_issues} · "
+        f"이미지 +{len(image_ops)} · 옛 {len(stale)}개 삭제)."
+    )
 
 
 if __name__ == "__main__":

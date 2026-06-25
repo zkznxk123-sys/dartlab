@@ -130,6 +130,61 @@ def test_normalize_slide(raw, expect) -> None:
     assert bcc._normalize_slide(raw) == expect
 
 
+def test_issue_contract_standalone(tmp_path: Path) -> None:
+    """blog/_issues/<slug>/carousel.yaml → code 없는 standalone 이슈 계약 + 이미지 hfMedia 경로/업로드 op."""
+    issues = tmp_path / "_issues"
+    slug = "2026-06-korea-macro"
+    d = issues / slug
+    (d / "assets").mkdir(parents=True, exist_ok=True)
+    (d / "assets" / "cover.webp").write_bytes(b"\x00fakewebp")  # 콘텐츠해시용 더미
+    (d / "carousel.yaml").write_text(
+        """name: "2026 한국 경제"
+title: "반도체가 끌고, 환율이 누른다"
+date: 2026-06-25
+sector: macro
+caption: |
+  설명 문단.
+pinnedComment: "출처·면책"
+slides:
+  - layout: editorial
+    line: "커버 [[강조]]"
+    image: cover
+  - layout: editorialStat
+    kicker: "성장률"
+    bigNumber: "2.5"
+    unit: "%"
+""",
+        encoding="utf-8",
+    )
+    contracts, ops = bcc.build_issue_contracts(issues, existing_files=set())
+    assert set(contracts.keys()) == {slug}
+    c = contracts[slug]
+    assert c["code"] == ""  # 종목코드 없음
+    assert c["standalone"] is True
+    assert c["name"] == "2026 한국 경제"
+    assert c["sector"] == "macro"
+    assert len(c["slides"]) == 2
+    # 첫 슬라이드 image → hfMedia 상대경로(issues/<slug>/cover.<hash8>.webp)
+    img = c["slides"][0]["image"]
+    assert img.startswith(f"issues/{slug}/cover.") and img.endswith(".webp")
+    assert len(ops) == 1 and ops[0].path_in_repo == img  # 새 해시 → 업로드 1건
+
+
+def test_issue_image_skip_when_already_uploaded(tmp_path: Path) -> None:
+    """이미 같은 해시가 repo 에 있으면 재업로드 안 함(op 0) — 계약 경로는 그대로."""
+    issues = tmp_path / "_issues"
+    d = issues / "x"
+    (d / "assets").mkdir(parents=True, exist_ok=True)
+    (d / "assets" / "cover.webp").write_bytes(b"\x00fakewebp")
+    (d / "carousel.yaml").write_text(
+        'name: "X"\nslides:\n  - layout: editorial\n    line: "L"\n    image: cover\n', encoding="utf-8"
+    )
+    first, ops1 = bcc.build_issue_contracts(issues, existing_files=set())
+    remote = first["x"]["slides"][0]["image"]
+    _, ops2 = bcc.build_issue_contracts(issues, existing_files={remote})
+    assert len(ops1) == 1 and ops2 == []  # 두 번째는 스킵
+
+
 def test_migration_idempotent(tmp_path: Path) -> None:
     """_inject 2회 = 동일(이미 carousel: 있으면 두 번째는 False)."""
     blog = tmp_path / "blog"

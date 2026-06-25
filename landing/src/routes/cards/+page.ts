@@ -7,5 +7,7 @@ export const prerender = false;
 export const load: PageLoad = ({ url }) => {
 	const sym = url.searchParams.get('sym') || '';
 	const perspective = url.searchParams.get('view') || 'earningsPower';
-	return { sym, perspective };
+	// post=<슬러그> — 공유 링크(cardShare 워커가 사람을 여기로 리다이렉트)·딥링크로 해당 캐러셀 바로 열기.
+	const post = url.searchParams.get('post') || '';
+	return { sym, perspective, post };
 };

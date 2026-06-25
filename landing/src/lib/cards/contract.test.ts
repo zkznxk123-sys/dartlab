@@ -49,4 +49,14 @@ describe('단일 파일 캐러셀 계약', () => {
 		expect(await loadCarousels()).toEqual([]);
 		expect(await loadContract('x')).toBeNull();
 	});
+
+	it('resolveSlideImage: 이슈 슬라이드(hfMedia 상대경로)는 회사 매니페스트 조회 없이 직접 해석', async () => {
+		const { resolveSlideImage } = await import('./contract');
+		// 슬래시 포함(issues/<slug>/...) = 이슈 → originUrl 로 그대로. media=null 이어도 해석됨.
+		expect(resolveSlideImage(null, '', 'issues/2026-06-korea-macro/cover.ab12cd34.webp')).toBe(
+			'https://media.test/issues/2026-06-korea-macro/cover.ab12cd34.webp'
+		);
+		// image 없으면 undefined.
+		expect(resolveSlideImage(null, '', undefined)).toBeUndefined();
+	});
 });

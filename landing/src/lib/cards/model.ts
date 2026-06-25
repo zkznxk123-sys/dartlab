@@ -90,10 +90,13 @@ export interface ContractSlide {
 	image?: string; // semantic 파일명(해시 없음) — 렌더가 hfMedia 매니페스트로 해석
 }
 export interface CarouselContract {
+	/** 종목코드 — 회사 캐러셀만. 이슈(standalone)는 빈 문자열(렌더가 회사 report 조회 안 함). */
 	code: string;
-	/** 글 슬러그(`003230-samyang-foods`) — serve 키(carousels/{slug}.json). 회사당 N편 구분(1:N). */
+	/** 글 슬러그(`003230-samyang-foods`) 또는 이슈 슬러그(`2026-06-korea-macro`) — serve 키. 회사당 N편(1:N). */
 	slug: string;
 	name: string;
+	/** standalone 이슈 캐러셀(블로그 글 없음) — true 면 PostModal '블로그 이어 읽기' CTA 숨김·회사 차트 미첨부. */
+	standalone?: boolean;
 	sector?: string;
 	/** 인스타 포스트 제목(blog title / meta.json title) — 우측 캡션 패널 헤드라인. */
 	title?: string;

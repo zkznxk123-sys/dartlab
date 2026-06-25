@@ -26,6 +26,9 @@ export function loadContract(slug: string): Promise<CarouselContract | null> {
 /** 슬라이드 image(semantic 'cleanroom-engine') → hfMedia 해시 파일명 URL. 매니페스트에 없으면 undefined(폴백). */
 export function resolveSlideImage(media: MediaIndex | null, code: string, image?: string): string | undefined {
 	if (!image) return undefined;
+	// 이슈 슬라이드: image 가 hfMedia 상대경로(`issues/<slug>/cover.<hash>.webp`) — 회사 매니페스트 조회 없이
+	// 그대로 해석(build_carousel_contracts.py 가 콘텐츠해시 경로로 치환해 실어 보냄). 회사는 semantic 파일명.
+	if (image.includes('/')) return originUrl('hfMedia', image);
 	const c = mediaCompany(media, code);
 	const hit = c?.assets.find((a) => a.name.startsWith(image + '.') || a.name === image);
 	return hit ? originUrl('hfMedia', `companies/${mediaKey(code)}/${hit.name}`) : undefined;

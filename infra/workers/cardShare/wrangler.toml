@@ -1,0 +1,8 @@
+name = "dartlab-card-share"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# 캐러셀 공유/OG 동적 엔드포인트. 공개 데이터(dartlab-media)만 읽어 secret 불필요.
+# LANDING_BASE = 사람이 리다이렉트될 실제 캐러셀 사이트 base(/cards?post=<slug>).
+[vars]
+LANDING_BASE = "https://eddmpython.github.io/dartlab"

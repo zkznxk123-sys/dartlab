@@ -32,17 +32,30 @@ export async function buildDeck(
 	post: { code: string; slug: string },
 	perspectiveKey: string
 ): Promise<CarouselDeck> {
-	const persp = findPerspective(perspectiveKey);
-	const [result, media, contract] = await Promise.all([
-		buildReport(rt, post.code, perspectiveKey),
-		loadMediaIndex(),
-		loadContract(post.slug)
-	]);
-	const spec = contract?.spec;
+	// media·contract 먼저(둘 다 캐시된 가벼운 단일 fetch) — code 유무로 회사/이슈 경로를 가른다.
+	const [media, contract] = await Promise.all([loadMediaIndex(), loadContract(post.slug)]);
 	const lead = contract ? contractToCards(contract, media) : [];
 	// 차트 슬라이드 배경은 **편집 계약의 큐레이션 이미지만** 순환(엉뚱한 자산[generic bg·타사 오배치] 끼우지 않게).
-	// 계약이 없으면(자동 덱) 회사 hero 전체로 폴백.
 	const curated = [...new Set(lead.map((c) => c.bg).filter((u): u is string => !!u))];
+
+	// 이슈(standalone·종목코드 없음) — 회사 report 조회/차트 첨부 안 하고 손글 editorial 슬라이드만 렌더.
+	if (!post.code) {
+		const cards = lead.length ? lead : [{ kind: 'empty' as const, reason: '카드가 아직 준비되지 않았습니다.' }];
+		return {
+			stockCode: '',
+			corpName: contract?.name ?? '',
+			perspectiveKey: '',
+			perspectiveLabel: '',
+			asOf: '',
+			heroUrls: curated,
+			cards
+		};
+	}
+
+	const persp = findPerspective(perspectiveKey);
+	const result = await buildReport(rt, post.code, perspectiveKey);
+	const spec = contract?.spec;
+	// 계약이 없으면(자동 덱) 회사 hero 전체로 폴백.
 	const heroUrls = curated.length ? curated : resolveHeroes(media, post.code, spec);
 	return projectResult(result, persp.label, { heroUrls, spec, lead });
 }

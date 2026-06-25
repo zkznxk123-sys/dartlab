@@ -4,6 +4,7 @@
 	import type { DartLabRuntime } from '@dartlab/ui-contracts';
 	import Deck from './Deck.svelte';
 	import { loadContract } from './contract';
+	import { cardShareUrl } from './share';
 	import { heroUrls } from './media';
 	import type { MediaIndex, CarouselContract } from './model';
 
@@ -45,6 +46,18 @@
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Escape') onClose();
 	}
+
+	// 공유 — cardShare 워커 링크(첫 슬라이드 OG 미리보기 + 이 캐러셀로 딥링크) 복사. 워커 미설정 시 /cards?post= 폴백.
+	let copied = $state(false);
+	async function share() {
+		try {
+			await navigator.clipboard.writeText(cardShareUrl(slug, base));
+			copied = true;
+			setTimeout(() => (copied = false), 1600);
+		} catch {
+			/* clipboard 차단 환경 무시 */
+		}
+	}
 </script>
 
 <svelte:window onkeydown={onKey} />
@@ -62,6 +75,9 @@
 					<img src="{base}/avatar.png" alt="DartLab" width="34" height="34" />
 				</picture>
 				<div class="prWho"><b>dartlab</b><small>{contract?.standalone ? 'DARTLAB · 이슈' : 'COMPANY STORY BY TICKER'}</small></div>
+				<button class="prShare" onclick={share} title="공유 링크 복사" aria-label="공유 링크 복사">
+					{#if copied}복사됨 ✓{:else}<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>공유{/if}
+				</button>
 			</header>
 			<div class="prScroll">
 				<p class="prMeta">{contract?.name ?? corpName}{code ? ` · ${code}` : ''}</p>
@@ -150,6 +166,29 @@
 		letter-spacing: 0.14em;
 		color: #94a3b8;
 		text-transform: uppercase;
+	}
+	/* 공유 버튼 — 헤더 우측. 링크 복사 시 '복사됨 ✓'. 테마색 보더. */
+	.prShare {
+		margin-left: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 6px 11px;
+		border-radius: 999px;
+		border: 1px solid rgba(var(--dl-accent-rgb), 0.4);
+		background: rgba(var(--dl-accent-rgb), 0.1);
+		color: var(--dl-accent);
+		font-size: 12px;
+		font-weight: 700;
+		cursor: pointer;
+		white-space: nowrap;
+		transition:
+			background 0.15s,
+			border-color 0.15s;
+	}
+	.prShare:hover {
+		background: rgba(var(--dl-accent-rgb), 0.18);
+		border-color: rgba(var(--dl-accent-rgb), 0.7);
 	}
 	.prScroll {
 		flex: 1;
