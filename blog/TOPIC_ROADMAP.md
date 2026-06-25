@@ -6,7 +6,7 @@
 
 **관계 문서**:
 - 글 단위 규칙 (파이프라인·품질·자산·SEO·dartlab 호출) → [BLOG.md](BLOG.md) 단일 SSOT.
-- 카테고리별 자동 발간 — `credit-reports publisher.py` · `macro-reports GitHub Actions`.
+- 카테고리별 자동 발간 — `credit-reports publisher.py`.
 
 ---
 

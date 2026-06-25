@@ -1,6 +1,6 @@
 """블로그 자동 발간 도구 (T12-3) — 3 카테고리 + 사용자 manual approve.
 
-T12-3 트랙: 기존 credit-reports / macro-reports auto 발간 외에 corporate / quant /
+T12-3 트랙: 기존 credit-reports auto 발간 외에 corporate / quant /
 industry 3 카테고리 추가. 자동 발간 PR 은 label `auto-blog` + 사용자 manual
 approve 강행 (CLAUDE.md `feedback_finish_to_end_no_midstop` 정합).
 

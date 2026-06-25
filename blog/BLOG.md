@@ -1,7 +1,7 @@
 # dartlab 블로그 단일 규칙
 
 > **이 문서 하나만 읽으면 블로그를 만들 수 있다.** 기존 BLOG_PIPELINE · BLOG_STRUCTURE · ASSET_POLICY · DARTLAB_USAGE · QUALITY_STANDARDS · SEO_PLAYBOOK 6 개 분할 문서를 흡수한 단일 SSOT.
-> 운영 데이터 (TOPIC_ROADMAP.md · `_reference/`) 와 카테고리별 자동 발간 (credit-reports publisher · macro-reports GitHub Actions) 만 별도 유지.
+> 운영 데이터 (TOPIC_ROADMAP.md · `_reference/`) 와 카테고리별 자동 발간 (credit-reports publisher) 만 별도 유지.
 
 각 섹션은 **"이렇게 한다"** 명제로 열고, 반복된 실수는 섹션 하단 **"반복 실패"** 에 작게 정리한다. 나아가야 할 길이 먼저, 금지는 그 아래.
 
@@ -25,7 +25,7 @@ dartlab 블로그는 재무제표의 **"왜?"** 를 풀어내는 엔진이다.
 
 `카테고리 폴더 → 번호-slug 폴더 → index.md + assets/` 구조.
 
-### 6 카테고리
+### 5 카테고리
 
 | 카테고리 | 폴더 | 설명 | 관리 |
 |---|---|---|---|
@@ -33,7 +33,6 @@ dartlab 블로그는 재무제표의 **"왜?"** 를 풀어내는 엔진이다.
 | DartLab 소식 | `02-dartlab-news` | 설치 · 기능 · 업데이트 | 사용자 직접 |
 | 신용분석 보고서 | `04-credit-reports` | **프로그래매틱 생성** — `publisher.py` 관리, `_registry.json` 매핑 | 자동 |
 | 기업분석 보고서 | `05-company-reports` | 6 막 재무 서사, audit 완료 후 발간 | audit + 블로그 + 영상 한 세트 |
-| 경제분석 보고서 | `06-macro-reports` | **월별 자동 발간** — GitHub Actions `macroReport.yml` | 자동 |
 
 ### 번호 체계
 
@@ -55,7 +54,7 @@ blog/
 title: 글 제목 (60자 이하, 검색형 질문 또는 판단 문장)
 date: YYYY-MM-DD
 description: 1문장 설명 (160자 이하, 검색 스니펫 노출)
-category: reading-disclosures | dartlab-news | credit-reports | company-reports | macro-reports
+category: reading-disclosures | dartlab-news | credit-reports | company-reports
 series: 시리즈 id
 seriesOrder: 숫자
 thumbnail: /avatar-*.png

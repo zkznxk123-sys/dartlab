@@ -49,19 +49,6 @@ export const categoryDefinitions = [
 		brandMessage:
 			'DartLab은 공시 데이터만으로 재현 가능한 독립 신용등급을 산출합니다.',
 		hidden: true
-	},
-	{
-		id: 'macro-reports',
-		slug: 'macro-reports',
-		folder: '06-macro-reports',
-		label: '경제분석 보고서',
-		description: '매월 자동 발간되는 매크로 경제분석 보고서입니다. 경제 사이클·금리·위기를 해석하고 40개 투자전략까지.',
-		seoTitle: '경제분석 보고서 | dartlab 매크로 엔진',
-		seoDescription:
-			'dartlab 경제분석 보고서. 사이클→금리→위기→전망의 3막 서사 구조로 경제를 분석합니다. Hamilton RS, Kalman DFM, Nelson-Siegel, BIS Credit-to-GDP gap 등 12개 방법론.',
-		brandMessage:
-			'DartLab은 종목코드 없이 경제 전체를 분석합니다. 매월 자동 발간.',
-		hidden: true
 	}
 ] as const;
 
