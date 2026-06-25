@@ -425,11 +425,7 @@ def _writeCompanyFile(
     # leaf 고유키 아님(part 순서를 sort 안정성에 못 맡김). period 별 rows 는 concat 시 이미 문서순서로
     # 인접하므로 global _ord 는 period 내 단조 = 문서순서 → (period,_ord) 고유키로 결정론 정렬.
     full = full.with_row_index("_ord").sort("period", "_ord").drop("_ord")
-    # row_group_size 고정 — period 오름차순 정렬이라 최신기는 연속 tail. 다중 row group 으로 써야
-    # 런타임 range read(rowStart/rowEnd)가 최신 분기 행만 fetch 한다. 미설정 시 Polars 가 전체를 단일
-    # row group 으로 기록 → contentRaw(파일의 99.6%, 단일 컬럼청크) 통째 다운로드(13~16MB)라 주석
-    # 글랜스가 콜드 수십 초. 2000 행/그룹 = 최신 8분기 tail ≈ 3~4MB(실측, 13MB→3.6MB). 파일 ~+15%(허용).
-    full.write_parquet(str(outPath), compression="zstd", row_group_size=2000)
+    full.write_parquet(str(outPath), compression="zstd")
     if verbose:
         _log.info("  %s: %d period, %d row → %s", code, len(result), full.height, outPath.name)
     return result

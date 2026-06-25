@@ -712,8 +712,8 @@ export function createReportSource(core: DataCore): ReportPort {
 	// panel 최신기들은 연속 tail → 최근 N분기 행 범위만 rowStart/rowEnd prune(대용량 read 회피). ──
 	const COST_BLK = /비용의\s*성격별|성격별\s*분류|성격별\s*비용|영업비용의\s*성격별/;
 	const SEG_BLK = /부문정보|영업부문|부문별\s*정보|부문별\s*보고|사업부문/;
-	const RECENT_N = 6; // 최근 N분기 — ACONTEXT XBRL 은 2025-03 사업보고서+ 라 실제 셀은 ~5분기. 6 이면 충분히 커버하며
-	// tail 행범위(=다운로드)를 줄인다. panel 재청크(다중 row group) 후 rowStart/rowEnd 가 이 tail 만 fetch.
+	const RECENT_N = 6; // 최근 N분기 — ACONTEXT XBRL 은 2025-03 사업보고서+ 라 실제 셀은 ~5분기. 6 이면 충분히 커버.
+	// (panel 은 단일 row group 이라 rowStart/rowEnd 가 네트워크를 못 줄인다 — read 자체는 lazy 로 호출측에서 보류.)
 
 	async function buildNoteSeries(code: string): Promise<NoteSeriesBundle | null> {
 		// Pass A — period 컬럼만(경량) → 최근 N분기 + 그 행 범위(연속 tail).

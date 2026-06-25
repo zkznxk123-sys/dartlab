@@ -310,9 +310,9 @@
 	let noteBundle = $state<NoteSeriesBundle | null>(null);
 	let notesState = $state<'idle' | 'loading' | 'ready' | 'empty' | 'error'>('idle');
 	let dashOpen = $state(false); // 주석 상세 다이얼로그
-	// 순수 런타임 lazy — 주석은 panel contentRaw(재청크 전 13~16MB 단일 청크) 직독이라 무겁다. 회사 전환 콜드 버스트
-	// (가격·재무·공시·뉴스·16MB 출자…)와 경쟁시키지 않도록, 주석 패널 sentinel 이 뷰포트 근처(800px)에 올 때만 read.
-	// notesWanted 는 sticky — 한 번 주석을 본 사용자는 이후 회사에서도 바로 로드(관심 신호). 별도 bake/재빌드 0.
+	// 순수 런타임 lazy — 주석은 panel contentRaw(단일 row group 13~16MB 청크, 런타임에서 축소 불가) 직독이라 무겁다.
+	// 회사 전환 콜드 버스트(가격·재무·공시·뉴스·16MB 출자…)와 경쟁시키지 않도록, 주석 패널 sentinel 이 뷰포트
+	// 근처(800px)에 올 때만 read. notesWanted 는 sticky — 한 번 본 사용자는 이후 회사 즉시 로드. 별도 bake/재빌드 0.
 	let notesSentinel = $state<HTMLElement | null>(null);
 	let notesWanted = $state(false);
 	$effect(() => {
@@ -340,7 +340,7 @@
 		notesState = 'loading';
 		let cancelled = false;
 		// Promise.resolve().then 으로 감싸 동기 throw 도 rejection 으로(effect throw 로 RightStack 깨짐 방지).
-		// 타임아웃 25s — 재청크 전 단일 청크 13~16MB 콜드 read 흡수(재청크 후엔 tail-prune ~0.9MB → 1s 내).
+		// 타임아웃 25s — panel 단일 청크 13~16MB 콜드 read 흡수(lazy 로 경쟁은 피하되 read 자체는 무거움).
 		withTimeout(Promise.resolve().then(() => rt.report.noteSeries(code)), 25_000).then(
 			(b) => {
 				if (cancelled) return;
