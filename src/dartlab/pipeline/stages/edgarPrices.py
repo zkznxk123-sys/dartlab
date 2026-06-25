@@ -1,16 +1,20 @@
-"""EDGAR prices stage — 회사별 일별 OHLCV bake (터미널 주가 그래프 artifact).
+"""EDGAR prices stage — 회사별 일별 OHLCV bake + 스냅샷 파생 (터미널 주가 그래프 + 게이트).
 
-주가 그래프(PriceChart)는 회사별 일별 OHLCV 전체이력을 ``rt.price`` 포트로 백필한다. 본 스테이지는
-gather US history(Yahoo v8 ~10년, 위임)를 ``edgar/prices/company/{ticker}.parquet`` 으로 구워
-브라우저 터미널이 KR ``krx``/``gov`` 회사 주가와 동일 reader(``edgarPriceSource``)로 직독하게 한다.
+한 스테이지가 둘을 생산한다(덕지덕지 차단 — gather 호출 1회/티커):
+  ① 그래프: ``edgar/prices/company/{ticker}.parquet`` (회사별 일별 OHLCV 전체이력). 브라우저 터미널
+     PriceChart 가 ``rt.price`` US 브랜치(``edgarPriceSource``)로 직독 — KR ``krx``/``gov`` 회사 주가와 동일 reader.
+  ② 게이트: ``landing/map/prices-snapshot-us.json`` (현재가·수익률·52주·변동성 요약). ``buildCompany`` 의
+     prices 게이트(``raw.prices.data[ticker]``)를 채워 US 종목이 검색→열림 되게 한다(KR prices-snapshot 동형).
 
 별도빌드 금지 — 수집은 gather 에 위임(``gather.price(ticker, market="US")``). 본 모듈은 오케스트레이션
-(유니버스 루프·parquet 쓰기·HF 증분 발행)만 한다. 온라인(Yahoo)이라 daily companyfacts(``edgar`` 스테이지)와
-카덴스가 달라 별 스테이지로 둔다(KR ``buildGovPriceData`` 가 별 워크플로인 것과 동형).
+(유니버스 루프·parquet 쓰기·스냅샷 파생·HF 발행)만 한다. 온라인(Yahoo)이라 daily companyfacts(``edgar``
+스테이지)와 카덴스가 달라 별 스테이지로 둔다(KR ``buildGovPriceData`` 가 별 워크플로인 것과 동형).
 """
 
 from __future__ import annotations
 
+import json
+import math
 import time
 
 from dartlab.pipeline.types import PipelineMode, StageResult
@@ -18,6 +22,11 @@ from dartlab.pipeline.types import PipelineMode, StageResult
 # date=Utf8 'YYYYMMDD' (Candle.t 규약). edgarPriceSource.parseEdgarPriceRows 가 대시 제거로 흡수하지만
 # 정본을 8자리 문자열로 굳혀 브라우저(hyparquet) read 가 결정적이게 한다.
 _START_DEFAULT = "2015-01-01"  # Yahoo 일봉 ~10년 — 그래프 전체이력(US 는 좌측 백필 없음, seed 가 곧 범위)
+
+# 스냅샷 수익률 거래일 오프셋 (KR buildPricesSnapshot 동일 규약 — 1M/3M/1Y).
+_RET_OFFSETS = {"return1m": 21, "return3m": 63, "return1y": 252}
+_SNAPSHOT_REPO = "eddmpython/dartlab-data"
+_SNAPSHOT_PATH_IN_REPO = "landing/map/prices-snapshot-us.json"
 
 
 def _universeTickers() -> list[str]:
@@ -39,16 +48,69 @@ def _universeTickers() -> list[str]:
         return []
 
 
-def _bakeOne(ticker: str, start: str, outDir) -> bool:
-    """단일 ticker 의 US OHLCV 를 gather 위임으로 받아 parquet 으로 굽는다.
+def _retPct(closes: list, bars: int) -> float | None:
+    """종가열의 bars 거래일 전 대비 수익률(%) — KR buildPricesSnapshot._retPct 동형."""
+    if len(closes) <= bars:
+        return None
+    last, prev = closes[-1], closes[-1 - bars]
+    if last is None or prev is None or prev == 0:
+        return None
+    return round((last / prev - 1) * 100, 2)
+
+
+def _volatility1y(closes: list) -> float | None:
+    """일별 로그수익률 표본표준편차 × √252 × 100 (최근 252수익률, 최소 60개) — KR 동형."""
+    window = [c for c in closes[-253:] if c is not None and c > 0]
+    rets = [math.log(window[i] / window[i - 1]) for i in range(1, len(window)) if window[i - 1] > 0]
+    if len(rets) < 60:
+        return None
+    mean = sum(rets) / len(rets)
+    var = sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)
+    return round(math.sqrt(var) * math.sqrt(252) * 100, 2)
+
+
+def _snapshotRow(closes: list, highs: list, lows: list, vols: list, lastDate: str) -> dict:
+    """OHLCV 열에서 터미널 게이트 스냅샷 행 파생 — KR PriceRow schema 동형.
+
+    Args:
+        closes: 종가 오름차순.
+        highs/lows: 고가/저가 오름차순.
+        vols: 거래량 오름차순.
+        lastDate: 최신 거래일 'YYYYMMDD'.
+
+    Returns:
+        dict — currentPrice·return*·volatility1y·week52*·volumeAvg30d·marketCap(null)·priceUpdated.
+            marketCap 은 shares(EDGAR dei) 결합이 별 작업이라 현재 null(게이트는 행 존재만 요구).
+    """
+    hi252 = [v for v in highs[-252:] if v is not None]
+    lo252 = [v for v in lows[-252:] if v is not None]
+    vol30 = [v for v in vols[-30:] if v is not None]
+    return {
+        "currentPrice": closes[-1],
+        "marketCap": None,  # TODO: shares(EDGAR dei EntityCommonStockSharesOutstanding) × currentPrice 후속 보강
+        "return1m": _retPct(closes, _RET_OFFSETS["return1m"]),
+        "return3m": _retPct(closes, _RET_OFFSETS["return3m"]),
+        "return1y": _retPct(closes, _RET_OFFSETS["return1y"]),
+        "volatility1y": _volatility1y(closes),
+        "week52High": max(hi252) if hi252 else None,
+        "week52Low": min(lo252) if lo252 else None,
+        "volumeAvg30d": int(sum(vol30) / len(vol30)) if vol30 else None,
+        "foreignPct": None,
+        "beta": None,
+        "priceUpdated": lastDate,
+    }
+
+
+def _bakeOne(ticker: str, start: str, outDir) -> dict | None:
+    """단일 ticker 의 US OHLCV 를 gather 위임으로 받아 parquet 으로 굽고 스냅샷 행을 파생한다.
 
     Args:
         ticker: US 티커(대문자).
         start: 시작일 'YYYY-MM-DD'.
-        outDir: 출력 디렉터리(Path).
+        outDir: parquet 출력 디렉터리(Path).
 
     Returns:
-        bool — 성공(파일 생성) True, 무데이터/실패 False.
+        dict | None — 스냅샷 행(게이트용). 무데이터/실패 None.
     """
     import polars as pl
 
@@ -56,7 +118,7 @@ def _bakeOne(ticker: str, start: str, outDir) -> bool:
 
     df = getDefaultGather().price(ticker, market="US", start=start)
     if df is None or not hasattr(df, "height") or df.height == 0:
-        return False
+        return None
     # gather 출력 = [date(Date), open, high, low, close, volume]. date → Utf8 'YYYYMMDD'.
     dateExpr = (
         pl.col("date").dt.strftime("%Y%m%d")
@@ -70,9 +132,64 @@ def _bakeOne(ticker: str, start: str, outDir) -> bool:
         .unique(subset=["date"], keep="last")
     )
     if out.height == 0:
-        return False
+        return None
     out.write_parquet(outDir / f"{ticker}.parquet", compression="zstd", statistics=True)
-    return True
+    return _snapshotRow(
+        out["close"].to_list(), out["high"].to_list(), out["low"].to_list(), out["volume"].to_list(), out["date"][-1]
+    )
+
+
+def _writeSnapshot(snap: dict, *, upload: bool, token) -> str:
+    """스냅샷 dict 를 기존 prices-snapshot-us.json 과 병합해 쓰고(증분 안전) 선택적 HF 발행.
+
+    Args:
+        snap: {ticker: row} 신규/갱신분.
+        upload: True 면 HF(landing/map/prices-snapshot-us.json) 직접 발행(KR snapshot 패턴 동형).
+        token: HF 토큰(None=env).
+
+    Returns:
+        str — 쓴 로컬 경로.
+    """
+    from datetime import datetime, timezone
+    from pathlib import Path
+
+    # repo 루트 = stages→pipeline→dartlab→src→repo (parents[4]). landing 정적 자산은 repo 상대(데이터 dir 무관).
+    repoRoot = Path(__file__).resolve().parents[4]
+    outLocal = repoRoot / "landing" / "static" / "map" / "prices-snapshot-us.json"
+    merged: dict = {}
+    if outLocal.exists():
+        try:
+            prev = json.loads(outLocal.read_text(encoding="utf-8"))
+            merged = dict(prev.get("data") or {})
+        except Exception:  # noqa: BLE001 — 손상/부재 → 신규분만
+            merged = {}
+    merged.update(snap)
+    payload = {
+        "schemaVersion": 1,
+        "builtAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "currency": "USD",
+        "count": len(merged),
+        "data": merged,
+    }
+    outLocal.parent.mkdir(parents=True, exist_ok=True)
+    outLocal.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"[pipeline] edgarPrices snapshot: {len(merged)}종목 → {outLocal}", flush=True)
+    if upload:
+        from huggingface_hub import HfApi
+
+        from dartlab.core.hfRetry import retryHfCall
+        from dartlab.pipeline.hfUpload import _resolveHfToken
+
+        retryHfCall(
+            HfApi(token=_resolveHfToken(token)).upload_file,
+            path_or_fileobj=str(outLocal),
+            path_in_repo=_SNAPSHOT_PATH_IN_REPO,
+            repo_id=_SNAPSHOT_REPO,
+            repo_type="dataset",
+            commit_message=f"갱신: prices-snapshot-us ({len(merged)}종목)",
+        )
+        print(f"[pipeline] edgarPrices snapshot HF 발행 → {_SNAPSHOT_PATH_IN_REPO}", flush=True)
+    return str(outLocal)
 
 
 def runEdgarPrices(
@@ -86,19 +203,20 @@ def runEdgarPrices(
     upload: bool = True,
     token=None,
 ) -> StageResult:
-    """유니버스 회사별 US OHLCV → ``edgar/prices/company/{ticker}.parquet`` bake + HF 증분 발행.
+    """유니버스 회사별 US OHLCV → 그래프 parquet + 게이트 스냅샷 bake + HF 발행.
 
     수집은 gather(Yahoo, 429 백오프·fallback 체인 내장)에 위임한다. tickers 미지정이면 상장 universe
-    전체(edgarPanel scope), 지정 시 그 목록만(스모크·증분). 개별 실패는 격리(나머지 진행).
+    전체(edgarPanel scope), 지정 시 그 목록만(스모크·증분). 개별 실패는 격리(나머지 진행). 스냅샷은
+    기존 파일과 병합 발행(증분 안전).
 
     Args:
-        category: HF 발행 카테고리(``edgarPriceCompany``).
+        category: 그래프 parquet HF 카테고리(``edgarPriceCompany``).
         mode: 미사용(인터페이스 호환).
         tickers: bake 대상 ticker 목록(대문자 무관). None=유니버스 전체.
         start: OHLCV 시작일 'YYYY-MM-DD'.
         limit: 처리 ticker 수 상한(스모크·부분 실행). None=전체.
         pauseSeconds: ticker 간 대기(추가 페이싱 — gather 자체 백오프 위. 0=없음).
-        upload: True 면 bake 변경분만 HF 증분 발행.
+        upload: True 면 parquet 증분 + 스냅샷 HF 발행.
         token: HF 토큰(None=env).
 
     Returns:
@@ -127,10 +245,13 @@ def runEdgarPrices(
     outDir = Path(cfg.dataDir) / "edgar" / "prices" / "company"
     outDir.mkdir(parents=True, exist_ok=True)
     changed: list[str] = []
+    snap: dict = {}
     for i, ticker in enumerate(uni):
         try:
-            if _bakeOne(ticker, start, outDir):
+            row = _bakeOne(ticker, start, outDir)
+            if row is not None:
                 changed.append(f"{ticker}.parquet")
+                snap[ticker] = row
                 res.report.ok += 1
             else:
                 res.report.skip += 1
@@ -150,5 +271,11 @@ def runEdgarPrices(
             from dartlab.pipeline.hfUpload import uploadCategoryToHf
 
             n = uploadCategoryToHf(category, changedFiles=changed, token=token)
-            print(f"[pipeline] edgarPrices HF 발행: {n}개", flush=True)
+            print(f"[pipeline] edgarPrices parquet HF 발행: {n}개", flush=True)
+    if snap:
+        try:
+            _writeSnapshot(snap, upload=upload, token=token)
+        except Exception as exc:  # noqa: BLE001 — 스냅샷 발행 실패 격리(parquet 발행은 성공 유지)
+            res.report.failures.append(f"snapshot: {type(exc).__name__}: {exc}")
+            print(f"[pipeline] edgarPrices snapshot 실패(격리): {exc}", flush=True)
     return res
