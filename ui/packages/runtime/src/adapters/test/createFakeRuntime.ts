@@ -222,6 +222,7 @@ function fakeFinance(): FinancePort {
 		async bundle(code, scope) {
 			if (code !== FIXTURE_CODE) return null;
 			return {
+				currency: 'KRW',
 				scope: scope ?? 'CFS',
 				availScopes: ['CFS', 'OFS'],
 				modes: ['annual'],

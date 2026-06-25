@@ -49,6 +49,8 @@ export interface TerminalFinance {
 }
 
 export interface TerminalFinanceBundle {
+	/** 표시 통화 — KR='KRW'(조/억), US(EDGAR)='USD'($T/$B). loadTerminalFinance 가 resolveMarket 으로 태깅. 표시(FinFullscreen·MiniFinChart)는 이 값으로 단위 렌더(per-card 분기 0). */
+	currency: string;
 	scope: FinScope; // 이 번들이 담은 범위 (연결/별도)
 	availScopes: FinScope[]; // 회사가 실제 보고한 범위 — 2개면 연결/별도 토글 노출
 	modes: FinMode[]; // 데이터상 가능한 모드 (분기 없으면 annual 만)

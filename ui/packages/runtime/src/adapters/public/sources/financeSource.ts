@@ -112,7 +112,9 @@ export function loadTerminalFinance(core: DataCore, stockCode: string, scope?: F
 		// 기본 = 연결 우선(최신성보다 우선) — 연결이 있으면 옛 분기여도 연결, 연결이 아예 없을 때만 별도. 지정 + 가용 시 그대로.
 		const fallback: FinScope = avail.includes('CFS') ? 'CFS' : 'OFS';
 		const useScope: FinScope = scope && avail.includes(scope) ? scope : fallback;
-		return buildBundle(rows, useScope, avail);
+		const bundle = buildBundle(rows, useScope, avail);
+		if (bundle) bundle.currency = resolveMarket(code).market === 'US' ? 'USD' : 'KRW';
+		return bundle;
 	})();
 }
 
@@ -726,5 +728,5 @@ function buildBundle(rows: RawRow[], fs: FinScope, availScopes: FinScope[]): Ter
 	if (modes.length === 0) return null;
 	const defaultMode: FinMode = views.quarter ? 'quarter' : views.annual ? 'annual' : modes[0]!; // 윗줄 length 가드로 항상 존재
 
-	return { scope: fs, availScopes, modes, views, defaultMode, filedDates };
+	return { currency: 'KRW', scope: fs, availScopes, modes, views, defaultMode, filedDates };
 }
