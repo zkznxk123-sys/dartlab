@@ -17,6 +17,8 @@ const apiTarget = process.env.DARTLAB_API_BASE || 'http://127.0.0.1:8400';
 process.env.VITE_DARTLAB_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/news';
 // 시장 전반 뉴스 라이브 오버레이 워커(/market-news, 네이버 검색) — HF 누적 위 머지, 공통 배선 기본값(가역).
 process.env.VITE_DARTLAB_MARKET_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/market-news';
+// 당일 공시 라이브 오버레이 워커(/market-filings, DART list) — HF 누적 위 머지, 공통 배선 기본값(가역).
+process.env.VITE_DARTLAB_MARKET_FILINGS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/market-filings';
 
 export default defineConfig({
 	plugins: [sveltekit()],

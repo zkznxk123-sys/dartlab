@@ -13,9 +13,11 @@ const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefi
 // 워커 프록시 base URL(가역 빌드-env 게이트). 비우면 미설정 — 호출측이 originConfigured 로 미동작([]) 판정.
 //   news = CF 워커 /news 라우트(전 환경 동일, dev 폴백 없음 — /__news 미들웨어는 구현된 적 없음).
 //   marketNews = CF 워커 /market-news 라우트(전 환경 동일, 네이버 검색 라이브 — newsWorker 동형 게이트).
+//   marketFilings = CF 워커 /market-filings 라우트(전 환경 동일, DART list 라이브 당일 공시 — 동형 게이트).
 //   naver = dev 는 Vite /__naver 미들웨어(브라우저 CORS 우회), 프로덕션은 CF 프록시 /naver 라우트.
 const NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const MARKET_NEWS_PROXY = ((viteEnv?.VITE_DARTLAB_MARKET_NEWS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
+const MARKET_FILINGS_PROXY = ((viteEnv?.VITE_DARTLAB_MARKET_FILINGS_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const NAVER_PROXY = ((viteEnv?.VITE_DARTLAB_NAVER_PROXY as string | undefined) ?? '').replace(/\/+$/, '');
 const naverDev = Boolean(viteEnv?.DEV);
 // gov 주가 dev 라이브 fill 게이트(naverDev 동형) — dev 만 /__gov 미들웨어 존재, 프로덕션은 읽기 전용.
@@ -28,6 +30,7 @@ export type OriginId =
 	| 'localApi'
 	| 'newsWorker'
 	| 'marketNewsWorker'
+	| 'marketFilingsWorker'
 	| 'naverWorker'
 	| 'duckdbHf'
 	| 'govDev';
@@ -61,6 +64,8 @@ const newsWorkerUrl = (spec: string): string => {
 };
 // market-news 워커 — path = 시장 코드(KR/US). 종목 워커와 달리 라이브 RSS 검색이라 code 대신 market 쿼리.
 const marketNewsWorkerUrl = (market: string): string => `${MARKET_NEWS_PROXY}?market=${encodeURIComponent(market)}`;
+// market-filings 워커 — 쿼리 없는 고정 라우트(당일 전체 공시). resolve(path) 의 path 무시.
+const marketFilingsWorkerUrl = (): string => MARKET_FILINGS_PROXY;
 const naverWorkerUrl = (code: string): string => {
 	const q = `code=${encodeURIComponent(code)}`;
 	return naverDev ? `/__naver?${q}` : `${NAVER_PROXY}?${q}`;
@@ -84,6 +89,12 @@ const ORIGINS: Partial<Record<OriginId, OriginDef>> = {
 		resolve: marketNewsWorkerUrl,
 		defaultCache: { scope: 'memory', ttlMs: 10 * MIN, maxEntries: 8 },
 		configured: () => Boolean(MARKET_NEWS_PROXY)
+	},
+	// market-filings 라이브 DART 공시 워커 — HF 누적 위 머지 오버레이. 미설정/실패해도 HF base 는 보임.
+	marketFilingsWorker: {
+		resolve: marketFilingsWorkerUrl,
+		defaultCache: { scope: 'memory', ttlMs: 5 * MIN, maxEntries: 1 },
+		configured: () => Boolean(MARKET_FILINGS_PROXY)
 	},
 	naverWorker: {
 		resolve: naverWorkerUrl,

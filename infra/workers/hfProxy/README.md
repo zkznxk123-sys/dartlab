@@ -20,8 +20,14 @@ HF URL 을 단일 SSOT 로 묶는 경량 프록시.
   누적 shard 위에 url-dedup 머지 → cron(일 2회) 사이 갭을 10분급으로 메움. 가드: market 검증(KR/US) +
   10분 엣지 캐시 + 실패 시 빈배열. 네이버 시크릿(아래) 필요.
   ※ Google News RSS 는 CF Workers outbound IP 에서 503(데이터센터 봇 차단)이라 라이브로 못 씀 — 네이버로 전환.
+- `GET /market-filings` → 당일 시장 전체 공시 라이브 오버레이. DART list.json(`opendart.fss.or.kr`)을
+  corp_code 없이 당일(KST) 호출 = 전체 시장 공시(stock_code 포함, market_recent 와 동일 스키마). page 1·2
+  = 최근 200, rceptNo desc. `{asOf, items:[{rceptNo,rceptDate,stockCode,corpName,reportNm,filer}]}` 반환.
+  프런트(`nonRegularFilingsSource`)가 HF 누적 위에 rceptNo-dedup 머지 → 시장 피드 + 종목 필터(stockCode) 한 소스.
+  가드: 10분 버킷 캐시 + 빈 결과 캐시 안 함. DART_API_KEY 시크릿 필요. **브라우저 UA 필수**(CF 기본 UA 는 DART 가
+  error1.html 로 무한 리다이렉트 차단).
 
-### 뉴스 시크릿 (byCompany read + 네이버 라이브)
+### 뉴스·공시 시크릿 (byCompany read + 네이버/DART 라이브)
 ```bash
 cd infra/workers/hfProxy
 # byCompany 아카이브(private 데이터셋) read — /news 의 base 레이어
@@ -29,11 +35,14 @@ CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put HF_NE
 # 네이버 검색 API 라이브(/news?q= · /market-news 오버레이) — id·secret 2개
 CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put NAVER_CLIENT_ID
 CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put NAVER_CLIENT_SECRET
+# DART open API 라이브 당일 공시(/market-filings)
+CLOUDFLARE_API_TOKEN=*** CLOUDFLARE_ACCOUNT_ID=*** npx wrangler secret put DART_API_KEY
 ```
-모두 graceful — HF_NEWS_TOKEN 없으면 byCompany base 생략, 네이버 시크릿 없으면 라이브 생략(프런트는 HF 누적 base 유지). 프런트 전환 env:
+모두 graceful — 시크릿 없으면 해당 라이브 생략(프런트는 HF 누적 base 유지). 프런트 전환 env:
 ```
 VITE_DARTLAB_NEWS_PROXY=https://dartlab-hf-proxy.<subdomain>.workers.dev/news
 VITE_DARTLAB_MARKET_NEWS_PROXY=https://dartlab-hf-proxy.<subdomain>.workers.dev/market-news
+VITE_DARTLAB_MARKET_FILINGS_PROXY=https://dartlab-hf-proxy.<subdomain>.workers.dev/market-filings
 ```
 
 ## 무엇을 안 하나 (의도적)

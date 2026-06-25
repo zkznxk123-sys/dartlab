@@ -81,6 +81,33 @@ async function naverSearch(env, query, display) {
 // 시장 헤드라인용. 소수 키워드 fan-out 후 머지(네이버는 OR 약해 단일 쿼리보다 분리 검색이 정확).
 const MARKET_QUERIES = { KR: ['증시', '코스피', '환율'], US: ['뉴욕증시', '나스닥', '미국증시'] };
 
+// ── DART 공시목록 라이브 (gather/dart/disclosure.py::listFilings 와 동일 list.json) ──
+// 배치(allFilingsBackfill 14:30)가 못 잡은 당일 공시를 조회시점에 DART list.json 으로 메움. corp_code 없이
+// 당일 호출 = 전체 시장 공시(stock_code 포함, market_recent 와 동일 스키마). 종목 필터는 클라가 stock_code 로.
+// DART 는 CF Workers 기본 UA 를 봇으로 보고 error1.html 로 무한 리다이렉트 — 브라우저 UA 로 우회(로컬 선례).
+const DART_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
+const dartYmd = (s) => { const t = String(s || ''); return t.length === 8 ? `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}` : t; };
+async function dartList(key, ymd, page) {
+	const u = `https://opendart.fss.or.kr/api/list.json?crtfc_key=${key}&bgn_de=${ymd}&end_de=${ymd}&page_no=${page}&page_count=100&sort=date&sort_mth=desc`;
+	const r = await fetch(u, { headers: { 'User-Agent': DART_UA } });
+	if (!r.ok) throw new Error(`dart ${r.status}`);
+	const j = await r.json();
+	if (j.status !== '000') return []; // 013=무자료 등 정상 빈
+	return (j.list || []).map((it) => ({
+		rceptNo: it.rcept_no || '',
+		rceptDate: dartYmd(it.rcept_dt),
+		stockCode: it.stock_code || '',
+		corpName: it.corp_name || '',
+		reportNm: (it.report_nm || '').trim(),
+		filer: it.flr_nm || ''
+	}));
+}
+// KST(UTC+9) 오늘 YYYYMMDD — DART 는 KST 접수일 기준(워커 Date 는 UTC).
+function kstToday() {
+	const d = new Date(Date.now() + 9 * 3600000);
+	return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
+}
+
 export default {
 	async fetch(req, env, ctx) {
 		// CORS allowlist: 프로덕션 origin(env.ALLOW_ORIGIN) + 로컬 dev(localhost/127.0.0.1). 일치 시 그 origin echo.
@@ -219,6 +246,42 @@ export default {
 				headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
 			});
 			if (ctx && items.length) ctx.waitUntil(caches.default.put(cacheKey, resp.clone())); // 빈 결과(일시 실패)는 캐시 안 함
+			return resp;
+		}
+		// /market-filings — 당일 시장 전체 공시 라이브 오버레이. DART list.json(corp_code 없이 당일=전체 시장,
+		// market_recent 동일 스키마). 배치(14:30) 사이 갭을 조회시점으로 메움. DART_API_KEY 시크릿. 10분 캐시.
+		// 종목 필터는 클라가 stockCode 로(시장+종목 한 소스). page 1·2 = 최근 200, rceptNo desc 최신순.
+		if (url.pathname === '/market-filings') {
+			const jsonHeaders = { ...cors, 'Content-Type': 'application/json; charset=utf-8' };
+			const key = env.DART_API_KEY || '';
+			if (!key) {
+				return new Response(JSON.stringify({ items: [], note: 'dart key not configured' }), {
+					headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
+				});
+			}
+			const ymd = kstToday();
+			const cacheKey = new Request(`https://dl-market-filings.cache/${ymd}/${Math.floor(Date.now() / 600000)}`);
+			const hit = await caches.default.match(cacheKey);
+			if (hit) {
+				const h2 = new Headers(hit.headers);
+				for (const [k, v] of Object.entries(jsonHeaders)) h2.set(k, v);
+				h2.set('x-dl-edge', 'HIT');
+				return new Response(hit.body, { status: hit.status, headers: h2 });
+			}
+			let items = [];
+			try {
+				const pages = await Promise.all([1, 2].map((p) => dartList(key, ymd, p).catch(() => [])));
+				const seen = new Set();
+				for (const it of pages.flat()) { if (!it.rceptNo || seen.has(it.rceptNo)) continue; seen.add(it.rceptNo); items.push(it); }
+				items.sort((a, b) => String(b.rceptNo).localeCompare(String(a.rceptNo))); // 접수번호 desc = 최신순
+				items = items.slice(0, 200);
+			} catch (e) {
+				return new Response(JSON.stringify({ items: [], error: String(e) }), { status: 502, headers: jsonHeaders });
+			}
+			const resp = new Response(JSON.stringify({ asOf: items[0]?.rceptDate ?? '', items }), {
+				headers: { ...jsonHeaders, 'Cache-Control': 'public, max-age=600' }
+			});
+			if (ctx && items.length) ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
 			return resp;
 		}
 		// /media/<path> — dartlab-media(이미지) 엣지 캐시 프록시. 불변 파일명(콘텐츠해시) → 1년 immutable.

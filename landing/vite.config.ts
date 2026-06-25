@@ -25,6 +25,8 @@ process.env.VITE_DARTLAB_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.wor
 // 시장 전반 뉴스 라이브 오버레이 워커(/market-news, 네이버 검색). HF 누적 shard 위에 머지되는 오버레이라 미설정/실패 시
 // HF base 만 — fallback 부재 아님(news 와 다름). 공통 배선으로 dev/직접빌드도 워커를 그대로 쓰게 기본값 부여(가역).
 process.env.VITE_DARTLAB_MARKET_NEWS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/market-news';
+// 당일 공시 라이브 오버레이 워커(/market-filings, DART list). HF 누적 위 머지, 공통 배선 기본값(가역).
+process.env.VITE_DARTLAB_MARKET_FILINGS_PROXY ??= 'https://dartlab-hf-proxy.eddmpython.workers.dev/market-filings';
 
 function contentType(filePath: string): string {
 	const ext = path.extname(filePath).toLowerCase();

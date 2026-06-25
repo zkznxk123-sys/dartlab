@@ -125,6 +125,9 @@ jobs:
           # 시장 전반 뉴스 라이브 오버레이 프록시(같은 hfProxy 워커 /market-news 라우트). 네이버 검색 API 를
           # 서버사이드 fetch → HF 누적 shard 위에 머지. cron(일 2회) 사이 갭을 10분급으로 메움. 비우면 HF base 만, 가역.
           VITE_DARTLAB_MARKET_NEWS_PROXY: https://dartlab-hf-proxy.eddmpython.workers.dev/market-news
+          # 당일 공시 라이브 오버레이 프록시(같은 hfProxy 워커 /market-filings 라우트). DART list.json 을 당일
+          # 전체로 서버사이드 fetch → HF 누적 위에 머지. 배치(14:30) 사이 갭을 조회시점으로 메움. 비우면 HF base 만, 가역.
+          VITE_DARTLAB_MARKET_FILINGS_PROXY: https://dartlab-hf-proxy.eddmpython.workers.dev/market-filings
           # Cloudflare Web Analytics 공개 beacon site token 또는 Cloudflare 제공 script snippet.
           # 비우면 analytics beacon 을 로드하지 않음.
           VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}

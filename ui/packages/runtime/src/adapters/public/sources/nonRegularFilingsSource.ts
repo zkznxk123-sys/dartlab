@@ -5,6 +5,7 @@
 // 타입 정본 = contracts (NonRegularFiling 승격 완료 — 중복 정의 금지).
 import type { MarketFiling, NonRegularFiling } from '@dartlab/ui-contracts';
 import type { DataCore } from '../../../data/fetch/request';
+import { originConfigured } from '../../../data/origins/registry';
 
 interface RecentRow extends Record<string, unknown> {
 	stock_code?: unknown;
@@ -22,20 +23,57 @@ function fmtDate(s: string): string {
 	return c.length === 8 ? `${c.slice(0, 4)}-${c.slice(4, 6)}-${c.slice(6, 8)}` : String(s);
 }
 
+// 워커 marketFilingsWorker — DART list 당일 전체 공시(라이브). 시장 피드·종목 비정기 공용(코어 캐시 공유).
+// 미배선/실패는 []. 워커 응답 {asOf, items:[{rceptNo,rceptDate,stockCode,corpName,reportNm,filer}]}.
+interface LiveFilingRow {
+	rceptNo?: string;
+	rceptDate?: string;
+	stockCode?: string;
+	corpName?: string;
+	reportNm?: string;
+	filer?: string;
+}
+function loadLiveMarketFilings(core: DataCore): Promise<LiveFilingRow[]> {
+	if (!originConfigured('marketFilingsWorker')) return Promise.resolve([]); // 워커 미배선 → HF base 만
+	return core
+		.request<{ items?: LiveFilingRow[] }>({
+			origin: 'marketFilingsWorker',
+			path: '', // 쿼리 없는 고정 라우트
+			cacheKey: 'allFilings.live.today',
+			cache: { scope: 'memory', ttlMs: 5 * 60_000, maxEntries: 1 },
+			parse: (r) => (r.ok ? (r.json() as Promise<{ items?: LiveFilingRow[] }>) : Promise.resolve({}))
+		})
+		.then((j) => (Array.isArray(j.items) ? j.items : []))
+		.catch(() => []);
+}
+
 export async function loadCompanyNonRegularFilings(core: DataCore, stockCode: string): Promise<NonRegularFiling[]> {
 	const code = stockCode.trim();
 	if (!/^\d{6}$/.test(code)) return [];
 	try {
-		const rows = await core.requestParquetRows<RecentRow>({
-			origin: 'hfRange',
-			path: 'dart/allFilings/recent.parquet',
-			columns: COLS,
-			filter: { stock_code: { $in: [code] } },
-			cacheKey: `allFilings.recent:one:${code}`,
-			cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 256 } // 신선도 — 짧은 TTL, 자체 Map 폐기
-		});
+		// HF 누적(전 이력) + 라이브 당일 공시(이 종목분 필터) 동시 — 라이브가 배치 사이 갭(당일) 메움.
+		const [rows, live] = await Promise.all([
+			core.requestParquetRows<RecentRow>({
+				origin: 'hfRange',
+				path: 'dart/allFilings/recent.parquet',
+				columns: COLS,
+				filter: { stock_code: { $in: [code] } },
+				cacheKey: `allFilings.recent:one:${code}`,
+				cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 256 } // 신선도 — 짧은 TTL, 자체 Map 폐기
+			}),
+			loadLiveMarketFilings(core)
+		]);
 		const seen = new Set<string>();
 		const result: NonRegularFiling[] = [];
+		// 라이브(오늘) 먼저 — 이 종목분만, 최신 우선 dedup(rceptNo)
+		for (const r of live) {
+			if (String(r.stockCode ?? '').trim() !== code) continue;
+			const rceptNo = String(r.rceptNo ?? '').trim();
+			const reportNm = String(r.reportNm ?? '').trim();
+			if (!rceptNo || seen.has(rceptNo) || REGULAR.some((n) => reportNm.includes(n))) continue;
+			seen.add(rceptNo);
+			result.push({ rceptNo, reportNm, rceptDate: fmtDate(String(r.rceptDate ?? '')), filer: String(r.filer ?? '').trim(), url: `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}` });
+		}
 		for (const r of rows) {
 			const rceptNo = String(r.rcept_no ?? '').trim();
 			const reportNm = String(r.report_nm ?? '').trim();
@@ -111,17 +149,29 @@ interface FeedRow extends RecentRow {
 
 export async function loadMarketFeed(core: DataCore): Promise<MarketFiling[]> {
 	try {
-		const rows = await core.requestParquetWholeFile<FeedRow>({
-			origin: 'hf',
-			path: 'dart/allFilings/market_recent.parquet',
-			columns: FEED_COLS,
-			cacheKey: 'allFilings.marketFeed',
-			cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 2 } // 일일 cron 갱신 — 신선도 우선 10분 TTL(worker 엣지 600s 와 일치)
-		});
-		if (!rows) return [];
+		// HF 누적 bake(3개월) + 라이브 당일 전체 공시 동시 — 라이브가 배치(14:30) 사이 갭(당일) 메움.
+		const [rows, live] = await Promise.all([
+			core.requestParquetWholeFile<FeedRow>({
+				origin: 'hf',
+				path: 'dart/allFilings/market_recent.parquet',
+				columns: FEED_COLS,
+				cacheKey: 'allFilings.marketFeed',
+				cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 2 } // 일일 cron 갱신 — 신선도 우선 10분 TTL(worker 엣지 600s 와 일치)
+			}),
+			loadLiveMarketFilings(core)
+		]);
 		const seen = new Set<string>();
 		const result: MarketFiling[] = [];
-		for (const r of rows) {
+		// 라이브(오늘 전체 시장) 먼저 — 최신 우선 dedup(rceptNo)
+		for (const r of live) {
+			const rceptNo = String(r.rceptNo ?? '').trim();
+			const stockCode = String(r.stockCode ?? '').trim();
+			const reportNm = String(r.reportNm ?? '').trim();
+			if (!rceptNo || !stockCode || seen.has(rceptNo) || REGULAR.some((n) => reportNm.includes(n))) continue;
+			seen.add(rceptNo);
+			result.push({ rceptNo, rceptDate: fmtDate(String(r.rceptDate ?? '')), stockCode, corpName: String(r.corpName ?? '').trim(), reportNm, filer: String(r.filer ?? '').trim(), url: `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}` });
+		}
+		for (const r of rows ?? []) {
 			const rceptNo = String(r.rcept_no ?? '').trim();
 			const stockCode = String(r.stock_code ?? '').trim();
 			const reportNm = String(r.report_nm ?? '').trim();
@@ -138,7 +188,9 @@ export async function loadMarketFeed(core: DataCore): Promise<MarketFiling[]> {
 				url: `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}`
 			});
 		}
-		return result; // 파일이 이미 rcept_dt 내림차순(bake) — 재정렬 불필요. 캐시·dedup 은 코어/위.
+		// 라이브(오늘) + HF(bake desc) 합침 → rceptDate desc 재정렬(라이브 오늘이 위로). 캐시·dedup 은 코어/위.
+		result.sort((a, b) => b.rceptDate.localeCompare(a.rceptDate) || b.rceptNo.localeCompare(a.rceptNo));
+		return result;
 	} catch {
 		return [];
 	}
