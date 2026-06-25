@@ -794,6 +794,45 @@
     .coverTitle { font-size: 28px; }
   }
 
+  /* ── 폰(≤640) — '떠있는 용지' 은유 해제: 카드 크롬(margin·radius·shadow·side border) 제거하고
+     콘텐츠가 뷰포트 폭을 꽉 채운다. backdrop 회색 거터 소멸 = 낭비 여백 0. 데스크톱(>640) 무변경. ── */
+  @media (max-width: 640px) {
+    .sheet {
+      width: 100%; max-width: 100%; margin: 0; padding: 18px 14px 36px;
+      border-left: 0; border-right: 0; border-top: 0; border-radius: 0; box-shadow: none;
+    }
+    .cover { padding: 4px 0 16px; margin-bottom: 18px; }
+    .coverKicker { font-size: 11px; margin-bottom: 8px; }
+    .coverTitle { font-size: clamp(21px, 6.4vw, 28px); margin-bottom: 12px; line-height: 1.12; }
+    .coverTitle .code { display: block; margin: 6px 0 0; font-size: 13px; }
+    .coverIntro { font-size: 12.5px; margin-top: 12px; }
+    /* coverFacts — right-border 격자 → 2열 + bottom-border(폰에서 깔끔히 쌓임) */
+    .coverFacts { grid-template-columns: 1fr 1fr; }
+    .coverFacts .fact { padding: 8px 12px 8px 0; border-right: 1px solid var(--bd); border-bottom: 1px solid var(--bd); }
+    .coverFacts .fact:nth-child(2n) { border-right: 0; }
+    .overviewLead { padding: 13px; margin-bottom: 18px; }
+    .ovThesis { font-size: 12.5px; }
+    .block { margin-bottom: 20px; }
+    .leadProse { font-size: clamp(13.5px, 4vw, 15px); }
+    /* 표 우측 과패딩 축소 — 좁은 폭 칸 확보 */
+    .summaryTable td { padding-right: 14px; }
+    .figTable td { padding-right: 14px; }
+    .rptSection { margin-bottom: 22px; scroll-margin-top: 132px; }
+    .secHead { gap: 9px; margin-bottom: 11px; padding-bottom: 8px; }
+    .secNo { font-size: 13px; }
+    .secTitle { font-size: clamp(16px, 5vw, 19px); }
+    .secSrc { font-size: 9.5px; padding: 2px 5px; }
+    /* 표 — 가로스크롤 유지(숫자 격자 보존) + 셀 패딩 축소. 폰에선 스파크열 숨겨 숫자열 우선. */
+    .bTableWrap { margin: 10px 0; -webkit-overflow-scrolling: touch; }
+    .bTable td, .bTable th { padding-left: 8px; padding-right: 8px; }
+    .bTable td.sparkCol, .bTable th.sparkCol { display: none; }
+    /* 종합 의견 — 3열 그리드 → 라벨/출처 한 줄, 본문 아래 풀폭(auto 칸 압박 해소) */
+    .clRow { grid-template-columns: 1fr auto; gap: 4px 10px; padding-left: 10px; }
+    .clLine { grid-column: 1 / -1; font-size: 12.5px; }
+    .rptFooter { margin-top: 24px; }
+    .footSign { font-size: 11px; gap: 5px; }
+  }
+
   /* ── 인쇄 — A4, 화이트 강제 ── */
   @media print {
     /* 루트 레이아웃의 :global(html/body){overflow-x:clip} 이 Chrome 인쇄 페이지네이션을 비워(빈 미리보기)

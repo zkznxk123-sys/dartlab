@@ -196,4 +196,17 @@
 		color: #64748b;
 		padding: 40px 0;
 	}
+	/* 폰(≤640) — 1열 피드 거터 축소(인스타 패턴 유지, 양 끝 낭비 제거). 데스크톱 무변경. */
+	@media (max-width: 640px) {
+		.feed {
+			padding: 12px 12px 64px;
+		}
+		.grid {
+			grid-template-columns: 1fr;
+			gap: 14px;
+		}
+		.cHeader {
+			padding: 8px 12px;
+		}
+	}
 </style>

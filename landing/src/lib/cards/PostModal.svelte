@@ -61,20 +61,22 @@
 					<source srcset="{base}/avatar.webp" type="image/webp" />
 					<img src="{base}/avatar.png" alt="DartLab" width="34" height="34" />
 				</picture>
-				<div class="prWho"><b>dartlab</b><small>COMPANY STORY BY TICKER</small></div>
+				<div class="prWho"><b>dartlab</b><small>{contract?.standalone ? 'DARTLAB · 이슈' : 'COMPANY STORY BY TICKER'}</small></div>
 			</header>
 			<div class="prScroll">
-				<p class="prMeta">{contract?.name ?? corpName} · {code}</p>
+				<p class="prMeta">{contract?.name ?? corpName}{code ? ` · ${code}` : ''}</p>
 				{#if contract?.title}<h2 class="prTitle">{contract.title}</h2>{/if}
 				{#if contract}
 					{#each captionParas(contract.caption) as para (para)}<p class="prPara">{para}</p>{/each}
 					{#if !contract.caption}<p class="prPara prMuted">캡션이 아직 준비되지 않았습니다.</p>{/if}
-					<!-- 블로그 이어 읽기 — 이 캐러셀의 원문 글(같은 slug=blog [slug]). 제목을 카드로 노출, 새 탭. -->
-					<a class="prBlog" href="{base}/blog/{slug}" target="_blank" rel="noopener">
-						<span class="prBlogIco" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg></span>
-						<span class="prBlogTxt"><small>블로그에서 이어 읽기</small><b>{contract.title ?? contract.name}</b></span>
-						<span class="prBlogArr" aria-hidden="true">↗</span>
-					</a>
+					<!-- 블로그 이어 읽기 — 회사 캐러셀만(같은 slug=blog [slug]). 이슈(standalone)는 원문 글이 없어 숨김. -->
+					{#if !contract.standalone}
+						<a class="prBlog" href="{base}/blog/{slug}" target="_blank" rel="noopener">
+							<span class="prBlogIco" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg></span>
+							<span class="prBlogTxt"><small>블로그에서 이어 읽기</small><b>{contract.title ?? contract.name}</b></span>
+							<span class="prBlogArr" aria-hidden="true">↗</span>
+						</a>
+					{/if}
 					{#if contract.pinnedComment}<p class="prPinned">{contract.pinnedComment}</p>{/if}
 				{:else}
 					<p class="prPara prMuted">불러오는 중…</p>
@@ -287,6 +289,40 @@
 			max-width: none;
 			border-left: none;
 			border-top: 1px solid #1e2433;
+		}
+	}
+	/* 폰(≤640) — 모달을 화면 꽉 채움(거터 0). 카드 위 / 캡션 아래 한 흐름으로 스크롤.
+	   100dvh = iOS Safari 주소창 가변 높이 잘림 방지(미지원 시 위 820 블록 max-height:92vh 폴백). */
+	@media (max-width: 640px) {
+		.post {
+			padding: 0;
+			background: #050811;
+			backdrop-filter: none;
+		}
+		.postInner {
+			width: 100vw;
+			max-width: 100vw;
+			height: 100dvh;
+			max-height: 100dvh;
+			border: 0;
+			border-radius: 0;
+		}
+		.postLeft {
+			aspect-ratio: 1080 / 1350;
+		}
+		.prScroll {
+			padding: 16px 14px 28px;
+		}
+		.prHead {
+			padding: 12px 14px;
+		}
+		/* 닫기 = 우상단 고정, 터치 38px, 캐러셀 badge(z3) 위로 떠야 충돌 안 함 → z5 */
+		.postClose {
+			top: calc(8px + env(safe-area-inset-top, 0px));
+			right: 12px;
+			width: 38px;
+			height: 38px;
+			z-index: 5;
 		}
 	}
 </style>
