@@ -261,6 +261,9 @@ function fakeMacro(): MacroPort {
 				{ d: '20260602', v: 1355 }
 			];
 		},
+		async getSeriesRaw(id) {
+			return id === 'USDKRW' ? [{ d: '20260601', v: 1350 }, { d: '20260602', v: 1355 }] : null;
+		},
 		async getLatest() {
 			return [{ def, v: 1355, d: '20260602', chg: 5, spark: [1350, 1355] }];
 		},
@@ -320,9 +323,6 @@ function fakeMacro(): MacroPort {
 				sourceRefs: ['dartlab://macro/transmission'],
 				missing: []
 			};
-		},
-		async getSim() {
-			return null; // fake — 시뮬 JSON 미배선(피처게이트 null)
 		}
 	};
 }

@@ -12,6 +12,7 @@
 	import MacroRegimePanel from './MacroRegimePanel.svelte'; // 거시 국면 글랜스 — 좌측 최상단(깔때기 꼭대기)
 	import MacroRegimeDialog from './MacroRegimeDialog.svelte'; // 거시 국면 상세 — 판정·모델·고밀도 지표차트
 	import { buildMacroGlanceView, buildRegimeView } from '../lib/macroLens'; // 국면 view-model (macro.json 라이브)
+	import { computeMacroSim } from '../lib/macroSimCompute'; // 거시 전망 BVAR — 브라우저 런타임 계산(별도 배선·발행 0)
 	import { watchlist } from '../lib/watchlist.svelte'; // 워치 카운트 — 하단 탭 라벨 배지
 	import { finTypeOf, displayPair } from '../lib/finType'; // 재무 유형 라벨 SSOT (기준=data/finType.ts 한 곳)
 	import { chgClass, sign, sparkPts } from '../ui/helpers';
@@ -40,6 +41,9 @@
 	const macroGlance = $derived(buildMacroGlanceView(macro, macroTailwinds, { mode: 'compact' }));
 	const regimeView = $derived(buildRegimeView(macro, null));
 	let macroOpen = $state(false);
+	// 거시 전망 시뮬 — 런타임 BVAR(이미 로드된 raw observations). HF publish·별도 데이터 배선 0.
+	// getSeriesRaw = yoy 미적용 원시 index(Python 엔진과 동일 입력 → fan parity).
+	const loadSim = (m: 'KR' | 'US') => computeMacroSim(m, (id) => rt.macro.getSeriesRaw(id));
 
 	// scan 와 동일 universe: finance+prices 보유 회사 (eng 불변 → 1 회 산출 후 캐시)
 	const nodes = $derived(
@@ -183,4 +187,4 @@
 
 <ScreenerModal {eng} {lang} open={screenerOpen} onClose={() => (screenerOpen = false)} onPick={(c) => { onPick(c); screenerOpen = false; }} />
 {#if finLegendOpen}<FinTypeLegendDialog {lang} onClose={() => (finLegendOpen = false)} />{/if}
-{#if macroOpen && macro}<MacroRegimeDialog {macro} regime={macroGlance.regime} {regimeView} {lang} loadSeries={(id) => rt.macro.getSeries(id)} loadSim={(m) => rt.macro.getSim(m)} onClose={() => (macroOpen = false)} />{/if}
+{#if macroOpen && macro}<MacroRegimeDialog {macro} regime={macroGlance.regime} {regimeView} {lang} loadSeries={(id) => rt.macro.getSeries(id)} {loadSim} onClose={() => (macroOpen = false)} />{/if}

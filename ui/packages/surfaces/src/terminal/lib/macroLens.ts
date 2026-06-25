@@ -2752,7 +2752,7 @@ export function buildMacroEvidenceCards(
 
 // ───────────────────────── 거시 forward 시뮬 — BVAR 팬·IRF·국면경로 (MacroRegimeDialog 전망 섹션) ─────────────────────────
 // macro/sim/{market}.json (rt.macro.getSim) → 뷰모델. 팬 = 과거 실적(실선) + 미래 p50/p5/p95(밴드) FinCard.
-// 결정론: JSON 이 seed 고정 precompute 라 렌더 순수. fail-closed: status≠'ok'·regimePath.status 면 표시 보류.
+// 결정론: 해석적 BVAR(난수 0)이라 같은 데이터 같은 화면. fail-closed: status≠'ok'·regimePath.status 면 표시 보류.
 
 export interface MacroSimRegimePathView {
 	forward: { h: number; p: number }[];
@@ -2773,7 +2773,7 @@ export interface MacroSimView {
 	fanCards: FinCard[];
 	regimePath: MacroSimRegimePathView | null;
 	irf: MacroSimIrfView | null;
-	honesty: { sampleN: number | null; seed: number; calibrated: boolean; note: string };
+	honesty: { sampleN: number | null; calibrated: boolean; note: string };
 }
 
 // asOf('YYYY-MM') 기준 back 개월 과거 + fwd 개월 미래 월축 라벨('YY.MM'). asOf 는 마지막 실적월.
@@ -2807,7 +2807,7 @@ const SIM_COLORS = { hist: '#7d8ea0', mid: '#5b9bf0', band: '#9ec5f5' };
 
 /** macro/sim 파일 → 전망 시뮬 뷰. status≠'ok' 또는 fan 비면 holdback(섹션 미렌더). */
 export function buildMacroSimView(sim: MacroSimFile | null, lang: Lang): MacroSimView {
-	const empty: MacroSimView = { status: 'holdback', asOf: sim?.asOf ?? '', horizon: sim?.horizon ?? 0, periods: [], fanCards: [], regimePath: null, irf: null, honesty: { sampleN: null, seed: sim?.seed ?? 0, calibrated: false, note: '' } };
+	const empty: MacroSimView = { status: 'holdback', asOf: sim?.asOf ?? '', horizon: sim?.horizon ?? 0, periods: [], fanCards: [], regimePath: null, irf: null, honesty: { sampleN: null, calibrated: false, note: '' } };
 	if (!sim || sim.status !== 'ok' || !sim.fan || !Object.keys(sim.fan).length) return empty;
 
 	const horizon = sim.horizon || 12;
@@ -2853,6 +2853,6 @@ export function buildMacroSimView(sim: MacroSimFile | null, lang: Lang): MacroSi
 		: null;
 
 	const nObs = typeof sim.model?.nObs === 'number' ? sim.model.nObs : null;
-	const note = T(`표본 ${nObs ?? '?'}개월 · seed ${sim.seed} · BVAR · 추정 ${sim.asOf} · scenario≠forecast`, `N=${nObs ?? '?'} · seed ${sim.seed} · BVAR · as of ${sim.asOf} · scenario≠forecast`);
-	return { status: 'ok', asOf: sim.asOf, horizon, periods, fanCards, regimePath, irf, honesty: { sampleN: nObs, seed: sim.seed, calibrated: false, note } };
+	const note = T(`표본 ${nObs ?? '?'}개월 · BVAR(해석적) · 추정 ${sim.asOf} · 런타임 계산 · scenario≠forecast`, `N=${nObs ?? '?'} · BVAR(analytic) · as of ${sim.asOf} · runtime · scenario≠forecast`);
+	return { status: 'ok', asOf: sim.asOf, horizon, periods, fanCards, regimePath, irf, honesty: { sampleN: nObs, calibrated: false, note } };
 }

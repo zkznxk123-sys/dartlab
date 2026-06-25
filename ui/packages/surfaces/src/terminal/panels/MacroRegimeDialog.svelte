@@ -262,9 +262,9 @@
 				</div>
 				<div class="mrSimNote">{simView.honesty.note}</div>
 			{:else if simLoading}
-				<div class="mrLoading"><span class="mrSpinner"></span>{T('전망 시뮬 불러오는 중', 'loading outlook simulation')}</div>
+				<div class="mrLoading"><span class="mrSpinner"></span>{T('전망 시뮬 계산 중 (런타임 BVAR)', 'computing outlook (runtime BVAR)')}</div>
 			{:else}
-				<div class="mrEmpty">{T('전망 시뮬 표시 보류 — 빌드 publish 후 표시', 'outlook simulation pending — shown after build publishes')}</div>
+				<div class="mrEmpty">{T('전망 시뮬 표시 보류 — 표본 부족 또는 불안정', 'outlook pending — insufficient sample or unstable')}</div>
 			{/if}
 		{/if}
 

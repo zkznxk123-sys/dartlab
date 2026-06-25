@@ -184,12 +184,11 @@ export interface MacroSimRegimePath {
 	converged?: boolean;
 }
 
-/** 거시 시뮬 산출 파일 — macro/sim/{kr,us}.json (runMacroSim 빌드). */
+/** 거시 시뮬 산출 — 런타임 BVAR(computeMacroSim) 또는 Python toPayload 동형. 해석적·결정론. */
 export interface MacroSimFile {
 	market: string;
 	status: string;
 	asOf: string;
-	seed: number;
 	horizon: number;
 	model: Record<string, unknown>;
 	fan: Record<string, MacroSimFanVar>;
@@ -199,12 +198,18 @@ export interface MacroSimFile {
 	missing: { id: string; status: string; reason: string }[];
 }
 
+// ⛔ 거시 forward 시뮬은 MacroPort(HF 데이터 포트)에 두지 않는다 — 별도 데이터 배선/아티팩트
+// 금지. 런타임 pyodide 가 `dartlab.macro('시뮬레이션')` 직접 실행, 결과(MacroSimFile)는 landing
+// 셸이 loadMacroSim 콜백으로 터미널에 주입(onOpenCards 패턴). 타입(MacroSimFile)만 계약 유지.
 export interface MacroPort {
 	/** 화이트리스트 시리즈 정의 (출처 attribution 포함 메타). */
 	listSeries(): Promise<MacroSeriesDef[]>;
 	getSeries(id: string): Promise<MacroPoint[] | null>;
+	/** 원시 시리즈(yoy 미적용·저장 index 그대로) — 거시 시뮬 BVAR 등 원본 필요 시. 같은 parquet. */
+	getSeriesRaw(id: string): Promise<MacroPoint[] | null>;
 	getLatest(): Promise<MacroLatest[]>;
 	getTransmission(query?: MacroTransmissionQuery): Promise<MacroTransmissionResult | null>;
-	/** 거시 forward 시뮬(BVAR 팬+IRF+국면경로). macro/sim/{market}.json. 미배선/실패 null. */
-	getSim(market: 'KR' | 'US'): Promise<MacroSimFile | null>;
 }
+
+/** 거시 시뮬 런타임 실행 콜백 — landing pyodide 가 구현, 터미널에 주입. null=미배선/실패. */
+export type MacroSimRunner = (market: 'KR' | 'US') => Promise<MacroSimFile | null>;

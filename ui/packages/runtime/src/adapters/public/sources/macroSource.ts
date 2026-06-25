@@ -2,8 +2,8 @@
 // (seriesId, date, value) 가 seriesId+date 정렬이라 seriesId 필터로 row-group pruning.
 // 차트 오버레이(ECON)·KPI 티커가 공유하는 단일 로더. 전체 파일 1.5MB 이하 — 시리즈당 첫 로드 수백 ms.
 // 화이트리스트·출처표시 정본은 contracts (MACRO_SERIES·MACRO_ATTRIBUTION).
-import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort, type MacroSimFile, type MacroTransmissionEdge, type MacroTransmissionQuery, type MacroTransmissionResult } from '@dartlab/ui-contracts';
-import { loadHfJson, loadJson } from '../../../data/dartlabData';
+import { MACRO_SERIES, type MacroLatest, type MacroPoint, type MacroPort, type MacroTransmissionEdge, type MacroTransmissionQuery, type MacroTransmissionResult } from '@dartlab/ui-contracts';
+import { loadJson } from '../../../data/dartlabData';
 import { moduleFallbackCore, type DataCore } from '../../../data/fetch/request';
 
 const browser = typeof window !== 'undefined';
@@ -56,6 +56,7 @@ async function loadSource(core: DataCore, src: 'fred' | 'ecos'): Promise<Map<str
 	for (const r of rows) {
 		const id = r.seriesId == null ? '' : String(r.seriesId);
 		const d = toYmd(r.date);
+		if (r.value == null) continue; // null 관측 skip (Number(null)=0 오변환 차단 — Python drop_nulls 정합)
 		const v = Number(r.value);
 		if (!id || d.length !== 8 || !Number.isFinite(v)) continue;
 		let arr = bySeries.get(id);
@@ -87,6 +88,17 @@ export async function loadMacroSeries(id: string, core?: DataCore): Promise<Macr
 	const bySeries = await loadSource(macroCore(core), def.src);
 	let pts = bySeries.get(id) ?? [];
 	if (def.yoy) pts = toYoy(pts);
+	return pts.length ? pts : null;
+}
+
+/** 시리즈 *원시* 이력 (yoy 미적용 — 저장된 index/level 그대로). 거시 시뮬 BVAR 입력처럼 원본이 필요할 때.
+ *  같은 observations.parquet(getSeries 와 동일 데이터·캐시) — 별도 데이터 배선 아님, yoy 뷰변환만 생략. */
+export async function loadMacroSeriesRaw(id: string, core?: DataCore): Promise<MacroPoint[] | null> {
+	if (!browser) return null;
+	const def = defById.get(id);
+	if (!def) return null;
+	const bySeries = await loadSource(macroCore(core), def.src);
+	const pts = bySeries.get(id) ?? [];
 	return pts.length ? pts : null;
 }
 
@@ -175,15 +187,9 @@ async function loadMacroTransmission(query: MacroTransmissionQuery = {}): Promis
 	return payload ? filterTransmission(payload, query) : null;
 }
 
-/** 거시 forward 시뮬 — macro/sim/{market}.json (HF dataset 직독, runMacroSim 빌드). null = 미배선/실패.
- *  빌드 publish 전엔 null → UI 피처게이트(섹션 미렌더). dev=퍼블릭 기준이라 HF 직독으로 동일. */
-export async function loadMacroSim(market: 'KR' | 'US'): Promise<MacroSimFile | null> {
-	if (!browser) return null;
-	return loadHfJson<MacroSimFile>(`macro/sim/${market.toLowerCase()}.json`, { fetchFn: fetch, required: false });
-}
-
 /** HF 공개 데이터 기반 MacroPort — 거시 시계열은 회사·앱 무관이라 local 셸도 본 포트를 명시적으로 재사용한다.
- *  core 는 어댑터(createXRuntime)가 주입(전역 싱글턴 금지). 미주입(ui/web 레거시 직접 호출)은 모듈 폴백 코어. */
+ *  core 는 어댑터(createXRuntime)가 주입(전역 싱글턴 금지). 미주입(ui/web 레거시 직접 호출)은 모듈 폴백 코어.
+ *  ⛔ 거시 시뮬은 본 포트에 없음 — 런타임 pyodide(landing) 가 직접 실행, 별도 데이터 배선 금지. */
 export function createHfMacroPort(core?: DataCore): MacroPort {
 	const c = macroCore(core);
 	return {
@@ -191,8 +197,8 @@ export function createHfMacroPort(core?: DataCore): MacroPort {
 			return MACRO_SERIES;
 		},
 		getSeries: (id) => loadMacroSeries(id, c),
+		getSeriesRaw: (id) => loadMacroSeriesRaw(id, c),
 		getLatest: () => loadMacroLatest(c),
-		getTransmission: (query) => loadMacroTransmission(query),
-		getSim: (market) => loadMacroSim(market)
+		getTransmission: (query) => loadMacroTransmission(query)
 	};
 }
