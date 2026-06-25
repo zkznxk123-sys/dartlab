@@ -72,14 +72,18 @@ routeLoad: KR aggregate + US 동형 엔트리 병합(1곳) → raw → createEng
 - **P2 병합·발행·검증**: routeLoad 병합 + HF/CI 발행. **dev 5173 AAPL 검색→열림→USD 정상** 눈검수(시각).
 - **P3 확장**: panel/filings(edgar/panel 있음)·scan(edgar/scan)·map·eco US.
 
-## 6. 미결정 (운영자 판단 필요)
+## 6. 주가 소스 — 확정: 무료 Yahoo spark 배치 (비용 결정 불필요)
 
-**주가 bulk 소스** — 헤드리스 무료 없음:
-- (A) Yahoo 일배치 cron(gather 기존, 페이싱+백오프) — 무료·느림(6437≈수시간, GHA 6h 한계 내).
-- (B) 유료 API(EOD Historical/Polygon/FMP paid) — 빠름·키+비용.
-- (C) 범위 축소(S&P500 등 우선) + 점진 확대.
+US 정부 오픈 주가 데이터는 **없다**(EDGAR=공시만, 주가=거래소 상업데이터·Stooq bulk=401/PoW·FMP free=250/day).
+그러나 **429 는 per-ticker 호출 탓**이었고, Yahoo **멀티심볼 spark** 가 해법:
+- `query1.finance.yahoo.com/v7/finance/spark?symbols=A,B,…&range=1y&interval=1d` — **무인증, 한 요청 ~20 티커**
+  1년 일별 종가. (v7/quote 는 Unauthorized, spark 는 열림 — 실측.)
+- 6437 개 = **~322 배치 요청 ≈ 수분** → 일배치 cron(GHA) 충분. **무료·비용 0.**
+- 산출: currentPrice=최신종가, return1m/3m/1y·volatility1y=종가 계산, 52w hi/lo=종가 근사(거래량은 spark 부재 → null·minor).
+  **marketCap = currentPrice × shares(EDGAR dei `EntityCommonStockSharesOutstanding`)** — KR 무관 자급.
+- 신규 gather 도메인(`yahooSpark` 배치) 또는 prebuild 온라인 스텝. 페이싱+백오프 가드.
 
-권장: 우선 (A) 무료로 도달 증명 → 필요 시 (B). **단 운영자 비용 결정이라 확정 전 P1③ 보류.**
+→ **블로커 해소.** P1③ 진행 가능.
 
 ## 7. 검증 게이트
 - vitest `engineUsReach`(도달 계약, 통과중) 유지.
