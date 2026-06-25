@@ -17,7 +17,9 @@ import type {
 	ScanPort,
 	ViewerPort
 } from '@dartlab/ui-contracts';
+import { resolveMarket } from '@dartlab/ui-contracts';
 import { loadGovCandles, loadGovRecent } from './sources/govPriceSource';
+import { loadEdgarCandles } from './sources/edgarPriceSource';
 import { loadNaverFresh } from './sources/naverPriceSource';
 import { loadInitialOHLCV, loadOlderYear, loadedCandles, mergeDedup, seedCandles } from './sources/priceSource';
 import { createPublicIndexPort } from './sources/indexSource';
@@ -81,15 +83,22 @@ export function publicPricePort(core?: DataCore): PricePort {
 		// 이기고 네이버는 gap(미발행일)만 채움 — gov=네이버 동일값이라 점프 없음. 둘 다 미스면 date/ 폴백.
 		// dev 미스는 /__gov 라이브 채움, 네이버 fresh 는 /__naver(dev)·CF 프록시(프로덕션) 경로.
 		async initial(code, year) {
+			// US(EDGAR) = 회사별 OHLCV 통파일 전체이력 1발 seed (Yahoo bake, edgar/prices/company). KRX 연도샤드·gov·네이버 경로 무관.
+			const m = resolveMarket(code);
+			if (m.market === 'US' && m.ticker) {
+				const us = await loadEdgarCandles(m.ticker, core);
+				return us && us.length ? seedCandles(code, us) : null;
+			}
 			const c = code.trim();
 			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c, core), loadGovRecent(core), loadNaverFresh(c, core)]);
 			const tail = recent?.[c] ?? [];
 			if ((gov && gov.length) || tail.length || fresh.length) return seedCandles(c, mergeDedup(gov ?? [], tail, fresh));
 			return loadInitialOHLCV(c, year, core);
 		},
-		older: (code, targetYear) => loadOlderYear(code, targetYear, core),
-		loaded: loadedCandles,
-		govCandles: (code) => loadGovCandles(code, core),
+		// US 는 initial 이 통파일 전체이력을 이미 seed — 좌측 팬 추가 백필 없음([]). KR 만 gov/prices/date 연도샤드 prepend.
+		older: (code, targetYear) => (resolveMarket(code).market === 'US' ? Promise.resolve([]) : loadOlderYear(code, targetYear, core)),
+		loaded: loadedCandles, // code-keyed 캐시 공유 — US ticker ∩ KR 6자리코드 모양 무충돌
+		govCandles: (code) => (resolveMarket(code).market === 'US' ? Promise.resolve(null) : loadGovCandles(code, core)), // gov(공공누리) = KR 전용
 		govRecent: () => loadGovRecent(core)
 	};
 }
