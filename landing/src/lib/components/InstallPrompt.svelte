@@ -127,7 +127,9 @@
 		display: flex;
 		align-items: center;
 		gap: 11px;
-		max-width: min(440px, calc(100vw - 24px));
+		/* 명시 width — 없으면 fixed+flex 가 콘텐츠 최소폭으로 쪼그라들고, 전역 overflow-wrap:anywhere 가
+		   글자단위로 끊어 세로로 깨진다. 고정폭 + 아래 텍스트 keep-all 로 정상 줄바꿈. */
+		width: min(380px, calc(100vw - 24px));
 		padding: 10px 12px;
 		border-radius: 14px;
 		background: rgba(13, 17, 25, 0.96);
@@ -155,13 +157,18 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1px;
+		flex: 1 1 auto;
 		min-width: 0;
-		line-height: 1.25;
+		line-height: 1.3;
+		/* 전역 overflow-wrap:anywhere 해제 — 한글 어절 단위(keep-all)로만 줄바꿈(글자단위 깨짐 차단). */
+		overflow-wrap: normal;
+		word-break: keep-all;
 	}
 	.ipText b {
 		font-size: 13px;
 		font-weight: 700;
 		color: #f5f8fc;
+		white-space: nowrap;
 	}
 	.ipText span {
 		display: inline-flex;
