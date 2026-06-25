@@ -316,8 +316,9 @@
 		notesState = 'loading';
 		let cancelled = false;
 		// Promise.resolve().then 으로 감싸 동기 throw 도 rejection 으로(effect throw 로 RightStack 깨짐 방지).
-		// panel tail-prune read 라 가벼움 — 타임아웃 15s 여유.
-		withTimeout(Promise.resolve().then(() => rt.report.noteSeries(code)), 15_000).then(
+		// panel row-group 재청크 전엔 contentRaw 단일 청크(13~16MB) 통째 다운로드라 콜드 read 가 무겁다 —
+		// 타임아웃 25s(재청크 후엔 tail-prune 으로 ~3MB → 수 초). 콜드 single-group 에서 버튼 사라짐 방지.
+		withTimeout(Promise.resolve().then(() => rt.report.noteSeries(code)), 25_000).then(
 			(b) => {
 				if (cancelled) return;
 				noteBundle = b;
@@ -711,10 +712,19 @@
 	</Panel>
 {/if}
 
-<!-- 주석 상세 다이얼로그 (lazy) -->
+<!-- 주석 상세 다이얼로그 (lazy) — import/마운트 실패는 {:catch} 로 가시화(과거 catch 부재 시 무표시=안 뜬 것처럼 보임). -->
 {#if dashOpen}
-	{#await import('./NotesDashboardDialog.svelte') then { default: NotesDashboardDialog }}
+	{#await import('./NotesDashboardDialog.svelte')}
+		<!-- 청크 로딩 중 — 무표시(즉시 도착) -->
+	{:then { default: NotesDashboardDialog }}
 		<NotesDashboardDialog {co} {lang} cost={noteBundle?.cost ?? null} segment={noteBundle?.segment ?? null} onClose={() => (dashOpen = false)} />
+	{:catch err}
+		<div class="scrimWrap" role="presentation" onclick={() => (dashOpen = false)}>
+			<div class="scrModal" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
+				<div class="scrHead"><span class="scrTitle">{lang === 'en' ? 'NOTES' : '주석'}</span><button class="scrClose" onclick={() => (dashOpen = false)} aria-label="close">✕</button></div>
+				<div class="ndBody"><div class="storyEmpty">{lang === 'en' ? 'failed to open detail' : '상세 열기 실패'} — {String((err as Error)?.message ?? err)}</div></div>
+			</div>
+		</div>
 	{/await}
 {/if}
 
@@ -746,8 +756,7 @@
 
 <div class="rowSplit">
 	<!-- CREDIT -->
-	<Panel {lang} className="eCredit" prov="derived" title={{ kr: 'dartlab 신용 스코어', en: 'dartlab CREDIT' }} sub={{ kr: '비공식', en: 'unofficial' }} flush>
-		{#snippet right()}<span class="dim">{lang === 'en' ? '5-feature' : '5피처'}</span>{/snippet}
+	<Panel {lang} className="eCredit" prov="derived" title={{ kr: '신용분석', en: 'CREDIT' }} sub={{ kr: '비공식', en: 'unofficial' }} flush>
 		<div class="creditTop"><div class="creditGrade"><span class="cgVal tCredit">{cr.grade}</span><span class="cgSub">{lang === 'en' ? 'health' : '건전도'} <b class={toneClass(cr.tone)}>{cr.healthScore}</b>/100 · PD <b class="tNeu">{cr.pd}</b></span></div></div>
 		<div class="creditTracks">{#each cr.tracks as t (t.en)}<div class="ctRow"><span class="ctName">{txc(t, lang)}</span><div class="ctTrack"><div class="ctFill" style={`width:${t.score}%`}></div></div><span class="ctVal mono">{t.score}</span></div>{/each}</div>
 		<div class="creditDiv">{lang === 'en' ? `Debt ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, current ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. Heuristic dCR — not official.` : `부채비율 ${cr.basis.debtRatio != null ? cr.basis.debtRatio.toFixed(0) + '%' : '—'}, 유동비율 ${cr.basis.curr != null ? cr.basis.curr + '%' : '—'}. 휴리스틱 dCR — 공식등급 아님.`}</div>
