@@ -316,10 +316,12 @@
 		.prHead {
 			padding: 12px 14px;
 		}
-		/* 닫기 = 우상단 고정, 터치 38px, 캐러셀 badge(z3) 위로 떠야 충돌 안 함 → z5 */
+		/* 닫기 = 폰 풀스크린에선 좌상단(우상단 회사 badge·우하단 page badge 와 충돌 회피, 좌상단은 enlarge 미사용으로 빔).
+		   터치 38px, z5 로 캐러셀 크롬 위. */
 		.postClose {
 			top: calc(8px + env(safe-area-inset-top, 0px));
-			right: 12px;
+			left: 12px;
+			right: auto;
 			width: 38px;
 			height: 38px;
 			z-index: 5;
