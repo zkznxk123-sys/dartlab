@@ -17,7 +17,7 @@
 	import FinFullscreen from './FinFullscreen.svelte';
 	import GradeExplainDialog from './GradeExplainDialog.svelte';
 	import { tx, txc, chgClass, sign, fmtNum, sparkPts as kpiSpark } from '../ui/helpers';
-	import { fmtKRW } from '../lib/engine';
+	import { fmtKRW, fmtMoney } from '../lib/engine';
 	import { requestViewer } from '../lib/viewerEntry.svelte'; // 공시뷰어 전체화면 — 우측 ViewerOverlay 열기 신호
 	import { finFullEntry } from '../lib/finFullEntry.svelte'; // 우측 레일 도시에 섹션 상세보기 → 재무 전체화면 특정 탭(people·shareholder) 열기 신호
 	import { classifyFiling } from '../lib/eventRail'; // 비정기 공시 원문명 → DART 공시그룹 근사 분류(이벤트 레일 필터)
@@ -240,7 +240,7 @@
 	const dispRet3m = $derived(candleRet(66) ?? p.ret3m);
 	const dispRet1y = $derived(candleRet(252) ?? p.ret1y);
 	const dispAsOf = $derived(lastCandle ? `${lastCandle.t.slice(0, 4)}-${lastCandle.t.slice(4, 6)}-${lastCandle.t.slice(6, 8)}` : p.asOf);
-	const dispMktcap = $derived(lastCandle && p.last && p.mktcapRaw != null ? fmtKRW(p.mktcapRaw * (lastCandle.c / p.last)) : p.mktcap);
+	const dispMktcap = $derived(lastCandle && p.last && p.mktcapRaw != null ? fmtMoney(p.mktcapRaw * (lastCandle.c / p.last), co.currency) : p.mktcap);
 	const stats = $derived([
 		{ l: '1M', v: dispRet1m == null ? '—' : sign(dispRet1m, 1) + '%', t: chgClass(dispRet1m) },
 		{ l: '3M', v: dispRet3m == null ? '—' : sign(dispRet3m, 1) + '%', t: chgClass(dispRet3m) },
@@ -566,7 +566,7 @@
 <!-- 재무제표 분석 — dart/finance parquet 분기 TTM, 밀집 small-multiples.
      ui/web analysis.financial 의 핵심 카드 체계를 한 화면에 빽빽하게. -->
 <Panel {lang} className="eAnalysis" prov="real" title={{ kr: '재무제표 분석', en: 'FINANCIALS' }}
-	sub={finData ? { kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기 · 조 KRW', en: finMode + ' · ' + finData.periods.length + 'p' } : { kr: 'dart/finance', en: 'dart/finance' }} flush>
+	sub={finData ? { kr: finModeLabel[finMode] + ' · ' + finData.periods.length + '기 · ' + (co.currency === 'USD' ? 'USD' : '조 KRW'), en: finMode + ' · ' + finData.periods.length + 'p · ' + (co.currency === 'USD' ? 'USD' : 'KRW') } : { kr: co.currency === 'USD' ? 'edgar/financeStmt' : 'dart/finance', en: co.currency === 'USD' ? 'edgar/financeStmt' : 'dart/finance' }} flush>
 	{#snippet right()}
 		{#if finBundle && finBundle.availScopes.length > 1}
 			<span class="segGroup mini">{#each finBundle.availScopes as s (s)}<button class={finBundle.scope === s ? 'seg on' : 'seg'} onclick={() => (finScope = s)} title={s === 'CFS' ? (lang === 'en' ? 'consolidated' : '연결재무제표') : (lang === 'en' ? 'separate' : '별도재무제표')}>{finScopeLabel(s)}</button>{/each}</span>
