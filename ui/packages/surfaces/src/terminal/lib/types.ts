@@ -543,6 +543,8 @@ export interface Financials {
 }
 export interface Company {
 	code: string;
+	/** 표시 통화 — KR='KRW'(조/억), US(EDGAR)='USD'($T/$B). buildCompany 가 finance 엔트리 currency 태그에서 채움. 기본 KRW(무회귀). */
+	currency: string;
 	marketLabel: string;
 	name: Bilingual;
 	sector: Bilingual;

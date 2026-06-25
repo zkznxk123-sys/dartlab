@@ -195,12 +195,38 @@ function gradeScore(scaleKey: string, val?: string): Num {
 	return 1 - i / (sc.length - 1);
 }
 
-export function fmtKRW(v: Num): string {
+// 통화별 raw 금액(원/USD) 포맷 — 시총·장부가 등. KRW=조/억, USD=$T/$B/$M. 통화 인식 SSOT.
+// 재무 시리즈(이미 조 단위로 ÷1e12 된 값)는 fmtMoneyTril 을 쓴다(별 컨벤션).
+export function fmtMoney(v: Num, currency = 'KRW'): string {
 	if (v == null) return '—';
+	if (currency === 'USD') {
+		const a = Math.abs(v);
+		if (a >= 1e12) return '$' + (v / 1e12).toLocaleString('en-US', { maximumFractionDigits: 2 }) + 'T';
+		if (a >= 1e9) return '$' + (v / 1e9).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'B';
+		if (a >= 1e6) return '$' + (v / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M';
+		return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 });
+	}
 	// 천단위 콤마 — 조/억 환산값도 콤마 적용(타법인 출자 장부가·시총 등 큰 금액 가독성).
 	if (v >= 1e12) return (v / 1e12).toLocaleString('en-US', { maximumFractionDigits: 1 }) + '조';
 	if (v >= 1e8) return Math.round(v / 1e8).toLocaleString('en-US') + '억';
 	return v.toLocaleString('en-US');
+}
+
+// 이미 조(兆) 단위로 환산된 재무 시리즈 값(예 0.4162=$416B·300=300조) 포맷 — fmtMoney(raw)와 컨벤션 다름.
+// KRW: v+'조'. USD: v≥1 → $vT, 아니면 $(v*1000)B (조달러→억/십억달러).
+export function fmtMoneyTril(v: Num, currency = 'KRW'): string {
+	if (v == null) return '—';
+	if (currency === 'USD') {
+		const a = Math.abs(v);
+		if (a >= 1) return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 2 }) + 'T';
+		if (a >= 0.001) return '$' + (v * 1000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'B';
+		return '$' + (v * 1e6).toLocaleString('en-US', { maximumFractionDigits: 0 }) + 'M';
+	}
+	return v.toLocaleString('en-US', { maximumFractionDigits: 2 }) + '조';
+}
+
+export function fmtKRW(v: Num): string {
+	return fmtMoney(v, 'KRW');
 }
 
 export interface Engine {
@@ -680,6 +706,8 @@ export function createEngine(raw: RawData): Engine {
 		const industry = idx ? idx.industry : 'misc';
 		const last = px.currentPrice;
 		const mktcapKRW = px.marketCap;
+		// 표시 통화 — finance 엔트리 currency 태그(US=USD). 기본 KRW(KR 무회귀).
+		const currency = (fin as { currency?: string }).currency ?? 'KRW';
 
 		const net = lastNonNull(fin.is.net);
 		const sales = lastNonNull(fin.is.sales);
@@ -832,6 +860,7 @@ export function createEngine(raw: RawData): Engine {
 
 		const co: Company = {
 			code,
+			currency,
 			marketLabel,
 			name: { kr: name, en: name },
 			sector: { kr: eco.industryName || SECTOR_KR[industry] || industry, en: SECTOR_EN[industry] || industry },
@@ -844,7 +873,7 @@ export function createEngine(raw: RawData): Engine {
 			changes,
 			price: {
 				last,
-				mktcap: fmtKRW(mktcapKRW),
+				mktcap: fmtMoney(mktcapKRW, currency),
 				mktcapRaw: mktcapKRW,
 				ret1m: px.return1m, ret3m: px.return3m, ret1y: px.return1y,
 				vol1y: px.volatility1y, hi52: px.week52High, lo52: px.week52Low, vol: px.volumeAvg30d,
