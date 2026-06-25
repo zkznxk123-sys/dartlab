@@ -103,6 +103,15 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "SEC EDGAR 분기 벌크 메타 (sub/pre/tag)",
         "public": True,
     },
+    "edgarPriceCompany": {
+        # 터미널 주가 그래프 artifact — 회사별 일별 OHLCV 전체이력(Yahoo v8 ~10년 bake). 브라우저
+        # 터미널 PriceChart 가 rt.price US 브랜치(edgarPriceSource)로 직독. KR krxPriceCompany·gov/prices/company
+        # 와 동형(회사당 flat). date=Utf8 'YYYYMMDD'(Candle.t 규약)·close=Yahoo adjclose. raw companyfacts·
+        # financeStmt 와 별개 축(주가는 공시 아님). flat: data/edgar/prices/company/{ticker}.parquet.
+        "dir": "edgar/prices/company",
+        "label": "SEC 유니버스 회사별 일별 OHLCV (터미널 주가 그래프 artifact, Yahoo bake, 회사당 flat)",
+        "public": True,
+    },
     "edgarTickers": {
         # ticker↔CIK 맵 — 퍼블릭 브라우저 식별자 해소(finance=cik·panel=ticker 이중키).
         # 엔진은 로컬 flat data/edgar/tickers.parquet 직독, 브라우저는 HF edgar/tickers/tickers.parquet
