@@ -10,19 +10,23 @@ export interface SimVarSpec {
 	label: string;
 	transform: 'level' | 'logdiff100';
 }
+// 6변수 (Python _MARKET_SPECS mirror). 신용축 = BAA10Y(Baa−10Y 스프레드, 1986~). HY 는
+// ICE BofA 라이선스로 FRED 가 2023-06~ 만 제공 → 백필 불가라 정통 신용스프레드로 편입.
 const US_SPECS: SimVarSpec[] = [
 	{ id: 'INDPRO', label: '산업생산', transform: 'logdiff100' },
 	{ id: 'CPIAUCSL', label: '소비자물가', transform: 'logdiff100' },
 	{ id: 'DCOILWTICO', label: '원유', transform: 'logdiff100' },
 	{ id: 'FEDFUNDS', label: '정책금리', transform: 'level' },
-	{ id: 'DGS10', label: '10년금리', transform: 'level' }
+	{ id: 'DGS10', label: '10년금리', transform: 'level' },
+	{ id: 'BAA10Y', label: '신용스프레드', transform: 'level' }
 ];
 const KR_SPECS: SimVarSpec[] = [
 	{ id: 'IPI', label: '산업생산', transform: 'logdiff100' },
 	{ id: 'CPI', label: '소비자물가', transform: 'logdiff100' },
 	{ id: 'DCOILWTICO', label: '원유', transform: 'logdiff100' },
 	{ id: 'BASE_RATE', label: '기준금리', transform: 'level' },
-	{ id: 'USDKRW', label: '원/달러', transform: 'logdiff100' }
+	{ id: 'USDKRW', label: '원/달러', transform: 'logdiff100' },
+	{ id: 'BAA10Y', label: '신용스프레드', transform: 'level' }
 ];
 const MARKET: Record<'KR' | 'US', { specs: SimVarSpec[]; policyIdx: number }> = {
 	US: { specs: US_SPECS, policyIdx: 3 },
