@@ -27,8 +27,9 @@ _BATCH_SIZE = 200
 def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
     """전종목 EDGAR finance → scan/finance.parquet.
 
-    각 CIK parquet에서 최신 연간 BS/IS/CF 주요 계정을 추출하여
-    하나의 wide DataFrame으로 합산한다.
+    각 CIK parquet에서 전 사업연도(sinceYear~)별 BS/IS/CF 주요 계정을 추출하여
+    회사-연도 1행씩 다년 패널 wide DataFrame으로 합산한다 (KR buildFinance 대칭).
+    옛 latestFy-only 는 단년 횡단면이라 finance.json 5Y 시계열을 못 줬다.
 
     Parameters
     ----------
@@ -55,8 +56,9 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
     True
 
     Capabilities:
-        - EDGAR raw CIK parquet 컬렉션 → 종목별 최신 연간 BS/IS/CF 주요 계정을 wide DataFrame
-          으로 합산. DART scan ``buildFinance`` 와 같은 정공법 (200 단위 배치 + 중간 파일 병합).
+        - EDGAR raw CIK parquet 컬렉션 → 종목별 전 사업연도 BS/IS/CF 주요 계정을 회사-연도 1행씩
+          다년 패널 wide DataFrame 으로 합산. DART scan ``buildFinance`` 와 같은 정공법 (다년 패널 +
+          200 단위 배치 + 중간 파일 병합).
         - SnakeId → XBRL primary tag 변환은 ``EdgarMapper.getTagsForSnakeIds()`` 가 자동.
 
     AIContext:
@@ -72,8 +74,8 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
         EDGAR Data Sync 직후 (별도 cron). DART prebuild 와 같은 일일 사이클.
 
     How:
-        edgar finance 디렉토리 종목별 parquet glob → 200 단위 배치 → 종목당 최신 연간 row +
-        주요 계정 select + wide pivot → 임시 청크 file write → 종료 시 single 파일 merge.
+        edgar finance 디렉토리 종목별 parquet glob → 200 단위 배치 → 종목당 전 fy 루프(회사-연도
+        1행) + standalone 연간 값 select + wide → 임시 청크 file write → 종료 시 single 파일 merge.
         gc 명시 호출로 RSS 가드.
 
     Requires:
@@ -187,47 +189,47 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
             if annual.is_empty():
                 continue
 
-            latestFy = annual["fy"].max()
-            latest = annual.filter(pl.col("fy") == latestFy)
-            entityName = latest["entityName"][0] if latest.height > 0 else ""
-
-            # 10-K 는 비교재무제표로 과거 2~3년 데이터를 같은 fy 라벨로 포함한다.
-            # 해당 fy 의 **standalone 연간 값만** 선택 — end date 가 fy 연도의 +/- 1 년
-            # 범위에 들고 연간(duration ≥ 300일) 또는 frame=CY{latestFy} 인 행.
-            latest = latest.with_columns((pl.col("end") - pl.col("start")).dt.total_days().alias("_dur"))
-            fyAnnual = latest.filter(
-                (pl.col("_dur").is_null() | (pl.col("_dur") > 300))
-                & (
-                    pl.col("end").dt.year().is_between(latestFy - 1, latestFy)
-                    | pl.col("frame").str.starts_with(f"CY{latestFy}")
-                )
-            )
-            if fyAnnual.is_empty():
-                continue
-
-            # snakeId 매핑 → 값 추출. end 가 최대인 값(해당 fy 결산일) 우선.
+            # 다년 패널 — 회사별 전 fy 1행씩 (KR buildFinance 대칭). 옛 latestFy-only 는 단년
+            # 횡단면이라 finance.json 5Y 를 못 줬다. 스크리너(횡단면 소비자)는 read 시 latest 슬라이스,
+            # corporate macro 는 전 연도(cycle) — KR dart/scan/finance 다년 패턴과 동형.
             # stockCode 는 ticker 우선 (AI/quant user-facing), universe 에 없으면 CIK fallback.
             ticker = cikToTicker.get(cik, cik)
-            record: dict = {
-                "stockCode": ticker,
-                "cik": cik,
-                "corpName": entityName,
-                "fy": int(latestFy),
-                "sic": sicMap.get(cik),
-                "sector": _sicToSector(sicMap.get(cik)),
-            }
-            usdRows = fyAnnual.filter(pl.col("unit").str.contains("(?i)USD"))
-            for snakeId in targetAccounts:
-                candidateTags = snakeIdToTags.get(snakeId, [])
-                if not candidateTags:
+            sicCode = sicMap.get(cik)
+            sector = _sicToSector(sicCode)
+            annual = annual.with_columns((pl.col("end") - pl.col("start")).dt.total_days().alias("_dur"))
+            for fyVal in sorted(annual["fy"].unique().to_list()):
+                fyRows = annual.filter(pl.col("fy") == fyVal)
+                entityName = fyRows["entityName"][0] if fyRows.height > 0 else ""
+                # 10-K 는 비교재무제표로 과거 2~3년 데이터를 같은 fy 라벨로 포함한다. 해당 fy 의
+                # **standalone 연간 값만** 선택 — end 가 fy 연도의 +/- 1 년 범위 + 연간(duration ≥ 300일)
+                # 또는 frame=CY{fyVal}. end DESC 로 그 fy 결산일 값 우선.
+                fyAnnual = fyRows.filter(
+                    (pl.col("_dur").is_null() | (pl.col("_dur") > 300))
+                    & (
+                        pl.col("end").dt.year().is_between(fyVal - 1, fyVal)
+                        | pl.col("frame").str.starts_with(f"CY{fyVal}")
+                    )
+                )
+                if fyAnnual.is_empty():
                     continue
-                tagRows = usdRows.filter(pl.col("tag").is_in(candidateTags))
-                if tagRows.height > 0:
-                    # end date DESC → 가장 최신 결산일 값 우선
-                    val = tagRows.sort(["end", "filed"], descending=[True, True])["val"][0]
-                    record[snakeId] = val
-
-            records.append(record)
+                record: dict = {
+                    "stockCode": ticker,
+                    "cik": cik,
+                    "corpName": entityName,
+                    "fy": int(fyVal),
+                    "sic": sicCode,
+                    "sector": sector,
+                }
+                usdRows = fyAnnual.filter(pl.col("unit").str.contains("(?i)USD"))
+                for snakeId in targetAccounts:
+                    candidateTags = snakeIdToTags.get(snakeId, [])
+                    if not candidateTags:
+                        continue
+                    tagRows = usdRows.filter(pl.col("tag").is_in(candidateTags))
+                    if tagRows.height > 0:
+                        val = tagRows.sort(["end", "filed"], descending=[True, True])["val"][0]
+                        record[snakeId] = val
+                records.append(record)
 
         except (pl.exceptions.ComputeError, OSError):
             continue
