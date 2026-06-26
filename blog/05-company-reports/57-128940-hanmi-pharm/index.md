@@ -40,7 +40,7 @@ carousel:
     sub: |-
       글로벌 라이선스 계약 4건이 반환됐다($54억 공중분해).
       그런데 2025년 영업이익 2,578억, 순이익 1,871억 — 둘 다 사상 최대.
-    image: hanmi-drug-capsules
+    image: cc0-capsules
   - layout: editorialBeat
     kicker: 9년간 4번
     line: |-
@@ -87,7 +87,7 @@ carousel:
       2025년 2,578억은 9년간 태운 R&D 2.5조가 일부 돌아온 것.
       MASH·비만 신약(HM15275)의 글로벌 계약이
       다음 방아쇠다.
-    image: hanmi-drug-capsules
+    image: cc0-capsules
 ---
 
 <script>

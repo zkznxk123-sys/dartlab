@@ -59,7 +59,7 @@ carousel:
     context: |-
       매출 80.3조에 영업이익은 흑자였다.
       여기까지만 보면 정상이다.
-    image: ess-containers
+    image: cc0-ev-charging
   - layout: editorialStat
     kicker: 그런데 당기순손실
     bigNumber: '−5.54'
@@ -67,7 +67,7 @@ carousel:
     context: |-
       영업이익 아래에서 무엇이
       부호를 통째로 뒤집었나.
-    image: battery-line
+    image: cc0-battery-cells
   - layout: editorialBeat
     kicker: 범인은 영업 아래 한 줄
     line: |-
@@ -77,7 +77,7 @@ carousel:
       Ford와 세운 약 11조 합작공장 BlueOval SK를
       접는 비용이 한꺼번에 손익으로 돌아왔다.
       (합작 해체는 외부 보도)
-    image: battery-line
+    image: cc0-ev-charging
   - layout: editorialStat
     kicker: 잉여현금흐름(FCF)
     bigNumber: '−3.37'
@@ -85,7 +85,7 @@ carousel:
     context: |-
       성장 투자는 계속되는데 현금은 빠져나갔다.
       Debt/EBITDA 19.8배.
-    image: ess-containers
+    image: cc0-ev-charging
   - layout: editorialBeat
     kicker: 그래서 봐야 할 것
     line: |-

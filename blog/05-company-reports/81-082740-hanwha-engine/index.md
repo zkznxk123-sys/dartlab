@@ -51,7 +51,7 @@ carousel:
     sub: |-
       그런데 지금 실적을 만든 건
       데이터센터가 아니다.
-    image: engine-room
+    image: cc0-power-generator
   - layout: editorialBeat
     kicker: 먼저, 진짜 실적
     line: |-
@@ -61,7 +61,7 @@ carousel:
       2021년 −6.6% → 2025년 +9.5%.
       매출도 0.60조 → 1.37조.
       선박엔진 턴어라운드가 만든 숫자다.
-    image: engine-room
+    image: cc0-power-generator
   - layout: editorialStat
     kicker: 수주잔고
     bigNumber: '4.11'
@@ -70,7 +70,7 @@ carousel:
       매출의 3배. 그중 선박엔진 97%,
       고부가 DF엔진 신규수주 88%.
       평균 18개월에 걸쳐 매출이 된다.
-    image: engine-room
+    image: cc0-power-generator
   - layout: editorialStat
     kicker: 순차입금
     bigNumber: '−1,928'
@@ -78,7 +78,7 @@ carousel:
     context: |-
       마이너스 — 순현금으로 돌아섰다.
       부채비율도 407%(2023) → 205%로 내려왔다.
-    image: datacenter-genset
+    image: cc0-cargo-ship
   - layout: editorialBeat
     kicker: 그리고 새 질문
     line: |-
@@ -88,7 +88,7 @@ carousel:
       HD현대중공업이 미국 데이터센터에
       684MW(6,271억) 발전설비를 공급하기로 했다(외부).
       한화엔진 직접 수주는 아직 미확인이다.
-    image: datacenter-genset
+    image: cc0-cargo-ship
   - layout: editorialBeat
     kicker: 그래서 봐야 할 것
     line: |-
@@ -97,7 +97,7 @@ carousel:
     sub: |-
       지금 기대가 깔려 있다. 재평가는 한화엔진 이름의
       발전엔진 수주가 찍히는 순간 시작된다.
-    image: engine-room
+    image: cc0-power-generator
 ---
 
 <script>
