@@ -52,7 +52,7 @@ carousel:
     sub: |-
       제조업·플랫폼·유통 어느 틀에 넣어도 이상하다.
       매출보다 영업이익이 6배 크다.
-    image: hero-equity-method
+    image: cc0-semiconductor
   - layout: editorialStat
     kicker: 영업이익률
     bigNumber: '623'
@@ -61,7 +61,7 @@ carousel:
       고마진 사업이라는 뜻이 아니다.
       SK하이닉스 지분법이익 8.93조가 영업이익에 들어온 회계 구조.
       매출과 이익의 출처가 다르다.
-    image: hero-equity-method
+    image: cc0-chip-fab
   - layout: editorialBeat
     kicker: 무엇을 팔아 8.8조?
     line: |-
@@ -71,7 +71,7 @@ carousel:
       SK하이닉스 20.07%를 들고 있어서다.
       하이닉스가 AI 메모리로 순이익 42.9조를 내자,
       그 몫이 SK스퀘어 장부에 9조로 찍혔다.
-    image: hero-equity-method
+    image: cc0-semiconductor
   - layout: editorialStat
     kicker: 그런데 주가는
     bigNumber: '1/3'
@@ -80,7 +80,7 @@ carousel:
       보유자산 가치(NAV) 약 93조인데 시가총액은 약 62조(특정 시점).
       시장은 자산의 약 3분의 1을 깎아 가격을 매긴다 —
       투자자가 하이닉스를 직접 살 수 있기 때문이다.
-    image: nav-discount
+    image: cc0-circuit
   - layout: editorialBeat
     kicker: 두 얼굴
     line: |-
@@ -90,7 +90,7 @@ carousel:
       지분만 들고 있으면 할인은 안 줄어든다.
       비핵심 정리 → 현금 → 자사주 소각·배당이 반복돼야
       '투자회사'로 재평가된다.
-    image: nav-discount
+    image: cc0-chip-fab
   - layout: editorial
     line: |-
       2025는 하이닉스가
@@ -99,7 +99,7 @@ carousel:
       좋은 사이클에선 실수도 가려진다.
       진짜 실력은 하이닉스가 식는 해에 드러난다 —
       2026부터는 SK스퀘어의 자본배치가 답해야 한다.
-    image: nav-discount
+    image: cc0-circuit
 ---
 
 <script>
