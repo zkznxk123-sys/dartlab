@@ -22,6 +22,72 @@ ai:
   weaknesses: ["매출원가율 103% 4년 연속", "금융비용 연 2,650억 (매출의 11%)", "유동비율 40.5% — 단기 유동성 위기"]
   keyMetrics: {revenue: 2.38, opm: -7.05, roe: 51.5, fcf: -0.13}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 팔수록 적자 4년인데 순이익 +3,260억 — 효성화학의 두 얼굴
+  caption: |-
+    팔면 팔수록 적자가 나는 회사가 어떻게 흑자로 마감했을까. 효성화학 2025년은 영업이익 -1,681억, 이자로 -2,652억, 합쳐서 매출의 18%를 잃는 구조였습니다. 그런데 순이익은 +3,260억.
+
+    반전은 손익계산서 중간에 들어온 +6,891억(계산)입니다. 특수가스 매각으로 추정되는 차익이 4년 누적 영업적자 -8,641억을 한 번에 메웠습니다. 자본총계가 -680억에서 +6,331억으로 +7,011억 재건됐죠. 본업 영업이익 개선은 겨우 +24억. 거의 안 움직였습니다.
+
+    관전 포인트는 매출원가율 103%가 100% 밑으로 내려오는 날. 매각은 한 번 쓴 카드라 다시 못 씁니다. 2026년 단 하나의 숫자만 본다면 9년 연속 마이너스인 잉여현금흐름이 플러스로 도느냐입니다.
+  pinnedComment: 투자 판단이 아닙니다. 숫자는 dartlab 실측(2026-04-18 기준)이며, 신용등급·D/EBITDA는 dartlab 신용엔진 산출, 매각 대금 약 9,200억은 재무 재구성 추정, PP 증설·5사 비교는 외부 업계 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      팔수록 적자인데
+      순이익은 [[+3,260억]]
+    sub: |-
+      효성화학 298000 · 매출 2.38조
+      한 장의 표 안 두 얼굴 — 왜?
+    image: vina-ncc-plant
+  - layout: editorialStat
+    kicker: 2025 영업이익률
+    bigNumber: '-7.05'
+    unit: '%'
+    context: |-
+      영업으로 매출의 7%,
+      이자로 11% — 합쳐 18%를
+      매년 잃는 구조
+    image: production-site
+  - layout: editorialBeat
+    kicker: 손익계산서의 빈칸
+    line: |-
+      이익이 세전부터 역전된다
+      중간에 들어온 [[+6,891억]]
+    sub: |-
+      특수가스 매각으로 추정되는 차익(계산)
+      4년 누적 영업적자 -8,641억을
+      한 번에 메웠다
+    image: glacial-chemistry
+  - layout: editorialStat
+    kicker: 자본총계 1년 변화
+    bigNumber: '+7,011'
+    unit: 억원
+    context: |-
+      -680억(자본잠식)에서
+      +6,331억으로 재건
+      본업 영업이익 개선은 겨우 +24억
+    image: research-lab
+  - layout: editorialStat
+    kicker: D/EBITDA · 신용등급
+    bigNumber: '10.6'
+    unit: 배
+    context: |-
+      번 돈으로 빚 갚는 데 10.6년
+      유동비율 40.54%, 이자보상배율 -0.63
+      dartlab 신용등급 dCR-B(57.48점)
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 2026년에 봐야 할 단 하나
+    line: |-
+      매각은 탈출이 아니라 재구성
+      진짜 신호는 [[잉여현금흐름 플러스]]
+    sub: |-
+      9년 연속 마이너스였던 잉여현금흐름이
+      한 번이라도 플러스로 돌면
+      그게 9년 만의 첫 변곡점
+    image: production-site
 ---
 
 <script>

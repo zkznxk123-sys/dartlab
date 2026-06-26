@@ -35,6 +35,68 @@ ai:
     netMargin: "2.47%"
     icr: "0.6배"
   dataAsOf: "2026-04-23"
+carousel:
+  title: 대한전선 — 매출 사상 최대인데, 영업이익보다 큰 이자비용
+  caption: |-
+    매출 사상 최대 3.64조, 영업이익 사상 최대 1,286억. 완벽한 성장 곡선처럼 보였습니다. 그런데 같은 해 이자비용이 2,124억이었습니다.
+
+    영업이익 1,286억의 1.65배. 영업에서 번 돈으로 이자조차 못 갚는 구조 — dartlab 실측 이자보상배율 0.6배(위험)입니다. 같은 해 부채 +7,143억, 재고 +2,597억, 영업현금흐름 +68억 → -1,713억이 한꺼번에 적신호로 켜졌습니다. 70년 케이블 회사의 해저케이블 베팅이 치르는 첫 청구서입니다.
+
+    관전 포인트: 이 비용이 일회성이려면 2026년 영업현금흐름이 +로 돌아오고 이자보상배율이 1.5배+로 회복해야 합니다. 다음에 볼 지표는 분기 OCF·이자보상배율·해저케이블 매출 비중 셋입니다.
+  pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·이자비용·이자보상 0.6배·부채·재고·OCF·dCR-BBB+ 는 dartlab 실측(2026-04-23)입니다. 2024 금융비용 99억은 회계 분류 영향 포함 가능(본문 재검증 메모). 차입금 사용처 분해·해저케이블 점유율·매출 비중·수주잔고·시장규모는 BNEF·IEA·GWEC·회사 IR 기반 업계 추정입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      매출 사상 최대를 찍은 해에
+      [[영업이익보다 큰 이자비용]]
+    sub: |-
+      대한전선 (001440)
+      영업이익 1,286억 < 이자비용 2,124억
+    image: bg-dangjin-submarine-cable-factory
+  - layout: editorialBeat
+    kicker: 표면의 숫자
+    line: |-
+      2025년 매출 3조 6,360억(+10.5%)
+      [[영업이익 1,286억, 둘 다 사상 최대]]
+    sub: |-
+      2017년 매출 1.59조의 2.3배 · 8년 연속 흑자.
+      호반그룹 인수(2021) 이후 다시 살아난 70년 케이블 회사.
+    image: cable-spool
+  - layout: editorialStat
+    kicker: 반전 — 같은 해 이자비용
+    bigNumber: '2,124'
+    unit: 억원
+    context: |-
+      영업이익 1,286억의 1.65배.
+      영업에서 번 돈으로 이자조차 못 갚는 구조.
+    image: bg-cable-spool-warehouse
+  - layout: editorialStat
+    kicker: dartlab 실측 — 이자보상배율
+    bigNumber: '0.6'
+    unit: 배 (위험)
+    context: |-
+      1배 미만 = 영업이익으로 이자조차 못 갚음.
+      부족분은 금융수익·법인세 환급·자본 확충이 임시로 떠받칩니다.
+    image: bg-submarine-cable-laying-ship
+  - layout: editorialBeat
+    kicker: 베팅의 청구서
+    line: |-
+      부채 +7,143억 · 재고 +2,597억
+      [[영업현금흐름 +68억 → -1,713억]]
+    sub: |-
+      재고 5,966억 → 8,563억(+44%) · 부채비율 76.7% → 114%.
+      해저케이블·HVDC 선제 베팅의 운전자본·증설 부담으로 추정.
+    image: submarine-cable-laying
+  - layout: editorialBeat
+    kicker: 결론 — 다음에 볼 지표
+    line: |-
+      신용등급 dCR-BBB+ · Altman Z 1.79
+      [[2026년이 정상화 분기점]]
+    sub: |-
+      ① 분기 영업현금흐름 +로 복귀 ② 이자보상배율 1.5배+ ③ 해저케이블 매출 비중 확대.
+      이 셋이 동시에 와야 신사업 베팅의 정상화가 확인됩니다.
+    image: cable-spool-warehouse
 ---
 
 <script>
