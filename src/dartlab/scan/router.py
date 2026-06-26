@@ -207,6 +207,13 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         description="공시 변화 기반 선행 리스크 (우발부채, 감사변경, 계열변화, 사업전환)",
         example='scan("disclosureRisk")',
     ),
+    "orders": _AxisEntry(
+        module="dartlab.scan.orders",
+        fn="scanOrders",
+        label="신규수주",
+        description="전 상장사 신규수주 flow (book-to-bill, 모멘텀, 계약상대 집중도) — 단일판매·공급계약 선행지표",
+        example='scan("orders")',
+    ),
 }
 
 
@@ -283,6 +290,11 @@ _ALIASES: dict[str, str] = {
     # disclosureRisk
     "공시리스크": "disclosureRisk",
     "공시변화": "disclosureRisk",
+    # orders
+    "신규수주": "orders",
+    "수주": "orders",
+    "수주현황": "orders",
+    "공급계약": "orders",
 }
 
 

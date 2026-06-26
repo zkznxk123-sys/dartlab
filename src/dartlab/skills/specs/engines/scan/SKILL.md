@@ -79,7 +79,7 @@ examples:
   - 매출 상위 100 개 회사 발굴
   - 신용 위험 상위 100 개 스크리닝
 procedure:
-  - dartlab.scan() 으로 21 축 가이드 DataFrame 확인.
+  - dartlab.scan() 으로 22 축 가이드 DataFrame 확인.
   - axis 선택 (account · ratio · screen · valuation · quality · governance 등).
   - dartlab.scan(axis, target?, universe=..., spec=...) 호출.
   - 결과의 ranking · universe · datasetAsOf · filter · formula · executionRef 묶음.
@@ -131,7 +131,7 @@ custom = dartlab.scan("screen", spec={"filters": []})
 
 ## 강행 호출 룰 (agent 답변 품질 회귀 차단)
 
-21 axis 횡단 스크리닝에서 다음 4 룰 강행 — 메모리 압박 + refs 0 회귀 차단.
+22 axis 횡단 스크리닝에서 다음 4 룰 강행 — 메모리 압박 + refs 0 회귀 차단.
 
 1. **1 차 도구는 EngineCall 강제**. `EngineCall(apiRef="scan", args={"axis": "ratio", "metric": "roe"})` 양식. RunPython 으로 전 종목 parquet 직접 로드 금지 — Polars Rust 힙 누수 (Company 1 개 ≈ 200~500MB) 로 OOM 가능.
 2. **개별 종목 분석 질문에 scan 호출 금지** — "삼성전자 수익성" 처럼 단일 기업이면 `Company.panel`/`Company.analysis` 사용. scan 은 *여러 종목 후보 찾기* 한정.
@@ -171,6 +171,7 @@ custom = dartlab.scan("screen", spec={"filters": []})
 | fields | 필드카탈로그 | DART | `dartlab.scan("fields", "roe")` |
 | screen | 스크리닝 | DART | `dartlab.scan("screen", "value")` |
 | disclosureRisk | 공시리스크 | DART | `dartlab.scan("disclosureRisk")` |
+| orders | 신규수주 | DART | `dartlab.scan("orders")` |
 
 ## 대표 반환 형태
 
@@ -203,6 +204,7 @@ metric/value/score, rank, basis/source, flags
 | cashflow | 8 종 현금흐름 패턴 분류 (Healthy/Growing/Distressed/Mature/...) 명시 없이 *위험* 단정 X; capex 음수 vs 양수 의미 회사별 다름 — 부호 임의 해석 X |
 | debt | 부채비율 단일 metric 으로 *위험* 단정 X (ICR + OCF/부채 교차); 사채 1 년 만기 비중 무시 X |
 | disclosureRisk | 공시 변화 신호와 확정 사실 혼동 X; 단일 신호로 *위험* 단정 X (5+ 신호 종합) |
+| orders | book-to-bill 상위 그대로 추천 X (micro-cap 잡음 — 매출 규모·계약건수 필터 필수); momentum 극단치(직전TTM 0 근처)를 추세 단정 X; amountSuspect 값 신뢰 X (값-정합 위반) |
 | dividendTrend | 5 패턴 (연속증가/안정/감소/시작/중단) 명시 없이 단정 X; 배당 지속가능성 검증 없이 추세만 인용 X |
 | efficiency | 자산회전 / 재고회전 / 매출채권회전 분류 명시; CCC 분리 식 (DSO + DIO - DPO) 명시 |
 | fields | 필드 카탈로그 결과를 *데이터 자체* 로 인용 X (메타데이터); finance/report/docs/krx 4 source 분리 명시 |

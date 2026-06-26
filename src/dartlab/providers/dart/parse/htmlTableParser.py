@@ -174,6 +174,45 @@ def extractItemValuePairs(html: str) -> dict[str, str]:
     return out
 
 
+def flattenTableCells(html: str) -> list[str]:
+    """본문 내 *모든* ``<table>`` 의 cell text 를 문서 순서 flat list 로.
+
+    ``parseHtmlTable`` (첫 표 1 개) 과 달리 KRX 수시공시처럼 여러 ``<table>`` block 으로
+    구성된 본문 전체를 훑어 라벨→값 인접 탐색용 평탄 셀 시퀀스를 만든다. colspan/rowspan
+    은 펼치지 않고 원본 cell 1 회 (라벨/값 인접성은 cell 순서로 충분). 태그 제거 + 공백
+    정규화 (``itertext`` join). lxml recover 로 깨진 HTML 흡수.
+
+    Args:
+        html: 공시 본문 HTML (다중 ``<table>`` 허용).
+
+    Returns:
+        list[str] — 문서 순서 cell text. parse 실패/비표는 빈 list.
+
+    Example:
+        >>> flattenTableCells('<table><tr><td>계약금액(원)</td><td>100</td></tr></table>')
+        ['계약금액(원)', '100']
+
+    Raises:
+        없음 — XMLSyntaxError silent + 빈 list.
+    """
+    if not html or "<table" not in html:
+        return []
+    try:
+        parser = etree.HTMLParser(recover=True)
+        root = etree.fromstring(html, parser)
+    except (etree.XMLSyntaxError, ValueError):
+        return []
+    if root is None:
+        return []
+    out: list[str] = []
+    for table in root.iter("table"):
+        for tr in _findTrs(table):
+            for td in tr:
+                if isinstance(td.tag, str) and td.tag in ("td", "th"):
+                    out.append(" ".join("".join(td.itertext()).split()))
+    return out
+
+
 def cellGrid(html: str) -> list[list[HtmlTableCell]]:
     """rowspan/colspan 을 *모두 펼친* cell grid (rectangular).
 

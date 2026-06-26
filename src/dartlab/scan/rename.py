@@ -54,6 +54,18 @@ _COLUMN_RENAME = {
     "auditorChanged": "감사인변경",
     "hasSpecialMatter": "특기사항",
     "dpsGrowth": "DPS성장",
+    # orders (신규수주 flow)
+    "ttmOrders": "TTM수주액",
+    "recentRevenue": "최근매출액",
+    "bookToBill": "수주매출배율",
+    "momentum": "수주모멘텀",
+    "momentumLabel": "모멘텀구분",
+    "topCounterparty": "최대계약상대",
+    "topShare": "상대집중도",
+    "nContract": "계약건수",
+    "nAmend": "정정건수",
+    "nCancel": "해지건수",
+    "asOf": "기준일",
 }
 
 
