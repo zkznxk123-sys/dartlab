@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from .config import BROKERS
 from .parse import PARSERS
-from .resolve import _resolveTicker
+from .resolve import _extractOpinion, _resolveTicker
 from .schema import ReportMeta
 
 if TYPE_CHECKING:
@@ -85,6 +85,7 @@ async def _fetchAsync(
             if rid in seen:
                 continue
             seen.add(rid)
+            r.opinion = _extractOpinion(r.title)
             if resolveTickers:
                 r.ticker = _resolveTicker(r.title)
             out.append(r)

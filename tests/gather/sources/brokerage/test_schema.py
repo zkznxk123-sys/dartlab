@@ -14,6 +14,7 @@ _COLUMNS = [
     "broker_name",
     "title",
     "report_type",
+    "opinion",
     "ticker",
     "pub_date",
     "url",

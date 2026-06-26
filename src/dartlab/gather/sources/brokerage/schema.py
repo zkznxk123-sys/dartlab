@@ -17,6 +17,7 @@ _COLUMNS = [
     "broker_name",
     "title",
     "report_type",
+    "opinion",
     "ticker",
     "pub_date",
     "url",
@@ -36,6 +37,7 @@ class ReportMeta:
     reportType: str | None = None
     author: str | None = None
     ticker: str | None = None
+    opinion: str | None = None
 
     def reportId(self) -> str:
         """(증권사·제목·발간일) 기반 안정 해시 PK — 재수집 idempotent dedup 키.
@@ -111,6 +113,7 @@ def toDataFrame(items: list[ReportMeta]) -> pl.DataFrame:
             "broker_name": it.brokerName,
             "title": it.title,
             "report_type": it.reportType,
+            "opinion": it.opinion,
             "ticker": it.ticker,
             "pub_date": it.pubDate,
             "url": it.url,

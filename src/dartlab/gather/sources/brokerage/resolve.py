@@ -12,6 +12,14 @@ from functools import lru_cache
 
 _CODE_RE = re.compile(r"\((\d{6})[/)\s]")
 
+# 투자의견 화이트리스트 — '(코드/의견)' 패턴의 의견부만(날짜 '(6/29)' 등 오탐 차단).
+_OPINION_RE = re.compile(
+    r"\([^()]*/\s*(매수|매도|중립|보유|비중확대|비중축소|적정|"
+    r"Not\s*Rated|N\.?R\.?|Buy|Sell|Hold|Outperform|Marketperform|Underperform|Overweight|Underweight)"
+    r"\s*\)",
+    re.IGNORECASE,
+)
+
 
 @lru_cache(maxsize=1)
 def _listedPairs() -> tuple[tuple[str, str], ...]:
@@ -68,3 +76,23 @@ def _resolveTicker(title: str, *, minLen: int = 3, useNameMatch: bool = True) ->
         if len(name) >= minLen and name in title:
             return code
     return None
+
+
+def _extractOpinion(title: str) -> str | None:
+    """제목의 '(코드/의견)' 패턴에서 투자의견만 추출(화이트리스트). 없으면 None.
+
+    Args:
+        title: 리포트 제목.
+
+    Returns:
+        str | None — '매수'·'Not Rated' 등 정규화 의견. 패턴/화이트리스트 불일치 시 None.
+
+    Example::
+
+        _extractOpinion("삼성전자 (005930/매수) ...")   # '매수'
+        _extractOpinion("◆ 시황 (6/29~7/3) ◆")          # None
+    """
+    if not title:
+        return None
+    m = _OPINION_RE.search(title)
+    return m.group(1).strip() if m else None

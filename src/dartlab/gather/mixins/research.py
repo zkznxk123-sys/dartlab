@@ -38,6 +38,7 @@ class _GatherResearchMixin(GatherMixinContext):
             - 본문은 호스팅하지 않고 ``url`` 로 원본 링크아웃 (링크=한국 확립 판례상 합법).
             - 날짜순 전체 / 종목별(ticker) / 검색(query) 3 패턴 + 증권사·구분 필터.
             - 제목→종목코드 해소: 명시 6자리 코드 우선, corpCode 상장사명 fallback(graceful).
+            - 투자의견(opinion) 추출: 제목 '(코드/매수)' 패턴에서 — 증권사 매수편향 측정 raw 데이터(사실).
             - 서버렌더 3개사(미래에셋·NH·유안타) 작동. SPA(한투·KB·키움·하나)는 deferred.
             - TTL 캐시(1h) + circuit breaker + rate limit (gather/infra 자동).
 
@@ -67,7 +68,7 @@ class _GatherResearchMixin(GatherMixinContext):
             brokers: 수집 대상 broker key 리스트. None 이면 enabled 전체.
 
         Returns:
-            pl.DataFrame — report_id·broker·broker_name·title·report_type·ticker·pub_date·url·author.
+            pl.DataFrame — report_id·broker·broker_name·title·report_type·opinion·ticker·pub_date·url·author.
             발간일 내림차순. 결과 없으면 동일 스키마 빈 DataFrame.
 
         Requires:
