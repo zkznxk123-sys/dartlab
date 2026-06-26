@@ -51,6 +51,24 @@ carousel:
 ## 이미지
 - 슬라이드는 이미지를 **이름**으로만 가리킴 → 실제 파일은 hfMedia `companies/{code}/` 에서 찾음.
 - 이미지 마음에 안 들면 **계약 안 건드리고 hfMedia 이미지만 교체**하면 됨.
+- 로컬 원본 = `sns/assets/{code}/{name}.webp` → `build_index.py` 인덱싱 → `publish_assets_hf.py` 가 hfMedia 업로드.
+  파일명에 `card`/`thumbnail`/`og-` 토큰만 없으면 hero 로 자동 채택(별도 등록 불필요).
+
+### 이미지가 부실할 때 — 저작권 없는(CC0/PD) 이미지 가져오는 곳
+회사 카드 이미지가 모자라거나 부실하면 아래 두 길로 **저작권 의무 0** 이미지를 받아 `sns/assets/{code}/` 에 채운다.
+받은 뒤 `build_index.py` → `publish_assets_hf.py` 로 올리고, 슬라이드에서 `image: <이름>` 으로 가리키면 끝(별도 배선 없음).
+
+1. **스톡 (CC0/PD) — `fetch_cc0_images.py`**: Wikimedia Commons(실사 적중률 1순위) + Openverse 에서 PD/CC0 만 받는다.
+   `cc0-*.webp` 로 저장. 출처는 회사 폴더 `CREDITS.md` 에 자동 기록(의무 아니나 감사 추적).
+   ```
+   uv run python -X utf8 blog/_scripts/fetch_cc0_images.py --jobs sns/assets/_plans/cc0FetchJobs.json
+   ```
+   jobs = `[{"code","name","queries":[...],"keywords":[...]}]`. **반드시 받은 이미지를 눈으로 확인** —
+   스톡은 특정 회사 피사체(정유탑·병입라인 등) 적중률이 들쭉날쭉해 오매치가 섞인다(실측: 받은 것 중 절반은 폐기).
+2. **생성형 (주제 정확) — `gen_company_flux.py`**: Replicate FLUX 로 4:5 hero 를 생성. 특정 피사체 적중률 1순위.
+   비용 사전충전이며 잔액 있을 때만 동작(잔액 부족 = HTTP 402). jobs = `[{"code","name","prompt"}]`.
+
+> 원칙: 스톡(CC0/PD)이 1차(공짜·합법), 안 맞으면 생성형. 둘 다 받은 즉시 눈검수 후 채택. 출처는 `CREDITS.md` 에 남긴다.
 
 ## 도구
 | 파일 | 역할 |
