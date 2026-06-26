@@ -170,6 +170,7 @@ _FORM_B_ALLOWLIST: frozenset = frozenset(
         "splits",
         "majorShareholders",
         "revenueConsensus",
+        "brokerageReports",
         "history",
         "collect",
         # lifecycle / infra
