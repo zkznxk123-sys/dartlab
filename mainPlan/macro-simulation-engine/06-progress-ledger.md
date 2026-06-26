@@ -36,16 +36,29 @@
   ⑤ pyodide 기각 — 휠 재발행(=발행) 필요 + 16MB 로드. 해석적 TS 가 발행 0·즉시.
 - **검증**: Python 10 · parity 4 · macroLens 53 · runtime 53 · svelte-check 0err · tsc 0. 시각 확인(US 483·KR 315행 팬 2×2 렌더·무스크롤·footer "런타임 계산").
 
+### ✅ Phase 3 — 시나리오 조건부 forward (커밋 백엔드 `90200b2f4`·UI `627206673`)
+- **방법 = Gaussian 조건부 예측**(Doan-Litterman-Sims 1984·Bańbura-Giannone-Lenza 2015): 무조건 예측분포
+  N(μ,Ω)에 정책금리 경로 하드제약 → 조건부 평균·밴드 닫힌형. **MC 아님·해석적·결정론**(런타임 전환 정합).
+  μ̃ = μ + ΩR'(RΩR')⁻¹δ, Ω̃ = Ω − ΩR'(RΩR')⁻¹RΩ. Ω = Ψ(I⊗Σ)Ψ'(`companionMA` 공유닻으로 fan·scenario drift 0).
+- **엔진** `scenarioPath.py`: `conditionalPath`·`_stackedCov`·`buildScenarios` + `SCENARIO_PRESETS`(긴축 +100bp held·완화 −25bp/월, 6M).
+  `MacroSimResult.scenarios` 배선(`_types`·`simulate`·`__init__`). `dartlab.macro('시뮬레이션')` 결과에 동봉.
+- **런타임 TS** `macroSimCompute.ts` 동일수식 mirror(companionMA·stackedCov·conditionalPath·buildScenarios) → `computeMacroSim` scenarios 합류.
+  contract `MacroSimScenario`. **golden parity 2종**(자유변수 A·조건변수 C byte 일치, 조건 horizon 밴드 붕괴 검증).
+- **UI** 다이얼로그 전망 팬에 **기준|긴축|완화 칩**(`mrScenTabs`) + 활성 시 변수별 조건부 q50 **별색(주황) overlay** + **'조건부 가정 · 정책금리 ±…' 배지**.
+  MiniFinChart SSOT 불변(별색 1라인, fill 변경 0). `buildMacroSimView(sim, lang, activeScenarioKey)`.
+- **정직**: 조건 변수는 조건 horizon 에서 baseline+δ 로 정확 고정 + 밴드≈0(하드 제약 가시). scenario≠forecast 배지·footer.
+- **검증**: Python 14(신규 4) · TS parity 6(신규 2) · macroLens 53 · svelte-check 0err · tsc(contracts·runtime) 0.
+
 ### 게이트 (운영자 승인 대기)
-- **UI git push 보류** — 공개 터미널이라 운영자 시각 눈검수 후 push("푸시해"). 커밋만 완료.
+- **UI git push 보류** — 공개 터미널 시각 변경(칩·overlay·배지)이라 운영자 눈검수 후 push("푸시해"). 두 commit 완료(백엔드도 동반 보류).
 - **데이터 publish 불요** — 런타임 계산이라 HF 아티팩트 없음(별도 배선 0). 미배선/표본부족 = 피처게이트(섹션 미렌더).
 
-## NEXT (Phase 3~4 — 후순위, PRD 05 가 명시한 선택/후순위)
+## NEXT (Phase 4 — 선택·후순위, 데이터벽 게이트)
 
-1. **운영자 시각 눈검수** → UI push + sim 데이터 publish 승인.
-2. **Phase 3 — 시나리오 조건부 forward**(`scenarioPath.py`): runScenario 프리셋→충격경로 어댑터 → 조건부 fan + 다이얼로그 overlay.
-3. **Phase 4 — transmission 브리지**(선택): IRF→섹터/기업 타격 + scenario-simulator 외생축 격상. 데이터벽 held-out 측정 후 점진.
-4. (데이터) HY스프레드 전이력 백필 → 신용축 5→6변수 편입 + 재보정.
+1. **운영자 시각 눈검수**(전망 탭 → 시나리오 칩 overlay) → UI push 승인("푸시해").
+2. **Phase 4 — transmission 브리지**(선택): IRF/조건부경로 → 섹터·기업 타격 + scenario-simulator 외생축 격상.
+   ⚠ **데이터벽 먼저** — transmission 회사단 커버리지 held-out 측정이 빌드 전제(PRD 05 §5). 측정 없이 빌드 = `feedback_plan_score_not_signature` 위반. 측정 → 점진.
+3. (데이터) HY스프레드 전이력 백필 → 신용축 5→6변수 편입 + 재보정.
 
 ## 결정 로그
 
