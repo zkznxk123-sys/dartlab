@@ -157,15 +157,16 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		align-items: stretch;
+		align-items: center;
 		height: 100%;
 		min-width: 0;
 	}
 	.ndTsBar {
 		flex: 1;
+		width: 22px;
 		display: flex;
 		flex-direction: column;
-		border-radius: 3px;
+		border-radius: 2px;
 		overflow: hidden;
 		background: var(--dl-bg-deep);
 	}
