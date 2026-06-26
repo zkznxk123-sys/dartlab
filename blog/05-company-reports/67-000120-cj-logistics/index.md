@@ -40,6 +40,71 @@ ai:
     - "EBITDA/이자비용 1.94배 (credit 하방 압력)"
   keyMetrics: {revenue: 12.28, opm: 4.14, roic: 7.22, roe: 6.0}
   dataAsOf: "2026-04-22"
+carousel:
+  title: 매출은 3년째 멈췄는데, 영업이익은 23% 늘었다 — CJ대한통운(000120)
+  caption: |-
+    택배 박스 절반은 이 회사 손을 거친다. 그런데 dartlab으로 9년 재무제표를 열면 이상한 게 보인다. 2022년 매출 12.13조, 2025년 12.28조 — 3년간 +1.2% 정체. 시장은 커지는데 1위의 매출만 멈췄다.
+
+    반전은 같은 3년 영업이익이 4,118억에서 5,081억으로 +23.4% 늘었다는 것. 매출이 멈춘 회사에서 이익이 자란 건 판관비 통제·자동화·글로벌 수익성 개선, 즉 매출이 아니라 효율에서 왔다. 그래도 영업이익률 4.14%는 현대글로비스 7.01%의 약 6할이다.
+
+    관전 포인트는 그 이익의 절반이 어디로 가는가다. 금융비용 2,617억이 영업이익 5,081억의 51%를 가져간다. 2013년 CJ 편입 인수차입의 그림자. 이 구조가 풀리려면 순차입금 1.6조가 1조 아래로 내려가야 한다. 다음에 볼 지표는 순차입금이다.
+  pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·OPM·순차입금·신용등급은 dartlab 실측, 택배 점유율 약 50%와 물동량 증가 추세는 외부 통계 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      택배의 절반을 나르는데
+      매출은 [[3년째 제자리]]였다
+    sub: |-
+      2022년 12.13조 = 2025년 12.28조
+      시장은 커지는데 1위만 멈췄다
+      이익은 오히려 늘었다
+    image: customer-context
+  - layout: editorialStat
+    kicker: 매출 정체 (2022 → 2025)
+    bigNumber: '+1.2'
+    unit: '%'
+    context: |-
+      12.13조 → 12.28조.
+      택배 물동량은 늘었는데
+      1위의 매출은 거의 안 움직였다.
+    image: operations-site
+  - layout: editorialBeat
+    kicker: 반전
+    line: |-
+      매출이 멈춘 그 3년 동안
+      [[영업이익은 +23.4%]] 늘었다
+    sub: |-
+      4,118억 → 5,081억.
+      매출이 아니라 효율에서 온 이익.
+    image: gonjiam-hub
+  - layout: editorialStat
+    kicker: 영업이익률 (2025)
+    bigNumber: '4.14'
+    unit: '%'
+    context: |-
+      현대글로비스 7.01%의 약 6할,
+      한진 3.66%와 비슷.
+      규모는 1위지만 마진은 4% 천장.
+    image: operations-site
+  - layout: editorialStat
+    kicker: 이익의 절반은 어디로
+    bigNumber: '2,617'
+    unit: 억원
+    context: |-
+      영업이익 5,081억의 51%가 이자로.
+      2013년 CJ 편입 인수차입의 그림자.
+    image: fleet-control
+  - layout: editorialBeat
+    kicker: 결론 + 다음에 볼 지표
+    line: |-
+      매출 12조·택배 1위지만
+      이익의 절반은 [[이자로 반환]]된다
+    sub: |-
+      신용등급 dCR-AA-, ROIC 7.22%.
+      다음에 볼 지표 = 순차입금 1.6조.
+      1조 아래로 내려가는가.
+    image: customer-context
 ---
 
 <script>
