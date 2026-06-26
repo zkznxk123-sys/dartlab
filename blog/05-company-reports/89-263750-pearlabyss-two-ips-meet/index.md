@@ -41,6 +41,80 @@ ai:
     netIncome: -0.0084
     cashAndEquivalents: 0.134
   dataAsOf: "2025-12-31"
+carousel:
+  title: 9년 단일 IP가 만난 한 분기 — 펄어비스 263750
+  caption: |-
+    9년간 분기 매출이 800억과 5,000억을 오가던 회사. 그 진동이 2024년에 멎었습니다. 매출 -41.26%, 2024Q4는 직전 6년 Q4 평균의 23.7%로 가라앉았죠.
+
+    진짜는 한 분기 안에 있었습니다. 6년 개발한 자체 신작 붉은사막이 (회사 IR 기준) 첫 달 500만장, 출시 26일째에 전년 매출(3,656억)을 넘겼고, 같은 분기 8년 보유한 CCP/EVE는 $225M에 사서 $120M에 팔렸습니다(-46%). dartlab 실측으로는 3년 누적 영업적자 -435억인데도 순현금(현금 1,339억).
+
+    한 IP가 막 깨어나고, 한 IP가 막 떠난 분기. 다음에 볼 지표는 2026Q2 손익계산서 — 첫 달 500만장이 분기 매출 급등으로 어떻게 찍히는지입니다.
+  pinnedComment: 투자 판단이 아닙니다. 재무·분기 수치는 DART 사업보고서·분기보고서 기반 dartlab 실측, 판매량·매각가·출시일은 회사 IR·Sony·보도 등 외부 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      9년간 800억과 5,000억을 오가던 매출.
+      [[2024년에 그 진동이 멎었다.]]
+    sub: |-
+      검은사막 단일 IP가 식은 그 분기, 새 IP가 깨어났다.
+      2024 매출 -41.26%
+      9년 뒤, 붉은사막이 첫 달 500만장
+    image: mmorpg-cityscape
+  - layout: editorialStat
+    kicker: 2024 매출 (전년비)
+    bigNumber: '-41.26'
+    unit: '%'
+    context: |-
+      2023 5,829억 → 2024 3,424억.
+      2024Q4 957억 = 직전 6년 Q4 평균(4,036억)의 23.7%.
+      9년 Q4 spike가 처음으로 사라진 해.
+    image: spaceship-cluster-eve
+  - layout: editorialStat
+    kicker: 분기 PEAK (2019Q4)
+    bigNumber: '5,359'
+    unit: 억원
+    context: |-
+      9년 시계열 최고 단일 분기 봉우리.
+      6년간(2018Q4~2023Q4) Q4 평균 4,036억.
+      이게 단일 IP가 도달한 매출 천장이었다.
+    image: fantasy-warrior-cinematic
+  - layout: editorialBeat
+    kicker: 부실 4신호 + 순현금 모순 (2025Q4)
+    line: |-
+      부도예측 4개 모형이 동시에 빨간불.
+      [[그런데 회사는 순현금이었다.]]
+    sub: |-
+      Altman Z 1.83 / Springate 0.32 / Piotroski 4·9 / 이자보상 -0.6배 (2025Q4).
+      3년 누적 영업적자 -435억, 그러나 현금 1,339억 > 차입(추정).
+    image: mmorpg-cityscape
+  - layout: editorialStat
+    kicker: CCP/EVE 8년 보유 후 매각 (외부)
+    bigNumber: '-46'
+    unit: '%'
+    context: |-
+      2018 인수 $225M → 2026-04 매각 $120M.
+      자본손익 -$105M, 8년 보유.
+      자체 IP가 깨어나자 외부 IP 보험을 회수한 것으로 읽힌다.
+    image: spaceship-cluster-eve
+  - layout: editorialStat
+    kicker: 붉은사막 첫 달 판매 (외부)
+    bigNumber: '500'
+    unit: 만장
+    context: |-
+      6년 개발, 2026-03-19 글로벌 출시.
+      첫 주 300만장 → 첫 달 500만장.
+      출시 26일째에 전년 매출(3,656억) 초과.
+    image: fantasy-warrior-cinematic
+  - layout: editorialBeat
+    kicker: 결론 — 다음에 볼 지표
+    line: |-
+      한 IP가 막 깨어나고, 한 IP가 막 떠났다.
+      [[답은 2026Q2 손익계산서.]]
+    sub: |-
+      첫 달 500만장이 분기 매출 급등으로 어떻게 찍히는가.
+      그 급등이 검은사막처럼 9년 라이브로 정착하는가 — 두 단계 검증이 남았다.
+    image: mmorpg-cityscape
 ---
 
 <script>
