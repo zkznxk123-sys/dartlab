@@ -43,10 +43,17 @@
 - ⛔ OOM 가드: 백테스트 module-scope fixture·직렬 load. ⛔ master only·변경단위 commit·UTF-8.
 - ⛔ _attempts 졸업: moat(02d)는 `tests/_attempts/quantMoat/` 개념확립 후 `analysis/financial/moat.py` 본진.
 
-## ⚠ 운영자 승인 필요 — 결정사항
+## 운영자 결정 (확정)
 
-1. **신용 prebuild-publish (02e P1)**: dCR 를 `finance.json` 에 임베드하는 경로. 에이전트 논거 = "`macroExposure` 가 *이미* finance.json 에 임베드돼 있다(`buildFinanceJson.py:324`) → 이건 *런타임-SSOT 출력 직렬화*이지 금지된 베이크가 아니다. dCR 은 브라우저에서 산출 불가(Company 객체·BS/IS/CF·sectorThresholds·CHS 필요)." **그러나 런타임-SSOT 강행규칙상 베이크성 작업은 사전 토론·명시 승인 필요** — `macroExposure` 선례가 이미 블레스됐다면 일관, 아니라면 TS 재구현+golden-parity 대안. **운영자 판단 요청.**
-2. **순서 확정**: P1(능력)→P2(엔진)→P3(랜딩) — operator 이미 확정. P1 내 02a 선행도 확정.
+1. **신용 prebuild-publish (02e P1) — ✅ 조건부 승인 (2026-06-26).** 코드 검증 완료: `evaluateCompany`(`creditBadge.py:40-44`)는 full Company(재무3표·sector 임계·CHS·7축·Notch) 필요 → 브라우저 산출 불가. TS 재구현은 *79사 검증모델 2중 구현 = 영구 parity 부담 = 관리불능* 이라 더 나쁨. `macroExposure` 가 *이미* 같은 루프에서 finance.json 에 임베드(`buildFinanceJson.py:324`) → 같은 단일 빌드에 한 줄 추가. **즉 publish 가 덜-덕지덕지한 선택.**
+
+   **관리 가능 가드 (덕지덕지·관리불능 방지 — operator 조건):**
+   - ① **단일 경로만**: `buildFinanceJson.py` 의 기존 루프에 `data["credit"]=getDcrBadge(...)` 한 줄. *새 파일·새 파이프라인·새 빌드 스텝 금지.*
+   - ② **단일 소스**: Python credit 엔진 0-변경. *TS 재구현 영구 금지*(2중 구현이 곧 관리불능).
+   - ③ **정의된 스키마**: credit packet(grade·gradeRaw·axes·pdEstimate·outlook·confidence)을 `reportModel.ts` 계약 필드로 *명시 정의*. loose blob 금지.
+   - ④ **빌드비용 관리**: per-company `evaluateCompany` ×~3,000사 = OOM 가드(module-scope·직렬·BoundedCache) + 빌드시간 측정·기록. forward PD 는 20행 grade→PD lookup 1회 ship(per-company 루프 밖 join).
+   - ⑤ **offline 가드**: `offlineGuard.enforceOffline()` 적용(prebuild = offline only). `macroExposure` 와 동일 거버넌스(staleness = 동일 rebuild 케이던스, 새 미관리 산출물 0).
+2. **순서 확정**: P1(능력)→P2(엔진)→P3(랜딩) — operator 확정. P1 내 02a 선행 확정.
 
 ## 리스크 요약
 
@@ -54,6 +61,6 @@
 |---|---|
 | 백테스트 OOM | module-scope fixture·직렬·BoundedCache |
 | 격상이 기존 답변 회귀 | de-gate 는 추가형, 기존 경로 G4 무회귀 게이트 |
-| credit publish 가 베이크 규칙 위반 | §결정1 운영자 승인 게이트 |
+| credit publish 가 덕지덕지·관리불능化 | §결정1 5가드(단일경로·단일소스·정의스키마·빌드비용·offline). ✅ 조건부 승인 |
 | 두 빌더 drift | 6상수 parity(전체 아님) |
 | UI 시각 회귀 | 스크린샷 눈검수 + 운영자 승인 push |

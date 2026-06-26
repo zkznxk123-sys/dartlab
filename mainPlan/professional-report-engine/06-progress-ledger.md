@@ -9,7 +9,7 @@
 - ✅ 능력 엔진 6 SSOT 조사 (de-gate 발견) — `02a~02e`
 - ✅ 리포트 엔진 아키텍처 (계약 SSOT·delete ~2,834·emitter) — `03`
 - ✅ Phase 분해·게이트·가드 — `04`
-- ☐ 운영자 결정: 신용 prebuild-publish 승인 (§04 결정1)
+- ✅ 운영자 결정: 신용 prebuild-publish **조건부 승인** (§04 결정1) — 코드검증(브라우저 산출불가·TS재구현=관리불능) + 5가드(단일경로·단일소스·정의스키마·빌드비용·offline)
 
 ## P0 · publish
 - ☐ 현 안정본 publish
@@ -19,7 +19,7 @@
 - ☐ P1b 전망 driver + `_revenueBacktest.py` — 게이트 MAPE·방향·밴드·skill
 - ☐ P1c 세그먼트 마진 도출 + SOTP — 게이트 MAE≤5%p·커버·ρ
 - ☐ P1d 정량 moat(`_attempts/quantMoat` → `moat.py`) — 게이트 cohort 평균회귀
-- ☐ P1e 신용 라이브배선 + 매크로 강화 — 게이트 parity·79사·β-stability ⚠(결정1)
+- ☐ P1e 신용 라이브배선 + 매크로 강화 — 게이트 parity·79사·β-stability (결정1 ✅ 조건부, 5가드 준수)
 
 ## P2 · 리포트 엔진
 - ☐ 삭제 ~2,834 LOC (`story/macro`·publisher·sixAct·dashboard·sections)
@@ -34,4 +34,5 @@
 - ☐ UI 스크린샷 눈검수 + 운영자 승인 push
 
 ## 결정·이벤트 로그
-- 2026-06-26 착수. operator 사상 확정: 정직-스킵=무능, 능력부족은 SSOT 찾아 개선, 날조만 금지. 순서 = 능력 먼저. 기획 6문서 박제.
+- 2026-06-26 착수. operator 사상 확정: 정직-스킵=무능, 능력부족은 SSOT 찾아 개선, 날조만 금지. 순서 = 능력 먼저. 기획 7+5문서 박제.
+- 2026-06-26 신용 publish 조건부 승인 ("반드시 필요하면 허용, 단 덕지덕지·관리불능 금지"). 코드검증 후 5가드 박제 → 착수 unblocked.
