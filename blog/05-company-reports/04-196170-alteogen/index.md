@@ -62,7 +62,7 @@ carousel:
       항암제를 1시간 IV에서 5분 SC로.
       이 효소를 만들 수 있는 회사는
       전 세계 단 두 곳, 그중 하나가 알테오젠.
-    image: pembrolizumab-structure
+    image: research-lab
   - layout: editorialStat
     kicker: 2020년 머크 계약
     bigNumber: '1,600'
