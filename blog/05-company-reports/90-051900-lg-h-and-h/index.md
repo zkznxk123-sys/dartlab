@@ -35,6 +35,73 @@ ai:
     netIncome: "-858억"
     operatingMargin: "2.69%"
   dataAsOf: "2026-05-07"
+carousel:
+  title: 영업이익 1.29조 → 1,707억, 8분의 1로 줄어든 LG생활건강의 1년
+  caption: |-
+    한국 럭셔리 화장품의 신화였던 LG생활건강(051900). 차석용 19년 황금기에 영업이익 1.29조까지 갔던 회사가, 2025년 1,707억으로 8분의 1이 됐습니다. 같은 해 2025Q4 -727억 사상 첫 분기 영업적자, 연간 -858억 사상 첫 연간 순손실이 동시에 도래했습니다.
+
+    그런데 자본은 멀쩡합니다. 자본총계 5.57조, 부채비율 23.32%(9년 최저), Altman Z 3.66 안전권, dCR-AA-. 무너진 건 화장품 본체 한 사업부였습니다 — 매출 감소의 158%를 본체가 기여하는 동안 음료 자회사 2곳은 성장, 제약은 보합이었습니다. 자본 위기가 아니라 이익 모델 위기입니다.
+
+    관전 포인트: DOL 9.4배·안전마진 5.43%로 손익분기점이 코앞입니다. 2026 분기 OPM 5% 복귀와 매출총이익률 50% 라인이 사이클 회복이냐 모델 종료냐를 가릅니다.
+  pinnedComment: 투자 판단이 아닙니다. 본 카드의 모든 수치는 dartlab 실측·사업보고서 1차 출처(검증표 대조)입니다. 면세점 매출·따이공·중국 로컬 점유율 같은 외부 추정치는 본 카드에 싣지 않았습니다(블로그 본문에서 '(외부)'로 구분).
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      영업이익이 [[8분의 1로]] 줄어든
+      LG생활건강의 1년
+    sub: |-
+      LG생활건강 051900
+      1.29조(2021) → 1,707억(2025)
+      자본은 5.57조, 거의 그대로
+    image: luxury-hanbang-cosmetics
+  - layout: editorialStat
+    kicker: 2025 연간 영업이익
+    bigNumber: '1,707'
+    unit: 억원
+    context: |-
+      2021 정점 1.29조 대비 -86.8%
+      8분의 1로 줄어든 1년치
+      영업이익률 15.94% → 2.69%
+    image: luxury-hanbang
+  - layout: editorialBeat
+    kicker: 사상 첫 두 가지가 같은 해에
+    line: |-
+      2025Q4 영업이익 -727억
+      [[첫 분기 영업적자]], 연간 -858억 첫 순손실
+    sub: |-
+      매출 8.09조 → 6.36조 (-21.4%)
+      매출총이익률 62.43% → 49.48%
+    image: duty-free-cosmetics-aisle
+  - layout: editorialStat
+    kicker: 매출 감소의 158%가 한 사업부
+    bigNumber: '-158'
+    unit: '%'
+    context: |-
+      화장품 본체가 전체 감소의 158% 기여
+      음료 자회사 2곳(+74%·+65%)은 성장, 제약은 보합
+      HHI 2,519 — 4사업부 균형 포트폴리오
+    image: duty-free-aisle
+  - layout: editorialBeat
+    kicker: 자본은 안전, 이익만 무너졌다
+    line: |-
+      부채비율 23.32% 9년 최저
+      [[자본은 안전, 이익률은 부실 신호]]
+    sub: |-
+      자본총계 5.57조 · 영업CF 4,464억 흑자
+      Altman Z 3.66 안전 vs Springate 0.66 부실
+      dCR-AA- 유지, 단 outlook 부정적
+    image: luxury-hanbang
+  - layout: editorialBeat
+    kicker: 결론 · 다음에 볼 지표
+    line: |-
+      DOL 9.4배·안전마진 5.43%
+      [[손익분기점이 코앞]]이다
+    sub: |-
+      추적 신호 1) 분기 OPM 5% 복귀
+      2) 매출총이익률 50% 라인 사수
+      → 사이클 회복이냐 모델 종료냐
+    image: duty-free-cosmetics-aisle
 ---
 
 <script>

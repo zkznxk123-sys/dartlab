@@ -37,6 +37,80 @@ ai:
     - "부채비율 140% — 순차입 구조"
   keyMetrics: {revenue: 89.2, opm: 2.78, ocf: 4.28, cash: 8.77}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 89조를 파는데 2.8%만 남는 회사 — LG전자
+  caption: |-
+    매출 89.2조. 글로벌 톱 티어 규모다. 그런데 영업이익률은 2.78%. 5년 전 5.05%에서 2.27%포인트 깎여 내려왔다. 매출은 41% 늘었는데 영업이익은 22% 줄었다. 커질수록 덜 남기는 구조다.
+
+    범인은 안에 있었다. LG전자는 사실상 네 개의 회사다. 전장(VS) 5.0%, 냉난방공조 6.9%, 생활가전 4.9%로 셋만 보면 5%대가 가능하다. 그런데 TV(MS)가 영업이익률 -3.9%, 적자 7,509억으로 전사 마진을 1.85%포인트 깎아먹는다. 세계 TV 1위가 TV에서 적자를 본다.
+
+    관전 포인트는 마진 전환 속도다. 스마트폰 5조 적자는 끊었고(전장이 그 자리를 채웠다), 구독가전은 2.5조까지 +29% 성장 중이다. 다만 이자보상배율이 2.96배(2023)에서 1.72배(2025)로 급락했다. 다음에 볼 지표 — TV의 OLED 비중과 이자보상배율.
+  pinnedComment: 투자 판단이 아닙니다. 재무 수치(매출·영업이익·현금)는 dartlab 실측, 이자보상배율은 이자비용 추정 기반 산출, 부문별 실적·구독 매출·경쟁사 비교·수주 잔고는 LG전자 IR 및 외부 자료 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      89조를 팔았다.
+      남은 건 2.78%.
+    sub: |-
+      매출은 5년새 +41%
+      영업이익은 -22%
+      커질수록 덜 남기는 구조
+    image: lg-factory
+  - layout: editorialStat
+    kicker: 영업이익률 추이
+    bigNumber: '2.78'
+    unit: '%'
+    context: |-
+      2020년 5.05% → 2025년 2.78%
+      5년에 걸쳐 2.27%p 깎였다
+      매출 89.2조 치고 글로벌 가전 마진 하위권
+    image: production-site
+  - layout: editorialBeat
+    kicker: 네 개의 회사
+    line: |-
+      한 회사 안에 흑자와 적자가 산다
+      범인은 [[TV였다]]
+    sub: |-
+      전장 5.0% · 냉난방 6.9% · 생활가전 4.9%
+      그런데 TV(MS)는 -3.9% (LG IR)
+    image: product-detail
+  - layout: editorialStat
+    kicker: TV 세계 1위의 역설
+    bigNumber: '-7,509'
+    unit: 억원
+    context: |-
+      19.4조를 팔아서 7,509억을 잃었다
+      이 적자 하나가 전사 마진을 1.85%p 깎는다
+      중국 LCD 가격전쟁이 마진을 짓누른다
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 끊은 것과 얻은 것
+    line: |-
+      스마트폰 5조 적자를 끊었다
+      그 자리를 [[전장이 채웠다]]
+    sub: |-
+      스마트폰 23분기 연속 적자, 누적 ~5조
+      전장(VS) 5.5조(2020) → 11.1조(2025), 영업이익 5,590억
+    image: production-site
+  - layout: editorialStat
+    kicker: 미래를 사는 돈
+    bigNumber: '2.5'
+    unit: 조원
+    context: |-
+      구독가전 매출 +29% 성장 (LG IR)
+      현금 8.77조는 사상 최대
+      미래를 살 실탄은 있다
+    image: research-lab
+  - layout: editorialBeat
+    kicker: 다음에 볼 지표
+    line: |-
+      자를 수 없으면 바꿔야 한다
+      TV의 [[OLED 비중]]과 이자보상배율
+    sub: |-
+      LCD→OLED, 하드웨어→서비스 전환 속도가 관건
+      이자보상배율 2.96배(2023) → ~1.72배(추정, 2025), 빠듯하다
+    image: lg-factory
 ---
 
 <script>
