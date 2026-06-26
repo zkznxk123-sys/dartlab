@@ -15,6 +15,7 @@ from dartlab.macro.simulate.bvar import estimateBvar, maxCompanionModulus
 from dartlab.macro.simulate.fan import forwardFan
 from dartlab.macro.simulate.irf import impulseResponse
 from dartlab.macro.simulate.regimePath import simulateRegimePath
+from dartlab.macro.simulate.scenarioPath import buildScenarios
 
 # 시장별 변수 사양(개념검증 GO 셋). policyIdx=충격 변수, gdpSeries=Hamilton 입력.
 # HY스프레드(신용축)는 데이터 백필 후 편입 — 그 전엔 본 셋(원유=물가퍼즐 해소 + 장기이력).
@@ -158,9 +159,10 @@ def simulateMacro(
     irf = impulseResponse(fit, horizon=24, shockVar=cfg["policyIdx"], shockSize=1.0)
     irf["shockLabel"] = "정책금리 +100bp"
     regimePath = _regimePathBlock(cfg["gdpSeries"], g, horizon)
+    scenarios = buildScenarios(fit, panel.panel, cfg["policyIdx"], horizon=horizon)
 
     model = {**base, "nObs": fit.nObs, "companionEig": round(eig, 4), "endYm": panel.endYm, "status": "ok"}
-    return MacroSimResult(mk, "ok", panel.endYm, horizon, model, fan, irf, regimePath, [])
+    return MacroSimResult(mk, "ok", panel.endYm, horizon, model, fan, irf, regimePath, [], scenarios)
 
 
 def analyzeSimulation(market: str = "US", **kwargs) -> dict:
@@ -174,6 +176,6 @@ def analyzeSimulation(market: str = "US", **kwargs) -> dict:
         **kwargs: horizon/asOf/draws/seed/lag/lam (simulateMacro 전달).
 
     Returns:
-        dict — MacroSimResult.toPayload() (market/status/asOf/seed/horizon/model/fan/irf/regimePath/missing).
+        dict — MacroSimResult.toPayload() (market/status/asOf/horizon/model/fan/irf/regimePath/scenarios/missing).
     """
     return simulateMacro(market=market, **kwargs).toPayload()

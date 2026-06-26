@@ -76,6 +76,7 @@ class MacroSimResult:
     irf: dict[str, Any]
     regimePath: dict[str, Any]
     missing: list[dict[str, Any]] = field(default_factory=list)
+    scenarios: list[dict[str, Any]] = field(default_factory=list)
 
     def toPayload(self) -> dict[str, Any]:
         """JSON 친화 dict(numpy 제거)."""
@@ -88,5 +89,6 @@ class MacroSimResult:
             "fan": self.fan,
             "irf": self.irf,
             "regimePath": self.regimePath,
+            "scenarios": self.scenarios,
             "missing": self.missing,
         }

@@ -48,21 +48,33 @@ def _meanPath(fit: BvarFit, history: np.ndarray, horizon: int) -> np.ndarray:
     return out
 
 
-def _forecastSE(fit: BvarFit, horizon: int) -> np.ndarray:
-    """다단 예측오차 표준오차 — (horizon, n). Σ_h = Σ_{j=0}^{h-1} Φ_j Σ Φ_j^T 누적."""
+def companionMA(fit: BvarFit, horizon: int) -> list[np.ndarray]:
+    """VAR(p) MA 계수 Φ_0..Φ_{horizon-1} (각 n×n). Φ_h = J C^h J^T.
+
+    예측오차 분산(fan)과 조건부 예측(scenarioPath) 이 공유하는 닻 — 한 곳에서 산출해 drift 차단.
+    """
     n, p = fit.n, fit.p
     comp = _companion(fit)
-    sigma = fit.sigmaHat
     sel = np.zeros((n, n * p))
     sel[:, :n] = np.eye(n)  # J: companion 상태 → 관측 n
-    se = np.empty((horizon, n))
+    coefs: list[np.ndarray] = []
     cj = np.eye(n * p)  # C^0
-    accum = np.zeros((n, n))
+    for _ in range(horizon):
+        coefs.append(sel @ cj @ sel.T)
+        cj = cj @ comp
+    return coefs
+
+
+def _forecastSE(fit: BvarFit, horizon: int) -> np.ndarray:
+    """다단 예측오차 표준오차 — (horizon, n). Σ_h = Σ_{j=0}^{h-1} Φ_j Σ Φ_j^T 누적."""
+    coefs = companionMA(fit, horizon)
+    sigma = fit.sigmaHat
+    se = np.empty((horizon, fit.n))
+    accum = np.zeros((fit.n, fit.n))
     for h in range(horizon):
-        phi = sel @ cj @ sel.T  # Φ_h (n, n)
+        phi = coefs[h]  # Φ_h (n, n)
         accum = accum + phi @ sigma @ phi.T
         se[h] = np.sqrt(np.maximum(np.diag(accum), 0.0))
-        cj = cj @ comp
     return se
 
 

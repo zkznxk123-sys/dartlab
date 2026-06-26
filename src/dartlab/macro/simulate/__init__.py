@@ -12,12 +12,15 @@ from dartlab.macro.simulate.calibration import fanCalibration
 from dartlab.macro.simulate.fan import forwardFan
 from dartlab.macro.simulate.irf import impulseResponse
 from dartlab.macro.simulate.regimePath import simulateRegimePath
+from dartlab.macro.simulate.scenarioPath import buildScenarios, conditionalPath
 from dartlab.macro.simulate.simulate import simulateMacro
 
 __all__ = [
     "BvarFit",
     "MacroSimResult",
     "VarSpec",
+    "buildScenarios",
+    "conditionalPath",
     "estimateBvar",
     "fanCalibration",
     "forwardFan",

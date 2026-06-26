@@ -11,6 +11,8 @@ import pytest
 
 from dartlab.macro.simulate import (
     VarSpec,
+    buildScenarios,
+    conditionalPath,
     estimateBvar,
     forwardFan,
     impulseResponse,
@@ -18,6 +20,8 @@ from dartlab.macro.simulate import (
     simulateRegimePath,
 )
 from dartlab.macro.simulate.calibration import measureCoverage
+from dartlab.macro.simulate.fan import _meanPath
+from dartlab.macro.simulate.scenarioPath import SCENARIO_PRESETS
 
 pytestmark = pytest.mark.unit
 
@@ -120,6 +124,50 @@ def test_regimePathAbsorbingLimit():
     """완전 지속(1,1)이면 현재 분포 유지."""
     rp = simulateRegimePath(1.0, 1.0, [0.3, 0.7], horizon=6)
     assert abs(rp["forward"][-1]["pContraction"] - 0.7) < 1e-9
+
+
+def test_conditionalPathPinsConditioned(fit):
+    """조건 변수(C, idx=2)는 조건 horizon 에서 baseline+δ 로 정확히 고정 + 밴드≈0(하드 제약)."""
+    panel = _synthPanel()
+    deltas = [0.5, 0.5, 0.5, 0.5]
+    cp = conditionalPath(fit, panel, 2, deltas, horizon=12)
+    base = _meanPath(fit, panel, 12)
+    r = cp["금리"]
+    for h, d in enumerate(deltas):
+        assert abs(r["mean"][h] - (base[h, 2] + d)) < 1e-9  # baseline + δ
+        assert abs(r["q95"][h] - r["q5"][h]) < 1e-7  # 고정 → 밴드 붕괴
+
+
+def test_conditionalPathFreeVarResponds(fit):
+    """자유 변수(A·성장)는 정책 충격 경로에 반응 — baseline 무조건 fan 과 달라야."""
+    panel = _synthPanel()
+    base = forwardFan(fit, panel, horizon=12)
+    cp = conditionalPath(fit, panel, 2, [0.5, 0.5, 0.5, 0.5], horizon=12)
+    diff = max(abs(cp["성장"]["q50"][h] - base["성장"]["q50"][h]) for h in range(12))
+    assert diff > 1e-4  # 조건이 전파돼 경로가 이동
+
+
+def test_conditionalPathQuantileMonotone(fit):
+    panel = _synthPanel()
+    cp = conditionalPath(fit, panel, 2, [-0.25, -0.5, -0.75], horizon=12)
+    for s in SPECS:
+        r = cp[s.label]
+        for h in range(12):
+            assert r["q5"][h] <= r["q25"][h] <= r["q50"][h] <= r["q75"][h] <= r["q95"][h]
+        # logdiff100 변수는 레벨 누적 환산 동봉
+        if s.transform == "logdiff100":
+            assert "level_q50" in r and len(r["level_q50"]) == 12
+
+
+def test_buildScenariosPresets(fit):
+    """프리셋 2종(긴축·완화) → 각 조건부 fan dict. condIdx=2(금리) 고정."""
+    panel = _synthPanel()
+    scs = buildScenarios(fit, panel, 2, horizon=12)
+    assert [s["key"] for s in scs] == [p["key"] for p in SCENARIO_PRESETS]
+    for sc in scs:
+        assert sc["condVar"] == "금리"
+        assert set(sc["fan"]) == {s.label for s in SPECS}
+        assert len(sc["fan"]["성장"]["q50"]) == 12
 
 
 def test_measureCoverageSane():
