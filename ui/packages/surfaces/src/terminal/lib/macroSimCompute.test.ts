@@ -2,7 +2,7 @@
 // 같은 결정론 패널(난수 0)에서 Python forwardFan 값과 byte 수준 일치 검증 → drift 차단.
 // golden = `uv run python ... estimateBvar/forwardFan` (해석적이라 재현 정확).
 import { describe, expect, it } from 'vitest';
-import { estimateBvar, forwardFan, maxCompanionModulus, type SimVarSpec } from './macroSimCompute';
+import { conditionalPath, estimateBvar, forwardFan, maxCompanionModulus, type SimVarSpec } from './macroSimCompute';
 
 // Python 과 동일 recurrence 고정 패널 (T=48, N=3).
 function fixedPanel(): number[][] {
@@ -61,5 +61,23 @@ describe('macroSimCompute — Python golden parity (해석적 BVAR, 결정론)',
 			const w = (h: number) => r.q95[h] - r.q5[h];
 			for (let h = 0; h < 11; h++) expect(w(h + 1)).toBeGreaterThanOrEqual(w(h) - TOL);
 		}
+	});
+
+	// 시나리오 조건부 — Python conditionalPath(condIdx=2·δ=[0.5]*4·H=12) golden.
+	it('조건부 경로 Python golden 일치 (자유변수 A·조건변수 C)', () => {
+		const cp = conditionalPath(fit!, panel, 2, [0.5, 0.5, 0.5, 0.5], 12);
+		const a = cp['A'], c = cp['C'];
+		// 자유 변수 A — 정책 충격 경로에 반응
+		[[0, 0.250891], [5, 0.109995], [11, 0.006392]].forEach(([h, g]) => expect(a.q50[h]).toBeCloseTo(g, 5));
+		[[0, 0.236329], [5, 0.088677], [11, -0.015774]].forEach(([h, g]) => expect(a.q5[h]).toBeCloseTo(g, 5));
+		[[0, 0.265452], [5, 0.131313], [11, 0.028558]].forEach(([h, g]) => expect(a.q95[h]).toBeCloseTo(g, 5));
+		// 조건 변수 C — q50 golden + h=0..3 하드 고정(밴드 붕괴: q5==q95)
+		[[0, 0.507566], [5, 0.093224], [11, 0.002699]].forEach(([h, g]) => expect(c.q50[h]).toBeCloseTo(g, 5));
+		for (let h = 0; h < 4; h++) expect(c.q95[h] - c.q5[h]).toBeCloseTo(0, 6);
+	});
+
+	it('조건부 logdiff 레벨 누적 Python golden 일치 (A level_q50[11])', () => {
+		const cp = conditionalPath(fit!, panel, 2, [0.5, 0.5, 0.5, 0.5], 12);
+		expect(cp['A'].level_q50![11]).toBeCloseTo(101.203293, 4);
 	});
 });

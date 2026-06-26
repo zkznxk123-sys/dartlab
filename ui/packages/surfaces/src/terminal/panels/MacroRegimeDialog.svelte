@@ -93,7 +93,9 @@
 		});
 		return () => { cancelled = true; };
 	});
-	const simView = $derived<MacroSimView>(buildMacroSimView(simCache[market] ?? null, lang));
+	// 활성 시나리오(정책금리 충격 프리셋) — 칩 선택 시 팬에 조건부 중앙 overlay. null=기준.
+	let activeScenario = $state<string | null>(null);
+	const simView = $derived<MacroSimView>(buildMacroSimView(simCache[market] ?? null, lang, activeScenario));
 
 	// 국면경로 과거+미래 연속 polyline — 과거 history + 미래 forward P(수축), 0~1 고정축.
 	const regimePoly = (hist: number[], fwd: { h: number; p: number }[]): { past: string; future: string; boundary: number } => {
@@ -248,8 +250,20 @@
 				<div class="mrSec">
 					<div class="mrSecHd">
 						<span class="mrSecTitle">{T('전망 — BVAR 팬', 'OUTLOOK — BVAR fan')}</span>
-						<span class="mrSecSub">{T(`향후 ${simView.horizon}개월 · 80% 밴드 · 호버=분위`, `next ${simView.horizon}m · 80% band · hover for quantiles`)}</span>
+						{#if simView.activeScenario}
+							<span class="mrScenBadge">{T('조건부 가정', 'conditional')} · {simView.activeScenario.condLabel}</span>
+						{:else}
+							<span class="mrSecSub">{T(`향후 ${simView.horizon}개월 · 80% 밴드 · 호버=분위`, `next ${simView.horizon}m · 80% band · hover for quantiles`)}</span>
+						{/if}
 					</div>
+					{#if simView.scenarios.length}
+						<div class="mrTabs mrScenTabs">
+							<button class={'mrTab' + (activeScenario === null ? ' on' : '')} onclick={() => (activeScenario = null)}>{T('기준', 'BASE')}</button>
+							{#each simView.scenarios as sc (sc.key)}
+								<button class={'mrTab' + (activeScenario === sc.key ? ' on' : '')} title={sc.condLabel} onclick={() => (activeScenario = activeScenario === sc.key ? null : sc.key)}>{sc.label}</button>
+							{/each}
+						</div>
+					{/if}
 					{#if simView.fanCards.length}
 						<div class="finFsGrid mrCharts2">
 							{#each simView.fanCards as card (card.key)}

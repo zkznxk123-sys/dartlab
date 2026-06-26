@@ -184,6 +184,19 @@ export interface MacroSimRegimePath {
 	converged?: boolean;
 }
 
+/** 시나리오 조건부 forward — 정책금리 경로 고정 시 변수별 조건부 분위 경로(baseline fan 동형). */
+export interface MacroSimScenario {
+	key: string;
+	label: string;
+	labelEn: string;
+	/** 조건 라벨(예 '정책금리 +100bp · 6M') — '조건부 가정' 배지에 표기. */
+	condLabel: string;
+	condLabelEn: string;
+	/** 고정한 변수 라벨(보통 정책금리). */
+	condVar: string;
+	fan: Record<string, MacroSimFanVar>;
+}
+
 /** 거시 시뮬 산출 — 런타임 BVAR(computeMacroSim) 또는 Python toPayload 동형. 해석적·결정론. */
 export interface MacroSimFile {
 	market: string;
@@ -195,6 +208,8 @@ export interface MacroSimFile {
 	/** 변수별 IRF 경로 + 'shockLabel'/'caveat' 문자열 키. */
 	irf: Record<string, number[] | string>;
 	regimePath: MacroSimRegimePath;
+	/** 시나리오 조건부 경로(정책금리 충격 프리셋). 미산출/holdback 시 빈 배열. */
+	scenarios?: MacroSimScenario[];
 	missing: { id: string; status: string; reason: string }[];
 }
 

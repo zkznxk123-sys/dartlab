@@ -2,7 +2,7 @@
 // 이미 로드된 observations(rt.macro.getSeries)로 BVAR 추정 → 해석적 분위 팬 + IRF.
 // ⛔ Python 정본(src/dartlab/macro/simulate)과 *동일 수식* — golden parity 테스트로 drift 차단.
 //    난수 0(해석적)이라 Python·TS byte 수준 일치. fan = 예측오차 분산 누적(Lütkepohl §2.2).
-import type { MacroPoint, MacroSimFile, MacroSimFanVar } from '@dartlab/ui-contracts';
+import type { MacroPoint, MacroSimFile, MacroSimFanVar, MacroSimScenario } from '@dartlab/ui-contracts';
 
 // ── 시장 변수 사양 (Python _MARKET_SPECS mirror) ──
 export interface SimVarSpec {
@@ -157,18 +157,24 @@ function meanPath(fit: BvarFit, history: Mat, horizon: number): Mat {
 	}
 	return out;
 }
-function forecastSE(fit: BvarFit, horizon: number): Mat {
-	const { n, p } = fit, c = companion(fit), sigma = fit.sigma, np = n * p;
-	const sel = zeros(n, np); for (let i = 0; i < n; i++) sel[i][i] = 1;
+// VAR(p) MA 계수 Φ_0..Φ_{horizon-1} (각 n×n). Φ_h = J C^h J^T. fan·scenarioPath 공유 닻(drift 차단).
+function companionMA(fit: BvarFit, horizon: number): Mat[] {
+	const { n, p } = fit, c = companion(fit), npn = n * p;
+	const sel = zeros(n, npn); for (let i = 0; i < n; i++) sel[i][i] = 1;
 	const selT = transpose(sel);
-	let cj = eye(np);
+	const coefs: Mat[] = [];
+	let cj = eye(npn);
+	for (let h = 0; h < horizon; h++) { coefs.push(matMul(matMul(sel, cj), selT)); cj = matMul(cj, c); }
+	return coefs;
+}
+function forecastSE(fit: BvarFit, horizon: number): Mat {
+	const { n } = fit, coefs = companionMA(fit, horizon), sigma = fit.sigma;
 	const accum = zeros(n, n), se: Mat = [];
 	for (let h = 0; h < horizon; h++) {
-		const phi = matMul(matMul(sel, cj), selT); // Φ_h (n,n)
+		const phi = coefs[h]; // Φ_h (n,n)
 		const contrib = matMul(matMul(phi, sigma), transpose(phi));
 		for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) accum[i][j] += contrib[i][j];
 		se.push(Array.from({ length: n }, (_, i) => Math.sqrt(Math.max(accum[i][i], 0))));
-		cj = matMul(cj, c);
 	}
 	return se;
 }
@@ -243,6 +249,71 @@ function impulseResponse(fit: BvarFit, horizon: number, shockVar: number): Recor
 	return out;
 }
 
+// ── 시나리오 조건부 forward (Python scenarioPath.py mirror) ──
+// 정책 변수 경로를 고정한 Gaussian 조건부 예측(Doan-Litterman-Sims 1984). 해석적·결정론 → parity.
+//   μ̃ = μ + Ω R'(R Ω R')⁻¹ δ,   Ω̃ = Ω − Ω R'(R Ω R')⁻¹ R Ω
+interface ScenarioPreset { key: string; labelKr: string; labelEn: string; condLabelKr: string; condLabelEn: string; deltaPath: number[]; }
+const SCENARIO_PRESETS: ScenarioPreset[] = [
+	{ key: 'tighten', labelKr: '긴축 +100bp', labelEn: 'Tightening +100bp', condLabelKr: '정책금리 +100bp · 6M', condLabelEn: 'policy +100bp · 6M', deltaPath: [1, 1, 1, 1, 1, 1] },
+	{ key: 'ease', labelKr: '완화 −150bp', labelEn: 'Easing −150bp', condLabelKr: '정책금리 −25bp/월 · 6M', condLabelEn: 'policy −25bp/mo · 6M', deltaPath: [-0.25, -0.5, -0.75, -1, -1.25, -1.5] }
+];
+
+// (H·n, H·n) 누적 예측오차 공분산 Ω. 블록(a,b) = Σ_{j=0}^{min(a,b)} Φ_j Σ Φ_{j+|b−a|}'.
+function stackedCov(fit: BvarFit, horizon: number): Mat {
+	const coefs = companionMA(fit, horizon), sigma = fit.sigma, n = fit.n, hn = horizon * n;
+	const omega = zeros(hn, hn);
+	for (let a = 0; a < horizon; a++) for (let b = a; b < horizon; b++) {
+		const d = b - a, block = zeros(n, n);
+		for (let j = 0; j <= a; j++) {
+			const cc = matMul(matMul(coefs[j], sigma), transpose(coefs[j + d]));
+			for (let i = 0; i < n; i++) for (let q = 0; q < n; q++) block[i][q] += cc[i][q];
+		}
+		for (let i = 0; i < n; i++) for (let q = 0; q < n; q++) { omega[a * n + i][b * n + q] = block[i][q]; if (a !== b) omega[b * n + q][a * n + i] = block[i][q]; }
+	}
+	return omega;
+}
+
+// 정책 변수(condIdx)를 baseline+condDeltas 로 고정한 조건부 forward 분위 경로(forwardFan 동형).
+export function conditionalPath(fit: BvarFit, history: Mat, condIdx: number, condDeltas: number[], horizon: number): Record<string, MacroSimFanVar> {
+	const n = fit.n, mean = meanPath(fit, history, horizon), omega = stackedCov(fit, horizon);
+	const hn = horizon * n, m = Math.min(condDeltas.length, horizon);
+	const muStack: number[] = [];
+	for (let h = 0; h < horizon; h++) for (let i = 0; i < n; i++) muStack.push(mean[h][i]);
+	const omRt = zeros(hn, m); // Ω R' — column a = Ω[:, a·n+condIdx]
+	for (let r = 0; r < hn; r++) for (let a = 0; a < m; a++) omRt[r][a] = omega[r][a * n + condIdx];
+	const rOmRt = zeros(m, m); // R Ω R' = omRt 의 조건 행
+	for (let a = 0; a < m; a++) for (let bb = 0; bb < m; bb++) rOmRt[a][bb] = omRt[a * n + condIdx][bb];
+	const inv = matInv(rOmRt);
+	if (!inv) return {}; // fail-closed
+	const gain = matMul(omRt, inv); // (hn × m)
+	const muCond = muStack.map((v, r) => { let s = v; for (let a = 0; a < m; a++) s += gain[r][a] * condDeltas[a]; return s; });
+	const condSE: number[] = []; // sqrt(diag(Ω) − diag(gain · R Ω))
+	for (let r = 0; r < hn; r++) { let red = 0; for (let a = 0; a < m; a++) red += gain[r][a] * omega[a * n + condIdx][r]; condSE.push(Math.sqrt(Math.max(omega[r][r] - red, 0))); }
+	const QS = [5, 25, 50, 75, 95] as const;
+	const out: Record<string, MacroSimFanVar> = {};
+	fit.specs.forEach((s, i) => {
+		const cm = (h: number) => muCond[h * n + i], cse = (h: number) => condSE[h * n + i];
+		const rec: MacroSimFanVar = { transform: s.transform, label: s.label, seriesId: s.id, mean: Array.from({ length: horizon }, (_, h) => cm(h)), q5: [], q25: [], q50: [], q75: [], q95: [] };
+		const dyn = rec as unknown as Record<string, number[]>;
+		for (const q of QS) dyn[`q${q}`] = Array.from({ length: horizon }, (_, h) => cm(h) + Z[q] * cse(h));
+		if (s.transform === 'logdiff100') {
+			const lvl0 = fit.lastLevels[i];
+			for (const q of QS) { let acc = 0; dyn[`level_q${q}`] = dyn[`q${q}`].map((g) => { acc += g / 100; return lvl0 * Math.exp(acc); }); }
+		}
+		out[s.label] = rec;
+	});
+	return out;
+}
+
+// SCENARIO_PRESETS 전체를 조건부 경로로 산출 → 다이얼로그 overlay 소비.
+function buildScenarios(fit: BvarFit, history: Mat, market: 'KR' | 'US', horizon: number): MacroSimScenario[] {
+	const condIdx = MARKET[market].policyIdx;
+	return SCENARIO_PRESETS.map((p) => ({
+		key: p.key, label: p.labelKr, labelEn: p.labelEn, condLabel: p.condLabelKr, condLabelEn: p.condLabelEn,
+		condVar: fit.specs[condIdx].label, fan: conditionalPath(fit, history, condIdx, p.deltaPath, horizon)
+	}));
+}
+
 /**
  * 거시 forward 시뮬을 *런타임* 계산. getSeries(이미 로드된 observations)로 BVAR → 해석적 팬.
  * 반환 = MacroSimFile(Python toPayload 와 동형). 데이터 부족·불안정은 fail-closed(status).
@@ -277,11 +348,12 @@ export async function computeMacroSim(
 	const fanFinite = Object.values(fan).every((v) => v.q5.every(isFinite) && v.q95.every(isFinite));
 	if (!fanFinite) return hold('불안정·표시 보류', [{ id: 'fan', status: '표시 보류', reason: '밴드 비유한' }]);
 	const irf: MacroSimFile['irf'] = { ...impulseResponse(fit, 24, cfg.policyIdx), shockLabel: '정책금리 +100bp', caveat: 'recursive-identification·illustrative' };
+	const scenarios = buildScenarios(fit, built.panel, market, horizon);
 	const nObs = built.panel.length;
 	// regimePath = Hamilton EM(중) → TS 런타임 미포팅. 현재 Python 도 분리도 약해 보류 → 일관 보류.
 	return {
 		market, status: 'ok', asOf: built.yms[built.yms.length - 1], horizon,
 		model: { kind: 'BVAR', lag, prior: 'minnesota', nObs, companionEig: +eig.toFixed(4), status: 'ok' },
-		fan, irf, regimePath: { status: '국면경로 — 런타임 미산출' }, missing: []
+		fan, irf, scenarios, regimePath: { status: '국면경로 — 런타임 미산출' }, missing: []
 	};
 }

@@ -1306,3 +1306,6 @@
 .dlTerm .mrPathPast { fill: none; stroke: var(--dim); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
 .dlTerm .mrPathFuture { fill: none; stroke: var(--dn); stroke-width: 1.6; stroke-dasharray: 3 2; vector-effect: non-scaling-stroke; }
 .dlTerm .mrSimNote { font-family: var(--cond); font-size: 9px; color: var(--dimmer); margin-top: 7px; padding-top: 5px; border-top: 1px dashed var(--bd); }
+/* 시나리오 조건부 — 프리셋 칩(기준|긴축|완화) + '조건부 가정' 배지(별색=조건부 overlay 라인 톤) */
+.dlTerm .mrScenTabs { margin: 0 0 8px; }
+.dlTerm .mrScenBadge { font-family: var(--cond); font-size: 9px; font-weight: 700; letter-spacing: 0.4px; color: #f0a93b; border: 1px solid rgba(240, 169, 59, 0.4); border-radius: 3px; padding: 1px 6px; white-space: nowrap; }

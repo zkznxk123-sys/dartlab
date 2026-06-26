@@ -2765,12 +2765,21 @@ export interface MacroSimIrfView {
 	caveat: string;
 	vars: { label: string; data: number[] }[];
 }
+export interface MacroSimScenarioView {
+	key: string;
+	label: string;
+	condLabel: string;
+}
 export interface MacroSimView {
 	status: 'ok' | 'holdback';
 	asOf: string;
 	horizon: number;
 	periods: string[];
 	fanCards: FinCard[];
+	/** 시나리오 칩(정책금리 충격 프리셋). 빈 배열이면 칩 미렌더. */
+	scenarios: MacroSimScenarioView[];
+	/** 활성 시나리오(칩 선택 시) — fanCards 에 조건부 중앙 overlay + '조건부 가정' 배지. null=기준. */
+	activeScenario: MacroSimScenarioView | null;
 	regimePath: MacroSimRegimePathView | null;
 	irf: MacroSimIrfView | null;
 	honesty: { sampleN: number | null; calibrated: boolean; note: string };
@@ -2803,16 +2812,23 @@ function simMonthAxis(asOf: string, back: number, fwd: number): string[] {
 }
 
 const SIM_HIST = 18;
-const SIM_COLORS = { hist: '#7d8ea0', mid: '#5b9bf0', band: '#9ec5f5' };
+const SIM_COLORS = { hist: '#7d8ea0', mid: '#5b9bf0', band: '#9ec5f5', scenario: '#f0a93b' };
 
-/** macro/sim 파일 → 전망 시뮬 뷰. status≠'ok' 또는 fan 비면 holdback(섹션 미렌더). */
-export function buildMacroSimView(sim: MacroSimFile | null, lang: Lang): MacroSimView {
-	const empty: MacroSimView = { status: 'holdback', asOf: sim?.asOf ?? '', horizon: sim?.horizon ?? 0, periods: [], fanCards: [], regimePath: null, irf: null, honesty: { sampleN: null, calibrated: false, note: '' } };
+/** macro/sim 파일 → 전망 시뮬 뷰. status≠'ok' 또는 fan 비면 holdback(섹션 미렌더).
+ *  activeScenarioKey 지정 시 fanCards 에 해당 시나리오 조건부 중앙(별색) overlay + 배지. */
+export function buildMacroSimView(sim: MacroSimFile | null, lang: Lang, activeScenarioKey: string | null = null): MacroSimView {
+	const empty: MacroSimView = { status: 'holdback', asOf: sim?.asOf ?? '', horizon: sim?.horizon ?? 0, periods: [], fanCards: [], scenarios: [], activeScenario: null, regimePath: null, irf: null, honesty: { sampleN: null, calibrated: false, note: '' } };
 	if (!sim || sim.status !== 'ok' || !sim.fan || !Object.keys(sim.fan).length) return empty;
 
 	const horizon = sim.horizon || 12;
 	const periods = simMonthAxis(sim.asOf, SIM_HIST, horizon);
 	const T = (kr: string, en: string): string => (lang === 'en' ? en : kr);
+
+	// 시나리오 칩 + 활성 시나리오(조건부 overlay). 활성 fan = 변수별 조건부 q50 라인 1개 추가.
+	const simScenarios = sim.scenarios ?? [];
+	const scenarios: MacroSimScenarioView[] = simScenarios.map((s) => ({ key: s.key, label: T(s.label, s.labelEn), condLabel: T(s.condLabel, s.condLabelEn) }));
+	const activeRaw = activeScenarioKey ? simScenarios.find((s) => s.key === activeScenarioKey) ?? null : null;
+	const activeScenario: MacroSimScenarioView | null = activeRaw ? { key: activeRaw.key, label: T(activeRaw.label, activeRaw.labelEn), condLabel: T(activeRaw.condLabel, activeRaw.condLabelEn) } : null;
 
 	// 팬 FinCard — 변수당 1장: 과거 실적(실선) + 현재 anchor 에서 p50/p5/p95(밴드) 미래로.
 	// 원유는 모델 control(물가퍼즐 해소용)이라 헤드라인 팬에서 제외 → 깔끔한 2×2.
@@ -2836,6 +2852,9 @@ export function buildMacroSimView(sim: MacroSimFile | null, lang: Lang): MacroSi
 			{ name: T('중앙', 'median'), data: fanOf(v.q50), color: SIM_COLORS.mid, type: 'line' },
 			{ name: T('하위10', 'p10'), data: fanOf(v.q5), color: SIM_COLORS.band, type: 'line' }
 		];
+		// 조건부 overlay — 활성 시나리오의 같은 변수 조건부 q50(별색 1라인). baseline 밴드 위에 얹어 delta 가시.
+		const condVar = activeRaw?.fan?.[label];
+		if (condVar) series.push({ name: T('조건부', 'cond'), data: fanOf(condVar.q50), color: SIM_COLORS.scenario, type: 'line' });
 		const unit = v.transform === 'logdiff100' ? '%' : '%';
 		fanCards.push({ key: v.seriesId, title: `${label} · ${T(v.transform === 'logdiff100' ? '월간 변화' : '수준', v.transform === 'logdiff100' ? 'MoM' : 'level')}`, unit, series });
 	}
@@ -2854,5 +2873,5 @@ export function buildMacroSimView(sim: MacroSimFile | null, lang: Lang): MacroSi
 
 	const nObs = typeof sim.model?.nObs === 'number' ? sim.model.nObs : null;
 	const note = T(`표본 ${nObs ?? '?'}개월 · BVAR(해석적) · 추정 ${sim.asOf} · 런타임 계산 · scenario≠forecast`, `N=${nObs ?? '?'} · BVAR(analytic) · as of ${sim.asOf} · runtime · scenario≠forecast`);
-	return { status: 'ok', asOf: sim.asOf, horizon, periods, fanCards, regimePath, irf, honesty: { sampleN: nObs, calibrated: false, note } };
+	return { status: 'ok', asOf: sim.asOf, horizon, periods, fanCards, scenarios, activeScenario, regimePath, irf, honesty: { sampleN: nObs, calibrated: false, note } };
 }
