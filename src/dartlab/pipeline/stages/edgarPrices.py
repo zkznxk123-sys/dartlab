@@ -28,6 +28,11 @@ _RET_OFFSETS = {"return1m": 21, "return3m": 63, "return1y": 252}
 _SNAPSHOT_REPO = "eddmpython/dartlab-data"
 _SNAPSHOT_PATH_IN_REPO = "landing/map/prices-snapshot-us.json"
 
+# 행수 가드 — Yahoo 는 throttle(429) 시 에러 없이 default 범위(~110행 ≈ 6개월)만 반환하는 조용한
+# 부분응답을 낸다(실측: UNH·AAPL 2887행 대신 110행). 이보다 적으면 degraded 의심 → 검증 재시도.
+_DEGRADED_ROW_FLOOR = 250  # 다년 start 인데 이 미만이면 부분응답 의심(252거래일=1년)
+_DEGRADED_RETRY_SLEEP = 20.0  # degraded 재시도 전 throttle 해소 대기(초)
+
 
 def _universeTickers() -> list[str]:
     """주가 bake 대상 유니버스 ticker(대문자) — edgarPanel 우선순위(상장 universe)와 동일 scope.
@@ -112,13 +117,23 @@ def _bakeOne(ticker: str, start: str, outDir) -> dict | None:
     Returns:
         dict | None — 스냅샷 행(게이트용). 무데이터/실패 None.
     """
+    import time as _time
+
     import polars as pl
 
     from dartlab.gather import getDefaultGather
 
-    df = getDefaultGather().price(ticker, market="US", start=start)
+    g = getDefaultGather()
+    df = g.price(ticker, market="US", start=start)
     if df is None or not hasattr(df, "height") or df.height == 0:
         return None
+    # 행수 가드 — 적은 행은 throttle 부분응답(~110행) 의심. 더 긴 sleep 후 검증 재시도: 재시도가 더 주면
+    # 첫 응답이 degraded(큰 쪽 채택), 같으면 진짜 짧은 이력(최근 IPO 등 — 그대로). 손상 백필 차단.
+    if df.height < _DEGRADED_ROW_FLOOR:
+        _time.sleep(_DEGRADED_RETRY_SLEEP)
+        df2 = g.price(ticker, market="US", start=start)
+        if df2 is not None and hasattr(df2, "height") and df2.height > df.height:
+            df = df2
     # gather 출력 = [date(Date), open, high, low, close, volume]. date → Utf8 'YYYYMMDD'.
     dateExpr = (
         pl.col("date").dt.strftime("%Y%m%d")
