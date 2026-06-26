@@ -180,6 +180,6 @@ api.upload_file(
     repo_type="dataset",
     path_or_fileobj=README.encode("utf-8"),
     path_in_repo="README.md",
-    commit_message="align license with GitHub repo (apache-2.0)",
+    commit_message="update sponsor link to buymeacoffee.com/eddmpython",
 )
 print("README.md 업로드 완료")
