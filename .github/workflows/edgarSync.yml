@@ -153,7 +153,7 @@ jobs:
           path: data/dart/searchCatalog/edgarPanel/**
           if-no-files-found: ignore
 
-      # ── 4. scan 프리빌드 ──
+      # ── 4. scan 프리빌드 (다년 패널 — finance-us 5Y 소스) ──
       - name: Build EDGAR scan prebuild
         run: |
           uv run python -X utf8 -c "
@@ -162,6 +162,38 @@ jobs:
           "
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
+
+      # ── 4b. US 터미널 게이트 집계 (finance-us / search-us JSON) ──
+      # 브라우저 터미널 raw.finance / raw.index 의 US 분 — scan 집계(위에서 빌드)를 reshape.
+      # KR buildFinanceJson / buildSearchMain 의 US 대칭. routeLoad 가 이 2 JSON 을 KR 위에 병합.
+      - name: Build US terminal aggregates (finance-us + search-us)
+        run: |
+          uv run python -X utf8 .github/scripts/prebuild/buildFinanceJsonUs.py
+          uv run python -X utf8 .github/scripts/prebuild/buildSearchIndexUs.py
+        env:
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/data
+      - name: Publish US terminal aggregates to HF
+        run: |
+          uv run python -X utf8 -c "
+          import os
+          from huggingface_hub import HfApi
+          from dartlab.core.hfRetry import retryHfCall
+          api = HfApi(token=os.environ['HF_TOKEN'])
+          pairs = [
+              ('landing/static/dashboards/finance-us.json', 'landing/dashboards/finance-us.json'),
+              ('landing/static/map/search-index-us.json', 'landing/map/search-index-us.json'),
+          ]
+          for local, repoPath in pairs:
+              if not os.path.exists(local):
+                  print('skip (missing):', local)
+                  continue
+              retryHfCall(api.upload_file, path_or_fileobj=local, path_in_repo=repoPath,
+                          repo_id='eddmpython/dartlab-data', repo_type='dataset',
+                          commit_message=f'갱신: {repoPath}')
+              print('published', repoPath)
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       # ── 5. HF 업로드 (dartlab 파생물만) ──
       # finance / meta 는 SEC 벌크가 원본이므로 HF 미러링 없음 (사용자 PC 자동 다운로드).
