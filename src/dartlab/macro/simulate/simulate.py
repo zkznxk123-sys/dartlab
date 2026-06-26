@@ -17,14 +17,17 @@ from dartlab.macro.simulate.irf import impulseResponse
 from dartlab.macro.simulate.regimePath import simulateRegimePath
 from dartlab.macro.simulate.scenarioPath import buildScenarios
 
-# 시장별 변수 사양(개념검증 GO 셋). policyIdx=충격 변수, gdpSeries=Hamilton 입력.
-# HY스프레드(신용축)는 데이터 백필 후 편입 — 그 전엔 본 셋(원유=물가퍼즐 해소 + 장기이력).
+# 시장별 변수 사양(6변수). policyIdx=충격 변수, gdpSeries=Hamilton 입력.
+# 신용축 = BAA10Y(Moody's Baa−10Y 스프레드, 1986~). HY(BAMLH0A0HYM2)는 ICE BofA 라이선스로
+# FRED 가 2023-06~ 만 제공(과거 truncation) → 백필 원천 불가라 정통 신용스프레드 BAA10Y 로 편입.
+# 원유=물가퍼즐 해소 control 유지.
 _US_SPECS = (
     VarSpec("INDPRO", "산업생산", "logdiff100"),
     VarSpec("CPIAUCSL", "소비자물가", "logdiff100"),
     VarSpec("DCOILWTICO", "원유", "logdiff100"),
     VarSpec("FEDFUNDS", "정책금리", "level"),
     VarSpec("DGS10", "10년금리", "level"),
+    VarSpec("BAA10Y", "신용스프레드", "level"),
 )
 _KR_SPECS = (
     VarSpec("IPI", "산업생산", "logdiff100"),
@@ -32,6 +35,7 @@ _KR_SPECS = (
     VarSpec("DCOILWTICO", "원유", "logdiff100"),
     VarSpec("BASE_RATE", "기준금리", "level"),
     VarSpec("USDKRW", "원/달러", "logdiff100"),
+    VarSpec("BAA10Y", "신용스프레드", "level"),
 )
 _MARKET_SPECS = {
     "US": {"specs": _US_SPECS, "policyIdx": 3, "gdpSeries": "A191RL1Q225SBEA"},
@@ -81,7 +85,7 @@ def simulateMacro(
     """거시 변수·국면을 미래로 확률 시뮬 — BVAR 팬 + IRF + 국면경로.
 
     Capabilities:
-        시장 핵심 거시 5변수 BVAR(자연켤레 Minnesota)를 추정해 향후 horizon 개월의 분위 팬
+        시장 핵심 거시 6변수 BVAR(자연켤레 Minnesota·신용스프레드 포함)를 추정해 향후 horizon 개월의 분위 팬
         (해석적 예측오차 분산 밴드), 정책금리 충격 IRF(재귀식별·예시), 국면 forward 경로
         (Hamilton Markov)를 *결정론*으로 산출. 거시 '예측' 축을 점추정에서 분포·경로로 확장.
 
