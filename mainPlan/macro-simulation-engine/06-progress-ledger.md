@@ -62,11 +62,19 @@
 - **UI git push 보류** — 공개 터미널 시각 변경(칩·overlay·배지·신용 fan 카드)이라 운영자 눈검수 후 push("푸시해"). commit 완료(백엔드 동반 보류).
 - **데이터 publish 불요** — 런타임 계산 + BAA10Y 가 이미 SSOT 에 있어 별도 배선·HF 쓰기 0.
 
-## NEXT (Phase 4 — 선택·후순위, 데이터벽 게이트)
+### 🚫 Phase 4 — transmission 정량 브리지: held-out 측정 → **데이터벽 확정(빌드 안 함)**
+- **측정**(대표 6社·정유/화학/반도체/자동차/건설, 분기 YoY 매출 vs 거시동인 walk-forward, 스크래치 측정·코드 0):
+  - ① 낙관(full-sample 선택 3변수): r2vsPers **+0.31**, 지속성 이김 5/6 — 좋아 보임.
+  - ② 엄격(window별 동인 재선택, look-ahead 제거): r2vsPers **−0.28**, 2/6(유가직결 S-Oil·롯데케미칼만 +0.4~0.57).
+  - ③ 고정 이론동인 1개(브리지 실제 설계): r2vsPers **−0.74**, **0/6**.
+- **판정**: in-sample R²0.73·sign0.85 는 **선택 look-ahead + 매출YoY 자기상관 인플레**. 선택을 honest 하게 할수록 스킬 소멸 →
+  회사단 거시→재무 전이는 **표본외에서 지속성(전분기 YoY)도 못 이김**(~37분기 과적합). 유가→정유/화학만 좁게 살아있으나 그조차 단변량선 붕괴.
+- **결정**: **정량 브리지 빌드 안 함**(`feedback_plan_score_not_signature` — 검증 실패한 기능 표면화 금지). PRD 05 §5 예견 데이터벽 실측 확정.
+  기존 **정성 transmission**(엣지·sign·lag·falsifier·requiredCompanyEvidence·evidence-gate)이 올바른 레벨 — 정량 정밀 참칭 안 함. scenario-simulator 외생축 격상도 동일 사유 보류.
+- **은행 미커버**: 금융 IS(매출/영업이익 비표준) → calcMacroRegression None. 별도 메트릭 필요(후순위).
 
-1. **운영자 시각 눈검수**(전망 탭 → 시나리오 칩 overlay + 신용스프레드 fan) → push 승인("푸시해").
-2. **Phase 4 — transmission 브리지**(선택): IRF/조건부경로 → 섹터·기업 타격 + scenario-simulator 외생축 격상.
-   ⚠ **데이터벽 먼저** — transmission 회사단 커버리지 held-out 측정이 빌드 전제(PRD 05 §5). 측정 없이 빌드 = `feedback_plan_score_not_signature` 위반. 측정 → 점진.
+## 결론 — 거시 시뮬레이션 엔진 **완결**
+Phase 0~3(BVAR 팬·IRF·국면경로·시나리오 조건부) + 신용축(BAA10Y) 빌드·배포·검증 완료. Phase 4 는 측정으로 데이터벽 확정 → 정량 브리지 미빌드(정공 판정). 잔여 후순위 = 은행 거시민감 메트릭·HY 라이선스 해소 시 재편(둘 다 외부 데이터 의존).
 
 ## 결정 로그
 
