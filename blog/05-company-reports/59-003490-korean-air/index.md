@@ -53,18 +53,18 @@ carousel:
       kicker: "10년의 끝"
       line: "자본잠식 직전까지 갔던 회사가\n[[아시아나를 삼켰다]]"
       sub: "2020년 코로나로 자본총계 3,300억, 유상증자 4.5조로 살아남아 2024년 12월 인수를 완료했다."
-      image: bg-timeline-grid
+      image: kal-boeing-takeoff
     - layout: editorialStat
       kicker: "삼킨 무게"
       bigNumber: "16.6"
       unit: "조 자산이 하루에 흡수"
       context: "합병일에 아시아나가 통째로 찍혔다. 자산 30.39조 → 47.01조, 부채비율 340%로 점프."
-      image: bg-navy-gradient
+      image: kal-boeing-takeoff
     - layout: editorialBeat
       kicker: "반토막의 범인 ①"
       line: "화물 슈퍼사이클이\n[[정상으로 돌아왔다]]"
       sub: "톤당 $0.45였던 화물 단가가 $0.22로 반토막. 화물 매출 7.6조(2022)에서 5조로, -2.6조가 빠졌다."
-      image: bg-world-map-dark
+      image: bg-runway-dusk
     - layout: editorialStat
       kicker: "반토막의 범인 ②·③"
       bigNumber: "-9,966"

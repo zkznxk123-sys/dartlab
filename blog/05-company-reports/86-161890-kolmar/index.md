@@ -71,12 +71,12 @@ carousel:
       bigNumber: "540"
       unit: "억 이자 · 매년"
       context: "인수 차입 1.1조의 이자. 본업이 약하던 2022년엔 영업이익의 81%를 가져갔다. 본업이 아니라 인수의 일부였다."
-      image: bg-console-grid
+      image: odm-factory-floor
     - layout: editorialBeat
       kicker: "흑자가 적자가 되는 회계"
       line: "영업이익 733억 흑자가\n순이익 [[-41억]] 적자로"
       sub: "2022년, 금융비용 595 + 기타비용 396 + 평가손실 290 + 법인세 211. 다섯 비용이 한 해에 같이 터졌다."
-      image: bg-paper-grey
+      image: pharma-production
     - layout: editorialStat
       kicker: "본업의 진짜 힘"
       bigNumber: "5.52"
@@ -98,7 +98,7 @@ carousel:
       kicker: "처음 본업이 이겼다"
       line: "본업 +1,663억이\n영업외를 [[8.6배]]로 압도했다"
       sub: "2025년 영업이익 2,396억, 순이익 1,682억 사상 최대. 8년 누적 -3,500억을 이번 사이클에서 처음 따라잡기 시작했다."
-      image: bg-cream-grid
+      image: k-beauty-ampoule
 ---
 
 <script>

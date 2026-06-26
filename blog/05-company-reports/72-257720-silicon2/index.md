@@ -74,7 +74,7 @@ carousel:
       2026년 1분기 연결 매출.
       전년 대비 41.1% 늘었습니다.
       K뷰티 수요가 숫자로 찍혔습니다.
-    image: packing-line
+    image: cc0-cosmetics-shelf
   - layout: editorialStat
     kicker: 영업이익
     bigNumber: '645'
@@ -122,7 +122,7 @@ carousel:
       유통사는 빠르게 커질 수 있습니다.
       반대로 유행이 식거나 운반비가 흔들리면
       재고와 비용이 먼저 보입니다.
-    image: packing-line
+    image: cc0-export-port
   - layout: editorialBeat
     kicker: 마무리
     line: |-

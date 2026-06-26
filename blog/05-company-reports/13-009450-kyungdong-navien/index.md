@@ -60,7 +60,7 @@ carousel:
       bigNumber: "42.5"
       unit: "% 매출총이익률"
       context: "제조업 평균의 두 배. 현대차 18%, 삼성 반도체 36%, 철강 14%. 콘덴싱 기술이 만든 마진이다."
-      image: bg-blueprint-detailed
+      image: navien-boiler-unit
     - layout: editorialBeat
       kicker: "70년의 카테고리 점프"
       line: "연탄 → 보일러 → 온수기\n다음은 [[퍼네스]]"
