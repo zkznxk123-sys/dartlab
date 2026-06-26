@@ -54,26 +54,52 @@ carousel:
 - 로컬 원본 = `sns/assets/{code}/{name}.webp` → `build_index.py` 인덱싱 → `publish_assets_hf.py` 가 hfMedia 업로드.
   파일명에 `card`/`thumbnail`/`og-` 토큰만 없으면 hero 로 자동 채택(별도 등록 불필요).
 
-### 이미지가 부실할 때 — 저작권 없는(CC0/PD) 이미지 가져오는 곳
-회사 카드 이미지가 모자라거나 부실하면 아래 두 길로 **저작권 의무 0** 이미지를 받아 `sns/assets/{code}/` 에 채운다.
+### 이미지 점검 — 쓰레기(평면 벡터·도식·인포그래픽) 먼저 잡기
+생성형 hero 중 일부가 실사가 아니라 **평면 도식·막대그래프·텍스트 카드**로 나와 흑백 풀블리드 배경으로 깨진다.
+발행 전·수시로 전수 스캔한다. 색복잡도(평면≈수십 색, 실사≈수천 색)로 의심을 잡고 **반드시 눈으로 한 장씩 확정**한다
+(자동 판정 아님 — 야간 정유탑·검은 분말 같은 어두운 실사도 같이 잡힌다).
+```
+uv run python -X utf8 blog/_scripts/audit_carousel_images.py            # 색<600 또는 이름패턴 의심 목록
+uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면 벡터/도식에 집중
+```
+
+### 이미지 가져오는 곳 — 저작권 없는(무료) 소스만
+⛔ **핀터레스트·구글 이미지 금지** — 거기 올라온 사진은 대부분 **저작권 있음**(긁어온 것)이라 가져다 쓰면 침해다.
+아래 무료 소스만 쓴다.
+- **Wikimedia Commons / Openverse** — PD/CC0 (귀속 의무 0). `fetch_cc0_images.py` 가 이 둘에서만 받는다.
+- 보강 여지(필요 시 API 키로 추가): **Unsplash·Pexels·Pixabay**(무료 라이선스·상업 OK), **NASA·각국 공공기관**(PD).
+
+회사 카드 이미지가 모자라거나 부실하면 아래 두 길로 받아 `sns/assets/{code}/` 에 채운다.
 받은 뒤 `build_index.py` → `publish_assets_hf.py` 로 올리고, 슬라이드에서 `image: <이름>` 으로 가리키면 끝(별도 배선 없음).
 
-1. **스톡 (CC0/PD) — `fetch_cc0_images.py`**: Wikimedia Commons(실사 적중률 1순위) + Openverse 에서 PD/CC0 만 받는다.
-   `cc0-*.webp` 로 저장. 출처는 회사 폴더 `CREDITS.md` 에 자동 기록(의무 아니나 감사 추적).
+1. **스톡 (CC0/PD) — `fetch_cc0_images.py`**: Commons(실사 적중률 1순위) + Openverse 에서 PD/CC0 만 받아 `cc0-*.webp` 저장.
+   출처는 회사 폴더 `CREDITS.md` 에 자동 기록(의무 아니나 감사 추적).
    ```
    uv run python -X utf8 blog/_scripts/fetch_cc0_images.py --jobs sns/assets/_plans/cc0FetchJobs.json
    ```
    jobs = `[{"code","name","queries":[...],"keywords":[...]}]`. **반드시 받은 이미지를 눈으로 확인** —
-   스톡은 특정 회사 피사체(정유탑·병입라인 등) 적중률이 들쭉날쭉해 오매치가 섞인다(실측: 받은 것 중 절반은 폐기).
-2. **생성형 (주제 정확) — `gen_company_flux.py`**: Replicate FLUX 로 4:5 hero 를 생성. 특정 피사체 적중률 1순위.
+   스톡은 특정 피사체(정유탑·병입라인 등) 적중률이 들쭉날쭉해 오매치(엉뚱한 사진·텍스트 광고·도식)가 섞인다(실측: 받은 것 절반 폐기).
+2. **생성형 (주제 정확) — `gen_company_flux.py`**: Replicate FLUX 로 4:5 hero 생성. 특정 피사체 적중률 1순위.
    비용 사전충전이며 잔액 있을 때만 동작(잔액 부족 = HTTP 402). jobs = `[{"code","name","prompt"}]`.
 
-> 원칙: 스톡(CC0/PD)이 1차(공짜·합법), 안 맞으면 생성형. 둘 다 받은 즉시 눈검수 후 채택. 출처는 `CREDITS.md` 에 남긴다.
+> 원칙: 스톡(무료 PD/CC0)이 1차, 안 맞으면 생성형. **둘 다 받은 즉시 눈검수 후 채택**(쓰레기 거르기). 출처는 `CREDITS.md` 에.
+
+## 발행 전 전문가 검토 게이트 — 작가 패널 토론·평가
+**캐러셀은 공개물이라 발행 전에 전문가 검토를 반드시 거친다.** 자동 통과 금지.
+1. **작가 패널 토론** — 서로 다른 렌즈(훅 강도·서사·디자인/이미지 적합성·정직성)로 독립 검토 후 토론으로 약점 합의.
+2. **정직성·근거 평가** — 본문 숫자가 전부 `## 검증표`에 있는가, 외부/실측이 분리됐나, 과장·투자권유 표현 없나.
+3. **이미지 적합성 평가** — 위 색복잡도 감사 통과 + 주제 적합 + 눈검수 완료(쓰레기·텍스트·도식 0).
+4. **평가 점수**가 기준 미달이면 발행 보류·수정. (점수는 실가치 proxy 가 아니라 게이트 — 미빌드 점수 인플레 금지.)
+
+> 운영자 검토 흐름: 큰 변경·신규편은 위 패널을 거쳐 합의된 수정 반영 후에만 `build_carousel_contracts.py` 발행.
 
 ## 도구
 | 파일 | 역할 |
 |---|---|
 | `blog/_scripts/build_carousel_contracts.py` | **발행** — blog frontmatter → hfMedia 단일 파일 |
+| `blog/_scripts/audit_carousel_images.py` | **이미지 감사** — 평면 벡터·도식·인포그래픽(쓰레기) 색복잡도로 탐지 |
+| `blog/_scripts/fetch_cc0_images.py` | 무료(PD/CC0) 이미지 수급 — Commons·Openverse |
+| `blog/_scripts/gen_company_flux.py` | 생성형 hero(4:5) — 잔액 충전 시 |
 | `blog/_scripts/audit_seo.py` | carousel 형식·숫자 검사 |
 | `blog/_scripts/migrate_carousels_to_blog.py` | 1회성 이관(sns/carousels → blog frontmatter, **완료**) |
 | `blog/_scripts/test_carousel_contracts.py` | 발행/이관 테스트 |
