@@ -40,12 +40,18 @@
 		latestPct: number;
 		amt: number;
 	}
+	interface TsCol {
+		label: string;
+		total: number;
+		segs: { name: string; color: string; pct: number }[]; // 그 기간 카테고리 비중%(스택 세그먼트)
+	}
 	interface TblCard {
 		titleKr: string;
 		titleEn: string;
 		subKr: string;
 		subEn: string;
 		quarters: string[];
+		cols: TsCol[]; // 시계열 스택 — 기간(분기)별 컬럼
 		rows: TblRow[];
 		latestPeriod: string;
 		latestTotal: number;
@@ -66,7 +72,13 @@
 			.filter((r) => r.latestPct > 0.05) // 당기 0 인 사족 행 제거(태그 변경 잔여 등)
 			.sort((a, b) => b.latestPct - a.latestPct);
 		if (!rows.length) return null;
-		return { titleKr, titleEn, subKr, subEn, quarters: pts.map((p) => shortPeriod(p.period)), rows, latestPeriod: last.period, latestTotal: last.total, annual: last.quarter === '4분기' };
+		// 시계열 스택 — 각 기간(분기)을 100% 적층 컬럼으로. 세그먼트 순서 = rows(당기 비중 desc) 고정이라 색 밴드가 기간 가로질러 흐름.
+		const cols: TsCol[] = pts.map((p, j) => ({
+			label: shortPeriod(p.period),
+			total: p.total,
+			segs: rows.map((r) => ({ name: r.name, color: r.color, pct: r.pcts[j] ?? 0 }))
+		}));
+		return { titleKr, titleEn, subKr, subEn, quarters: pts.map((p) => shortPeriod(p.period)), cols, rows, latestPeriod: last.period, latestTotal: last.total, annual: last.quarter === '4분기' };
 	}
 	const cards = $derived(
 		[makeCard(cost, '비용 체질', 'COST CHASSIS', '돈을 뭐에 쓰나', 'where the money goes'), makeCard(segment, '부문별 매출', 'SEGMENT REVENUE', '어디서 버나', 'revenue by segment')].filter((c): c is TblCard => c != null)
@@ -87,11 +99,17 @@
 						<span class="ndCardTitle">{T(c.titleKr, c.titleEn)} <span class="dim">· {T(c.subKr, c.subEn)}</span></span>
 						<span class="ndHdRight">{T('당기', 'period')} <b class="mono">{fmtKRW(c.latestTotal)}</b> · {c.latestPeriod}</span>
 					</div>
-					<div class="ndBar" role="img" aria-label={T(c.titleKr, c.titleEn)}>
-						{#each c.rows as r (r.name)}
-							<i class="ndBarSeg" style={`width:${r.latestPct}%;background:${r.color}`} title={`${niceName(r.name)} ${r.latestPct.toFixed(1)}%`}>
-								{#if r.latestPct >= 7}<span>{niceName(r.name)} {Math.round(r.latestPct)}</span>{/if}
-							</i>
+					<!-- 시계열 스택 — 분기별 100% 적층 컬럼(왼→오 과거→당기). 색 = 카테고리, 밴드가 기간 가로질러 흐름. -->
+					<div class="ndTs" role="img" aria-label={T(c.titleKr, c.titleEn) + ' time series'}>
+						{#each c.cols as col, j (col.label)}
+							<div class="ndTsCol">
+								<div class="ndTsBar">
+									{#each col.segs as s (s.name)}
+										{#if s.pct > 0.05}<i style={`height:${s.pct}%;background:${s.color}`} title={`${col.label} · ${niceName(s.name)} ${s.pct.toFixed(1)}%`}></i>{/if}
+									{/each}
+								</div>
+								<span class={'ndTsLbl ' + (j === c.cols.length - 1 ? 'ndCur' : '')}>{col.label}</span>
+							</div>
 						{/each}
 					</div>
 					<table class="ndTbl">
@@ -128,30 +146,44 @@
 		color: var(--dimmer);
 		letter-spacing: 0.03em;
 	}
-	.ndBar {
+	.ndTs {
 		display: flex;
-		height: 22px;
+		align-items: flex-end;
+		gap: 5px;
+		margin: 8px 0 9px;
+		height: 104px;
+	}
+	.ndTsCol {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		height: 100%;
+		min-width: 0;
+	}
+	.ndTsBar {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
 		border-radius: 3px;
 		overflow: hidden;
-		gap: 1px;
 		background: var(--dl-bg-deep);
-		margin: 7px 0 8px;
 	}
-	.ndBar .ndBarSeg {
-		height: 100%;
-		min-width: 2px;
-		display: flex;
-		align-items: center;
-		padding: 0 5px;
-		overflow: hidden;
-		white-space: nowrap;
+	.ndTsBar i {
+		display: block;
+		width: 100%;
+		min-height: 1px;
 	}
-	.ndBar .ndBarSeg span {
-		font-family: var(--cond);
+	.ndTsLbl {
+		font-family: var(--mono);
 		font-size: 9.5px;
+		color: var(--dimmer);
+		text-align: center;
+		padding-top: 4px;
+	}
+	.ndTsLbl.ndCur {
+		color: var(--fg);
 		font-weight: 700;
-		color: rgba(0, 0, 0, 0.72);
-		text-shadow: 0 0 2px rgba(255, 255, 255, 0.25);
 	}
 	.ndTbl {
 		width: 100%;
