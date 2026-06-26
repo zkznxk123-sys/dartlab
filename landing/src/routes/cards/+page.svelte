@@ -9,7 +9,7 @@
 	import { DARTLAB_BRAND_LINKS, SupportDialog, BrandSwitch, fetchGithubStars, fmtStars } from '@dartlab/ui-surfaces/terminal';
 	import BrandSocial from '$lib/components/BrandSocial.svelte';
 	import { loadMediaIndex } from '$lib/cards/media';
-	import { loadCarousels } from '$lib/cards/contract';
+	import { loadCarousels, contractToCards } from '$lib/cards/contract';
 	import type { MediaIndex, CarouselContract } from '$lib/cards/model';
 	import PostModal from '$lib/cards/PostModal.svelte';
 	import FeedCard from '$lib/cards/FeedCard.svelte';
@@ -61,6 +61,7 @@
 			caption: p.caption ?? '',
 			pinnedComment: p.pinnedComment ?? '',
 			standalone: !!p.standalone,
+			leadCards: contractToCards(p, media), // 계약 lead 슬라이드 미리 투영 — 미리보기 표지 깜빡임 제거
 			corpName: p.name || media?.companies[p.code]?.displayName || p.code
 		}));
 		const q = query.trim().toLowerCase();
@@ -139,7 +140,7 @@
 		{:else}
 			<div class="grid">
 				{#each visible as row (row.slug)}
-					<FeedCard {rt} code={row.stockCode} slug={row.slug} corpName={row.corpName} title={row.title} caption={row.caption} pinnedComment={row.pinnedComment} standalone={row.standalone} {base} {media} onOpen={() => openPost(row.stockCode, row.slug, row.corpName)} />
+					<FeedCard {rt} code={row.stockCode} slug={row.slug} corpName={row.corpName} title={row.title} caption={row.caption} pinnedComment={row.pinnedComment} standalone={row.standalone} leadCards={row.leadCards} {base} {media} onOpen={() => openPost(row.stockCode, row.slug, row.corpName)} />
 				{/each}
 			</div>
 			<div bind:this={sentinel} class="sentinel"></div>

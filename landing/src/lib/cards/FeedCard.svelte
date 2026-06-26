@@ -8,7 +8,7 @@
 	import CoverThumb from './CoverThumb.svelte';
 	import { cardShareUrl } from './share';
 	import { heroUrls } from './media';
-	import type { MediaIndex } from './model';
+	import type { MediaIndex, CarouselCard } from './model';
 
 	let {
 		rt,
@@ -19,6 +19,7 @@
 		caption = '',
 		pinnedComment = '',
 		standalone = false,
+		leadCards = [],
 		base = '',
 		media,
 		onOpen
@@ -31,6 +32,7 @@
 		caption?: string;
 		pinnedComment?: string;
 		standalone?: boolean;
+		leadCards?: CarouselCard[];
 		base?: string;
 		media: MediaIndex | null;
 		onOpen: () => void;
@@ -73,7 +75,7 @@
 	<!-- 인스타 피드식 — 풀폭 인라인 스와이프 캐러셀 + 아래 캡션 바. -->
 	<article class="fc">
 		<div class="fcDeck">
-			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} />
+			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} {leadCards} />
 		</div>
 		<div class="fcBar">
 			<picture>

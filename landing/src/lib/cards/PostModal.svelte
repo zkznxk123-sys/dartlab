@@ -3,7 +3,7 @@
 	// /cards 피드와 /terminal 회사 네비「카드뉴스」가 공유(단일 SSOT). 계약은 code 로 직접 로드(레이스 가드).
 	import type { DartLabRuntime } from '@dartlab/ui-contracts';
 	import Deck from './Deck.svelte';
-	import { loadContract } from './contract';
+	import { loadContract, contractToCards } from './contract';
 	import { cardShareUrl } from './share';
 	import { heroUrls } from './media';
 	import type { MediaIndex, CarouselContract } from './model';
@@ -66,7 +66,7 @@
 <div class="post" role="dialog" aria-modal="true" aria-label="{corpName} 포스트" onclick={onClose}>
 	<div class="postInner" role="document" onclick={(e) => e.stopPropagation()}>
 		<div class="postLeft">
-			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} />
+			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} leadCards={contract ? contractToCards(contract, media) : []} />
 		</div>
 		<aside class="postRight">
 			<header class="prHead">

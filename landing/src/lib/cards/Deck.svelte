@@ -4,7 +4,7 @@
 	// 색감·규격은 기존 SNS 캐러셀(colors.ts·1080×1350) 재현. 키보드 ←→ 는 포커스된 덱에만.
 	import type { DartLabRuntime } from '@dartlab/ui-contracts';
 	import { buildDeck, DECK_PERSPECTIVES } from './build';
-	import type { CarouselDeck } from './model';
+	import type { CarouselDeck, CarouselCard } from './model';
 	import CardSlide from './CardSlide.svelte';
 
 	let {
@@ -13,6 +13,7 @@
 		slug,
 		corpName,
 		heroUrls = [],
+		leadCards = [],
 		perspectiveKey = 'earningsPower',
 		onEnlarge
 	}: {
@@ -21,19 +22,28 @@
 		slug: string;
 		corpName: string;
 		heroUrls?: string[];
+		/** 편집 계약 lead 슬라이드(부모가 contract 로 미리 투영) — 미리보기를 빌드 후 첫 슬라이드와 동일하게. */
+		leadCards?: CarouselCard[];
 		perspectiveKey?: string;
 		onEnlarge?: () => void;
 	} = $props();
 
-	// 표지 미리보기 — buildReport 없이 hfMedia 사진+이름만(피드에서 첫장 즉시 노출).
+	// 표지 미리보기 — buildReport 없이 즉시 첫장 노출(피드 가벼움).
 	function previewDeck(): CarouselDeck {
-		return {
+		const base = {
 			stockCode: sym,
 			corpName,
 			perspectiveKey,
 			perspectiveLabel: DECK_PERSPECTIVES.find((p) => p.key === perspectiveKey)?.label ?? '',
 			asOf: '',
-			heroUrls,
+			heroUrls
+		};
+		// 편집 계약의 실제 lead 슬라이드가 주어지면 그대로 미리보기로 — 빌드 후 첫 슬라이드(들)와 동일해
+		// 표지가 '엉뚱한 사진 → 다른 사진'으로 깜빡이며 바뀌는 현상 제거(빌드는 뒤에 차트만 덧붙인다).
+		if (leadCards.length) return { ...base, cards: leadCards };
+		// 계약 없는 자동 덱만 합성 표지(heroUrls[0]) — 이 경우 빌드 표지도 heroUrls[0] 라 깜빡임 없음.
+		return {
+			...base,
 			cards: [
 				{
 					kind: 'cover',
