@@ -28,7 +28,18 @@ def buildRegistry() -> dict[str, StageSpec]:
         True
     """
     # krx 스테이지는 운영 OFF (gov 로 대체, 저작권). `stages/krx.py` 코드는 보존 — 미import 로 unwire.
-    from dartlab.pipeline.stages import allFilings, dart, dartZip, edgar, edgarPanel, macro, news, prebuild, reconcile
+    from dartlab.pipeline.stages import (
+        allFilings,
+        brokerageReports,
+        dart,
+        dartZip,
+        edgar,
+        edgarPanel,
+        macro,
+        news,
+        prebuild,
+        reconcile,
+    )
 
     specs: list[StageSpec] = [
         StageSpec("finance", run=dart.runDartRecent, uploadCategories=("finance",), label="DART 재무 (증분)"),
@@ -102,6 +113,12 @@ def buildRegistry() -> dict[str, StageSpec]:
             run=prebuild.runMacroJson,
             online=False,
             label="macro.json (offline prebuild — cycle/regime → landing 대시보드 v20)",
+        ),
+        StageSpec(
+            "brokerageReports",
+            run=brokerageReports.runBrokerageReports,
+            uploadCategories=("brokerageReports",),
+            label="증권사 리서치 메타 인덱스 (일별 증분, 서버렌더 3개사)",
         ),
         StageSpec("news", run=news.runNewsHeadlines, uploadCategories=("newsHeadlines",), label="뉴스 헤드라인"),
         StageSpec(

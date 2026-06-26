@@ -52,6 +52,13 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "전종목 횡단분석 프리빌드 데이터",
         "public": True,
     },
+    "brokerageReports": {
+        # 증권사 리서치 *메타 인덱스* (본문 0 — 제목·URL·발간일·구분·종목). pub_date 월별
+        # flat {YYYYMM}.parquet. 공개 게시판 자체 스크랩(링크아웃), gather.sources.brokerage SSOT.
+        "dir": "research/brokerage",
+        "label": "증권사 리서치 리포트 메타 인덱스 (제목·링크·발간일·종목, 본문 없음)",
+        "public": True,
+    },
     "edgarDocs": {
         # plan delegated-prancing-tower PR-E7a — deprecated 마킹.
         # 안전 게이트 (4 주 sectionsParityEdgar 0 violations + D.1 2 주 + viewer
