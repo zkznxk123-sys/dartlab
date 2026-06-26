@@ -32,6 +32,82 @@ ai:
   weaknesses: ["분기 OPM -28%~+16% 극심 변동", "판관비율 35~46%", "dCR-BB+ 투기등급"]
   keyMetrics: {revenue: 0.3196, opm: 3.7, roe: 2.8, fcf: -0.0307}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 연간 영업이익률 3.7%인데 Q4 혼자 16% — 위성 안테나 1위권의 분기 함정
+  caption: |-
+    해상 위성통신 안테나(VSAT) 세계 1위권, 매출은 9년간 837억에서 3,196억으로 3.8배. 그런데 같은 해 분기 영업이익률이 Q1 -27.8%에서 Q4 +16.0%까지 출렁인다. 마이너스 28%와 플러스 16%가 한 회사 한 해에 공존한다.
+
+    진짜 원인은 시장이 아니라 구조였다. 원가율은 연 60.9%로 거의 일정한데, 판관비(인건비·R&D)는 매 분기 균등하게 나간다. 매출이 적은 Q1엔 고정비가 이익을 삼키고, 매출 1,243억이 몰린 Q4엔 같은 고정비가 희석된다. 2024년엔 매출이 15% 빠지자 판관비율이 46.1%로 튀며 연간 적자(-7.5%)가 났다.
+
+    관찰할 지표는 분기 편중 해소다. 2026Q1 매출 500억 이상 + 영업이익 흑자면 'Q1 적자 패턴' 탈피의 신호, 또 400억 + 적자면 영업이익률 3~4%에 갇히는 구조는 그대로다. 투자 권유가 아니라 구조 전환 여부를 가를 if-then이다.
+  pinnedComment: 투자 판단이 아닙니다. 재무 수치는 dartlab이 9년치 전자공시로 실측한 값이고, 시장 규모·경쟁사 순위(1위권) 등 일부는 외부/업계 추정 표기로 구분했습니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      위성 안테나 세계 1위권이
+      [[같은 해 Q1 -28%, Q4 +16%]]
+    sub: |-
+      매출 9년간 3.8배 성장
+      그런데 분기마다 흑적을 오간다
+      한 회사 한 해에 어떻게 가능한가?
+    image: satellite-antenna
+  - layout: editorialStat
+    kicker: 매출 9년 (2017→2025)
+    bigNumber: '3.8'
+    unit: 배
+    context: |-
+      837억에서 3,196억으로
+      연평균 18% 성장
+      LEO 위성통신 투자 붐을 탔다
+    image: starlink-constellation
+  - layout: editorialBeat
+    kicker: 반전 — 성장했는데 마진은 제자리
+    line: |-
+      매출 3.8배인데
+      [[영업이익률은 8.4%→3.7%로 하락]]
+    sub: |-
+      매출은 성장, 마진은 성장하지 않는 구조
+      원인은 판관비라는 무거운 고정비
+    image: production-site
+  - layout: editorialStat
+    kicker: 2025년 분기 매출 격차
+    bigNumber: '1,243'
+    unit: 억 (Q4)
+    context: |-
+      Q1은 434억뿐 — Q4의 2.9분의 1
+      연간 매출의 39%가 Q4 한 분기에 집중
+      원가율은 연 60.9%로 거의 일정
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 적자의 진짜 방아쇠
+    line: |-
+      2024년 매출 15% 감소에
+      [[판관비율 37%→46%로 급등]]
+    sub: |-
+      판관비 절대액은 비슷한데 매출이 줄어 비율이 튐
+      → 연간 영업이익률 -7.5% 적자
+      2025년 매출 반등하자 판관비율 35.3%로 복귀
+    image: control-room
+  - layout: editorialStat
+    kicker: 재무 체력 — 성장했지만 안전하진 않다
+    bigNumber: '9.6'
+    unit: '% 안전마진'
+    context: |-
+      신용등급 dCR-BB+ (투기등급)
+      차입금 1,363억 — 1년 새 2.3배·부채비율 87%
+      매출 10% 빠지면 손익분기점 아래로
+    image: production-site
+  - layout: editorialBeat
+    kicker: 관찰 지표 — 다음에 볼 한 줄
+    line: |-
+      구조 전환을 가를 한 줄 →
+      [[2026Q1 매출 500억+ & 흑자]]
+    sub: |-
+      그러면 Q1 적자 패턴 탈피, 구조적 전환 신호
+      또 400억 + 적자면 현 구조 그대로 유지
+      투자 권유 아님 — 구조를 가르는 if-then
+    image: control-room
 ---
 
 <script>
