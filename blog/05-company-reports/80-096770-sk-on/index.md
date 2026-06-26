@@ -33,6 +33,68 @@ ai:
     netMargin: "-6.90%"
     fcf: "-3.37조"
   dataAsOf: "2026-04-28"
+carousel:
+  title: 배터리 성장주가 어쩌다 5.5조 순손실이 됐나
+  caption: |-
+    SK이노베이션(096770)의 2025년 연결 영업이익은 4,487억원, 흑자였습니다. 매출도 80.3조원. 그런데 같은 해 당기순손실은 5.54조원이었습니다.
+
+    부호를 뒤집은 건 영업이익 아래 '기타비용' 한 줄입니다. 2024년 7,006억원이던 기타비용이 2025년 5.64조원으로 불었습니다. Ford와 세운 약 11조원짜리 배터리 합작공장 BlueOval SK를 접는 비용이 한꺼번에 손익으로 돌아온 겁니다(합작 해체·SK온 단독 영업손실 9,319억은 외부 보도).
+
+    EV 수요가 꺾이자 11조 공장·차입·감가·손상이 동시에 모회사 손익계산서로 들어왔습니다. 잉여현금흐름은 −3.37조. 다음 공시에서 볼 건 매출이 아니라, 합작 해체 비용이 멈추고 현금이 돌아오는가입니다.
+  pinnedComment: 투자 판단이 아닙니다. SK이노베이션 연결은 dartlab 실측, SK온 단독 실적과 BlueOval SK·Ford 합작 해체는 외부 보도입니다. 기타비용이 멈추는가, 잉여현금흐름이 양수로 돌아오는가를 보세요.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      영업이익은 [[흑자]]였다
+      그런데 순손실 [[5.5조]]
+    sub: |-
+      11조짜리 합작공장을 접은 비용이
+      영업이익 아래로 떨어졌다.
+    image: cc0-battery-cells
+  - layout: editorialStat
+    kicker: SK이노베이션 2025 연결 영업이익
+    bigNumber: '4,487'
+    unit: 억
+    context: |-
+      매출 80.3조에 영업이익은 흑자였다.
+      여기까지만 보면 정상이다.
+    image: ess-containers
+  - layout: editorialStat
+    kicker: 그런데 당기순손실
+    bigNumber: '−5.54'
+    unit: 조
+    context: |-
+      영업이익 아래에서 무엇이
+      부호를 통째로 뒤집었나.
+    image: battery-line
+  - layout: editorialBeat
+    kicker: 범인은 영업 아래 한 줄
+    line: |-
+      기타비용 [[5.64조]]
+      1년 전엔 7,006억
+    sub: |-
+      Ford와 세운 약 11조 합작공장 BlueOval SK를
+      접는 비용이 한꺼번에 손익으로 돌아왔다.
+      (합작 해체는 외부 보도)
+    image: battery-line
+  - layout: editorialStat
+    kicker: 잉여현금흐름(FCF)
+    bigNumber: '−3.37'
+    unit: 조
+    context: |-
+      성장 투자는 계속되는데 현금은 빠져나갔다.
+      Debt/EBITDA 19.8배.
+    image: ess-containers
+  - layout: editorialBeat
+    kicker: 그래서 봐야 할 것
+    line: |-
+      매출이 아니라
+      [[합작 해체 비용이 멈추는가]]
+    sub: |-
+      EV 수요가 꺾인 순간 11조 공장·차입·감가·손상이
+      한꺼번에 손익계산서로 돌아왔다.
+    image: cc0-battery-cells
 ---
 
 <script>

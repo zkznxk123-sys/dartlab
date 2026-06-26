@@ -49,7 +49,7 @@ carousel:
       2018~2025 8년간 연간 영업이익률이 9%를 한 번도 못 넘었다.
       매출이 가장 큰 2024년(8.00%)이
       더 작은 2020년(8.78%)보다 오히려 낮다.
-    image: beer-war
+    image: cc0-bottling-line
   - layout: editorialBeat
     kicker: 변동성의 위치
     line: |-

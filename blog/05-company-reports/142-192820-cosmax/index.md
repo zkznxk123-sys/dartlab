@@ -58,7 +58,7 @@ carousel:
       가장 좋은 2025년조차 영업이익률 8.2%.
       ODM은 자기 브랜드 없이 고객사 제품을 만든다 —
       가치사슬에서 브랜드 칸이 아니라 제조 칸을 점유한 자리값.
-    image: behind-the-label
+    image: cc0-cosmetics-line
   - layout: editorialBeat
     kicker: 영업선 아래 누수
     line: |-
