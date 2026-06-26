@@ -32,6 +32,73 @@ ai:
   weaknesses: ["OPM -19% (적자 지속)", "원가율 88% 고착", "현금 1,056억 (CAPEX 부담)"]
   keyMetrics: {revenue: 0.6514, opm: -19.0, roe: -0.8, fcf: -0.1579}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 매출이 2.4배 뛰었는데 적자는 그대로 — SK바이오사이언스의 진짜 마진
+  caption: |-
+    매출이 2,675억에서 6,514억으로 2.4배 뛰었다. 그런데 영업이익률은 여전히 -19.0%. 매출이 돌아왔는데 왜 적자는 안 줄어들까?
+
+    범인은 원가율이다. 2021년 코로나 시절 매출원가율 38.6%였던 회사가 지금은 88.3%. 100원 팔면 88원이 원가로 나간다. 코로나 백신이 만든 영업이익률 51%는 다시 오지 않는 '가짜 마진'이었고, 일반 백신으로 정상화된 -19%가 진짜 현실이다.
+
+    관전 포인트: 설비투자 2,604억이 매출로 전환되는 순간. 분기 영업이익률 흑자 전환과 CDMO 대형 수주 공시 — 둘 중 하나라도 나오면 J커브의 변곡점이다.
+  pinnedComment: 투자 판단이 아닙니다. 모든 재무 수치는 dartlab 실측(전자공시 분기 합산)입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      매출은 2.4배 뛰었다
+      그런데 [[적자는 그대로다]]
+    sub: |-
+      SK바이오사이언스 302440
+      영업이익률 51% → -19%
+      코로나가 만든 마진, 왜 안 돌아오나
+    image: vaccine-lab
+  - layout: editorialStat
+    kicker: 2025 영업이익률
+    bigNumber: '-19.0'
+    unit: '%'
+    context: |-
+      매출은 6,514억으로 2.4배 반등
+      그런데 7분기 연속 적자
+      매출이 돌아와도 마진은 안 돌아왔다
+    image: production-site
+  - layout: editorialStat
+    kicker: 2025 매출원가율
+    bigNumber: '88.3'
+    unit: '%'
+    context: |-
+      코로나 시절 2021년엔 38.6%였다
+      100원 팔면 88원이 원가
+      남는 12원, 그런데 판관비로 31원이 나간다
+    image: factory-exterior
+  - layout: editorialBeat
+    kicker: 가짜 마진의 정체
+    line: |-
+      2021년 영업이익률 51.1%
+      [[다시 올 수 없는 숫자다]]
+    sub: |-
+      매출 9,290억, 영업이익 4,742억.
+      AZ 위탁생산·노바백스 기술이전·수요 폭발이
+      동시에 만든 한시적 마진. 코로나가 끝나자 함께 사라졌다.
+    image: research-lab
+  - layout: editorialStat
+    kicker: 2025 설비투자
+    bigNumber: '2,604'
+    unit: 억원
+    context: |-
+      428억(2021) → 2,604억(2025), 역대 최대
+      영업현금흐름 1,025억의 2.5배를 쏟아부었다
+    image: factory-exterior
+  - layout: editorialBeat
+    kicker: 다음에 볼 것
+    line: |-
+      적자인데 역대 최대 투자
+      [[포기가 아니라 베팅이다]]
+    sub: |-
+      현금은 3,127억 → 1,056억으로 급감.
+      자본 2.04조·부채비율 45%·dCR-BBB+,
+      J커브 완주의 관건은 시간이다.
+      봐야 할 한 줄 — CDMO 대형 수주 공시와 분기 영업이익률 흑자 전환.
+    image: product-detail
 ---
 
 <script>

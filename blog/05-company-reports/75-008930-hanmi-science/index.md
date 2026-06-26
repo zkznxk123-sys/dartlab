@@ -34,6 +34,72 @@ ai:
     netMargin: "8.67%"
     netIncome: "1,177억"
   dataAsOf: "2026-04-23"
+carousel:
+  title: 영업이익 +40%인데 순이익은 +108%, 한미사이언스에 무슨 일이
+  caption: |-
+    영업이익은 1년 만에 +40% 늘었다. 그런데 순이익은 +108% — 567억에서 1,177억으로 두 배가 됐다. 이 간격은 어디서 왔을까.
+
+    정답은 영업 밖에 있었다. 2024년 0이었던 지분법이익이 2025년 818억으로 복귀(엔진 실측 기준). 한미약품(128940) 41% 지분에서 흘러온 이 돈이 순이익을 두 배로 끌어올렸다. 같은 해 OPM 10.22%로 사상 최대를 찍었다.
+
+    관전 포인트는 이 회복의 지속성. 지분법이익 800억+가 매년 들어오는가, 한미약품 OPM 16%가 유지되는가가 2026년의 진짜 질문이다.
+  pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·OPM·순이익·지분법이익(008930)·지분율 41%는 dartlab 실측. 한미약품 1.55조·OPM 16.6%·순이익 1,871억은 한미약품(128940) 블로그의 검증 수치 인용입니다. 지분법이익 0→818억은 dartlab 엔진 실측이나, 2024년 0의 회계 분류·단위 해석은 사업보고서 주석 원문 확인이 필요한 항목입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      영업이익은 +40%
+      [[순이익은 +108%]]
+    sub: |-
+      한미사이언스 008930
+      그 간격은 어디서 왔나
+    image: pharmaceutical-tablets
+  - layout: editorialStat
+    kicker: 2025 영업이익률
+    bigNumber: '10.22'
+    unit: '%'
+    context: |-
+      회사 설립 이래 OPM 최고치
+      1년 전 7.70%에서 반등
+      매출 1.36조 · 영업이익 1,387억
+    image: production-site
+  - layout: editorialBeat
+    kicker: 진짜 동력
+    line: |-
+      답은 영업 밖에 있었다
+      [[지분법이익 0 → 818억]]
+    sub: |-
+      2024년 0이었던 한미약품 지분법이익이
+      2025년 818억으로 복귀, 순이익을 두 배로
+    image: pharmaceutical-tablets
+  - layout: editorialStat
+    kicker: 순이익 V자
+    bigNumber: '1,177'
+    unit: 억원 (+108%)
+    context: |-
+      2024년 567억 저점에서
+      두 배로 회복
+      순이익률 8.67%
+    image: customer-shelf
+  - layout: editorialBeat
+    kicker: 구조
+    line: |-
+      순수 지주가 아니다
+      [[한미약품 41% + 자체 사업]]
+    sub: |-
+      한미약품(1.55조·OPM 16.6%) 41% 지분법 +
+      Health Science·유통의 복합 지주, dCR-A
+    image: product-detail
+  - layout: editorialBeat
+    kicker: 다음에 볼 것
+    line: |-
+      회복은 이어지는가
+      [[지분법 800억+ 유지 여부]]
+    sub: |-
+      한미약품 OPM 16% 유지
+      지분법이익 다시 0 안 됨
+      경영권 추가 분쟁 없음
+      — 2026 정상궤도의 세 조건
+    image: probiotic-bottles
 ---
 
 <script>

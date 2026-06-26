@@ -32,6 +32,71 @@ ai:
   weaknesses: ["관계기업손익 2,262억 일회성 의존", "무형자산 +4,612억 급등", "카카오 지분 재편 불확실성"]
   keyMetrics: {revenue: 1.1749, opm: 15.6, roe: 26.5, fcf: 0.2037}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 카카오가 4조에 샀는데 -1.82조 찍었다. 정작 SM은 영업이익률 15.6% 역대 최고
+  caption: |-
+    카카오는 2023년 SM을 약 4조원에 인수하고 그 해 순손실 -1.82조원을 찍었다. 인수 대금의 절반에 가까운 돈이 1년 만에 회계상 비용으로 잡혔다. 그런데 정작 SM 자체는 2025년 영업이익률 15.6%, 매출 1.17조, 순이익 3,594억으로 전부 역대 최고다.
+
+    반전은 비용 구조에 있다. SM과 HYBE는 원가율이 63% vs 65%로 거의 같다. 갈린 건 판관비 — SM 21.2% vs HYBE 33.1%. 이 12%포인트 차이가 영업이익률 8배(15.6% vs 1.9%) 격차를 만든다. 단일 레이블(SM)은 비용을 공유하고, 멀티레이블(HYBE)은 고정비가 중복된다.
+
+    관전 포인트는 순이익의 질이다. 2025년 순이익 3,594억 중 2,262억이 관계기업손익 — 일회성일 수 있다. 2026Q1에 이 항목이 0에 가까우면 일회성 확정. 영업 기준 영업이익률 15.6%는 그래도 K-Pop 최고다.
+  pinnedComment: 투자 판단이 아닙니다. SM/카카오 재무 수치는 dartlab 실측(2026-04-18 기준), HYBE 영업이익률·판관비와 카카오 순손실·영업권 2.2조는 dartlab 타사 리포트 교차 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      4조에 샀는데 [[-1.82조]] 찍었다
+      정작 SM은 영업이익률 15.6%, 역대 최고
+    sub: |-
+      매출 1.17조 · 순이익 3,594억
+      같은 K-Pop HYBE의 8배 마진
+      인수한 쪽이 -1.82조 적자, 인수당한 쪽이 역대 최고
+    image: kpop-stage
+  - layout: editorialStat
+    kicker: SM 영업이익률 5년 턴어라운드
+    bigNumber: '28'
+    unit: 배
+    context: |-
+      2020 코로나 바닥 영업이익 65억
+      2025 역대 최고 영업이익 1,830억
+      5년 만에 28배 · 영업이익률 1.1% → 15.6%
+    image: performance-site
+  - layout: editorialStat
+    kicker: 같은 K-Pop, 8배 격차
+    bigNumber: '15.6'
+    unit: '%'
+    context: |-
+      HYBE는 1.9% — 영업이익률 8배 격차
+      원가율 63.2%(실측) vs HYBE 64.7%(외부)
+      갈린 건 판관비 21.2%(실측) vs HYBE 33.1%(외부)
+    image: artist-operations
+  - layout: editorialBeat
+    kicker: 카카오 아이러니
+    line: |-
+      카카오 -1.82조는 SM이 못 벌어서가 아니다
+      [[인수 가격이 너무 높았던 것]]
+    sub: |-
+      SM 2023 영업이익률 11.8%, 인수 전(10.7%)보다 개선.
+      카카오 순손실 -1.82조는 영업권 2.2조 + 손상차손 (교차 인용).
+    image: production-studio
+  - layout: editorialStat
+    kicker: K-Pop 최우량 재무
+    bigNumber: '52'
+    unit: 억 차입금
+    context: |-
+      순현금 +3,594억 (현금 3,646억 - 차입금 52억)
+      신용등급 dCR-AA- (dartlab 등급, K-Pop 유일)
+      영업CF 1,949억 · 현금전환주기 -36일
+    image: recording-studio
+  - layout: editorialBeat
+    kicker: 다음에 볼 지표
+    line: |-
+      순이익 3,594억 중 2,262억이 관계기업손익
+      [[반복인가, 일회성인가]]
+    sub: |-
+      영업 기준 영업이익률 15.6%는 K-Pop 최고.
+      2026Q1 관계기업손익이 0에 가까우면 일회성 확정 — 순이익은 절반 이하로.
+    image: kpop-stage
 ---
 
 <script>
