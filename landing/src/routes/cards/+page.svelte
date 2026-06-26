@@ -58,6 +58,9 @@
 			stockCode: p.code,
 			slug: p.slug,
 			title: p.title ?? '',
+			caption: p.caption ?? '',
+			pinnedComment: p.pinnedComment ?? '',
+			standalone: !!p.standalone,
 			corpName: p.name || media?.companies[p.code]?.displayName || p.code
 		}));
 		const q = query.trim().toLowerCase();
@@ -136,7 +139,7 @@
 		{:else}
 			<div class="grid">
 				{#each visible as row (row.slug)}
-					<FeedCard {rt} code={row.stockCode} slug={row.slug} corpName={row.corpName} title={row.title} {base} {media} onOpen={() => openPost(row.stockCode, row.slug, row.corpName)} />
+					<FeedCard {rt} code={row.stockCode} slug={row.slug} corpName={row.corpName} title={row.title} caption={row.caption} pinnedComment={row.pinnedComment} standalone={row.standalone} {base} {media} onOpen={() => openPost(row.stockCode, row.slug, row.corpName)} />
 				{/each}
 			</div>
 			<div bind:this={sentinel} class="sentinel"></div>

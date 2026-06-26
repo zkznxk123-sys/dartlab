@@ -16,6 +16,9 @@
 		slug,
 		corpName,
 		title = '',
+		caption = '',
+		pinnedComment = '',
+		standalone = false,
 		base = '',
 		media,
 		onOpen
@@ -25,10 +28,23 @@
 		slug: string;
 		corpName: string;
 		title?: string;
+		caption?: string;
+		pinnedComment?: string;
+		standalone?: boolean;
 		base?: string;
 		media: MediaIndex | null;
 		onOpen: () => void;
 	} = $props();
+
+	// 캡션 인라인 펼침(인스타 피드식) — 클릭 시 모달이 아니라 그 자리(같은 페이지) 이미지 아래에서 펼침/접힘.
+	let expanded = $state(false);
+	function captionParas(c: string): string[] {
+		return String(c ?? '')
+			.split(/\n\s*\n/)
+			.map((p) => p.trim())
+			.filter(Boolean);
+	}
+	const hasCaption = $derived(!!caption.trim());
 
 	// 뷰포트 분기 — matchMedia(반응형). 모바일=인라인 스와이프, 데스크톱=그리드 썸네일.
 	let mobile = $state(false);
@@ -74,8 +90,20 @@
 				{/if}
 			</button>
 		</div>
-		{#if title}
-			<button class="fcTitle" onclick={onOpen}>{title} <span class="fcMore">더보기</span></button>
+		{#if title || hasCaption}
+			<div class="fcCap">
+				{#if title}<p class="fcCapTitle" class:clamp={!expanded}>{title}</p>{/if}
+				{#if expanded}
+					{#each captionParas(caption) as para (para)}<p class="fcCapPara">{para}</p>{/each}
+					{#if !standalone}
+						<a class="fcCapBlog" href="{base}/blog/{slug}" target="_blank" rel="noopener">블로그에서 이어 읽기 ↗</a>
+					{/if}
+					{#if pinnedComment}<p class="fcCapPinned">{pinnedComment}</p>{/if}
+				{/if}
+				{#if hasCaption}
+					<button class="fcMore" onclick={() => (expanded = !expanded)}>{expanded ? '접기' : '… 더 보기'}</button>
+				{/if}
+			</div>
 		{/if}
 	</article>
 {:else}
@@ -130,29 +158,58 @@
 	.fcShare:active {
 		background: rgba(var(--dl-accent-rgb), 0.2);
 	}
-	/* 제목(훅) 한 줄 + 더보기 → 모달(전체 캡션·블로그). 인스타 캡션 truncate 역할. */
-	.fcTitle {
-		display: block;
-		width: 100%;
-		text-align: left;
-		border: none;
-		background: none;
+	/* 인스타 피드 캡션 — 이미지 아래 같은 페이지. 접힘=제목 2줄, '더 보기'로 캡션 본문 인라인 펼침(모달 아님). */
+	.fcCap {
 		padding: 0 4px 2px;
+	}
+	.fcCapTitle {
 		margin: 0;
 		font-size: 14.5px;
-		font-weight: 600;
+		font-weight: 700;
 		line-height: 1.45;
-		color: #cdd9e6;
-		cursor: pointer;
+		color: #e8eef6;
 		word-break: keep-all;
+	}
+	.fcCapTitle.clamp {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
+	.fcCapPara {
+		margin: 9px 0 0;
+		font-size: 14px;
+		line-height: 1.62;
+		color: #cdd9e6;
+		white-space: pre-line;
+		word-break: keep-all;
+	}
+	.fcCapBlog {
+		display: inline-block;
+		margin: 12px 0 2px;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--dl-accent);
+		text-decoration: none;
+	}
+	.fcCapPinned {
+		margin: 12px 0 0;
+		font-size: 12px;
+		line-height: 1.5;
+		color: #7c8aa0;
+		white-space: pre-line;
+		word-break: keep-all;
+	}
 	.fcMore {
+		display: inline-block;
+		margin-top: 4px;
+		padding: 2px 0;
+		border: none;
+		background: none;
 		color: #64748b;
 		font-weight: 700;
+		font-size: 13.5px;
+		cursor: pointer;
 	}
 </style>

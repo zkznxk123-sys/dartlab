@@ -90,6 +90,27 @@
 
 	const total = $derived(deck.cards.length);
 
+	// 닷 = 인스타식 슬라이딩 윈도우(절대 줄바꿈 X). 회사 덱은 20장+이라 모든 점을 한 줄에 못 넣는다 →
+	// 한 번에 고정 개수(DOT_WINDOW)만 보이고, 활성점을 가운데 두며 윈도우를 슬라이드. 양 끝점은 축소해
+	// "더 있음"을 표시(IG 페이지네이션). step = 점(6px) + 간격(5px) = 11px.
+	const DOT_WINDOW = 7;
+	const DOT_STEP = 11;
+	const winCount = $derived(Math.min(total, DOT_WINDOW));
+	const winStart = $derived(
+		Math.min(Math.max(idx - Math.floor(winCount / 2), 0), Math.max(0, total - winCount))
+	);
+	function dotScale(i: number): number {
+		const pos = i - winStart;
+		if (pos < 0 || pos >= winCount) return 0; // 창 밖 — 뷰포트가 클립
+		const moreL = winStart > 0;
+		const moreR = winStart + winCount < total;
+		if (moreL && pos === 0) return 0.45;
+		if (moreL && pos === 1) return 0.72;
+		if (moreR && pos === winCount - 1) return 0.45;
+		if (moreR && pos === winCount - 2) return 0.72;
+		return 1;
+	}
+
 	function go(to: number) {
 		if (!track) return;
 		const n = Math.max(0, Math.min(total - 1, to));
@@ -160,9 +181,13 @@
 						<svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true"><path d="M2 1 L9 5 L2 9 Z" /></svg>
 					{/if}
 				</button>
-				{#each deck.cards as _, i (i)}
-					<button class="dot" class:on={i === idx} onclick={() => go(i)} aria-label="{i + 1}번" aria-current={i === idx}></button>
-				{/each}
+				<div class="dotWin" style="width:{winCount * DOT_STEP - 5}px">
+						<div class="dotStrip" style="transform: translateX({-winStart * DOT_STEP}px)">
+							{#each deck.cards as _, i (i)}
+								<button class="dot" class:on={i === idx} style="transform: scale({dotScale(i)})" onclick={() => go(i)} aria-label="{i + 1}번" aria-current={i === idx}></button>
+							{/each}
+						</div>
+					</div>
 			</div>
 		{/if}
 		<p class="live" aria-live="polite">{idx + 1} / {total}</p>
@@ -282,11 +307,19 @@
 		transform: translateX(-50%);
 		display: flex;
 		align-items: center;
-		gap: 5px;
-		flex-wrap: wrap;
-		justify-content: center;
-		max-width: 64%;
+		gap: 3px;
 		z-index: 3;
+	}
+	/* 닷 뷰포트 — 고정 폭(winCount*step) 클립. 창 밖 점은 잘려 절대 줄바꿈 안 됨(IG 페이지네이션). */
+	.dotWin {
+		overflow: hidden;
+		display: flex;
+	}
+	.dotStrip {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		transition: transform 0.25s ease;
 	}
 	/* 재생/정지 — 점 행 맨 좌측 작은 토글. 켜지면 테마색. */
 	.playBtn {
@@ -311,13 +344,17 @@
 		background: var(--dl-accent);
 	}
 	.dot {
+		flex: 0 0 6px;
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
 		border: none;
-		background: rgba(255, 255, 255, 0.4);
+		background: rgba(255, 255, 255, 0.45);
 		cursor: pointer;
 		padding: 0;
+		transition:
+			transform 0.2s ease,
+			background 0.2s ease;
 	}
 	.dot.on {
 		background: var(--dl-accent);
