@@ -828,7 +828,7 @@
         "engines.story",
         "engines.gather"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`macro`는 회사가 아니라 시장/경제 환경을 읽는 L2 엔진이다. 경제 사이클, 재고, 기업집계, 교역, 전파 edge, 금리, 유동성, 위기, 자산, 심리, 예측, 시나리오, 종합을 6막 인과 구조로 해석한다.\n\n단일 기업 수익성/현금흐름/가치평가는 `analysis`가 담당한다. macro는 그 기업이 놓인 외부 환경을 제공하고, 보고서 조합은 `story`가 담당한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nguide = dartlab.macro()\ncycle = dartlab.macro(\"cycle\", market=\"KR\")\nrates = dartlab.macro(\"금리\", market=\"US\")\nscenario = dartlab.macro(\"시나리오\", \"2008 금융위기\")\nsummary = dartlab.macro(\"종합\", market=\"KR\")\ntransmission = dartlab.macro(\"전파\", market=\"KR\", sectorKey=\"semiconductor\")\n\nc = dartlab.Company(\"005930\")\ncompany_macro = c.macro(\"사이클\")   "
+      "bodyPreview": "## 엔진 역할\n\n`macro`는 회사가 아니라 시장/경제 환경을 읽는 L2 엔진이다. 경제 사이클, 재고, 기업집계, 교역, 전파 edge, 금리, 유동성, 위기, 자산, 심리, 예측, 시나리오, 전망 시뮬레이션, 종합을 6막 인과 구조로 해석한다.\n\n단일 기업 수익성/현금흐름/가치평가는 `analysis`가 담당한다. macro는 그 기업이 놓인 외부 환경을 제공하고, 보고서 조합은 `story`가 담당한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nguide = dartlab.macro()\ncycle = dartlab.macro(\"cycle\", market=\"KR\")\nrates = dartlab.macro(\"금리\", market=\"US\")\nscenario = dartlab.macro(\"시나리오\", \"2008 금융위기\")\nsimulation = dartlab.macro(\"시뮬레이션\", market=\"US\")   # BVAR 변수 팬(분위 경로) + IRF + 국면 forward\nsummary = dartlab.macro(\"종합\", market=\"KR\")\ntransmission = dartlab.macro(\"전파\", marke"
     },
     {
       "id": "engines.macro.commodityCycle",

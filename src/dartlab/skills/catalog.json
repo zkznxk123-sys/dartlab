@@ -3487,7 +3487,7 @@
     },
     {
       "id": "engines.macro",
-      "bodyPreview": "## 엔진 역할\n\n`macro`는 회사가 아니라 시장/경제 환경을 읽는 L2 엔진이다. 경제 사이클, 재고, 기업집계, 교역, 전파 edge, 금리, 유동성, 위기, 자산, 심리, 예측, 시나리오, 종합을 6막 인과 구조로 해석한다.\n\n단일 기업 수익성/현금흐름/가치평가는 `analysis`가 담당한다. macro는 그 기업이 놓인 외부 환경을 제공하고, 보고서 조합은 `story`가 담당한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nguide = dartlab.macro()\ncycle = dartlab.macro(\"cycle\", market=\"KR\")\nrates = dartlab.macro(\"금리\", market=\"US\")\nscenario = dartlab.macro(\"시나리오\", \"2008 금융위기\")\nsummary = dartlab.macro(\"종합\", market=\"KR\")\ntransmission = dartlab.macro(\"전파\", market=\"KR\", sectorKey=\"semiconductor\")\n\nc = dartlab.Company(\"005930\")\ncompany_macro = c.macro(\"사이클\")                    # 시장 매크로 (KR 자동) — c.macro 의 axis 는 macro 엔진 axis\nsensitivity = c.analysis(\"macro\", \"매크로민감도\")   # 기업 단위 매크로 민감도는 analysis 엔진\n```\n\n## 강행 호출 룰 (agent 답변 품질 회귀 차단)\n\n14 axis 매크로 질문 (cycle·rates·transmission·corporate·trade 등) 에서 다음 4 룰 강행.\n\n1. **1 차 도구는 EngineCall 강제**. `EngineCall(apiRef=\"macro\", args={\"axis\": \"rates\", \"market\": \"KR\"})` 양식. RunPython 직접 ECOS/FRED 호출 금지 — 본 엔진이 HF SSOT 캐시 + tableRef 발급 담당.\n2. **본문 숫자에 `[valueRef:...]` 또는 `[dateRef:...]` inline 표기 필수**. macro 데이터는 시점 (asOf) 변동 큼 — dateRef 누락 시 stale 데이터 환각.\n3. **cycle / inventory 4 phase 판정은 `[conf:30]` 기본** — 회고적 신호임을 명시. NBER vs ECRI vs Cleveland Fed 정의 차이 인지.\n4. **단일 지표로 사이클 단정 금지** — CLI·LEI·yield curve 중 최소 2 종 ref 동행. 단일 지표 답변은 한계 명시 필수.\n5. **macro EngineCall 결과는 본문에 최소 1 개 수치 + dateRef inline 인용 의무**. macro 호출 했는데 답변에 결과 인용 0 회 = evidence flow 누락 회귀 (2026-05-20 OAuth probe 시나리오 F: rates/KR 3 회 호출 후 답변에",
+      "bodyPreview": "## 엔진 역할\n\n`macro`는 회사가 아니라 시장/경제 환경을 읽는 L2 엔진이다. 경제 사이클, 재고, 기업집계, 교역, 전파 edge, 금리, 유동성, 위기, 자산, 심리, 예측, 시나리오, 전망 시뮬레이션, 종합을 6막 인과 구조로 해석한다.\n\n단일 기업 수익성/현금흐름/가치평가는 `analysis`가 담당한다. macro는 그 기업이 놓인 외부 환경을 제공하고, 보고서 조합은 `story`가 담당한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nguide = dartlab.macro()\ncycle = dartlab.macro(\"cycle\", market=\"KR\")\nrates = dartlab.macro(\"금리\", market=\"US\")\nscenario = dartlab.macro(\"시나리오\", \"2008 금융위기\")\nsimulation = dartlab.macro(\"시뮬레이션\", market=\"US\")   # BVAR 변수 팬(분위 경로) + IRF + 국면 forward\nsummary = dartlab.macro(\"종합\", market=\"KR\")\ntransmission = dartlab.macro(\"전파\", market=\"KR\", sectorKey=\"semiconductor\")\n\nc = dartlab.Company(\"005930\")\ncompany_macro = c.macro(\"사이클\")                    # 시장 매크로 (KR 자동) — c.macro 의 axis 는 macro 엔진 axis\nsensitivity = c.analysis(\"macro\", \"매크로민감도\")   # 기업 단위 매크로 민감도는 analysis 엔진\n```\n\n## 강행 호출 룰 (agent 답변 품질 회귀 차단)\n\n15 axis 매크로 질문 (cycle·rates·transmission·corporate·trade 등) 에서 다음 4 룰 강행.\n\n1. **1 차 도구는 EngineCall 강제**. `EngineCall(apiRef=\"macro\", args={\"axis\": \"rates\", \"market\": \"KR\"})` 양식. RunPython 직접 ECOS/FRED 호출 금지 — 본 엔진이 HF SSOT 캐시 + tableRef 발급 담당.\n2. **본문 숫자에 `[valueRef:...]` 또는 `[dateRef:...]` inline 표기 필수**. macro 데이터는 시점 (asOf) 변동 큼 — dateRef 누락 시 stale 데이터 환각.\n3. **cycle / inventory 4 phase 판정은 `[conf:30]` 기본** — 회고적 신호임을 명시. NBER vs ECRI vs Cleveland Fed 정의 차이 인지.\n4. **단일 지표로 사이클 단정 금지** — CLI·LEI·yield curve 중 최소 2 종 ref 동행. 단일 지표 답변은 한계 명시 필수.\n5. **macro EngineCall 결과는 본문에 최소 1 개 수치 + dateRef inline 인용 의무**. mac",
       "title": "Macro",
       "category": "engines",
       "categoryTitle": "Engines",
@@ -3546,7 +3546,7 @@
       ],
       "procedure": [
         "dartlab.macro() 로 14 축 가이드 DataFrame 확인.",
-        "axis 선택 (cycle · inventory · corporate · trade · transmission · rates · liquidity · crisis · assets · sentiment · narrative · forecast · scenario · summary).",
+        "axis 선택 (cycle · inventory · corporate · trade · transmission · rates · liquidity · crisis · assets · sentiment · narrative · forecast · scenario · simulate · summary).",
         "dartlab.macro(axis, market=\"KR\" 또는 \"US\") 호출.",
         "결과의 indicator · dateRef · valueRef · executionRef 묶음.",
         "시장 레벨 macro 와 기업 내부 재무 해석은 분리 — 회사 단위는 c.macro 또는 engines.analysis."
@@ -3582,7 +3582,7 @@
         "경기 사이클과 자산배분 확인",
         "2008 금융위기 시나리오 비교",
         "미국 유동성 측정",
-        "dartlab.macro 14 축 가이드",
+        "dartlab.macro 15 축 가이드",
         "매크로 종합 (한국 / 미국)",
         "기업 매크로 민감도 (c.macro)"
       ],
