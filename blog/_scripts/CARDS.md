@@ -7,6 +7,10 @@
 - 화면은 hfMedia `carousels/index.json` **한 파일**을 읽어 그때그때 그린다(**안 굽는다**·디자인은 코드가 정함).
 - 같은 회사 다른 주제 글이면 각자 `carousel:` → **자동으로 여러 편**(1:N).
 
+> **정본은 /cards(이 파이프라인) 하나다.** 옛 `sns/carousels/`(hook.json→PNG·reel) 는 **유물**이다 —
+> 운영자가 인스타그램에 *직접* 올릴 때만 수동으로 쓰고, 그것도 이제 **/cards 에 있는 걸 그대로 올리면 된다**.
+> frontmatter ↔ hook.json **동기화는 하지 않는다**(sns 분기는 방치). 신규·개선은 전부 frontmatter 에서 한다.
+
 ## 카드 새로 올리기 — 3단계
 1. 블로그 글 frontmatter 에 `carousel:` 쓴다 (아래 형식).
 2. (선택) 검사: `uv run python -X utf8 blog/_scripts/audit_seo.py`  ← 형식·숫자 점검
@@ -64,6 +68,9 @@ uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면
 ```
 
 ### 이미지 가져오는 곳 — 저작권 없는(무료) 소스만
+> **주체별 규칙(강행)**: **GPT 로 작업할 땐 `image_gen` 으로 생성**, **Claude 로 작업할 땐 무료(PD/CC0) 이미지로 잡는다**
+> (`fetch_cc0_images.py`). Claude 는 image_gen 불가 → 무료 소스가 1차. 어느 쪽이든 받은 즉시 눈으로 확정한다.
+
 ⛔ **핀터레스트·구글 이미지 금지** — 거기 올라온 사진은 대부분 **저작권 있음**(긁어온 것)이라 가져다 쓰면 침해다.
 아래 무료 소스만 쓴다.
 - **Wikimedia Commons / Openverse** — PD/CC0 (귀속 의무 0). `fetch_cc0_images.py` 가 이 둘에서만 받는다.
@@ -84,14 +91,17 @@ uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면
 
 > 원칙: 스톡(무료 PD/CC0)이 1차, 안 맞으면 생성형. **둘 다 받은 즉시 눈검수 후 채택**(쓰레기 거르기). 출처는 `CREDITS.md` 에.
 
-## 발행 전 전문가 검토 게이트 — 작가 패널 토론·평가
-**캐러셀은 공개물이라 발행 전에 전문가 검토를 반드시 거친다.** 자동 통과 금지.
-1. **작가 패널 토론** — 서로 다른 렌즈(훅 강도·서사·디자인/이미지 적합성·정직성)로 독립 검토 후 토론으로 약점 합의.
-2. **정직성·근거 평가** — 본문 숫자가 전부 `## 검증표`에 있는가, 외부/실측이 분리됐나, 과장·투자권유 표현 없나.
-3. **이미지 적합성 평가** — 위 색복잡도 감사 통과 + 주제 적합 + 눈검수 완료(쓰레기·텍스트·도식 0).
-4. **평가 점수**가 기준 미달이면 발행 보류·수정. (점수는 실가치 proxy 가 아니라 게이트 — 미빌드 점수 인플레 금지.)
+## 발행 전 전문가 검토 게이트 — 작가 패널 토론·평가 (cards 정식 게이트)
+**캐러셀은 공개물이라 발행 전에 전문가 루프를 반드시 거친다.** 자동 통과 금지.
+이 루프는 옛 sns 의 `editorial_loop`(기획·작가·평가·재평가) 를 **cards 파이프라인으로 가져온 것**이다 — 신규·기존개선 모두 적용.
+1. **작가 패널 토론(다중 에이전트)** — 서로 다른 렌즈(훅 강도·서사 스파인·디자인/이미지 적합성·정직성)로 독립 검토 후 약점 합의.
+2. **정직성·근거 평가** — 슬라이드 숫자가 전부 `## 검증표`에 있는가, 외부/실측이 분리·표기됐나, 과장·투자권유 표현 없나.
+3. **이미지 적합성 평가** — 색복잡도 감사 통과 + 주제 적합 + 눈검수 완료(쓰레기·텍스트·도식 0).
+4. **재평가** — 합의된 수정 반영 후 같은 패널이 다시 본다. 기준 미달이면 발행 보류·재수정.
+   (점수는 실가치 proxy 가 아니라 게이트 — 미빌드 점수 인플레 금지.)
 
-> 운영자 검토 흐름: 큰 변경·신규편은 위 패널을 거쳐 합의된 수정 반영 후에만 `build_carousel_contracts.py` 발행.
+> 흐름: 신규·개선편은 위 패널(다중 에이전트 토론·평가→수정→재평가)을 거친 뒤에만 `build_carousel_contracts.py` 발행.
+> **이미 발행된 편도 이 루프로 개선한다**(발행본 품질 상향이 기본 운영).
 
 ## 도구
 | 파일 | 역할 |
@@ -101,7 +111,7 @@ uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면
 | `blog/_scripts/fetch_cc0_images.py` | 무료(PD/CC0) 이미지 수급 — Commons·Openverse |
 | `blog/_scripts/gen_company_flux.py` | 생성형 hero(4:5) — 잔액 충전 시 |
 | `blog/_scripts/audit_seo.py` | carousel 형식·숫자 검사 |
-| `blog/_scripts/migrate_carousels_to_blog.py` | 1회성 이관(sns/carousels → blog frontmatter, **완료**) |
+| `blog/_scripts/migrate_carousels_to_blog.py` | 1회성 이관(sns/carousels → blog frontmatter, **완료**). 이후 sns 는 **유물**·재동기화 안 함 |
 | `blog/_scripts/test_carousel_contracts.py` | 발행/이관 테스트 |
 
 설계 SSOT: `mainPlan/blog-carousel-ssot/01-unified-slug-ssot.md`

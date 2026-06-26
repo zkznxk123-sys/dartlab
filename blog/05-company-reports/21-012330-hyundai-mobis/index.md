@@ -61,7 +61,7 @@ carousel:
     context: |-
       AS(순정) 부품은 매출의 30%인데
       영업이익의 60~70%를 만든다.
-      마진 20~25%의 독점 사업.
+      마진 20~25%(업계 추정)의 독점 사업.
     image: product-detail
   - layout: editorialBeat
     kicker: 1만 원이 3만 원이 되는 곳
@@ -78,10 +78,10 @@ carousel:
     bigNumber: '0.67'
     unit: 배 PBR
     context: |-
-      덴소 1.5배의 절반도 안 된다.
+      덴소 1.5배(외부 시세)의 절반도 안 된다.
       순환출자 고리(모비스→차→기아→모비스)의
       정점인데 정의선 지분은 0.32%.
-    image: production-site
+    image: research-lab
   - layout: editorialStat
     kicker: 탈출구 — 해외 비계열 수주
     bigNumber: '5'
@@ -95,11 +95,11 @@ carousel:
     kicker: 작가의 기준선
     line: |-
       배당성향 [[15%→35%]]
-      자사주 소각 3,500억
+      자사주 소각 3,000억
     sub: |-
       "기다려라, 현금으로 달랠게"의 언어.
-      별도 21%·연결 8%·PBR 0.8이 같이 나오는 날,
-      승계 퍼즐이 풀리기 시작한다.
+      지금은 별도 21%만 충족 —
+      연결 8%·PBR 0.8까지 오는 날 승계 퍼즐이 풀린다.
     image: product-detail
 ---
 

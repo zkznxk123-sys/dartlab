@@ -40,7 +40,7 @@ carousel:
     sub: |-
       1966년 한방, 2008년 쿠션.
       둘 다 세계가 따라 한 발명.
-      그런데 이익은 9년 만에 반토막.
+      제품은 멀쩡한데 이익만 무너졌다.
     image: sulwhasoo-counter
   - layout: editorialStat
     kicker: 제품은 버텼다
@@ -57,7 +57,7 @@ carousel:
       성장 엔진이
       [[따이공이었다]]
     sub: |-
-      면세 매출의 절반 이상을 보따리상이(업계 추정).
+      한때 면세 매출의 80%대를 보따리상이 날랐다(업계 추정).
       2014년 '별그대'가 연 중국 수요 —
       회사가 닦은 길이 아니라 밖에서 열린 문.
     image: dutyfree-counter
@@ -73,21 +73,21 @@ carousel:
   - layout: editorialStat
     kicker: 닫힌 문 앞에 멈춘 1조
     bigNumber: '-94%'
-    unit: 설비투자 (CAPEX)
+    unit: 유형자산 취득 (CAPEX)
     context: |-
-      유형자산 취득 1조862억(2016) → 646억(2025).
+      1조862억(2016) → 646억(2025).
       현금은 남는데(부채비율 26%)
       다음 용량을 깔 확신이 약해졌다.
-    image: sulwhasoo-counter
+    image: dutyfree-counter
   - layout: editorialBeat
     kicker: 새 문, 북미 — 그리고 기준선
     line: |-
       발명은 안에서
-      [[명운은 밖에서]]
+      명운은 [[밖에서]]
     sub: |-
       라네즈·코스알엑스로 3년 연속 회복.
       단 영업이익은 아직 정점의 40%.
-      판관비 부담률이 64%대에서 내려와야 '자기 문'.
+      판관비성 부담률이 64%대에서 내려와야 '자기 문'.
     image: sephora-shelf
 ---
 
