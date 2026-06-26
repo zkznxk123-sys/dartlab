@@ -36,6 +36,71 @@ ai:
     - "의결권 66.5% 차등의결권 — 거버넌스 리스크"
   keyMetrics: {revenue: 5.7, opm: 4.0, gpm: 46.1, cash: 1.0}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 제품 마진은 Nike보다 높은데, 왜 87%가 증발했나 — Under Armour
+  caption: |-
+    CEO가 3명 바뀌는 동안 매출은 $5.7B에서 줄었다. 시가총액은 $20B에서 $2.5B로 87% 증발했다. 도전자였던 "제2의 Nike"에게 무슨 일이 있었나.
+
+    반전은 재무제표에 있다. Under Armour의 매출총이익률은 FY2024 46.1% — Nike(44.6%)보다 높다. 제품 자체는 건강하다. 그런데 판관비가 매출의 42.1%를 먹어 영업이익률은 4.0%로 주저앉는다. Nike의 판관비는 32.3%다. 9.8%p 차이가 구조적으로 고정돼 있다.
+
+    관전 포인트는 두 가지다. 창업자 Kevin Plank이 의결권 66.5%(지분 16.6%)로 복귀해 제품 수(SKU) 25% 축소를 밀고 있다. 다음 재무제표에서 볼 지표는 단 하나 — 판관비 비율이 42%에서 내려오는가.
+  pinnedComment: 투자 판단이 아닙니다. 매출·마진·판관비·Nike 비교·의결권 수치는 dartlab EDGAR 실측(FY2024 기준)입니다. 시가총액 추이·SKU 가이던스·FY2025 추정치는 외부 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      제품 마진은 Nike보다 높다.
+      그런데 [[가치의 87%]]가 사라졌다.
+    sub: |-
+      매출 $5.7B → $5.2B(추정)
+      시가총액 $20B → $2.5B
+      CEO 3명이 바뀌는 동안
+    image: ua-empty-store
+  - layout: editorialStat
+    kicker: 시가총액 (외부)
+    bigNumber: '-87%'
+    unit: 10년 누적
+    context: |-
+      2015년 $20B → 2024년 $2.5B.
+      Nike 시가총액의 3%도 안 된다.
+      시장은 이미 판단을 내렸다.
+    image: ua-stock-exchange
+  - layout: editorialBeat
+    kicker: 반전 — 제품은 건강하다
+    line: |-
+      매출총이익률 46.1%.
+      Nike(44.6%)보다 [[높다]].
+    sub: |-
+      FY2024 실측. 매출 규모는 1/9인데
+      제품 마진은 더 좋다. 문제는 제품이 아니다.
+    image: ua-store-shelf
+  - layout: editorialStat
+    kicker: 판매관리비 / 매출 (FY2024)
+    bigNumber: '42.1'
+    unit: "%"
+    context: |-
+      Nike는 32.3%. 9.8%p 차이.
+      매출총이익 46.1%가 영업이익 4.0%까지
+      깎이는 곳 — 판관비다.
+    image: ua-warehouse
+  - layout: editorialStat
+    kicker: 창업자 의결권
+    bigNumber: '66.5'
+    unit: "%"
+    context: |-
+      지분은 16.6%인데 의결권은 66.5%.
+      차등의결권. CEO 3명을 갈아치운 건
+      혼란이 아니라 한 사람의 결정이었다.
+    image: ua-boardroom
+  - layout: editorialBeat
+    kicker: 결론 — 다음에 볼 지표
+    line: |-
+      무기는 마진 46.1%.
+      짐은 [[판관비 42.1%]].
+    sub: |-
+      제품 수(SKU) 25% 축소(외부 가이던스)가 답이 되려면,
+      다음 재무제표에서 판관비 비율이 내려와야 한다.
+    image: ua-tightrope
 ---
 
 <script>

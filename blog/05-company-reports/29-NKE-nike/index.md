@@ -33,6 +33,81 @@ ai:
     - "도매처 손실"
   keyMetrics: {revenue: 46.3, opm: 7.0, roe: 0.0, fcf: 0.0}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 세계 1위 나이키가 매출 -10%, 주가 $170→$44 난 진짜 이유
+  caption: |-
+    세계 인구 93%가 아는 스우시. 스포츠웨어 점유율 27%로 압도적 1위. 그런데 FY2025 매출이 $51.4B에서 $46.3B로 -10%, 순이익은 -44% 빠졌다. 2009년 금융위기 이후 처음이다. 주가는 고점 $170대에서 $44까지, 고점 대비 -75%.
+
+    범인은 외부가 아니라 내부였다. CEO가 "중간상을 없애고 직접 판다"며 전통 도매 파트너의 50% 이상을 잘랐다(외부). 빈 선반은 On, Hoka, New Balance가 즉시 채웠다. DTC 비율은 32%에서 42%로 올랐지만 전체 파이는 성장이 아니라 채널 이동이었고, FY2025엔 양쪽 다 줄었다.
+
+    관전 포인트는 회복 신호다. 32년 Nike맨 Elliott Hill이 복귀해 도매 복원을 최우선으로 밀었고, FY2026 Q2에 Wholesale +8% 첫 반등이 나왔다. 다음에 볼 지표는 도매 비중 회복과 OP Margin 8%→12% 복원 속도다.
+  pinnedComment: 투자 판단이 아닙니다. 매출·순이익·현금흐름·자본은 dartlab EDGAR 실측, DTC 채널분해·연도별 바이백은 dartlab 본문 산출, 도매 50% 절감·경쟁사 성장률·점유율·주가는 외부 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      세계 1위가 매출 -10%.
+      이유는 [[빈 선반]]이었다
+    sub: |-
+      스포츠웨어 점유율 27%
+      매출 $51.4B → $46.3B
+      주가 $170 → $44 (고점 대비 -75%)
+    image: store-shelf-shrinking
+  - layout: editorialStat
+    kicker: FY2025 매출
+    bigNumber: '46.3'
+    unit: $B (-10%)
+    context: |-
+      FY2024 $51.4B 대비 -10%.
+      2009년 금융위기 이후 첫 역성장.
+      순이익은 $5.7B→$3.2B, -44%.
+    image: revenue-chart-dark
+  - layout: editorialBeat
+    kicker: 자초한 전략
+    line: |-
+      "중간상을 없애고 직접 판다"
+      도매 파트너 [[50% 이상을 잘랐다]]
+    sub: |-
+      Foot Locker 물량 -40%
+      Zappos 공급 중단 (외부)
+      빈 선반은 On·Hoka·NB가 채웠다
+    image: footlocker-storefront
+  - layout: editorialStat
+    kicker: DTC 비율 (직접판매)
+    bigNumber: '42'
+    unit: "% (32%→42%)"
+    context: |-
+      직접판매는 32%→42%로 올랐지만
+      전체 파이는 성장이 아닌 채널 이동.
+      FY2025엔 DTC -13%, 도매 -7% 양쪽 다 감소.
+    image: shoe-store-vs-phone
+  - layout: editorialStat
+    kicker: 바이백의 역설
+    bigNumber: '11.8'
+    unit: $B 프로그램 집행
+    context: |-
+      $18B 프로그램 중 자사주 $11.8B 집행.
+      그 사이 주가는 $170대 → $44.
+      시총 $250B→$90B, -$160B 증발.
+    image: money-burning-abstract
+  - layout: editorialBeat
+    kicker: 빈 선반의 승자들
+    line: |-
+      Nike -10%일 때
+      [[On +32%, Hoka +28%, NB +19%]]
+    sub: |-
+      러닝 성장분을 경쟁사가 가져갔다(외부).
+      Nike $46B로 무너지진 않지만 성장은 뺏겼다.
+    image: running-shoes-lineup
+  - layout: editorialBeat
+    kicker: 결론 · 다음에 볼 지표
+    line: |-
+      32년 Nike맨이 돌아왔다
+      도매 [[+8% 첫 반등]]
+    sub: |-
+      Elliott Hill 복귀, FY2026 Q2 Wholesale +8%.
+      관전 포인트: 도매 비중 회복 + OP Margin 8%→12% 복원.
+    image: running-track-dawn
 ---
 
 <script>

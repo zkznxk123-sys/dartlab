@@ -44,6 +44,73 @@ ai:
     roe: 27.8
     fcf: 46.1
   dataAsOf: "2026-04-16"
+carousel:
+  title: 공장 없는 광고 회사가 삼성전자보다 설비투자를 많이 한 이유
+  caption: |-
+    Meta는 공장도 원재료도 재고도 없다. 매출원가율 18%, 매출총이익률 82%. 그런데 2025년 AI 데이터센터에 설비투자 $69.7B를 쏟았다. 매출의 34.7%, 삼성전자(약 53조원·외부)보다 많은 102조원이다.
+
+    반전은 현금에 있었다. 순이익은 $60.5B인데 영업활동현금흐름은 $115.8B — 순이익의 1.9배다. 감가상각과 주식보상비용이 비현금 비용으로 빠지기 때문. 이 현금 여력이 $70B 투자를 감당하고도 잉여현금흐름 $46.1B를 남긴다. 영업이익률은 2022년 바닥 24.8%에서 41.4%로 돌아왔다.
+
+    관전 포인트는 하나다. 자산은 1년에 +59% 늘었는데 매출은 +22%. 총자산회전율이 0.55회로 3기 연속 하락했다. 2026년에 볼 한 줄 — "AI 설비투자의 매출 전환율".
+  pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·현금흐름·설비투자 등 본문 표 수치는 dartlab 실측(2026-06-20, USD 연결·분기 합산)입니다. 삼성전자 설비투자(약 53조원)·GPU 단가·130만 GPU 대수는 외부/회사 발표 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      공장도 원재료도 없는데
+      [[삼성전자보다 설비투자가 많다]]
+    sub: |-
+      매출원가율 18% · 매출총이익률 82%
+      그런데 설비투자는 102조원
+      광고 회사가 왜 제조업처럼 투자하나
+    image: advertising-network
+  - layout: editorialStat
+    kicker: 매출총이익률 (2025)
+    bigNumber: '82'
+    unit: '%'
+    context: |-
+      매출원가율 18% — 9년 불변의 구조적 마진.
+      공장·원재료·재고 없이
+      광고주가 내고 서버가 보여주는 사이에 남는 돈.
+    image: ai-datacenter
+  - layout: editorialStat
+    kicker: 영업이익률 회복
+    bigNumber: '41.4'
+    unit: '%'
+    context: |-
+      2022년 바닥 24.8% → 2024년 42.2% → 2025년 41.4%.
+      Year of Efficiency 21,000명 감원으로
+      무너진 건 마진이 아니라 비대한 비용이었다.
+    image: zuckerberg-efficiency
+  - layout: editorialStat
+    kicker: AI 설비투자 (2025)
+    bigNumber: '69.7'
+    unit: $B
+    context: |-
+      매출의 34.7%, 1년 만에 +87%.
+      삼성전자(약 53조원·외부)보다 많은 102조원을
+      AI 데이터센터에 투입(회사 발표 130만 GPU).
+    image: ai-datacenter
+  - layout: editorialBeat
+    kicker: 반전 — 이익보다 현금
+    line: |-
+      순이익은 $60.5B인데
+      [[현금은 $115.8B 들어왔다]]
+    sub: |-
+      영업활동현금흐름 = 순이익의 1.9배.
+      감가상각·주식보상비용이 비현금 비용으로 빠져
+      $70B 투자 후에도 잉여현금흐름 $46.1B가 남는다.
+    image: advertising-network
+  - layout: editorialBeat
+    kicker: 결론 — 다음에 볼 지표
+    line: |-
+      신용등급 dCR-AA인데
+      [[Piotroski는 4/9, outlook 부정적]]
+    sub: |-
+      자산은 +59% 늘었는데 매출은 +22%.
+      총자산회전율 0.55회로 3기 연속 하락.
+      2026년에 볼 한 줄 — "AI 설비투자의 매출 전환율".
+    image: zuckerberg-efficiency
 ---
 
 <script>

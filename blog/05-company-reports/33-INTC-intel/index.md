@@ -35,6 +35,79 @@ ai:
     - "배당 중단, 배당귀족 36년 연속기록 종료"
   keyMetrics: {revenue: 53.1, opm: -22.0, roe: -19.7, fcf: -15.7}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 적자 100억달러인데 주가 213%? 인텔의 마지막 베팅을 숫자로 읽다
+  caption: |-
+    "반도체를 발명한 회사가 역대 최대 적자를 냈는데, 주가가 213% 올랐다." 2024년 인텔 순손실 $18.8B(약 25조원), 36년 배당귀족 기록도 끊겼습니다. 그런데 2025년 한 해 주가는 213% 상승(외부). 적자와 급등이 한 회사 안에 있습니다.
+
+    뜯어보면 반전이 있습니다. 매출은 $79B→$53B로 33% 급락, 파운드리(IFS) 적자만 $10.3B(외부, Intel Q4 2025). 그런데 최대 경쟁자 NVIDIA가 $5B를 넣었고(외부), 일론 머스크의 Terafab 파트너십(외부)이 왔고, 위기에 팔았던 아일랜드 Fab 34를 $14.2B에 되샀습니다(외부). 시장이 산 건 실적이 아니라 '18A 공정의 미래'입니다.
+
+    관전 포인트는 단 하나입니다. IFS가 흑자로 돌아서고 18A 수율이 80%를 넘는가. 지금은 적자 $10.3B(외부), 수율 65~75%(외부 추정), 잉여현금흐름 -$15.7B. 다음 분기 IFS 영업이익과 18A 수율 곡선을 보세요.
+  pinnedComment: 투자 판단이 아닙니다. 연결 재무 수치(매출·연결손익·현금흐름·배당·자산)는 dartlab EDGAR 실측, IFS 세그먼트 손익($10.3B)·시총·주가·점유율·18A 수율·NVIDIA $5B·Terafab·Fab 34는 외부 인용(Intel Q4 2025/Bloomberg/Reuters/WSJ/FT/Yahoo/TrendForce/SemiAnalysis)입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      역대 최대 적자를 낸 해,
+      [[주가는 213% 올랐다]]
+    sub: |-
+      순손실 $18.8B · 배당 36년 기록 종료
+      시장은 왜 적자가 아니라
+      '아직 오지 않은 미래'를 샀을까
+    image: bg-intel-fab-wide
+  - layout: editorialStat
+    kicker: 순손실 (2024)
+    bigNumber: '18.8'
+    unit: 십억달러
+    context: |-
+      인텔 56년 역사상 최대 적자.
+      매출도 $79B → $53B로 33% 급락.
+      이 중 $10.1B은 빅배스 — 돌아오지 않는 비경상 비용.
+    image: bg-wallet-empty
+  - layout: editorialBeat
+    kicker: R&D의 무게
+    line: |-
+      매출총이익 $17.3B,
+      [[R&D가 $16.5B]]
+    sub: |-
+      남은 돈의 95%를 연구에 쏟는다.
+      설계도 제조도 하는 IDM의 딜레마 — 줄이면 파운드리가 끝난다.
+    image: bg-circuit-blueprint
+  - layout: editorialStat
+    kicker: 파운드리(IFS) 영업손실
+    bigNumber: '10.3'
+    unit: 십억달러
+    context: |-
+      매출 $17.8B에 적자 $10.3B (외부, Intel Q4 2025).
+      $1 벌려고 $1.58을 쓴다.
+    image: wafer-18a-euv-macro
+  - layout: editorialBeat
+    kicker: 적이 돈을 넣다
+    line: |-
+      현금이 마르던 그때,
+      [[NVIDIA가 $5B를 넣었다]]
+    sub: |-
+      잉여현금흐름 -$15.7B, 배당 중단.
+      그런데 최대 경쟁자가 4% 지분을 샀다 (외부). "포기하지 마라."
+    image: bg-coins-dark
+  - layout: editorialBeat
+    kicker: 영화 같은 반전
+    line: |-
+      위기에 팔았던 공장을,
+      [[$3B 더 주고 되샀다]]
+    sub: |-
+      아일랜드 Fab 34를 $11.2B에 팔고, 18개월 뒤 $14.2B에 재매입 (외부).
+      "파운드리, 계속한다." 신임 CEO의 전략 선언.
+    image: bg-fab34-ireland-exterior
+  - layout: editorialStat
+    kicker: 2025년 주가 상승률
+    bigNumber: '+213'
+    unit: "%"
+    context: |-
+      시장이 산 건 실적이 아니라 18A의 미래 (외부, Yahoo).
+      다음에 볼 곡선 — IFS 흑자 전환(현재 -$10.3B, 외부)과
+      18A 수율 80%(현재 65~75%, 외부 추정).
+    image: bg-terminal-dark
 ---
 
 <script>

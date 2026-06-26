@@ -32,6 +32,71 @@ ai:
   weaknesses: ["2019~2023년 낮은 GAAP 영업이익률이 오래 지속", "2025년에도 판관비율 34.6%로 비용 기준선 유지 여부가 핵심", "매출채권 성장이 매출 성장보다 빠르다는 dartlab summary flag 존재", "FY26 SBC 3.48B와 FY27 가이던스상 SBC 9.0%p 조정은 GAAP·non-GAAP 간극을 만든다", "AI·Data Cloud 성장이 손익으로 얼마나 번역될지는 다음 국면"]
   keyMetrics: {revenue: 41.53, opm: 20.06, npm: 17.96, ocf: 15.00, fcf: 14.40}
   dataAsOf: "2026-06-18"
+carousel:
+  title: 매출 3배를 만든 뒤에야 마진 20%가 열린 회사
+  caption: |-
+    클라우드 회사가 6년간 4%도 못 남겼다. Salesforce는 매출을 13.28B에서 41.53B로 3.1배 키웠는데, 영업이익률은 2019~2023년 내내 2~4%대에 갇혀 있었다.
+
+    반전은 원가가 아니라 판관비에서 왔다. 판관비율이 2023년 43.1%에서 2025년 34.6%로 내려가자, 영업이익률은 3.3%에서 20.1%로 뛰었다. 2025년 영업현금흐름 15.00B는 순이익 7.46B의 2배다. 매출이 커져서가 아니라, 매출이 큰 뒤 비용을 접어서 난 이익이다.
+
+    이제 질문은 한 단계 넘어간다. 회사 발표 기준 non-GAAP 마진은 34%, GAAP은 20%이고, 그 14%포인트 격차의 가장 큰 항목이 SBC(회사 가이던스 조정표 기준)다. 다음에 볼 것은 AI 제품명이 아니라 GAAP 20% 마진과 current RPO가 같이 살아 있는가다.
+  pinnedComment: 투자 판단이 아닙니다. dartlab 실측(라벨연도 분기 합산, USD)은 손익·현금흐름표 기준이고, RPO·SBC·Agentforce·자사주 등 회사 발표 숫자는 (외부) 공시 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      매출은 벌써 3배였는데
+      이익은 왜 [[이렇게 늦게]] 왔나
+    sub: |-
+      매출 13.28B(2019) → 41.53B(2025), 3.1배
+      그 사이 영업이익률은 2~4%대에 갇혀 있었다
+      클라우드 회사인데 왜 안 남겼나
+    image: 155-salesforce-tower
+  - layout: editorialStat
+    kicker: 2019~2023 영업이익률
+    bigNumber: '2.1~4.0'
+    unit: '%'
+    context: |-
+      매출은 6년 만에 3배가 됐지만
+      영업이익률은 4% 아래에 오래 머물렀다
+      매출총이익률은 73~74%로 높았는데도
+    image: 155-data-cloud
+  - layout: editorialBeat
+    kicker: 반전의 본체
+    line: |-
+      범인은 원가가 아니라
+      [[판관비]]였다
+    sub: |-
+      판관비율 43.1%(2023) → 34.6%(2025)
+      영업비용률은 69.8% → 56.9%로 12.9%p 하락
+    image: 155-crm-workflow
+  - layout: editorialStat
+    kicker: 영업이익률 (2023→2025)
+    bigNumber: '20.1'
+    unit: '%'
+    context: |-
+      3.3%(2023) → 14.4%(2024) → 20.1%(2025)
+      매출 10.17B 증가에 영업이익 7.30B 증가
+      성장이 아니라 비용 레버리지의 이야기
+    image: 155-salesforce-tower
+  - layout: editorialStat
+    kicker: 2025 영업현금흐름
+    bigNumber: '15.00'
+    unit: B(USD)
+    context: |-
+      순이익 7.46B의 2.0배, OCF/NI 201.1%
+      자유현금흐름 14.40B, CAPEX/매출 1.43%
+      이익이 회계가 아니라 현금으로 따라왔다
+    image: 155-crm-workflow
+  - layout: editorialBeat
+    kicker: 다음에 볼 지표
+    line: |-
+      non-GAAP 34%가 아니라
+      [[GAAP 20%]]가 살아 있는가
+    sub: |-
+      두 마진 사이 14%p가 SBC다 (회사 가이던스)
+      다음엔 제품명 말고 GAAP 20% 마진이 살아 있는지 본다
+    image: 155-data-cloud
 ---
 
 > **데이터 기준**: 2026-06-18 dartlab 실측 — Salesforce(CRM) 미국 연결(USD), 분기 데이터를 라벨연도별 합산. 이 글의 dartlab **2025 라벨은 회사 FY2026(2026-01-31 종료) 실적과 대응**한다. 2026년 이후 공식 공시는 RPO·Agentforce·가이던스·주주환원 맥락으로만 분리해 인용한다.

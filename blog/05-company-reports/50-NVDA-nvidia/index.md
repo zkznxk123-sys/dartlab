@@ -22,6 +22,81 @@ ai:
   weaknesses: ["TSMC 단일 제조 의존", "AI 투자 사이클 둔화 리스크"]
   keyMetrics: {revenue: 130.5, opm: 62.4, roe: 0, fcf: 0}
   dataAsOf: "2026-04-18"
+carousel:
+  title: 공장 없는 반도체 회사가 영업이익률 62%를 찍은 구조
+  caption: |-
+    반도체 회사인데 공장이 없다. 매출총이익률 75% — 마이크로소프트(72%)보다, 구글(58%)보다 높다(각사 공시 기준 참고치). 2023년 매출 $27B, 영업이익률 16%. 2년 뒤 매출 $130.5B, 영업이익률 약 62%. 매출이 5배 뛰는 동안 마진도 4배 뛰었다. 왜 칩을 설계만 하는 회사가 소프트웨어 회사보다 마진이 좋은가.
+
+    답은 두 축이 동시에 작동했다는 것. 팹리스 — 공장이 없으니 유형자산이 인텔의 18분의 1, 매출이 4.8배 뛰는 동안 영업이익은 19.4배 뛰었다(영업 레버리지). 그리고 AI 수요 독점 — ChatGPT 이후 데이터센터 매출이 전체의 88%, $15B에서 $115.2B로 2년 만에 7.7배. CUDA 생태계 전환 비용이 가격결정력을 만든다.
+
+    관전 포인트는 하나다. 이 구조의 전제는 AI 투자가 계속돼야 한다는 것. 2022년 암호화폐 거품이 터진 여파로 2023년 영업이익률은 16%까지 떨어졌다. 다음 분기엔 데이터센터 매출이 $30B을 넘기는지, 매출총이익률 75%가 73% 아래로 깨지지 않는지를 본다.
+  pinnedComment: 투자 판단이 아닙니다. NVIDIA의 매출·마진·세그먼트 숫자는 dartlab 실측(EDGAR 연결 기준)입니다. 경쟁사(MS·구글·인텔·SK하이닉스 등) 마진 비교치는 각사 공시 기반 참고치이고, GPU 단가·TSMC 웨이퍼 가격·하이퍼스케일러 설비투자·전력 전망은 외부/업계 추정입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      반도체 회사인데 공장이 없다
+      그런데 [[영업이익률 62%]]
+    sub: |-
+      매출총이익률 75% — MS 72%보다 높다
+      2년 만에 매출 5배, 마진 4배
+      칩을 설계만 하는 회사의 정체
+    image: gpu-closeup
+  - layout: editorialBeat
+    kicker: 독자의 질문
+    line: |-
+      공장도 없는데
+      [[소프트웨어보다 마진이 좋다]]?
+    sub: |-
+      반도체를 설계만 하는 회사가
+      어떻게 SW 회사보다 마진이 높은가.
+    image: nvda-question
+  - layout: editorialStat
+    kicker: 반전 — 팹리스의 힘
+    bigNumber: '18'
+    unit: 분의 1
+    context: |-
+      유형자산 5.8B vs 인텔 104.2B.
+      공장이 없으니 고정 자산이 18분의 1.
+      한계비용이 거의 들지 않는 구조다.
+    image: nvda-stack-tower
+  - layout: editorialStat
+    kicker: 근거 1 — 영업 레버리지
+    bigNumber: '19.4'
+    unit: 배
+    context: |-
+      매출 4.8배 → 영업이익 19.4배.
+      영업이익 4.2B → 81.5B.
+      고정비 분산이 마진을 폭발시켰다.
+    image: nvda-chart-grid
+  - layout: editorialStat
+    kicker: 근거 2 — AI 수요 독점
+    bigNumber: '88'
+    unit: "%"
+    context: |-
+      데이터센터가 매출의 88%.
+      15.0B → 115.2B, 2년 만에 7.7배.
+      CUDA 전환 비용 = 가격결정력.
+    image: datacenter
+  - layout: editorialStat
+    kicker: 증거 — 구조가 만든 현금
+    bigNumber: '60.9'
+    unit: B 달러
+    context: |-
+      잉여현금흐름 60.9B, 설비투자 3.2B뿐.
+      OCF 64.1B은 순이익 72.9B의 88%.
+      이 중 36.1B(59%)을 주주에 환원.
+    image: nvda-cash-flow
+  - layout: editorialBeat
+    kicker: 결론 — 다음에 볼 지표
+    line: |-
+      이 구조의 전제는
+      [[AI 투자가 계속돼야 한다]]
+    sub: |-
+      직전 하강기엔 영업이익률 16%까지.
+      다음 분기: 데이터센터 매출 30B 돌파?
+      매출총이익률 75% → 73% 사수 여부.
+    image: nvda-timeline-bg
 ---
 
 <script>

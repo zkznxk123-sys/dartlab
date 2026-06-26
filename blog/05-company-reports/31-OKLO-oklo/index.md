@@ -33,6 +33,82 @@ ai:
     - "인허가 거절 이력"
   keyMetrics: {revenue: 0.0, opm: 0.0, roe: 0.0, fcf: -0.11}
   dataAsOf: "2026-04-13"
+carousel:
+  title: 매출 0원, 시총 18조원. PER을 못 구하는 회사 — Oklo
+  caption: |-
+    PER(주가수익비율)을 계산하려면 이익이 필요한데, 이 회사엔 분모가 없습니다. 매출 $0, 직원 120명, 시총 약 $13B(18조원). 1인당 시총 $108M.
+
+    재무제표를 열면 빈칸입니다. 매출 3년 연속 0, 순손실은 -$4.3M에서 -$105.7M으로. 자산이 1년 만에 83배가 된 건 원자로가 아니라 주식 발행 때문이었습니다. 계약은 14GW(원전 14기 분량) 쌓였지만 법적 구속력 있는 건 미 공군 75MW, 전체의 0.5%뿐. NRC(미국원자력규제위원회)는 2022년 한 번 거절했습니다.
+
+    관전 포인트: 현금 런웨이 약 3.2년. 첫 원자로가 돌기 전에 추가 자금 조달이 필요합니다. 다음에 볼 지표는 매출 행 — 2027년 INL에서 1호기가 임계에 도달하는 날, 0이 아닌 첫 숫자가 적힙니다.
+  pinnedComment: 투자 판단이 아닙니다. 재무 수치(매출·순손실·자본·현금)는 SEC 10-K 기준 dartlab 실측, 계약 용량·주가·시총·경쟁사 수치는 외부 공시·시세 인용입니다.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      매출은 0원인데
+      시총은 [[18조원]]입니다
+    sub: |-
+      직원 120명, 가동 원자로 0기
+      계약서엔 14GW가 적혀 있고
+      Sam Altman이 SPAC으로 상장시켰다
+    image: bg-terminal-oklo
+  - layout: editorialStat
+    kicker: 1인당 시총 — 120명이 약속한 미래
+    bigNumber: '108'
+    unit: $M / 1인
+    context: |-
+      직원 120명, 시총 약 $13B.
+      1인당 시총 $108M — 삼성전자의 약 90배.
+      120명이 만든 가치가 아니라, 약속한 가치다.
+    image: bg-grid-office-dark
+  - layout: editorialStat
+    kicker: 손익계산서 — 3년 연속 빈칸
+    bigNumber: '0'
+    unit: 원 매출
+    context: |-
+      매출 행이 3년 연속 0.
+      존재하는 건 영업비용뿐.
+      PER은 분모가 없어 계산 불가.
+    image: bg-empty-revenue-blur
+  - layout: editorialStat
+    kicker: 순손실 궤적 — 돈을 쓰기 시작했다
+    bigNumber: '-105.7'
+    unit: $M 순손실(적자)
+    context: |-
+      FY2023 -$4.3M → FY2025 -$105.7M, 약 25배.
+      연구·설계·인허가에 태우는 중.
+      손실 확대 = 돈을 쓰기 시작했다는 신호.
+    image: bg-runway-dusk
+  - layout: editorialBeat
+    kicker: 대차대조표 — 자산 83배의 정체
+    line: |-
+      자본이 -$3.1M에서
+      [[+$1,205.6M]]으로 — 1년 만에
+    sub: |-
+      총자산 14.9M→1,246.2M, 83배.
+      기술이 아니라 주식 발행이 만든 자산.
+      현금 $410M + 2026.1 유증 $1.18B.
+    image: bg-balance-sheet-dark
+  - layout: editorialStat
+    kicker: 계약 14GW 중 법적 구속은 0.5%
+    bigNumber: '75'
+    unit: MW
+    context: |-
+      법적 구속력 있는 계약은 미 공군 75MW뿐.
+      Switch 12GW는 LOI(비구속), 전체의 0.5%만 진짜.
+      NRC는 2022.1 인허가 거절 이력.
+    image: bg-nrc-document-dark
+  - layout: editorialBeat
+    kicker: 결론 — 다음에 볼 지표
+    line: |-
+      현금 런웨이는 약 [[3.2년]]
+      첫 원자로가 돌기 전에 바닥난다
+    sub: |-
+      맞으면 18조는 시작일 수도,
+      틀리면 잔여 현금에 수렴.
+      볼 지표: 매출 행 — 2027 INL 1호기 임계.
+    image: bg-empty-site-desert
 ---
 
 <script>

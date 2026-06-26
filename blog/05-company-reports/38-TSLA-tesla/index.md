@@ -45,6 +45,72 @@ ai:
     roe: 5.9
     fcf: 6.2
   dataAsOf: "2026-04-16"
+carousel:
+  title: DCF가 마이너스인데 시총은 1조 달러, 테슬라의 진짜 가격
+  caption: |-
+    매출이 상장 이후 처음으로 줄었다. 2024년 $97.69B에서 2025년 $94.83B, -2.9%. 영업이익률은 2022년 16.8%에서 2025년 4.6%로 무너졌다. 그런데 시총은 시장가 기준 여전히 약 $1T.
+
+    반전은 가치평가에 있다. dartlab DCF가 계산한 자동차 사업 기업가치는 -$3.7B, 마이너스다. EVA도 2022년 +$7.8B에서 2025년 -$4.2B로 돌아섰다 — 투하자본수익률 4.27%가 자본조달비용(WACC) 9.89%를 못 넘는다. 삼각검증 가중 타겟은 $963B, 중앙값 $321B. 시총의 약 1/3 수준이다.
+
+    관전 포인트는 하나다. 2026년 로보택시 상업 서비스의 분기 매출. 손익계산서에 찍히면 $1T가 정당화되기 시작하고, 안 찍히면 dFV 중앙값 $321B 쪽으로 수렴한다. 자동차로는 피크아웃, AI로는 시작 전 — 어느 쪽인지 숫자로 드러나는 해다.
+  pinnedComment: 투자 판단이 아닙니다. 재무 수치는 dartlab 실측(2017~2025 분기 합산), 2026 Q1 마진은 10-Q 공식 공시, 시총은 시장 관측치, 로보택시·FSD·Optimus·Dojo 가치는 손익계산서에 없는 옵션으로 본문에서 별도 해석.
+  slides:
+  - layout: editorial
+    date: 2026. 06. 26
+    line: |-
+      DCF가 마이너스다.
+      그런데 시총은 [[1조 달러]]다.
+    sub: |-
+      매출 상장 이후 첫 역성장
+      EVA 플러스에서 마이너스로
+      자동차냐 AI냐, 가격이 묻는다
+    image: tsla-valuation-bg
+  - layout: editorialStat
+    kicker: 매출 YoY (2025)
+    bigNumber: '-2.9'
+    unit: '%'
+    context: |-
+      $97.69B → $94.83B
+      2010년 상장 이후 첫 역성장
+      성장 서사가 멈춘 해
+    image: tsla-car-silhouette
+  - layout: editorialStat
+    kicker: 영업이익률 붕괴 (2022→2025)
+    bigNumber: '4.6'
+    unit: '% (2022 16.8%)'
+    context: |-
+      영업이익 13.66B(2022) → 4.36B(2025)
+      2025 한 해: 매출 -3% → 영업이익 -38%
+      영업레버리지 13.1배
+    image: tsla-lever
+  - layout: editorialBeat
+    kicker: EVA — 가치 창출에서 파괴로
+    line: |-
+      2022년 +$7.8B
+      2025년 [[-$4.2B]]
+    sub: |-
+      버는 수익(4.27%)이 자본조달비용(9.89%)에 못 미친다
+      자본은 3배 늘고 수익은 1/10로
+    image: tsla-eva-bg
+  - layout: editorialStat
+    kicker: 시총의 1/3, dartlab 가치평가
+    bigNumber: '321'
+    unit: $B (시총의 약 1/3)
+    context: |-
+      삼각검증 중앙값 $321B
+      자동차 DCF 기업가치는 -$3.7B
+      현재 시총 약 $1T과의 격차
+    image: tsla-scale-bg
+  - layout: editorialBeat
+    kicker: 2026년에 봐야 할 한 줄
+    line: |-
+      로보택시 상업 서비스의
+      [[분기 매출]]
+    sub: |-
+      찍히면 $1T 정당화 시작
+      안 찍히면 dFV 중앙값 $321B로 수렴
+      자동차는 피크아웃, AI는 시작 전
+    image: tsla-2026-bg
 ---
 
 <script>
