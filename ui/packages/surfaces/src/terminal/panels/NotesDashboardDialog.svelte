@@ -89,7 +89,7 @@
 	<div class="scrModal ndModal" role="dialog" aria-modal="true" tabindex="-1" aria-label={T('주석 상세', 'notes detail')} onclick={(e) => e.stopPropagation()}>
 		<div class="scrHead">
 			<span class="scrTitle">{T('주석', 'NOTES')} · {co.name.kr}</span>
-			<span class="ndHeadMeta">{T('정부 XBRL 직독 · 분기=YTD 누적', 'gov XBRL · quarterly YTD')}</span>
+			<span class="ndHeadMeta">{T('분기 = YTD 누적', 'quarter = YTD')}</span>
 			<button class="scrClose" onclick={onClose} aria-label="close">✕</button>
 		</div>
 		<div class="ndBody">
