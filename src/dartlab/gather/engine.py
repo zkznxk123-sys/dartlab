@@ -14,6 +14,7 @@ from .mixins.info import _GatherInfoMixin
 from .mixins.macro import _GatherMacroMixin
 from .mixins.news import _GatherNewsMixin
 from .mixins.price import _GatherPriceMixin
+from .mixins.research import _GatherResearchMixin
 
 
 class Gather(
@@ -22,6 +23,7 @@ class Gather(
     _GatherNewsMixin,
     _GatherMacroMixin,
     _GatherCollectMixin,
+    _GatherResearchMixin,
 ):
     """통합 멀티소스 비동기 병렬 수집 엔진.
 

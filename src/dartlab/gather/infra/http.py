@@ -42,6 +42,10 @@ DOMAIN_POLICY: dict[str, DomainConfig] = {
     "financialmodelingprep.com": DomainConfig(rpm=4, concurrency=1, timeout=15.0, jitter_min=1.0, jitter_max=3.0),
     # 뉴스
     "news.google.com": DomainConfig(rpm=20, concurrency=2, jitter_min=0.3, jitter_max=1.5),
+    # 증권사 리서치 보드 — 민감 도메인, 보수적 지터 (스크래핑 예의)
+    "securities.miraeasset.com": DomainConfig(rpm=15, concurrency=1, jitter_min=0.5, jitter_max=2.0),
+    "m.nhqv.com": DomainConfig(rpm=15, concurrency=1, jitter_min=0.5, jitter_max=2.0),
+    "www.myasset.com": DomainConfig(rpm=15, concurrency=1, jitter_min=0.5, jitter_max=2.0),
 }
 
 _DEFAULT_POLICY = DomainConfig(rpm=30, concurrency=2)
