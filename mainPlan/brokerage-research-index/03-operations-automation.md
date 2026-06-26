@@ -54,6 +54,8 @@ src/dartlab/pipeline/registry.py  (StageSpec 추가)
 3. **자가치유 액션** — 깨진 증권사를 자동 `enabled=False` 강등(**전체 stage 는 계속**) + `StageResult.failures` 기록 + GitHub Step Summary 경고. 운영자가 `config.py` selector 고치고 재활성.
 4. **구현 최소** — stage 안 함수 + 기존 `telemetry.emit`(`gather:fetch:done` 패턴) 재사용. 새 모니터링 인프라 신설 금지.
 
+> **구현됨 (`664e8b50c`)**: `sources/brokerage/fetch.py::_detectBroken(brokerCounts, enabledKeys)` — enabled 인데 수집 0행인 증권사 반환(셀렉터 깨짐 의심). `syncBrokerageReports.py` 가 증권사별 수집수 + 깨짐 경고를 stdout(→ CI 로그)에 출력. *수율 baseline 대비(14일 중앙값)·파싱 성공률·자동 강등*은 후속(현재는 0행=깨짐 단순판정).
+
 > 이게 "URL만 관리하면 된다"의 실제 운영 보장 — selector 가 깨지면 **시스템이 먼저 알려준다**, 사용자가 빈 화면 보기 전에.
 
 ## 5. Freshness / as-of 노출
