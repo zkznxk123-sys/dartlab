@@ -10,6 +10,8 @@ from __future__ import annotations
 import argparse
 
 from dartlab.gather import getDefaultGather
+from dartlab.gather.sources.brokerage.config import enabledBrokers
+from dartlab.gather.sources.brokerage.fetch import _detectBroken
 from dartlab.gather.sources.brokerage.io import writeMonthly
 from dartlab.pipeline.changed import writeChanged
 from dartlab.pipeline.hfUpload import uploadCategoryToHf
@@ -28,6 +30,13 @@ def main() -> int:
     changed = writeMonthly(df)
     writeChanged(_CATEGORY, changed)
     print(f"[brokerageReports] {df.height} rows · {len(changed)} months changed: {changed}", flush=True)
+
+    # 수율 가드 (PRD 03 §4) — enabled 인데 0행이면 셀렉터 깨짐 의심, 운영자에게 surface.
+    counts = {row[0]: int(row[1]) for row in df.group_by("broker").len().iter_rows()} if df.height else {}
+    print(f"[brokerageReports] 증권사별 수집: {counts}", flush=True)
+    broken = _detectBroken(counts, list(enabledBrokers()))
+    if broken:
+        print(f"[brokerageReports] ⚠ 수율 0 — 셀렉터 깨짐 의심: {broken} (config selector 점검 필요)", flush=True)
 
     if changed and not args.no_upload:
         pushed = uploadCategoryToHf(_CATEGORY)

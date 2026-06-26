@@ -27,6 +27,15 @@ def _decode(content: bytes, text: str, enc: str | None) -> str:
     return text
 
 
+def _detectBroken(brokerCounts: dict[str, int], enabledKeys: list[str]) -> list[str]:
+    """수율 가드 — enabled 증권사 중 수집 0행인 곳(셀렉터 깨짐 의심) 반환.
+
+    스크래핑 제품이 죽는 가장 흔한 이유 = '200 OK + 0행' 조용한 깨짐(HTML 구조 변경).
+    enabled 인데 결과 0건이면 파서가 깨졌을 가능성 → 운영자에게 surface (PRD 03 §4).
+    """
+    return sorted(k for k in enabledKeys if brokerCounts.get(k, 0) == 0)
+
+
 async def _fetchBroker(key: str, cfg: dict, client: "GatherHttpClient") -> list[ReportMeta]:
     """증권사 1곳의 모든 카테고리를 fetch+parse. 카테고리별 실패는 격리(로그 후 skip)."""
     parser = PARSERS.get(key)

@@ -6,7 +6,7 @@ import importlib
 
 import pytest
 
-from dartlab.gather.sources.brokerage.fetch import _decode
+from dartlab.gather.sources.brokerage.fetch import _decode, _detectBroken
 
 pytestmark = pytest.mark.unit
 
@@ -23,3 +23,14 @@ def test_decode_with_enc() -> None:
 
 def test_decode_no_enc_uses_text() -> None:
     assert _decode(b"x", "이미디코드", None) == "이미디코드"
+
+
+def test_detect_broken_zero_yield() -> None:
+    # nh 가 enabled 인데 수집 0행 → 깨짐 의심
+    counts = {"miraeasset": 30, "yuanta": 10}
+    assert _detectBroken(counts, ["miraeasset", "nh", "yuanta"]) == ["nh"]
+
+
+def test_detect_broken_all_healthy() -> None:
+    counts = {"miraeasset": 30, "nh": 12, "yuanta": 10}
+    assert _detectBroken(counts, ["miraeasset", "nh", "yuanta"]) == []
