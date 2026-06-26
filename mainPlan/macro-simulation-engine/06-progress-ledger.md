@@ -49,16 +49,24 @@
 - **정직**: 조건 변수는 조건 horizon 에서 baseline+δ 로 정확 고정 + 밴드≈0(하드 제약 가시). scenario≠forecast 배지·footer.
 - **검증**: Python 14(신규 4) · TS parity 6(신규 2) · macroLens 53 · svelte-check 0err · tsc(contracts·runtime) 0.
 
+### ✅ 신용축 편입 — 5→6변수 (커밋 백엔드 `<pending>`·UI `<pending>`)
+- **★HY 데이터벽 실측·확정**: `BAMLH0A0HYM2`(ICE BofA US HY OAS)는 FRED meta `observation_start=2023-06-26`
+  — **ICE BofA 라이선스로 FRED 가 과거를 truncation**(BAMLC0A0CM 회사채 OAS 도 동일). 대조군 DGS10(1962~)·VIXCLS(1990~)는 full.
+  → HY 백필은 *원천 불가*(HF 게이트 아님, 데이터가 FRED 에 없음). **미래 세션 HY 재시도 금지.**
+- **대체 = `BAA10Y`**(Moody's Baa 회사채−10Y 스프레드, 1986~ 일별, **이미 SSOT 10119개·MACRO_SERIES 화이트리스트 有**).
+  정통 신용스프레드 → **백필·HF 쓰기 0·게이트 0, 순수 코드**(스펙 2곳). `_US_SPECS`·`_KR_SPECS` 6번째 `VarSpec("BAA10Y","신용스프레드","level")`.
+- **실측 안정**: US nObs483 eig0.9981·KR nObs315 eig0.9956 (둘 다 <1, fan 유한). 긴축 +100bp 조건부 → 신용스프레드 q50 1.45→1.86 **확대**(긴축→신용경색 정통 전이 포착).
+- fan 자동 5장(원유 control 제외, 신용스프레드 포함) + 시나리오 overlay 에 신용 반응. macroLens·contract 무변경(자동). 검증 green(Python14·parity6·lens53·svelte0·tsc0).
+
 ### 게이트 (운영자 승인 대기)
-- **UI git push 보류** — 공개 터미널 시각 변경(칩·overlay·배지)이라 운영자 눈검수 후 push("푸시해"). 두 commit 완료(백엔드도 동반 보류).
-- **데이터 publish 불요** — 런타임 계산이라 HF 아티팩트 없음(별도 배선 0). 미배선/표본부족 = 피처게이트(섹션 미렌더).
+- **UI git push 보류** — 공개 터미널 시각 변경(칩·overlay·배지·신용 fan 카드)이라 운영자 눈검수 후 push("푸시해"). commit 완료(백엔드 동반 보류).
+- **데이터 publish 불요** — 런타임 계산 + BAA10Y 가 이미 SSOT 에 있어 별도 배선·HF 쓰기 0.
 
 ## NEXT (Phase 4 — 선택·후순위, 데이터벽 게이트)
 
-1. **운영자 시각 눈검수**(전망 탭 → 시나리오 칩 overlay) → UI push 승인("푸시해").
+1. **운영자 시각 눈검수**(전망 탭 → 시나리오 칩 overlay + 신용스프레드 fan) → push 승인("푸시해").
 2. **Phase 4 — transmission 브리지**(선택): IRF/조건부경로 → 섹터·기업 타격 + scenario-simulator 외생축 격상.
    ⚠ **데이터벽 먼저** — transmission 회사단 커버리지 held-out 측정이 빌드 전제(PRD 05 §5). 측정 없이 빌드 = `feedback_plan_score_not_signature` 위반. 측정 → 점진.
-3. (데이터) HY스프레드 전이력 백필 → 신용축 5→6변수 편입 + 재보정.
 
 ## 결정 로그
 
