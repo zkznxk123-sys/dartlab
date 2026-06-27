@@ -294,3 +294,216 @@ def runEdgarPrices(
             res.report.failures.append(f"snapshot: {type(exc).__name__}: {exc}")
             print(f"[pipeline] edgarPrices snapshot 실패(격리): {exc}", flush=True)
     return res
+
+
+# ── 일증분 (Polygon by-day) — gov daily 대칭 ──────────────────────────────────────────────
+# 백필(runEdgarPrices, Yahoo per-ticker)이 회사별 전체이력 base 를 깐 뒤, 매일 Polygon grouped-daily
+# 1콜로 그날 전종목 OHLC 를 받아 edgar/prices/recent.parquet(최근 tail 1파일)에 누적한다. 런타임이
+# company(base) + recent(tail)를 머지(KR govPriceSource 와 동형). 6437 per-ticker 매일 회피.
+_POLYGON_PACE_SECONDS = 13.0  # 무료 5콜/분 → 12s/콜 + 여유
+_RECENT_KEEP_DAYS = 45  # recent tail 보관 달력일 (backfill 주기 사이 가교)
+
+
+def _resolvePolygonKey(key: str | None = None) -> str:
+    """Polygon(Massive) 키 해석 — 인자 > POLYGON_API_KEY env > repo .env. 도메인은 env 미참조라 여기서 주입."""
+    if key:
+        return key
+    import os
+
+    env = os.environ.get("POLYGON_API_KEY", "").strip()
+    if env:
+        return env
+    from pathlib import Path
+
+    envPath = Path(__file__).resolve().parents[4] / ".env"
+    if envPath.exists():
+        import re
+
+        m = re.search(r"^POLYGON_API_KEY=(.*)$", envPath.read_text(encoding="utf-8"), re.M)
+        if m:
+            return m.group(1).strip().strip('"').strip("'").strip()
+    return ""
+
+
+def _patchSnapshotCurrent(patch: dict, *, upload: bool, token) -> int:
+    """기존 prices-snapshot-us.json 의 currentPrice·priceUpdated 만 갱신(returns/52w 는 백필 보존).
+
+    Args:
+        patch: {ticker: {"currentPrice": float, "priceUpdated": "YYYYMMDD"}}.
+        upload: True 면 HF 재발행.
+        token: HF 토큰.
+
+    Returns:
+        int — 패치된 종목 수.
+    """
+    import json
+    from pathlib import Path
+
+    outLocal = Path(__file__).resolve().parents[4] / "landing" / "static" / "map" / "prices-snapshot-us.json"
+    if not outLocal.exists():
+        return 0
+    try:
+        payload = json.loads(outLocal.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 — 손상 시 패치 skip(백필이 재생성)
+        return 0
+    data = payload.get("data") or {}
+    n = 0
+    for ticker, upd in patch.items():
+        row = data.get(ticker)
+        if row is None:  # 백필 안 된 종목은 건너뜀(returns/52w 없는 빈 행 만들지 않음)
+            continue
+        row["currentPrice"] = upd["currentPrice"]
+        row["priceUpdated"] = upd["priceUpdated"]
+        n += 1
+    if n == 0:
+        return 0
+    payload["data"] = data
+    payload["count"] = len(data)
+    outLocal.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"[edgarPricesDaily] snapshot 현재가 패치: {n}종목", flush=True)
+    if upload:
+        from huggingface_hub import HfApi
+
+        from dartlab.core.hfRetry import retryHfCall
+        from dartlab.pipeline.hfUpload import _resolveHfToken
+
+        retryHfCall(
+            HfApi(token=_resolveHfToken(token)).upload_file,
+            path_or_fileobj=str(outLocal),
+            path_in_repo=_SNAPSHOT_PATH_IN_REPO,
+            repo_id=_SNAPSHOT_REPO,
+            repo_type="dataset",
+            commit_message=f"갱신: prices-snapshot-us 현재가 ({n}종목)",
+        )
+    return n
+
+
+def runEdgarPricesDaily(
+    *,
+    dates: list[str] | None = None,
+    lookbackDays: int = 7,
+    listedOnly: bool = True,
+    upload: bool = True,
+    token=None,
+    polygonKey: str | None = None,
+) -> StageResult:
+    """Polygon grouped-daily 위임 → edgar/prices/recent.parquet 누적 + 스냅샷 현재가 패치 (gov daily 대칭).
+
+    수집은 gather(``domains.polygon.fetchGroupedDaily``)에 위임 — 별도빌드 금지. 본 스테이지는 날짜 루프·
+    recent tail 누적·스냅샷 패치·HF 발행만. by-day 1콜/날짜라 per-ticker 6437 회피.
+
+    Args:
+        dates: 'YYYYMMDD' 목록(명시). None=최근 lookbackDays 평일.
+        lookbackDays: dates 미지정 시 최근 평일 수(휴장일은 빈 응답 → skip).
+        listedOnly: True 면 edgar/tickers 의 상장 ticker 만 recent 에 보관(OTC junk 제외).
+        upload: True 면 recent.parquet + 스냅샷 HF 발행.
+        token: HF 토큰(None=env).
+        polygonKey: Polygon 키(None=env/.env).
+
+    Returns:
+        StageResult — ok=수집 성공 날짜 수, err=실패.
+
+    Raises:
+        SystemExit: POLYGON_API_KEY 부재.
+
+    Example:
+        >>> runEdgarPricesDaily(lookbackDays=3, upload=False)  # doctest: +SKIP
+    """
+    from datetime import date as _date
+    from datetime import timedelta
+    from pathlib import Path
+
+    import httpx
+    import polars as pl
+
+    import dartlab.config as cfg
+    from dartlab.gather.domains.polygon import fetchGroupedDaily
+
+    res = StageResult(category="edgarPriceRecent")
+    key = _resolvePolygonKey(polygonKey)
+    if not key:
+        raise SystemExit("[edgarPricesDaily] POLYGON_API_KEY 없음 — .env/secret 등록 필요")
+
+    if dates is None:
+        out: list[str] = []
+        d = _date.today()
+        while len(out) < lookbackDays:
+            d -= timedelta(days=1)
+            if d.weekday() < 5:  # 평일만(휴장일은 빈 응답 skip)
+                out.append(d.strftime("%Y%m%d"))
+        dates = sorted(out)
+
+    frames: list[pl.DataFrame] = []
+    cli = httpx.Client(timeout=30.0, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        for i, ds in enumerate(dates):
+            try:
+                df = fetchGroupedDaily(ds, apiKey=key, client=cli)
+                if df.height:
+                    frames.append(df)
+                    res.report.ok += 1
+                else:
+                    res.report.skip += 1
+                print(f"[edgarPricesDaily] {ds}: {df.height}행", flush=True)
+            except Exception as exc:  # noqa: BLE001 — 개별 날짜 실패 격리
+                res.report.err += 1
+                res.report.failures.append(f"{ds}: {type(exc).__name__}: {exc}")
+                print(f"[edgarPricesDaily] {ds} 실패: {exc}", flush=True)
+            if i + 1 < len(dates):
+                time.sleep(_POLYGON_PACE_SECONDS)
+    finally:
+        cli.close()
+
+    if not frames:
+        print("[edgarPricesDaily] 신규 0 → skip", flush=True)
+        return res
+
+    fresh = pl.concat(frames, how="vertical_relaxed")
+    if listedOnly:
+        try:
+            tickers = pl.read_parquet(Path(cfg.dataDir) / "edgar" / "tickers.parquet", columns=["ticker"])
+            listed = {str(t).strip().upper() for t in tickers["ticker"].to_list() if t}
+            if listed:
+                fresh = fresh.filter(pl.col("ticker").is_in(list(listed)))
+        except Exception:  # noqa: BLE001 — tickers 부재 → 필터 없이 전체
+            pass
+
+    outDir = Path(cfg.dataDir) / "edgar" / "prices"
+    outDir.mkdir(parents=True, exist_ok=True)
+    recentPath = outDir / "recent.parquet"
+    if recentPath.exists():
+        try:
+            fresh = pl.concat([pl.read_parquet(recentPath), fresh], how="vertical_relaxed")
+        except Exception:  # noqa: BLE001 — 손상 recent 무시(신규로 대체)
+            pass
+    cutoff = (_date.today() - timedelta(days=_RECENT_KEEP_DAYS)).strftime("%Y%m%d")
+    fresh = (
+        fresh.unique(subset=["ticker", "date"], keep="last").filter(pl.col("date") >= cutoff).sort(["ticker", "date"])
+    )
+    fresh.write_parquet(recentPath, compression="zstd", statistics=True)
+    print(f"[edgarPricesDaily] recent.parquet: {fresh.height}행 ({fresh['ticker'].n_unique()}종목)", flush=True)
+
+    # 스냅샷 현재가 패치 — 각 ticker 최신 close/date
+    latest = fresh.sort("date").group_by("ticker").last()
+    patch = {r["ticker"]: {"currentPrice": r["close"], "priceUpdated": r["date"]} for r in latest.iter_rows(named=True)}
+
+    if upload:
+        from huggingface_hub import HfApi
+
+        from dartlab.core.hfRetry import retryHfCall
+        from dartlab.pipeline.hfUpload import _resolveHfToken
+
+        retryHfCall(
+            HfApi(token=_resolveHfToken(token)).upload_file,
+            path_or_fileobj=str(recentPath),
+            path_in_repo="edgar/prices/recent.parquet",
+            repo_id=_SNAPSHOT_REPO,
+            repo_type="dataset",
+            commit_message=f"갱신: edgar/prices/recent ({fresh.height}행)",
+        )
+        print("[edgarPricesDaily] recent.parquet HF 발행", flush=True)
+    try:
+        _patchSnapshotCurrent(patch, upload=upload, token=token)
+    except Exception as exc:  # noqa: BLE001 — 스냅샷 패치 실패 격리(recent 발행은 성공 유지)
+        res.report.failures.append(f"snapshotPatch: {type(exc).__name__}: {exc}")
+    return res
