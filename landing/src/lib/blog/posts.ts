@@ -49,6 +49,18 @@ export const categoryDefinitions = [
 		brandMessage:
 			'DartLab은 공시 데이터만으로 재현 가능한 독립 신용등급을 산출합니다.',
 		hidden: true
+	},
+	{
+		id: 'data-reports',
+		slug: 'data-reports',
+		folder: '06-data-reports',
+		label: '데이터 리포트',
+		description: '전상장사 공시 데이터를 전수 집계해 시장 전체의 구조를 드러내는 데이터 저널리즘 리포트입니다.',
+		seoTitle: '데이터 리포트 | 전상장사 전수 집계 분석',
+		seoDescription:
+			'DartLab 데이터 리포트. 전상장사 공시 데이터를 전수 집계해 자사주·주주환원·재무 구조의 시장 전체 패턴을 드러냅니다.',
+		brandMessage:
+			'DartLab은 전상장사 공시 데이터를 한 번에 집계해, 개별 종목이 아니라 시장 전체의 구조를 드러냅니다.'
 	}
 ] as const;
 
@@ -159,6 +171,14 @@ export const seriesDefinitions = {
 		seoTitle: '흥미로운 이야기 | dartlab',
 		seoDescription: 'dartlab 흥미로운 이야기. 같은 판 위의 기업들을 나란히 놓으면 숫자가 갈리는 이유가 보입니다. 테마별 비교 분석.',
 		brandMessage: '한 기업이 아니라 같은 판 위의 기업들을 나란히 놓으면, 숫자가 갈리는 이유가 보입니다.'
+	},
+	'data-reports': {
+		id: 'data-reports',
+		label: '데이터 리포트',
+		description: '전상장사 공시 데이터를 전수 집계해 시장 전체의 패턴을 드러내는 데이터 저널리즘 시리즈입니다.',
+		seoTitle: '데이터 리포트 | 전상장사 전수 집계',
+		seoDescription: 'DartLab 데이터 리포트 시리즈. 자사주, 주주환원, 부채, 현금흐름 등 전상장사 공시 데이터를 전수 집계한 분석.',
+		brandMessage: 'DartLab은 전상장사 데이터를 전수로 집계해 시장 전체의 구조를 드러냅니다.'
 	}
 } as const;
 
