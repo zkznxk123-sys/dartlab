@@ -191,9 +191,56 @@ def _parseHanyang(html: str, label: str, srcUrl: str) -> list[ReportMeta]:
     return out
 
 
+def _parseBookook(html: str, label: str, srcUrl: str) -> list[ReportMeta]:
+    """부국 보드 표(번호·날짜·제목·-·저자/조회수) → ReportMeta. per-report URL 부재 → 보드 URL.
+
+    detail 은 같은 페이지 in-page 펼침(viewDetailContent), PDF 는 POST(/file/download)라
+    깨끗한 per-report GET 링크가 없어 보드 URL 로 링크아웃(유안타 동형). cp949 디코드 전제.
+
+    Args:
+        html: research_N 보드 응답 HTML(cp949 디코드 후).
+        label: 카테고리 라벨 = reportType.
+        srcUrl: 보드 list URL (각 행 url 로 사용).
+
+    Returns:
+        list[ReportMeta] — 날짜 있는 표 행마다 1건. 제목에 종목코드(304360) 내장.
+
+    Example::
+
+        _parseBookook(html, "기업분석", url)
+    """
+    soup = BeautifulSoup(html, "lxml")
+    out: list[ReportMeta] = []
+    body = soup.find("tbody") or soup
+    for tr in body.find_all("tr"):
+        cells = [td.get_text(" ", strip=True) for td in tr.find_all("td")]
+        date = next((c for c in cells if re.match(r"\d{4}[./-]\d{2}[./-]\d{2}", c)), "")
+        if not date:
+            continue
+        titles = [c for c in cells if c and c != date and not c.isdigit()]
+        if not titles:
+            continue
+        title = max(titles, key=len)
+        # 저자 = 숫자(번호·조회수)·날짜·제목 아닌 셀. 기업분석엔 있고(예 유대웅) 시황엔 없음(None).
+        author = next((c for c in cells if c and not c.isdigit() and c not in {title, date}), None)
+        out.append(
+            ReportMeta(
+                broker="bookook",
+                brokerName="부국",
+                title=title,
+                url=srcUrl,
+                pubDate=_normDate(date),
+                reportType=label,
+                author=author,
+            )
+        )
+    return out
+
+
 PARSERS = {
     "miraeasset": _parseMiraeasset,
     "nh": _parseNh,
     "yuanta": _parseYuanta,
     "hanyang": _parseHanyang,
+    "bookook": _parseBookook,
 }

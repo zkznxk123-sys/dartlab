@@ -11,7 +11,7 @@ pytestmark = pytest.mark.unit
 
 def test_enabled_set() -> None:
     enabled = _config.enabledBrokers()
-    assert set(enabled) == {"miraeasset", "nh", "yuanta", "hanyang"}
+    assert set(enabled) == {"miraeasset", "nh", "yuanta", "hanyang", "bookook"}
 
 
 def test_spa_deferred() -> None:

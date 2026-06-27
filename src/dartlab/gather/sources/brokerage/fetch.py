@@ -27,13 +27,44 @@ def _decode(content: bytes, text: str, enc: str | None) -> str:
     return text
 
 
-def _detectBroken(brokerCounts: dict[str, int], enabledKeys: list[str]) -> list[str]:
-    """수율 가드 — enabled 증권사 중 수집 0행인 곳(셀렉터 깨짐 의심) 반환.
+def _healthProblems(
+    catCounts: dict[str, dict[str, int]],
+    completeness: dict[str, float],
+    enabledCats: dict[str, list[str]],
+    *,
+    minCompleteness: float = 0.9,
+) -> list[str]:
+    """수율·완전성 헬스 판정 — 깨짐 사유 목록 반환(빈 리스트=정상). PRD 03 §4.
 
-    스크래핑 제품이 죽는 가장 흔한 이유 = '200 OK + 0행' 조용한 깨짐(HTML 구조 변경).
-    enabled 인데 결과 0건이면 파서가 깨졌을 가능성 → 운영자에게 surface (PRD 03 §4).
+    스크래핑이 죽는 가장 흔한 방식 = '200 OK + 0행/malformed' 조용한 깨짐(HTML 구조 변경).
+    예외 기반 circuit breaker 가 못 보는 이걸 3 신호로 잡아 운영자에게 surface 한다:
+      (1) 증권사 전체 0행 — 사이트 차단/다운 또는 전체 셀렉터 깨짐(report_type 전체 합으로 판정).
+      (2) 일부 카테고리만 0행(증권사는 살아있음) — 그 보드 URL/셀렉터 깨짐.
+      (3) 파싱 완전성(필수필드 비율) < 임계 — 부분 셀렉터 깨짐(필드 누락).
+
+    Args:
+        catCounts: broker → {report_type: 수집행수}.
+        completeness: broker → 필수필드(title·url·pubDate) 채워진 비율 0~1 (0행이면 0.0).
+        enabledCats: broker → 검사할 카테고리 라벨 목록. **빈 리스트면 카테고리별 검사 생략**
+            (NH 처럼 report_type 을 행별 동적 재라벨해 config 라벨과 안 맞는 브로커 → 총량만).
+        minCompleteness: 완전성 하한(기본 0.9). 미만이면 깨짐.
+
+    Returns:
+        list[str] — 사람이 읽는 깨짐 사유. 빈 리스트면 전 증권사 정상.
     """
-    return sorted(k for k in enabledKeys if brokerCounts.get(k, 0) == 0)
+    problems: list[str] = []
+    for broker, cats in enabledCats.items():
+        counts = catCounts.get(broker, {})
+        if sum(counts.values()) == 0:  # 전체 report_type 합 — 동적 라벨 브로커 오탐 방지
+            problems.append(f"{broker}: 전체 0행 — 사이트 차단/다운 또는 전체 셀렉터 깨짐")
+            continue
+        for c in cats:  # cats=[] (동적 라벨) 면 생략
+            if counts.get(c, 0) == 0:
+                problems.append(f"{broker}/{c}: 0행 — 보드 URL/셀렉터 깨짐 의심")
+        comp = completeness.get(broker, 1.0)
+        if comp < minCompleteness:
+            problems.append(f"{broker}: 파싱 완전성 {comp:.0%} < {minCompleteness:.0%} — 필드 누락(부분 깨짐)")
+    return problems
 
 
 async def _fetchBroker(key: str, cfg: dict, client: "GatherHttpClient") -> list[ReportMeta]:

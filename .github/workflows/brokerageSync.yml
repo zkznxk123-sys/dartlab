@@ -3,9 +3,11 @@ name: Brokerage Research Sync
 # ──────────────────────────────────────────────────────────────
 # 증권사 리서치 메타 인덱스 — 공개 게시판 자체 스크랩(본문 0·원본 링크아웃) → 월별 parquet → HF.
 #   - gather.sources.brokerage 가 스크랩·파싱·ticker 해소 SSOT (별도빌드 금지).
-#   - syncBrokerageReports.py 는 g.brokerageReports() 호출 + 월별 write + changed manifest + HF push.
+#   - syncBrokerageReports.py 는 g.brokerageReports() 호출 + 월별 write + manifest + HF push + 헬스 게이트.
 #   - report_id(증권사·제목·발간일) dedup 으로 재수집 idempotent — GHA 캐시 불필요(HF=store).
-#   - 서버렌더 3개사(미래에셋·NH·유안타) 작동. SPA 4개사는 deferred.
+#   - 서버렌더 5개사(미래에셋·NH·유안타·한양·부국) 작동. SPA 4개사(안티봇)는 deferred.
+#   - 헬스 게이트(PRD 03 §4): 수율 0행/카테고리 0행/완전성<90% 깨짐 감지 → Step Summary 표 +
+#     깨짐이면 exit 1 → 이 워크플로 RED → GitHub 가 운영자에게 자동 알림(데이터는 알림 전 push 보존).
 # 상세: mainPlan/brokerage-research-index/03-operations-automation.md
 # ──────────────────────────────────────────────────────────────
 

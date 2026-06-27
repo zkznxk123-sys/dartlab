@@ -54,7 +54,9 @@ src/dartlab/pipeline/registry.py  (StageSpec 추가)
 3. **자가치유 액션** — 깨진 증권사를 자동 `enabled=False` 강등(**전체 stage 는 계속**) + `StageResult.failures` 기록 + GitHub Step Summary 경고. 운영자가 `config.py` selector 고치고 재활성.
 4. **구현 최소** — stage 안 함수 + 기존 `telemetry.emit`(`gather:fetch:done` 패턴) 재사용. 새 모니터링 인프라 신설 금지.
 
-> **구현됨 (`664e8b50c`)**: `sources/brokerage/fetch.py::_detectBroken(brokerCounts, enabledKeys)` — enabled 인데 수집 0행인 증권사 반환(셀렉터 깨짐 의심). `syncBrokerageReports.py` 가 증권사별 수집수 + 깨짐 경고를 stdout(→ CI 로그)에 출력. *수율 baseline 대비(14일 중앙값)·파싱 성공률·자동 강등*은 후속(현재는 0행=깨짐 단순판정).
+> **구현됨 v1 (`664e8b50c`)**: `_detectBroken` — enabled 0행 증권사 stdout 경고(단순).
+>
+> **구현됨 v2 (헬스 게이트, 2026-06-27)**: `_detectBroken` → **`fetch.py::_healthProblems(catCounts, completeness, enabledCats, minCompleteness=0.9)`** 로 격상. 3 신호 감지: (1) **증권사 전체 0행**(전 report_type 합=0 → 사이트 차단/다운/전체 셀렉터 깨짐) (2) **카테고리별 0행**(증권사는 살아있으나 특정 보드 0 → 그 URL/셀렉터 깨짐. 단 **동적 report_type 브로커**[NH=행별 p.sort 재라벨]는 `dynamicReportType:True` 로 카테고리별 검사 생략·총량만 → 오탐 방지) (3) **파싱 완전성 < 90%**(필수필드 title·url·pub_date non-empty 비율 → 부분 셀렉터 깨짐). `syncBrokerageReports.py` 가 **업로드 후**(건강 데이터 보존) 헬스 판정 → **GitHub Step Summary 에 증권사×카테고리 수율·완전성 표 + 깨짐 사유** write + 깨짐이면 **`::error::` 주석 + exit 1 → 워크플로 RED → GitHub 가 운영자에게 자동 메일 알림**. 로컬=Step Summary env 부재라 stdout 만. *수율 baseline 대비(14일 중앙값)·자동 enabled=False 강등*은 후속(현재는 0행/완전성 임계 판정 — 보드는 항상 최신 N 반환이라 0=깨짐 신뢰 가능).
 
 > 이게 "URL만 관리하면 된다"의 실제 운영 보장 — selector 가 깨지면 **시스템이 먼저 알려준다**, 사용자가 빈 화면 보기 전에.
 

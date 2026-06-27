@@ -12,6 +12,7 @@ _MIRAE = "https://securities.miraeasset.com/bbs/board/message/list.do?categoryId
 _NH = "https://m.nhqv.com/research/boardList?rshPprDitCd="
 _YUANTA = "https://www.myasset.com/myasset/research/rs_list/rs_list.cmd?cd006=&cd008=&cd007="
 _HANYANG = "https://www.hygood.co.kr/board/"
+_BOOKOOK = "https://www.bookook.co.kr/research/"
 
 BROKERS: dict[str, dict] = {
     # --- 서버렌더 = 작동 ---
@@ -31,6 +32,7 @@ BROKERS: dict[str, dict] = {
         "mechanism": "htmlList",
         "enc": None,
         "enabled": True,
+        "dynamicReportType": True,  # report_type 을 행별 p.sort(ETF·전략·기업…)로 재라벨 → 헬스 카테고리별 검사 제외(총량만)
         "categories": {
             "기업분석": _NH + "01",
             "시황전략": _NH + "02",
@@ -58,6 +60,17 @@ BROKERS: dict[str, dict] = {
             "시황": _HANYANG + "researchHanyangNews/list",
         },
         "note": "서버렌더 표, 제목에 종목코드 내장·PDF 는 한양 자기 서버(hygood.co.kr) 링크아웃",
+    },
+    "bookook": {
+        "name": "부국",
+        "mechanism": "htmlTable",
+        "enc": "cp949",
+        "enabled": True,
+        "categories": {
+            "기업분석": _BOOKOOK + "research_5",
+            "시황": _BOOKOOK + "research_1",
+        },
+        "note": "서버렌더 표(cp949). per-report 링크 부재(detail=in-page 펼침·PDF=POST /file/download) → 보드 URL fallback(유안타 동형). 제목에 종목코드 내장",
     },
     # --- SPA/AJAX = deferred (초기 HTML 에 데이터·엔드포인트 없음 → browser 자동화 필요) ---
     # 빅 증권사 SPA 는 단순 셸+AJAX 가 아니라 안티봇 게이트라 무브라우저 직호출 불가:
@@ -117,6 +130,6 @@ def enabledBrokers() -> dict[str, dict]:
     Example::
 
         from dartlab.gather.sources.brokerage.config import enabledBrokers
-        list(enabledBrokers())   # ['miraeasset', 'nh', 'yuanta', 'hanyang']
+        list(enabledBrokers())   # ['miraeasset', 'nh', 'yuanta', 'hanyang', 'bookook']
     """
     return {k: v for k, v in BROKERS.items() if v.get("enabled")}
