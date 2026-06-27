@@ -19,6 +19,19 @@
 		return m[1] + intPart + (m[3] ?? '') + (m[4] ?? '');
 	}
 
+	// editorialStat 길이 인지 — 긴 bigNumber/unit 이 거대폰트로 줄깨짐·충돌하던 버그 가드.
+	const eStatGeo = $derived.by(() => {
+		if (card.kind !== 'editorialStat') return { big: '', numCq: 18, unitCq: 6 };
+		const big = fmtBig(card.bigNumber ?? '');
+		const bn = big.replace(/\s/g, '').length;
+		const un = (card.unit ?? '').length;
+		return {
+			big,
+			numCq: bn <= 3 ? 18 : bn <= 5 ? 13 : bn <= 7 ? 10 : 8,
+			unitCq: un <= 4 ? 6 : un <= 10 ? 4.2 : 3.2
+		};
+	});
+
 	// 자유텍스트(line/sub/context) 천단위 콤마 — 4자리+ 순수 정수만(소수·기존콤마 보존, 4자리 연도 19xx/20xx 제외).
 	function commaText(s: string): string {
 		return String(s).replace(/\d[\d,]*\.?\d*/g, (m) => {
@@ -214,7 +227,7 @@
 		{:else if card.kind === 'editorialStat'}
 			<div class="editorial">
 				{#if card.kicker}<span class="eyebrow">{card.kicker}</span>{/if}
-				<div class="eStat"><span class="eNum">{fmtBig(card.bigNumber)}</span>{#if card.unit}<span class="eUnit">{card.unit}</span>{/if}</div>
+				<div class="eStat" style="--eNumCq:{eStatGeo.numCq};--eUnitCq:{eStatGeo.unitCq}"><span class="eNum">{eStatGeo.big}</span>{#if card.unit}<span class="eUnit">{card.unit}</span>{/if}</div>
 				{#if card.context}<p class="eSub">{stripDots(commaText(card.context))}</p>{/if}
 			</div>
 		{:else}
@@ -478,19 +491,32 @@
 	.eStat {
 		display: flex;
 		align-items: baseline;
-		gap: 0.2em;
+		flex-wrap: wrap; /* 긴 unit 은 숫자와 충돌 대신 아래 줄로 */
+		gap: 0.05em 0.25em;
+		max-width: 100%;
 	}
 	.eNum {
-		font-size: clamp(56px, 18cqw, 200px);
+		/* 길이 인지 폰트(--eNumCq, JS 가 자릿수로 설정) — 긴 숫자도 한 줄 유지(쪼개짐 0) */
+		font-size: clamp(28px, calc(var(--eNumCq, 18) * 1cqw), 200px);
 		font-weight: 900;
 		line-height: 0.92;
 		color: var(--dl-accent);
+		white-space: nowrap;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.eUnit {
-		font-size: clamp(20px, 6cqw, 56px);
+		font-size: clamp(16px, calc(var(--eUnitCq, 6) * 1cqw), 56px);
 		font-weight: 800;
 		color: #f4f6fb;
-		white-space: nowrap;
+		line-height: 1.25;
+		max-width: 100%;
+		word-break: keep-all;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2; /* 긴 unit 2줄까지(그 이상은 클립) */
+		overflow: hidden;
 	}
 	/* cover */
 	.cover {
