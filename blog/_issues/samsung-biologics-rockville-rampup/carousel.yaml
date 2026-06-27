@@ -1,0 +1,50 @@
+name: "삼성바이오로직스"
+title: "삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다"
+date: 2026-06-28
+sector: biopharma
+caption: |
+  삼성바이오로직스는 최근 실적만 보면 이미 좋아 보이는 기업입니다.
+
+  2026년 1분기 CDMO 사업 매출은 1조2571억원, 영업이익은 5808억원이었습니다.
+  회사는 1~4공장 풀가동과 프로젝트 실행력이 실적을 이끌었다고 설명했습니다.
+
+  하지만 이 회사를 볼 때 핵심은 좋은 숫자를 외우는 게 아닙니다.
+  새로 늘어난 생산능력이 실제 매출과 남는 이익으로 바뀌는지 보는 것입니다.
+
+  록빌 인수로 총 생산능력은 84만5000리터가 됐고, 5공장 램프업도 진행 중입니다.
+  분모가 커진 만큼 다음 질문은 더 선명합니다.
+  새 공장이 마진을 지키며 차는가, 아니면 한동안 고정비 부담으로 남는가.
+pinnedComment: "투자 권유 아님. 출처: 삼성바이오로직스 2026년 1분기 실적 발표(2026.4.22), 록빌 제조시설 인수 완료 발표(2026.3.31). 숫자는 회사 발표 기준이며, 생산능력은 곧바로 매출을 뜻하지 않습니다."
+slides:
+  - layout: editorial
+    date: "2026. 06. 28"
+    line: "좋은 기업은 숫자보다 [[작동 방식]]이 보입니다"
+    sub: "삼성바이오로직스는 신약보다 공장 가동률과 생산능력의 매출화를 봐야 합니다."
+    image: scene-01-cover-hook
+  - layout: editorialStat
+    kicker: "2026년 1분기"
+    bigNumber: "1.26"
+    unit: "조원"
+    context: "CDMO 사업 매출은 1조2571억원, 영업이익은 5808억원이었습니다. 회사는 1~4공장 풀가동을 배경으로 제시했습니다."
+    image: scene-02-number-evidence
+  - layout: editorialBeat
+    kicker: "좋은 이유"
+    line: "핵심은 [[공장 가동률]]입니다"
+    sub: "남의 약을 대신 만드는 CDMO는 설비가 찰수록 고정비 부담이 낮아집니다."
+    image: scene-03-narrative-turn
+  - layout: editorialStat
+    kicker: "록빌 인수 후"
+    bigNumber: "84.5"
+    unit: "만L"
+    context: "총 생산능력은 84만5000리터가 됐습니다. 다만 생산능력은 매출이 아니라 매출로 바뀔 수 있는 분모입니다."
+    image: scene-04-number-evidence
+  - layout: editorialBeat
+    kicker: "미국"
+    line: "록빌은 [[고객 가까이]] 가는 카드입니다"
+    sub: "첫 미국 제조 거점은 고객 접근성과 공급망 탄력성을 높이는 선택입니다."
+    image: scene-05-narrative-turn
+  - layout: editorialBeat
+    kicker: "다음 질문"
+    line: "5공장과 록빌이 [[마진을 지키는가]]"
+    sub: "좋은 기업이라는 판단은 새 생산능력이 가동률과 이익률로 확인될 때 더 단단해집니다."
+    image: scene-06-closing-checkpoint

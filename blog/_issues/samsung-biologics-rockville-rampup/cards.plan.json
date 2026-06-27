@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-27T17:38:21.359019+00:00",
+  "target": {
+    "kind": "issue",
+    "slug": "samsung-biologics-rockville-rampup",
+    "stockCode": "",
+    "corpName": "",
+    "title": "삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다",
+    "postPath": "blog/_issues/samsung-biologics-rockville-rampup/carousel.yaml",
+    "assetRoot": "blog/_issues/samsung-biologics-rockville-rampup/assets",
+    "planPath": "blog/_issues/samsung-biologics-rockville-rampup/cards.plan.json"
+  },
+  "planning": {
+    "blogThesis": "삼성바이오로직스는 최근 실적만 보면 이미 좋아 보이는 기업입니다.",
+    "cardThesis": "삼성바이오로직스는 최근 실적만 보면 이미 좋아 보이는 기업입니다.",
+    "audienceQuestion": "삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다 이슈를 /cards에서 볼 때 마지막에 무엇을 확인해야 하나?",
+    "blogAndCardsTogether": false,
+    "bodyPreview": ""
+  },
+  "carousel": {
+    "slideCount": 6,
+    "layouts": [
+      "editorial",
+      "editorialStat",
+      "editorialBeat",
+      "editorialStat",
+      "editorialBeat",
+      "editorialBeat"
+    ]
+  },
+  "imagePlan": [
+    {
+      "order": 1,
+      "assetKey": "scene-01-cover-hook",
+      "slideRefs": [
+        1
+      ],
+      "role": "cover-hook",
+      "scene": "photorealistic opening scene that makes 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다 and '좋은 기업은 숫자보다 작동 방식이 보입니다' understandable at first glance",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/samsung-biologics-rockville-rampup/assets/scene-01-cover-hook.webp\nAsset key: scene-01-cover-hook\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nStory title: 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nCarousel role: cover-hook.\nImage subject: photorealistic opening scene that makes 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다 and '좋은 기업은 숫자보다 작동 방식이 보입니다' understandable at first glance.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 2,
+      "assetKey": "scene-02-number-evidence",
+      "slideRefs": [
+        2
+      ],
+      "role": "number-evidence",
+      "scene": "real-world operation or evidence scene behind the number 'CDMO 사업 매출은 1조2571억원, 영업이익은 5808억원이었습니다. 회사는 1~4공장 풀가동을 배경으로 제시했습니다.', without charts or readable text",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/samsung-biologics-rockville-rampup/assets/scene-02-number-evidence.webp\nAsset key: scene-02-number-evidence\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nStory title: 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nCarousel role: number-evidence.\nImage subject: real-world operation or evidence scene behind the number 'CDMO 사업 매출은 1조2571억원, 영업이익은 5808억원이었습니다. 회사는 1~4공장 풀가동을 배경으로 제시했습니다.', without charts or readable text.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 3,
+      "assetKey": "scene-03-narrative-turn",
+      "slideRefs": [
+        3
+      ],
+      "role": "narrative-turn",
+      "scene": "editorial business-news scene showing the turning point '핵심은 공장 가동률입니다' through physical work, demand, or operations",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/samsung-biologics-rockville-rampup/assets/scene-03-narrative-turn.webp\nAsset key: scene-03-narrative-turn\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nStory title: 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nCarousel role: narrative-turn.\nImage subject: editorial business-news scene showing the turning point '핵심은 공장 가동률입니다' through physical work, demand, or operations.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 4,
+      "assetKey": "scene-04-number-evidence",
+      "slideRefs": [
+        4
+      ],
+      "role": "number-evidence",
+      "scene": "real-world operation or evidence scene behind the number '총 생산능력은 84만5000리터가 됐습니다. 다만 생산능력은 매출이 아니라 매출로 바뀔 수 있는 분모입니다.', without charts or readable text",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/samsung-biologics-rockville-rampup/assets/scene-04-number-evidence.webp\nAsset key: scene-04-number-evidence\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nStory title: 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nCarousel role: number-evidence.\nImage subject: real-world operation or evidence scene behind the number '총 생산능력은 84만5000리터가 됐습니다. 다만 생산능력은 매출이 아니라 매출로 바뀔 수 있는 분모입니다.', without charts or readable text.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 5,
+      "assetKey": "scene-05-narrative-turn",
+      "slideRefs": [
+        5
+      ],
+      "role": "narrative-turn",
+      "scene": "editorial business-news scene showing the turning point '록빌은 고객 가까이 가는 카드입니다' through physical work, demand, or operations",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/samsung-biologics-rockville-rampup/assets/scene-05-narrative-turn.webp\nAsset key: scene-05-narrative-turn\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nStory title: 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nCarousel role: narrative-turn.\nImage subject: editorial business-news scene showing the turning point '록빌은 고객 가까이 가는 카드입니다' through physical work, demand, or operations.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 6,
+      "assetKey": "scene-06-closing-checkpoint",
+      "slideRefs": [
+        6
+      ],
+      "role": "closing-checkpoint",
+      "scene": "quiet final-check scene for the reader to verify '5공장과 록빌이 마진을 지키는가', such as documents, equipment, or operations context without readable text",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/samsung-biologics-rockville-rampup/assets/scene-06-closing-checkpoint.webp\nAsset key: scene-06-closing-checkpoint\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nStory title: 삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다.\nCarousel role: closing-checkpoint.\nImage subject: quiet final-check scene for the reader to verify '5공장과 록빌이 마진을 지키는가', such as documents, equipment, or operations context without readable text.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    }
+  ],
+  "imagegen": {
+    "tool": "GPT image_gen",
+    "generationRule": "각 imagePlan.prompt 를 한 장씩 image_gen 으로 생성한다.",
+    "extractCommand": "uv run python -X utf8 sns/scripts/extractImagegenAssets.py assets --assets-root blog/_issues/samsung-biologics-rockville-rampup --count 6 --names scene-01-cover-hook,scene-02-number-evidence,scene-03-narrative-turn,scene-04-number-evidence,scene-05-narrative-turn,scene-06-closing-checkpoint --keywords \"samsung-biologics-rockville-rampup,삼성바이오로직스는 좋은 숫자보다 공장 가동을 봅니다\"",
+    "checkCommand": "uv run python -X utf8 sns/scripts/checkImagegenAssets.py blog/_issues/samsung-biologics-rockville-rampup/assets",
+    "publishCommands": [
+      "uv run python -X utf8 blog/_scripts/build_carousel_contracts.py"
+    ]
+  },
+  "reviewGate": {
+    "status": "passed",
+    "requiredRounds": [
+      {
+        "id": "writerPanel",
+        "purpose": "훅 강도, 서사 스파인, 블로그 산문과 카드 흐름의 일치 여부를 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "honestyEvidence",
+        "purpose": "슬라이드 숫자와 주장 근거가 블로그 본문/검증표에 있는지 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "imageFit",
+        "purpose": "5~10장 이미지가 각기 다른 의미 장면인지, 로고·텍스트·도식이 없는지 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "readerFit",
+        "purpose": "처음 보는 독자가 첫 장과 마지막 장만 봐도 관전 포인트를 이해하는지 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "reevaluation",
+        "purpose": "수정 후 같은 패널이 다시 보고 발행 가능 여부를 닫는다.",
+        "status": "passed"
+      }
+    ],
+    "decisionLog": [
+      {
+        "round": "writerPanel",
+        "decision": "????????? ?? ?? ??? ??? ?? ??? ??? ?? ???? ?? ????? ????? ?? ???? ???."
+      },
+      {
+        "round": "honestyEvidence",
+        "decision": "1Q26 CDMO ?? 1?2571??, ???? 5808??, ? ???? 84?5000??? ???????? ?? ?? ????. ????? ??? ??? ???? ?? ????."
+      },
+      {
+        "round": "imageFit",
+        "decision": "image_gen?? 6? ?? ? 4:5 WebP? ????. ???, ???, ?? ?, ?? ?? ??, ?? ?? ???? ??? ??? ?????????? ? ?? ??? ????? ????."
+      },
+      {
+        "round": "readerFit",
+        "decision": "? ?? ?? ???? ?? ??? ??? ???, ??? ?? 5??? ??? ??? ???? ????? ?????? ???."
+      },
+      {
+        "round": "reevaluation",
+        "decision": "??? ???, ?? ??? ????? ?? ???? ????."
+      }
+    ]
+  }
+}
