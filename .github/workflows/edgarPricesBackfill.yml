@@ -1,22 +1,18 @@
 name: EDGAR Prices Backfill (Yahoo deep history)
 
-# US 주가 딥백필 — 회사별 일별 OHLCV 전체이력(~11년)을 Yahoo per-ticker bake →
-# edgar/prices/company/{ticker}.parquet. 1회성(이력은 안 변함, 분할만 — 필요 시 재dispatch).
-# 스냅샷은 안 만든다(writeSnapshotFlag=False) — 게이트 스냅샷은 daily(Polygon)가 소유.
-# 청크 = offset/limit dispatch. Yahoo throttle 회피: 한 런이 부분이면 offset 올려 재dispatch(누적).
-# (단일 잡 — 병렬 matrix 는 HF 동시 commit 충돌 위험이라 운영자 청크 dispatch 로 직렬.)
+# US 주가 딥백필 — 회사별 일별 OHLCV 전체이력(~11년) Yahoo per-ticker bake → edgar/prices/company/{ticker}.parquet.
+# 1회성(이력 불변, 분할만 — 필요 시 재dispatch). 스냅샷은 안 만든다(daily Polygon 이 소유).
+#
+# 설계 (정공):
+#   bake (matrix N 샤드)  : 샤드마다 distinct runner IP → Yahoo throttle 회피(병렬). 로컬만 굽고(upload=False)
+#                           GitHub artifact 로 올림. HF 미접촉 → 샤드 간 commit 충돌 0.
+#   publish (단일 잡)      : 모든 샤드 artifact 다운로드 → HF 단일 committer 로 발행(배치 commit). 충돌 0.
+#                           if: always() — 일부 샤드 실패해도 가용분 발행(부분 진행 보존).
+#   유니버스 = search-us(도달 가능 ~3771)만 — 못 여는 종목 그래프는 낭비라 제외.
 
 on:
   workflow_dispatch:
     inputs:
-      offset:
-        description: '유니버스 시작 인덱스(청크 이어받기)'
-        default: '0'
-        type: string
-      limit:
-        description: '이번 런 처리 종목 수(빈값=offset 이후 전체)'
-        default: '2000'
-        type: string
       pauseSeconds:
         description: 'ticker 간 페이싱(초) — throttle 완화'
         default: '1.5'
@@ -25,14 +21,14 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: hf-edgar-prices-backfill
-  cancel-in-progress: false
-
 jobs:
-  backfill:
+  bake:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - uses: actions/checkout@v6
       - name: Install uv
@@ -41,25 +37,62 @@ jobs:
         run: uv python install 3.12
       - name: Install dependencies
         run: uv sync
-      - name: Backfill chunk (Yahoo per-ticker, company parquet only)
+      - name: Bake shard ${{ matrix.shard }} (Yahoo per-ticker, company parquet, local only)
         run: |
           uv run python -X utf8 -c "
-          import os
-          import polars as pl
+          import json, os
           from huggingface_hub import hf_hub_download
           from dartlab.pipeline.stages.edgarPrices import runEdgarPrices
-          # 유니버스 = edgar/tickers(HF) 상장 ticker. offset/limit 로 청크(이어받기).
-          p = hf_hub_download('eddmpython/dartlab-data', 'edgar/tickers/tickers.parquet', repo_type='dataset', token=os.environ['HF_TOKEN'])
-          tk = pl.read_parquet(p)
-          uni = [str(t).upper() for t, ex in zip(tk['ticker'].to_list(), tk['is_exchange_listed'].to_list()) if t and ex]
-          offset = int('${{ github.event.inputs.offset || '0' }}')
-          lim = '${{ github.event.inputs.limit || '' }}'.strip()
-          limit = int(lim) if lim else None
-          print(f'universe {len(uni)} · offset {offset} · limit {limit}')
-          res = runEdgarPrices(tickers=uni, offset=offset, limit=limit, pauseSeconds=float('${{ github.event.inputs.pauseSeconds || '1.5' }}'), writeSnapshotFlag=False, upload=True)
+          # 도달 가능 유니버스 = search-us(HF). stride 샤드(distinct IP).
+          p = hf_hub_download('eddmpython/dartlab-data', 'landing/map/search-index-us.json', repo_type='dataset', token=os.environ['HF_TOKEN'])
+          uni = [r['stockCode'] for r in json.load(open(p, encoding='utf-8')) if r.get('stockCode')]
+          shard = uni[${{ matrix.shard }}::8]
+          print(f'shard ${{ matrix.shard }}/8: {len(shard)} tickers (universe {len(uni)})')
+          res = runEdgarPrices(tickers=shard, pauseSeconds=float('${{ github.event.inputs.pauseSeconds || '1.5' }}'), writeSnapshotFlag=False, upload=False)
           print('ok', res.report.ok, 'skip', res.report.skip, 'err', res.report.err)
-          if res.report.failures:
-              print('FAILURES(sample)', res.report.failures[:5])
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/data
+      - name: Upload shard artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: prices-shard-${{ matrix.shard }}
+          path: data/edgar/prices/company/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  publish:
+    needs: bake
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Download all shard artifacts (merge into one dir)
+        uses: actions/download-artifact@v5
+        with:
+          pattern: prices-shard-*
+          path: data/edgar/prices/company
+          merge-multiple: true
+      - name: Publish company parquets to HF (single committer)
+        run: |
+          uv run python -X utf8 -c "
+          import glob, os
+          from dartlab.pipeline.hfUpload import uploadCategoryToHf
+          files = sorted(os.path.basename(f) for f in glob.glob('data/edgar/prices/company/*.parquet'))
+          print(f'publishing {len(files)} company parquets → HF')
+          if files:
+              n = uploadCategoryToHf('edgarPriceCompany', changedFiles=files, token=os.environ['HF_TOKEN'])
+              print('uploaded', n)
+          else:
+              print('no parquets — bake 전부 실패?')
           "
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
