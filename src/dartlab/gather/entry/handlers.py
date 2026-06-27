@@ -1064,7 +1064,7 @@ def handleNarrative(
     return arch.filter(pl.col("title").str.contains(keyword, literal=True))
 
 
-def handleBrokerageReports(
+def handleResearch(
     g: Any,
     target: str | None,
     *,
@@ -1074,12 +1074,12 @@ def handleBrokerageReports(
     marketExplicit: bool,  # noqa: ARG001
     **kwargs: Any,
 ) -> pl.DataFrame:
-    """brokerageReports axis dispatch — 증권사 리서치 메타 인덱스.
+    """research axis dispatch — 증권사 리서치 메타 인덱스.
 
     Capabilities: 위치 target 분기(6자리=종목코드 필터·그 외=제목 검색) + kwarg 필터 → g.brokerageReports.
-    AIContext: gather("brokerageReports", ...) 본체 — 메타 사실만(매수/매도 신호 재가공 금지).
+    AIContext: gather("research", ...) 본체 — 메타 사실만(매수/매도 신호 재가공 금지).
     Guide: target 없으면 전 증권사 최신. 6자리=종목별, 그 외 문자열=검색(narrative 동형).
-    When: GatherEntry._run("brokerageReports", target, ...) lookup 시.
+    When: GatherEntry._run("research", target, ...) lookup 시.
     How: target/kwargs → ticker·query 결정 → g.brokerageReports(ticker, query, start, end, broker, reportType, brokers).
 
     Args:
@@ -1098,7 +1098,7 @@ def handleBrokerageReports(
 
     Example::
 
-        df = handleBrokerageReports(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+        df = handleResearch(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
 
     Requires:
         Gather 인스턴스 + 네트워크 (증권사 공개 게시판 무인증). ticker 회사명 fallback 은

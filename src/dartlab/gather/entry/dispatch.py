@@ -139,7 +139,7 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
         targetRequired=False,
         targetType="keyword",
     ),
-    "brokerageReports": GatherAxisEntry(
+    "research": GatherAxisEntry(
         label="증권사 리서치",
         description=(
             "증권사 공개 게시판 리서치 *메타 인덱스* (제목·발간일·종목·증권사·구분·투자의견·저자). "
@@ -148,8 +148,7 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
             "query/broker/reportType/start/end kwarg 추가 필터. 절대 매수/매도 신호로 재가공 금지(메타 사실만)."
         ),
         example=(
-            'gather("brokerageReports") / gather("brokerageReports", "005930") / '
-            'gather("brokerageReports", query="2차전지", broker="hanyang")'
+            'gather("research") / gather("research", "005930") / gather("research", query="2차전지", broker="hanyang")'
         ),
         targetRequired=False,
         targetType="keyword",
@@ -195,7 +194,7 @@ API_KEY_INFO: dict[str, str] = {
     "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
     "krxIndex": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX idx OpenAPI 직접 호출)",
     "narrative": "불필요 (Phase A/D HF + 로컬 archive)",
-    "brokerageReports": "불필요 (명시 6자리코드 무키, 제목→회사명 fallback 시 DART_API_KEY 로 커버리지↑)",
+    "research": "불필요 (명시 6자리코드 무키, 제목→회사명 fallback 시 DART_API_KEY 로 커버리지↑)",
     "dartDoc": "불필요 (viewer 무인증 단건 fetch)",
     "calendar": "DART_API_KEY (Company.disclosure 사용)",
 }

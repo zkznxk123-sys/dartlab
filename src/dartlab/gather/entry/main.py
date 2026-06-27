@@ -22,7 +22,6 @@ from .dispatch import (
     _resolveAxis,
 )
 from .handlers import (
-    handleBrokerageReports,
     handleCalendar,
     handleDartDoc,
     handleFlow,
@@ -36,6 +35,7 @@ from .handlers import (
     handleOwnership,
     handlePeers,
     handlePrice,
+    handleResearch,
     handleSector,
 )
 
@@ -55,7 +55,7 @@ _AXIS_DISPATCH: dict[str, Any] = {
     "krx": handleKrx,
     "krxIndex": handleKrxIndex,
     "narrative": handleNarrative,
-    "brokerageReports": handleBrokerageReports,
+    "research": handleResearch,
     "calendar": handleCalendar,
     "dartDoc": handleDartDoc,
 }

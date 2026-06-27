@@ -159,7 +159,7 @@ _METHOD_TO_AXIS: dict[str, str] = {
     "insiderTrading": "insider",
     "ownership": "ownership",
     "industryPeers": "peers",
-    "brokerageReports": "brokerageReports",
+    "brokerageReports": "research",
     "dartDoc": "dartDoc",
 }
 
