@@ -73,6 +73,20 @@ POSTS: list[tuple[str, str, str, list[str], str]] = [
         ["설치 없이 엑셀·브라우저에서", "dartlab을 그대로"],
         "xlwings Lite · JupyterLite · Colab",
     ),
+    (
+        "09",
+        "terminal-one-screen",
+        "DartLab 소식 · 터미널",
+        ["종목 하나 보려고", "창을 일곱 개?"],
+        "전 상장사 · 한 화면 계기판",
+    ),
+    (
+        "10",
+        "cards-publish",
+        "DartLab 소식 · 카드뉴스",
+        ["2만 자 분석은 안 읽힌다", "같은 숫자를 카드로"],
+        "회사·이슈 카드 · /cards 에서 스와이프",
+    ),
 ]
 
 

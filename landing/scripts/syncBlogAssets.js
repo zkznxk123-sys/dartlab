@@ -15,6 +15,9 @@ function collectAssets(dir, result = []) {
 					const assetPath = resolve(fullPath, asset);
 					if (!statSync(assetPath).isFile()) continue;
 					if (asset.endsWith('.md')) continue;
+					// 썸네일 합성 소스(원본 배경) — markdown 미참조, 출력은 /thumbnails/. 카테고리마다 NN 재시작이라
+					// basename 이 전역 충돌(01-thumbnail-bg.webp 등) → 서빙 대상 아니므로 스킵.
+					if (/thumbnail-bg\.webp$/i.test(asset)) continue;
 					result.push(assetPath);
 				}
 				continue;

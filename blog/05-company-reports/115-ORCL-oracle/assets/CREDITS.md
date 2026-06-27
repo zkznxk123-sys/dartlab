@@ -1,0 +1,3 @@
+# 썸네일 배경 출처 (CC0 / Public Domain — Wikimedia Commons · Openverse)
+
+- **cc0-thumbnail-bg.webp** — 2025 - free download photo of a view over the tram platform stops near station Zuid with waiting people and in the background glass facades of modern architecture. Street photography in high resolution by Fons Heijnsbroek, Netherlands / Fons Heijnsbroek / CC0 / [modern office building glass facade] / https://commons.wikimedia.org/wiki/File:2025_-_free_download_photo_of_a_view_over_the_tram_platform_stops_near_station_Zuid_with_waiting_people_and_in_the_background_glass_facades_of_modern_architecture._Street_photography_in_high_resolution_by_Fons_Heijnsbroek,_Netherlands.tif

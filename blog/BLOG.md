@@ -357,12 +357,14 @@ c.quant("종합"); c.quant("팩터")
 
 ### 썸네일 (og:image 1200×630)
 
-> **★ 신정책 (2026-06-27) — 카드뉴스 톤 단일 템플릿이 SSOT.** 사진 풀블리드 폐기. 모든 카테고리 썸네일은
-> `blog/_scripts/gen_blog_thumbnails.py` 한 곳에서 생성한다 (글마다 즉흥 레이아웃 금지 — "제각각" 회귀 가드).
-> - 배경: navy `#050811` + 옅은 좌하단 accent 글로우 (사진 없음 · 그레이/다크 톤)
-> - 텍스트: 하단 정렬·좌측. kicker(● + 카테고리, accent) → 제목(흰 `#f6f8fb`, 숫자=accent 자동강조) → 부제(dim `#9aa3ad`)
+> **★ 신정책 (2026-06-27) — 카드뉴스 editorial 단일 템플릿이 SSOT.** 사진을 버리지 않는다(CardSlide editorial 그대로).
+> 모든 카테고리 썸네일은 `blog/_scripts/gen_blog_thumbnails.py` 한 곳에서 생성한다 (글마다 즉흥 레이아웃 금지 — "제각각" 회귀 가드).
+> - 배경: 글 폴더 `assets/{NN}*thumbnail-bg.webp` 를 **흑백 cover** (CardSlide CSS와 동일: grayscale 0.85·대비 1.06·밝기 0.92). 이미지 없으면 navy `#050811` + 좌하단 accent 글로우 폴백
+> - 스크림: 텍스트 시작점(kicker) 위로 부드럽게, 아래로 진해지는 navy 그라데이션 — 사진 위에서도 글씨가 읽힌다
+> - 텍스트: 하단 정렬·좌측. kicker(● + 카테고리, accent) → 제목(흰 `#f6f8fb`, 숫자=accent 자동강조) → 부제(dim)
 > - 서명: 좌하단 `avatar.webp`(원형) + **dartlab** — `CoverThumb .brand` 와 동일 위치
 > - 색 = 카드 팔레트 `CARD`(accent `#ff3f6f` = `--dl-accent` 테마 스왑색). `[[구절]]` 강조를 숫자 자동강조로 근사
+> - 배경 수급: 이미지 없는 글은 `blog/_scripts/gen_blog_cc0.py` (Commons + Openverse, PD/CC0 만 · 업종 추론 쿼리) 로 `assets/{NN}-thumbnail-bg.webp` 채움 — 생성형(FLUX) 안 씀
 > - frontmatter `title`·`description`·`category` 만으로 생성. 전체 적용: `uv run python -X utf8 blog/_scripts/gen_blog_thumbnails.py --all --apply` (ogImage 경로 덮어쓰기, 없으면 frontmatter 에 `ogImage: /thumbnails/...webp` 먼저 추가)
 
 (legacy · 폐기) 좌측 다크 그라데이션 + 회사명 + 제목 2 줄, 우측 GPT `image_gen` 배경, `malgunbd.ttf`. 저장: `/thumbnails/{stockCode}-{slug}.webp`. 아래 dartlab-news·회사보고서 풀블리드 사진 스펙도 모두 legacy — 참고 보존.

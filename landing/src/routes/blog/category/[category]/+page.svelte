@@ -3,6 +3,7 @@
 	import { brand } from '$lib/brand';
 	import { ArrowRight, Calendar } from 'lucide-svelte';
 	import { getCategory, getPostsByCategory, getSeriesGroupsByCategory, getSeriesPath } from '$lib/blog/posts';
+	import CardThumb from '$lib/blog/CardThumb.svelte';
 
 	let { data } = $props();
 
@@ -107,12 +108,13 @@
 								읽기 <ArrowRight size={14} />
 							</span>
 						</div>
-						<picture>
-							{#if post.cardPreviewWebp}
-								<source srcset="{base}{post.cardPreviewWebp}" type="image/webp" />
-							{/if}
-							<img src="{base}{post.cardPreview}" alt={post.title} class="category-post-thumb" width="172" height="172" loading="lazy" decoding="async" />
-						</picture>
+						<CardThumb
+							image="{base}{post.cardPreview}"
+							imageWebp={post.cardPreviewWebp ? `${base}${post.cardPreviewWebp}` : undefined}
+							keyword={post.cardKeyword}
+							kicker={post.categoryLabel}
+							alt={post.title}
+						/>
 					</div>
 				</a>
 			{/each}
@@ -242,9 +244,10 @@
 
 	.category-post-shell {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 172px;
-		gap: 1rem;
+		grid-template-columns: minmax(0, 1fr) clamp(240px, 32%, 320px);
+		gap: 1.25rem;
 		align-items: stretch;
+		min-height: 168px; /* 카드 균일 높이 — 우측 썸네일이 비율로 위아래 꽉 차게 */
 	}
 
 	.category-post-body {
@@ -290,27 +293,24 @@
 		color: rgba(100, 116, 139, 0.72);
 	}
 
-	.category-post-thumb {
-		display: block;
-		width: 172px;
-		height: 172px;
-		object-fit: contain;
-		object-position: center;
-		border-radius: 10px;
-		align-self: stretch;
-		background: var(--dl-mkt-card);
-	}
-
 	.category-post-title {
 		font-size: 1.2rem;
 		font-weight: 700;
 		color: var(--dl-ink-print);
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 
 	.category-post-desc {
 		font-size: 0.92rem;
-		line-height: 1.75;
+		line-height: 1.7;
 		color: var(--dl-ink-mute);
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 
 	.category-post-cta {
@@ -325,15 +325,11 @@
 	@media (max-width: 900px) {
 		.category-post-shell {
 			grid-template-columns: 1fr;
+			min-height: 0;
 		}
 
-		.category-post-thumb {
-			width: 100%;
-			max-width: 100%;
-			height: auto;
-			aspect-ratio: 16 / 9;
-			object-fit: cover;
-			justify-self: stretch;
+		.category-post-shell :global(.card-thumb) {
+			aspect-ratio: 1200 / 630;
 		}
 	}
 

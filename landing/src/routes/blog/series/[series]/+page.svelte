@@ -3,6 +3,7 @@
 	import { brand } from '$lib/brand';
 	import { ArrowRight, Calendar } from 'lucide-svelte';
 	import { getSeries, getSeriesPosts } from '$lib/blog/posts';
+	import CardThumb from '$lib/blog/CardThumb.svelte';
 
 	let { data } = $props();
 
@@ -87,12 +88,13 @@
 									<span class="series-step-cta">읽기 <ArrowRight size={14} /></span>
 								</div>
 							</div>
-							<picture>
-								{#if post.cardPreviewWebp}
-									<source srcset="{base}{post.cardPreviewWebp}" type="image/webp" />
-								{/if}
-								<img src="{base}{post.cardPreview}" alt={post.title} class="series-step-thumb" width="172" height="172" loading="lazy" decoding="async" />
-							</picture>
+							<CardThumb
+								image="{base}{post.cardPreview}"
+								imageWebp={post.cardPreviewWebp ? `${base}${post.cardPreviewWebp}` : undefined}
+								keyword={post.cardKeyword}
+								kicker={post.categoryLabel}
+								alt={post.title}
+							/>
 						</div>
 					</a>
 				{/each}
@@ -198,9 +200,10 @@
 
 	.series-step-shell {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 172px;
-		gap: 1rem;
-		align-items: center;
+		grid-template-columns: minmax(0, 1fr) clamp(240px, 32%, 320px);
+		gap: 1.25rem;
+		align-items: stretch;
+		min-height: 168px; /* 카드 균일 높이 — 우측 썸네일이 비율로 위아래 꽉 차게 */
 	}
 
 	.series-step-main {
@@ -269,26 +272,25 @@
 		color: rgba(100, 116, 139, 0.72);
 	}
 
-	.series-step-thumb {
-		display: block;
-		width: 172px;
-		height: 172px;
-		object-fit: cover;
-		object-position: center;
-		border-radius: 10px;
-	}
-
 	.series-step-title {
 		font-size: 1.15rem;
 		font-weight: 700;
 		color: var(--dl-ink-print);
 		margin-bottom: 0.45rem;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 
 	.series-step-desc {
 		font-size: 0.92rem;
-		line-height: 1.75;
+		line-height: 1.7;
 		color: var(--dl-ink-mute);
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 
 	.series-step-cta {
@@ -339,17 +341,15 @@
 	@media (max-width: 820px) {
 		.series-step-shell {
 			grid-template-columns: 1fr;
+			min-height: 0;
 		}
 
 		.series-step-main {
 			grid-template-columns: auto minmax(0, 1fr);
 		}
 
-		.series-step-thumb {
-			width: 100%;
-			max-width: 220px;
-			height: auto;
-			aspect-ratio: 1 / 1;
+		.series-step-shell :global(.card-thumb) {
+			aspect-ratio: 1200 / 630;
 		}
 	}
 </style>

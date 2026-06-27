@@ -1,0 +1,3 @@
+# 썸네일 배경 출처 (CC0 / Public Domain — Wikimedia Commons · Openverse)
+
+- **cc0-thumbnail-bg.webp** — Evening sun is shining at the brick facades of office building on the university campus Roeterseiland in the Roeterstraat, free photos of modern glass architecture in Amsterdam city; free photo by Fons Heijnsbroek, late Summer 2012 / Fons Heijnsbroek / CC0 / [modern office building glass facade] / https://commons.wikimedia.org/wiki/File:Evening_sun_is_shining_at_the_brick_facades_of_office_building_on_the_university_campus_Roeterseiland_in_the_Roeterstraat,_free_photos_of_modern_glass_architecture_in_Amsterdam_city;_free_photo_by_Fons_Heijnsbroek,_late_Summer_2012.tif

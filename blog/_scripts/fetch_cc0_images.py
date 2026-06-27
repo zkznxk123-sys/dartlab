@@ -38,7 +38,9 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import os
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -47,10 +49,66 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS_ROOT = ROOT / "sns" / "assets"
 OPENVERSE = "https://api.openverse.org/v1/images/"
+OPENVERSE_TOKEN_URL = "https://api.openverse.org/v1/auth_tokens/token/"
 COMMONS = "https://commons.wikimedia.org/w/api.php"
 UA = {"User-Agent": "dartlab-carousel/1.0 (license-clean CC0/PD image fetch)"}
 LONG_EDGE = 1400  # 4:5 cover 에 충분, webp q82
 _FREE_LICENSE_TOKENS = ("public domain", "cc0", "pd-", "no restrictions")  # 귀속 의무 없는 것만
+
+# 정중한 요청 간격(429 회피) — Commons 무인증은 느슨, Openverse 는 토큰으로 여유.
+_COMMONS_MIN_INTERVAL = 1.3
+_OPENVERSE_MIN_INTERVAL = 0.4
+_last_call: dict[str, float] = {"commons": 0.0, "openverse": 0.0}
+
+
+def _throttle(which: str, interval: float) -> None:
+    """직전 호출 후 interval 초가 지나도록 대기(API 정중성)."""
+    dt = time.monotonic() - _last_call[which]
+    if dt < interval:
+        time.sleep(interval - dt)
+    _last_call[which] = time.monotonic()
+
+
+_OV_TOKEN: str | None = None
+_OV_TOKEN_TRIED = False
+
+
+def _env(key: str) -> str:
+    """환경변수 우선, 없으면 repo 루트 .env 에서 key= 값 읽기."""
+    val = os.environ.get(key)
+    if val:
+        return val.strip()
+    envf = ROOT / ".env"
+    if envf.exists():
+        for line in envf.read_text(encoding="utf-8").splitlines():
+            if line.startswith(key + "="):
+                return line.split("=", 1)[1].strip().strip("'\"")
+    return ""
+
+
+def _openverse_token() -> str | None:
+    """OPENVERSE_CLIENT_ID/SECRET 로 bearer 토큰 1회 발급(레이트리밋 완화). 실패 시 무인증."""
+    global _OV_TOKEN, _OV_TOKEN_TRIED
+    if _OV_TOKEN_TRIED:
+        return _OV_TOKEN
+    _OV_TOKEN_TRIED = True
+    cid, secret = _env("OPENVERSE_CLIENT_ID"), _env("OPENVERSE_CLIENT_SECRET")
+    if not (cid and secret):
+        return None
+    try:
+        resp = requests.post(
+            OPENVERSE_TOKEN_URL,
+            data={"client_id": cid, "client_secret": secret, "grant_type": "client_credentials"},
+            headers=UA,
+            timeout=25,
+        )
+        resp.raise_for_status()
+        _OV_TOKEN = resp.json().get("access_token")
+        sys.stderr.write("    openverse 인증 토큰 발급 — 레이트리밋 완화\n")
+    except Exception as exc:
+        sys.stderr.write(f"    openverse 토큰 발급 실패(무인증으로 진행): {exc}\n")
+        _OV_TOKEN = None
+    return _OV_TOKEN
 
 
 def _relevant(item: dict, keywords: list[str]) -> bool:
@@ -90,18 +148,28 @@ def _save_webp(im: Image.Image, dest: Path) -> int:
 
 def _search_openverse(query: str, n: int = 12) -> list[dict]:
     """Openverse CC0/PDM 검색 → 정규화 item 리스트(실패 시 빈 리스트)."""
-    try:
-        resp = requests.get(
-            OPENVERSE,
-            params={"q": query, "license": "cc0,pdm", "page_size": n, "mature": "false"},
-            headers=UA,
-            timeout=25,
-        )
-        resp.raise_for_status()
-        return resp.json().get("results", [])
-    except Exception as exc:
-        sys.stderr.write(f"    openverse '{query}' 실패: {exc}\n")
-        return []
+    headers = dict(UA)
+    token = _openverse_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    for attempt in range(3):
+        _throttle("openverse", _OPENVERSE_MIN_INTERVAL)
+        try:
+            resp = requests.get(
+                OPENVERSE,
+                params={"q": query, "license": "cc0,pdm", "page_size": n, "mature": "false"},
+                headers=headers,
+                timeout=25,
+            )
+            if resp.status_code == 429:
+                time.sleep(4 * (attempt + 1))
+                continue
+            resp.raise_for_status()
+            return resp.json().get("results", [])
+        except Exception as exc:
+            sys.stderr.write(f"    openverse '{query}' 실패: {exc}\n")
+            return []
+    return []
 
 
 def _strip_html(s: str) -> str:
@@ -113,27 +181,36 @@ def _strip_html(s: str) -> str:
 
 def _search_commons(query: str, n: int = 20) -> list[dict]:
     """Wikimedia Commons 사진 검색 → PD/CC0 만 골라 Openverse 와 동일 스키마로 정규화."""
-    try:
-        resp = requests.get(
-            COMMONS,
-            params={
-                "action": "query",
-                "format": "json",
-                "generator": "search",
-                "gsrsearch": f"{query} filetype:bitmap",
-                "gsrnamespace": "6",
-                "gsrlimit": n,
-                "prop": "imageinfo",
-                "iiprop": "url|size|extmetadata",
-                "iiurlwidth": LONG_EDGE,
-            },
-            headers=UA,
-            timeout=25,
-        )
-        resp.raise_for_status()
-        pages = (resp.json().get("query", {}) or {}).get("pages", {}) or {}
-    except Exception as exc:
-        sys.stderr.write(f"    commons '{query}' 실패: {exc}\n")
+    pages: dict = {}
+    for attempt in range(3):
+        _throttle("commons", _COMMONS_MIN_INTERVAL)
+        try:
+            resp = requests.get(
+                COMMONS,
+                params={
+                    "action": "query",
+                    "format": "json",
+                    "generator": "search",
+                    "gsrsearch": f"{query} filetype:bitmap",
+                    "gsrnamespace": "6",
+                    "gsrlimit": n,
+                    "prop": "imageinfo",
+                    "iiprop": "url|size|extmetadata",
+                    "iiurlwidth": LONG_EDGE,
+                },
+                headers=UA,
+                timeout=25,
+            )
+            if resp.status_code == 429:
+                time.sleep(6 * (attempt + 1))  # Commons 백오프 — 6·12·18초
+                continue
+            resp.raise_for_status()
+            pages = (resp.json().get("query", {}) or {}).get("pages", {}) or {}
+            break
+        except Exception as exc:
+            sys.stderr.write(f"    commons '{query}' 실패: {exc}\n")
+            return []
+    if not pages:
         return []
 
     items = []

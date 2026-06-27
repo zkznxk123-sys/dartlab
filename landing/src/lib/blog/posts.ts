@@ -188,6 +188,19 @@ export type SeriesDefinition = (typeof seriesDefinitions)[SeriesId];
 const categoryById = new Map<string, CategoryDefinition>(categoryDefinitions.map((category) => [category.id, category]));
 const categoryBySlug = new Map<string, CategoryDefinition>(categoryDefinitions.map((category) => [category.slug, category]));
 
+/**
+ * 카드 썸네일 위에 얹을 핵심키워드(카드뉴스 헤드라인) — 타이틀을 그대로 쓰지 않고 hook 한 구절만 뽑는다.
+ * "회사 (코드) — hook" → hook · "주제 — sub" → sub · hook 에 ':' 있으면 앞부분(핵심). 대시 없으면 제목 그대로.
+ */
+function deriveKeyword(title: string): string {
+	let s = title.trim();
+	const dash = s.search(/[—–]/); // em/en dash
+	if (dash >= 0) s = s.slice(dash + 1).trim();
+	const colon = s.search(/[:：]/);
+	if (colon > 0) s = s.slice(0, colon).trim();
+	return s || title.trim();
+}
+
 export interface PostMeta {
 	slug: string;
 	title: string;
@@ -197,6 +210,7 @@ export interface PostMeta {
 	ogImage?: string;
 	cardPreview: string;
 	cardPreviewWebp?: string;
+	cardKeyword: string;
 	previewAsset?: string;
 	readingMinutes: number;
 	category: CategoryId;
@@ -269,8 +283,14 @@ function buildPosts(): PostMeta[] {
 		const previewAsset = findPreviewAsset(path, rawMarkdown);
 		const thumbnail = metadata.thumbnail ? String(metadata.thumbnail) : '/avatar-chart.png';
 		const ogImage = metadata.ogImage ? String(metadata.ogImage) : undefined;
-		const cardPreview = metadata.cardPreview ? String(metadata.cardPreview) : ogImage ?? previewAsset ?? thumbnail;
+		// 리스트 카드 썸네일 = 텍스트 없는 깨끗한 -card 흑백 이미지(소스). 그 위에 핵심키워드를 HTML 로 얹는다(굽지 않음).
+		// og:image(텍스트 합성본)는 소셜 공유 전용.
+		const ogCard = ogImage && /^\/thumbnails\/.+\.webp$/.test(ogImage) ? ogImage.replace(/\.webp$/, '-card.webp') : undefined;
+		const cardPreview = metadata.cardPreview ? String(metadata.cardPreview) : (ogCard ?? ogImage ?? previewAsset ?? thumbnail);
 		const cardPreviewWebp = toWebpAsset(cardPreview);
+		// 이미지 위에 얹을 핵심키워드 — 타이틀·내용 그대로가 아니라 hook 한 구절(카드뉴스 헤드라인). frontmatter cardKeyword 로 개별 지정 가능.
+		const titleStr = metadata.title ? String(metadata.title) : '';
+		const cardKeyword = metadata.cardKeyword ? String(metadata.cardKeyword) : deriveKeyword(titleStr);
 		const stockCode = metadata.stockCode ? String(metadata.stockCode).trim() || undefined : undefined;
 		// carousel 은 중첩 객체 — 객체일 때만 채택(스칼라 오기는 무시). 검증은 blog/_scripts/audit_seo.py(yaml).
 		const carousel =
@@ -285,6 +305,7 @@ function buildPosts(): PostMeta[] {
 			ogImage,
 			cardPreview,
 			cardPreviewWebp,
+			cardKeyword,
 			previewAsset,
 			readingMinutes,
 			category: category.id,

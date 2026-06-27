@@ -3,6 +3,7 @@
 	import { brand } from '$lib/brand';
 	import { ArrowRight, Calendar } from 'lucide-svelte';
 	import { getCategoryGroups, getCategoryPath, getLatestPosts, getSeriesGroups, getSeriesPath } from '$lib/blog/posts';
+	import CardThumb from '$lib/blog/CardThumb.svelte';
 
 	const categoryGroups = getCategoryGroups();
 	const latestPosts = getLatestPosts(6);
@@ -115,12 +116,13 @@
 							<h3 class="latest-title">{post.title}</h3>
 							<p class="latest-desc">{post.description}</p>
 						</div>
-						<picture>
-							{#if post.cardPreviewWebp}
-								<source srcset="{base}{post.cardPreviewWebp}" type="image/webp" />
-							{/if}
-							<img src="{base}{post.cardPreview}" alt={post.title} class="latest-thumb" width="260" height="137" loading="lazy" decoding="async" />
-						</picture>
+						<CardThumb
+							image="{base}{post.cardPreview}"
+							imageWebp={post.cardPreviewWebp ? `${base}${post.cardPreviewWebp}` : undefined}
+							keyword={post.cardKeyword}
+							kicker={post.categoryLabel}
+							alt={post.title}
+						/>
 					</div>
 				</a>
 			{/each}
@@ -320,15 +322,17 @@
 
 	.latest-card-shell {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 260px;
-		gap: 1rem;
-		align-items: center;
+		grid-template-columns: minmax(0, 1fr) clamp(240px, 32%, 320px);
+		gap: 1.25rem;
+		align-items: stretch;
+		min-height: 160px; /* 카드 균일 높이 — 우측 썸네일이 비율로 위아래 꽉 차게 */
 	}
 
 	.latest-card-body {
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		gap: 0.4rem;
 	}
 
@@ -358,28 +362,24 @@
 		color: rgba(100, 116, 139, 0.5);
 	}
 
-	.latest-thumb {
-		display: block;
-		width: 260px;
-		height: auto;
-		aspect-ratio: 1200 / 630;
-		object-fit: cover;
-		object-position: center;
-		border-radius: 10px;
-		background: var(--dl-mkt-card);
-		border: 1px solid var(--dl-mkt-border);
-	}
-
 	.latest-title {
 		font-size: 1.05rem;
 		font-weight: 700;
 		color: var(--dl-ink-print);
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 
 	.latest-desc {
 		font-size: 0.85rem;
 		line-height: 1.6;
 		color: var(--dl-ink-mute);
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 
 	.series-grid {
@@ -447,15 +447,11 @@
 
 		.latest-card-shell {
 			grid-template-columns: 1fr;
+			min-height: 0;
 		}
 
-		.latest-thumb {
-			width: 100%;
-			max-width: none;
-			height: auto;
+		.latest-card-shell :global(.card-thumb) {
 			aspect-ratio: 1200 / 630;
-			object-fit: cover;
-			background: var(--dl-mkt-card);
 		}
 
 		.blog-hub-title {

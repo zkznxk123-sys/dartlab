@@ -531,6 +531,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.terminal</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/operation.testing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1521,7 +1526,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/category/macro-reports</loc>
+    <loc>https://eddmpython.github.io/dartlab/blog/category/data-reports</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
@@ -1592,6 +1597,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/series/기업이야기</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.72</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/series/data-reports</loc>
     <changefreq>weekly</changefreq>
     <priority>0.72</priority>
   </url>
@@ -1894,6 +1904,18 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-04-21</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/terminal-one-screen</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-25</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/cards-publish</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-06-25</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/005930-samsung</loc>
@@ -2934,15 +2956,9 @@
     <lastmod>2026-06-13</lastmod>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/04-kr</loc>
+    <loc>https://eddmpython.github.io/dartlab/blog/treasury-stock-not-cancelled</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2026-04-05</lastmod>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/04-us</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-04-05</lastmod>
+    <lastmod>2026-06-27</lastmod>
   </url>
 </urlset>

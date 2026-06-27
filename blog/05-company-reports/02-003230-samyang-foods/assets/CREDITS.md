@@ -1,0 +1,3 @@
+# 썸네일 배경 출처 (CC0 / Public Domain — Wikimedia Commons · Openverse)
+
+- **cc0-thumbnail-bg.webp** — GD 廣東 Guangdong 河源市 HeYuan 高新區 High Tech Zone 興工南路 24 XingGong South Road 百家鮮食品科技 BaiJiaXian Food production line April 2026 N13P 02 / LANENWM Meso Amermbalin / CC0 / [food production line factory] / https://commons.wikimedia.org/wiki/File:GD_%E5%BB%A3%E6%9D%B1_Guangdong_%E6%B2%B3%E6%BA%90%E5%B8%82_HeYuan_%E9%AB%98%E6%96%B0%E5%8D%80_High_Tech_Zone_%E8%88%88%E5%B7%A5%E5%8D%97%E8%B7%AF_24_XingGong_South_Road_%E7%99%BE%E5%AE%B6%E9%AE%AE%E9%A3%9F%E5%93%81%E7%A7%91%E6%8A%80_BaiJiaXian_Food_production_line_April_2026_N13P_02.jpg
