@@ -6,7 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 9
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/news-terminal-one-screen.webp
 keywords:
   - dartlab 터미널
   - 전 종목 재무 한눈에

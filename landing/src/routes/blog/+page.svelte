@@ -119,7 +119,7 @@
 							{#if post.cardPreviewWebp}
 								<source srcset="{base}{post.cardPreviewWebp}" type="image/webp" />
 							{/if}
-							<img src="{base}{post.cardPreview}" alt={post.title} class="latest-thumb" width="160" height="160" loading="lazy" decoding="async" />
+							<img src="{base}{post.cardPreview}" alt={post.title} class="latest-thumb" width="260" height="137" loading="lazy" decoding="async" />
 						</picture>
 					</div>
 				</a>
@@ -320,7 +320,7 @@
 
 	.latest-card-shell {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 160px;
+		grid-template-columns: minmax(0, 1fr) 260px;
 		gap: 1rem;
 		align-items: center;
 	}
@@ -360,12 +360,14 @@
 
 	.latest-thumb {
 		display: block;
-		width: 160px;
-		height: 160px;
-		object-fit: contain;
+		width: 260px;
+		height: auto;
+		aspect-ratio: 1200 / 630;
+		object-fit: cover;
 		object-position: center;
 		border-radius: 10px;
 		background: var(--dl-mkt-card);
+		border: 1px solid var(--dl-mkt-border);
 	}
 
 	.latest-title {
@@ -449,10 +451,10 @@
 
 		.latest-thumb {
 			width: 100%;
-			max-width: 200px;
+			max-width: none;
 			height: auto;
-			aspect-ratio: 1 / 1;
-			object-fit: contain;
+			aspect-ratio: 1200 / 630;
+			object-fit: cover;
 			background: var(--dl-mkt-card);
 		}
 
