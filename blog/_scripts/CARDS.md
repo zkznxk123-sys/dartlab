@@ -11,10 +11,16 @@
 > 운영자가 인스타그램에 *직접* 올릴 때만 수동으로 쓰고, 그것도 이제 **/cards 에 있는 걸 그대로 올리면 된다**.
 > frontmatter ↔ hook.json **동기화는 하지 않는다**(sns 분기는 방치). 신규·개선은 전부 frontmatter 에서 한다.
 
-## 카드 새로 올리기 — 3단계
-1. 블로그 글 frontmatter 에 `carousel:` 쓴다 (아래 형식).
-2. (선택) 검사: `uv run python -X utf8 blog/_scripts/audit_seo.py`  ← 형식·숫자 점검
-3. 발행: `uv run python -X utf8 blog/_scripts/build_carousel_contracts.py`
+## 카드 새로 올리기 — 5단계
+1. 블로그 글 frontmatter 에 `carousel:` 쓴다 (아래 형식). **블로그 산문과 카드 기획은 한 번에 잡는다.**
+2. 이미지·토론 계획 생성: `uv run python -X utf8 blog/_scripts/plan_card_news.py --post blog/05-company-reports/{글폴더} --write`
+   - 계획 파일 = 같은 글 폴더의 `cards.plan.json`.
+   - `imagePlan[]` 은 **5~10장**이어야 한다. 고정 템플릿이 아니라 카드 흐름에서 의미가 다른 장면만 기획한다.
+   - 각 항목의 `prompt` 를 GPT `image_gen` 으로 한 장씩 생성한다.
+   - 생성 뒤 `imagegen.extractCommand` 로 `sns/assets/{code}/{assetKey}.webp` 에 저장하고 `imagegen.checkCommand` 로 프레이밍을 본다.
+3. 작가 패널 토론·평가를 `cards.plan.json` 의 `reviewGate` 에 기록하고 `status: "passed"` 로 닫는다.
+4. (선택) 검사: `uv run python -X utf8 blog/_scripts/audit_seo.py`  ← 형식·숫자 점검
+5. 발행: `uv run python -X utf8 blog/_scripts/build_carousel_contracts.py`
    - hfMedia 에 `carousels/index.json` **한 파일** 올림(옛 파일 자동 삭제).
    - `/cards` 새로고침하면 뜬다. **사이트 재빌드 불필요**(데이터만 올림).
    - `--dry-run` 붙이면 *올릴 것·지울 것*만 미리 본다.
@@ -67,14 +73,35 @@ uv run python -X utf8 blog/_scripts/audit_carousel_images.py            # 색<60
 uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면 벡터/도식에 집중
 ```
 
-### 이미지 가져오는 곳 — 카드 캐러셀은 CC0 스톡으로만 수급 (FLUX 안 씀)
-> **카드 캐러셀 발간 규칙(강행)**: 카드 이미지는 **저작권 없는(PD/CC0) 스톡으로만 수급한다**(`fetch_cc0_images.py`).
-> **FLUX·생성형 이미지는 카드 캐러셀에 쓰지 않는다** — 발간 카드는 출처가 깨끗한 실사 스톡으로 통일한다.
-> (옛 "GPT→image_gen / Claude→CC0" 주체별 분기는 폐기 — 발간 방식 자체를 CC0 단일 경로로 못 박는다.)
-> 받은 즉시 눈으로 한 장씩 확정한다.
+### 이미지 가져오는 곳 — GPT image_gen 1차, CC0/PD 보강
+> **카드 캐러셀 발간 규칙(강행)**: 랜딩 `/cards` 이미지는 블로그·카드 공동 기획의 `cards.plan.json`
+> 에서 먼저 정한다. 기본 경로는 GPT `image_gen` 이고, 실제 장소·공공 사진이 더 적합한 경우만
+> `fetch_cc0_images.py` 로 PD/CC0 스톡을 보강한다. FLUX 스크립트는 legacy/다른 용도다.
+
+GPT image_gen 산출물은 `sns/assets/{code}/{assetKey}.webp` 공유자산으로 저장한다. 포스트 폴더에 직접
+넣지 않는다. `cards.plan.json` 의 `imagegen.extractCommand` 가 이 저장 경로를 고정한다.
+
+기본 생성 절차:
+```
+uv run python -X utf8 blog/_scripts/plan_card_news.py --post blog/05-company-reports/{글폴더} --write
+# imagePlan[].prompt 를 GPT image_gen 으로 5~10장 생성
+# cards.plan.json 의 imagegen.extractCommand 실행
+# cards.plan.json 의 imagegen.checkCommand 실행
+uv run python -X utf8 sns/scripts/build_index.py
+uv run python -X utf8 sns/scripts/publish_assets_hf.py
+uv run python -X utf8 blog/_scripts/build_carousel_contracts.py
+```
+
+이슈 카드(`blog/_issues/{slug}/carousel.yaml`)는:
+```
+uv run python -X utf8 blog/_scripts/plan_card_news.py --issue {slug} --write
+# imagePlan[].prompt 를 GPT image_gen 으로 5~10장 생성
+# cards.plan.json 의 imagegen.extractCommand 실행
+uv run python -X utf8 blog/_scripts/build_carousel_contracts.py
+```
 
 ⛔ **핀터레스트·구글 이미지 금지** — 거기 올라온 사진은 대부분 **저작권 있음**(긁어온 것)이라 가져다 쓰면 침해다.
-아래 무료 소스만 쓴다.
+스톡 보강은 아래 무료 소스만 쓴다.
 - **Wikimedia Commons / Openverse** — PD/CC0 (귀속 의무 0). `fetch_cc0_images.py` 가 이 둘에서만 받는다.
 - 보강 여지(필요 시 API 키로 추가): **Unsplash·Pexels·Pixabay**(무료 라이선스·상업 OK), **NASA·각국 공공기관**(PD).
 
@@ -88,9 +115,11 @@ uv run python -X utf8 blog/_scripts/fetch_cc0_images.py --jobs sns/assets/_plans
 ```
 jobs = `[{"code","name","queries":[...],"keywords":[...]}]`. **반드시 받은 이미지를 눈으로 확인** —
 스톡은 특정 피사체(정유탑·병입라인 등) 적중률이 들쭉날쭉해 오매치(엉뚱한 사진·텍스트 광고·도식)가 섞인다(실측: 받은 것 절반 폐기).
-안 맞으면 **다른 검색어(`queries`)로 재시도**하고, 그래도 없으면 그 슬라이드는 **이미지 없이 간다 — 생성형으로 메우지 않는다**.
+안 맞으면 **다른 검색어(`queries`)로 재시도**한다. 스톡으로 정확히 못 잡는 추상 장면은 `cards.plan.json`
+의 image_gen 프롬프트로 되돌린다.
 
-> 원칙: **카드 캐러셀 이미지 = CC0 스톡 단일 경로.** 받은 즉시 눈검수 후 채택(쓰레기 거르기). 출처는 `CREDITS.md` 에.
+> 원칙: **카드 캐러셀 이미지 = cards.plan.json 에서 먼저 기획한다.** GPT image_gen 은 로고·텍스트·상표·
+> 특정 인물 없이 photorealistic 장면만 만든다. CC0/PD 스톡은 실제 공공 사진이 필요한 때의 보강 경로다.
 
 ## 발행 전 전문가 검토 게이트 — 작가 패널 토론·평가 (cards 정식 게이트)
 **캐러셀은 공개물이라 발행 전에 전문가 루프를 반드시 거친다.** 자동 통과 금지.
@@ -103,14 +132,19 @@ jobs = `[{"code","name","queries":[...],"keywords":[...]}]`. **반드시 받은 
 
 > 흐름: 신규·개선편은 위 패널(다중 에이전트 토론·평가→수정→재평가)을 거친 뒤에만 `build_carousel_contracts.py` 발행.
 > **이미 발행된 편도 이 루프로 개선한다**(발행본 품질 상향이 기본 운영).
+> `cards.plan.json` 이 있는 글은 `reviewGate.status: "passed"` 와 각 required round `status: "passed"` 가
+> 아니면 `build_carousel_contracts.py` 가 발행을 중단한다. legacy 글은 plan 파일이 없으면 허용하되, 신규·개선은 plan 을 만든다.
 
 ## 도구
 | 파일 | 역할 |
 |---|---|
 | `blog/_scripts/build_carousel_contracts.py` | **발행** — blog frontmatter → hfMedia 단일 파일 |
+| `blog/_scripts/plan_card_news.py` | **블로그+카드+image_gen 기획** — `cards.plan.json` 생성·검사 |
 | `blog/_scripts/audit_carousel_images.py` | **이미지 감사** — 평면 벡터·도식·인포그래픽(쓰레기) 색복잡도로 탐지 |
 | `blog/_scripts/fetch_cc0_images.py` | 무료(PD/CC0) 이미지 수급 — Commons·Openverse |
-| `blog/_scripts/gen_company_flux.py` | 생성형 hero(4:5) — **카드 캐러셀엔 안 씀**(딴 용도 한정). 카드 이미지는 CC0 단일 경로 |
+| `sns/scripts/extractImagegenAssets.py` | GPT `image_gen` 세션 결과 → `sns/assets/{code}/{asset}.webp` 추출 |
+| `sns/scripts/checkImagegenAssets.py` | image_gen 산출물 4:5·밝기·프레이밍 1차 검사 |
+| `blog/_scripts/gen_company_flux.py` | legacy 생성형 hero(4:5) — 신규 `/cards` 기본 경로 아님 |
 | `blog/_scripts/audit_seo.py` | carousel 형식·숫자 검사 |
 | `blog/_scripts/migrate_carousels_to_blog.py` | 1회성 이관(sns/carousels → blog frontmatter, **완료**). 이후 sns 는 **유물**·재동기화 안 함 |
 | `blog/_scripts/test_carousel_contracts.py` | 발행/이관 테스트 |

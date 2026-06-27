@@ -1,0 +1,41 @@
+name: "공시 읽기"
+title: "자사주 매입과 소각은 다릅니다"
+date: 2026-06-27
+sector: disclosure
+caption: |
+  자사주를 샀다는 공시만 보고 주식 수가 줄었다고 읽으면 안 됩니다.
+
+  먼저 회사가 자기 주식을 취득했는지 봅니다.
+  그다음 그 주식이 소각됐는지, 아니면 금고에 남아 있는지 봅니다.
+
+  취득은 회사가 주식을 사는 일이고, 소각은 그 주식을 없애는 일입니다.
+  금고에 남은 자사주는 보유·처분 계획에 따라 임직원 보상, 교환, 처분 재원으로 다시 나올 수 있습니다.
+
+  그래서 자사주 공시는 취득 금액보다 목적, 보유·처분 계획, 소각 결정을 같이 읽어야 합니다.
+pinnedComment: "투자 권유 아님. 공시 원문에서 취득 목적, 보유·처분 계획, 소각 여부를 분리해서 확인합니다. 기준: 금융위원회 자기주식 보유·처분 공시 강화 자료, KRX KIND 자사주취득/처분 공시."
+slides:
+  - layout: editorial
+    line: "자사주 매입은 [[끝]]이 아닙니다"
+    sub: "소각까지 봐야 주식 수가 줄어듭니다"
+    image: scene-01-cover-hook
+  - layout: editorialBeat
+    kicker: "첫 질문"
+    line: "회사가 산 주식이 [[어디에 남는지]] 봅니다"
+    sub: "보유·처분 계획이 있으면 다시 나올 수 있습니다"
+    image: scene-02-narrative-turn
+  - layout: editorialStat
+    kicker: "핵심 구분"
+    bigNumber: "2"
+    unit: "단계"
+    context: "취득은 사는 일, 소각은 없애는 일입니다"
+    image: scene-03-number-evidence
+  - layout: editorialBeat
+    kicker: "위험"
+    line: "자사주는 [[처분 재원]]이 될 수도 있습니다"
+    sub: "임직원 보상, 교환, 매각 같은 활용 가능성을 같이 봅니다"
+    image: scene-04-narrative-turn
+  - layout: editorialBeat
+    kicker: "읽는 순서"
+    line: "[[목적]], 보유·처분 계획, 소각 결정을 나눠 봅니다"
+    sub: "공시 제목보다 원문 문장이 더 중요합니다"
+    image: scene-05-closing-checkpoint

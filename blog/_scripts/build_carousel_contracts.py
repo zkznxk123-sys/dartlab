@@ -6,7 +6,8 @@
      ReportModel 에서 덧붙인다(code 기반 라이브 조회).
   2. 이슈(standalone) — `blog/_issues/<slug>/carousel.yaml`. **블로그 글 없이 카드만** 발간(경제/시국 등
      그때그때 이슈). code 없음 → /cards 가 회사 report 조회 안 하고 손글 editorial 슬라이드만 렌더.
-     슬라이드 image 는 `blog/_issues/<slug>/assets/<name>.webp`(FLUX 생성) → hfMedia `issues/<slug>/` 업로드.
+     슬라이드 image 는 `blog/_issues/<slug>/assets/<name>.webp`(cards.plan.json 기반 image_gen 산출물)
+     → hfMedia `issues/<slug>/` 업로드.
 
 손글 편집 카피(editorial/editorialBeat/editorialStat)가 캐러셀의 *중심점(계약)* 이고, landing /cards 가
 **굽지 않고** 라이브 렌더한다. (옛 `sns/carousels/E*/hook.json` 분리 SSOT 폐기 → frontmatter 이관됨.)
@@ -41,6 +42,7 @@ import tempfile
 from pathlib import Path
 
 import yaml
+from cards_plan import validate_contract_plan_gate
 from huggingface_hub import CommitOperationAdd, CommitOperationDelete, HfApi
 
 from dartlab.core.dataConfig import HF_MEDIA_REPO
@@ -302,6 +304,15 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="게시 안 함, 요약만")
     parser.add_argument("--repo", default=HF_MEDIA_REPO)
     parser.add_argument("--allow-layout-warn", action="store_true", help="레이아웃 가드 위반이 있어도 발행 강행")
+    parser.add_argument("--require-card-plan", action="store_true", help="모든 계약에 cards.plan.json 요구")
+    parser.add_argument(
+        "--allow-unreviewed-card-plan",
+        action="store_true",
+        help="cards.plan.json 이 planned 상태여도 발행 허용(운영 중 임시 우회)",
+    )
+    parser.add_argument(
+        "--require-card-assets", action="store_true", help="cards.plan.json 의 모든 image_gen 산출물 존재 요구"
+    )
     args = parser.parse_args()
 
     # 발간 전 repo 파일 목록 1회(옛 json 삭제 + 이미 올라간 이슈 이미지 해시 스킵 양쪽에 씀).
@@ -326,6 +337,28 @@ def main() -> None:
             sys.exit(1)
     else:
         print("레이아웃 가드: 위반 0건 ✓")
+
+    # 신규/개선 카드뉴스 운영 게이트. legacy 계약은 plan 파일이 없으면 허용하되, cards.plan.json 이 생긴
+    # 글은 작가 패널·정직성·이미지 적합성·재평가를 passed 로 닫아야 발행한다.
+    plan_violations, plan_stats = validate_contract_plan_gate(
+        contracts,
+        require_plan=args.require_card_plan,
+        require_passed=not args.allow_unreviewed_card_plan,
+        require_assets=args.require_card_assets,
+    )
+    if plan_violations:
+        sys.stderr.write(f"⚠ 카드 기획/토론 게이트 위반 {len(plan_violations)}건:\n")
+        for v in plan_violations:
+            sys.stderr.write(f"  - {v}\n")
+        sys.stderr.write(
+            "발행 중단 — plan_card_news.py 로 cards.plan.json 을 만들고 reviewGate 를 passed 로 닫은 뒤 재시도.\n"
+        )
+        sys.exit(1)
+    print(
+        "카드 기획/토론 게이트: "
+        f"계약 {plan_stats['contracts']}편 · 계획 {plan_stats['plans']}개 · "
+        f"통과 {plan_stats['passed']}개 · 누락 {plan_stats['missing']}개"
+    )
 
     posts = build_index(contracts)
     n_slides = sum(len(c["slides"]) for c in contracts.values())

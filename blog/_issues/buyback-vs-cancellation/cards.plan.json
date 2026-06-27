@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-27T12:55:58.111881+00:00",
+  "target": {
+    "kind": "issue",
+    "slug": "buyback-vs-cancellation",
+    "stockCode": "",
+    "corpName": "",
+    "title": "자사주 매입과 소각은 다릅니다",
+    "postPath": "blog/_issues/buyback-vs-cancellation/carousel.yaml",
+    "assetRoot": "blog/_issues/buyback-vs-cancellation/assets",
+    "planPath": "blog/_issues/buyback-vs-cancellation/cards.plan.json"
+  },
+  "planning": {
+    "blogThesis": "자사주를 샀다는 공시만 보고 주식 수가 줄었다고 읽으면 안 됩니다.",
+    "cardThesis": "자사주를 샀다는 공시만 보고 주식 수가 줄었다고 읽으면 안 됩니다.",
+    "audienceQuestion": "자사주 매입과 소각은 다릅니다 이슈를 /cards에서 볼 때 마지막에 무엇을 확인해야 하나?",
+    "blogAndCardsTogether": false,
+    "bodyPreview": ""
+  },
+  "carousel": {
+    "slideCount": 5,
+    "layouts": [
+      "editorial",
+      "editorialBeat",
+      "editorialStat",
+      "editorialBeat",
+      "editorialBeat"
+    ]
+  },
+  "imagePlan": [
+    {
+      "order": 1,
+      "assetKey": "scene-01-cover-hook",
+      "slideRefs": [
+        1
+      ],
+      "role": "cover-hook",
+      "scene": "photorealistic opening scene that makes 자사주 매입과 소각은 다릅니다 and '자사주 매입은 끝이 아닙니다' understandable at first glance",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/buyback-vs-cancellation/assets/scene-01-cover-hook.webp\nAsset key: scene-01-cover-hook\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 자사주 매입과 소각은 다릅니다.\nStory title: 자사주 매입과 소각은 다릅니다.\nCarousel role: cover-hook.\nImage subject: photorealistic opening scene that makes 자사주 매입과 소각은 다릅니다 and '자사주 매입은 끝이 아닙니다' understandable at first glance.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 2,
+      "assetKey": "scene-02-narrative-turn",
+      "slideRefs": [
+        2
+      ],
+      "role": "narrative-turn",
+      "scene": "editorial business-news scene showing the turning point '회사가 산 주식이 어디에 남는지 봅니다' through physical work, demand, or operations",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/buyback-vs-cancellation/assets/scene-02-narrative-turn.webp\nAsset key: scene-02-narrative-turn\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 자사주 매입과 소각은 다릅니다.\nStory title: 자사주 매입과 소각은 다릅니다.\nCarousel role: narrative-turn.\nImage subject: editorial business-news scene showing the turning point '회사가 산 주식이 어디에 남는지 봅니다' through physical work, demand, or operations.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 3,
+      "assetKey": "scene-03-number-evidence",
+      "slideRefs": [
+        3
+      ],
+      "role": "number-evidence",
+      "scene": "real-world operation or evidence scene behind the number '취득은 사는 일, 소각은 없애는 일입니다', without charts or readable text",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/buyback-vs-cancellation/assets/scene-03-number-evidence.webp\nAsset key: scene-03-number-evidence\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 자사주 매입과 소각은 다릅니다.\nStory title: 자사주 매입과 소각은 다릅니다.\nCarousel role: number-evidence.\nImage subject: real-world operation or evidence scene behind the number '취득은 사는 일, 소각은 없애는 일입니다', without charts or readable text.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 4,
+      "assetKey": "scene-04-narrative-turn",
+      "slideRefs": [
+        4
+      ],
+      "role": "narrative-turn",
+      "scene": "editorial business-news scene showing the turning point '자사주는 처분 재원이 될 수도 있습니다' through physical work, demand, or operations",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/buyback-vs-cancellation/assets/scene-04-narrative-turn.webp\nAsset key: scene-04-narrative-turn\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 자사주 매입과 소각은 다릅니다.\nStory title: 자사주 매입과 소각은 다릅니다.\nCarousel role: narrative-turn.\nImage subject: editorial business-news scene showing the turning point '자사주는 처분 재원이 될 수도 있습니다' through physical work, demand, or operations.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    },
+    {
+      "order": 5,
+      "assetKey": "scene-05-closing-checkpoint",
+      "slideRefs": [
+        5
+      ],
+      "role": "closing-checkpoint",
+      "scene": "quiet final-check scene for the reader to verify '목적, 보유, 소각 결정을 나눠 봅니다', such as documents, equipment, or operations context without readable text",
+      "reason": "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커",
+      "status": "generated",
+      "prompt": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/buyback-vs-cancellation/assets/scene-05-closing-checkpoint.webp\nAsset key: scene-05-closing-checkpoint\nPrimary request: Create a realistic editorial image for DartLab landing /cards about 자사주 매입과 소각은 다릅니다.\nStory title: 자사주 매입과 소각은 다릅니다.\nCarousel role: closing-checkpoint.\nImage subject: quiet final-check scene for the reader to verify '목적, 보유, 소각 결정을 나눠 봅니다', such as documents, equipment, or operations context without readable text.\nImage reason: 블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커.\nComposition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.\nStyle/medium: realistic business-news photography, not illustration, not a chart, not an infographic.\nLighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.\nConstraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.\nAvoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper."
+    }
+  ],
+  "imagegen": {
+    "tool": "GPT image_gen",
+    "generationRule": "각 imagePlan.prompt 를 한 장씩 image_gen 으로 생성한다.",
+    "extractCommand": "uv run python -X utf8 sns/scripts/extractImagegenAssets.py assets --assets-root blog/_issues/buyback-vs-cancellation --count 5 --names scene-01-cover-hook,scene-02-narrative-turn,scene-03-number-evidence,scene-04-narrative-turn,scene-05-closing-checkpoint --keywords \"buyback-vs-cancellation,자사주 매입과 소각은 다릅니다\"",
+    "checkCommand": "uv run python -X utf8 sns/scripts/checkImagegenAssets.py blog/_issues/buyback-vs-cancellation/assets",
+    "publishCommands": [
+      "uv run python -X utf8 blog/_scripts/build_carousel_contracts.py"
+    ]
+  },
+  "reviewGate": {
+    "status": "passed",
+    "requiredRounds": [
+      {
+        "id": "writerPanel",
+        "purpose": "훅 강도, 서사 스파인, 블로그 산문과 카드 흐름의 일치 여부를 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "honestyEvidence",
+        "purpose": "슬라이드 숫자와 주장 근거가 블로그 본문/검증표에 있는지 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "imageFit",
+        "purpose": "5~10장 이미지가 각기 다른 의미 장면인지, 로고·텍스트·도식이 없는지 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "readerFit",
+        "purpose": "처음 보는 독자가 첫 장과 마지막 장만 봐도 관전 포인트를 이해하는지 본다.",
+        "status": "passed"
+      },
+      {
+        "id": "reevaluation",
+        "purpose": "수정 후 같은 패널이 다시 보고 발행 가능 여부를 닫는다.",
+        "status": "passed"
+      }
+    ],
+    "decisionLog": [
+      {
+        "round": "writerPanel",
+        "decision": "??? ??? ??? ???? ?? ?? ???? ??? ????. ? ?? ??? ?? ??? ?? ?? ??? ???."
+      },
+      {
+        "round": "honestyEvidence",
+        "decision": "???, ?? ??, ?? ??? ?? ??? ???. ????? ???? ????? ?? ?? ??? KRX KIND ?????/?? ?? ??? ?? ???? ???."
+      },
+      {
+        "round": "imageFit",
+        "decision": "image_gen?? 5? ?? ? 4:5 WebP? ????. ??, ????, ?? ? ?? ?? ?? ?? ????? ???? ????."
+      },
+      {
+        "round": "readerFit",
+        "decision": "?? ?? ??? ?? ???? ??, ????? ??, ?? ??? ??? ?? ??? ??? ??? ????."
+      },
+      {
+        "round": "reevaluation",
+        "decision": "?? ? ?? ???? ????."
+      }
+    ]
+  }
+}
