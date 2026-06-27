@@ -68,8 +68,8 @@ carousel:
     - layout: editorialStat
       kicker: "적자의 크기"
       bigNumber: "32.7"
-      unit: "조 영업적자 · 2022"
-      context: "삼성전자 반도체가 1년에 번 21조보다 크다. 경영이 아니라 정책이 만든 적자다."
+      unit: "조 (2022)"
+      context: "2022년 영업적자. 삼성전자 반도체가 1년에 번 21조보다 크다. 경영이 아니라 정책이 만든 적자다."
       image: bg-cost-scale-dark
     - layout: editorialBeat
       kicker: "빚으로 메운 적자"
@@ -79,8 +79,8 @@ carousel:
     - layout: editorialStat
       kicker: "부도지표인데 초우량"
       bigNumber: "AA+"
-      unit: "신용등급 · 부채비율 497%"
-      context: "이자보상배율 0.92x, 번 돈으로 이자도 못 갚는 상태. 그래도 AA+ — 정부가 51.1% 주주라서."
+      unit: "신용등급"
+      context: "부채비율 497%. 이자보상배율 0.92x, 번 돈으로 이자도 못 갚는 상태. 그래도 AA+ — 정부가 51.1% 주주라서."
       image: bg-dual-face-dark
     - layout: editorialBeat
       kicker: "같은 구조의 끝"

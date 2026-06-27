@@ -77,11 +77,11 @@ carousel:
   - layout: editorialStat
     kicker: 영업이익률 붕괴 (2022→2025)
     bigNumber: '4.6'
-    unit: '% (2022 16.8%)'
+    unit: '%'
     context: |-
+      2022년 16.8% → 2025년 4.6%
       영업이익 13.66B(2022) → 4.36B(2025)
-      2025 한 해: 매출 -3% → 영업이익 -38%
-      영업레버리지 13.1배
+      2025 한 해: 매출 -3% → 영업이익 -38%, 영업레버리지 13.1배
     image: tsla-lever
   - layout: editorialBeat
     kicker: EVA — 가치 창출에서 파괴로
@@ -95,9 +95,9 @@ carousel:
   - layout: editorialStat
     kicker: 시총의 1/3, dartlab 가치평가
     bigNumber: '321'
-    unit: $B (시총의 약 1/3)
+    unit: $B
     context: |-
-      삼각검증 중앙값 $321B
+      삼각검증 중앙값 $321B (시총의 약 1/3)
       자동차 DCF 기업가치는 -$3.7B
       현재 시총 약 $1T과의 격차
     image: tsla-scale-bg

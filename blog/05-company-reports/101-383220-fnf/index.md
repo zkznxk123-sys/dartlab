@@ -54,9 +54,9 @@ carousel:
   - layout: editorialStat
     kicker: 마진이 빠졌다
     bigNumber: '24.2'
-    unit: '% — 2025년 영업이익률'
+    unit: '%'
     context: |-
-      2022년 29.0%에서 내려왔다
+      2025년 영업이익률 — 2022년 29.0%에서 내려왔다
       매출총이익률도 70.6% → 66.8%
       옷이 안 팔린 게 아니다 — 비용이 먼저 움직였다
     image: signature
@@ -73,9 +73,9 @@ carousel:
   - layout: editorialStat
     kicker: 중국은 둔화가 아니다
     bigNumber: '9,603억'
-    unit: 2025년 중국법인 매출
+    unit: 원
     context: |-
-      전년 대비 11.9% 성장 (공식 공시)
+      2025년 중국법인 매출 — 전년 대비 11.9% 성장 (공식 공시)
       연결 매출과 단순 비교하면 절반에 가깝다
       성장 엔진이 한 법인에 걸려 있다
     image: china-store

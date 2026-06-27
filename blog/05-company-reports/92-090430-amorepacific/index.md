@@ -45,9 +45,9 @@ carousel:
   - layout: editorialStat
     kicker: 제품은 버텼다
     bigNumber: '72.3'
-    unit: '% 매출총이익률 (2025)'
+    unit: '%'
     context: |-
-      원가 빼고 남는 비율은 그대로.
+      매출총이익률(2025) — 원가 빼고 남는 비율은 그대로.
       무너진 건 만드는 힘이 아니라
       잘 만든 물건을 파는 길이었다.
     image: sulwhasoo-counter
@@ -73,9 +73,9 @@ carousel:
   - layout: editorialStat
     kicker: 닫힌 문 앞에 멈춘 1조
     bigNumber: '-94%'
-    unit: 유형자산 취득 (CAPEX)
+    unit: CAPEX
     context: |-
-      1조862억(2016) → 646억(2025).
+      유형자산 취득 1조862억(2016) → 646억(2025).
       현금은 남는데(부채비율 26%)
       다음 용량을 깔 확신이 약해졌다.
     image: dutyfree-counter

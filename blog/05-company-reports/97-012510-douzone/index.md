@@ -54,27 +54,27 @@ carousel:
   - layout: editorialStat
     kicker: SaaS 전부터 두꺼웠다
     bigNumber: '21.7'
-    unit: '% (2016 영업이익률)'
+    unit: '%'
     context: |-
-      클라우드 구독 전환 전인 2016년,
+      2016 영업이익률 — 클라우드 구독 전환 전인데
       이미 영업이익률 21.7%.
       마진의 뿌리는 SaaS가 아니라 의무 단말 락인.
     image: cloud-saas
   - layout: editorialStat
     kicker: 길목 밑의 인프라
     bigNumber: '2011'
-    unit: 년 · 춘천 자체 데이터센터
+    unit: 년
     context: |-
-      클라우드 붐 한참 전,
+      춘천 자체 데이터센터 — 클라우드 붐 한참 전,
       의무 데이터가 한 곳을 거쳐 가게 만든 물리적 토대.
       장부 데이터는 아무 데나 맡길 수 없다.
     image: datacenter
   - layout: editorialStat
     kicker: 본업의 두께, 그리고 누수
     bigNumber: '1,296'
-    unit: 억 (2025 영업활동현금흐름)
+    unit: 억
     context: |-
-      영업이익 1,277억 · 당기순이익 923억.
+      2025 영업활동현금흐름 — 영업이익 1,277억 · 당기순이익 923억.
       이익이 실제 현금으로 내려왔다.
       단, 영업이익→순이익 사이 약 354억은 영업외에서 빠진다.
     image: tax-office

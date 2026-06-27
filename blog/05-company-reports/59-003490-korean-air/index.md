@@ -46,8 +46,8 @@ carousel:
     - layout: editorialStat
       kicker: "비대칭"
       bigNumber: "+41"
-      unit: "% 매출인데 영업이익 -47%"
-      context: "매출 25.23조로 폭증했는데 영업이익은 1.11조로 반토막. 매출이 오르는데 이익이 빠졌다."
+      unit: "%"
+      context: "매출 25.23조로 폭증했는데 영업이익은 1.11조로 -47% 반토막. 매출이 오르는데 이익이 빠졌다."
       image: bg-dual-tail-logos
     - layout: editorialBeat
       kicker: "10년의 끝"
@@ -79,8 +79,8 @@ carousel:
     - layout: editorialStat
       kicker: "통합 첫 해 손익"
       bigNumber: "4.4"
-      unit: "% 영업이익률 · 합병 전 12~15%"
-      context: "화물 정점이던 2022년엔 20.1%였다. 골은 2025Q1 2.9% — 거기서 다시 올라오는 중이다."
+      unit: "%"
+      context: "영업이익률 — 합병 전 12~15%에서 내려앉았다. 화물 정점이던 2022년엔 20.1%. 골은 2025Q1 2.9% — 거기서 다시 올라오는 중이다."
       image: bg-runway-dusk
     - layout: editorialBeat
       kicker: "합병의 진짜 값"

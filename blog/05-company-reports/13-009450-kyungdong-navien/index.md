@@ -80,8 +80,8 @@ carousel:
     - layout: editorialStat
       kicker: "잘 버는데"
       bigNumber: "-910"
-      unit: "억 잉여현금흐름 · 2년째 음수"
-      context: "영업이익 1,434억인데 현금이 없다. 설비투자가 410억에서 1,622억으로 3년 만에 2.5배 뛰었다."
+      unit: "억"
+      context: "잉여현금흐름이 2년째 음수다. 영업이익 1,434억인데 현금이 없다. 설비투자가 410억에서 1,622억으로 3년 만에 2.5배 뛰었다."
       image: bg-terminal-dark-glow
     - layout: editorialBeat
       kicker: "돈은 어디로 갔나"

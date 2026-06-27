@@ -45,9 +45,9 @@ carousel:
   - layout: editorialStat
     kicker: 21조를 팔고 남은 돈
     bigNumber: '1.6'
-    unit: '% 매출총이익률 (2023)'
+    unit: '%'
     context: |-
-      21.3조를 팔아 원가 빼고 남은 게 3,452억.
+      2023년 매출총이익률 — 21.3조를 팔아 남은 게 3,452억.
       100원 팔아 1.6원. 나머지는 다 원가.
       값을 자기가 못 정하기 때문이다.
     image: lcd-fab
@@ -73,11 +73,11 @@ carousel:
     image: lcd-fab
   - layout: editorialStat
     kicker: 같은 한국, 다른 좌표
-    bigNumber: 82 vs 2
-    unit: '% 스마트폰 OLED · 삼성:LG (2019, 외부)'
+    bigNumber: '82'
+    unit: '%'
     context: |-
-      삼성은 돈 되는 좌표로 갈아탔다.
-      LG는 대형 패널에 공장을 박은 채 남았다.
+      스마트폰 OLED 점유율 삼성 82% vs LG 2% (2019, 외부).
+      삼성은 돈 되는 좌표로 갈아탔고 LG는 대형 패널에 남았다.
       무너진 건 환경이 아니라 좌표 선택.
     image: smartphone-oled
   - layout: editorialBeat

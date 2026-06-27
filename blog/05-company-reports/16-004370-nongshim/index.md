@@ -56,8 +56,9 @@ carousel:
   - layout: editorialStat
     kicker: 같은 라면, 다른 세계
     bigNumber: '5.2'
-    unit: '% vs 삼양 22.3%'
+    unit: '%'
     context: |-
+      농심 영업이익률 5.2% vs 삼양 22.3%.
       매출 농심 3.51조 > 삼양 2.35조.
       영업이익 농심 1,839억 < 삼양 5,242억.
       시장은 규모가 아니라 마진에 값을 매긴다.

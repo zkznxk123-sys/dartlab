@@ -103,6 +103,44 @@ def _normalize_slide(raw: object) -> dict | None:
     return slide
 
 
+# ── 레이아웃 깨짐 가드(원천 체크) ───────────────────────────────────────────────
+# editorialStat 의 bigNumber 는 거대폰트(최대 200px) 한 줄 펀치 숫자여야 한다. 길거나 공백/화살표가
+# 있으면(예 '1조 4,375억', '641% → 102%') 줄이 쪼개지고 unit 과 충돌한다(렌더는 줄여서 방어하나,
+# 소스에서 잡는 게 정공). unit 도 짧은 라벨만('%','조원','$B (-50%)') — 문장형('% 영업외 흡수율 · 9년
+# 최저')은 context 로 가야 한다.
+_BIGNUM_MAXLEN = 10
+_UNIT_MAXLEN = 12
+
+
+def _validate_slide(layout: str, slide: dict) -> list[str]:
+    """슬라이드 1장의 레이아웃 깨짐 위험 검사 — 위반 메시지 리스트(없으면 빈 리스트)."""
+    issues: list[str] = []
+    if layout == "editorialStat":
+        big = str(slide.get("bigNumber", "")).strip()
+        unit = str(slide.get("unit", "")).strip()
+        if not big:
+            issues.append("bigNumber 누락(editorialStat 필수)")
+        elif len(big) > _BIGNUM_MAXLEN or " " in big:
+            issues.append(f"bigNumber 과다/비펀치('{big}' {len(big)}자) — 짧은 한 숫자만(맥락은 context 로)")
+        if len(unit) > _UNIT_MAXLEN:
+            issues.append(f"unit 과다('{unit}' {len(unit)}자) — 짧은 단위만(문장은 context 로)")
+    for f in ("line", "sub", "context"):
+        v = str(slide.get(f, ""))
+        if v.count("[[") != v.count("]]"):
+            issues.append(f"{f} [[강조]] 마커 불균형")
+    return issues
+
+
+def validate_contracts(contracts: dict[str, dict]) -> list[str]:
+    """전 계약 슬라이드를 검사해 위반 라인 리스트 반환(슬러그·슬라이드#·layout·사유)."""
+    out: list[str] = []
+    for slug, c in sorted(contracts.items()):
+        for i, s in enumerate(c.get("slides", []), 1):
+            for msg in _validate_slide(s.get("layout", ""), s):
+                out.append(f"{slug} #{i}({s.get('layout')}): {msg}")
+    return out
+
+
 def _spec_from(carousel: dict) -> dict | None:
     """자동 덱 큐레이션 오버레이(hero/order/notes) 추출 — 없으면 None."""
     spec: dict = {}
@@ -263,6 +301,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="게시 안 함, 요약만")
     parser.add_argument("--repo", default=HF_MEDIA_REPO)
+    parser.add_argument("--allow-layout-warn", action="store_true", help="레이아웃 가드 위반이 있어도 발행 강행")
     args = parser.parse_args()
 
     # 발간 전 repo 파일 목록 1회(옛 json 삭제 + 이미 올라간 이슈 이미지 해시 스킵 양쪽에 씀).
@@ -275,6 +314,18 @@ def main() -> None:
             sys.stderr.write(f"  dup slug(이슈↔회사 충돌, 회사 우선): {slug}\n")
             continue
         contracts[slug] = c
+
+    # 원천 레이아웃 가드 — 거대폰트 editorialStat 줄깨짐/충돌 등을 발행 전에 잡는다.
+    violations = validate_contracts(contracts)
+    if violations:
+        sys.stderr.write(f"⚠ 레이아웃 가드 위반 {len(violations)}건:\n")
+        for v in violations:
+            sys.stderr.write(f"  - {v}\n")
+        if not args.dry_run and not args.allow_layout_warn:
+            sys.stderr.write("발행 중단 — 위반 수정 후 재시도(또는 --allow-layout-warn 로 강행).\n")
+            sys.exit(1)
+    else:
+        print("레이아웃 가드: 위반 0건 ✓")
 
     posts = build_index(contracts)
     n_slides = sum(len(c["slides"]) for c in contracts.values())

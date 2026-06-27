@@ -54,9 +54,9 @@ carousel:
   - layout: editorialStat
     kicker: 2024 영업이익 · OPM
     bigNumber: '-1.26'
-    unit: 조원 (OPM −3.9%)
+    unit: 조원
     context: |-
-      7개년 중 유일한 음수.
+      OPM −3.9%, 7개년 중 유일한 음수.
       이 한 해 손실은 직전 5년(2019~2023)
       누적 영업이익 3.52조의 약 35.9% 규모.
     image: hourglass

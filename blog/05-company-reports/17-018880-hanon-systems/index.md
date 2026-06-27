@@ -66,8 +66,9 @@ carousel:
   - layout: editorialStat
     kicker: 총차입금 2013→2024
     bigNumber: '×11'
-    unit: 4,000억 → 4.5조
+    unit: "배"
     context: |-
+      4,000억 → 4.5조.
       매출은 같은 기간 2배 늘었는데
       빚은 11배 늘었다.
       차이의 대부분이 배당 재원 차입이다.

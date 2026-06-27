@@ -57,8 +57,8 @@ carousel:
     - layout: editorialStat
       kicker: "이미 들어간 기대"
       bigNumber: "49.74"
-      unit: "배 PER · 산업재인데"
-      context: "주가 108만원, 시가총액 39.18조. 좋은 회사라는 설명만으로는 부족한 구간에 들어와 있다."
+      unit: "배 PER"
+      context: "산업재인데도 주가 108만원, 시가총액 39.18조. 좋은 회사라는 설명만으로는 부족한 구간에 들어와 있다."
       image: substation-datacenter
     - layout: editorialBeat
       kicker: "소프트웨어 같은 숫자"

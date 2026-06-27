@@ -63,7 +63,7 @@ carousel:
     image: cement-silos
   - layout: editorialStat
     kicker: 9년 보유의 입성 가격
-    bigNumber: '1조 4,375억'
+    bigNumber: '1조4,375억'
     unit: 지분 77.68%
     context: |-
       2016년 4월 한앤컴퍼니 인수.
@@ -82,11 +82,11 @@ carousel:
     image: cement-bulk-carrier
   - layout: editorialStat
     kicker: 합병 회계 한 번의 충격
-    bigNumber: '641% → 102%'
-    unit: 부채비율 (1년 변동)
+    bigNumber: '102'
+    unit: '%'
     context: |-
-      자본총계 +14,833억.
-      비유동부채 -18,500억.
+      부채비율 641%에서 1년 만에 102%로.
+      자본총계 +14,833억, 비유동부채 -18,500억.
       영업이 아니라 회계가 만든 숫자.
     image: rotary-kiln
   - layout: editorialBeat

@@ -80,8 +80,8 @@ carousel:
     - layout: editorialStat
       kicker: "본업의 진짜 힘"
       bigNumber: "5.52"
-      unit: "배 영업레버리지 · 2023"
-      context: "K-뷰티 인디 800+ 폭발이 ODM에 찍혔다. 매출 +16%에 영업이익 +86%. 고정비를 넘은 매출이 그대로 이익이 됐다."
+      unit: "배"
+      context: "2023년 영업레버리지. K-뷰티 인디 800+ 폭발이 ODM에 찍혔다. 매출 +16%에 영업이익 +86%. 고정비를 넘은 매출이 그대로 이익이 됐다."
       image: odm-factory-floor
     - layout: editorialBeat
       kicker: "마진의 V자"
@@ -91,8 +91,8 @@ carousel:
     - layout: editorialStat
       kicker: "인수 사이클을 닫다"
       bigNumber: "12"
-      unit: "% 영업외 흡수율 · 9년 최저"
-      context: "2024년 5월 HK이노엔 매각으로 인수 회수가 끝났다. 흡수율이 77%(2022)에서 12%로 — 본업이 처음 영업외를 제압했다."
+      unit: "%"
+      context: "영업외 흡수율 9년 최저. 2024년 5월 HK이노엔 매각으로 인수 회수가 끝났다. 흡수율이 77%(2022)에서 12%로 — 본업이 처음 영업외를 제압했다."
       image: bg-cream-warm
     - layout: editorialBeat
       kicker: "처음 본업이 이겼다"

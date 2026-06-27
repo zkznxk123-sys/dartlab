@@ -44,20 +44,20 @@ carousel:
   - layout: editorialStat
     kicker: 2025 연결 영업이익
     bigNumber: '1.19'
-    unit: 조원 (전년 0.92조, +0.27)
+    unit: 조원
     context: |-
-      OPM 2.6%
+      전년 0.92조, +0.27 · OPM 2.6%
       표면은 '회복'처럼 읽힌다
       그런데 다음 장에서 인상이 깨진다
     image: nav-discount
   - layout: editorialStat
     kicker: 2025 지배주주순익
     bigNumber: '-1.82'
-    unit: 조원 (전년 -0.69조, 약 2.6배 악화)
+    unit: 조원
     context: |-
+      전년 -0.69조, 약 2.6배 악화
       영업이익은 위로, 주인 몫은 아래로
-      같은 한 해, 두 화살표가 갈라진다
-      이게 글 전체의 코어다
+      같은 한 해, 두 화살표가 갈라진다 — 글 전체의 코어
     image: two-companies
   - layout: editorialBeat
     kicker: 차액에 이름 붙이기
