@@ -27,31 +27,37 @@ from dartlab.scan.router import (
 
 
 class Scan:
-    """시장 전체 횡단분석 -- 15축, 전부 Polars DataFrame.
+    """시장 전체 횡단분석 -- 22축, 전부 Polars DataFrame.
 
     Capabilities:
-        - governance: 최대주주 지분, 사외이사, 감사위원회 종합 등급
-        - workforce: 임직원 수, 평균급여, 근속연수
-        - capital: 배당수익률, 배당성향, 자사주
+        - governance: 최대주주 지분, 사외이사, 보수비율, 감사의견, 소액주주 분산 + 등급
+        - workforce: 임직원 수, 평균급여, 인건비율, 1인당부가가치, 성장률
+        - capital: 배당, 자사주(취득/처분/소각), 증자/감자, 환원 분류
         - debt: 사채만기, 부채비율, ICR, 위험등급
         - account: 전종목 단일 계정 시계열 (매출액, 영업이익 등)
         - ratio: 전종목 단일 재무비율 시계열 (ROE, 부채비율 등)
-        - fields: 조건형 스크리닝 필드 카탈로그
-        - cashflow: OCF/ICF/FCF + 현금흐름 패턴 분류
+        - network: 상장사 관계 네트워크 (출자/지분/계열)
+        - cashflow: OCF/ICF/FCF + 현금흐름 패턴 분류 (8종)
         - audit: 감사의견, 감사인변경, 특기사항, 감사독립성
         - insider: 최대주주 지분변동, 자기주식, 경영권 안정성
         - quality: Accrual Ratio + CF/NI -- 이익의 현금 뒷받침
         - liquidity: 유동비율 + 당좌비율 -- 단기 지급능력
         - growth: 매출/영업이익/순이익 CAGR + 성장 패턴 분류
         - profitability: 영업이익률/순이익률/ROE/ROA + 등급
-        - digest: 시장 전체 공시 변화 다이제스트
-        - network: 상장사 관계 네트워크 (출자/지분/계열)
+        - efficiency: 자산/재고/매출채권 회전율 + CCC + 등급
+        - valuation: PER/PBR/PSR + 시가총액 + 등급 (네이버 실시간)
+        - dividendTrend: DPS 시계열 + 패턴 (연속증가/안정/감소/시작/중단)
+        - macroBeta: 전종목 GDP/금리/환율 베타 횡단면 (OLS)
+        - fields: 조건형 스크리닝 필드 카탈로그
+        - screen: 멀티팩터 프리셋 + spec 조건형 스크리닝
+        - disclosureRisk: 공시 변화 기반 선행 리스크 (우발부채/감사변경/계열/사업전환)
+        - orders: 신규수주 flow (book-to-bill/모멘텀/계약상대 집중도) -- 단일판매·공급계약 선행지표
 
     Requires:
         데이터: 축별로 다름 (prebuild 또는 collect 데이터)
         - governance/workforce/capital/debt/audit/insider: report
         - account/ratio: finance
-        - network/digest: panel
+        - network: panel; disclosureRisk: changes; orders: allFilings(런타임 직독)
 
     AIContext:
         시장 전체 비교/순위 질문에 사용. 개별 종목 분석은 Company 메서드 사용.
@@ -71,7 +77,7 @@ class Scan:
         - gather: 주가/수급 데이터 (모멘텀 보완)
 
     Args:
-        axis: 축 이름. None이면 13축 가이드 반환.
+        axis: 축 이름. None이면 22축 가이드 반환.
         target: 축별 대상 (종목코드, 항목, 비율명 등).
         **kwargs: 축별 옵션 (freq, fsPref, market 등).
 
