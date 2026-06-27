@@ -37,6 +37,28 @@
 - 배치: **우측 글랜스엔 안 올림**(증식 차단). **NotesDashboardDialog 안 섹션/탭**으로만.
 - 단일축 표만(다축 합성 컷). ACONTEXT 양식(2025-03+) 회사만 최근분기 포착(미태깅=정직 skip).
 
+## ⛔ panel 파싱 아키텍처 가드 — 공통파서 + 선언적 dispatch SSOT (운영자 지시 2026-06-27)
+
+**panel 파케에서 데이터를 가져올 때 노트 종류별 손함수 복붙 = 덕지덕지. 절대 금지.** ([[feedback_always_check_clutter]])
+
+현 구조의 위험: 노트 1종 추가에 ① block 정규식(`COST_BLK`/`SEG_BLK`) ② selector(`costCells`/`segmentCells`) ③ `buildNoteSeries` 분기 — 3개가 노트당 한 벌씩 손으로 늘어남. P1 6종을 이대로 = selector·분기 6벌 복붙.
+
+**강제 구조 (P1 착수 시):**
+1. **raw 파서 1개 = `xbrlCellsFromContent`** 가 유일한 ACODE/ACONTEXT 직독 정본. 새 raw 파서 신설 금지.
+2. **노트별 손함수(`costCells`류) 신설 금지.** 대신 **선언적 dispatch 레지스트리 1개**:
+   ```
+   NOTE_SPECS = [
+     { key:'cost',    blockRegex:비용성격별, acodeFilter, axisFilter:none,    agg:byAcode },
+     { key:'segment', blockRegex:부문정보,   acodeFilter:Revenue, axisFilter:SEG, agg:bySegment },
+     { key:'lease',   blockRegex:리스,       acodeFilter:Lease*,  ... },   // ← P1 추가 = 이 한 줄
+   ]
+   ```
+   spec 한 줄 추가 = 노트 확장. **단일 파싱 엔진**(`buildNoteSeries`)이 `NOTE_SPECS` 순회 → `xbrlCellsFromContent` → spec.agg 적용. 기존 cost/segment 도 이 spec 으로 흡수(리팩터 선행).
+3. **집계기는 재사용 가능한 소수 primitive** (`byAcode`·`bySegment`·`byAcodeRollup`) 만 — 노트마다 새 집계 함수 누적 금지.
+4. 셀렉터 패턴(acode/axis 정규식)은 spec 의 *데이터*지 코드 분기가 아니다. 새 노트 = 데이터 한 줄, 새 코드 0 지향.
+
+**게이트**: P1 PR 에서 노트당 신규 함수 ≥1 개 추가되면 = 덕지덕지 신호 → 중단·레지스트리화. svelte-check 0 + `xbrlCells.test.ts` 회귀.
+
 ### P2 — 빌드 = 사전 토론·승인 게이트 ⛔
 - **수주 flow scan('orders')**: [[project_order_flow_scan]] _attempts 졸업(value-sanity 가드=병합셀 concatenation 오파싱 차단·정정/해지 reconcile·gather/scan 거처 이동) → scan 빌드. **승인 필요**. 졸업 후 통합 패널 ④블록(수주산업 조건부).
 - **Tier A 주석 시장 횡단 scan**: 리스·차입금 분위/이상치 — 브라우저가 3000 panel 동시 못 읽어 scan 빌드 필요. **승인 필요**. _attempts 품질 입증 선행.
