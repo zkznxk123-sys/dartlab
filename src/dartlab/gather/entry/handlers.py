@@ -1064,6 +1064,69 @@ def handleNarrative(
     return arch.filter(pl.col("title").str.contains(keyword, literal=True))
 
 
+def handleBrokerageReports(
+    g: Any,
+    target: str | None,
+    *,
+    market: str,  # noqa: ARG001
+    start: str | None,
+    end: str | None,
+    marketExplicit: bool,  # noqa: ARG001
+    **kwargs: Any,
+) -> pl.DataFrame:
+    """brokerageReports axis dispatch — 증권사 리서치 메타 인덱스.
+
+    Capabilities: 위치 target 분기(6자리=종목코드 필터·그 외=제목 검색) + kwarg 필터 → g.brokerageReports.
+    AIContext: gather("brokerageReports", ...) 본체 — 메타 사실만(매수/매도 신호 재가공 금지).
+    Guide: target 없으면 전 증권사 최신. 6자리=종목별, 그 외 문자열=검색(narrative 동형).
+    When: GatherEntry._run("brokerageReports", target, ...) lookup 시.
+    How: target/kwargs → ticker·query 결정 → g.brokerageReports(ticker, query, start, end, broker, reportType, brokers).
+
+    Args:
+        g: Gather 싱글턴.
+        target: None=전체 · 6자리 숫자=종목코드 필터 · 그 외 문자열=제목 검색.
+        market: 무시 (KR 게시판 전용).
+        start/end: 발간일 범위 "YYYY-MM-DD".
+        marketExplicit: 무시.
+        **kwargs: ticker, query, broker, reportType, brokers (명시 kwarg 가 위치 target 보다 우선).
+
+    Returns:
+        pl.DataFrame — report_id·broker·broker_name·title·report_type·opinion·ticker·pub_date·url·author.
+
+    Raises:
+        없음 — 증권사·카테고리별 실패는 격리.
+
+    Example::
+
+        df = handleBrokerageReports(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 + 네트워크 (증권사 공개 게시판 무인증). ticker 회사명 fallback 은
+        DART_API_KEY (없으면 명시 6자리코드만 해소).
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/research.brokerageReports : 본 handler 가 호출하는 backend.
+    """
+    ticker = kwargs.pop("ticker", None)
+    query = kwargs.pop("query", None)
+    # 위치 target: 6자리 숫자=종목코드, 그 외=제목 검색 (narrative axis 동형). 명시 kwarg 우선.
+    if target:
+        if target.isdigit() and len(target) == 6:
+            ticker = ticker or target
+        else:
+            query = query or target
+    return g.brokerageReports(
+        ticker=ticker,
+        query=query,
+        start=start,
+        end=end,
+        broker=kwargs.pop("broker", None),
+        reportType=kwargs.pop("reportType", None),
+        brokers=kwargs.pop("brokers", None),
+    )
+
+
 def handleDartDoc(
     g: Any,  # noqa: ARG001
     target: str | None,

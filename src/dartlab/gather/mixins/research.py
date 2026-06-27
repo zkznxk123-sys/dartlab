@@ -79,11 +79,11 @@ class _GatherResearchMixin(GatherMixinContext):
 
         Example::
 
-            g = getDefaultGather()
-            g.brokerageReports()                          # 전 증권사 최신
-            g.brokerageReports(ticker="005930")           # 삼성전자 관련 리포트
-            g.brokerageReports(query="2차전지")            # 제목 검색
-            g.brokerageReports(reportType="기업분석", start="2026-06-01")
+            import dartlab
+            dartlab.gather("brokerageReports")                       # 전 증권사 최신
+            dartlab.gather("brokerageReports", "005930")             # 삼성전자 관련 (6자리=종목)
+            dartlab.gather("brokerageReports", query="2차전지")       # 제목 검색
+            dartlab.gather("brokerageReports", reportType="기업분석", start="2026-06-01")
 
         See Also:
             ``news`` — 뉴스 RSS/검색 (리서치 리포트와 별개).

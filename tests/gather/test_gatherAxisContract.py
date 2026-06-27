@@ -159,6 +159,7 @@ _METHOD_TO_AXIS: dict[str, str] = {
     "insiderTrading": "insider",
     "ownership": "ownership",
     "industryPeers": "peers",
+    "brokerageReports": "brokerageReports",
     "dartDoc": "dartDoc",
 }
 
@@ -170,7 +171,6 @@ _FORM_B_ALLOWLIST: frozenset = frozenset(
         "splits",
         "majorShareholders",
         "revenueConsensus",
-        "brokerageReports",
         "history",
         "collect",
         # lifecycle / infra
