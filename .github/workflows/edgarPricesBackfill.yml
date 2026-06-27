@@ -1,0 +1,66 @@
+name: EDGAR Prices Backfill (Yahoo deep history)
+
+# US 주가 딥백필 — 회사별 일별 OHLCV 전체이력(~11년)을 Yahoo per-ticker bake →
+# edgar/prices/company/{ticker}.parquet. 1회성(이력은 안 변함, 분할만 — 필요 시 재dispatch).
+# 스냅샷은 안 만든다(writeSnapshotFlag=False) — 게이트 스냅샷은 daily(Polygon)가 소유.
+# 청크 = offset/limit dispatch. Yahoo throttle 회피: 한 런이 부분이면 offset 올려 재dispatch(누적).
+# (단일 잡 — 병렬 matrix 는 HF 동시 commit 충돌 위험이라 운영자 청크 dispatch 로 직렬.)
+
+on:
+  workflow_dispatch:
+    inputs:
+      offset:
+        description: '유니버스 시작 인덱스(청크 이어받기)'
+        default: '0'
+        type: string
+      limit:
+        description: '이번 런 처리 종목 수(빈값=offset 이후 전체)'
+        default: '2000'
+        type: string
+      pauseSeconds:
+        description: 'ticker 간 페이싱(초) — throttle 완화'
+        default: '1.5'
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hf-edgar-prices-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: Backfill chunk (Yahoo per-ticker, company parquet only)
+        run: |
+          uv run python -X utf8 -c "
+          import os
+          import polars as pl
+          from huggingface_hub import hf_hub_download
+          from dartlab.pipeline.stages.edgarPrices import runEdgarPrices
+          # 유니버스 = edgar/tickers(HF) 상장 ticker. offset/limit 로 청크(이어받기).
+          p = hf_hub_download('eddmpython/dartlab-data', 'edgar/tickers/tickers.parquet', repo_type='dataset', token=os.environ['HF_TOKEN'])
+          tk = pl.read_parquet(p)
+          uni = [str(t).upper() for t, ex in zip(tk['ticker'].to_list(), tk['is_exchange_listed'].to_list()) if t and ex]
+          offset = int('${{ github.event.inputs.offset || '0' }}')
+          lim = '${{ github.event.inputs.limit || '' }}'.strip()
+          limit = int(lim) if lim else None
+          print(f'universe {len(uni)} · offset {offset} · limit {limit}')
+          res = runEdgarPrices(tickers=uni, offset=offset, limit=limit, pauseSeconds=float('${{ github.event.inputs.pauseSeconds || '1.5' }}'), writeSnapshotFlag=False, upload=True)
+          print('ok', res.report.ok, 'skip', res.report.skip, 'err', res.report.err)
+          if res.report.failures:
+              print('FAILURES(sample)', res.report.failures[:5])
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/data

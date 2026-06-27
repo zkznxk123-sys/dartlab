@@ -178,6 +178,24 @@ def _writeSnapshot(snap: dict, *, upload: bool, token) -> str:
             merged = dict(prev.get("data") or {})
         except Exception:  # noqa: BLE001 — 손상/부재 → 신규분만
             merged = {}
+    elif upload:
+        # 로컬 부재(CI fresh 청크 런) → 기존 HF 스냅샷 다운로드해 누적. 청크 백필이 서로 덮지 않게.
+        try:
+            from huggingface_hub import hf_hub_download
+
+            from dartlab.core.hfRetry import retryHfCall
+            from dartlab.pipeline.hfUpload import _resolveHfToken
+
+            cached = retryHfCall(
+                hf_hub_download,
+                repo_id=_SNAPSHOT_REPO,
+                repo_type="dataset",
+                filename=_SNAPSHOT_PATH_IN_REPO,
+                token=_resolveHfToken(token),
+            )
+            merged = dict(json.loads(Path(cached).read_text(encoding="utf-8")).get("data") or {})
+        except Exception:  # noqa: BLE001 — 첫 발행 등 미존재 → 신규분만
+            merged = {}
     merged.update(snap)
     payload = {
         "schemaVersion": 1,
@@ -214,11 +232,16 @@ def runEdgarPrices(
     tickers: list[str] | None = None,
     start: str = _START_DEFAULT,
     limit: int | None = None,
+    offset: int = 0,
     pauseSeconds: float = 0.0,
+    writeSnapshotFlag: bool = True,
     upload: bool = True,
     token=None,
 ) -> StageResult:
     """유니버스 회사별 US OHLCV → 그래프 parquet + 게이트 스냅샷 bake + HF 발행.
+
+    offset/limit = 청크(matrix 백필 분산 IP — runner 마다 distinct IP 라 Yahoo throttle 회피).
+    writeSnapshotFlag=False = company parquet 만(matrix 청크 병렬 시 스냅샷 race 방지 — 스냅샷은 daily 가 빌드).
 
     수집은 gather(Yahoo, 429 백오프·fallback 체인 내장)에 위임한다. tickers 미지정이면 상장 universe
     전체(edgarPanel scope), 지정 시 그 목록만(스모크·증분). 개별 실패는 격리(나머지 진행). 스냅샷은
@@ -250,6 +273,8 @@ def runEdgarPrices(
 
     res = StageResult(category=category)
     uni = [str(t).strip().upper() for t in (tickers if tickers is not None else _universeTickers()) if str(t).strip()]
+    if offset:
+        uni = uni[offset:]
     if limit is not None:
         uni = uni[:limit]
     if not uni:
@@ -287,7 +312,7 @@ def runEdgarPrices(
 
             n = uploadCategoryToHf(category, changedFiles=changed, token=token)
             print(f"[pipeline] edgarPrices parquet HF 발행: {n}개", flush=True)
-    if snap:
+    if snap and writeSnapshotFlag:
         try:
             _writeSnapshot(snap, upload=upload, token=token)
         except Exception as exc:  # noqa: BLE001 — 스냅샷 발행 실패 격리(parquet 발행은 성공 유지)
@@ -323,59 +348,6 @@ def _resolvePolygonKey(key: str | None = None) -> str:
         if m:
             return m.group(1).strip().strip('"').strip("'").strip()
     return ""
-
-
-def _patchSnapshotCurrent(patch: dict, *, upload: bool, token) -> int:
-    """기존 prices-snapshot-us.json 의 currentPrice·priceUpdated 만 갱신(returns/52w 는 백필 보존).
-
-    Args:
-        patch: {ticker: {"currentPrice": float, "priceUpdated": "YYYYMMDD"}}.
-        upload: True 면 HF 재발행.
-        token: HF 토큰.
-
-    Returns:
-        int — 패치된 종목 수.
-    """
-    import json
-    from pathlib import Path
-
-    outLocal = Path(__file__).resolve().parents[4] / "landing" / "static" / "map" / "prices-snapshot-us.json"
-    if not outLocal.exists():
-        return 0
-    try:
-        payload = json.loads(outLocal.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001 — 손상 시 패치 skip(백필이 재생성)
-        return 0
-    data = payload.get("data") or {}
-    n = 0
-    for ticker, upd in patch.items():
-        row = data.get(ticker)
-        if row is None:  # 백필 안 된 종목은 건너뜀(returns/52w 없는 빈 행 만들지 않음)
-            continue
-        row["currentPrice"] = upd["currentPrice"]
-        row["priceUpdated"] = upd["priceUpdated"]
-        n += 1
-    if n == 0:
-        return 0
-    payload["data"] = data
-    payload["count"] = len(data)
-    outLocal.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"[edgarPricesDaily] snapshot 현재가 패치: {n}종목", flush=True)
-    if upload:
-        from huggingface_hub import HfApi
-
-        from dartlab.core.hfRetry import retryHfCall
-        from dartlab.pipeline.hfUpload import _resolveHfToken
-
-        retryHfCall(
-            HfApi(token=_resolveHfToken(token)).upload_file,
-            path_or_fileobj=str(outLocal),
-            path_in_repo=_SNAPSHOT_PATH_IN_REPO,
-            repo_id=_SNAPSHOT_REPO,
-            repo_type="dataset",
-            commit_message=f"갱신: prices-snapshot-us 현재가 ({n}종목)",
-        )
-    return n
 
 
 def runEdgarPricesDaily(
@@ -483,9 +455,16 @@ def runEdgarPricesDaily(
     fresh.write_parquet(recentPath, compression="zstd", statistics=True)
     print(f"[edgarPricesDaily] recent.parquet: {fresh.height}행 ({fresh['ticker'].n_unique()}종목)", flush=True)
 
-    # 스냅샷 현재가 패치 — 각 ticker 최신 close/date
-    latest = fresh.sort("date").group_by("ticker").last()
-    patch = {r["ticker"]: {"currentPrice": r["close"], "priceUpdated": r["date"]} for r in latest.iter_rows(named=True)}
+    # 스냅샷 빌드 — 각 ticker 의 recent 시계열에서 _snapshotRow (currentPrice + recent 윈도 가능한 returns/52w).
+    # 백필(matrix)은 스냅샷을 안 만드므로 daily 가 게이트를 채운다(전 recent ticker 엔트리 생성·갱신). recent 윈도가
+    # 짧아 1y/52w 는 null 일 수 있음(윈도 성장·후속 full-snap 으로 채움) — currentPrice·return1m 은 즉시.
+    snap: dict = {}
+    for tk, grp in fresh.sort("date").group_by("ticker"):
+        ticker = str(tk[0] if isinstance(tk, tuple) else tk)
+        g2 = grp.sort("date")
+        snap[ticker] = _snapshotRow(
+            g2["close"].to_list(), g2["high"].to_list(), g2["low"].to_list(), g2["volume"].to_list(), g2["date"][-1]
+        )
 
     if upload:
         from huggingface_hub import HfApi
@@ -503,7 +482,7 @@ def runEdgarPricesDaily(
         )
         print("[edgarPricesDaily] recent.parquet HF 발행", flush=True)
     try:
-        _patchSnapshotCurrent(patch, upload=upload, token=token)
-    except Exception as exc:  # noqa: BLE001 — 스냅샷 패치 실패 격리(recent 발행은 성공 유지)
-        res.report.failures.append(f"snapshotPatch: {type(exc).__name__}: {exc}")
+        _writeSnapshot(snap, upload=upload, token=token)
+    except Exception as exc:  # noqa: BLE001 — 스냅샷 발행 실패 격리(recent 발행은 성공 유지)
+        res.report.failures.append(f"snapshot: {type(exc).__name__}: {exc}")
     return res
