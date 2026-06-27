@@ -67,29 +67,30 @@ uv run python -X utf8 blog/_scripts/audit_carousel_images.py            # 색<60
 uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면 벡터/도식에 집중
 ```
 
-### 이미지 가져오는 곳 — 저작권 없는(무료) 소스만
-> **주체별 규칙(강행)**: **GPT 로 작업할 땐 `image_gen` 으로 생성**, **Claude 로 작업할 땐 무료(PD/CC0) 이미지로 잡는다**
-> (`fetch_cc0_images.py`). Claude 는 image_gen 불가 → 무료 소스가 1차. 어느 쪽이든 받은 즉시 눈으로 확정한다.
+### 이미지 가져오는 곳 — 카드 캐러셀은 CC0 스톡으로만 수급 (FLUX 안 씀)
+> **카드 캐러셀 발간 규칙(강행)**: 카드 이미지는 **저작권 없는(PD/CC0) 스톡으로만 수급한다**(`fetch_cc0_images.py`).
+> **FLUX·생성형 이미지는 카드 캐러셀에 쓰지 않는다** — 발간 카드는 출처가 깨끗한 실사 스톡으로 통일한다.
+> (옛 "GPT→image_gen / Claude→CC0" 주체별 분기는 폐기 — 발간 방식 자체를 CC0 단일 경로로 못 박는다.)
+> 받은 즉시 눈으로 한 장씩 확정한다.
 
 ⛔ **핀터레스트·구글 이미지 금지** — 거기 올라온 사진은 대부분 **저작권 있음**(긁어온 것)이라 가져다 쓰면 침해다.
 아래 무료 소스만 쓴다.
 - **Wikimedia Commons / Openverse** — PD/CC0 (귀속 의무 0). `fetch_cc0_images.py` 가 이 둘에서만 받는다.
 - 보강 여지(필요 시 API 키로 추가): **Unsplash·Pexels·Pixabay**(무료 라이선스·상업 OK), **NASA·각국 공공기관**(PD).
 
-회사 카드 이미지가 모자라거나 부실하면 아래 두 길로 받아 `sns/assets/{code}/` 에 채운다.
+회사 카드 이미지가 모자라거나 부실하면 CC0 스톡으로 받아 `sns/assets/{code}/` 에 채운다.
 받은 뒤 `build_index.py` → `publish_assets_hf.py` 로 올리고, 슬라이드에서 `image: <이름>` 으로 가리키면 끝(별도 배선 없음).
 
-1. **스톡 (CC0/PD) — `fetch_cc0_images.py`**: Commons(실사 적중률 1순위) + Openverse 에서 PD/CC0 만 받아 `cc0-*.webp` 저장.
-   출처는 회사 폴더 `CREDITS.md` 에 자동 기록(의무 아니나 감사 추적).
-   ```
-   uv run python -X utf8 blog/_scripts/fetch_cc0_images.py --jobs sns/assets/_plans/cc0FetchJobs.json
-   ```
-   jobs = `[{"code","name","queries":[...],"keywords":[...]}]`. **반드시 받은 이미지를 눈으로 확인** —
-   스톡은 특정 피사체(정유탑·병입라인 등) 적중률이 들쭉날쭉해 오매치(엉뚱한 사진·텍스트 광고·도식)가 섞인다(실측: 받은 것 절반 폐기).
-2. **생성형 (주제 정확) — `gen_company_flux.py`**: Replicate FLUX 로 4:5 hero 생성. 특정 피사체 적중률 1순위.
-   비용 사전충전이며 잔액 있을 때만 동작(잔액 부족 = HTTP 402). jobs = `[{"code","name","prompt"}]`.
+**스톡 (CC0/PD) — `fetch_cc0_images.py`**: Commons(실사 적중률 1순위) + Openverse 에서 PD/CC0 만 받아 `cc0-*.webp` 저장.
+출처는 회사 폴더 `CREDITS.md` 에 자동 기록(의무 아니나 감사 추적).
+```
+uv run python -X utf8 blog/_scripts/fetch_cc0_images.py --jobs sns/assets/_plans/cc0FetchJobs.json
+```
+jobs = `[{"code","name","queries":[...],"keywords":[...]}]`. **반드시 받은 이미지를 눈으로 확인** —
+스톡은 특정 피사체(정유탑·병입라인 등) 적중률이 들쭉날쭉해 오매치(엉뚱한 사진·텍스트 광고·도식)가 섞인다(실측: 받은 것 절반 폐기).
+안 맞으면 **다른 검색어(`queries`)로 재시도**하고, 그래도 없으면 그 슬라이드는 **이미지 없이 간다 — 생성형으로 메우지 않는다**.
 
-> 원칙: 스톡(무료 PD/CC0)이 1차, 안 맞으면 생성형. **둘 다 받은 즉시 눈검수 후 채택**(쓰레기 거르기). 출처는 `CREDITS.md` 에.
+> 원칙: **카드 캐러셀 이미지 = CC0 스톡 단일 경로.** 받은 즉시 눈검수 후 채택(쓰레기 거르기). 출처는 `CREDITS.md` 에.
 
 ## 발행 전 전문가 검토 게이트 — 작가 패널 토론·평가 (cards 정식 게이트)
 **캐러셀은 공개물이라 발행 전에 전문가 루프를 반드시 거친다.** 자동 통과 금지.
@@ -109,7 +110,7 @@ uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면
 | `blog/_scripts/build_carousel_contracts.py` | **발행** — blog frontmatter → hfMedia 단일 파일 |
 | `blog/_scripts/audit_carousel_images.py` | **이미지 감사** — 평면 벡터·도식·인포그래픽(쓰레기) 색복잡도로 탐지 |
 | `blog/_scripts/fetch_cc0_images.py` | 무료(PD/CC0) 이미지 수급 — Commons·Openverse |
-| `blog/_scripts/gen_company_flux.py` | 생성형 hero(4:5) — 잔액 충전 시 |
+| `blog/_scripts/gen_company_flux.py` | 생성형 hero(4:5) — **카드 캐러셀엔 안 씀**(딴 용도 한정). 카드 이미지는 CC0 단일 경로 |
 | `blog/_scripts/audit_seo.py` | carousel 형식·숫자 검사 |
 | `blog/_scripts/migrate_carousels_to_blog.py` | 1회성 이관(sns/carousels → blog frontmatter, **완료**). 이후 sns 는 **유물**·재동기화 안 함 |
 | `blog/_scripts/test_carousel_contracts.py` | 발행/이관 테스트 |
