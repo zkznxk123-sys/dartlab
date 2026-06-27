@@ -2,7 +2,7 @@
 // 변환·오름차순 정렬·일자 dedup·null/비정상 close 행 제외를 네트워크 없이 검증(parseEdgarPriceRows 순수 함수).
 // bake schema(date/open/high/low/close/volume)는 KR gov company 와 동형 — close=수정주가라 r/tv=null.
 import { describe, it, expect } from 'vitest';
-import { parseEdgarPriceRows } from './edgarPriceSource';
+import { parseEdgarPriceRows, parseEdgarRecent } from './edgarPriceSource';
 
 function row(o: Partial<Record<string, unknown>>): Record<string, unknown> {
 	return { date: '2026-06-24', open: 1, high: 1, low: 1, close: 1, volume: 1, ...o };
@@ -51,5 +51,29 @@ describe('parseEdgarPriceRows', () => {
 	it('open/high/low 결측 시 close 로 폴백(라인 degenerate 방어)', () => {
 		const out = parseEdgarPriceRows([row({ date: '2026-06-24', open: null, high: null, low: null, close: 100 })]);
 		expect(out[0]).toMatchObject({ o: 100, h: 100, l: 100, c: 100 });
+	});
+});
+
+describe('parseEdgarRecent', () => {
+	it('ticker 별 그룹 + 각 그룹 오름차순 정렬', () => {
+		const map = parseEdgarRecent([
+			{ ticker: 'AAPL', date: '20260625', open: 287, high: 288, low: 273, close: 275, volume: 107 },
+			{ ticker: 'MSFT', date: '20260624', open: 500, high: 505, low: 498, close: 502, volume: 20 },
+			{ ticker: 'AAPL', date: '20260624', open: 295, high: 299, low: 292, close: 293, volume: 53 }
+		]);
+		expect(Object.keys(map).sort()).toEqual(['AAPL', 'MSFT']);
+		expect(map.AAPL!.map((k) => k.t)).toEqual(['20260624', '20260625']); // 정렬
+		expect(map.AAPL![1]).toMatchObject({ c: 275, r: null, tv: null });
+		expect(map.MSFT).toHaveLength(1);
+	});
+
+	it('ticker 소문자→대문자 정규화 + 빈 ticker·비정상 close 제외', () => {
+		const map = parseEdgarRecent([
+			{ ticker: 'aapl', date: '20260624', open: 1, high: 1, low: 1, close: 293, volume: 1 },
+			{ ticker: '', date: '20260624', open: 1, high: 1, low: 1, close: 1, volume: 1 },
+			{ ticker: 'XYZ', date: '20260624', open: 1, high: 1, low: 1, close: 0, volume: 1 }
+		]);
+		expect(Object.keys(map)).toEqual(['AAPL']);
+		expect(map.AAPL?.[0]?.c).toBe(293);
 	});
 });

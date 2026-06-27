@@ -19,7 +19,7 @@ import type {
 } from '@dartlab/ui-contracts';
 import { resolveMarket } from '@dartlab/ui-contracts';
 import { loadGovCandles, loadGovRecent } from './sources/govPriceSource';
-import { loadEdgarCandles } from './sources/edgarPriceSource';
+import { loadEdgarCandles, loadEdgarRecent } from './sources/edgarPriceSource';
 import { loadNaverFresh } from './sources/naverPriceSource';
 import { loadInitialOHLCV, loadOlderYear, loadedCandles, mergeDedup, seedCandles } from './sources/priceSource';
 import { createPublicIndexPort } from './sources/indexSource';
@@ -86,8 +86,9 @@ export function publicPricePort(core?: DataCore): PricePort {
 			// US(EDGAR) = 회사별 OHLCV 통파일 전체이력 1발 seed (Yahoo bake, edgar/prices/company). KRX 연도샤드·gov·네이버 경로 무관.
 			const m = resolveMarket(code);
 			if (m.market === 'US' && m.ticker) {
-				const us = await loadEdgarCandles(m.ticker, core);
-				return us && us.length ? seedCandles(code, us) : null;
+				const [base, recent] = await Promise.all([loadEdgarCandles(m.ticker, core), loadEdgarRecent(core)]);
+				const merged = mergeDedup(base ?? [], recent?.[m.ticker] ?? []);
+				return merged.length ? seedCandles(code, merged) : null;
 			}
 			const c = code.trim();
 			const [gov, recent, fresh] = await Promise.all([loadGovCandles(c, core), loadGovRecent(core), loadNaverFresh(c, core)]);

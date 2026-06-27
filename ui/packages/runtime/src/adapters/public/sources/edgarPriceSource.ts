@@ -57,6 +57,47 @@ export function parseEdgarPriceRows(rows: EdgarPriceRow[]): Candle[] {
 	return dedup;
 }
 
+// 최근 거래일 tail — 일증분(Polygon by-day)이 매일 갱신하는 edgar/prices/recent.parquet(전 종목 1파일).
+// 회사 base(company/{ticker})와 머지해 마지막 봉까지 신선. KR gov/prices/recent 와 동형(ticker 컬럼 추가).
+const EDGAR_RECENT_COLUMNS = ['ticker', 'date', 'open', 'high', 'low', 'close', 'volume'];
+interface EdgarRecentRow extends EdgarPriceRow {
+	ticker?: string | null;
+}
+
+/** recent parquet 행 묶음 → {ticker: 캔들 오름차순}. 순수 함수 — 단위 테스트 진입점(네트워크 무관). */
+export function parseEdgarRecent(rows: EdgarRecentRow[]): Record<string, Candle[]> {
+	const map: Record<string, Candle[]> = {};
+	for (const r of rows) {
+		const tk = r.ticker == null ? '' : String(r.ticker).trim().toUpperCase();
+		const k = rowToCandle(r);
+		if (!tk || !k) continue;
+		(map[tk] ??= []).push(k);
+	}
+	for (const arr of Object.values(map)) arr.sort((a, b) => a.t.localeCompare(b.t));
+	return map;
+}
+
+/** 전 종목 최근 tail (ticker → 캔들 오름차순, JSON-safe Record). null = 미발행. 코어가 read 캐시·dedup. */
+export function loadEdgarRecent(core?: DataCore): Promise<Record<string, Candle[]> | null> {
+	if (!browser) return Promise.resolve(null);
+	const dc = edgarCore(core);
+	return (async () => {
+		try {
+			const rows = await dc.requestParquetWholeFile<EdgarRecentRow>({
+				origin: 'hf',
+				path: 'edgar/prices/recent.parquet',
+				columns: EDGAR_RECENT_COLUMNS,
+				cacheKey: 'edgar.prices.recent',
+				cache: { scope: 'memory', ttlMs: 10 * 60_000, maxEntries: 2 } // 일증분 — 신선도 우선 10분 TTL
+			});
+			if (!rows) return null;
+			return parseEdgarRecent(rows);
+		} catch {
+			return null;
+		}
+	})();
+}
+
 /** US 회사 주가(전체 이력, 오름차순). null = 미캐시·미발행. ticker 키(대문자). read 캐시·dedup 은 코어. */
 export function loadEdgarCandles(ticker: string, core?: DataCore): Promise<Candle[] | null> {
 	if (!browser) return Promise.resolve(null);
