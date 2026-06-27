@@ -9,9 +9,9 @@ from dartlab.gather.sources.brokerage import config as _config
 pytestmark = pytest.mark.unit
 
 
-def test_enabled_three() -> None:
+def test_enabled_set() -> None:
     enabled = _config.enabledBrokers()
-    assert set(enabled) == {"miraeasset", "nh", "yuanta"}
+    assert set(enabled) == {"miraeasset", "nh", "yuanta", "hanyang"}
 
 
 def test_spa_deferred() -> None:

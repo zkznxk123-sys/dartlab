@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.gather.sources.brokerage.parse import _normDate, _parseMiraeasset, _parseNh
+from dartlab.gather.sources.brokerage.parse import (
+    _normDate,
+    _parseHanyang,
+    _parseMiraeasset,
+    _parseNh,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -22,6 +27,15 @@ _NH_HTML = """
 <p class="sort">기업</p><p class="tit">[한세실업] 과도한 우려</p>
 <p class="info"><span class="info_name">정지윤</span><span class="info_date">2026.06.26</span></p>
 </a></li></ul>
+"""
+
+_HANYANG_HTML = """
+<table><tbody>
+<tr><td>2052</td>
+    <td><a href="/board/researchAnalyzeCompany/detail/2087;jsessionid=ABC?pageIndex=1">[06/25] 리브스메드(491000) : 바이오 약세장 추천종목</a>
+        <a href="https://www.hygood.co.kr/download?atchFileId=FILE_001">첨부</a></td>
+    <td>2026.06.25</td><td></td><td>304</td></tr>
+</tbody></table>
 """
 
 
@@ -56,3 +70,19 @@ def test_parse_nh() -> None:
     assert r.author == "정지윤"
     assert r.pubDate == "2026-06-26"
     assert r.url.startswith("https://m.nhqv.com/research/authCheck")
+
+
+def test_parse_hanyang() -> None:
+    rows = _parseHanyang(_HANYANG_HTML, "기업분석", "https://fallback")
+    assert len(rows) == 1
+    r = rows[0]
+    assert r.broker == "hanyang"
+    assert r.reportType == "기업분석"
+    assert r.pubDate == "2026-06-25"
+    assert "리브스메드(491000)" in r.title
+    # detail 링크 = 한양 자기 서버, jsessionid 꼬리 제거
+    assert r.url == "https://www.hygood.co.kr/board/researchAnalyzeCompany/detail/2087"
+
+
+def test_parse_hanyang_no_detail() -> None:
+    assert _parseHanyang("<table><tbody><tr><td>없음</td></tr></tbody></table>", "기업분석", "u") == []

@@ -146,8 +146,54 @@ def _parseYuanta(html: str, label: str, srcUrl: str) -> list[ReportMeta]:
     return out
 
 
+def _parseHanyang(html: str, label: str, srcUrl: str) -> list[ReportMeta]:
+    """한양 board 표(번호·제목·날짜·조회수) → ReportMeta. 링크는 /detail/{id}(자기 서버).
+
+    Args:
+        html: /board/<board>/list 응답 HTML.
+        label: 카테고리 라벨 = reportType.
+        srcUrl: 링크 부재 시 fallback URL.
+
+    Returns:
+        list[ReportMeta] — detail 링크 있는 행마다 1건. 제목에 종목코드(005930) 내장.
+
+    Example::
+
+        _parseHanyang(html, "기업분석", url)
+    """
+    soup = BeautifulSoup(html, "lxml")
+    out: list[ReportMeta] = []
+    body = soup.find("tbody") or soup
+    detailRe = re.compile(r"/board/\w+/detail/")
+    for tr in body.find_all("tr"):
+        link = tr.find("a", href=detailRe)
+        if link is None:
+            continue
+        href = link.get("href", "").split(";")[0]  # jsessionid 꼬리 제거
+        url = ("https://www.hygood.co.kr" + href) if href.startswith("/") else (href or srcUrl)
+        date = ""
+        for td in tr.find_all("td"):
+            txt = td.get_text(strip=True)
+            if re.match(r"\d{4}[.\-/]\d{2}[.\-/]\d{2}", txt):
+                date = txt
+                break
+        out.append(
+            ReportMeta(
+                broker="hanyang",
+                brokerName="한양",
+                title=link.get_text(" ", strip=True),
+                url=url,
+                pubDate=_normDate(date),
+                reportType=label,
+                author=None,
+            )
+        )
+    return out
+
+
 PARSERS = {
     "miraeasset": _parseMiraeasset,
     "nh": _parseNh,
     "yuanta": _parseYuanta,
+    "hanyang": _parseHanyang,
 }

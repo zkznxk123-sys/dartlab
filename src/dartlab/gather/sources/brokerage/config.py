@@ -11,6 +11,7 @@ from __future__ import annotations
 _MIRAE = "https://securities.miraeasset.com/bbs/board/message/list.do?categoryId="
 _NH = "https://m.nhqv.com/research/boardList?rshPprDitCd="
 _YUANTA = "https://www.myasset.com/myasset/research/rs_list/rs_list.cmd?cd006=&cd008=&cd007="
+_HANYANG = "https://www.hygood.co.kr/board/"
 
 BROKERS: dict[str, dict] = {
     # --- 서버렌더 = 작동 ---
@@ -45,7 +46,24 @@ BROKERS: dict[str, dict] = {
         },
         "note": "메타 작동, 링크는 onclick 역추출 미완 → 카테고리 URL fallback",
     },
+    "hanyang": {
+        "name": "한양",
+        "mechanism": "htmlTable",
+        "enc": None,
+        "enabled": True,
+        "categories": {
+            "기업분석": _HANYANG + "researchAnalyzeCompany/list",
+            "이슈분석": _HANYANG + "researchAnalyzeIssue/list",
+            "채권분석": _HANYANG + "researchBondsCredit/list",
+            "시황": _HANYANG + "researchHanyangNews/list",
+        },
+        "note": "서버렌더 표, 제목에 종목코드 내장·PDF 는 한양 자기 서버(hygood.co.kr) 링크아웃",
+    },
     # --- SPA/AJAX = deferred (초기 HTML 에 데이터·엔드포인트 없음 → browser 자동화 필요) ---
+    # 빅 증권사 SPA 는 단순 셸+AJAX 가 아니라 안티봇 게이트라 무브라우저 직호출 불가:
+    #   kiwoom = EverSafe(eversafeThreat/CD-14000) JS 토큰, hana = FNN client secret/세션.
+    # 네이버 금융 리서치 목록은 서버렌더(33사 전부)지만 PDF 가 100% 네이버 CDN(stock.pstatic.net)
+    # 호스팅 = DB권+무단재배포 회색이라 채택 안 함(각 증권사 자체 보드만 인덱싱).
     "koreainvestment": {
         "name": "한국투자",
         "mechanism": "spaAjax",
@@ -99,6 +117,6 @@ def enabledBrokers() -> dict[str, dict]:
     Example::
 
         from dartlab.gather.sources.brokerage.config import enabledBrokers
-        list(enabledBrokers())   # ['miraeasset', 'nh', 'yuanta']
+        list(enabledBrokers())   # ['miraeasset', 'nh', 'yuanta', 'hanyang']
     """
     return {k: v for k, v in BROKERS.items() if v.get("enabled")}
