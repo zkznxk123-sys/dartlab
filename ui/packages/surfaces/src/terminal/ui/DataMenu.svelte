@@ -1,7 +1,8 @@
 <script lang="ts">
-	// 터미널 상단 「데이터」 — 이 회사의 *모든 공개 데이터*를 Excel·CSV 로. 브라우저 parquet/포트 직독→변환(서버 0).
+	// 터미널 상단(헤더) 「데이터」 — 공개 데이터를 Excel·CSV 로. 브라우저 parquet/포트 직독→변환(서버 0).
 	// 회사별: 재무(원본 long + 시계열 가공 IS/BS/CF 시트분할)·공시수평화·정기보고서·일별시세·공시리스트.
-	// 전종목: scan 프리빌드. 뉴스는 언론사 저작권(재배포 불가)이라 라이브 표시 전용 — 다운로드 미제공.
+	// 전종목: scan 프리빌드. 전역(회사 무관, 헤더라 상시): 거시(FRED·ECOS·관세청)·SEC ticker맵·시장지수·증권사
+	// 리서치·전종목 시세. 뉴스는 언론사 저작권(재배포 불가)이라 라이브 표시 전용 — 다운로드 미제공.
 	import type { DartLabRuntime, StmtKind } from '@dartlab/ui-contracts';
 	import { DOWNLOAD_CATALOG } from '@dartlab/ui-runtime/data/catalog/downloadCatalog';
 	import { hfUrl, readParquetRows } from '@dartlab/ui-runtime/data/parquet/hfRange';
@@ -56,17 +57,20 @@
 	let busy = $state('');
 	let err = $state('');
 
+	const clean = (s: string) => s.replace(/[/ ()·]/g, '');
 	function stem(label: string): string {
-		return `${corpName || code}_${label.replace(/[/ ()·]/g, '')}`;
+		return `${corpName || code}_${clean(label)}`;
 	}
-	function emit(label: string, rows: Record<string, unknown>[], fmt: 'xlsx' | 'csv') {
+	// fileStem 미지정 = 회사 접두(회사 데이터). 전역(거시·지수) 데이터는 회사명 접두 없이 label 그대로.
+	function emit(label: string, rows: Record<string, unknown>[], fmt: 'xlsx' | 'csv', fileStem?: string) {
 		if (!rows.length) {
-			err = en ? 'no data for this company' : '이 회사 데이터 없음';
+			err = en ? 'no data' : '데이터 없음';
 			return;
 		}
 		const cols = Object.keys(rows[0]);
-		if (fmt === 'csv') downloadCsv(stem(label), cols, rows);
-		else downloadBlob(objectsToWorkbook([{ label, columns: cols, rows }]), `${stem(label)}.xlsx`, XLSX_MIME);
+		const name = fileStem ?? stem(label);
+		if (fmt === 'csv') downloadCsv(name, cols, rows);
+		else downloadBlob(objectsToWorkbook([{ label, columns: cols, rows }]), `${name}.xlsx`, XLSX_MIME);
 	}
 
 	async function run(key: string, fn: () => Promise<void>) {
@@ -139,6 +143,26 @@
 			const { rows } = await readParquetRows(file.path);
 			emit(`scan_${file.label}`, rows, fmt);
 		});
+
+	// 시장·거시 전역 데이터 — 회사 무관(헤더라 상시 노출). 단일 파일은 Excel/CSV 직변환(행수 ≤104만 안전 실측),
+	// 다파일(지수별·월별)·대형(연 16MB)은 HF 폴더 브라우즈. krx/indices·krx/prices·edgar/meta 는 HF 미발행이라 제외.
+	const TREE = 'https://huggingface.co/datasets/eddmpython/dartlab-data/tree/main';
+	const MARKET_FILES = $derived([
+		{ path: 'macro/fred/observations.parquet', label: en ? 'FRED macro series' : 'FRED 거시 시계열' },
+		{ path: 'macro/ecos/observations.parquet', label: en ? 'ECOS (BOK) macro' : 'ECOS 한은 거시' },
+		{ path: 'macro/customs/observations.parquet', label: en ? 'Customs trade (KR)' : '관세청 수출입' },
+		{ path: 'edgar/tickers/tickers.parquet', label: en ? 'SEC ticker↔CIK map' : 'SEC ticker↔CIK 맵' }
+	]);
+	const MARKET_FOLDERS = $derived([
+		{ dir: 'gov/indices/index', label: en ? 'Market indices (daily, per index)' : '시장지수 일별 (지수별)' },
+		{ dir: 'research/brokerage', label: en ? 'Brokerage research (monthly)' : '증권사 리서치 (월별)' },
+		{ dir: 'gov/prices/date', label: en ? 'All-stock daily prices (by year)' : '전종목 일별 시세 (연도별·대형)' }
+	]);
+	const dlMarket = (m: { path: string; label: string }, fmt: 'xlsx' | 'csv') =>
+		run(`mkt:${m.path}:${fmt}`, async () => {
+			const { rows } = await readParquetRows(m.path);
+			emit(m.label, rows, fmt, clean(m.label));
+		});
 </script>
 
 <div class="dataDl">
@@ -183,6 +207,23 @@
 							<button class="dsBtn" onclick={() => dlScan(s, 'csv')} disabled={!!busy}>{busy === `scan:${s.path}:csv` ? '…' : 'CSV'}</button>
 						</span>
 					{/if}
+				</div>
+			{/each}
+
+			<div class="dpDiv">{en ? 'market & macro (global)' : '시장·거시 (전역)'}</div>
+			{#each MARKET_FILES as m (m.path)}
+				<div class="dsRow">
+					<span class="dsLabel">{m.label}<span class="dsDir">{m.path}</span></span>
+					<span class="dsBtns">
+						<button class="dsBtn" onclick={() => dlMarket(m, 'xlsx')} disabled={!!busy}>{busy === `mkt:${m.path}:xlsx` ? '…' : 'Excel'}</button>
+						<button class="dsBtn" onclick={() => dlMarket(m, 'csv')} disabled={!!busy}>{busy === `mkt:${m.path}:csv` ? '…' : 'CSV'}</button>
+					</span>
+				</div>
+			{/each}
+			{#each MARKET_FOLDERS as m (m.dir)}
+				<div class="dsRow">
+					<span class="dsLabel">{m.label}<span class="dsDir">{m.dir}/</span></span>
+					<span class="dsBtns"><a class="dsBtn" href={`${TREE}/${m.dir}`} target="_blank" rel="noreferrer">parquet ↗</a></span>
 				</div>
 			{/each}
 
