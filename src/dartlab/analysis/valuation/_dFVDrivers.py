@@ -46,8 +46,13 @@ def _growthPathFromRoics(
     """
     if not validRoic:
         return None
-    s = sorted(validRoic)
-    roicAnchor = s[len(s) // 2]
+    # 데이터 아티팩트 가드 — ROIC > 100% 는 투하자본 분모 이상(예: 삼양식품 699%) → 제외.
+    # 지속 가능 ROIC 상한도 40%로 cap(Damodaran: 영구 초과수익 비현실) — 성장 과대 차단.
+    clean = [r for r in validRoic if -50.0 <= r <= 100.0]
+    if not clean:
+        return None
+    s = sorted(clean)
+    roicAnchor = min(s[len(s) // 2], 40.0)
     if roicAnchor <= 0:
         return None
     n = max(1, int(years))

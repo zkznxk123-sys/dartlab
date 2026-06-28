@@ -84,8 +84,13 @@ def calcCrossSectionRegression(*args, **kwargs):
 
 
 def _rimCalc(*args, **kwargs):
-    """RIM calc — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
-    from dartlab.analysis.financial.valuation import _rimCalc as _f
+    """RIM calc — residualIncome.calcResidualIncome 위임 (cycle 회피 lazy proxy).
+
+    d77f9abf8 facade 리팩토링이 valuation.py 의 `_rimCalc` re-export 를 누락 →
+    ImportError 로 calcValuationSynthesis 의 RIM/relative 합성이 깨짐. 원 정의
+    (analysis.valuation.residualIncome.calcResidualIncome) 로 직접 위임해 복구.
+    """
+    from dartlab.analysis.valuation.residualIncome import calcResidualIncome as _f
 
     return _f(*args, **kwargs)
 
