@@ -41,8 +41,10 @@
 - ☐ 소비자 마이그레이션 (CLI·테스트·storyTemplate) + 死코드 삭제(importer 신뢰검증 후)
 
 ## P3 · 랜딩 동일소비
-- ☐ `build.ts` → ReportModel emit (베이크 0)
-- ☐ `model.ts` re-export shim
+- ✅ **`model.ts` → 공유 계약 shim**(`47cd8d7e2`): landing ReportModel = @dartlab/ui-contracts 타입(단일 SSOT). 랜딩 전용 소형 보조타입·lastNonNull 유지·import 무변경. project.ts pro블록 10종 skip 케이스(assertNever 보존). **svelte-check 0 errors**. 타입레벨만(렌더 무변경).
+- ✅ **렌더러 graceful-skip 확인**: `+page.svelte` 블록 if-체인이 8 legacy 후 else 없이 종료 → 신규 pro 블록 자동 skip(크래시 0). 미래호환 충족, 변경 불요.
+- ☐ `build.ts` pro 블록 emit (thesisStruct TS·valuationBridge/scenario **pyodide `c.reportModel()`** §3 (a)) — pyodide 휠에 reportModel 포함(빌드) + 배선 필요
+- ☐ `+page.svelte` pro 블록 렌더 케이스 추가 — **시각 작업·눈검수 필수**
 - ☐ 6상수 golden-parity (N=5, ~20셀)
 - ☐ UI 스크린샷 눈검수 + 운영자 승인 push
 
