@@ -41,6 +41,10 @@ function collectBlogAssets(dir: string, result = new Map<string, string>()) {
 	for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
 		const fullPath = path.resolve(dir, entry.name);
 		if (entry.isDirectory()) {
+			// underscore 특수폴더(_issues 캐러셀·_reference·_scripts)는 평면 /blog/assets/ 서빙 대상이 아니다.
+			// 특히 _issues 캐러셀 자산은 build_carousel_contracts.py 가 HF media `issues/<slug>/<name>.<hash>` 로
+			// slug-네임스페이스 서빙 → 캐러셀마다 scene-NN 재시작이 정상(평면 basename 충돌로 dev 부팅을 깨면 안 됨).
+			if (entry.name.startsWith('_')) continue;
 			if (entry.name === 'assets') {
 				for (const asset of fs.readdirSync(fullPath, { withFileTypes: true })) {
 					if (!asset.isFile()) continue;
