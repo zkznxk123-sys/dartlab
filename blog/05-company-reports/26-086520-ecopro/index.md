@@ -45,6 +45,24 @@ carousel:
     창업주는 감옥에 있는데 주가는 153만원 신고가. 개인투자자 73%가 산 건 숫자가 아니라 '리튬의 미래'라는 서사였다.
 
     에코프로는 회사가 아니라 리튬에 레버리지를 건 옵션이다. 재무제표는 이미 그 답을 말하고 있었다.
+  explainers:
+    - term: PER(주가수익비율)
+      body: 주가가 이익의 몇 배인지 보는 지표입니다. 에코프로는 한때 903배 — 지금 이익을 903년 벌어야 하는 수준으로, 숫자보다 '리튬의 미래' 서사에 베팅한 결과입니다.
+    - term: 리튬·니켈 종속
+      body: 원가의 85%가 리튬·니켈입니다. 원자재가 오르면 매출이 오르고 떨어지면 매출이 반토막 나, 회사 실적이 원자재 가격에 종속됩니다.
+  relatedNews:
+    - title: 인도네시아 니켈 증산 전망에 가격 하락세…에코프로 하반기 실적 변수
+      source: businesspost.co.kr
+      date: "2026-06-28"
+      url: https://www.businesspost.co.kr/BP?command=article_view&num=440956
+      track: naver
+      description: 네이버 보관 뉴스 기준. 니켈 가격이 실적을 좌우하는 모습 — 카드가 말한 '원자재 가격 종속'을 그대로 보여줍니다.
+    - title: K-배터리, 2분기 흑자전환 시동…전기차 회복·ESS로 부활하나
+      source: yna.co.kr
+      date: "2026-06-28"
+      url: https://www.yna.co.kr/view/AKR20260626053000003?input=1195m
+      track: naver
+      description: 네이버 보관 뉴스 기준. 배터리 업황 회복 흐름 — 양극재 수요·실적의 사이클 배경입니다.
   pinnedComment: |
     원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
     github.com/eddmpython/dartlab
