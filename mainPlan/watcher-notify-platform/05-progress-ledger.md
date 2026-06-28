@@ -20,7 +20,7 @@
 - **왓처 ≠ 새 L2 엔진** — P1-P2 러너 plain 함수(게이트 비대상), P3 에서 synth/watch 발견적 추출.
 - **`scan.orders` 이미 본진 졸업** — '신규수주' 토픽 새 데이터 0줄. 메모리 stale 정정 필요.
 - **D1 = 2테이블·개인조건 0** — 개인화는 로컬 소유(재식별 회피).
-- **`/send` 3중 인증** — SEND_TOKEN+HMAC+nonce. 발신자 인증 없으면 스팸/피싱 발사대.
+- **`/send` 인증** — Bearer SEND_TOKEN + 결정적 nonce(품질점검서 HMAC 층 절단=독립 신뢰축 0). 발신자 인증 없으면 스팸/피싱 발사대.
 - **PNA 미들웨어 신규 필수** — Starlette CORSMiddleware 는 PNA 헤더 미발급. pure-ASGI 추가.
 - **capability 토큰** — 로컬 `/api` 무인증 + CORS 개방 = 악성 사이트 CSRF 면. 쓰기/ai/export 토큰 강제.
 

@@ -9,25 +9,23 @@ P2 = *공개 왓처 토픽 러너*(scan SSOT 직독)로 별개.
 
 ```
 .github/scripts/notify/
-  send.py          # /send 호출 + 3중 인증 헤더 조립
-  authHeaders.py   # SSOT HMAC 서명 (06 §3 과 바이트 동일)
+  send.py          # detect → /send 호출 + Bearer/nonce 헤더 + 응답 집계 헬스게이트
+  authHeaders.py   # Bearer + 결정적 nonce (HMAC 서명 제거)
   payload.py       # aes128gcm 평문(title/body/url/tag) 조립 + sanitize
   sanitize.py      # 제어/RTL/zero-width strip + 출처라벨 + dartlab 자기 라우트 링크
 ```
 
 `noScriptsDir.py` 는 repo-루트 `scripts/`만 차단 → `.github/scripts/notify/` 허용(실측 확인, 안전).
 
-### authHeaders.py — HMAC SSOT ([06] §3 과 1:1, 결정적 nonce)
+### authHeaders.py — Bearer + nonce (HMAC 서명 제거, 품질점검)
 ```python
-def signHeaders(sign_key: str, payload: dict, ts: int, topic: str, slug: str) -> tuple[bytes, dict]:
-    raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    msg = f"{ts}.".encode("utf-8") + raw                       # ts 먼저 + '.' + raw  (06 §3 SSOT, bytes 연산)
-    sig = hmac.new(sign_key.encode(), msg, hashlib.sha256).hexdigest()
-    nonce = hashlib.sha1(f"{topic}:{slug}".encode()).hexdigest()   # 결정적 — 같은 (topic,slug) 재push 멱등 (uuid 아님!)
-    return raw, {"X-DL-Ts": str(ts), "X-DL-Sign": sig, "X-DL-Nonce": nonce}
+def authHeaders(payload: dict, ts: int, topic: str, slug: str) -> tuple[bytes, dict]:
+    raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")  # 전송할 바로 그 바이트
+    nonce = hashlib.sha1(f"{topic}:{slug}".encode()).hexdigest()   # 결정적 — (topic,slug) 재push 멱등 (uuid 아님!)
+    return raw, {"X-DL-Ts": str(ts), "X-DL-Nonce": nonce}           # Authorization: Bearer 는 send.py 가 부착
 ```
-**send.py 는 서명한 `raw` 바이트를 그대로 HTTP body 로 전송**(재직렬화 금지). nonce 가 (topic,slug) 결정적이라
-같은 발행 재push 는 허브 `sentNonce` 충돌로 1회, blogPublish·cardPublish 는 토픽이 달라 둘 다 발송(라운드2 R4·라운드3 정정).
+**send.py 는 `raw` 바이트를 그대로 HTTP body 로 전송**(재직렬화 금지). HMAC `X-DL-Sign` 제거 — SIGN_KEY·SEND_TOKEN 이
+같은 secrets 라 독립 신뢰축 0([06 §2]). nonce 가 (topic,slug) 결정적이라 같은 발행 재push 1회, blog·card 는 토픽이 달라 둘 다 발송.
 
 ### payload.py — 발행 알림 본문 (토픽별 url/tag, body=description)
 ```python
@@ -79,7 +77,7 @@ def detect(before: str, sha: str) -> list[PublishEvent]:
 - **frontmatter 키 = `title`/`description`/`carousel`** (실측: `summary:` 0건, `description:` 정본, `blog/PIPELINE.md`).
   `parse_frontmatter` = `---`…`---` 사이 통째 `yaml.safe_load`(PyYAML, `pyproject.toml` 의존 확인) — nested carousel dict·`|-` 멀티라인 caption·list 처리. carousel 키 없는 회사글은 KeyError 없이 skip.
 - **detect ↔ 워크플로 paths 1:1 커버** — detect 가 매칭하는 경로(index.md·_issues/cards.plan.json)만 paths 에. 비대칭(트리거되는데 detect 0) 금지.
-- 흐름: `detect → buildPayload(ev) → signHeaders(raw, ts, ev.topic, ev.slug) → POST /send`. 이벤트 1개당 1 POST.
+- 흐름: `detect → buildPayload(ev) → authHeaders(payload, ts, ev.topic, ev.slug) → POST /send(Bearer)`. 이벤트 1개당 1 POST.
 - 회귀: `test_detect` — 실제 index.md(description 키)·_issues/cards.plan.json 입력에 title+body 비지 않음 + slug 가 +page.ts 와 동형 + (topic,slug) 결정적 nonce.
 
 ### 독립 워크플로
@@ -99,13 +97,14 @@ jobs:
       - uses: actions/checkout@v6
         with: { fetch-depth: 0 }          # git diff before..sha (얕은 checkout 금지)
       - run: uv run python -m notify.send --before "${{ github.event.before }}" --sha "${{ github.sha }}"
-        env: { PUSHHUB_URL: "${{ vars.VITE_PUSHHUB_URL }}", PUSHHUB_SEND_TOKEN: "${{ secrets.PUSHHUB_SEND_TOKEN }}", PUSHHUB_SIGN_KEY: "${{ secrets.PUSHHUB_SIGN_KEY }}" }
+        env: { PUSHHUB_URL: "${{ vars.VITE_PUSHHUB_URL }}", PUSHHUB_SEND_TOKEN: "${{ secrets.PUSHHUB_SEND_TOKEN }}" }
 ```
-- **카드 발행 = git 이벤트 아님**(라운드2 실측): 카드는 `publishCarousels.yml` 이 HF(dartlab-media)로 in-place push,
-  `landing/static/cards/**` 디렉터리는 repo 에 *부재*. → cardPublish 트리거는 ① blog index.md 의 `carousel:` 블록
-  변경(위 detect) 또는 ② `publishCarousels.yml` 완료 후 `workflow_run` 체이닝 중 택1(운영자 결정#7 신규). 본 설계는 ①.
-- **멱등 nonce = `sha1(f"{topic}:{slug}")`**(토픽 차원 포함) — 같은 index.md push 가 blogPublish·cardPublish 둘 다
-  유발해도 각자 독립 nonce 라 둘 다 발송(라운드1 `sha1(slug)` 단일키는 둘째가 409 드롭됐음). 같은 (topic,slug) 재push 는 멱등.
+- cardPublish 트리거 = ① blog index.md `carousel:` 블록 detect(본 설계 확정). 대안 ②(`workflow_run` 체이닝)는 [09](09-evaluation-ledger.md) 운영자 결정#7 에만 박제(여기선 노이즈라 컷).
+- **관측성 헬스게이트(send.py, brokerageSync 패턴 미러)**: send.py 가 각 `/send` 응답 `{sent,pruned,failed}` 를 집계 →
+  `GITHUB_STEP_SUMMARY` 에 topic별 표 출력 + **발송 이벤트가 있었는데 `sent==0`(전 실패)·HTTP 자체실패(401/409)·`failed` 비율
+  임계 초과 시 비-0 exit → 워크플로 RED → 운영자 자동알림.** 구독 0(no-op)은 정상 종료로 구분. *조용한 발송 실패 차단*(알림 도메인 핵심).
+- **재시도 = P1 비범위(의도)**: (topic,slug) 결정적 nonce 라 워크플로 재실행은 전부 409(성공자 멱등) — 일시 실패자만 재시도 불가.
+  발행 알림은 *저-stakes 단발*(놓친 알림 = 데이터 손실 아님, 다음 발행은 새 알림)이라 best-effort 단발로 둔다. per-endpoint 재시도는 P2 향상안.
 
 ## 3. 배포 절차 + 롤백
 
@@ -114,12 +113,13 @@ cd infra/workers/pushHub
 wrangler d1 create dartlab-push-hub                 # → database_id 를 wrangler.toml 기입
 wrangler d1 execute dartlab-push-hub --remote --file schema.sql
 wrangler secret put VAPID_PRIVATE_KEY               # pkcs8 base64url ([06] §4)
-wrangler secret put PUSHHUB_SEND_TOKEN
-wrangler secret put PUSHHUB_SIGN_KEY
+wrangler secret put PUSHHUB_SEND_TOKEN              # (SIGN_KEY 제거 — HMAC 층 삭제)
 # wrangler.toml [vars] VAPID_PUBLIC_KEY·VAPID_SUBJECT 기입
 wrangler deploy
-# GitHub: vars VITE_VAPID_PUBLIC_KEY·VITE_PUSHHUB_URL, secrets PUSHHUB_SEND_TOKEN·PUSHHUB_SIGN_KEY
+# GitHub: vars VITE_VAPID_PUBLIC_KEY·VITE_PUSHHUB_URL, secret PUSHHUB_SEND_TOKEN
 ```
+**⚠ secret 짝맞춤**: `PUSHHUB_SEND_TOKEN` 은 **Cloudflare Worker secret ↔ GitHub Actions secret 동일값 필수**(다르면 전 발송 401).
+회전 시 양쪽 동시 갱신(롤백 §3-③ 함정). 나머지: VAPID 비밀키=Worker only, 공개키=양쪽 공개값.
 롤백: ① Worker 미배포/문제 → `VITE_PUSHHUB_URL` 미설정 시 NotifyOptIn 자동 hidden(랜딩 무영향). ② 구독 0 → 발송 no-op.
 ③ 발송 사고 → secret 회전(`wrangler secret put` 재실행)으로 즉시 발송 차단. ④ landing 회귀 → 직전 커밋 revert(자동 push 안 했으므로 미발간 상태).
 
@@ -132,7 +132,7 @@ wrangler deploy
 테스트 자산은 **3 러너에 분산**(단일 `npm test` 로 못 묶음 — landing vitest=node pool, Worker=workers pool, py=pytest):
 - `landing/src/lib/notify/{sanitize,subscription}.test.ts` — **`src/lib/**` 글롭 아래**여야 `landing/vitest.config.ts`(environment:node, include `src/lib/**/*.test.ts`)가 수집. 제어/RTL/피싱 URL·직렬화 라운드트립.
 - `infra/workers/pushHub/test/{send,subscribe}.test.js` — vitest-pool-workers(위 하네스). 401/409/nonce/purge·JWT.
-- `.github/scripts/notify/test_authHeaders.py` — pytest. py 서명 ↔ Worker 검증 동형(HMAC SSOT, 한글 1건·동일 (topic,slug)=동일 nonce).
+- `.github/scripts/notify/test_detect.py` — pytest. detect/payload/nonce: 실제 index.md(description)·_issues cards.plan.json(target.*) 픽스처로 title+body 비지않음·slug 동형·`sha1(topic:slug)` 결정성(같은=같은, 다른 topic=다른). (HMAC 서명 회귀 제거 — 층 삭제.)
 
 ### Worker 테스트 하네스 — 그린필드 (infra/workers 선례 0). 버전핀 + 설치 버전 템플릿 스캐폴드
 pushHub 가 repo 최초 package.json 보유 Worker(형제 4종은 raw `wrangler deploy`). `infra/workers/*` 는 루트
@@ -164,7 +164,9 @@ jobs:
 
 ## 5. P1 SHIP 게이트 (전부 닫혀야 출시)
 
-- [ ] **HMAC 라운드트립**: py `authHeaders` 출력 → Worker 검증 통과(test_authHeaders + send.test, 한글 1건)
+- [ ] **인증**: Bearer 누락/오류 401, nonce replay 409 (send.test)
+- [ ] **발송 동시성**: N≥50 구독 브로드캐스트가 단일 `/send` wall-clock 한도 내 완주(Promise.allSettled 청크, [06 §3])
+- [ ] **관측성**: send.py 가 `sent==0`/HTTP 실패 시 워크플로 RED(헬스게이트, [08 §2])
 - [ ] **ece 졸업(선행)**: `tests/_attempts/pushHub/` Chrome ece 수신 성공 ([06 §5])
 - [ ] **aes128gcm 실배달 — Chrome 1대**: 알림 수신·제목 표시
 - [ ] **aes128gcm 실배달 — iOS 16.4+ standalone 1대**: 수신·제목 표시(Chrome 통과≠Apple 수락, 별 leg)
@@ -174,7 +176,7 @@ jobs:
 - [ ] **권한 제스처**: requestPermission 이 클릭 안에서만, 콜드 자동팝업 0
 - [ ] **landing 시각 회귀**: NotifyOptIn/InstallPrompt 겹침 없음 — **운영자 스크린샷 눈검수**
 - [ ] **TOPIC_ALLOWLIST = blogPublish·cardPublish 2개**(newOrders 미포함)
-- [ ] **3 러너 green**: ① `npm test -w landing`(node vitest, sink·직렬화) ② `cd infra/workers/pushHub && npm test`(workers pool, 401/409/purge) ③ `pytest .github/scripts/notify/`(HMAC 동형). 단일 명령으로 못 묶음 — 셋 다 별 step
+- [ ] **3 러너 green**: ① `npm test -w landing`(node vitest, sink·직렬화) ② `cd infra/workers/pushHub && npm test`(workers pool, 401/409/purge·fan-out) ③ `pytest .github/scripts/notify/`(detect/payload/nonce). 단일 명령으로 못 묶음 — 셋 다 별 step
 
 ## 6. 미검증 → 닫을 작업 (가정 박제 금지)
 - D1 `batch` 원자성 → `send.test`/`subscribe.test` 로 실측.

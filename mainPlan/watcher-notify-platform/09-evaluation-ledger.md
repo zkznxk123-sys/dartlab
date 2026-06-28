@@ -90,7 +90,7 @@
 - **dry(전 차원 PASS)는 마크다운 전사로는 도달 불가**가 라운드2~4 로 입증됨: 러너/하네스의 *라이브 바인딩*(BASE_PATH·
   frontmatter/json 키·라우트·외부 라이브러리 버전 API)은 손으로 옮길 때마다 새 전사 오류가 생기고 다음 라운드가 잡는다.
   이는 *능력 부족이 아니라* PRD 고도 문제 — 라이브 SSOT 가 진실이지 마크다운이 아니다.
-- **안정·검증된 층**(4 라운드 적대 통과): 3계층 아키텍처 · aes128gcm 2단 HKDF(RFC 정확 확인) · HMAC SSOT · /send 3중 인증 ·
+- **안정·검증된 층**(4 라운드 적대 통과): 3계층 아키텍처 · aes128gcm 2단 HKDF(RFC 정확 확인) · /send 인증(Bearer+nonce, 품질점검서 HMAC 절단) ·
   D1 스키마(06 정본) · FK ON · PNA→LNA · 보안 위협모델 · iOS 가드 · 파일 계획.
 - **라이브 바인딩**(이번에 검증된 사실은 박제, 나머지는 *bind-to-SSOT + 테스트 게이트* 고도): payload base=SW BASE_URL,
   _issues=target.*/cardThesis, 라우트=`/cards?post=`+live `+page.ts`, 하네스=설치버전 템플릿+첫 green, frontmatter=description.
@@ -98,3 +98,17 @@
 - **판정: 빌드-ready 수렴.** 구조/크립토/계약/보안 = 검증·안정. 러너/하네스 라이브바인딩 = 검증된 사실 박제 + 게이트 위임.
   구현자가 본 PRD + 라이브 파일 + 테스트 게이트로 정확한 코드 산출 가능. *추가 라운드는 라이브바인딩 전사 churn 만 생성* —
   더 돌리려면 운영자 요청 시 1회 더, 아니면 여기서 구현 착수(운영자 결정 8종 회수 후 P1 deep 플랜).
+
+## 품질 점검 (구현 전): 깔끔·속도·운영효율 3축 — 전부 acceptable-with-fixes → 적용
+
+정확성(버그)이 아니라 *설계 품질*. "강함은 깎아서". 적용한 변경:
+
+| 축 | 변경 |
+|---|---|
+| 🔪 클러터 | **`/send` HMAC 서명층 제거** — SIGN_KEY·SEND_TOKEN 이 같은 GHA secrets 라 독립 신뢰축 0(Bearer 유출=둘 다). secret 4→3종 + 06 §3 바이트SSOT·test 서명회귀 삭제. Bearer+nonce 2층. *(라운드2~3 버그 절반이 이 HMAC 바이트정합이었음 — 제거가 큰 클린)* |
+| 🔪 클러터 | deleteEndpoint 방어적 중복 DELETE → subscriptions 1줄(CASCADE) · postMessage fallback 양분기 → 측정후 1경로 stub · batch원자성 변론 3곳→1 SSOT · cardPublish ②안→ledger |
+| ⚡ 속도 | **`/send` 직렬 fan-out → `Promise.allSettled` 청크(P=20)** (N=200 직렬=30~60s Worker한도) · VAPID JWT origin별 요청스코프 메모(재서명 N→3) · topic→endpoint **JOIN 1회**(N+1 금지) · 404/410 **batch purge**(건별→끝-일괄) |
+| 🛠 운영 | **관측성 헬스게이트** — send.py 가 `{sent,failed}` 집계→Step Summary+`sent==0`시 RED(brokerageSync 미러, 조용한 발송실패 차단) · secret 짝맞춤 표 · 빈 'N개월 만료' 약속 삭제(cron 0 정합) · 재시도=best-effort 단발 명시 |
+
+**HMAC 제거는 되돌릴 수 있는 운영자 결정**(belt-and-suspenders 원하면 1줄 복원) — 단 보안 이득 0, 복잡도만 큼.
+keep-as-is(과최적화 경계): aes128gcm 격상·3러너분산(런타임 물리제약)·순수 WebCrypto·독립 워크플로·결정적 nonce·멱등 쓰기.

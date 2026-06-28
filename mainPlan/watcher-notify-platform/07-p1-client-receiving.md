@@ -79,17 +79,10 @@ SW·NotifyOptIn 양쪽 import(직렬화 형태·URL·토픽 1 SSOT). `sub.toJSON
 
 ## 7. P1 SHIP 전 실측 게이트 (가정 아님 — 닫을 항목)
 라운드1이 "검증 필요"로 남긴 것을 *닫는 작업*으로 승격:
-1. **SW `import.meta.env.VITE_VAPID_PUBLIC_KEY` 정적 치환** — P1 *첫 작업* = `npm run build -w landing` 1회로
-   SW 산출물에 키 인라인 확인(실측: 현재 SW 는 VITE 소비 선례 0건이라 단일 장애점). 빌드 결과로 둘 중 본설계 1회 확정:
-   - **치환됨(기대)**: §1.2 `import.meta.env` 직독 그대로. 아래 fallback 경로는 dead.
-   - **미치환(fallback 본설계)**: page→SW `postMessage` 키 전달.
-     ```ts
-     // page(NotifyOptIn): reg.active?.postMessage({ type:'dl-vapid', key: VAPID_PUBLIC_KEY })  ← subscribe 직전
-     // SW: let RUNTIME_VAPID = ''; self.addEventListener('message', e => {
-     //       if (e.data?.type === 'dl-vapid') RUNTIME_VAPID = e.data.key; });
-     //     pushsubscriptionchange 재구독은 RUNTIME_VAPID 사용. 키 미수신 시 재구독 skip(다음 page 진입이 재공급).
-     ```
-     비용: SW 부팅~키 도착 전 `pushsubscriptionchange` 발생 시 그 1회 재구독 skip(page 재진입이 복구) — 허용 가능.
+1. **SW `import.meta.env.VITE_VAPID_PUBLIC_KEY` 정적 치환** — P1 *첫 작업* = `npm run build -w landing` 1회로 SW 산출물에
+   키 인라인 확인. SvelteKit+Vite 의 `import.meta.env` 정적 치환은 SW 빌드에도 적용되는 표준 동작이라 **치환됨이 압도적 기대값**
+   → §1.2 직독 그대로. *(미치환이 실측되면)* page→SW `postMessage` 키 전달로 패치 — **측정 후 설계**(양분기 동시 설계 = over-build,
+   품질점검). 추가로 `pushsubscriptionchange` 가 `oldSubscription.options` 로 키를 보존(§1)하므로 fallback 의존도 자체가 낮음.
 2. **iOS 16.4+ standalone aes128gcm 실배달** — 실기기 1대 수신 확인.
 3. **iOS user-gesture 소실**(`await serviceWorker.ready` 가 제스처 끊는지) — 끊기면 `ready` 를 클릭 전 미리 확보.
 4. **aes128gcm ece 바이트 프레이밍** — `tests/_attempts/pushHub/` 실브라우저 졸업([06] §5).
