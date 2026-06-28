@@ -42,6 +42,24 @@ carousel:
     그런데 2025년 영업이익 2,486억(+34.7%), 영업이익률 6.0%로 건설 빅4 중 1위를 찍었습니다. 같은 해 현대건설은 1.2조 적자였습니다.
 
     살아남은 건 실력이 아니라 돈이었습니다. 자체개발 비중 55%의 자금력이 도급 공백 2년을 버티게 했습니다. 진짜 시험대는 2026년 2월, 재시공한 센테니얼 아이파크 준공일입니다.
+  explainers:
+  - term: 자체개발(시행)
+    body: 땅을 직접 사서 기획·분양까지 하는 방식입니다(단순 도급과 대비). HDC현대산업개발은 자체개발 비중 55%의 자금력으로 사고 이후 도급 공백 2년을 버텼습니다.
+  - term: 영업이익률
+    body: 매출에서 영업이익이 남는 비율입니다. HDC현산은 2025년 6.0%로 건설 빅4 중 1위 — 같은 해 현대건설이 1.2조 적자였던 것과 대비됩니다.
+  relatedNews:
+  - title: "[건설업계 브리핑] 대우건설·IPARK현산·롯데건설·현대엔지니어링"
+    source: daily.hankooki.com
+    date: '2026-06-26'
+    url: https://daily.hankooki.com/news/articleView.html?idxno=1380256
+    track: naver
+    description: 네이버 보관 뉴스 기준. 업계 브리핑 속 정상 영업 — 카드가 말한 '살아남았다'의 현재 진행형입니다.
+  - title: 가격 경쟁력 앞세운 '김해 신문 센트럴 아이파크' 주목
+    source: thegolftimes.co.kr
+    date: '2026-06-27'
+    url: https://www.thegolftimes.co.kr/news/articleView.html?idxno=81458
+    track: naver
+    description: 네이버 보관 뉴스 기준. 아이파크 신규 분양 — 사고 이후 브랜드 평판 회복이 시장에서 작동하는지의 단서입니다.
   pinnedComment: 투자 판단이 아닙니다. 영업이익률 8% 진입, 2026년 2월 센테니얼 아이파크 준공·무하자, 오너의 다음 대형 M&A 여부 — 이 셋이 턴어라운드의 완성을 가립니다.
   slides:
   - layout: editorial
