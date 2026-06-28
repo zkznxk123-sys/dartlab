@@ -42,6 +42,24 @@ carousel:
     고객사의 바이오의약품을 대신 개발하고 생산하는 회사에 가깝습니다. 그래서 매출 1조2571억원보다 더 봐야 할 것은 공장이 얼마나 차 있고 새 공장이 비용을 이기는가입니다.
 
     다음에는 5공장이 얼마나 돌아가는지, 계약이 매출과 남는 이익으로 바뀌는지, 증설 뒤 영업이익률을 봅니다.
+  explainers:
+  - term: CDMO
+    body: 고객사의 바이오의약품을 대신 개발·생산해 주는 위탁개발생산입니다. 삼성바이오로직스는 신약 회사가 아니라 '공장이 얼마나 차는가'로 읽어야 하는 이유입니다.
+  - term: 가동률
+    body: 지어 놓은 공장 생산능력 중 실제로 돌아가는 비율입니다. 새 공장(5공장)이 늘린 비용을 이기려면 수주가 들어와 가동률이 올라야 합니다.
+  relatedNews:
+  - title: '[특징주] 삼성바이오로직스(207940), 글로벌 생산망 확장…수주 경쟁력 부각'
+    source: incheonilbo.com
+    date: '2026-06-28'
+    url: https://www.incheonilbo.com/news/articleView.html?idxno=1326032
+    track: naver
+    description: 카드의 핵심인 '공장·수주' 그대로 — 생산망 확장과 수주 경쟁력이 주가 동력으로 거론됩니다.
+  - title: 삼성부터 SK까지…대기업 바이오사 '송도대전' 임박
+    source: srtimes.kr
+    date: '2026-06-28'
+    url: http://www.srtimes.kr/news/articleView.html?idxno=206221
+    track: naver
+    description: 5공장·증설로 이어지는 송도 CDMO 생산능력 경쟁 — '새 공장이 비용을 이기는가'의 업계 배경입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 5공장이 얼마나 돌아가는지, 계약이 매출과 남는 이익으로 바뀌는지, 증설 뒤 영업이익률을 읽는 관점입니다.'
   slides:
   - layout: editorial
