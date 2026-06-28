@@ -42,6 +42,24 @@ carousel:
     매출은 1조 1,450억원, 영업이익은 3,219억원이었습니다. 더 중요한 건 신규 제품 매출 비중이 60%까지 올라왔다는 점입니다. 오래된 주력품만으로 버틴 숫자가 아닙니다.
 
     다음엔 신규 제품 매출 비중, 유럽 입찰과 처방, 미국 보험 등재 뒤 처방, 연구개발비 뒤 영업이익률을 보면 됩니다.
+  explainers:
+  - term: 바이오시밀러
+    body: 특허가 만료된 바이오의약품의 복제약입니다. 셀트리온의 주력으로, 원조약보다 싸게 팔아 입찰·처방 경쟁에서 점유율을 늘립니다.
+  - term: 신규 제품 비중
+    body: 전체 매출 중 새로 출시한 제품의 비율입니다. 60%까지 올라, 오래된 주력품 의존에서 벗어났는지를 보여줍니다.
+  relatedNews:
+  - title: "[특징주] 셀트리온, 자가면역질환 치료제 'CT-P55' 국내 허가 신청"
+    source: tokenpost.kr
+    date: '2026-06-28'
+    url: https://www.tokenpost.kr/news/economy/373408
+    track: naver
+    description: 네이버 보관 뉴스 기준. 새 치료제 허가 신청 — 카드가 말한 '신규 제품 매출 비중'을 키우는 파이프라인입니다.
+  - title: 셀트리온, '바이오 USA 2026'서 역대 최다 180건 비즈니스 미팅 성료
+    source: ziksir.com
+    date: '2026-06-26'
+    url: https://www.ziksir.com/news/articleView.html?idxno=138155
+    track: naver
+    description: 네이버 보관 뉴스 기준. 글로벌 파트너십 — 카드가 말한 '약보다 팔리는 길(판매 경로)'과 닿습니다.
   pinnedComment: '근거: 셀트리온 2026년 1분기 공식 보도자료와 IR 자료입니다. 투자 판단이 아니라 사업 구조를 읽는 카드입니다.'
   slides:
   - layout: editorial
