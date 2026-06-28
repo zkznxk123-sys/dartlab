@@ -42,6 +42,24 @@ carousel:
     2026년 1분기 매출은 7,575억원으로 전분기보다 늘었고, 전사는 흑자로 돌아섰습니다. 그런데 영업이익률은 2.3%였고, 에너지소재 쪽은 11억원 적자였습니다.
 
     다음엔 에너지소재 손익, 소재 가격, 설비투자 부담, 차입금을 보면 됩니다.
+  explainers:
+  - term: 에너지소재(양극재·음극재)
+    body: 배터리 핵심 소재 사업입니다. 포스코퓨처엠의 미래 축이지만 아직 적자 구간이라, 흑자 전환 속도가 관건입니다.
+  - term: 설비투자(CAPEX)·차입금
+    body: 공장 증설에 쓴 돈과 그 빚입니다. 매출보다 투자가 앞서면 현금이 마르고 차입이 늘어, 수익성과 함께 봐야 합니다.
+  relatedNews:
+  - title: 북미 양극재 공급 재개 기대…포스코퓨처엠, 하반기 실적 개선 전망
+    source: biztribune.co.kr
+    date: '2026-06-26'
+    url: http://www.biztribune.co.kr/news/articleView.html?idxno=355198
+    track: naver
+    description: 네이버 보관 뉴스 기준. 양극재 공급 재개 — 카드가 말한 '에너지소재 손익'이 개선되는지의 단서입니다.
+  - title: 차입금 늘고 영업외손실 낸 포스코퓨처엠, 차세대 동박 투자
+    source: newsquest.co.kr
+    date: '2026-06-24'
+    url: https://www.newsquest.co.kr/news/articleView.html?idxno=268473
+    track: naver
+    description: 네이버 보관 뉴스 기준. 차입·투자 부담 — '설비투자 부담, 차입금' 관전 포인트와 직결됩니다.
   pinnedComment: '근거: 포스코퓨처엠 2026년 1분기 공식 IR 자료. 회사 제공 분기 자료이므로 이후 공시와 실적에서 숫자가 갱신될 수 있습니다. 투자 판단이 아니라 사업 구조를 읽는 포인트입니다.'
   slides:
   - layout: editorial
