@@ -30,6 +30,24 @@ carousel:
     더 이상한 건 순이익 1.1조를 내는데도 자본총계 9.3조가 10년째 제자리라는 점 — 번 돈을 쌓지 않고 배당·자사주 소각으로 토해내는 정책의 결과입니다. 그리고 가장 자랑하는 자산(정관장)을 두고 행동주의가 '분리상장하라'고 요구했습니다(회사는 거부).
 
     이 회사는 성장이 아니라 분배와 보존으로 읽어야 합니다. 단, 환원 재원 일부는 자산 매각이라는 일회성이라 영업현금흐름이 영업이익을 따라오는지가 관건입니다.
+  explainers:
+  - term: 영업이익률
+    body: 100원을 팔아 본업에서 얼마가 남는지 보는 비율입니다. KT&G는 매출이 늘어도 마진 얇은 해외 궐련·비담배 비중이 커져 이 숫자가 깎였습니다.
+  - term: 자사주 소각·주주환원
+    body: 번 돈을 쌓지 않고 배당·자사주 매입소각으로 주주에게 돌려주는 정책입니다. KT&G는 자본총계가 10년째 제자리일 만큼 환원에 집중합니다.
+  relatedNews:
+  - title: KT&G, 1분기 해외 담배매출 5596억원…전년대비 24.6% 증가
+    source: dongponews.net
+    date: '2026-05-08'
+    url: https://www.dongponews.net/news/articleView.html?idxno=57913
+    track: naver
+    description: 네이버 보관 뉴스 기준. 외형 성장이 해외 궐련에서 나온다는 카드 논제를 숫자로 보여줍니다.
+  - title: 글로벌 큰 손 눈독…KT&G 방경만, 밸류업 총력
+    source: shinailbo.co.kr
+    date: '2026-06-12'
+    url: https://www.shinailbo.co.kr/news/articleView.html?idxno=5029446
+    track: naver
+    description: 네이버 보관 뉴스 기준. 주주환원·밸류업 행보 — 카드가 말한 '성장이 아니라 분배와 보존' 관점입니다.
   pinnedComment: 투자 판단이 아닙니다. 연간 영업이익률 21%대 유지, 영업현금흐름과 영업이익의 갭 축소, 정관장(KGC)의 향방 — 이 셋을 봐야 합니다.
   slides:
   - layout: editorial
