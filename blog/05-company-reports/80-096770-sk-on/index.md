@@ -41,6 +41,24 @@ carousel:
     부호를 뒤집은 건 영업이익 아래 '기타비용' 한 줄입니다. 2024년 7,006억원이던 기타비용이 2025년 5.64조원으로 불었습니다. Ford와 세운 약 11조원짜리 배터리 합작공장 BlueOval SK를 접는 비용이 한꺼번에 손익으로 돌아온 겁니다(합작 해체·SK온 단독 영업손실 9,319억은 외부 보도).
 
     EV 수요가 꺾이자 11조 공장·차입·감가·손상이 동시에 모회사 손익계산서로 들어왔습니다. 잉여현금흐름은 −3.37조. 다음 공시에서 볼 건 매출이 아니라, 합작 해체 비용이 멈추고 현금이 돌아오는가입니다.
+  explainers:
+  - term: 기타비용
+    body: 영업이익 아래에 잡히는 일회성 비용입니다. SK이노베이션은 2025년 기타비용이 5.64조로 불어, 영업흑자(4,487억)인데도 순손실 5.5조가 났습니다.
+  - term: BlueOval SK(합작공장)
+    body: SK온이 미국 포드와 세운 약 11조원짜리 배터리 합작공장입니다. EV 수요 둔화로 이를 접는 비용이 한꺼번에 손익에 반영됐습니다.
+  relatedNews:
+  - title: 美 ESS·유럽 EV '투트랙'…투트랙 전략 짠 K-배터리
+    source: ddaily.co.kr
+    date: '2026-06-28'
+    url: https://www.ddaily.co.kr/page/view/2026062803131655373
+    track: naver
+    description: 네이버 보관 뉴스 기준. EV 수요 둔화에 K배터리가 ESS로 무게를 옮기는 흐름 — 카드가 말한 'EV 수요가 꺾이자'의 산업 배경입니다.
+  - title: K배터리 'ESS 훈풍' 착시…공공입찰 '출혈 수주' 청구서 우려
+    source: dealsite.co.kr
+    date: '2026-06-26'
+    url: https://dealsite.co.kr/articles/164261
+    track: naver
+    description: 네이버 보관 뉴스 기준. 배터리 수익성이 여전히 어렵다는 신호 — 손상·적자 구조가 풀리는 속도를 보는 맥락입니다.
   pinnedComment: 투자 판단이 아닙니다. SK이노베이션 연결은 dartlab 실측, SK온 단독 실적과 BlueOval SK·Ford 합작 해체는 외부 보도입니다. 기타비용이 멈추는가, 잉여현금흐름이 양수로 돌아오는가를 보세요.
   slides:
   - layout: editorial
