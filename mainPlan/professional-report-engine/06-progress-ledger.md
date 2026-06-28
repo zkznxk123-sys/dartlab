@@ -35,8 +35,10 @@
 ## P2 · 리포트 엔진
 - ☐ 삭제 ~2,834 LOC (`story/macro`·publisher·sixAct·dashboard·sections)
 - ✅ **`reportModel.ts` 계약 + 18블록 완성**(`9e7c77862`, tsc 통과): 기존 8 + 신규 10(thesis·exhibit·callout·verdict[noComposite]·scenario·valuationBridge·peerScatter·driverTree·excerpt·transition) + 구조화 객체(Thesis·ScenarioSet·ValuationView). Python emitter·TS build 공통 SSOT. 신규 전부 optional(무회귀). index.ts export(ReportPort 무충돌).
-- ☐ `story/report.py::buildReportModel` emitter
-- ☐ 소비자 마이그레이션 (CLI·테스트·storyTemplate)
+- ✅ **`story/report.py::buildReportModel` emitter 완성·검증**(`044daf6dd`): Story 블록→계약 ReportBlock 매핑(legacy 6→8, self-calc 0) + de-gate 밸류에이션(calcDFV)→valuationBridge·scenario pro 블록 + 구조화 thesis 합성 → schemaVersion=2 dict. L2 lazy import. never-raise(skipped dict). **실데이터 검증**: 삼성전자 10섹션 + valuationBridge(relative 196,337·WACC 7.72·g 8.91) + scenario(172,777/196,337/219,897). offline 9 테스트(`tests/story/test_report.py`). story __init__ export.
+- ✅ **`Company.reportModel()` 공개 verb**(`f47f63a28`, dart·edgar): @property+CallableAccessor dual-access(story 동형)→_reportModelImpl lazy 위임. `report` 정형공시 accessor 충돌 회피로 `reportModel` 명명. ⚠ 함정 교훈: verb 는 @property 라 메서드를 @property·def 사이에 끼우면 데코레이터 탈취 — 별도 @property+_impl 로 분리. 검증: schemaVersion=2·story 무회귀.
+- ◐ 잔여 emitter 심화(offline): thesis.py(정규식 아닌 구조화 인과논거)·arc.py(11단계 아크·transition)·verdict/peerScatter/driverTree pro 블록·waccBreakdown 배선. 현 thesis 는 기존 conclusion+strengths 엮기(작동하나 얕음).
+- ☐ 소비자 마이그레이션 (CLI·테스트·storyTemplate) + 死코드 삭제(importer 신뢰검증 후)
 
 ## P3 · 랜딩 동일소비
 - ☐ `build.ts` → ReportModel emit (베이크 0)
