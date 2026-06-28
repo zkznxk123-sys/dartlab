@@ -36,9 +36,16 @@ Mode A 는 머신 켜질 때만. 진짜 오프라인 폰 알림은 **폰 구독 
 
 ## 3. 로컬 브리지 — PNA/CORS 정밀 (배선, `_attempts` 비대상)
 
-퍼블릭 HTTPS(`https://eddmpython.github.io`) → `http://127.0.0.1:8400` 호출은 mixed-content + Private
-Network Access(PNA) preflight. **현재 코드엔 PNA 헤더 0이고 Starlette `CORSMiddleware` 는 PNA 미구현**이라
-"allow_origins 추가만 하면 된다"는 착각이다.
+> ⚠ **정정(라운드1): PNA 서버헤더 방식은 이미 무효.** Chrome 142(2025-10-28 안정판)부터 PNA 가
+> Local Network Access(LNA)로 교체됐다 — `Access-Control-Allow-Private-Network` 응답 헤더는 **더 이상
+> 통과 메커니즘이 아니고**, 사용자 *권한 프롬프트* + `Private-Network-Access-Name`/`-ID` 응답 헤더로 바뀌었다.
+> 아래 미들웨어 설계는 **P3 착수 직전 LNA 권한-프롬프트 모델로 재작성**해야 한다(P1/P2 무영향 — 브리지는 P3).
+> Firefox/Safari 는 PNA/LNA 미적용이라 origin CORS 만으로 통과(Chrome 한정 게이트). 아래는 *옛 PNA 기준
+> 골격*으로, LNA 재작성 전까지 참고용.
+
+퍼블릭 HTTPS(`https://eddmpython.github.io`) → `http://127.0.0.1:8400` 호출은 mixed-content + 로컬망 접근
+preflight. **현재 코드엔 관련 헤더 0이고 Starlette `CORSMiddleware` 는 미구현**이라 "allow_origins 추가만
+하면 된다"는 착각이다.
 
 - `server/__init__.py` 에 `_PrivateNetworkAccessMiddleware` (**pure-ASGI** — `BaseHTTPMiddleware` 금지,
   streaming buffer 회귀 가드 준수). OPTIONS + `access-control-request-private-network: true` →
@@ -78,11 +85,12 @@ PNA/CORS·`dartlab serve` 명령은 설치가이드로 격리(UI 비노출).
 평가 task 로 합쳐 단일 포트** — `ensurePort` 핑퐁·이중 포트 혼란 회피, `bridge/ping` caps 로 통합 상태 노출.
 헤드리스 사용자용 `dartlab watch` 단독 기동 경로도 남김. (`dartlab serve` 는 존재하지 않음 — 진입은 `dartlab ai`.)
 
-## 7. PNA 종속성 리스크
+## 7. LNA 종속성 리스크 (정정: 예고 아님 — 이미 출시)
 
-PNA spec 은 Chrome 에서 진화 중(permission prompt·local-network-access 로 변경 예고). 헤더를 깔아도 Chrome
-버전에 따라 prompt 가 떠 자동 탐지가 깨질 수 있다. → 핸드셰이크를 '실패 시 명시 안내'로 설계(자동 의존 0).
-Firefox/Safari 는 PNA 미적용이라 origin CORS 만으로 통과 — Chrome 만의 추가 게이트임을 명시.
+Chrome 142(2025-10-28)에서 PNA→LNA 가 **이미 출시**됐다(예고 아님). 로컬망 접근은 이제 사용자 *권한
+프롬프트*가 1급이고, 서버 헤더(`Private-Network-Access-Name`/`-ID`)는 디바이스 식별용일 뿐 통과 메커니즘이
+아니다. → 핸드셰이크를 '권한 프롬프트 + 실패 시 명시 안내'로 설계(자동 탐지 의존 0). Firefox/Safari 는
+미적용이라 origin CORS 만으로 통과 — Chrome 한정 추가 게이트. **P3 본설계 = LNA 모델 기준 재작성.**
 
 ## 8. 모드 B (gist 등록) = P4, 운영자 결정 뒤
 

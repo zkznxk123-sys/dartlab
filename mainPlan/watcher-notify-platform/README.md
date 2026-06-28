@@ -23,10 +23,16 @@ DartLab 을 "보고 끝"이 아니라 "**변화가 생기면 먼저 알려주는
 | [03-local-bridge-personalization.md](03-local-bridge-personalization.md) | 개인화 분기·PNA 미들웨어·capability 토큰·watch.json |
 | [04-phasing-scope-guardrails.md](04-phasing-scope-guardrails.md) | P1~P4·잘라낸 것(scope cut)·non-goal·운영자 결정·파일 계획 |
 | [05-progress-ledger.md](05-progress-ledger.md) | 진행 원장 |
+| [06-p1-hub-worker.md](06-p1-hub-worker.md) | **P1 상세설계** — pushHub worker.js·VAPID JWT·aes128gcm·schema·wrangler (build-ready) |
+| [07-p1-client-receiving.md](07-p1-client-receiving.md) | **P1 상세설계** — SW 3 리스너·NotifyOptIn·공유모듈·env 주입 |
+| [08-p1-publish-ops-test.md](08-p1-publish-ops-test.md) | **P1 상세설계** — 발행 러너·독립 워크플로·배포/롤백·SHIP 게이트 |
+| [09-evaluation-ledger.md](09-evaluation-ledger.md) | **PRD 평가 원장** — 갭 소진 추적(라운드별 PASS/PARTIAL + 폐쇄) |
 
 ## 상태
 
-PRD 합성 완료(6 분야 전문 패널 + 통합). **P1 미착수.** 운영자 결정 대기 → [04](04-phasing-scope-guardrails.md) §운영자 결정.
+PRD 합성(6 분야 패널) + **P1 구현급 상세설계(06~08) + 적대적 평가 4 라운드 → 빌드-ready 수렴 선언**([09](09-evaluation-ledger.md)).
+구조·크립토(aes128gcm 2단 HKDF RFC 검증)·계약·보안 = 안정. 러너/하네스 라이브바인딩 = 검증사실 박제 + 테스트게이트 위임.
+**P1 미착수.** 운영자 결정 8종 → [04 §4](04-phasing-scope-guardrails.md)·[09](09-evaluation-ledger.md). 결정 회수 후 P1 deep 플랜 → 구현.
 
 ## 핵심 정정 (브리프 원안 → 패널 확정)
 

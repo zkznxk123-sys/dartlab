@@ -4,10 +4,11 @@
 
 ### P1 — 허브 + 발행 알림 + 수신 스택 (출시 가능 최소체)
 - `infra/workers/pushHub/` Worker — `/subscribe`·`/send`·`DELETE`, D1 2테이블(+`sentNonce`), VAPID JWT ES256 순수 WebCrypto
-- **수신 스택 0에서 신규 구축**: `service-worker.ts` push/notificationclick/pushsubscriptionchange 3 리스너
+- **수신 스택 0에서 신규 구축**: `service-worker.ts` push/notificationclick/pushsubscriptionchange 3 리스너 ([07](07-p1-client-receiving.md))
 - `NotifyOptIn.svelte` — 2단 게이트 권한·`pushManager.subscribe`·endpoint 직렬화 → `/subscribe`
-- 페이로드 = VAPID-only 빈 본문(본문 푸시는 P2)
-- 발행 알림 토픽(블로그·카드) 발송 — 사람 수동 POST 또는 발행 cron 1줄
+- **페이로드 = aes128gcm 암호화 본문**(라운드1 격상 — 제목 표시 + iOS 표준경로, [06 §0](06-p1-hub-worker.md)). ece 졸업 = P1 SHIP 게이트
+- 발행 알림 러너 `.github/scripts/notify/` + **독립 워크플로 `notify-publish.yml`**(cancel-in-progress 유실 가드, [08 §2](08-p1-publish-ops-test.md))
+- 상세설계 = [06](06-p1-hub-worker.md)(허브) · [07](07-p1-client-receiving.md)(수신) · [08](08-p1-publish-ops-test.md)(러너·운영·검증)
 - **`/send` 인증(SEND_TOKEN + HMAC + nonce) + endpoint origin 화이트리스트 = P1 SHIP 게이트** (미루면 무인증 발송 = 스팸/피싱 발사대)
 - iOS 가드: standalone 일 때만 활성, 미설치는 설치가이드 분기
 
@@ -70,10 +71,14 @@
 | P1 | `infra/workers/pushHub/{worker.js,schema.sql,wrangler.toml,README.md}` | siteSignals/questionCollector 형판 |
 | P1 | `landing/src/service-worker.ts` | push·notificationclick·pushsubscriptionchange 추가(기존 보존) |
 | P1 | `landing/src/lib/components/NotifyOptIn.svelte` | 2단 게이트·구독·POST |
-| P1 | `landing/src/lib/notify/sanitize.ts` | 알림 sink 정화 |
-| P1 | `landing/.env` + `docs.yml` Build env | `VITE_VAPID_PUBLIC_KEY`(공개값) |
-| P2 | `.github/scripts/notify/` + `.github/workflows/*.yml` | 러너 함수·cron(brokerageSync 형판+헬스게이트) |
-| P2 | `tests/_attempts/pushHub/` | aes128gcm ece 졸업 |
+| P1 | `landing/src/lib/notify/subscription.ts` | SW·컴포넌트 공유(직렬화·URL·토픽 SSOT) |
+| P1 | `landing/src/lib/pwa/platform.ts` | `isStandalone`/`isIosSafari` 공유 추출(InstallPrompt 미러) |
+| P1 | `landing/.env` + **`deploy-landing.yml` Build site env** | `VITE_VAPID_PUBLIC_KEY`·`VITE_PUSHHUB_URL`(공개값) |
+| P1 | **`.github/scripts/notify/`** {send,authHeaders,payload,sanitize}.py | 발행 알림 러너(HMAC SSOT [06 §3]) |
+| P1 | **`.github/workflows/notify-publish.yml`** | 독립 워크플로(cancel-in-progress 유실 가드) |
+| P1 | **`tests/_attempts/pushHub/`** | aes128gcm ece 실브라우저 졸업(P1 SHIP 게이트) |
+| P1 | `deploy-landing.yml` `npm test -w landing` 1줄 | vitest CI 게이트화 |
+| P2 | `.github/scripts/notify/` *공개 왓처 토픽* 러너 | scan/gather SSOT 직독(발행 러너와 별개) |
 | P3 | `tests/_attempts/watcherEval/` | 평가 졸업 |
 | P3 | `src/dartlab/synth/watch/` | WATCHER_REGISTRY + 순수 evaluate |
 | P3 | `src/dartlab/pipeline/stages/watch` | L4 오케스트레이션 |
