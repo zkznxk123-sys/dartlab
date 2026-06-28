@@ -32,6 +32,24 @@ carousel:
     포인트는 배를 많이 만들었느냐가 아닙니다. 인도되는 배의 가격, 엔진 이익률, 후판가와 인건비, 영업이익률이 버티느냐입니다.
 
     다음엔 인도되는 배의 가격, 엔진 이익률, 후판가와 인건비, 영업이익률을 보면 됩니다.
+  explainers:
+  - term: 선가
+    body: 배를 파는 가격입니다. 호황기에 비싸게 계약한 배가 인도되며 실적에 반영되는지가 이익률을 좌우합니다.
+  - term: 후판
+    body: 선체를 만드는 두꺼운 철판입니다. 조선사의 핵심 원가라, 후판가가 오르면 이익률이 눌립니다.
+  relatedNews:
+  - title: "'조선주 비싸다?'…\"PER만으로 판단할 업종 아냐\""
+    source: news.mtn.co.kr
+    date: '2026-06-27'
+    url: https://news.mtn.co.kr/news-detail/2026062609144529191
+    track: naver
+    description: 네이버 보관 뉴스 기준. 조선주는 수주·PER이 아니라 이익으로 봐야 한다는 시각 — 카드의 '배보다 이익률' 논제와 같습니다.
+  - title: "\"조선이 또 조선했다\"…해상 데이터센터로 넓히는 고부가 영역"
+    source: etoday.co.kr
+    date: '2026-06-27'
+    url: https://www.etoday.co.kr/news/view/2597675
+    track: naver
+    description: 네이버 보관 뉴스 기준. 고부가 선박·신사업 흐름 — '비싼 배가 얼마나 남기는지'라는 카드 관점의 배경입니다.
   pinnedComment: HD현대중공업은 수주 뉴스보다 인도되는 배의 가격, 엔진 이익률, 후판가와 인건비, 영업이익률을 같이 봐야 합니다.
   slides:
   - layout: editorial
