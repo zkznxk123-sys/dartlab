@@ -150,6 +150,7 @@ def prompt_for(
             f"Image subject: {scene}.",
             f"Image reason: {reason}.",
             "Story specificity: make the image feel planned for this exact article, company, event, location, facility, product, or operating question; avoid generic stock-finance imagery.",
+            "Concrete-scene requirement: translate abstract business words into physical subjects from the story, such as products, facilities, process equipment, quality tests, logistics, customer workflow, or field operations.",
             "Composition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.",
             "Style/medium: realistic business-news photography, not illustration, not a chart, not an infographic.",
             "Lighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.",

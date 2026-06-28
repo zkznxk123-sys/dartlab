@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-28T07:05:54.533951+00:00",
+  "method": "codex-session-jsonl-image-generation-call-result",
+  "cardCrop4x5": true,
+  "assets": [
+    {
+      "file": "scene-01-cover-hook.webp",
+      "session": "C:\\Users\\MSI\\.codex\\sessions\\2026\\06\\27\\rollout-2026-06-27T16-41-58-019f0807-37df-7d52-923d-13c5caac64ba.jsonl",
+      "line": 1807,
+      "promptPreview": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/sk-hynix-hbm-roadmap-lockin/assets/scene-01-cover-hook.webp\nAsset key: scene-01-cover-hook\nPrimary request: Create a realistic editor"
+    },
+    {
+      "file": "scene-02-narrative-turn.webp",
+      "session": "C:\\Users\\MSI\\.codex\\sessions\\2026\\06\\27\\rollout-2026-06-27T16-41-58-019f0807-37df-7d52-923d-13c5caac64ba.jsonl",
+      "line": 1812,
+      "promptPreview": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/sk-hynix-hbm-roadmap-lockin/assets/scene-02-narrative-turn.webp\nAsset key: scene-02-narrative-turn\nPrimary request: Create a realisti"
+    },
+    {
+      "file": "scene-03-number-evidence.webp",
+      "session": "C:\\Users\\MSI\\.codex\\sessions\\2026\\06\\27\\rollout-2026-06-27T16-41-58-019f0807-37df-7d52-923d-13c5caac64ba.jsonl",
+      "line": 1817,
+      "promptPreview": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/sk-hynix-hbm-roadmap-lockin/assets/scene-03-number-evidence.webp\nAsset key: scene-03-number-evidence\nPrimary request: Create a realis"
+    },
+    {
+      "file": "scene-04-number-evidence.webp",
+      "session": "C:\\Users\\MSI\\.codex\\sessions\\2026\\06\\27\\rollout-2026-06-27T16-41-58-019f0807-37df-7d52-923d-13c5caac64ba.jsonl",
+      "line": 1822,
+      "promptPreview": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/sk-hynix-hbm-roadmap-lockin/assets/scene-04-number-evidence.webp\nAsset key: scene-04-number-evidence\nPrimary request: Create a realis"
+    },
+    {
+      "file": "scene-05-narrative-turn.webp",
+      "session": "C:\\Users\\MSI\\.codex\\sessions\\2026\\06\\27\\rollout-2026-06-27T16-41-58-019f0807-37df-7d52-923d-13c5caac64ba.jsonl",
+      "line": 1827,
+      "promptPreview": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/sk-hynix-hbm-roadmap-lockin/assets/scene-05-narrative-turn.webp\nAsset key: scene-05-narrative-turn\nPrimary request: Create a realisti"
+    },
+    {
+      "file": "scene-06-closing-checkpoint.webp",
+      "session": "C:\\Users\\MSI\\.codex\\sessions\\2026\\06\\27\\rollout-2026-06-27T16-41-58-019f0807-37df-7d52-923d-13c5caac64ba.jsonl",
+      "line": 1832,
+      "promptPreview": "Use case: photorealistic-natural\nAsset type: vertical landing /cards news-card background for blog/_issues/sk-hynix-hbm-roadmap-lockin/assets/scene-06-closing-checkpoint.webp\nAsset key: scene-06-closing-checkpoint\nPrimary request: Create a "
+    }
+  ]
+}
