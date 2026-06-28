@@ -54,6 +54,7 @@ from dartlab.story.catalog import (
 from dartlab.story.layout import DEFAULT_LAYOUT, StoryLayout
 from dartlab.story.registry import buildBlocks, buildStory
 from dartlab.story.renderer import renderStory
+from dartlab.story.report import buildReportModel
 from dartlab.story.section import Section
 from dartlab.story.sixAct import SixActScore, sixActScore
 from dartlab.story.summary import SummaryCard
@@ -483,6 +484,7 @@ __all__ = [
     "getSectionMeta",
     "buildBlocks",
     "buildStory",
+    "buildReportModel",
     "renderStory",
     "SixActScore",
     "sixActScore",
