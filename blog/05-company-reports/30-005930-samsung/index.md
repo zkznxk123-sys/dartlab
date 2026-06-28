@@ -43,6 +43,30 @@ carousel:
     그래서 삼성전자는 스마트폰보다 반도체 이익의 질을 봐야 합니다. 메모리 가격과 AI용 제품이 만든 이익이면, 다음 분기에도 그 흐름이 이어지는지가 핵심입니다.
 
     다음에는 세 가지만 보면 됩니다. 반도체 이익이 유지되는지, AI 메모리 샘플이 고객 매출로 바뀌는지, 칩 위탁생산 손익이 나아지는지입니다.
+  explainers:
+  - term: 반도체 부문(DS)
+    body: 삼성전자의 메모리·파운드리를 묶은 사업 부문(Device Solutions)입니다. 1분기 전사 이익의 대부분이 이곳에서 나왔습니다.
+  - term: 파운드리(위탁생산)
+    body: 남이 설계한 칩을 대신 제조해 주는 사업입니다. 메모리와 달리 삼성은 1위 TSMC를 추격하는 입장이라, 손익이 나아지는지가 관전 포인트입니다.
+  relatedNews:
+  - title: 이 대통령, 이재용·최태원 회장과 '3대 메가프로젝트' 공개…반도체 신산업 축
+    source: khan.co.kr
+    date: '2026-06-28'
+    url: https://www.khan.co.kr/article/202606281459001
+    track: naver
+    description: 네이버 보관 뉴스 기준. 삼성전자가 호남 반도체 클러스터 등 차세대 반도체 투자의 중심에 선 흐름입니다.
+  - title: 日 키옥시아 직원 600명 백만장자…AI 수요로 메모리 실적 급증
+    source: news1.kr
+    date: '2026-06-28'
+    url: https://www.news1.kr/world/northeast-asia/6210612
+    track: naver
+    description: 네이버 보관 뉴스 기준. 카드가 말한 '반도체에서 거의 다 번 이익'의 배경 — AI 수요발 메모리 호황입니다.
+  - title: 미국 가는 SK하이닉스…삼성·마이크론과 HBM 경쟁
+    source: joongang.co.kr
+    date: '2026-06-28'
+    url: https://www.joongang.co.kr/article/25440481
+    track: naver
+    description: 네이버 보관 뉴스 기준. 카드의 'AI용 제품' 관전 포인트와 닿는 HBM 경쟁 구도를 보여줍니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 삼성전자 이익의 출처와 다음 확인점을 분리해 보는 관점입니다.'
   slides:
   - layout: editorial

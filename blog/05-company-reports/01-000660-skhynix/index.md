@@ -50,6 +50,30 @@ carousel:
     그래서 질문은 하나입니다. 이 초과이익이 아직 남았느냐, 아니면 이미 피크를 지나고 있느냐입니다.
 
     질문이 피크로 바뀌는지 보려면 HBM4 출하, 영업이익률, 서버 메모리 가격을 봐야 합니다.
+  explainers:
+  - term: HBM
+    body: AI 가속기 옆에 쌓아 붙이는 고대역폭 메모리입니다. 일반 D램보다 비싸게 팔려 하이닉스 이익률을 끌어올린 핵심입니다. HBM3E가 현재 주력, HBM4가 다음 세대입니다.
+  - term: 영업이익률
+    body: 100원을 팔아 본업에서 얼마가 남는지 보는 비율입니다. 메모리는 가격 등락이 커서 이 숫자가 호황에 치솟고 불황에 무너집니다.
+  relatedNews:
+  - title: 미국 가는 SK하이닉스…메모리 기업들이 월가로 향하는 이유
+    source: joongang.co.kr
+    date: '2026-06-28'
+    url: https://www.joongang.co.kr/article/25440481
+    track: naver
+    description: 네이버 보관 뉴스 기준. 하이닉스의 미국 나스닥 ADR 상장 추진 — 메모리 호황 속 글로벌 자본시장 진출 맥락입니다.
+  - title: 日 반도체 키옥시아 직원 600명 백만장자…AI 수요로 메모리 실적 급증
+    source: news1.kr
+    date: '2026-06-28'
+    url: https://www.news1.kr/world/northeast-asia/6210612
+    track: naver
+    description: 네이버 보관 뉴스 기준. 카드가 말한 '비정상적으로 커진 숫자'의 배경 — AI 수요발 메모리 호황을 보여줍니다.
+  - title: 李대통령, 삼전닉스와 '메가투자' 공개…호남 반도체 클러스터
+    source: yna.co.kr
+    date: '2026-06-28'
+    url: https://www.yna.co.kr/view/AKR20260628032300001?input=1195m
+    track: naver
+    description: 네이버 보관 뉴스 기준. 다음 메모리 사이클을 좌우할 대규모 증설 투자 흐름의 맥락입니다.
   pinnedComment: 투자 판단이 아닙니다. 다음 실적에서 볼 관전 포인트는 HBM4 출하, 영업이익률, 서버 메모리 가격입니다.
   slides:
   - layout: editorial
