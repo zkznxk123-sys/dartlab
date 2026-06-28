@@ -41,6 +41,24 @@ carousel:
     범인은 외부가 아니라 내부였다. CEO가 "중간상을 없애고 직접 판다"며 전통 도매 파트너의 50% 이상을 잘랐다(외부). 빈 선반은 On, Hoka, New Balance가 즉시 채웠다. DTC 비율은 32%에서 42%로 올랐지만 전체 파이는 성장이 아니라 채널 이동이었고, FY2025엔 양쪽 다 줄었다.
 
     관전 포인트는 회복 신호다. 32년 Nike맨 Elliott Hill이 복귀해 도매 복원을 최우선으로 밀었고, FY2026 Q2에 Wholesale +8% 첫 반등이 나왔다. 다음에 볼 지표는 도매 비중 회복과 OP Margin 8%→12% 복원 속도다.
+  explainers:
+  - term: DTC(직접판매)
+    body: 브랜드가 도매상을 거치지 않고 소비자에게 직접 파는 방식입니다. 나이키는 DTC를 밀며 도매의 50%+를 잘랐는데, 빈 매대를 On·Hoka가 채워 역효과가 났습니다.
+  - term: 도매(wholesale)
+    body: 백화점·편집숍 등 유통 파트너를 통한 판매입니다. 나이키 회복의 핵심으로, FY2026 2분기 도매 +8% 첫 반등이 턴어라운드 신호로 꼽힙니다.
+  relatedNews:
+  - title: Nike stock falls after Q2 2026 earnings (wholesale rebounds)
+    source: cnbc.com
+    date: '2025-12-18'
+    url: https://www.cnbc.com/2025/12/18/nike-nke-q2-2026-earnings.html
+    track: global
+    description: CNBC. 도매 +8% 첫 반등이 나온 분기 — 카드가 말한 '도매 복원' 회복 신호의 실측입니다.
+  - title: Are Nike CEO Elliott Hill's Turnaround Efforts Paying Off? (Motley Fool)
+    source: fool.com
+    date: '2026-03-12'
+    url: https://www.fool.com/investing/2026/03/12/are-nike-ceo-elliott-hills-turnaround-efforts-payi/
+    track: global
+    description: Motley Fool. 엘리엇 힐의 도매 복원 전략 점검 — 카드가 본 '회복 신호'가 진짜인지의 시각입니다.
   pinnedComment: 투자 판단이 아닙니다. 매출·순이익·현금흐름·자본은 dartlab EDGAR 실측, DTC 채널분해·연도별 바이백은 dartlab 본문 산출, 도매 50% 절감·경쟁사 성장률·점유율·주가는 외부 인용입니다.
   slides:
   - layout: editorial

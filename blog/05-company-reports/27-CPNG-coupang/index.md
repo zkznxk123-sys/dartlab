@@ -44,6 +44,24 @@ carousel:
     그런데 쿠팡의 질문은 끝났느냐가 아닙니다. 고객이 다시 주문하는가, 본업 이익률이 버티는가, 과징금이 현금 부담으로 얼마나 남는가, 새 사업 손실이 줄어드는가입니다.
 
     다음에는 고객 재주문과 본업 이익률, 과징금의 현금 부담, 새 사업 손실 감소를 봅니다.
+  explainers:
+  - term: 과징금
+    body: 법 위반에 부과되는 행정 벌금입니다. 쿠팡은 개인정보 유출·무단수집으로 6,246억(개인정보위 사상 최대)을 맞았고, 이게 현금 부담으로 얼마나 남는지가 관전 포인트입니다.
+  - term: 본업 이익률
+    body: 쿠팡 핵심 커머스의 영업이익률입니다. 유출 공포보다, 고객이 다시 주문하고 본업 마진이 버티는지가 진짜 숫자입니다.
+  relatedNews:
+  - title: South Korea fines Coupang $409 million in country's largest data breach penalty
+    source: finance.yahoo.com
+    date: '2026-06-11'
+    url: https://finance.yahoo.com/sectors/technology/articles/south-korea-fines-coupang-409-032153432.html
+    track: global
+    description: Yahoo Finance. 사상 최대 과징금 $409M(약 6,246억) — 카드가 말한 바로 그 사건의 실측입니다.
+  - title: Coupang Fine Tests Data Privacy Resilience And Global Growth Ambitions
+    source: finance.yahoo.com
+    date: '2026-06-12'
+    url: https://finance.yahoo.com/markets/stocks/articles/coupang-fine-tests-data-privacy-170940380.html
+    track: global
+    description: Yahoo Finance. 신뢰가 비용으로 바뀌는 국면 — 카드가 본 '본업 이익률·재주문이 버티는가'의 시험대입니다.
   pinnedComment: 투자 판단이 아닙니다. 쿠팡은 고객 재주문과 본업 이익률, 과징금의 현금 부담, 새 사업 손실 감소를 봐야 합니다.
   slides:
   - layout: editorial
