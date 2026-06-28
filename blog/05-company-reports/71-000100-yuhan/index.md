@@ -42,6 +42,24 @@ carousel:
     답은 손익계산서 아래층이다. dartlab 이익품질 엔진 실측 영업외/영업이익 비율 113.3% — 영업에서 번 돈보다 영업 밖에서 번 돈이 더 많았던 해. 영업외 +1,183억이 영업이익 1,044억 위에 얹혀 순이익을 배가했다.
 
     관전 포인트는 그 영업외가 내년에도 들어오느냐다. 유한킴벌리 지분법손익은 주석 실측상 2023년 469억만 컸고 나머지 해는 사실상 0. 렉라자 로열티 본격 유입은 2026년 이후. 다음 분기 얀센 Lazcluze 매출 궤적을 본다.
+  explainers:
+  - term: 영업외손익
+    body: 본업(영업) 밖에서 생기는 손익입니다. 유한양행은 영업외 +1,183억(지분법·로열티 등)이 영업이익 1,044억을 넘어, 순이익을 1.77배로 키웠습니다.
+  - term: 렉라자(Lazcluze)
+    body: 유한양행이 개발한 폐암 신약입니다. 글로벌 제약사 얀센이 'Lazcluze'로 팔고 그 매출의 일부가 로열티로 들어옵니다 — 2026년 이후 본격 유입이 관전 포인트입니다.
+  relatedNews:
+  - title: '[더벨] 포스트 렉라자 의구심, 유한양행이 푸는 법'
+    source: thebell.co.kr
+    date: '2026-06-25'
+    url: https://www.thebell.co.kr/free/content/ArticleView.asp?key=202606220510108060105750
+    track: naver
+    description: 네이버 보관 뉴스 기준. 렉라자 이후 파이프라인 — 카드가 던진 '그 영업외가 내년에도 들어오느냐'와 같은 질문입니다.
+  - title: 유한양행, '독점 신약' 글로벌 공략으로 2분기 어닝 서프라이즈 기대
+    source: techholic.co.kr
+    date: '2026-06-26'
+    url: http://www.techholic.co.kr/news/articleView.html?idxno=221846
+    track: naver
+    description: 네이버 보관 뉴스 기준. 렉라자 글로벌 매출 기대 — 카드가 본 '얀센 Lazcluze 매출 궤적'의 진행입니다.
   pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·순이익·영업외 비율·부채비율·유한킴벌리 지분법손익은 dartlab 실측, 한미·셀트리온 비교 수치는 타사 블로그 인용, 렉라자 마일스톤 금액·$1.255B 계약·FDA 승인은 외부 출처/업계 추정입니다.
   slides:
   - layout: editorial
