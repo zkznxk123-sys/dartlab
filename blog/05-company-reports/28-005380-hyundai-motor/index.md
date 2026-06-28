@@ -41,6 +41,30 @@ carousel:
     2026년 1분기 매출은 45.9조원으로 컸지만, 영업이익은 2.5조원이고 영업이익률은 5.5%였습니다. 하이브리드 비중은 17.8%까지 올라왔습니다.
 
     다음엔 영업이익률, 하이브리드 비중, 미국 관세 영향, 가격과 비용 방어를 보면 됩니다.
+  explainers:
+  - term: 영업이익률
+    body: 100원을 팔아 본업에서 얼마가 남는지 보는 비율입니다. 현대차는 많이 팔아도 가격·비용·환율·관세에 따라 이 숫자가 흔들립니다.
+  - term: 하이브리드 비중
+    body: 전체 판매 중 하이브리드차의 비율입니다. 전기차와 내연기관 사이에서 수익성이 좋은 구간이라, 이 비중이 마진을 좌우합니다.
+  relatedNews:
+  - title: 현대차그룹 '미래로' BYD '한국으로'…부산서 불붙은 모빌리티 전쟁
+    source: edaily.co.kr
+    date: '2026-06-28'
+    url: https://www.edaily.co.kr/news/newspath.asp?newsid=01738406645486312
+    track: naver
+    description: 네이버 보관 뉴스 기준. BYD의 한국 진입 등 경쟁 심화 — 카드가 말한 '가격·비용 방어'의 압박 요인입니다.
+  - title: 16시간 파업에 3000억 손실…현대차, 올해 협상도 '첩첩산중'
+    source: dt.co.kr
+    date: '2026-06-28'
+    url: https://www.dt.co.kr/article/12069806?ref=naver
+    track: naver
+    description: 네이버 보관 뉴스 기준. 임금협상·파업에 따른 비용 — '많이 팔아도 남기는 게 문제'라는 논제의 비용 측 근거입니다.
+  - title: 현대차, 190조원 전기차 충전시장 정조준…전동화 승부수
+    source: mydaily.co.kr
+    date: '2026-06-28'
+    url: https://www.mydaily.co.kr/page/view/2026062612483039676
+    track: naver
+    description: 네이버 보관 뉴스 기준. 전동화 투자 흐름 — 하이브리드 비중과 함께 볼 파워트레인 전환 맥락입니다.
   pinnedComment: 근거는 현대차 2026년 1분기 공식 실적 발표입니다. 판매량과 매출은 이익 확정이 아니라 가격, 비용, 관세 뒤에 다시 확인할 숫자입니다.
   slides:
   - layout: editorial
