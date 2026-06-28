@@ -42,6 +42,24 @@ carousel:
     반전은 더 있습니다. 영업현금흐름은 491억에서 5,277억으로 10.7배 폭증했는데, 순이익은 1,437억에서 401억으로 -72% 급락했습니다. 한 회사의 네 지표가 네 방향으로 갈렸죠. 답은 손익계산서 아래층 — 영업외 -2,665억이 영업이익의 83.2%를 흡수했습니다.
 
     관전 포인트는 2026년입니다. 이 영업외 충격이 일회성이면 순이익은 1,000억+로 복귀하고, 계속 -2,000억 이상이면 Vestas 인수 공장의 구조적 감손입니다. 분기 영업외손익과 미국 IRA AMPC 실수혜액이 정답을 말해줄 겁니다.
+  explainers:
+  - term: 영업외손익
+    body: 본업(영업) 밖에서 생기는 손익입니다. CS윈드는 2025년 영업외 -2,665억이 영업이익의 83%를 흡수해, 영업이익은 늘었는데 순이익이 급락했습니다.
+  - term: IRA AMPC
+    body: 미국 인플레이션감축법의 첨단제조 생산세액공제입니다. 풍력 부품 생산에 보조금을 줘, 실수혜액이 CS윈드 미국 실적을 좌우합니다.
+  relatedNews:
+  - title: 씨에스윈드, 미국 풍력발전 시장서 정책 변수 여전
+    source: businesspost.co.kr
+    date: '2026-06-19'
+    url: https://www.businesspost.co.kr/BP?command=article_view&num=440425
+    track: naver
+    description: 네이버 보관 뉴스 기준. 미국 풍력 정책(IRA·AMPC) 변수 — 카드가 말한 영업외·실적을 가르는 핵심 요인입니다.
+  - title: 제동 걸린 트럼프 풍력 규제…K풍력에도 훈풍 불까
+    source: sisajournal-e.com
+    date: '2026-06-17'
+    url: https://www.sisajournal-e.com/news/articleView.html?idxno=421798
+    track: naver
+    description: 네이버 보관 뉴스 기준. 미국 풍력 정책 회복 흐름 — 2026년 실적 방향의 배경입니다.
   pinnedComment: 투자 판단이 아닙니다. 회계수치(매출·영업이익·OPM·OCF·재고증감·영업외 -2,665억·부채비율)는 dartlab 엔진 실측, 그 원인 귀속(영업외 4갈래 분해·강재가격·감손·점유율·산업 전망)은 외부/업계 추정입니다.
   slides:
   - layout: editorial
