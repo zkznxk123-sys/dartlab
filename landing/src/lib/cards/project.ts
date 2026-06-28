@@ -60,6 +60,17 @@ export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | 
 			const cols = [label, ...periods.slice(-6)];
 			return { ...head, kind: 'table', cols, data: block.data, unit: block.unit };
 		}
+		case 'thesis':
+		case 'exhibit':
+		case 'callout':
+		case 'verdict':
+		case 'scenario':
+		case 'valuationBridge':
+		case 'peerScatter':
+		case 'driverTree':
+		case 'excerpt':
+		case 'transition':
+			return null; // 전문 리포트 pro 블록 — /report 전용, 캐러셀 슬라이드 아님(명시 skip)
 		default:
 			return assertNever(block);
 	}
