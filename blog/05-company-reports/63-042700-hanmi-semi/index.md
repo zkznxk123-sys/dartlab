@@ -32,6 +32,24 @@ carousel:
     한미반도체는 2026년 6월 SK하이닉스와 442억원 규모 공급계약을 공시했습니다. 최근 매출 대비 7.66%입니다. 다만 주문, 납품, 매출로 잡히는 시점은 서로 다릅니다.
 
     결론은 단순합니다. 다음 확인 포인트는 AI 메모리 장비 추가 발주, 한 고객 의존이 줄어드는지, 납품 뒤 이익 비율이 회복되는지입니다.
+  explainers:
+  - term: 본더(TC 본더)
+    body: 여러 칩을 정밀하게 쌓아 붙이는 장비입니다. HBM처럼 칩을 적층하는 메모리에 필수라, 메모리 수요가 늘면 본더 주문이 먼저 움직입니다.
+  - term: 공급계약 공시
+    body: 장비 납품 계약을 공시한 것입니다. 다만 계약(주문)·납품·매출 인식 시점이 달라, 공시 금액이 곧 그 분기 매출은 아닙니다.
+  relatedNews:
+  - title: HBM 장비 1위 한미반도체, 2.5D 패키징으로 보폭 넓힌다
+    source: biz.heraldcorp.com
+    date: '2026-06-26'
+    url: https://biz.heraldcorp.com/article/10789058?ref=naver
+    track: naver
+    description: 네이버 보관 뉴스 기준. HBM 본더 1위의 영역 확장 — 카드가 말한 'AI 메모리 장비 추가 발주' 흐름입니다.
+  - title: 한미반도체, 시스템반도체용 'FC 본더 3.5' 출시…파운드리·후공정 공급
+    source: businesspost.co.kr
+    date: '2026-06-26'
+    url: https://www.businesspost.co.kr/BP?command=article_view&num=440909
+    track: naver
+    description: 네이버 보관 뉴스 기준. 새 고객·후공정 진출 — '한 고객 의존이 줄어드는지' 관전 포인트와 닿습니다.
   pinnedComment: 장비주는 주문, 납품, 매출 시점이 다릅니다. 한미반도체는 추가 발주와 납품 뒤 이익 비율을 같이 봐야 합니다.
   slides:
   - layout: editorial
