@@ -79,3 +79,18 @@
 NER 자동추출 대신 손글 큐레이션으로 시작해 오매치 0·정직 유지. 저장 SSOT(story manifest)는 content-asset-ssot 가
 키우고, 본 PRD 는 그 위 **연결망**만 얹는다 — "굽지 않고 carousels/index.json·KnowledgeDB 재사용" 원칙 준수.
 UI 빌드는 푸시 게이트라 운영자 승인 후 한 편씩 완성한다.
+
+## 8. 카드 필터·크로스검색 (scan식 — 데이터 토대 착수, UI 향후)
+
+운영자 2026-06-28: 카드뉴스 전체를 scan 처럼 **크로스로 금방 찾아지게**. 필터 축을 카드 데이터에 박아둔다.
+
+**필터 축 (`CarouselContract` 필드)**
+- `code`(종목코드) · `name`(회사명) · `sector` — 이미 존재.
+- **`cardType`** — `company`(기업이야기) | `event`(기업 이벤트) | `economy`(경제이야기). 2026-06-28 데이터 토대 착수:
+  `build_carousel_contracts.py` 가 company-reports→`company`, `_issues`→yaml `type:`(기본: code 있으면 `event`·없으면 `economy`) 로 emit.
+  build 가 `carousels/index.json` 에 emit(런타임 데이터에 박힘). `model.ts` 인터페이스 타입은 필터 UI 빌드 때 반영(현재 소비처 없음). 3 이슈 카드(`samsung-biologics`=event·`buyback`=event·`korea-macro`=economy) type 박음.
+- **popularity(인기순 슬라이딩)** — 자주 찾고 자주 열어본 카드. 현재 view 데이터 없음 → 향후 조회/오픈 카운트 적재 후 `popularity` 필드. 데이터 생기기 전 보류(날조 금지).
+
+**소비 (UI·향후·푸시 게이트)**: `/cards` 피드에 필터 chip(타입·섹터) + 검색(code/name) + 정렬(date/popularity) — scan 처럼 한 화면 횡단. `carousels/index.json` 단일 파일이라 클라 필터(추가 fetch 0).
+
+**백필 정합**: 카드 근거 백필([[project_card_evidence_backfill]]) 시 code/name/cardType 정확히 박혔는지 함께 점검 → 필터 준비.

@@ -226,6 +226,7 @@ def build_contracts(blog_dir: Path = BLOG_DIR) -> dict[str, dict]:
             "code": code,
             "slug": slug,
             "name": str(fm.get("corpName") or carousel.get("name") or code),
+            "cardType": str(carousel.get("cardType") or "company"),  # 카드 필터 축 (company|event|economy)
             "slides": slides,
         }
         sector = carousel.get("sector") or fm.get("sector")
@@ -304,10 +305,12 @@ def build_issue_contracts(
             sys.stderr.write(f"  skip issue(no slides): {slug}\n")
             continue
         code = _code_from(data, slug)
+        card_type = str(data.get("type") or ("event" if code else "economy"))
         contract: dict = {
             "code": code,  # code 있으면 회사 report 조회/차트 첨부, 없으면 순수 이슈 카드
             "slug": slug,
             "name": str(data.get("corpName") or data.get("name") or data.get("title") or code or slug),
+            "cardType": card_type,  # company|event|economy — 카드 필터/크로스검색 축
             "standalone": True,  # 블로그 글 없음 → PostModal '블로그 이어 읽기' CTA 숨김(code 유무와 별개)
             "slides": slides,
         }

@@ -2,6 +2,7 @@ name: "공시 읽기"
 title: "자사주 매입과 소각은 다릅니다"
 date: 2026-06-27
 sector: disclosure
+type: event
 caption: |
   자사주를 샀다는 공시만 보고 주식 수가 줄었다고 읽으면 안 됩니다.
 
