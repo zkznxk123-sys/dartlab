@@ -40,6 +40,24 @@ carousel:
     범인은 원가율이다. 2021년 코로나 시절 매출원가율 38.6%였던 회사가 지금은 88.3%. 100원 팔면 88원이 원가로 나간다. 코로나 백신이 만든 영업이익률 51%는 다시 오지 않는 '가짜 마진'이었고, 일반 백신으로 정상화된 -19%가 진짜 현실이다.
 
     관전 포인트: 설비투자 2,604억이 매출로 전환되는 순간. 분기 영업이익률 흑자 전환과 CDMO 대형 수주 공시 — 둘 중 하나라도 나오면 J커브의 변곡점이다.
+  explainers:
+  - term: 원가율
+    body: 100원을 팔 때 원가로 나가는 비율(88%)입니다. 코로나 백신 시절 38%였다가 일반 백신으로 정상화되며 적자의 직접 원인이 됐습니다.
+  - term: CDMO
+    body: 남의 백신·바이오약을 대신 개발·생산하는 사업입니다. CAPEX 2,604억으로 지은 설비가 CDMO 수주로 차야 적자가 풀립니다.
+  relatedNews:
+  - title: SK바사, CDMO·차세대 폐렴 백신 쌍두마차 앞세워 실적 반등 예고
+    source: edaily.co.kr
+    date: '2026-06-17'
+    url: https://www.edaily.co.kr/news/newspath.asp?newsid=02699446645482704
+    track: naver
+    description: 네이버 보관 뉴스 기준. CDMO·백신 실적 반등 시나리오 — 카드가 말한 'J커브 변곡점'의 후보입니다.
+  - title: SK바이오사이언스, 질병청과 독감백신 조달 계약 체결…최다 물량
+    source: ilyoseoul.co.kr
+    date: '2026-06-24'
+    url: https://www.ilyoseoul.co.kr/news/articleView.html?idxno=518942
+    track: naver
+    description: 네이버 보관 뉴스 기준. 일반 백신 매출 계약 — 코로나 이후 '진짜 마진'으로 정상화되는 본업의 흐름입니다.
   pinnedComment: 투자 판단이 아닙니다. 모든 재무 수치는 dartlab 실측(전자공시 분기 합산)입니다.
   slides:
   - layout: editorial
