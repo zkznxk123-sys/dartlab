@@ -43,6 +43,24 @@ carousel:
     흥미로운 건 주문만 큰 게 아니라는 점입니다. 1분기 영업이익률은 24.9%였습니다. 다만 수주잔고는 아직 납품 전이고, 변압기는 빨리 찍어내는 제품이 아닙니다.
 
     다음에는 세 가지만 보면 됩니다. 새 주문이 계속 늘어나는지, 수주잔고가 매출로 바뀌는지, 24.9% 이익률이 버티는지입니다.
+  explainers:
+  - term: 변압기
+    body: 전압을 바꿔 전기를 멀리 보내는 핵심 전력 장비입니다. 빨리 찍어내지 못해 공급이 빠듯하고, 수주가 매출로 바뀌는 데 시간이 걸립니다.
+  - term: 수주잔고
+    body: 이미 계약했지만 아직 매출로 잡히지 않은 주문 총액입니다. 납품을 지나야 이익이 됩니다.
+  relatedNews:
+  - title: "\"전력기기만으론 부족하다\"…HD현대일렉트릭, 배전기기 수요 선점"
+    source: view.asiae.co.kr
+    date: '2026-06-28'
+    url: https://view.asiae.co.kr/article/2026062608405738469
+    track: naver
+    description: 네이버 보관 뉴스 기준. 전력 장비 수요 선점 행보 — 카드가 말한 '새 주문이 계속 늘어나는지' 관전 포인트입니다.
+  - title: 전력 수요 급증에 K전력기기 '호황'…효성·HD현대·LS 2분기 최대 실적
+    source: ezyeconomy.com
+    date: '2026-06-25'
+    url: https://www.ezyeconomy.com/news/articleView.html?idxno=236753
+    track: naver
+    description: 네이버 보관 뉴스 기준. 전력기기 호황·실적 흐름 — 수주잔고가 매출·이익으로 바뀌는 업황 배경입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 전력 장비 수주가 매출과 이익으로 바뀌는지 읽는 관점입니다.'
   slides:
   - layout: editorial
