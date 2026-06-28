@@ -28,6 +28,8 @@ export {
 	type DbState
 } from './duckSql';
 export { loadFinanceLiteRuntime, loadCompanyFinanceLitePeriods } from './financeLiteRuntime';
+// CSV 작성기(BOM·RFC4180) — 다운로드 센터 등 외부 재사용(6번째 작성기 금지, 기존 재사용).
+export { toCsv, downloadCsv } from './csvExport';
 
 // ── 페이로드·메트릭·프리셋·타입 ──
 export { encodeScanPayload, decodeScanPayload } from './url';
