@@ -49,6 +49,24 @@ carousel:
     좋게 볼 부분도 있습니다. 전력 저장 배터리 주문, 데이터센터 예비 배터리, 벤츠 공급 계약, 하이브리드용 원통형 배터리 프로젝트가 있습니다. 다만 계약과 주문이 바로 이익은 아닙니다.
 
     그래서 다음엔 영업손실률, 전력 저장 배터리 주문, 재고가 줄어드는 속도, 공장 가동률 회복을 보면 됩니다. 이 넷이 맞아야 삼성SDI는 성장 기대가 아니라 실제 이익 전환으로 읽힙니다.
+  explainers:
+  - term: EV 캐즘
+    body: 전기차 수요가 일시적으로 정체되는 구간입니다. 이 때문에 배터리 수요가 줄어 삼성SDI가 적자에 빠졌습니다.
+  - term: ESS(전력저장장치)
+    body: 전기를 모았다 쓰는 대형 배터리입니다. 전기차 부진을 메울 두 번째 수요축이라, 여기 주문이 실제 이익으로 오는지가 관건입니다.
+  relatedNews:
+  - title: K-배터리, 2분기 흑자전환 시동…전기차 회복·ESS로 부활하나
+    source: yna.co.kr
+    date: '2026-06-28'
+    url: https://www.yna.co.kr/view/AKR20260626053000003?input=1195m
+    track: naver
+    description: 네이버 보관 뉴스 기준. 흑자전환 시동 — 카드가 말한 '손실 축소에서 실제 이익 전환'의 업계 흐름입니다.
+  - title: "AI 타고 뜬 ESS, K배터리의 구원투수일까…\"장밋빛 낙관 경계\""
+    source: biz.newdaily.co.kr
+    date: '2026-06-26'
+    url: https://biz.newdaily.co.kr/site/data/html/2026/06/26/2026062600053.html
+    track: naver
+    description: 네이버 보관 뉴스 기준. ESS 기대와 함께 '계약·주문이 바로 이익은 아니다'라는 카드의 경계와 같은 시각입니다.
   pinnedComment: '근거: 삼성SDI 2026년 1분기 실적 보도자료와 IR 자료. 회사 전망은 확정 실적이 아닙니다.'
   slides:
   - layout: editorial
