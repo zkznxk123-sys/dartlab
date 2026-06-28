@@ -57,7 +57,9 @@ def _growthPathFromRoics(
         return None
     n = max(1, int(years))
     roicPath = [roicAnchor + (waccPct - roicAnchor) * (t / n) ** fadeExponent for t in range(1, n + 1)]
-    growthRates = [max(-5.0, min(reinvestRate * r, 25.0)) for r in roicPath]
+    # 성장 클램프 상한 18% — Damodaran: 8년 지속 >18% 성장은 상위 <5%(fad 외삽 차단).
+    # 25%→18 보수화: 고-ROIC 종목 과대평가 억제(삼양식품류), 일반 성장주 무영향.
+    growthRates = [max(-5.0, min(reinvestRate * r, 18.0)) for r in roicPath]
     return {"growthRates": growthRates, "roicPath": roicPath, "roicAnchor": round(roicAnchor, 2)}
 
 
