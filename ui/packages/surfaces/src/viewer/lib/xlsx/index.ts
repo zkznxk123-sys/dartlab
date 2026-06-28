@@ -14,4 +14,4 @@ export {
 	type SheetPart,
 	type OoxmlParts
 } from './workbook';
-export { buildWorkbook, sheetName, type SheetInput } from './buildWorkbook';
+export { buildWorkbook, objectsToWorkbook, sheetName, type SheetInput, type ObjectSheet } from './buildWorkbook';

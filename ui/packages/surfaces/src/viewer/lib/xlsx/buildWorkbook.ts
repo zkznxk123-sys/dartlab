@@ -167,3 +167,89 @@ export function buildWorkbook(sheets: SheetInput[]): Uint8Array {
 	}
 	return zip.finalize();
 }
+
+/** 객체 행(parquet/포트) 시트 입력 — 헤더 columns + rows(컬럼→네이티브 값). 데이터 export 전용. */
+export interface ObjectSheet {
+	label: string;
+	columns: string[];
+	rows: Record<string, unknown>[];
+}
+
+// 식별자 컬럼 — 숫자로 보여도 텍스트 강제(005930·14자리 접수번호가 숫자로 뭉개지지 않게).
+const ID_COL_RE = /(_no$|_cd$|code$|_id$|isin|ticker$|cik|accession|rcept|stock_?code|corp_?code|isu_cd)/i;
+// 날짜 문자열 — 8자리 YYYYMMDD 또는 구분자 날짜 → 텍스트.
+const DATE_VAL_RE = /^(19|20)\d{6}$|^\d{4}[-./]\d{1,2}[-./]\d{1,2}/;
+
+/** 컬럼별 숫자/텍스트 추론 — 데이터셋은 금액을 콤마없는 *문자열*로 주기도 한다(dart/finance). 한 컬럼의
+ *  모든 비공백 값이 깨끗한 수치(leading-zero·날짜 아님)면 숫자 컬럼. 식별자 이름은 무조건 텍스트. */
+function inferNumericCols(columns: string[], rows: Record<string, unknown>[]): Set<string> {
+	const numeric = new Set<string>();
+	for (const col of columns) {
+		if (ID_COL_RE.test(col)) continue;
+		let sawValue = false;
+		let allNumeric = true;
+		for (const r of rows) {
+			const v = r[col];
+			if (v === null || v === undefined || v === '') continue;
+			if (typeof v === 'number' || typeof v === 'bigint') {
+				sawValue = true;
+				continue;
+			}
+			if (typeof v !== 'string') {
+				allNumeric = false;
+				break;
+			}
+			const s = v.trim();
+			if (!s) continue;
+			if (/^0\d/.test(s) || DATE_VAL_RE.test(s) || typeof coerceCell(s) !== 'number') {
+				allNumeric = false;
+				break;
+			}
+			sawValue = true;
+		}
+		if (sawValue && allNumeric) numeric.add(col);
+	}
+	return numeric;
+}
+
+// 한 ObjectSheet → SheetPart. **타입 보존** — 금액류 컬럼은 숫자 셀(t="n", 정수=천단위/소수=일반), 식별자·
+// 날짜·텍스트는 inlineStr. null/빈값=blank(honest-gap, 0 금지).
+function objectSheetToPart(name: string, input: ObjectSheet): SheetPart {
+	const numericCols = inferNumericCols(input.columns, input.rows);
+	const cells: SheetCell[] = [];
+	input.columns.forEach((c, ci) => cells.push({ row: 0, col: ci, value: c, styleId: STYLE.HEADER }));
+	input.rows.forEach((r, ri) => {
+		const xlRow = ri + 1;
+		input.columns.forEach((c, ci) => {
+			const v = r[c];
+			if (v === null || v === undefined || v === '') return; // honest-gap blank
+			if (numericCols.has(c)) {
+				const num = typeof v === 'number' ? v : typeof v === 'bigint' ? Number(v) : coerceCell(String(v));
+				if (typeof num === 'number' && Number.isFinite(num)) {
+					const styleId = Number.isInteger(num) ? (num < 0 ? STYLE.NUMBER_NEG : STYLE.NUMBER) : STYLE.DEFAULT;
+					cells.push({ row: xlRow, col: ci, value: num, styleId });
+					return;
+				}
+			}
+			cells.push({ row: xlRow, col: ci, value: typeof v === 'string' ? v : String(v), styleId: STYLE.TEXT });
+		});
+	});
+	return { name, cells, merges: [] };
+}
+
+/**
+ * 객체 행 시트들 → 타입 보존 `.xlsx` 바이트. buildWorkbook(텍스트 격자, coerce)과 달리 parquet/포트
+ * 네이티브 타입을 그대로 — 숫자는 숫자, 식별자·날짜 문자열은 텍스트. 시트 분할(다중 ObjectSheet) 지원.
+ */
+export function objectsToWorkbook(sheets: ObjectSheet[]): Uint8Array {
+	const used = new Set<string>();
+	const parts: SheetPart[] = sheets.map((s, i) => objectSheetToPart(sheetName(s.label, used, i), s));
+	const ooxml = emitOoxmlParts(parts);
+	const zip = new ZipStore();
+	const te = new TextEncoder();
+	const order = Object.keys(ooxml).sort((a, b) =>
+		a === '[Content_Types].xml' ? -1 : b === '[Content_Types].xml' ? 1 : a.localeCompare(b)
+	);
+	for (const path of order) zip.addEntry(path, te.encode(ooxml[path]));
+	return zip.finalize();
+}
