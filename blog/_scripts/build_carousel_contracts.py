@@ -5,7 +5,7 @@
      한 글 = 한 스토리(회사+주제) = 산문(본문) + 캐러셀(frontmatter). 차트·핵심 지표는 /cards 가
      ReportModel 에서 덧붙인다(code 기반 라이브 조회).
   2. 이슈(standalone) — `blog/_issues/<slug>/carousel.yaml`. **블로그 글 없이 카드만** 발간(경제/시국 등
-     그때그때 이슈). code 없음 → /cards 가 회사 report 조회 안 하고 손글 editorial 슬라이드만 렌더.
+     그때그때 이슈). stockCode 가 있으면 /cards 가 회사 report 를 붙이고, 없으면 손글 editorial 만 렌더.
      슬라이드 image 는 `blog/_issues/<slug>/assets/<name>.webp`(cards.plan.json 기반 image_gen 산출물)
      → hfMedia `issues/<slug>/` 업로드.
 
@@ -210,9 +210,10 @@ def _content_hash(path: Path) -> str:
 def build_issue_contracts(
     issues_dir: Path, existing_files: set[str]
 ) -> tuple[dict[str, dict], list[CommitOperationAdd]]:
-    """blog/_issues/<slug>/carousel.yaml → standalone 이슈 계약(code 없음). 블로그 글 없이 카드만.
+    """blog/_issues/<slug>/carousel.yaml → standalone 이슈 계약. 블로그 글 없이 카드만.
 
-    회사 계약과 동일 슬라이드 스키마(editorial 3종)지만 키 = 폴더 슬러그, code="" (경제/시국 이슈).
+    회사 계약과 동일 슬라이드 스키마(editorial 3종)지만 키 = 폴더 슬러그. stockCode 가 있으면
+    회사 report 카드가 뒤에 붙고, stockCode 가 없으면 손글 editorial 슬라이드만 렌더한다.
     슬라이드 image(semantic 'cover') → 로컬 `assets/<image>.webp` 콘텐츠해시해서 hfMedia
     `issues/<slug>/<image>.<hash8>.webp` 경로로 치환(렌더가 originUrl('hfMedia', path) 로 해석).
     반환: (슬러그별 계약, 업로드할 이미지 CommitOperationAdd 리스트 — 이미 올라간 해시는 스킵).
@@ -251,11 +252,12 @@ def build_issue_contracts(
         if not slides:
             sys.stderr.write(f"  skip issue(no slides): {slug}\n")
             continue
+        code = _code_from(data, slug)
         contract: dict = {
-            "code": "",  # 경제/시국 이슈 — 종목코드 없음(렌더가 회사 report 조회 안 함)
+            "code": code,  # code 있으면 회사 report 조회/차트 첨부, 없으면 순수 이슈 카드
             "slug": slug,
-            "name": str(data.get("name") or data.get("title") or slug),
-            "standalone": True,  # 블로그 글 없음 → PostModal '블로그 이어 읽기' CTA 숨김
+            "name": str(data.get("corpName") or data.get("name") or data.get("title") or code or slug),
+            "standalone": True,  # 블로그 글 없음 → PostModal '블로그 이어 읽기' CTA 숨김(code 유무와 별개)
             "slides": slides,
         }
         for key in ("sector", "title"):

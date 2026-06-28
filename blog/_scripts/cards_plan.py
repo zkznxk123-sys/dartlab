@@ -320,11 +320,13 @@ def build_issue_plan(issue_dir: Path, *, count: int | None = None) -> dict[str, 
     slides = [s for raw in data.get("slides", []) if (s := normalize_slide(raw))]
     slug = issue_dir.name
     title = str(data.get("title") or data.get("name") or slug)
+    code = code_from(data, slug)
+    corp_name = str(data.get("corpName") or data.get("name") or code or "")
     asset_root = f"blog/_issues/{slug}/assets"
     names = ",".join(
         item["assetKey"]
         for item in build_image_plan(
-            title=title, slug=slug, corp_name="", code="", asset_root=asset_root, slides=slides, count=count
+            title=title, slug=slug, corp_name=corp_name, code=code, asset_root=asset_root, slides=slides, count=count
         )
     )
     return {
@@ -333,8 +335,8 @@ def build_issue_plan(issue_dir: Path, *, count: int | None = None) -> dict[str, 
         "target": {
             "kind": "issue",
             "slug": slug,
-            "stockCode": "",
-            "corpName": "",
+            "stockCode": code,
+            "corpName": corp_name,
             "title": title,
             "postPath": rel(issue_dir / "carousel.yaml"),
             "assetRoot": asset_root,
@@ -354,8 +356,8 @@ def build_issue_plan(issue_dir: Path, *, count: int | None = None) -> dict[str, 
         "imagePlan": build_image_plan(
             title=title,
             slug=slug,
-            corp_name="",
-            code="",
+            corp_name=corp_name,
+            code=code,
             asset_root=asset_root,
             slides=slides,
             count=count,

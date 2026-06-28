@@ -99,6 +99,8 @@ uv run python -X utf8 blog/_scripts/plan_card_news.py --issue {slug} --write
 # cards.plan.json 의 imagegen.extractCommand 실행
 uv run python -X utf8 blog/_scripts/build_carousel_contracts.py
 ```
+- 순수 매크로/제도 이슈는 `stockCode` 없이 둔다 → 손글 카드만 렌더.
+- 특정 기업 관전 포인트 이슈는 `stockCode`와 `corpName`을 넣는다 → 블로그 CTA는 숨기지만 카드 뒤에 회사 report 기반 KPI·그래프·테이블이 붙는다.
 
 ⛔ **핀터레스트·구글 이미지 금지** — 거기 올라온 사진은 대부분 **저작권 있음**(긁어온 것)이라 가져다 쓰면 침해다.
 스톡 보강은 아래 무료 소스만 쓴다.

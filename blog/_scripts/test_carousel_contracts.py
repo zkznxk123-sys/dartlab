@@ -170,6 +170,35 @@ slides:
     assert len(ops) == 1 and ops[0].path_in_repo == img  # 새 해시 → 업로드 1건
 
 
+def test_issue_contract_with_stock_code_attaches_company_deck(tmp_path: Path) -> None:
+    """stockCode 있는 이슈 카드는 블로그 CTA 는 숨기되 회사 report 덱을 붙일 수 있게 code 를 싣는다."""
+    issues = tmp_path / "_issues"
+    slug = "samsung-biologics-rockville-rampup"
+    d = issues / slug
+    (d / "assets").mkdir(parents=True, exist_ok=True)
+    (d / "assets" / "cover.webp").write_bytes(b"\x00fakewebp")
+    (d / "carousel.yaml").write_text(
+        """name: "삼성바이오로직스"
+stockCode: "207940"
+corpName: "삼성바이오로직스"
+title: "공장 가동을 봅니다"
+date: 2026-06-28
+slides:
+  - layout: editorial
+    line: "좋은 숫자보다 [[공장]]"
+    image: cover
+""",
+        encoding="utf-8",
+    )
+    contracts, ops = bcc.build_issue_contracts(issues, existing_files=set())
+    c = contracts[slug]
+    assert c["code"] == "207940"
+    assert c["name"] == "삼성바이오로직스"
+    assert c["standalone"] is True  # 블로그 글은 없어서 CTA 숨김. 차트 첨부 여부는 code 가 결정.
+    assert c["slides"][0]["image"].startswith(f"issues/{slug}/cover.")
+    assert len(ops) == 1
+
+
 def test_issue_image_skip_when_already_uploaded(tmp_path: Path) -> None:
     """이미 같은 해시가 repo 에 있으면 재업로드 안 함(op 0) — 계약 경로는 그대로."""
     issues = tmp_path / "_issues"
