@@ -106,6 +106,43 @@ def _snapshotRow(closes: list, highs: list, lows: list, vols: list, lastDate: st
     }
 
 
+def buildSnapshotFromCompanyDir(companyDir) -> dict:
+    """company/{ticker}.parquet 디렉터리 전체에서 deep 스냅샷 행을 빌드한다(실수익률·52주·변동성).
+
+    백필 publish 잡이 회사 parquet(전체이력)로 게이트 스냅샷을 정확히 채울 때 쓴다. daily(recent ~7일)는
+    currentPrice 만 패치하므로 returns/52w/volatility 의 정본은 본 함수(deep base)다. 둘을 분리해 daily 가
+    deep 수익률을 덮지 않게 한다(스냅샷 returns 전부 null 회귀 차단).
+
+    Args:
+        companyDir: edgar/prices/company 디렉터리(Path 또는 str) — {ticker}.parquet 들.
+
+    Returns:
+        dict — {ticker: snapshotRow}. parquet 부재/손상/빈 ticker 는 제외.
+
+    Example:
+        >>> buildSnapshotFromCompanyDir("data/edgar/prices/company")  # doctest: +SKIP
+        {'AAPL': {'currentPrice': 283.78, 'return1y': 12.4, ...}, ...}
+    """
+    from pathlib import Path
+
+    import polars as pl
+
+    d = Path(companyDir)
+    snap: dict = {}
+    for fp in sorted(d.glob("*.parquet")):
+        ticker = fp.stem.upper()
+        try:
+            df = pl.read_parquet(fp).sort("date")
+            if df.height == 0:
+                continue
+            snap[ticker] = _snapshotRow(
+                df["close"].to_list(), df["high"].to_list(), df["low"].to_list(), df["volume"].to_list(), df["date"][-1]
+            )
+        except Exception:  # noqa: BLE001 — 개별 parquet 손상 격리(나머지 진행)
+            continue
+    return snap
+
+
 def _bakeOne(ticker: str, start: str, outDir) -> dict | None:
     """단일 ticker 의 US OHLCV 를 gather 위임으로 받아 parquet 으로 굽고 스냅샷 행을 파생한다.
 
@@ -154,13 +191,15 @@ def _bakeOne(ticker: str, start: str, outDir) -> dict | None:
     )
 
 
-def _writeSnapshot(snap: dict, *, upload: bool, token) -> str:
+def _writeSnapshot(snap: dict, *, upload: bool, token, patchFields: tuple[str, ...] | None = None) -> str:
     """스냅샷 dict 를 기존 prices-snapshot-us.json 과 병합해 쓰고(증분 안전) 선택적 HF 발행.
 
     Args:
         snap: {ticker: row} 신규/갱신분.
         upload: True 면 HF(landing/map/prices-snapshot-us.json) 직접 발행(KR snapshot 패턴 동형).
         token: HF 토큰(None=env).
+        patchFields: 지정 시 *기존* ticker 행은 이 키들만 덮어쓴다(나머지 deep 필드 보존). 신규 ticker 는
+            전체 행 생성. daily(recent)가 deep 수익률을 덮지 않게 하는 분리 장치. None=행 전체 교체.
 
     Returns:
         str — 쓴 로컬 경로.
@@ -196,7 +235,16 @@ def _writeSnapshot(snap: dict, *, upload: bool, token) -> str:
             merged = dict(json.loads(Path(cached).read_text(encoding="utf-8")).get("data") or {})
         except Exception:  # noqa: BLE001 — 첫 발행 등 미존재 → 신규분만
             merged = {}
-    merged.update(snap)
+    if patchFields:
+        for tk, row in snap.items():
+            if tk in merged and isinstance(merged[tk], dict):
+                for k in patchFields:
+                    if k in row:
+                        merged[tk][k] = row[k]
+            else:
+                merged[tk] = row
+    else:
+        merged.update(snap)
     payload = {
         "schemaVersion": 1,
         "builtAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -327,6 +375,9 @@ def runEdgarPrices(
 # company(base) + recent(tail)를 머지(KR govPriceSource 와 동형). 6437 per-ticker 매일 회피.
 _POLYGON_PACE_SECONDS = 13.0  # 무료 5콜/분 → 12s/콜 + 여유
 _RECENT_KEEP_DAYS = 45  # recent tail 보관 달력일 (backfill 주기 사이 가교)
+# daily(recent ~7일)가 스냅샷에서 덮어도 되는 필드 — 최신가만. returns/52w/volatility 는 윈도가 짧아
+# 신뢰 불가 → deep 백필(buildSnapshotFromCompanyDir)이 정본이라 기존 값 보존.
+_DAILY_PATCH_FIELDS = ("currentPrice", "priceUpdated")
 
 
 def _resolvePolygonKey(key: str | None = None) -> str:
@@ -455,9 +506,9 @@ def runEdgarPricesDaily(
     fresh.write_parquet(recentPath, compression="zstd", statistics=True)
     print(f"[edgarPricesDaily] recent.parquet: {fresh.height}행 ({fresh['ticker'].n_unique()}종목)", flush=True)
 
-    # 스냅샷 빌드 — 각 ticker 의 recent 시계열에서 _snapshotRow (currentPrice + recent 윈도 가능한 returns/52w).
-    # 백필(matrix)은 스냅샷을 안 만드므로 daily 가 게이트를 채운다(전 recent ticker 엔트리 생성·갱신). recent 윈도가
-    # 짧아 1y/52w 는 null 일 수 있음(윈도 성장·후속 full-snap 으로 채움) — currentPrice·return1m 은 즉시.
+    # 스냅샷 패치 — daily(recent ~7일)는 currentPrice·priceUpdated 만 갱신한다(_DAILY_PATCH_FIELDS). returns/
+    # 52w/volatility 는 윈도가 짧아 신뢰 불가 → deep 백필(buildSnapshotFromCompanyDir·publish)이 정본이라 기존
+    # 값을 덮지 않는다(스냅샷 returns 전부 null 회귀 차단). 신규 ticker(아직 deep 미존재)는 게이트 엔트리만 생성.
     snap: dict = {}
     for tk, grp in fresh.sort("date").group_by("ticker"):
         ticker = str(tk[0] if isinstance(tk, tuple) else tk)
@@ -482,7 +533,7 @@ def runEdgarPricesDaily(
         )
         print("[edgarPricesDaily] recent.parquet HF 발행", flush=True)
     try:
-        _writeSnapshot(snap, upload=upload, token=token)
+        _writeSnapshot(snap, upload=upload, token=token, patchFields=_DAILY_PATCH_FIELDS)
     except Exception as exc:  # noqa: BLE001 — 스냅샷 발행 실패 격리(recent 발행은 성공 유지)
         res.report.failures.append(f"snapshot: {type(exc).__name__}: {exc}")
     return res
