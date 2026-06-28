@@ -260,7 +260,9 @@ def _calcLiquidationDetail(company: Any, overrides: dict) -> dict | None:
         return None
 
 
-def _calcTwoStageDcf(company: Any, lifePhase: str | None, overrides: dict) -> dict | None:
+def _calcTwoStageDcf(
+    company: Any, lifePhase: str | None, overrides: dict, basePeriod: str | None = None
+) -> dict | None:
     """Damodaran Multi-stage DCF (Ch.12) — lifeCycle 별 phase 자동 구성.
 
     - earlyGrowth → 3-phase: [5, 3, 2]년 × [g_high, g_high×0.5, g_high×0.2]
@@ -292,7 +294,7 @@ def _calcTwoStageDcf(company: Any, lifePhase: str | None, overrides: dict) -> di
         try:
             from dartlab.analysis.valuation._dFVDrivers import buildReinvestmentPath
 
-            drivers = buildReinvestmentPath(company, waccPct=wacc)
+            drivers = buildReinvestmentPath(company, waccPct=wacc, basePeriod=basePeriod)
         except (ImportError, AttributeError, ValueError, TypeError):
             drivers = None
     if drivers and drivers.get("growthRates"):

@@ -179,7 +179,7 @@ def calcDFV(
         allMethods["liquidation"] = liquidationDetail["perShare"]
 
     # 2b. Two-Stage DCF — 고성장 n년 명시적 + terminal 수렴 (Damodaran Ch.12)
-    twoStageDetail = _calcTwoStageDcf(company, lifePhase, ov)
+    twoStageDetail = _calcTwoStageDcf(company, lifePhase, ov, basePeriod=basePeriod)
     if twoStageDetail and twoStageDetail.get("perShare"):
         allMethods["dcf2stage"] = twoStageDetail["perShare"]
 
