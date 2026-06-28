@@ -296,11 +296,127 @@ DATA_RELEASES: dict[str, dict] = {
 }
 
 
+# ── 다운로드 센터 노출 카탈로그 (mainPlan/data-download-center) ──
+# 보안 SSOT = 위 DATA_RELEASES 의 `public` 플래그. 노출 = public:True · flat(nested 아님) · 표형(tabular).
+# 새 public flat 카테고리는 자동 노출(추가 코드 0), 새 private 은 자동 차단(public:False).
+# nested(`{a}/{b}.parquet`)는 flat `/{dir}/{id}` URL 모델 밖이라 제외(news/public·edgar/sections).
+# 비표형(검색 인덱스·JSON asset·deprecated)만 명시 제외.
+_DOWNLOAD_EXCLUDE_DIRS = {
+    "dart/contentIndex",  # 음절 bigram BM25 CSR 검색 인덱스 — 다운로드 표 아님
+    "edgar/docs",  # deprecated 좀비(edgar/sections 로 이행, write 은퇴)
+    "landing/map",  # 산업지도 JSON asset
+    "landing/dashboards",  # 대시보드 JSON asset
+}
+
+# shardKind — {id} 의 의미(다운로드 센터 UI 입력 + Tier2 적격 도출). 미등록 dir 은 "bulk"(단일/대형, Tier1 만).
+#   company  = {종목코드|ticker}.parquet (회사당 flat)
+#   series   = {시리즈|지수|월}.parquet
+#   dateShard= {날짜}.parquet (전종목 대형 — Tier2 라이브 변환 불가, 413)
+_DOWNLOAD_SHARD_KIND = {
+    "dart/finance": "company",
+    "dart/panel": "company",
+    "dart/report": "company",
+    "edgar/panel": "company",
+    "edgar/financeStmt": "company",
+    "edgar/prices/company": "company",
+    "gov/prices/company": "company",
+    "krx/prices/company": "company",
+    "macro/fred": "series",
+    "macro/ecos": "series",
+    "macro/customs": "series",
+    "gov/indices/index": "series",
+    "research/brokerage": "series",
+    "gov/prices/date": "dateShard",
+    "gov/indices/date": "dateShard",
+    # krx/prices·dart/scan·edgar/finance·edgar/meta·edgar/tickers·krx/indices = 미등록 → "bulk"(단일/대형, Tier1 만).
+}
+
+
+def downloadCatalog() -> list[dict]:
+    """다운로드 센터 노출 카탈로그 — public·flat·표형 dir 만 (보안 SSOT).
+
+    Capabilities:
+        DATA_RELEASES 를 순회해 다운로드 센터(브라우저 Tier1·라이브 워커 Tier2)가 노출할 dir
+        목록을 도출한다. 보안 경계 = `public` 플래그 단일 SSOT — public:False 는 자동 차단된다
+        (private dir 6종이 공개 repo 와 same-repo 라 토큰 차단이 안 먹으므로 코드 게이트가 유일 방어).
+    AIContext:
+        mainPlan/data-download-center 의 노출 화이트리스트 런타임 도출자. 새 public flat 카테고리는
+        추가 코드 0 으로 자동 노출, 새 private 은 자동 차단. TS 미러(downloadCatalog.ts)와 drift
+        가드(tests/core/test_download_catalog.py)가 동기화를 강제한다.
+    Guide:
+        새 카테고리 노출은 DATA_RELEASES 에 public:True flat 으로 추가하면 자동. 비표형(검색 인덱스·
+        JSON·deprecated)은 _DOWNLOAD_EXCLUDE_DIRS 에, {id} 의미는 _DOWNLOAD_SHARD_KIND 에 한 줄.
+    When:
+        다운로드 센터 카탈로그 렌더·워커 allowlist emit·drift 검증 시 호출.
+    How:
+        public:True · not nested · dir 미제외 인 항목만 모아 {dir, label, shardKind} 로 반환(dir 정렬).
+    Requires:
+        DATA_RELEASES 의 각 항목이 `dir`·`public` 키를 가진다(전 항목 충족).
+    Raises:
+        없음 — 빈 결과도 정상 반환.
+    Args:
+        없음.
+    Returns:
+        list[dict] — 각 {dir: str, label: str, shardKind: str}. dir 오름차순 정렬.
+    Example:
+        >>> dirs = {e["dir"] for e in downloadCatalog()}
+        >>> "dart/finance" in dirs and "dart/allFilings" not in dirs
+        True
+    SeeAlso:
+        DATA_RELEASES: 노출의 보안 SSOT(`public` 플래그).
+        _DOWNLOAD_EXCLUDE_DIRS · _DOWNLOAD_SHARD_KIND: 비표형 제외·{id} 분류.
+    """
+    out: list[dict] = []
+    for spec in DATA_RELEASES.values():
+        if not spec.get("public"):  # private 자동 차단 (보안 SSOT)
+            continue
+        if spec.get("nested"):  # nested 는 flat URL 모델 밖
+            continue
+        directory = spec["dir"]
+        if directory in _DOWNLOAD_EXCLUDE_DIRS:  # 비표형 명시 제외
+            continue
+        out.append(
+            {
+                "dir": directory,
+                "label": spec["label"],
+                "shardKind": _DOWNLOAD_SHARD_KIND.get(directory, "bulk"),
+            }
+        )
+    return sorted(out, key=lambda entry: entry["dir"])
+
+
 DATA_CATEGORY_ALIASES: dict[str, str] = {}
 
 
 def resolveDataCategory(category: str) -> str:
-    """Return the active data category for compatibility names."""
+    """호환 별칭(alias) 카테고리명을 활성 카테고리로 해석한다.
+
+    Capabilities:
+        옛 카테고리명(별칭)을 현행 DATA_RELEASES 키로 매핑한다. 미등록 이름은 그대로 반환해
+        repoFor/hfBaseUrl 등이 graceful 하게 기본 경로로 떨어지게 한다.
+    AIContext:
+        카테고리 별칭이 코드 곳곳에 흩어지지 않게 해석을 단일화하는 L0 설정 함수다.
+    Guide:
+        새 별칭은 DATA_CATEGORY_ALIASES 한 줄로 추가하고, 호출자는 원본/별칭 무엇이든 넘긴다.
+    When:
+        repoFor/hfBaseUrl 등이 카테고리를 다루기 직전 정규화할 때.
+    How:
+        DATA_CATEGORY_ALIASES 에 있으면 그 활성 키, 없으면 입력 category 그대로 반환.
+    Requires:
+        없음 — 미등록 입력도 graceful 통과.
+    Raises:
+        없음.
+    Args:
+        category: 카테고리 키 또는 옛 별칭(미등록이면 입력 그대로 반환).
+    Returns:
+        등록된 별칭이면 활성 카테고리 키, 아니면 입력 category.
+    Example:
+        >>> resolveDataCategory("__unregistered__")
+        '__unregistered__'
+    SeeAlso:
+        DATA_CATEGORY_ALIASES: 별칭→활성 카테고리 매핑.
+        repoFor: 해석된 카테고리로 HF repo 를 정한다.
+    """
 
     return DATA_CATEGORY_ALIASES.get(category, category)
 
