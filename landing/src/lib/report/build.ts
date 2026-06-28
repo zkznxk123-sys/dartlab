@@ -9,7 +9,7 @@ import type {
 	Num
 } from '@dartlab/ui-contracts';
 import { loadJson } from '@dartlab/ui-runtime/data/dartlabData';
-import type { ReportBlock, ReportModel, ReportResult, ReportSection, OverviewModel, OverviewTake } from './model';
+import type { ReportBlock, ReportModel, ReportResult, ReportSection, OverviewModel, OverviewTake, Thesis, ThesisPillar } from './model';
 import { lastNonNull, isSkipped } from './model';
 import { findPerspective, PERSPECTIVES, type PerspectiveMeta } from './perspectives';
 import type {
@@ -1481,6 +1481,36 @@ export async function buildReport(
 // ── 5관점 통합 리드 (Executive Overview) — 보고서를 한 몸으로 묶는 thesis + 관점별 한 줄 ──
 // 5관점을 모두 빌드(fetch 는 런타임 캐시 공유)해 관점을 *교차*한 긴장 서술을 만든다.
 // 종합점수·매수의견 아님 — 사실의 교차(마진 위치 vs 환원 강도 vs 밸류 위치)일 뿐.
+// 구조화 thesis — 정규식 산문(thesis: string) 폐기 후계. 관점 ReportModel 들에서 중심논거·
+// 지지기둥·약세론·트리거·콜을 결박해 계약 Thesis 로. Python story.thesis.buildThesis 와 동일
+// 계약(#5 drift-pinned) — TS 측은 관점 결론을, Python 측은 ROIC−WACC 메커니즘을 central 로.
+function buildThesisStruct(built: ReportModel[]): Thesis {
+	const m = (k: string) => built.find((r) => r.perspectiveKey === k);
+	const findOf = (r: ReportModel | undefined, k: string): string => r?.keyFindings.find((f) => f.key === k)?.finding ?? '';
+	const ep = m('earningsPower');
+	const mk = m('market');
+	const first = built[0];
+
+	const central = (ep?.conclusion || first.conclusion || '').trim();
+
+	const pillarOrder = ['earningsPower', 'liquidity', 'capitalReturn', 'market'];
+	const pillars: ThesisPillar[] = [];
+	for (const key of pillarOrder) {
+		const r = m(key);
+		if (r?.conclusion && pillars.length < 3) pillars.push({ claim: r.conclusion.trim(), sectionKey: key, refs: [] });
+	}
+
+	const valBand = /자기역사\s*(하단|중단|상단)/.exec(findOf(mk, '밸류'))?.[1] ?? null;
+	const bearCase = valBand
+		? `시장은 이를 자기 PER ${valBand}에 반영 중 — 밸류 ${valBand} 재평가가 논지 시험대`
+		: (mk?.conclusion?.trim() ?? '');
+
+	const triggers = built.flatMap((r) => r.focusQuestions ?? []).slice(0, 4);
+	const call = mk?.conclusion?.trim() || null;
+
+	return { central, pillars, bearCase, triggers, call };
+}
+
 export async function buildOverview(rt: DartLabRuntime, code: string): Promise<OverviewModel | null> {
 	const results = await Promise.all(
 		PERSPECTIVES.map((p) =>
@@ -1518,5 +1548,5 @@ export async function buildOverview(rt: DartLabRuntime, code: string): Promise<O
 	if (tail.length) parts.push(tail.join('이고, ') + '하고 있습니다.');
 	const thesis = parts.join(' ');
 
-	return { corpName: first.corpName, stockCode: code, asOf: first.asOf, dataBasis: first.dataBasis, industry: first.industry, thesis, takes };
+	return { corpName: first.corpName, stockCode: code, asOf: first.asOf, dataBasis: first.dataBasis, industry: first.industry, thesis, thesisStruct: buildThesisStruct(built), takes };
 }

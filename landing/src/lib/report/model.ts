@@ -9,6 +9,8 @@ import type {
 	ReportSection,
 	ReportSkipped,
 	ReportSourceEngine,
+	Thesis,
+	ThesisPillar,
 } from '@dartlab/ui-contracts';
 import { isSkipped } from '@dartlab/ui-contracts';
 
@@ -20,6 +22,8 @@ export type {
 	ReportSection,
 	ReportSkipped,
 	ReportSourceEngine,
+	Thesis,
+	ThesisPillar,
 };
 export { isSkipped };
 

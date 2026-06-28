@@ -304,7 +304,24 @@
         {#if overview && overview.takes.length > 1}
           <section class="overviewLead">
             <div class="ovKicker">5관점 요약</div>
-            <p class="ovThesis">{clean(overview.thesis)}</p>
+            {#if overview.thesisStruct}
+              {@const th = overview.thesisStruct}
+              <div class="ovThesisStruct">
+                {#if th.central}<p class="ovCentral">{clean(th.central)}</p>{/if}
+                {#if th.pillars.length}
+                  <ul class="ovPillars">
+                    {#each th.pillars as p}<li>{clean(p.claim)}</li>{/each}
+                  </ul>
+                {/if}
+                {#if th.call}<p class="ovCall"><span class="ovTag">콜</span>{clean(th.call)}</p>{/if}
+                {#if th.bearCase}<p class="ovBear"><span class="ovTag bear">약세론</span>{clean(th.bearCase)}</p>{/if}
+                {#if th.triggers.length}
+                  <div class="ovTriggers"><span class="ovTag">관점전환 트리거</span><ul>{#each th.triggers as tr}<li>{clean(tr)}</li>{/each}</ul></div>
+                {/if}
+              </div>
+            {:else}
+              <p class="ovThesis">{clean(overview.thesis)}</p>
+            {/if}
             <ol class="ovTakes">
               {#each overview.takes as t}
                 <li class:on={t.key === perspectiveKey}>
@@ -589,6 +606,17 @@
   .overviewLead { border: 1px solid var(--bd2); border-radius: 6px; background: var(--soft); padding: 16px 18px; margin-bottom: 26px; }
   .ovKicker { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 9px; }
   .ovThesis { font-size: 13.5px; line-height: 1.72; font-weight: 600; margin: 0 0 12px; }
+  /* 구조화 thesis — 중심논거 + 지지기둥 + 콜/약세론/트리거 */
+  .ovThesisStruct { margin: 0 0 13px; }
+  .ovCentral { font-size: 14.5px; line-height: 1.62; font-weight: 700; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .ovPillars { margin: 0 0 11px; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .ovPillars li { position: relative; padding-left: 15px; font-size: 12.5px; line-height: 1.6; color: var(--fg2); }
+  .ovPillars li::before { content: '▪'; position: absolute; left: 0; top: 0; color: var(--accent); font-size: 10px; }
+  .ovTag { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 3px; padding: 1px 5px; margin-right: 7px; vertical-align: 1px; }
+  .ovTag.bear { color: var(--neg, #c0392b); border-color: color-mix(in srgb, var(--neg, #c0392b) 35%, transparent); }
+  .ovCall, .ovBear { font-size: 12.5px; line-height: 1.6; margin: 0 0 7px; }
+  .ovTriggers { font-size: 12px; line-height: 1.55; margin: 4px 0 0; }
+  .ovTriggers ul { margin: 5px 0 0; padding-left: 16px; display: grid; gap: 3px; color: var(--fg2); }
   .ovTakes { margin: 0; padding: 0; list-style: none; counter-reset: ov; }
   .ovTakes li { counter-increment: ov; border-top: 1px solid var(--bd); }
   .ovTake { display: block; width: 100%; text-align: left; background: transparent; border: 0; padding: 7px 0 7px 28px; cursor: pointer; font-family: var(--sans); position: relative; }
