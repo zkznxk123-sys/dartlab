@@ -77,7 +77,7 @@ carousel:
       bigNumber: "141.6"
       unit: "% 매출원가율"
       context: "2022년 매출 71.3조에 원가 100.9조. 연료비는 국제시세가 정하고, 요금은 정치가 정한다."
-      image: bg-scissor-graph-dark
+      image: bg-lng-flame-dark
     - layout: editorialBeat
       kicker: "구조의 뿌리"
       line: "원가는 [[시장]]이 정하고\n매출은 [[정치]]가 정한다"
@@ -110,7 +110,7 @@ carousel:
       bigNumber: "59.6"
       unit: "%p 영업이익률 스윙"
       context: "-45.8%(2022) → +13.8%(2025). 원가가 떨어지고 요금이 오르자 그 차이가 그대로 이익이 됐다."
-      image: bg-opm-swing-dark
+      image: bg-power-tower-night
     - layout: editorialBeat
       kicker: "결론"
       line: "다음 재무제표를 쓸 사람은\nCEO가 아니라 [[정부]]다"
