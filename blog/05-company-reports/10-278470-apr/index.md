@@ -42,6 +42,24 @@ carousel:
     1분기 매출은 약 5,934억원, 영업이익은 약 1,523억원입니다. 해외 매출 비중은 89%까지 올라왔고, 뷰티기기 매출도 약 1,327억원입니다. 숫자는 강합니다.
 
     다음에는 뷰티기기 매출 비중, 해외·온라인 판매 경로, 재구매와 판매 비용을 보면 됩니다.
+  explainers:
+  - term: 객단가(결제금액)
+    body: 고객 한 명이 한 번에 결제하는 금액입니다. 에이피알은 화장품(세럼)에 뷰티기기를 묶어 객단가를 15배로 키우는 구조가 핵심입니다.
+  - term: 뷰티기기
+    body: 집에서 쓰는 미용 디바이스(부스터 등)입니다. 화장품보다 단가가 높아 에이피알 매출·마진의 동력이지만, 진입장벽이 낮은 게 약점입니다.
+  relatedNews:
+  - title: 에이피알, 해외 매출 207% 뛰는 동안…메디큐브 잘나간다
+    source: newsworker.co.kr
+    date: '2026-06-24'
+    url: http://www.newsworker.co.kr/news/articleView.html?idxno=432675
+    track: naver
+    description: 네이버 보관 뉴스 기준. 해외 매출 급증 — 카드가 말한 '해외 비중 89%'의 성장 동력입니다.
+  - title: 에이피알, '부스터 프로 X2' 캐릭터 협업 에디션 확대
+    source: sportschosun.com
+    date: '2026-06-28'
+    url: https://www.sportschosun.com/life/2026-06-28/202606280100193840012824
+    track: naver
+    description: 네이버 보관 뉴스 기준. 뷰티기기 신제품 — 카드가 짚은 '디바이스가 만든 결제 구조'의 실제 사례입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 뷰티기기 매출 비중, 해외·온라인 판매 경로, 재구매와 판매 비용을 읽는 관점입니다.'
   slides:
   - layout: editorial
