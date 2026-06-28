@@ -34,6 +34,28 @@ def _estimateReinvestRate(history: list[dict]) -> float | None:
     return max(0.0, min(med, 0.9))
 
 
+def _growthPathFromRoics(
+    validRoic: list[float], reinvestRate: float, waccPct: float, years: int, fadeExponent: float = 1.0
+) -> dict | None:
+    """through-cycle ROIC anchor → WACC fade → 연도별 펀더멘털 성장 (순수, 테스트용).
+
+    roicAnchor = through-cycle 중앙값(median) — 사이클 peak/trough 평탄화. 최신 peak 대신
+    정규화 ROIC 로 성장을 앵커링해 사이클 고점 과대평가 차단(FCF 정규화와 정합).
+    예: 하이닉스 latest 31% → median 7.35%(2023 메모리 불황 -10.4% 포함) → 과공격 성장 차단.
+    roicAnchor ≤ 0(구조적 적자) 면 None.
+    """
+    if not validRoic:
+        return None
+    s = sorted(validRoic)
+    roicAnchor = s[len(s) // 2]
+    if roicAnchor <= 0:
+        return None
+    n = max(1, int(years))
+    roicPath = [roicAnchor + (waccPct - roicAnchor) * (t / n) ** fadeExponent for t in range(1, n + 1)]
+    growthRates = [max(-5.0, min(reinvestRate * r, 25.0)) for r in roicPath]
+    return {"growthRates": growthRates, "roicPath": roicPath, "roicAnchor": round(roicAnchor, 2)}
+
+
 def buildReinvestmentPath(
     company: Any, *, waccPct: float | None = None, years: int = 8, fadeExponent: float = 1.0
 ) -> dict | None:
@@ -55,7 +77,8 @@ def buildReinvestmentPath(
             - ``growthRates`` (list[float]): 연도별 성장률(%) — multiStageDcf growthRates.
             - ``roicPath`` (list[float]): 연도별 ROIC(%, WACC 로 fade).
             - ``reinvestRate`` (float): 추정 재투자율 [0,0.9].
-            - ``roic0``/``wacc``/``fundamentalGrowth`` (float): 진단용.
+            - ``roic0``/``roicAnchor``/``wacc``/``fundamentalGrowth`` (float): 진단용
+              (roic0=최신 ROIC, roicAnchor=through-cycle median 정규화 — fundamentalGrowth 의 anchor).
         ROIC/재투자율 추정 실패 시 None (호출부가 기존 phase 폴백).
 
     Example:
@@ -99,27 +122,26 @@ def buildReinvestmentPath(
     if not rt or not rt.get("history"):
         return None
     hist = rt["history"]
-    # 최신 *유효* ROIC — 당해 미완 연도(IS 미집계)는 roic None 이라 skip.
+    # 유효 ROIC 시계열 — 당해 미완 연도(IS 미집계)는 roic None 이라 skip.
     validRoic = [h.get("roic") for h in hist if h.get("roic") is not None]
     if not validRoic:
-        return None
-    roic0 = validRoic[0]
-    if roic0 <= 0:
         return None
     reinvest = _estimateReinvestRate(hist)
     if reinvest is None:
         return None
     wacc = waccPct if waccPct is not None else (hist[0].get("waccEstimate") or 9.0)
-    n = max(1, int(years))
-    roicPath = [roic0 + (wacc - roic0) * (t / n) ** fadeExponent for t in range(1, n + 1)]
-    growthRates = [max(-5.0, min(reinvest * r, 25.0)) for r in roicPath]
+    # through-cycle median anchor (사이클 peak 정규화) — _growthPathFromRoics.
+    path = _growthPathFromRoics(validRoic, reinvest, wacc, years, fadeExponent)
+    if path is None:
+        return None
     return {
-        "growthRates": growthRates,
-        "roicPath": roicPath,
+        "growthRates": path["growthRates"],
+        "roicPath": path["roicPath"],
         "reinvestRate": round(reinvest, 4),
-        "roic0": round(roic0, 2),
+        "roic0": round(validRoic[0], 2),  # 최신(진단용)
+        "roicAnchor": path["roicAnchor"],  # through-cycle 정규화 앵커
         "wacc": round(wacc, 2),
-        "fundamentalGrowth": round(reinvest * roic0, 2),
+        "fundamentalGrowth": round(reinvest * path["roicAnchor"], 2),
     }
 
 

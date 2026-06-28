@@ -198,3 +198,38 @@ def test_g5_growth_equation_consistency():
         country="KR",
     )
     assert badRes["score"] <= okRes["score"], "위반 입력 score 가 정합보다 높음(검증 실패)"
+
+
+# ── through-cycle ROIC 정규화 (사이클 peak 과대평가 차단) — 실 캡처 ROIC 이력 ──
+
+HYNIX_ROIC = [31.08, 25.9, -10.4, 5.8, 14.82, 7.35, 4.63]  # 000660 — HBM peak + 2023 메모리 불황
+SAMSUNG_ROIC = [9.9, 6.71, 1.61, 10.35, 13.69, 10.15, 8.21]  # 005930 — 안정
+
+
+def test_through_cycle_roic_tames_cyclical_peak():
+    """고-ROIC 사이클 peak(하이닉스 31%)을 through-cycle median(7.35)으로 정규화 → 성장 절반↓."""
+    from dartlab.analysis.valuation._dFVDrivers import _growthPathFromRoics
+
+    reinvest = 0.9
+    hy = _growthPathFromRoics(HYNIX_ROIC, reinvest, 9.69, 8)
+    assert hy is not None
+    assert hy["roicAnchor"] == 7.35, "through-cycle median anchor (peak 31.08 아님)"
+    fundGNorm = reinvest * hy["roicAnchor"]
+    fundGPeak = reinvest * HYNIX_ROIC[0]  # 옛 latest-peak anchor
+    assert fundGNorm < fundGPeak * 0.5, "peak 대비 절반 이하로 정규화"
+
+
+def test_through_cycle_roic_leaves_stable_firm_unchanged():
+    """안정 종목(삼성)은 median ≈ latest → 정규화 영향 거의 없음."""
+    from dartlab.analysis.valuation._dFVDrivers import _growthPathFromRoics
+
+    sam = _growthPathFromRoics(SAMSUNG_ROIC, 0.9, 8.72, 8)
+    assert sam is not None
+    assert abs(sam["roicAnchor"] - SAMSUNG_ROIC[0]) < 1.5, "median ≈ latest (무변)"
+
+
+def test_through_cycle_roic_none_for_structural_loss():
+    """through-cycle ROIC ≤ 0(구조적 적자) → None (성장 anchor 불가, 호출부 폴백)."""
+    from dartlab.analysis.valuation._dFVDrivers import _growthPathFromRoics
+
+    assert _growthPathFromRoics([-5.0, -2.0, -8.0, 1.0], 0.5, 9.0, 8) is None
