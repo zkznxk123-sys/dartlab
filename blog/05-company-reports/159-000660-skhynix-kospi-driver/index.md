@@ -43,6 +43,24 @@ carousel:
     셋이 버티면 이야기는 이어집니다. 하나라도 빠르게 깨지면 질문은 더 갈까가 아니라 피크였나로 바뀝니다.
 
     그래서 다음엔 영업이익률 유지, HBM4 실제 물량, 공급 확대 뒤 가격을 봐야 합니다.
+  explainers:
+  - term: HBM
+    body: AI 반도체에 쌓아 올리는 초고속 메모리입니다. 엔비디아 GPU에 필수라, SK하이닉스 이익의 핵심 동력입니다. HBM4는 다음 세대입니다.
+  - term: 영업이익률(OPM)
+    body: 매출에서 영업이익이 차지하는 비율입니다. 1분기 72%는 메모리 역사상 비정상적으로 높은 수준이라, 이게 유지될지가 카드의 핵심 질문입니다.
+  relatedNews:
+  - title: HBM4E가 왜 7세대야?…AI 심장 HBM '가계도'
+    source: newstomato.com
+    date: '2026-06-28'
+    url: http://www.newstomato.com/ReadNews.aspx?no=1305417&inflow=N
+    track: naver
+    description: 네이버 보관 뉴스 기준. HBM 세대 정리 — 카드가 말한 'HBM4 실제 물량'의 기술 배경입니다.
+  - title: 메모리 대란에 애플·MS도 흔든…중소 업체는 '생존 위기'
+    source: edaily.co.kr
+    date: '2026-06-28'
+    url: https://www.edaily.co.kr/news/newspath.asp?newsid=02404246645486312
+    track: naver
+    description: 네이버 보관 뉴스 기준. 메모리 가격 급등·공급 부족 — 카드가 말한 '공급 확대 뒤 가격'을 가르는 변수입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 영업이익률 유지, HBM4 실제 물량, 공급 확대 뒤 가격을 읽는 관점입니다.'
   slides:
   - layout: editorial

@@ -45,6 +45,24 @@ carousel:
     그래도 이익의 질은 진짜다. 2025년 영업현금흐름 9,595억, FCF 7,176억 — 높은 이익이 실제 현금으로 이어졌다. AI 서버가 첫 장면이라면 변압기는 전기를 공급하는 병목, 반도체 랠리의 후행 인프라다.
 
     그러나 좋은 회사라는 설명은 이미 가격에 들어갔다. PER 50배가 버티려면 OPM 20%대 중반, 고마진 수주의 매출 전환, 북미 수요, 운전자본 품질이 동시에 유지돼야 한다. 두 번째 주도주 자리는 테마가 아니라 매 분기 숫자로 지키는 자리다 — 비싼데도 계속 들여다봐야 하는 종목인 이유다.
+  explainers:
+  - term: 변압기
+    body: 전압을 높이거나 낮춰 전기를 안전하게 보내는 핵심 전력기기입니다. 데이터센터가 늘면 필수라 수요가 몰리지만, 만드는 데 몇 년 걸려 수주가 매출이 되는 속도가 병목입니다.
+  - term: 수주잔고
+    body: 이미 계약했지만 아직 매출로 잡히지 않은 일감입니다. HD현대일렉트릭은 78.88억달러(10조+)로, 미래 매출의 가시성을 보여줍니다.
+  relatedNews:
+  - title: "\"전력기기만으론 부족하다\"…HD현대일렉트릭, AI發 배전기기 수요 선점"
+    source: asiae.co.kr
+    date: '2026-06-28'
+    url: https://view.asiae.co.kr/article/2026062608405738469
+    track: naver
+    description: 네이버 보관 뉴스 기준. AI 발(發) 전력 수요 선점 행보 — 카드가 말한 '두 번째 주도주' 논리의 현재 진행형입니다.
+  - title: AI 전력 수요 급증에 K전력기기 '호황'…HD현대 등 2분기 최대 실적
+    source: ezyeconomy.com
+    date: '2026-06-25'
+    url: https://www.ezyeconomy.com/news/articleView.html?idxno=236753
+    track: naver
+    description: 네이버 보관 뉴스 기준. 전력기기 호황·최대 실적 — 카드가 말한 'OPM 유지·수주의 매출 전환' 배경입니다.
   pinnedComment: |
     원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
     github.com/eddmpython/dartlab
