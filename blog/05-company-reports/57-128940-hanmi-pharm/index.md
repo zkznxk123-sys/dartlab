@@ -30,6 +30,24 @@ carousel:
     그래도 안 망한 이유는 매출총이익률 57%를 10년간 지킨 개량신약 포트폴리오(에소메졸·아모잘탄)입니다. 그 현금 바닥 위에서 R&D를 매출의 34%까지 태웠고(2020년 3,724억), 영업이익이 490억까지 떨어졌습니다.
 
     그 태운 R&D가 롤베돈 FDA 승인·로열티로 돌아오며 영업이익이 5년 만에 5.3배가 됐습니다. 남은 질문은 '태운 R&D가 몇 번 더 돌아오는가' — MASH·비만 신약의 글로벌 계약이 다음 방아쇠입니다.
+  explainers:
+  - term: 기술수출(라이선스)
+    body: 신약 후보물질을 글로벌 제약사에 팔아 계약금·로열티를 받는 것입니다. 한미는 9년간 4건이 반환됐지만, 태운 R&D가 다른 형태로 돌아왔습니다.
+  - term: 개량신약
+    body: 기존 약을 개선해 만든 약입니다(에소메졸·아모잘탄). 높은 마진으로 현금을 벌어 신약 R&D를 버티게 한 바닥입니다.
+  relatedNews:
+  - title: 기술수출에서 비만신약까지…한미약품 R&D 경쟁력 어디까지 왔나
+    source: koreaittimes.com
+    date: '2026-06-26'
+    url: https://www.koreaittimes.com/news/articleView.html?idxno=154750
+    track: naver
+    description: 네이버 보관 뉴스 기준. 기술수출·비만신약 R&D — 카드가 말한 '태운 R&D의 회수'를 정면으로 다룹니다.
+  - title: 한미약품, 혁신적 신약 파이프라인으로 시장 공략
+    source: techholic.co.kr
+    date: '2026-06-26'
+    url: http://www.techholic.co.kr/news/articleView.html?idxno=221847
+    track: naver
+    description: 네이버 보관 뉴스 기준. 신약 파이프라인 — '다음 방아쇠'인 MASH·비만 등 글로벌 계약 후보를 보여줍니다.
   pinnedComment: 투자 판단이 아닙니다. 기술수출 분기 매출, R&D 지출 반등, MASH·비만(HM15275)의 새 글로벌 계약 — 이 셋이 '태운 R&D의 회수'를 가립니다.
   slides:
   - layout: editorial
