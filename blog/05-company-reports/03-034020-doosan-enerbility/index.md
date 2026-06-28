@@ -41,6 +41,24 @@ carousel:
     1분기 에너빌리티 부문 수주는 2.8조원, 수주잔고는 23.2조원 수준이었습니다. 가스터빈 10기도 따냈습니다. 기대감이 아니라 주문이 먼저 보인 분기입니다.
 
     다음엔 신규 수주, 수주잔고의 매출 전환, 영업이익률, 현금 유입을 보면 됩니다.
+  explainers:
+  - term: 가스터빈
+    body: 발전소에서 가스를 태워 전기를 만드는 핵심 설비입니다. 두산에너빌리티가 국산화한 고부가 제품으로, 수주가 매출로 바뀌는 속도가 관건입니다.
+  - term: 수주잔고
+    body: 이미 계약했지만 아직 매출로 잡히지 않은 주문 총액입니다. 제작·납품·정산을 지나야 이익이 됩니다.
+  relatedNews:
+  - title: "'SMR 첫 삽'에 두산·현대 웃는다…22조 원전 공급망 선점 경쟁"
+    source: g-enews.com
+    date: '2026-06-26'
+    url: https://www.g-enews.com/view.php?ud=20260626070353711fbbec65dfb_1
+    track: naver
+    description: 네이버 보관 뉴스 기준. SMR·원전 공급망 수주 경쟁 — '신규 수주'가 카드 관전 포인트인 이유입니다.
+  - title: "'전력괴물' AI가 쏘아 올린 '원전 특수'…K건설, 활로 찾기"
+    source: inews24.com
+    date: '2026-06-26'
+    url: http://www.inews24.com/view/1979945
+    track: naver
+    description: 네이버 보관 뉴스 기준. AI 전력 수요발 원전 특수 — 카드가 말한 '원전 뉴스가 뜨는' 배경입니다.
   pinnedComment: 근거는 두산에너빌리티 2026년 1분기 공식 IR입니다. 수주는 매출과 이익 확정이 아니라 제작·납품·정산 뒤 확인할 숫자입니다.
   slides:
   - layout: editorial
