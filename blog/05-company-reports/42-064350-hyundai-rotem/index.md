@@ -44,6 +44,24 @@ carousel:
     수주잔고는 29.8조원입니다. 숫자는 크지만 잔고는 아직 매출이 아닙니다. 납품 일정, 원가, 환율을 지나야 실제 이익으로 바뀝니다.
 
     다음에는 세 가지만 보면 됩니다. 수주잔고가 매출로 바뀌는 속도, 방산에서 남는 이익 비율이 유지되는지, 새 주문이 다시 붙는지입니다.
+  explainers:
+  - term: 수주잔고
+    body: 이미 계약했지만 아직 매출로 잡히지 않은 주문(29.8조)입니다. 납품·원가·환율을 지나야 실제 이익이 됩니다.
+  - term: 방산(K2 전차)
+    body: 현대로템 이익의 중심입니다. 철도가 아니라 K2 전차 등 방산 수출이 1분기 이익 대부분을 만들었습니다.
+  relatedNews:
+  - title: 베일 벗는 K2 전차 조기 인도…방산주 랠리, 지금이 출구일까
+    source: g-enews.com
+    date: '2026-06-28'
+    url: https://www.g-enews.com/view.php?ud=202606280845115548fbbec65dfb_1
+    track: naver
+    description: 네이버 보관 뉴스 기준. K2 전차 인도 진전 — 카드가 말한 '수주잔고가 매출로 바뀌는 속도'입니다.
+  - title: 유럽 전차 시장 재편…K2, 골든타임 열렸지만 구조적 견제 넘어야
+    source: g-enews.com
+    date: '2026-06-27'
+    url: https://www.g-enews.com/view.php?ud=20260627092612639fbbec65dfb_1
+    track: naver
+    description: 네이버 보관 뉴스 기준. K2 수출 기회와 견제 — '새 주문이 다시 붙는지' 관전 포인트입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 현대로템의 이익 출처와 수주잔고 전환을 읽는 관점입니다.'
   slides:
   - layout: editorial
