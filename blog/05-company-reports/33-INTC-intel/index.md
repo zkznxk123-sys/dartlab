@@ -43,6 +43,24 @@ carousel:
     뜯어보면 반전이 있습니다. 매출은 $79B→$53B로 33% 급락, 파운드리(IFS) 적자만 $10.3B(외부, Intel Q4 2025). 그런데 최대 경쟁자 NVIDIA가 $5B를 넣었고(외부), 일론 머스크의 Terafab 파트너십(외부)이 왔고, 위기에 팔았던 아일랜드 Fab 34를 $14.2B에 되샀습니다(외부). 시장이 산 건 실적이 아니라 '18A 공정의 미래'입니다.
 
     관전 포인트는 단 하나입니다. IFS가 흑자로 돌아서고 18A 수율이 80%를 넘는가. 지금은 적자 $10.3B(외부), 수율 65~75%(외부 추정), 잉여현금흐름 -$15.7B. 다음 분기 IFS 영업이익과 18A 수율 곡선을 보세요.
+  explainers:
+  - term: 파운드리(IFS)
+    body: 다른 회사 칩을 위탁 생산하는 사업입니다. 인텔 파운드리(IFS)는 적자 $10.3B에 외부 고객 매출이 거의 없어, 흑자 전환이 턴어라운드의 핵심입니다.
+  - term: 18A(수율)
+    body: 인텔의 1.8nm급 최신 공정입니다. 수율(양품 비율)이 80%를 넘어야 대형 고객을 잡는데, 경쟁사 NVIDIA가 테스트 후 채택을 보류해 그 불확실성이 드러났습니다.
+  relatedNews:
+  - title: 'INTC: Intel Foundry Push and Nvidia Backing Could Drive 2026 Growth'
+    source: finance.yahoo.com
+    date: '2026-06-20'
+    url: https://finance.yahoo.com/news/intc-intel-foundry-push-nvidia-180510667.html
+    track: global
+    description: Yahoo Finance. 파운드리 드라이브 + NVIDIA $5B 지원 — 카드가 말한 '마지막 베팅'의 동력 쪽입니다.
+  - title: Intel shares slide after report Nvidia halts testing of 18A process
+    source: investing.com
+    date: '2026-06-18'
+    url: https://www.investing.com/news/stock-market-news/intel-shares-slide-after-report-nvidia-halts-testing-of-18a-process-4422451
+    track: global
+    description: Investing.com. NVIDIA의 18A 테스트 중단 보도 — 카드가 본 '18A 수율·미래'의 리스크 쪽을 보여주는 반대 신호입니다.
   pinnedComment: 투자 판단이 아닙니다. 연결 재무 수치(매출·연결손익·현금흐름·배당·자산)는 dartlab EDGAR 실측, IFS 세그먼트 손익($10.3B)·시총·주가·점유율·18A 수율·NVIDIA $5B·Terafab·Fab 34는 외부 인용(Intel Q4 2025/Bloomberg/Reuters/WSJ/FT/Yahoo/TrendForce/SemiAnalysis)입니다.
   slides:
   - layout: editorial

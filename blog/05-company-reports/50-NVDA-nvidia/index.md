@@ -30,6 +30,24 @@ carousel:
     답은 두 축이 동시에 작동했다는 것. 팹리스 — 공장이 없으니 유형자산이 인텔의 18분의 1, 매출이 4.8배 뛰는 동안 영업이익은 19.4배 뛰었다(영업 레버리지). 그리고 AI 수요 독점 — ChatGPT 이후 데이터센터 매출이 전체의 88%, $15B에서 $115.2B로 2년 만에 7.7배. CUDA 생태계 전환 비용이 가격결정력을 만든다.
 
     관전 포인트는 하나다. 이 구조의 전제는 AI 투자가 계속돼야 한다는 것. 2022년 암호화폐 거품이 터진 여파로 2023년 영업이익률은 16%까지 떨어졌다. 다음 분기엔 데이터센터 매출이 $30B을 넘기는지, 매출총이익률 75%가 73% 아래로 깨지지 않는지를 본다.
+  explainers:
+  - term: 팹리스(fabless)
+    body: 공장 없이 칩을 설계만 하는 회사입니다. NVIDIA는 유형자산이 인텔의 18분의 1이라, 매출이 4.8배 뛸 때 영업이익은 19배 뛰는 강한 영업레버리지가 나옵니다.
+  - term: CUDA 생태계
+    body: NVIDIA GPU에서 돌아가는 개발 소프트웨어 플랫폼입니다. 개발자가 여기 묶이면 다른 칩으로 옮기는 전환 비용이 커져, NVIDIA의 가격결정력을 만듭니다.
+  relatedNews:
+  - title: Nvidia earnings and guidance beat as data center revenue jumps 75%
+    source: cnbc.com
+    date: '2026-02-25'
+    url: https://www.cnbc.com/2026/02/25/nvidia-nvda-earnings-report-q4-2026.html
+    track: global
+    description: CNBC. 데이터센터 매출 +75% — 카드가 말한 '데이터센터가 매출의 88%'를 떠받치는 최신 분기 실측입니다.
+  - title: "Nvidia's Data Center Revenue Poised for Big Surge by 2027 (Motley Fool)"
+    source: fool.com
+    date: '2025-11-08'
+    url: https://www.fool.com/investing/2025/11/08/nvidias-ai-dominance-data-center-revenue-poised-fo/
+    track: global
+    description: Motley Fool. 데이터센터 성장 지속 전망 — 카드가 본 '이 구조의 전제(투자가 계속돼야 한다)'를 가르는 변수입니다.
   pinnedComment: 투자 판단이 아닙니다. NVIDIA의 매출·마진·세그먼트 숫자는 dartlab 실측(EDGAR 연결 기준)입니다. 경쟁사(MS·구글·인텔·SK하이닉스 등) 마진 비교치는 각사 공시 기반 참고치이고, GPU 단가·TSMC 웨이퍼 가격·하이퍼스케일러 설비투자·전력 전망은 외부/업계 추정입니다.
   slides:
   - layout: editorial
