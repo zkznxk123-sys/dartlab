@@ -30,6 +30,24 @@ carousel:
     세 수평선(매출·영업이익률·순이익률)이 서로 다른 박자로 움직입니다. 2020·2022년엔 영업은 흑자인데 순이익이 적자였고(영업선 아래 누수), 이익이 오르는 2023~2025년엔 오히려 영업현금흐름이 줄었습니다.
 
     ODM은 가치사슬에서 브랜드 칸이 아니라 제조 칸을 점유한 자리입니다. 매출이 늘면서 마진도 같이 오르는지 — 그게 다음 시험입니다. (지역 법인·고객사 믹스는 연결 장부에 분해돼 있지 않아 다루지 않습니다.)
+  explainers:
+  - term: ODM
+    body: 브랜드의 주문을 받아 제품을 대신 개발·생산하는 회사입니다. 코스맥스는 화장품 통 뒤 '깨알 제조사'로, 가치사슬에서 브랜드가 아닌 제조 칸을 점유합니다.
+  - term: 영업이익률
+    body: 매출에서 영업이익이 남는 비율입니다. 코스맥스는 매출을 2배로 키우고도 3~8% 한 자릿수 밴드를 못 벗어나, 매출과 마진이 같이 가는지가 시험대입니다.
+  relatedNews:
+  - title: "[시선] 'K뷰티 열풍'의 주역…코스맥스·한국콜마 '연매출 2조' 시대"
+    source: pointe.co.kr
+    date: '2026-06-23'
+    url: https://www.pointe.co.kr/news/articleView.html?idxno=80959
+    track: naver
+    description: 네이버 보관 뉴스 기준. ODM 양사 2조 매출 — 카드가 말한 '매출 두 배' 성장의 현주소입니다.
+  - title: K뷰티 주역 바뀌나…인디 브랜드 키운 ODM 전성시대
+    source: industrynews.co.kr
+    date: '2026-06-23'
+    url: https://www.industrynews.co.kr/news/articleView.html?idxno=82471
+    track: naver
+    description: 네이버 보관 뉴스 기준. 인디 브랜드가 키운 ODM 호황 — 카드가 짚은 '제조 칸 점유' 자리의 산업 배경입니다.
   pinnedComment: 투자 판단이 아닙니다. OPM이 8% 천장을 반복적으로 넘는가, 순이익률 개선이 유지되는가, 영업현금흐름이 순이익과 같은 방향으로 수렴하는가 — 이 셋을 봐야 합니다.
   slides:
   - layout: editorial

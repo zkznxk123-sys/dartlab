@@ -46,6 +46,24 @@ carousel:
     본업을 살린 건 K-뷰티였다. 인디 브랜드 800+가 폭발하자 ODM에 영업레버리지 5.52배가 찍혔다 — 매출 +16%에 영업이익 +86%. 매출원가율은 4년 연속 개선됐고, ROIC는 1.66%에서 7.40%로 6년 만에 처음 자본비용을 넘었다.
 
     2024년 5월 HK이노엔 매각으로 인수 사이클이 닫혔다. 영업외 흡수율은 77%에서 12%로 9년 최저. 2025년, 본업 +1,663억이 영업외를 8.6배로 압도했다. 8년간 새 나가던 돈을, 본업이 처음으로 이긴 해다.
+  explainers:
+  - term: ODM·영업레버리지
+    body: ODM은 브랜드 주문을 받아 대신 만드는 사업입니다. 한국콜마는 인디 브랜드 800+ 폭발로 매출 +16%에 영업이익 +86%(레버리지 5.52배)가 찍혔습니다.
+  - term: 영업외손익
+    body: 본업 밖에서 생기는 손익입니다. CJ헬스케어 1.3조 인수가 매년 540억 이자를 만들어 8년간 본업 이익의 38%를 깎았고, 2025년 처음 본업이 이를 이겼습니다.
+  relatedNews:
+  - title: 한국콜마, 수출 훈풍에 '깜짝 실적' 예고…계절성도 옅어진다
+    source: pinpointnews.co.kr
+    date: '2026-06-28'
+    url: https://www.pinpointnews.co.kr/news/articleView.html?idxno=463656
+    track: naver
+    description: 네이버 보관 뉴스 기준. 수출 호조 깜짝 실적 — 카드가 말한 '본업이 처음으로 이긴' 흐름의 연장입니다.
+  - title: 화장품 ODM, '상고하저' 공식 깨진다…하반기 실적 눈높이 높이는 증권가
+    source: newsian.co.kr
+    date: '2026-06-26'
+    url: http://www.newsian.co.kr/news/articleView.html?idxno=91486
+    track: naver
+    description: 네이버 보관 뉴스 기준. ODM 실적 눈높이 상향 — 본업 ODM이 힘을 받는 산업 배경입니다.
   pinnedComment: |
     원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
     github.com/eddmpython/dartlab
