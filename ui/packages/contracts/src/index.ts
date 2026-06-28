@@ -10,6 +10,7 @@ export * from './finance';
 export * from './viewer';
 export * from './macro';
 export * from './report';
+export * from './reportModel';
 export * from './scan';
 export * from './map';
 export * from './search';
