@@ -50,6 +50,24 @@ carousel:
     2026년 1분기 매출은 6,054억원으로 전분기보다 늘었고, 영업이익은 209억원이었습니다. 그런데 재고자산은 6,767억원으로 1분기 매출보다 컸습니다.
 
     다음엔 판매 단가, 원재료 가격, 재고자산, 빚 부담을 보면 됩니다.
+  explainers:
+  - term: 양극재
+    body: 배터리에서 에너지를 담는 핵심 소재입니다. 에코프로비엠은 글로벌 1위지만 소수 고객에 의존해, 수요가 흔들리면 재고가 쌓입니다.
+  - term: 재고자산
+    body: 아직 팔지 못한 원재료·제품입니다. 1분기 매출보다 큰 재고는 다음 분기 판매 단가·원가로 '부실인지 일시인지'를 가려야 합니다.
+  relatedNews:
+  - title: 美 ESS·유럽 EV '투트랙'…전략 짠 K-배터리
+    source: ddaily.co.kr
+    date: '2026-06-28'
+    url: https://www.ddaily.co.kr/page/view/2026062803131655373
+    track: naver
+    description: 네이버 보관 뉴스 기준. 양극재 수요처(ESS·EV) 흐름 — 재고가 판매로 풀리는지의 수요 배경입니다.
+  - title: 배터리주 반등은 언제…美 ESS·유럽 전기차 주목
+    source: view.asiae.co.kr
+    date: '2026-06-27'
+    url: https://view.asiae.co.kr/article/2026062515295753877
+    track: naver
+    description: 네이버 보관 뉴스 기준. 배터리 수요 회복 시점 — 판매 단가·재고 소진과 직결되는 환경입니다.
   pinnedComment: 근거는 에코프로비엠 2026년 1분기 공식 실적발표자료입니다. 재고 증가는 부실 확정이 아니라 다음 분기 판매 단가와 원가로 확인할 항목입니다.
   slides:
   - layout: editorial
