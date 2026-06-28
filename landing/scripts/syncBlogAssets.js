@@ -10,6 +10,8 @@ function collectAssets(dir, result = []) {
 		const fullPath = resolve(dir, entry);
 		const stat = statSync(fullPath);
 		if (stat.isDirectory()) {
+			// blog/_issues 이미지는 /cards HF 이슈 네임스페이스로 서빙된다. 블로그 정적 자산은 공개 카테고리만 평탄 복사.
+			if (entry.startsWith('_')) continue;
 			if (entry === 'assets') {
 				for (const asset of readdirSync(fullPath)) {
 					const assetPath = resolve(fullPath, asset);

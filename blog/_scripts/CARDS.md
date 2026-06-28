@@ -16,6 +16,8 @@
 2. 이미지·토론 계획 생성: `uv run python -X utf8 blog/_scripts/plan_card_news.py --post blog/05-company-reports/{글폴더} --write`
    - 계획 파일 = 같은 글 폴더의 `cards.plan.json`.
    - `imagePlan[]` 은 **5~10장**이어야 한다. 고정 템플릿이 아니라 카드 흐름에서 의미가 다른 장면만 기획한다.
+   - 이미지는 그 글의 회사·사건·장소·시설·제품·운영 질문을 상징하는 **실제 사용용 장면**이어야 한다. 범용 금융 배경은 탈락.
+   - 상호/회사명은 프롬프트와 검색 키워드에 써도 된다. 다만 생성형 이미지가 공식 로고·공식 문서·실제 내부시설을 사실처럼 꾸며내면 안 된다.
    - 각 항목의 `prompt` 를 GPT `image_gen` 으로 한 장씩 생성한다.
    - 생성 뒤 `imagegen.extractCommand` 로 `sns/assets/{code}/{assetKey}.webp` 에 저장하고 `imagegen.checkCommand` 로 프레이밍을 본다.
 3. 작가 패널 토론·평가를 `cards.plan.json` 의 `reviewGate` 에 기록하고 `status: "passed"` 로 닫는다.
@@ -36,6 +38,16 @@ carousel:
 
     둘째 문단.
   pinnedComment: "근거·면책 한 줄"
+  explainers:
+    - term: "낯선 용어"
+      body: "처음 보는 독자가 캡션을 끊지 않고 이해할 수 있게 한두 문장으로 설명"
+  relatedNews:
+    - title: "관련 뉴스 제목"
+      source: "naver-source.example"
+      date: "2026-06-15"
+      url: "https://example.com/news"
+      track: "naver"
+      description: "왜 이 링크가 카드 판단에 붙는지 한 줄"
   slides:
     - layout: editorial         # 표지
       line: "큰 글씨 한 줄"
@@ -53,6 +65,8 @@ carousel:
 ```
 - layout 은 **3종만**: `editorial`(표지) · `editorialStat`(큰 숫자) · `editorialBeat`(비트).
 - 슬라이드 숫자는 본문에 있는 숫자만(없는 숫자 쓰면 audit 가 경고).
+- `explainers` 는 록빌·CDMO처럼 독자가 멈칫할 용어를 바로 풀어주는 짧은 설명이다.
+- `relatedNews` 는 네이버 보관 뉴스(`track: naver`)나 공식 발표(`track: official`)를 연결한다. title/url 은 필수다.
 
 ## 화면(코드)도 바꿨을 때
 - slides 텍스트만 바꿈 → 위 3단계로 끝(데이터만).
@@ -80,6 +94,11 @@ uv run python -X utf8 blog/_scripts/audit_carousel_images.py --max 250  # 평면
 
 GPT image_gen 산출물은 `sns/assets/{code}/{assetKey}.webp` 공유자산으로 저장한다. 포스트 폴더에 직접
 넣지 않는다. `cards.plan.json` 의 `imagegen.extractCommand` 가 이 저장 경로를 고정한다.
+
+image_gen 프롬프트는 “그 회사/그 사건/그 장소/그 운영 질문”에 맞춘 상징 장면을 요구한다. 예를 들어
+공장 램프업 글이면 막연한 금융 차트가 아니라 클린룸, 바이오리액터, 물류, 검수 서류, 고객사 미팅처럼
+해당 글의 판단 축을 보이게 한다. 상호·회사명은 기획 맥락으로 써도 되지만, 생성형 이미지가 공식 로고,
+공식 보도사진, 실제 내부시설 사진처럼 보이는 가짜 장면을 만들면 폐기한다.
 
 기본 생성 절차:
 ```
@@ -120,8 +139,13 @@ jobs = `[{"code","name","queries":[...],"keywords":[...]}]`. **반드시 받은 
 안 맞으면 **다른 검색어(`queries`)로 재시도**한다. 스톡으로 정확히 못 잡는 추상 장면은 `cards.plan.json`
 의 image_gen 프롬프트로 되돌린다.
 
-> 원칙: **카드 캐러셀 이미지 = cards.plan.json 에서 먼저 기획한다.** GPT image_gen 은 로고·텍스트·상표·
-> 특정 인물 없이 photorealistic 장면만 만든다. CC0/PD 스톡은 실제 공공 사진이 필요한 때의 보강 경로다.
+Openverse/Commons 검색도 범용 업종어만 넣지 않는다. `queries` 는 회사명·상호, 사건명, 시설/도시명,
+제품/공정명을 앞쪽에 두고, `keywords` 는 그 글의 핵심 피사체가 제목/태그에 걸리도록 좁힌다. 회사명
+직검색은 로고·인물·광고 오매치가 섞일 수 있으므로 관련 키워드와 눈검수로 걸러낸다.
+
+> 원칙: **카드 캐러셀 이미지 = cards.plan.json 에서 먼저 기획한다.** image_gen 은 회사명·상호를
+> 맥락 키워드로 쓸 수 있지만 가짜 공식 로고·가짜 공식 문서·식별 가능한 인물·읽을 수 있는 주장을 만들지 않는다.
+> CC0/PD 스톡은 실제 공공 사진이 필요한 때의 보강 경로다.
 
 ## 발행 전 전문가 검토 게이트 — 작가 패널 토론·평가 (cards 정식 게이트)
 **캐러셀은 공개물이라 발행 전에 전문가 루프를 반드시 거친다.** 자동 통과 금지.

@@ -16,6 +16,30 @@ caption: |
   록빌 인수로 총 생산능력은 84만5000리터가 됐고, 5공장 램프업도 진행 중입니다.
   분모가 커진 만큼 다음 질문은 더 선명합니다.
   새 공장이 마진을 지키며 차는가, 아니면 한동안 고정비 부담으로 남는가.
+explainers:
+  - term: "록빌"
+    body: "미국 메릴랜드주의 바이오의약품 제조 거점입니다. 삼성바이오로직스가 GSK 제조시설을 인수해 첫 미국 생산기지로 삼은 곳입니다."
+  - term: "CDMO"
+    body: "고객사의 의약품 개발과 생산을 대신 수행하는 위탁개발생산 사업입니다. 설비가 찰수록 고정비 부담이 낮아지는 구조를 봅니다."
+relatedNews:
+  - title: "Samsung Biologics completes acquisition of GSK's manufacturing facility in Rockville, Maryland"
+    source: "Samsung Biologics"
+    date: "2026-03-31"
+    url: "https://samsungbiologics.com/media/company-news/samsung-biologics-completes-acquisition-of-gsks-manufacturing-facility-in-rockville-maryland"
+    track: "official"
+    description: "록빌 제조시설 인수 완료를 직접 확인할 수 있는 회사 발표입니다."
+  - title: "삼성바이오로직스, 바이오 USA서 美 록빌 공장 소개"
+    source: "viva100.com"
+    date: "2026-06-15"
+    url: "https://www.viva100.com/article/20260615500125"
+    track: "naver"
+    description: "네이버 보관 뉴스 기준. 바이오 USA 참가와 미국 록빌 공장 소개 맥락을 연결합니다."
+  - title: "삼성바이오로직스, 바이오USA \"14년 연속 단독부스\""
+    source: "biospectator.com"
+    date: "2026-06-15"
+    url: "https://www.biospectator.com/view/news_view.php?varAtcId=29038"
+    track: "naver"
+    description: "네이버 보관 뉴스 기준. 미국 록빌 등 글로벌 생산역량을 알리는 내용입니다."
 pinnedComment: "투자 권유 아님. 출처: 삼성바이오로직스 2026년 1분기 실적 발표(2026.4.22), 록빌 제조시설 인수 완료 발표(2026.3.31). 숫자는 회사 발표 기준이며, 생산능력은 곧바로 매출을 뜻하지 않습니다."
 slides:
   - layout: editorial

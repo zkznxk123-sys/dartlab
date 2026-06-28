@@ -89,6 +89,21 @@ export interface ContractSlide {
 	context?: string;
 	image?: string; // semantic 파일명(해시 없음) — 렌더가 hfMedia 매니페스트로 해석
 }
+
+export interface ContractExplainer {
+	term: string;
+	body: string;
+}
+
+export interface ContractRelatedNews {
+	title: string;
+	url: string;
+	source?: string;
+	date?: string;
+	description?: string;
+	track?: 'naver' | 'gdelt' | 'official' | 'web' | string;
+}
+
 export interface CarouselContract {
 	/** 종목코드 — 회사 캐러셀만. 이슈(standalone)는 빈 문자열(렌더가 회사 report 조회 안 함). */
 	code: string;
@@ -102,6 +117,10 @@ export interface CarouselContract {
 	title?: string;
 	/** 인스타 캡션(caption) — 포스트 우측 설명 산문(문단=빈 줄 구분). 슬라이드와 별개의 본문. */
 	caption?: string;
+	/** 짧은 설명 — 록빌/CDMO 같은 낯선 용어를 캡션 옆에서 바로 풀어준다. */
+	explainers?: ContractExplainer[];
+	/** 관련 뉴스/근거 링크 — 네이버 보관 뉴스나 공식 발표 원문. */
+	relatedNews?: ContractRelatedNews[];
 	/** 고정 댓글(pinnedComment) — 근거·면책. 캡션 하단 작게. */
 	pinnedComment?: string;
 	/** 발간일(blog date, YYYY-MM-DD) — 피드 최신순 정렬·표시용. */

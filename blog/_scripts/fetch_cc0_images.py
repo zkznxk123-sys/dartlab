@@ -10,6 +10,9 @@
 - 회색조(흑백)는 카드 렌더(`CardSlide` CSS filter)가 입히므로 여기선 **컬러 원본** 그대로 저장한다.
 - 카드 캐러셀 발간 이미지는 **CC0 스톡으로만** 수급한다 — 생성형(FLUX) 은 발간 카드에 쓰지 않는다(출처 깨끗한 실사로 통일).
   적중이 안 되면 다른 검색어로 재시도하고, 그래도 없으면 그 슬라이드는 이미지 없이 둔다.
+- 검색어는 범용 업종어보다 **그 글의 회사명·상호, 사건명, 시설/도시명, 제품/공정명**을 앞에 둔다.
+  회사명 직검색은 로고·광고·인물 오매치가 섞일 수 있으므로 `keywords` 와 눈검수로 걸러낸다.
+  실제 상호가 보이는 PD/CC0 사진은 쓸 수 있지만, 카드 맥락과 무관한 로고 클로즈업은 폐기한다.
 
 ## 흐름 (회사 hero 이미지 파이프라인에 그대로 합류)
 1. 이 도구가 `sns/assets/{code}/cc0-{name}.webp` 로 저장 (긴 변 1400·webp q82).
@@ -25,12 +28,12 @@
 
 jobs JSON = 리스트, 각 항목:
     {"code": "000080", "name": "bottling-line",
-     "queries": ["bottling plant", "brewery production line"],
-     "keywords": ["bottle", "brewery", "factory", "production"]}
+     "queries": ["하이트진로 bottling plant", "brewery production line Seoul", "bottling plant"],
+     "keywords": ["hite", "bottle", "brewery", "factory", "production"]}
   - code     = sns/assets/ 아래 폴더(보통 6자리 코드 또는 티커)
   - name     = 의미 이름(저장 파일 = cc0-{name}.webp, 슬라이드 image: 값과 동일)
-  - queries  = 앞에서부터 시도할 검색어들(첫 매치 채택)
-  - keywords = 제목/태그에 하나라도 있어야 채택(오매치 차단)
+  - queries  = 앞에서부터 시도할 검색어들. 회사/사건/시설/도시명 → 구체 공정 → 범용 업종 순으로 둔다.
+  - keywords = 제목/태그에 하나라도 있어야 채택(회사명·시설명·핵심 피사체로 오매치 차단)
 """
 
 from __future__ import annotations

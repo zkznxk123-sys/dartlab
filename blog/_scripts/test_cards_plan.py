@@ -63,6 +63,8 @@ def test_build_company_plan_clamps_to_min_five_images(tmp_path: Path) -> None:
     assert len(plan["imagePlan"]) == 5
     assert all("/cards" in row["prompt"] for row in plan["imagePlan"])
     assert all("Asset key:" in row["prompt"] for row in plan["imagePlan"])
+    assert all("Story specificity:" in row["prompt"] for row in plan["imagePlan"])
+    assert all("avoid generic stock-finance imagery" in row["prompt"] for row in plan["imagePlan"])
 
 
 def test_plan_validation_requires_passed_review(tmp_path: Path) -> None:

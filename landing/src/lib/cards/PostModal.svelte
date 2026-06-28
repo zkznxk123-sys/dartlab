@@ -43,6 +43,9 @@
 			.map((p) => p.trim())
 			.filter(Boolean);
 	}
+	function newsMeta(news: NonNullable<CarouselContract['relatedNews']>[number]): string {
+		return [news.source, news.date, news.track === 'naver' ? '네이버 보관' : ''].filter(Boolean).join(' · ');
+	}
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Escape') onClose();
 	}
@@ -85,6 +88,30 @@
 				{#if contract}
 					{#each captionParas(contract.caption) as para (para)}<p class="prPara">{para}</p>{/each}
 					{#if !contract.caption}<p class="prPara prMuted">캡션이 아직 준비되지 않았습니다.</p>{/if}
+					{#if contract.explainers?.length}
+						<section class="prInfoBlock" aria-label="짧은 설명">
+							<h3>짧은 설명</h3>
+							<div class="prExplainers">
+								{#each contract.explainers as item (item.term)}
+									<p class="prExplainer"><b>{item.term}</b><span>{item.body}</span></p>
+								{/each}
+							</div>
+						</section>
+					{/if}
+					{#if contract.relatedNews?.length}
+						<section class="prInfoBlock" aria-label="관련 뉴스">
+							<h3>관련 뉴스</h3>
+							<div class="prNewsList">
+								{#each contract.relatedNews as news (news.url)}
+									<a class="prNews" href={news.url} target="_blank" rel="noopener">
+										<span class="prNewsTitle">{news.title}</span>
+										{#if newsMeta(news)}<small>{newsMeta(news)}</small>{/if}
+										{#if news.description}<span class="prNewsDesc">{news.description}</span>{/if}
+									</a>
+								{/each}
+							</div>
+						</section>
+					{/if}
 					<!-- 블로그 이어 읽기 — 회사 캐러셀만(같은 slug=blog [slug]). 이슈(standalone)는 원문 글이 없어 숨김. -->
 					{#if !contract.standalone}
 						<a class="prBlog" href="{base}/blog/{slug}" target="_blank" rel="noopener">
@@ -231,6 +258,77 @@
 	}
 	.prMuted {
 		color: #64748b;
+	}
+	.prInfoBlock {
+		margin: 18px 0 0;
+		padding-top: 15px;
+		border-top: 1px solid #1e2433;
+	}
+	.prInfoBlock h3 {
+		margin: 0 0 9px;
+		font-size: 11px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: #94a3b8;
+		font-weight: 800;
+	}
+	.prExplainers,
+	.prNewsList {
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+	}
+	.prExplainer {
+		margin: 0;
+		display: grid;
+		grid-template-columns: minmax(54px, 0.34fr) minmax(0, 1fr);
+		gap: 10px;
+		font-size: 13px;
+		line-height: 1.55;
+		color: #cbd5e1;
+		word-break: keep-all;
+	}
+	.prExplainer b {
+		color: #f6f8fb;
+		font-weight: 800;
+	}
+	.prExplainer span {
+		min-width: 0;
+	}
+	.prNews {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		padding: 9px 0 10px;
+		border-bottom: 1px solid #161b26;
+		color: inherit;
+		text-decoration: none;
+	}
+	.prNews:hover .prNewsTitle {
+		color: var(--dl-accent);
+	}
+	.prNewsTitle {
+		font-size: 13.5px;
+		line-height: 1.42;
+		font-weight: 800;
+		color: #e8f0fb;
+		word-break: keep-all;
+	}
+	.prNews small {
+		font-size: 10.5px;
+		line-height: 1.35;
+		color: #94a3b8;
+	}
+	.prNewsDesc {
+		font-size: 12px;
+		line-height: 1.45;
+		color: #9fb0c4;
+		word-break: keep-all;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 	/* 블로그 이어 읽기 CTA — 캡션 아래, 면책 위. 테마색(--dl-accent) 배선(캐러셀 점·재생버튼과 동색). */
 	.prBlog {

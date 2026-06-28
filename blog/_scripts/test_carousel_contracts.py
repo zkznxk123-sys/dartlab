@@ -183,6 +183,16 @@ stockCode: "207940"
 corpName: "삼성바이오로직스"
 title: "공장 가동을 봅니다"
 date: 2026-06-28
+explainers:
+  - term: "록빌"
+    body: "미국 생산 거점"
+relatedNews:
+  - title: "관련 뉴스"
+    source: "naver.example"
+    date: 2026-06-15
+    url: "https://example.com/news"
+    track: "naver"
+    description: "보관 뉴스 링크"
 slides:
   - layout: editorial
     line: "좋은 숫자보다 [[공장]]"
@@ -195,6 +205,17 @@ slides:
     assert c["code"] == "207940"
     assert c["name"] == "삼성바이오로직스"
     assert c["standalone"] is True  # 블로그 글은 없어서 CTA 숨김. 차트 첨부 여부는 code 가 결정.
+    assert c["explainers"] == [{"term": "록빌", "body": "미국 생산 거점"}]
+    assert c["relatedNews"] == [
+        {
+            "title": "관련 뉴스",
+            "url": "https://example.com/news",
+            "source": "naver.example",
+            "date": "2026-06-15",
+            "description": "보관 뉴스 링크",
+            "track": "naver",
+        }
+    ]
     assert c["slides"][0]["image"].startswith(f"issues/{slug}/cover.")
     assert len(ops) == 1
 

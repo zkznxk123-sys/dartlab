@@ -15,7 +15,7 @@
 키 = **슬러그**(회사 `003230-samyang-foods` · 이슈 `2026-06-korea-macro`). 회사당 N편(1:N).
 
 계약(글당 1파일):
-  { code, slug, name, sector?, title?, caption?, pinnedComment?, date?,
+  { code, slug, name, sector?, title?, caption?, explainers?, relatedNews?, pinnedComment?, date?,
     slides: [ {layout, date?|kicker?, line?, sub?, bigNumber?, unit?, context?, image?} ],
     spec?: { hero?, order?, notes? } }
   layout ∈ editorial(커버) | editorialBeat(헤드라인 비트) | editorialStat(큰 숫자)
@@ -155,6 +155,56 @@ def _spec_from(carousel: dict) -> dict | None:
     return spec or None
 
 
+def _normalize_explainers(source: dict) -> list[dict]:
+    """짧은 설명 목록(`explainers`) → 계약 필드. term/body 둘 다 있어야 한다."""
+    raw = source.get("explainers") or []
+    if isinstance(raw, dict):
+        raw = [{"term": k, "body": v} for k, v in raw.items()]
+    if not isinstance(raw, list):
+        return []
+    out: list[dict] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        term = str(item.get("term") or item.get("label") or "").strip()
+        body = str(item.get("body") or item.get("text") or item.get("description") or "").strip()
+        if term and body:
+            out.append({"term": term, "body": body})
+    return out
+
+
+def _normalize_related_news(source: dict) -> list[dict]:
+    """관련 뉴스 링크(`relatedNews`) → 계약 필드. title/url 은 필수, 나머지는 표시 보조."""
+    raw = source.get("relatedNews") or source.get("related_news") or []
+    if not isinstance(raw, list):
+        return []
+    out: list[dict] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title") or "").strip()
+        url = str(item.get("url") or "").strip()
+        if not title or not url:
+            continue
+        news = {"title": title, "url": url}
+        for key in ("source", "date", "description", "track"):
+            value = str(item.get(key) or "").strip()
+            if value:
+                news[key] = value
+        out.append(news)
+    return out
+
+
+def _attach_caption_context(contract: dict, source: dict) -> None:
+    """캡션 보조 맥락(짧은 설명·관련뉴스)을 계약에 싣는다."""
+    explainers = _normalize_explainers(source)
+    if explainers:
+        contract["explainers"] = explainers
+    related_news = _normalize_related_news(source)
+    if related_news:
+        contract["relatedNews"] = related_news
+
+
 def build_contracts(blog_dir: Path = BLOG_DIR) -> dict[str, dict]:
     """블로그 글 → 슬러그별 계약(`carousel:` 블록 있는 글만). 같은 회사 다른 슬러그 = 각자 계약(1:N)."""
     contracts: dict[str, dict] = {}
@@ -190,6 +240,7 @@ def build_contracts(blog_dir: Path = BLOG_DIR) -> dict[str, dict]:
         pinned = carousel.get("pinnedComment")
         if pinned:
             contract["pinnedComment"] = str(pinned).strip()
+        _attach_caption_context(contract, carousel)
         date = str(fm.get("date") or "").strip()
         if date:
             contract["date"] = date
@@ -267,6 +318,7 @@ def build_issue_contracts(
             contract["caption"] = str(data["caption"]).strip()
         if data.get("pinnedComment"):
             contract["pinnedComment"] = str(data["pinnedComment"]).strip()
+        _attach_caption_context(contract, data)
         if data.get("date"):
             contract["date"] = str(data["date"]).strip()
         spec = _spec_from(data)

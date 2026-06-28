@@ -115,17 +115,16 @@ def scene_role(order: int, count: int, slide: dict[str, Any] | None) -> str:
 
 def scene_for(role: str, topic: str, corp_name: str, slide: dict[str, Any] | None) -> str:
     cue = slide_line(slide or {})
+    subject = corp_name or topic
     if role == "cover-hook":
-        return (
-            f"photorealistic opening scene that makes {corp_name or topic} and '{cue}' understandable at first glance"
-        )
+        return f"story-specific opening scene for {subject}, making the article angle '{cue}' visible through a concrete asset, place, or operation"
     if role == "number-evidence":
-        return f"real-world operation or evidence scene behind the number '{cue}', without charts or readable text"
+        return f"real-world {subject} operation or evidence scene behind the number '{cue}', using physical production, facility, customer, or supply-chain context instead of charts"
     if role == "narrative-turn":
-        return f"editorial business-news scene showing the turning point '{cue}' through physical work, demand, or operations"
+        return f"editorial business-news scene tied to {subject}, showing the turning point '{cue}' through physical work, demand, location, or operations"
     if role == "closing-checkpoint":
-        return f"quiet final-check scene for the reader to verify '{cue}', such as documents, equipment, or operations context without readable text"
-    return f"business context scene for '{cue}' with concrete objects, work sites, or customer context"
+        return f"quiet final-check scene tied to {subject} for the reader to verify '{cue}', such as documents, equipment, facility context, or customer workflow"
+    return f"specific business context scene for {subject} and '{cue}' with concrete objects, work sites, locations, or customer context"
 
 
 def prompt_for(
@@ -150,10 +149,12 @@ def prompt_for(
             f"Carousel role: {role}.",
             f"Image subject: {scene}.",
             f"Image reason: {reason}.",
+            "Story specificity: make the image feel planned for this exact article, company, event, location, facility, product, or operating question; avoid generic stock-finance imagery.",
             "Composition/framing: strict vertical 4:5 image; keep the main subject in the upper and middle 60%; keep the lower 40% natural but non-critical so text overlays remain readable.",
             "Style/medium: realistic business-news photography, not illustration, not a chart, not an infographic.",
             "Lighting/mood: bright enough to survive a dark overlay; real-world depth and contrast; no heavy vignette.",
-            "Constraints: no logo, no trademark, no readable text, no watermark, no recognizable public figure, no brand packaging.",
+            "Brand/name handling: company and trade names may be used as context. Do not fabricate an official logo, official document, real facility interior, or readable claim; incidental public signage is acceptable only when it supports the article and is not the main subject.",
+            "Constraints: no watermark, no recognizable public figure, no fake chart, no fake newspaper, no fabricated official badge, no brand packaging close-up.",
             "Avoid: collage, split panels, gradients, abstract glow, bokeh-only background, generic financial wallpaper, blacked-out half frame, 9:16 crop, ultra-tall phone wallpaper.",
         ]
     )
@@ -180,7 +181,7 @@ def build_image_plan(
             asset_key = sanitize_key(f"{asset_key}-{idx}", f"scene-{idx:02d}")
         used_keys.add(asset_key)
         scene = scene_for(role, title, corp_name, slide)
-        reason = "블로그 산문과 카드 흐름이 같은 장면을 보도록 만드는 시각 앵커"
+        reason = "그 글의 회사·사건·장소·운영 질문을 한 장면으로 묶는 시각 앵커"
         out.append(
             {
                 "order": idx,
@@ -221,7 +222,7 @@ def review_gate(status: str = "planned") -> dict[str, Any]:
             },
             {
                 "id": "imageFit",
-                "purpose": "5~10장 이미지가 각기 다른 의미 장면인지, 로고·텍스트·도식이 없는지 본다.",
+                "purpose": "5~10장 이미지가 그 글의 회사·사건·장소에 맞는 서로 다른 의미 장면인지, 가짜 공식 로고·텍스트·도식이 없는지 본다.",
                 "status": "todo",
             },
             {
@@ -283,7 +284,7 @@ def build_company_post_plan(post_dir: Path, *, count: int | None = None) -> dict
         ),
         "imagegen": {
             "tool": "GPT image_gen",
-            "generationRule": "각 imagePlan.prompt 를 한 장씩 image_gen 으로 생성한다.",
+            "generationRule": "각 imagePlan.prompt 를 한 장씩 image_gen 으로 생성한다. 프롬프트는 그 글의 회사·사건·장소·운영 질문을 상징하는 실제 사용용 이미지를 목표로 하며, 범용 금융 배경은 탈락시킨다.",
             "extractCommand": (
                 "uv run python -X utf8 sns/scripts/extractImagegenAssets.py "
                 f"{code or slug} --count {requested_image_count(slides, count)} "
@@ -329,6 +330,7 @@ def build_issue_plan(issue_dir: Path, *, count: int | None = None) -> dict[str, 
             title=title, slug=slug, corp_name=corp_name, code=code, asset_root=asset_root, slides=slides, count=count
         )
     )
+    keyword_bits = ",".join(bit for bit in (corp_name, slug, title) if bit)
     return {
         "version": 1,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -364,11 +366,11 @@ def build_issue_plan(issue_dir: Path, *, count: int | None = None) -> dict[str, 
         ),
         "imagegen": {
             "tool": "GPT image_gen",
-            "generationRule": "각 imagePlan.prompt 를 한 장씩 image_gen 으로 생성한다.",
+            "generationRule": "각 imagePlan.prompt 를 한 장씩 image_gen 으로 생성한다. 프롬프트는 그 글의 회사·사건·장소·운영 질문을 상징하는 실제 사용용 이미지를 목표로 하며, 범용 금융 배경은 탈락시킨다.",
             "extractCommand": (
                 "uv run python -X utf8 sns/scripts/extractImagegenAssets.py "
                 f"assets --assets-root blog/_issues/{slug} --count {requested_image_count(slides, count)} "
-                f'--names {names} --keywords "{slug},{title}"'
+                f'--names {names} --keywords "{keyword_bits}"'
             ),
             "checkCommand": f"uv run python -X utf8 sns/scripts/checkImagegenAssets.py blog/_issues/{slug}/assets",
             "publishCommands": [
