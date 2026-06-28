@@ -44,6 +44,24 @@ carousel:
     재미있는 건 유럽입니다. 1분기 유럽 매출은 1,618억원으로 전년 대비 99.0% 늘었습니다. 브랜드 하나의 이야기가 아니라, 해외 유통망이 커지는 이야기입니다.
 
     다음에는 세 가지만 보면 됩니다. 유럽 매출이 계속 늘어나는지, 매출에서 남는 이익 비율이 버티는지, 재고와 운반비가 커지지 않는지입니다.
+  explainers:
+  - term: K뷰티 유통 통로
+    body: 화장품을 만드는 게 아니라 여러 인디 브랜드를 모아 해외에 파는 수출 플랫폼입니다. 브랜드 하나의 흥행이 아니라 통로 자체가 커지는 게 실리콘투의 성장입니다.
+  - term: 영업이익률
+    body: 매출에서 영업이익이 남는 비율입니다. 실리콘투는 18.6%로 유통사치고 높은데, 이 비율이 유럽 급성장 속에서도 버티는지가 관전 포인트입니다.
+  relatedNews:
+  - title: K뷰티 유통사들 해외진출 빨라진다…'원조' 실리콘투 선두 지키기
+    source: businesspost.co.kr
+    date: '2026-06-18'
+    url: https://www.businesspost.co.kr/BP?command=article_view&num=440289
+    track: naver
+    description: 네이버 보관 뉴스 기준. 실리콘투를 'K뷰티 유통 원조'로 짚은 기사 — 카드가 말한 '브랜드가 아닌 통로' 관점과 일치합니다.
+  - title: K뷰티, 미국 이어 유럽까지 뻗는다
+    source: edaily.co.kr
+    date: '2026-06-22'
+    url: https://www.edaily.co.kr/news/newspath.asp?newsid=03388246645484344
+    track: naver
+    description: 네이버 보관 뉴스 기준. K뷰티 유럽 확장 — 카드가 본 '유럽 매출 +99%'의 산업 흐름입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 실리콘투를 브랜드가 아닌 해외 유통 통로로 읽는 관점입니다.'
   slides:
   - layout: editorial

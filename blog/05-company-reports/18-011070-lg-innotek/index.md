@@ -42,6 +42,24 @@ carousel:
     답은 가치사슬 위치입니다. 모듈에서 가장 비싼 건 소니 센서(원가의 40%), 설계는 애플이 BOM으로 단가를 정합니다. LG이노텍은 그 사이에서 조립 마진을 받습니다. 매출원가율이 92%까지 올라 100원 벌면 3원이 남습니다.
 
     대체는 불가능합니다 — 잠망경·Face ID·반도체 기판이라는 세 겹 해자 덕분입니다. 구조를 바꿀 열쇠는 애플 밖의 FC-BGA(영업이익률 15%). 전사 영업이익률 5%가 보이면 재평가 신호입니다.
+  explainers:
+  - term: 매출원가율
+    body: 매출에서 원가가 차지하는 비율입니다. LG이노텍은 92%까지 올라 100원 팔면 3원만 남습니다 — 소니 센서를 사서 조립만 하는 위치라 마진이 얇습니다.
+  - term: FC-BGA(반도체 기판)
+    body: 반도체를 메인보드에 연결하는 고부가 기판입니다. 영업이익률 15%로 카메라 모듈(3%)보다 높아, '애플 조립업체→기술 부품사' 전환의 열쇠입니다.
+  relatedNews:
+  - title: LG이노텍, 반도체 기판 타고 실적 개선 본격화 (KB증권)
+    source: finomy.com
+    date: '2026-06-26'
+    url: http://www.finomy.com/news/articleView.html?idxno=256340
+    track: naver
+    description: 네이버 보관 뉴스 기준. FC-BGA 반도체 기판 실적 — 카드가 말한 '구조를 바꿀 열쇠'가 움직이는 신호입니다.
+  - title: LG이노텍, 실적 서프라이즈 예고…증권가 "밸류 재평가 시작"
+    source: pinpointnews.co.kr
+    date: '2026-06-28'
+    url: https://www.pinpointnews.co.kr/news/articleView.html?idxno=463625
+    track: naver
+    description: 네이버 보관 뉴스 기준. 밸류 재평가 시작 — 카드가 본 '전사 영업이익률 5% 재평가 신호'와 같은 맥락입니다.
   pinnedComment: 투자 판단이 아닙니다. 전사 영업이익률 5%, 비모바일 매출 비중 30%, FC-BGA(반도체 기판) 성장 — 이 셋이 '애플 조립업체'에서 '기술 부품사'로의 전환을 가립니다.
   slides:
   - layout: editorial
