@@ -42,6 +42,24 @@ carousel:
     그래서 질문은 AI가 대단하냐가 아닙니다. 이 공장이 실제로 돈을 버느냐입니다.
 
     다음엔 세 가지만 보겠습니다. 55MW가 제때 켜지는가, 외부 고객이 붙는가, 전기값과 장비비를 이기는 매출이 나오는가입니다.
+  explainers:
+  - term: AI 데이터센터(55MW)
+    body: AI를 돌리는 대규모 전산 시설입니다. MW(메가와트)는 전력 규모로, 네이버가 직접 지어 외부 고객에게도 팔려는 새 사업입니다.
+  - term: 별도 vs 연결 이익률
+    body: 별도(검색)는 영업이익률 75%지만 연결(자회사 포함)은 18%로 떨어집니다. 본업의 높은 마진이 자회사·투자로 희석되는 구조입니다.
+  relatedNews:
+  - title: 네이버, 검색 수익모델 방어 나섰다…AI탭으로 예약·구매 연결
+    source: kpenews.com
+    date: '2026-06-28'
+    url: https://kpenews.com/View.aspx?No=4128455
+    track: naver
+    description: 네이버 보관 뉴스 기준. 검색에 AI를 붙여 수익으로 잇는 행보 — 카드가 묻는 'AI가 실제 돈을 버는가'의 한 축입니다.
+  - title: 네이버, 서비스 중심 AI 로보틱스 전략 제시
+    source: edaily.co.kr
+    date: '2026-06-28'
+    url: https://www.edaily.co.kr/news/newspath.asp?newsid=02076246645486312
+    track: naver
+    description: 네이버 보관 뉴스 기준. 검색창 밖으로 넓히는 AI 사업 확장 — 카드의 '검색창 밖으로 나간다' 흐름입니다.
   pinnedComment: 투자 판단이 아닙니다. 네이버 AI 공장은 55MW 가동 시점, 외부 고객, 비용을 이기는 매출을 봐야 합니다.
   slides:
   - layout: editorial
