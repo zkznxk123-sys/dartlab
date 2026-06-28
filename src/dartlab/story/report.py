@@ -138,28 +138,6 @@ def _scenarioSet(dfv: dict) -> dict | None:
     }
 
 
-def _buildThesis(card: Any, view: dict | None) -> dict | None:
-    """SummaryCard + ValuationView → 구조화 Thesis(중심논거·기둥·약세론·트리거·콜)."""
-    conclusion = getattr(card, "conclusion", "") if card else ""
-    strengths = list(getattr(card, "strengths", []) or []) if card else []
-    warnings = list(getattr(card, "warnings", []) or []) if card else []
-    if not conclusion and not strengths:
-        return None
-    pillars = [{"claim": s, "sectionKey": "", "refs": []} for s in strengths[:3]]
-    call = None
-    if view and view.get("intrinsic") and view.get("current"):
-        iv, cur = view["intrinsic"], view["current"]
-        upside = (iv - cur) / cur * 100 if cur else 0
-        call = f"내재가치 {iv:,}원 vs 현재가 {cur:,}원 ({upside:+.1f}%)"
-    return {
-        "central": conclusion,
-        "pillars": pillars,
-        "bearCase": warnings[0] if warnings else "",
-        "triggers": warnings,
-        "call": call,
-    }
-
-
 def _headlineKpis(card: Any, view: dict | None) -> list[dict]:
     """헤드라인 KPI — SummaryCard grades + 밸류에이션 콜."""
     kpis: list[dict] = []
@@ -255,7 +233,9 @@ def buildReportModel(company: Any, perspective: str = "full", *, basePeriod: str
             }
         )
 
-    thesis = _buildThesis(card, view)
+    from dartlab.story.thesis import buildThesis
+
+    thesis = buildThesis(company, card, view, basePeriod=basePeriod)
     conclusion = getattr(card, "conclusion", "") if card else ""
     findings = [{"key": "thesis", "finding": conclusion, "sourceEngine": "story"}] if conclusion else []
 

@@ -7,10 +7,8 @@ _scenarioSet·_buildThesis)를 합성 입력으로 검증. company 데이터 의
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-
 from dartlab.story.blocks import FlagBlock, HeadingBlock, MetricBlock, TableBlock, TextBlock
-from dartlab.story.report import _buildThesis, _mapBlock, _scenarioSet, _valuationView
+from dartlab.story.report import _mapBlock, _scenarioSet, _valuationView
 
 
 class _FakeDf:
@@ -83,25 +81,3 @@ def test_scenario_set_legs_and_upside():
 
 def test_scenario_set_none_without_base():
     assert _scenarioSet({"scenarios": {}}) is None
-
-
-# ── thesis 합성 ──
-
-
-def test_thesis_pillars_and_call():
-    card = SimpleNamespace(
-        conclusion="자본이 지속 가치 창출",
-        strengths=["ROIC 9.9% > WACC 7.7%", "FCF 흑자 지속", "부채 통제", "4번째(잘림)"],
-        warnings=["메모리 사이클 변동"],
-        grades={},
-    )
-    view = {"intrinsic": 196337, "current": 80000}
-    th = _buildThesis(card, view)
-    assert th["central"] == "자본이 지속 가치 창출"
-    assert len(th["pillars"]) == 3, "기둥 최대 3"
-    assert th["bearCase"] == "메모리 사이클 변동"
-    assert th["call"] is not None and "196,337" in th["call"]
-
-
-def test_thesis_none_when_empty():
-    assert _buildThesis(SimpleNamespace(conclusion="", strengths=[], warnings=[], grades={}), None) is None
