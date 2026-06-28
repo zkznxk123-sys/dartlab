@@ -44,6 +44,24 @@ carousel:
     전력 저장장치도 두 번째 축으로 커졌습니다. 1분기 매출 비중은 20% 중반, 북미 생산능력 목표는 연말 50GWh 이상입니다.
 
     다음에는 세 가지만 보면 됩니다. 수주가 매출로 바뀌는 속도, 전력 저장장치에서 남는 이익, 영업손실 2,078억원이 현금 부담으로 번지는지입니다.
+  explainers:
+  - term: 46시리즈(원통형)
+    body: 지름 46mm의 차세대 원통형 배터리입니다. LG에너지솔루션의 신규 대형 수주 축으로, 수주가 매출로 바뀌는 속도가 관건입니다.
+  - term: ESS(전력저장장치)
+    body: 전기를 모았다 필요할 때 쓰는 대형 배터리 시스템입니다. 전기차 다음 두 번째 성장축으로, 여기서 실제 이익이 나는지를 봅니다.
+  relatedNews:
+  - title: 태양광이 키운 ESS…K배터리, 전기차 넘어 새 성장축 뜬다
+    source: thebigdata.co.kr
+    date: '2026-06-28'
+    url: http://www.thebigdata.co.kr/view.php?ud=2026062616184842820ecbf9426b_23
+    track: naver
+    description: 네이버 보관 뉴스 기준. 전기차 다음 ESS 성장축 — 카드가 말한 '전력 저장장치 두 번째 축'을 보여줍니다.
+  - title: LG엔솔 버테크, 美 세미나서 BESS 안전 노하우 공유
+    source: theguru.co.kr
+    date: '2026-06-28'
+    url: https://www.theguru.co.kr/news/article.html?no=103514
+    track: naver
+    description: 네이버 보관 뉴스 기준. 북미 ESS(BESS) 사업 행보 — 카드의 '북미 생산능력·ESS 이익' 관전 포인트와 닿습니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 수주가 매출과 이익으로 바뀌는지 읽는 관점입니다.'
   slides:
   - layout: editorial
