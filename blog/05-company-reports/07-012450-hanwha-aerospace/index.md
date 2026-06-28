@@ -44,6 +44,30 @@ carousel:
     반대로 한화오션 영업이익은 4,411억원이었습니다. 그래서 이번 실적은 방산이냐 조선이냐가 아니라, 어디서 이익이 남았는지를 봐야 합니다.
 
     결론은 명확합니다. 큰 수주잔고는 시작일 뿐입니다. 다음 확인 포인트는 전차·장갑차 수출 물량이 회복되는지, 수주잔고가 매출로 바뀌는 속도, 한화오션의 남는 이익 비율이 유지되는지입니다.
+  explainers:
+  - term: 수주잔고
+    body: 이미 계약했지만 아직 납품·매출로 잡히지 않은 주문 총액입니다. 잔고가 커도 납품과 원가를 지나야 이익이 됩니다.
+  - term: 한화오션
+    body: 한화에어로스페이스 계열의 조선사입니다. 이번 분기엔 방산(전차·장갑차)보다 더 큰 이익을 내, '어디서 이익이 남는지'를 갈랐습니다.
+  relatedNews:
+  - title: '[K-방산은 지금] 최대 실적 무색… EU 금융장벽에 갇힌 몸값'
+    source: the-biz.co.kr
+    date: '2026-06-28'
+    url: http://www.the-biz.co.kr/news/articleView.html?idxno=723343
+    track: naver
+    description: 네이버 보관 뉴스 기준. 최대 실적에도 수출 금융장벽 — '수주잔고가 매출로 바뀌는 속도'라는 논제의 마찰 요인입니다.
+  - title: 한화에어로스페이스, '120조' 캐나다 잠수함 수주 연계 해외 수출
+    source: g-enews.com
+    date: '2026-06-28'
+    url: https://www.g-enews.com/view.php?ud=20260628061922471e8b8a793f7_1
+    track: naver
+    description: 네이버 보관 뉴스 기준. 대형 신규 수주 — 카드가 말한 '큰 수주잔고는 시작'의 실제 사례입니다.
+  - title: 스페인 11조 자주포 소송 극적 타협…최대 수혜 한화에어로스페이스
+    source: g-enews.com
+    date: '2026-06-28'
+    url: https://www.g-enews.com/view.php?ud=202606280556175637e8b8a793f7_1
+    track: naver
+    description: 네이버 보관 뉴스 기준. 자주포 수출 진전 — '전차·장갑차 수출 물량 회복' 관전 포인트와 닿습니다.
   pinnedComment: 수주잔고는 시작입니다. 납품과 원가를 지나 매출과 이익으로 바뀌는지가 핵심입니다.
   slides:
   - layout: editorial
