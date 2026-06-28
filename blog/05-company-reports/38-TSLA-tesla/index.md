@@ -53,6 +53,24 @@ carousel:
     반전은 가치평가에 있다. dartlab DCF가 계산한 자동차 사업 기업가치는 -$3.7B, 마이너스다. EVA도 2022년 +$7.8B에서 2025년 -$4.2B로 돌아섰다 — 투하자본수익률 4.27%가 자본조달비용(WACC) 9.89%를 못 넘는다. 삼각검증 가중 타겟은 $963B, 중앙값 $321B. 시총의 약 1/3 수준이다.
 
     관전 포인트는 하나다. 2026년 로보택시 상업 서비스의 분기 매출. 손익계산서에 찍히면 $1T가 정당화되기 시작하고, 안 찍히면 dFV 중앙값 $321B 쪽으로 수렴한다. 자동차로는 피크아웃, AI로는 시작 전 — 어느 쪽인지 숫자로 드러나는 해다.
+  explainers:
+  - term: DCF·EVA
+    body: DCF는 미래 현금흐름으로 기업가치를 매기는 방법, EVA는 자본비용을 넘는 초과이익입니다. 테슬라 자동차 사업은 둘 다 마이너스 — 시총 $1T는 자동차가 아니라 내러티브의 값입니다.
+  - term: 로보택시
+    body: 운전자 없이 운행하는 자율주행 택시 서비스입니다. 테슬라 시총을 떠받치는 핵심 내러티브로, 분기 매출로 찍히는지가 $1T 정당화의 갈림길입니다.
+  relatedNews:
+  - title: Tesla misses on revenue but beats on profit as auto margins jump
+    source: cnbc.com
+    date: '2026-04-22'
+    url: https://www.cnbc.com/2026/04/22/tesla-tsla-q1-2026-earnings-report.html
+    track: global
+    description: CNBC. Q1 매출 부진·마진 회복 — 카드가 말한 '매출 역성장, 영업이익률 4%대'의 최신 분기 확인입니다.
+  - title: Tesla Q2 deliveries expected to disappoint as Musk focuses on robotaxi efforts
+    source: finance.yahoo.com
+    date: '2026-06-24'
+    url: https://finance.yahoo.com/news/tesla-q2-deliveries-expected-to-disappoint-as-musk-focuses-on-ai-robotaxi-efforts-181452072.html
+    track: global
+    description: Yahoo Finance. 인도량 부진 + 로보택시 집중 — 카드가 본 '자동차는 피크아웃, 로보택시로 전환'을 그대로 보여줍니다.
   pinnedComment: 투자 판단이 아닙니다. 재무 수치는 dartlab 실측(2017~2025 분기 합산), 2026 Q1 마진은 10-Q 공식 공시, 시총은 시장 관측치, 로보택시·FSD·Optimus·Dojo 가치는 손익계산서에 없는 옵션으로 본문에서 별도 해석.
   slides:
   - layout: editorial

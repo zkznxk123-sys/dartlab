@@ -52,6 +52,24 @@ carousel:
     반전은 현금에 있었다. 순이익은 $60.5B인데 영업활동현금흐름은 $115.8B — 순이익의 1.9배다. 감가상각과 주식보상비용이 비현금 비용으로 빠지기 때문. 이 현금 여력이 $70B 투자를 감당하고도 잉여현금흐름 $46.1B를 남긴다. 영업이익률은 2022년 바닥 24.8%에서 41.4%로 돌아왔다.
 
     관전 포인트는 하나다. 자산은 1년에 +59% 늘었는데 매출은 +22%. 총자산회전율이 0.55회로 3기 연속 하락했다. 2026년에 볼 한 줄 — "AI 설비투자의 매출 전환율".
+  explainers:
+  - term: 매출총이익률(GPM)
+    body: 매출에서 원가를 뺀 이익의 비율입니다. Meta는 공장·재고가 없어 82%로, 이 구조적 마진이 거대 설비투자($70B)를 감당하는 현금의 원천입니다.
+  - term: 잉여현금흐름(FCF)
+    body: 영업으로 번 현금에서 투자를 빼고 남는 돈입니다. Meta는 순이익의 1.9배인 영업현금($115.8B) 덕에 거대 투자에도 FCF $46.1B를 남깁니다.
+  relatedNews:
+  - title: Meta's Zuckerberg gets green light from Wall Street to keep investing in AI
+    source: cnbc.com
+    date: '2026-01-28'
+    url: https://www.cnbc.com/2026/01/28/metas-zuckerberg-gets-green-light-from-wall-street-to-invest-in-ai.html
+    track: global
+    description: CNBC. 월가가 Meta의 거대 설비투자를 용인 — 카드가 말한 '매출의 35%를 데이터센터에 쏟는' 베팅을 시장이 받아주는 배경입니다.
+  - title: 'Meta Platforms: From Heavy AI CapEx to 2026 ROI?'
+    source: investing.com
+    date: '2026-02-10'
+    url: https://www.investing.com/analysis/meta-platforms-from-heavy-ai-capex-to-2026-roi-200673593
+    track: global
+    description: Investing.com. 거대 설비투자가 2026년 수익으로 돌아오는가 — 카드의 핵심 질문 '설비투자의 매출 전환율'과 같은 논점입니다.
   pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·현금흐름·설비투자 등 본문 표 수치는 dartlab 실측(2026-06-20, USD 연결·분기 합산)입니다. 삼성전자 설비투자(약 53조원)·GPU 단가·130만 GPU 대수는 외부/회사 발표 인용입니다.
   slides:
   - layout: editorial
