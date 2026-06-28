@@ -37,7 +37,10 @@
 - ✅ **`reportModel.ts` 계약 + 18블록 완성**(`9e7c77862`, tsc 통과): 기존 8 + 신규 10(thesis·exhibit·callout·verdict[noComposite]·scenario·valuationBridge·peerScatter·driverTree·excerpt·transition) + 구조화 객체(Thesis·ScenarioSet·ValuationView). Python emitter·TS build 공통 SSOT. 신규 전부 optional(무회귀). index.ts export(ReportPort 무충돌).
 - ✅ **`story/report.py::buildReportModel` emitter 완성·검증**(`044daf6dd`): Story 블록→계약 ReportBlock 매핑(legacy 6→8, self-calc 0) + de-gate 밸류에이션(calcDFV)→valuationBridge·scenario pro 블록 + 구조화 thesis 합성 → schemaVersion=2 dict. L2 lazy import. never-raise(skipped dict). **실데이터 검증**: 삼성전자 10섹션 + valuationBridge(relative 196,337·WACC 7.72·g 8.91) + scenario(172,777/196,337/219,897). offline 9 테스트(`tests/story/test_report.py`). story __init__ export.
 - ✅ **`Company.reportModel()` 공개 verb**(`f47f63a28`, dart·edgar): @property+CallableAccessor dual-access(story 동형)→_reportModelImpl lazy 위임. `report` 정형공시 accessor 충돌 회피로 `reportModel` 명명. ⚠ 함정 교훈: verb 는 @property 라 메서드를 @property·def 사이에 끼우면 데코레이터 탈취 — 별도 @property+_impl 로 분리. 검증: schemaVersion=2·story 무회귀.
-- ◐ 잔여 emitter 심화(offline): thesis.py(정규식 아닌 구조화 인과논거)·arc.py(11단계 아크·transition)·verdict/peerScatter/driverTree pro 블록·waccBreakdown 배선. 현 thesis 는 기존 conclusion+strengths 엮기(작동하나 얕음).
+- ✅ **thesis.py 격상**(`story/thesis.py`, 커밋 직후): ROIC−WACC 지속성→메커니즘 1문장(데이터 섞이면 조건부 정직)·정량 트리거·기둥 결박. 얕은 conclusion 엮기 폐기. 실데이터 차별: 삼성(조건부 미회수) vs 기아(+7%p 71% 방어 단정) vs NAVER(조건부). offline 9 테스트.
+- ✅ **버그수정**: `buildSectionSummary` tuple 크래시 가드(NAVER 등 reportModel 복구, `185590894`). 회귀 3 테스트.
+- 🟡 **verdict 블록 = 불필요 결론**(코드검증): `calcScorecard`/SummaryCard 는 {area,grade} thin(headlineKpis 와 중복). 축별 판정(최근값·기준·판정)은 **이미 재무 table 블록의 '판정'·'기준' 컬럼**에 실려 verdictTone 렌더(`+page.svelte:392`). 별도 verdict 블록 = table 중복 → 미추가(덕지덕지 가드). 계약 verdict 타입은 미래용 보존.
+- 🟡 **arc 재정렬 = 보류**: 현 emitter 는 buildStory reportType.sectionOrder(이미 전문 순서) + 밸류에이션 말미 append = 합리적 아크. 강제 재정렬은 회귀 위험·저ROI. transition 블록은 generic 시 fluff → 섹션쌍별 의미 로직 필요(신중).
 - ☐ 소비자 마이그레이션 (CLI·테스트·storyTemplate) + 死코드 삭제(importer 신뢰검증 후)
 
 ## P3 · 랜딩 동일소비
