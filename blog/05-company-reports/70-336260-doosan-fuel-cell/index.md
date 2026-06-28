@@ -43,6 +43,24 @@ carousel:
     2026년 1분기에는 원가율이 92.8%로 내려왔습니다. 손실은 남았지만, 볼 지점은 선명해졌습니다.
 
     다음엔 입찰 가격, 원가를 뺀 이익, 새 제품 안정성과 정비 매출을 봐야 합니다.
+  explainers:
+  - term: 매출원가율
+    body: 매출에서 원가가 차지하는 비율입니다. 두산퓨얼셀은 113.7%(100원 팔면 114원 원가)로 팔수록 적자였는데, 2026년 1분기 92.8%로 내려온 게 회복의 단서입니다.
+  - term: 연료전지(발전용)
+    body: 수소·가스로 전기를 만드는 발전 설비입니다. 두산퓨얼셀은 설비 판매 + 장기정비 매출 구조라, 입찰 가격과 정비 매출이 수익을 좌우합니다.
+  relatedNews:
+  - title: "[경제쇼] 전력난에 다시 뜨는 '수소'…투자 기회는?"
+    source: edaily.co.kr
+    date: '2026-06-22'
+    url: https://www.edaily.co.kr/news/newspath.asp?newsid=04332886645484344
+    track: naver
+    description: 네이버 보관 뉴스 기준. 전력난발 수소·연료전지 수요 — 카드가 다룬 발전용 연료전지 사업의 수요 환경입니다.
+  - title: 태양광·풍력 넘어 SOFC까지…SK이터닉스, 친환경 포트폴리오 가동 박차
+    source: pinpointnews.co.kr
+    date: '2026-06-23'
+    url: https://www.pinpointnews.co.kr/news/articleView.html?idxno=462292
+    track: naver
+    description: 네이버 보관 뉴스 기준. 연료전지(SOFC) 산업 확장 — 두산퓨얼셀이 속한 시장이 커지는 흐름입니다.
   pinnedComment: 투자 판단이 아닙니다. 두산퓨얼셀은 입찰 가격, 원가를 뺀 이익, 새 제품 안정성과 정비 매출을 봐야 합니다.
   slides:
   - layout: editorial
