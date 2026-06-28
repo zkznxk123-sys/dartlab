@@ -15,7 +15,12 @@
 - ☐ 현 안정본 publish
 
 ## P1 · 능력 격상 (순서: 02a 선행)
-- ☐ P1a 밸류에이션 de-gate + WACC/성장/fade/reverse — 게이트 G1·G2(백테스트)·G3·G5
+- ◐ P1a 밸류에이션 de-gate + WACC/성장/fade/reverse — 게이트 G1·G2(백테스트)·G3·G5
+  - ✅ **G1 단위 정합 통과** (gitignore 스크래치 + 졸업 `tests/quant/test_valuationUplift.py` 7개 통과): reinvest round-trip·fade ROIC→WACC 단조수렴·terminal 무료성장 차단·reverse-DCF 항등(오차 0%).
+  - ✅ **본진 디게이트 완료**: `_estimateWacc` bottom-up β + Damodaran 국가테이블(005930 실측 8.72) · `_calcTwoStageDcf` 펀더멘털 성장(g=reinvest×ROIC fade, naive 매출CAGR 대체) · 신규 `_dFVDrivers.py`(buildReinvestmentPath·buildDriverScenarios·reverseDcfExhibit) · `dFV` ±0.12→드라이버 시나리오 + reverseDcf·reinvestmentCheck 출력(guarded).
+  - ✅ **DCF de-gate 실데이터 검증**(005930 offline 결정론): fundG 8.91%(reinvest 0.9×ROIC 9.9) < naive · new DCF < old(과대 해소) · **TVshare 0.78→0.67**(터미널 의존 감소). camelCase·docstring·ruff·import 전부 clean.
+  - 🔧 **정공법 결정 2건**: ① `multiStageDcf` 재투자 FCFF *미적용* — `baseFcf` 가 이미 FCF(OCF−capex)라 거기서 또 빼면 이중계산. 성장 path 로 교정(02a §4.2 보다 정확). ② credit→Kd 스프레드(02a §4.4) = P1e 신용배선으로 이관(Fernandez 이중계산 회피 + 신용 SSOT 동시).
+  - ☐ **push 게이트(네트워크/CI 환경 필요)**: 샌드박스 calcDFV end-to-end 불가(credit/CHS·consensus fetch httpx 클라이언트-closed). 푸시 전 영속루프 환경에서: ① calcDFV 실행해 신규 dFV 값 확인 ② **`tests/quant/test_damodaranPhase4.py` requires_data 범위 가드(삼성 140k–230k 등) 무회귀 확인/필요시 정정**(de-gate 가 의도적으로 값 이동) ③ G2 백테스트(20사 t+12M) ④ G4 calcValuationSynthesis sanity(내 변경 무영향 — 독자 computeCompanyWacc 경로, 확인용). G4 sanity 는 영향 없음(calcValuationSynthesis ⊥ 내 calcDFV 경로). 커밋은 완료(로컬 게이트 7+import+ruff+camelCase+docstring clean), **push 보류**.
 - ☐ P1b 전망 driver + `_revenueBacktest.py` — 게이트 MAPE·방향·밴드·skill
 - ☐ P1c 세그먼트 마진 도출 + SOTP — 게이트 MAE≤5%p·커버·ρ
 - ☐ P1d 정량 moat(`_attempts/quantMoat` → `moat.py`) — 게이트 cohort 평균회귀

@@ -221,11 +221,16 @@ def calcDFV(
 
     primaryKey, primaryValue = _dfvCheckRelativeExtreme(company, primaryKey, primaryValue, secondaryKeys, allMethods)
 
-    # 5. Bull/Base/Bear 시나리오 (WACC ±1%p 효과 근사)
-    # WACC 1%p 변화 ≈ 적정가 ±10~15% (경험칙)
-    wacc_effect = 0.12  # 12% per 1%p WACC change
-    bull = primaryValue * (1 + wacc_effect)
-    bear = primaryValue * (1 - wacc_effect)
+    # 5. Bull/Base/Bear 시나리오 — DCF primary 면 드라이버(g·WACC) 교란(±12% 산술밴드 폐기),
+    #    비-DCF primary 는 ±12% 근사 fallback (P1a de-gate).
+    driver_scen = twoStageDetail.get("driverScenarios") if (primaryKey == "dcf2stage" and twoStageDetail) else None
+    if driver_scen and driver_scen.get("bull") and driver_scen.get("bear"):
+        bull = driver_scen["bull"]
+        bear = driver_scen["bear"]
+    else:
+        wacc_effect = 0.12  # WACC 1%p 변화 ≈ 적정가 ±12% (비-DCF primary 경험칙)
+        bull = primaryValue * (1 + wacc_effect)
+        bear = primaryValue * (1 - wacc_effect)
 
     # 6. 삼각검증
     triangulation = _triangulate(primaryKey, primaryValue, secondaryKeys, allMethods)
@@ -276,6 +281,26 @@ def calcDFV(
         "qualityWACC": qw,
         "allMethods": {k: round(v) for k, v in allMethods.items()},
     }
+    # P1a: reverse-DCF 헤드라인 + 재투자 진단 (펀더멘털 path 일 때만, 전부 guarded)
+    rdrivers = twoStageDetail.get("reinvestmentDrivers") if twoStageDetail else None
+    if rdrivers:
+        out["reinvestmentCheck"] = rdrivers
+        try:
+            from dartlab.analysis.valuation._dFVDrivers import reverseDcfExhibit
+
+            _sh = _inferShares(company)
+            if currentPrice and _sh and _sh > 0:
+                rdcf = reverseDcfExhibit(
+                    company,
+                    waccPct=adjusted_wacc,
+                    fundamentalGrowth=rdrivers.get("fundamentalGrowth"),
+                    marketCap=currentPrice * _sh,
+                )
+                if rdcf:
+                    out["reverseDcf"] = rdcf
+        except (ImportError, AttributeError, ValueError, TypeError):
+            pass
+
     _dfvApplyGoingConcern(out, goingConcern, survival)
     _dfvApplyTwoStage(out, twoStageDetail)
     _dfvApplyRealOptions(out, company, basePeriod, ov)

@@ -44,7 +44,7 @@ def _estimateWacc(company) -> float | None:
         return isinstance(exc, (httpx.HTTPError, SourceUnavailableError))
 
     cache = getattr(company, "_cache", None)
-    _KEY = "_estimateWacc_v2"
+    _KEY = "_estimateWacc_v3"  # v3: bottom-up β + Damodaran 국가테이블 de-gate (P1a)
     _SENTINEL = "__NONE__"
     if cache is not None and _KEY in cache:
         cached = cache[_KEY]
@@ -84,12 +84,23 @@ def _estimateWacc(company) -> float | None:
             except Exception as exc:
                 if not _isOptionalMarketDataError(exc):
                     raise
+            _currency = getattr(company, "currency", "KRW")
+            # de-gate (P1a): Damodaran 국가테이블(정밀 Rf/ERP) + bottom-up β fallback 활성.
+            # betaOverride(회귀 β) 우선 유지 → 평시 무변, 콜드/403 시 sector-const/1.0 대신 bottom-up.
+            try:
+                from dartlab.synth.riskPremiums import resolveCountryCode
+
+                _country = resolveCountryCode(currency=_currency)
+            except (ImportError, ValueError, TypeError):
+                _country = None
             wacc, _ = computeCompanyWacc(
                 series,
                 sectorParams=sectorParams,
                 marketCap=marketCap,
-                currency=getattr(company, "currency", "KRW"),
+                currency=_currency,
                 betaOverride=betaCalc,
+                country=_country,
+                bottomUpBeta=True,
             )
             result = round(wacc, 2)
     except (ImportError, AttributeError, TypeError, ValueError):

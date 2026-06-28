@@ -279,12 +279,28 @@ def _calcTwoStageDcf(company: Any, lifePhase: str | None, overrides: dict) -> di
         return None
 
     wacc = _tsdResolveWacc(company, overrides)
-    highG = _tsdResolveHighGrowth(company)
-    years_vec, rates_vec = _tsdBuildPhases(lifePhase, highG, overrides)
     terminal_g = _tsdResolveTerminalGrowth(lifePhase, company, overrides)
 
     margin_path = applyOverride(None, "marginPath", overrides)
     reinvestment_path = applyOverride(None, "reinvestmentPath", overrides)
+    rates_override = applyOverride(None, "growthRates", overrides)
+
+    # de-gate (P1a): 성장을 매출 CAGR 외삽이 아니라 펀더멘털 anchor 로 — g=reinvest×ROIC,
+    # ROIC→WACC fade. growthRates override·ROIC 추정 실패 시 기존 phase 로 폴백(가정 명시).
+    drivers = None
+    if rates_override is None:
+        try:
+            from dartlab.analysis.valuation._dFVDrivers import buildReinvestmentPath
+
+            drivers = buildReinvestmentPath(company, waccPct=wacc)
+        except (ImportError, AttributeError, ValueError, TypeError):
+            drivers = None
+    if drivers and drivers.get("growthRates"):
+        rates_vec = drivers["growthRates"]
+        years_vec = [1] * len(rates_vec)
+    else:
+        highG = _tsdResolveHighGrowth(company)
+        years_vec, rates_vec = _tsdBuildPhases(lifePhase, highG, overrides)
 
     baseFcf = _tsdExtractBaseFcf(company)
     if not baseFcf or baseFcf <= 0:
@@ -296,7 +312,7 @@ def _calcTwoStageDcf(company: Any, lifePhase: str | None, overrides: dict) -> di
         return None
     net_debt, shares = nd_shares
 
-    return multiStageDcf(
+    result = multiStageDcf(
         baseFcf=baseFcf,
         growthYears=years_vec,
         growthRates=rates_vec,
@@ -307,6 +323,28 @@ def _calcTwoStageDcf(company: Any, lifePhase: str | None, overrides: dict) -> di
         netDebt=net_debt,
         shares=shares,
     )
+    if result is None:
+        return None
+    # 드라이버 시나리오(±12% 산술밴드 폐기) + 펀더멘털 진단 부착 — 펀더멘털 path 일 때만
+    # (phase 폴백은 per-year 가 아니라 buildDriverScenarios 가정 위반).
+    if drivers:
+        result["reinvestmentDrivers"] = drivers
+        try:
+            from dartlab.analysis.valuation._dFVDrivers import buildDriverScenarios
+
+            scen = buildDriverScenarios(
+                baseFcf=baseFcf,
+                growthRates=rates_vec,
+                terminalGrowth=terminal_g,
+                wacc=wacc,
+                netDebt=net_debt,
+                shares=shares,
+            )
+            if scen:
+                result["driverScenarios"] = scen
+        except (ImportError, AttributeError, ValueError, TypeError):
+            pass
+    return result
 
 
 def _applySurvivalAdjustment(company: Any, primaryValue: float, overrides: dict) -> dict | None:
