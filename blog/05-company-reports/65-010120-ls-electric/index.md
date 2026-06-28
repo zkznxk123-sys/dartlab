@@ -32,6 +32,24 @@ carousel:
     최근 북미 AI 데이터센터용 3만8천 볼트급 고압 배전 시스템 계약이 나왔고, 북미 데이터센터 누적 주문도 작년 연간 규모를 반년 만에 넘어섰습니다.
 
     그래서 다음에는 북미 새 주문, 받아둔 주문의 매출 전환, 원자재가 올라도 버티는 이익률을 봅니다.
+  explainers:
+  - term: 배전 시스템
+    body: 전기를 안전하게 나누고 보호하는 장비입니다. 데이터센터가 늘면 서버보다 먼저 필요해, 전력 수요의 첫 수혜처가 됩니다.
+  - term: 수주(주문)→매출 전환
+    body: 계약한 주문이 실제 납품·매출로 잡히는 과정입니다. 북미 누적 주문이 매출·이익으로 바뀌는 속도가 관건입니다.
+  relatedNews:
+  - title: LS일렉트릭, 북미 데이터센터 수주…1,702억 원 공급 계약
+    source: topstarnews.net
+    date: '2026-04-13'
+    url: https://www.topstarnews.net/news/articleView.html?idxno=16033663
+    track: naver
+    description: 네이버 보관 뉴스 기준. 북미 데이터센터 대형 공급 계약 — 카드가 말한 '북미 새 주문'의 실제 사례입니다.
+  - title: LS ELECTRIC AMERICA, 북미 데이터센터 전력설비 공급
+    source: digitaltoday.co.kr
+    date: '2026-04-13'
+    url: https://www.digitaltoday.co.kr/news/articleView.html?idxno=656504
+    track: naver
+    description: 네이버 보관 뉴스 기준. 북미 데이터센터 전력설비 행보 — 받아둔 주문이 쌓이는 흐름입니다.
   pinnedComment: 투자 판단이 아닙니다. LS ELECTRIC은 AI 뉴스보다 북미 새 주문, 받아둔 주문의 매출 전환, 이익률을 봐야 합니다.
   slides:
   - layout: editorial
