@@ -49,6 +49,24 @@ carousel:
     진짜는 한 분기 안에 있었습니다. 6년 개발한 자체 신작 붉은사막이 (회사 IR 기준) 첫 달 500만장, 출시 26일째에 전년 매출(3,656억)을 넘겼고, 같은 분기 8년 보유한 CCP/EVE는 $225M에 사서 $120M에 팔렸습니다(-46%). dartlab 실측으로는 3년 누적 영업적자 -435억인데도 순현금(현금 1,339억).
 
     한 IP가 막 깨어나고, 한 IP가 막 떠난 분기. 다음에 볼 지표는 2026Q2 손익계산서 — 첫 달 500만장이 분기 매출 급등으로 어떻게 찍히는지입니다.
+  explainers:
+  - term: 단일 IP 의존
+    body: 회사 매출이 게임 하나(검은사막)에 쏠린 구조입니다. 펄어비스는 9년간 이 한 IP로 버텨, 분기 매출이 800억~5,000억을 오갈 만큼 변동성이 컸습니다.
+  - term: 순현금
+    body: 보유 현금이 차입금보다 많은 상태입니다. 펄어비스는 3년 누적 적자에도 현금 1,339억으로 순현금이라, 신작 출시까지 버틸 체력이 됐습니다.
+  relatedNews:
+  - title: "\"기술력에 빠른 대응\" 펄어비스 '붉은사막' 600만장 흥행 배경은"
+    source: daily.hankooki.com
+    date: '2026-06-26'
+    url: https://daily.hankooki.com/news/articleView.html?idxno=1380343
+    track: naver
+    description: 네이버 보관 뉴스 기준. 붉은사막 600만장 흥행 — 카드가 말한 '막 깨어난 IP'의 성적표입니다.
+  - title: 게임업계, '붉은사막' 빠른 대응 호평
+    source: sisaweek.com
+    date: '2026-06-26'
+    url: https://www.sisaweek.com/news/articleView.html?idxno=236378
+    track: naver
+    description: 네이버 보관 뉴스 기준. 출시 후 운영 호평 — 신작이 분기 매출 급등으로 이어질지의 단서입니다.
   pinnedComment: 투자 판단이 아닙니다. 재무·분기 수치는 DART 사업보고서·분기보고서 기반 dartlab 실측, 판매량·매각가·출시일은 회사 IR·Sony·보도 등 외부 인용입니다.
   slides:
   - layout: editorial
