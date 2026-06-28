@@ -77,6 +77,8 @@ carousel:
 - 이미지 마음에 안 들면 **계약 안 건드리고 hfMedia 이미지만 교체**하면 됨.
 - 로컬 원본 = `sns/assets/{code}/{name}.webp` → `build_index.py` 인덱싱 → `publish_assets_hf.py` 가 hfMedia 업로드.
   파일명에 `card`/`thumbnail`/`og-` 토큰만 없으면 hero 로 자동 채택(별도 등록 불필요).
+- **블로그 hero 공유 (SSOT)**: 블로그 회사 글 hero 사진은 `sns/scripts/ingest_blog_assets.py` 로 같은
+  `sns/assets/{code}/` 공유풀에 합류한다 (블로그·카드 이미지 한 풀). 멱등·손작성 자산 보호 — 절차는 `blog/BLOG.md` "블로그 hero ↔ 카드 공유풀".
 
 ### 이미지 점검 — 쓰레기(평면 벡터·도식·인포그래픽) 먼저 잡기
 생성형 hero 중 일부가 실사가 아니라 **평면 도식·막대그래프·텍스트 카드**로 나와 흑백 풀블리드 배경으로 깨진다.
@@ -170,6 +172,7 @@ Openverse/Commons 검색도 범용 업종어만 넣지 않는다. `queries` 는 
 | `blog/_scripts/fetch_cc0_images.py` | 무료(PD/CC0) 이미지 수급 — Commons·Openverse |
 | `sns/scripts/extractImagegenAssets.py` | GPT `image_gen` 세션 결과 → `sns/assets/{code}/{asset}.webp` 추출 |
 | `sns/scripts/checkImagegenAssets.py` | image_gen 산출물 4:5·밝기·프레이밍 1차 검사 |
+| `sns/scripts/ingest_blog_assets.py` | **블로그 hero ↔ 카드 공유풀 SSOT** — 블로그 회사글 hero → `sns/assets/{code}/`(멱등·손작성 보호) |
 | `blog/_scripts/gen_company_flux.py` | legacy 생성형 hero(4:5) — 신규 `/cards` 기본 경로 아님 |
 | `blog/_scripts/audit_seo.py` | carousel 형식·숫자 검사 |
 | `blog/_scripts/migrate_carousels_to_blog.py` | 1회성 이관(sns/carousels → blog frontmatter, **완료**). 이후 sns 는 **유물**·재동기화 안 함 |

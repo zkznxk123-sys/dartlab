@@ -83,7 +83,7 @@ ai:
 
 - `verdict` = 이 글이 붙잡은 독자 질문의 답 (기획자 확정 후 도출).
 - `strengths`/`weaknesses` = 재무분석가 발견.
-- `keyMetrics` = dartlab 실측 (`sync_financials.py` 자동 갱신).
+- `keyMetrics` = dartlab 실측 요약 (수동 기입, `auditBlogFinance.py` 로 본문 표·실측과 정합 검증).
 - KnowledgeDB 자동 파생 → HuggingFace 공유.
 
 ### carousel 블록 (선택 — 라이브 카드 캐러셀 큐레이션)
@@ -685,22 +685,16 @@ cr["grade"]; cr["score"]; cr["healthScore"]; cr["divergenceExplanation"]
 
 ---
 
-<!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
-<!-- AUTO:END -->
+<CompanyFinancials code="{stockCode}" />
 ```
 
-### 공시·Filings — AUTO 블록으로만 생성한다
+### 재무제표·공시 — `<CompanyFinancials>` 라이브 태그로 렌더한다
 
-`## 공시 / Filings` 와 `## 재무제표 — 최근 5 개년` 은 수동으로 쓰지 않는다. 본문 끝에 `<!-- AUTO:START -->` · `<!-- AUTO:END -->` 마커만 두고 `uv run python -X utf8 blog/_scripts/sync_financials.py {stockCode}` 실행. `sync_financials.py` 가 AUTO 블록 안에 2 H2 자동 생성.
+`## 재무제표 — 최근 5 개년` · `## 공시 / Filings` 는 **수동으로 쓰지 않고 굽지도 않는다**. 글 말미(검증표 아래)에 단일 태그 한 줄만 두고, 상단 `<script>` 블록에 `import CompanyFinancials from '$lib/components/blog/CompanyFinancials.svelte';` 를 추가한다. 컴포넌트가 **빌드타임에 데이터 SSOT(dart/finance)에서 직독**해 재무 5 개년·공시를 매 빌드 현재 매핑으로 산출한다.
 
-**발행 전 체크**: `grep -c "^## 공시 / Filings" 파일명` → 결과 **1** 이어야 함 (AUTO 블록 안의 1 개).
+옛 `<!-- AUTO:START/END -->` 정적 bake + `sync_financials.py` 는 **폐지**됐다 (`0f6a6f2f7`). 정적 bake 는 커밋 시점 숫자가 박제돼 노후화했고 (예 GS건설 매출 14,404 화석), 라이브 태그가 이를 구조적으로 종결한다. US(EDGAR HF 미존재) 글은 Phase 2 로 보존.
 
-**반복 실패** — 계속 반복됨:
-- 2026-04-16 META·TSLA·하이브·IONQ 4 건 — 검증표·공시·재무제표를 `## 부록: 재무제표 5 년` 아래 서브로 숨김
-- 2026-04-18 네이버·에스퓨얼셀·한화오션·오뚜기·SK바이오사이언스 5 건 — AUTO 밖 수동 공시 섹션 추가
-- 2026-04-18 인텔리안테크·SM엔터·팔란티어·로켓랩 4 건 — 같은 날 재발
-
-`## 부록: 재무제표 5 년` 같은 "부록" 이름으로 묶기 → 검증표·공시를 하위로 숨기게 됨. AUTO:START·END 마커 누락 → 자동 갱신 불가로 숫자 노후화. 본문 안에서 `## 재무제표 — 최근 5 개년` 중복 작성.
+> 말미 3 H2 (검증표·재무·공시)를 `## 부록…` 아래로 숨기지 않는다 (위 "글 말미 — 3 독립 H2" 원칙). 재무·공시는 태그가 생성하므로 본문에 중복 H2 를 수동 작성하지 않는다.
 
 ### 부록 재무제표 5 년 표
 
@@ -851,7 +845,7 @@ https://eddmpython.github.io/dartlab/
 
 - 배경: GPT `image_gen` 이미지가 캔버스 전체 채움 (비율 유지 crop, 좌우 텍스트 박스 없음).
 - 전체 어두운 필터 `(10,14,26,70)` + 좌측 가로 그라데이션 `alpha = 200*(1-x/900)`.
-- 합성: Pillow. 레퍼런스 스크립트 [gen_thumbnails.py](_scripts/gen_thumbnails.py).
+- 합성: Pillow. 썸네일 생성 SSOT [gen_blog_thumbnails.py](_scripts/gen_blog_thumbnails.py).
 - 사이즈: 1200×630, WebP (quality 90).
 - 텍스트 레이어:
   - 좌상단 `{회사명 (종목코드)}` malgun.ttf 24px `#94a3b8`
@@ -875,15 +869,30 @@ https://eddmpython.github.io/dartlab/
 
 - 최종 합성 썸네일: `landing/static/thumbnails/{code}-{slug}.webp` (덮어쓰기 OK).
 - 원본 이미지 배경: `blog/.../assets/{NN}-thumbnail-bg.webp` (덮어쓰기 없음).
-- `gen_thumbnails.py` 같은 재생성 스크립트는 **반드시 assets/ 의 원본 배경을 읽어서** 합성.
+- `gen_blog_thumbnails.py` 같은 재생성 스크립트는 **반드시 assets/ 의 원본 배경을 읽어서** 합성.
 - 원본 배경 파일명은 `{NN}-thumbnail-bg.webp` 고정.
 
 **Phase 3 체크리스트 (썸네일 생성 시)**:
 1. GPT `image_gen` 으로 배경 생성 → `extractImagegenAssets.py` 로 추출 → `assets/{NN}-thumbnail-bg.webp` 로 먼저 저장.
-2. `gen_thumbnails.py` 스타일로 합성 → `landing/static/thumbnails/{code}-{slug}.webp`.
+2. `gen_blog_thumbnails.py` 로 합성 → `landing/static/thumbnails/{code}-{slug}.webp`.
 3. 둘 다 커밋. 원본 배경 커밋 누락 시 차단.
 
 **반복 실패** — 2026-04-16 META·TSLA·하이브·IONQ 사고 직접 원인. MNST(36) 는 원본 남겨 재생성 가능, 37~40 은 원본 없어서 이미지 재호출 필요.
+
+### 블로그 hero ↔ 카드 공유풀 (HF 이미지 SSOT)
+
+회사 글의 hero 사진 (`blog/05-company-reports/{NN}-{code}-{slug}/assets/{NN}-{semantic}.webp`) 과 카드 캐러셀 이미지는 **같은 공유풀 `sns/assets/{code}/` → HF `dartlab-media`** 를 SSOT 로 쓴다. 블로그 원본 이미지를 카드와 한 풀로 모으는 표준 단계:
+
+```
+uv run python -X utf8 sns/scripts/ingest_blog_assets.py --dry-run   # 복사 범위 미리보기
+uv run python -X utf8 sns/scripts/ingest_blog_assets.py             # 블로그 hero → sns/assets 공유풀(멱등)
+uv run python -X utf8 sns/scripts/build_index.py                    # 인덱스 갱신
+uv run python -X utf8 sns/scripts/publish_assets_hf.py              # hfMedia 업로드
+```
+
+- 차트(`.svg`)·card/thumbnail 렌더는 제외, **hero 실사만** 가져온다.
+- provenance (`sns/assets/_blog_provenance.json`) 로 멱등 — 블로그 원본이 바뀐 것만 재복사. 손-작성 자산(같은 이름)은 보호(미덮어쓰기).
+- 이후 카드 슬라이드·블로그 모두 같은 풀의 이미지를 이름으로 가리킨다 (별도 배선 0).
 
 ### 검증 체크리스트
 
@@ -1049,11 +1058,11 @@ URL : /blog/skhynix  ← 숫자와 종목코드 제거
 
 | # | 증상 | 원인 | 정정 |
 |---|---|---|---|
-| 1 | 이미지가 캔버스 전체를 덮지 않고 우측 반만 차지 | 2 분할 레이아웃 재등장 | 풀블리드로 재생성 (`gen_thumbnails.py` 스펙) |
+| 1 | 이미지가 캔버스 전체를 덮지 않고 우측 반만 차지 | 2 분할 레이아웃 재등장 | 풀블리드로 재생성 (`gen_blog_thumbnails.py` 스펙) |
 | 2 | 제목 텍스트가 별도 단색 박스·카드 위에 놓임 | "텍스트 가독성" 이유로 박스 추가 | 좌측 가로 그라데이션 오버레이로 가독성 확보 |
-| 3 | 썸네일이 글마다 스타일이 제각각 | 매번 즉흥 레이아웃 | MNST 기준작 + `gen_thumbnails.py` 템플릿 공유 |
+| 3 | 썸네일이 글마다 스타일이 제각각 | 매번 즉흥 레이아웃 | MNST 기준작 + `gen_blog_thumbnails.py` 템플릿 공유 |
 
-**썸네일 스펙은 §6 + `gen_thumbnails.py` 단일 템플릿 고정**.
+**썸네일 스펙은 §6 + `gen_blog_thumbnails.py` 단일 템플릿 고정**.
 
 새 거짓 발견 시 즉시 등록 — 미래 글에서 같은 실수 차단.
 
