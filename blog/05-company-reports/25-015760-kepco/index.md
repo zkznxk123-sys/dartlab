@@ -45,6 +45,24 @@ carousel:
     프랑스 EDF는 같은 구조의 끝을 보여줬다. 정부 지분·요금 상한·부채비율 550% — 2023년 완전 국유화, 소액주주는 €12에 쫓겨났다. 한전은 497%, 50%p 차이다.
 
     2025년 영업이익 13.5조, 역대 최대 흑자에 영업이익률 스윙 59.6%p. 하지만 부채 130조는 그대로고, 잉여현금 2.4조로 갚으면 54년이다. 다음 재무제표를 쓸 사람은 CEO가 아니라 정부다.
+  explainers:
+    - term: 매출원가율
+      body: 100원을 팔 때 원가로 나가는 비율입니다. 한전은 2022년 141.6%(팔수록 적자)였습니다 — 원가(LNG·석탄)는 국제시세가, 매출(전기요금)은 정치가 정하기 때문입니다.
+    - term: 한전채
+      body: 한전이 적자를 메우려 발행한 회사채입니다. 정부가 51% 주주라 사실상 준국채로 AA+를 받지만, 부채 130조가 구조적 부담으로 남습니다.
+  relatedNews:
+    - title: 요금은 묶이고 원가는 뛰고…한전·가스공사 '이중 부담'
+      source: view.asiae.co.kr
+      date: "2026-06-26"
+      url: https://view.asiae.co.kr/article/2026062609561371649
+      track: naver
+      description: 네이버 보관 뉴스 기준. 원가는 오르고 요금은 동결 — 카드가 말한 '원가는 국제시세, 매출은 정치'를 정면으로 보여줍니다.
+    - title: "\"전기료 폭탄 막아라\"…AI가 요금 예측해 사전 경고"
+      source: idaegu.co.kr
+      date: "2026-06-25"
+      url: https://www.idaegu.co.kr/news/articleView.html?idxno=552106
+      track: naver
+      description: 네이버 보관 뉴스 기준. 전기요금 부담이 사회 이슈가 된 환경 — 요금 인상이 정치적으로 묶이는 배경입니다.
   pinnedComment: |
     원문·숫자 출처는 dartlab 기업이야기에서 확인할 수 있습니다.
     github.com/eddmpython/dartlab
