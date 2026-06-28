@@ -4,6 +4,7 @@
 	import type { DartLabRuntime } from '@dartlab/ui-contracts';
 	import Deck from './Deck.svelte';
 	import { loadContract, contractToCards } from './contract';
+	import { loadCompanyBadges, type CompanyBadges } from './meta';
 	import { cardShareUrl } from './share';
 	import { heroUrls } from './media';
 	import type { MediaIndex, CarouselContract } from './model';
@@ -33,6 +34,21 @@
 		contract = null;
 		loadContract(s).then((r) => {
 			if (s === slug) contract = r;
+		});
+	});
+
+	// 섹션 점프 네비 — Deck 이 빌드 후 챕터 앵커를 onSections 로 넘긴다. jumpTo 는 bind:this 로 호출.
+	let deckRef = $state<{ jumpTo: (i: number) => void } | null>(null);
+	let anchors = $state<{ label: string; index: number }[]>([]);
+
+	// 캡션 배지 — 제품·지주(rt.company.products 직독 + 회사명 휴리스틱). code 바뀌면 재로딩(레이스 가드).
+	let badges = $state<CompanyBadges | null>(null);
+	$effect(() => {
+		const c = code;
+		badges = null;
+		anchors = []; // 새 회사 = 새 덱 → 옛 앵커 비움(다이얼로그 재사용 시 stale 방지)
+		loadCompanyBadges(rt, c, corpName).then((b) => {
+			if (c === code) badges = b;
 		});
 	});
 
@@ -69,7 +85,7 @@
 <div class="post" role="dialog" aria-modal="true" aria-label="{corpName} 포스트" onclick={onClose}>
 	<div class="postInner" role="document" onclick={(e) => e.stopPropagation()}>
 		<div class="postLeft">
-			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} leadCards={contract ? contractToCards(contract, media) : []} />
+			<Deck bind:this={deckRef} {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} leadCards={contract ? contractToCards(contract, media) : []} onSections={(a) => (anchors = a)} />
 		</div>
 		<aside class="postRight">
 			<header class="prHead">
@@ -82,8 +98,20 @@
 					{#if copied}복사됨 ✓{:else}<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>공유{/if}
 				</button>
 			</header>
+			<!-- 섹션 점프 프리셋 — 캡션 헤더 바로 아래(사진 밖 웹 리더 크롬). 20장+ 익명 닷 보완. -->
+			{#if anchors.length > 1}
+				<nav class="prNav" aria-label="섹션 바로가기">
+					{#each anchors as a (a.index)}<button onclick={() => deckRef?.jumpTo(a.index)}>{a.label}</button>{/each}
+				</nav>
+			{/if}
 			<div class="prScroll">
 				<p class="prMeta">{contract?.name ?? corpName}{code ? ` · ${code}` : ''}</p>
+				{#if badges && (badges.product || badges.isHolding)}
+					<div class="prBadges">
+						{#if badges.isHolding}<span class="prTag prTagHold">지주회사</span>{/if}
+						{#if badges.product}<span class="prTag">{badges.product}</span>{/if}
+					</div>
+				{/if}
 				{#if contract?.title}<h2 class="prTitle">{contract.title}</h2>{/if}
 				{#if contract}
 					{#each captionParas(contract.caption) as para (para)}<p class="prPara">{para}</p>{/each}
@@ -229,6 +257,60 @@
 		letter-spacing: 0.08em;
 		color: var(--dl-accent);
 		font-weight: 700;
+	}
+	/* 섹션 점프 프리셋 — 캡션 헤더 아래 가로 칩 행(넘치면 가로 스크롤, 줄바꿈 금지). */
+	.prNav {
+		display: flex;
+		gap: 6px;
+		padding: 9px 18px;
+		border-bottom: 1px solid #161b26;
+		overflow-x: auto;
+		scrollbar-width: none;
+		flex: 0 0 auto;
+	}
+	.prNav::-webkit-scrollbar {
+		display: none;
+	}
+	.prNav button {
+		flex: 0 0 auto;
+		padding: 5px 11px;
+		border-radius: 999px;
+		border: 1px solid #243244;
+		background: rgba(255, 255, 255, 0.03);
+		color: #cbd5e1;
+		font-size: 12px;
+		font-weight: 700;
+		cursor: pointer;
+		white-space: nowrap;
+		transition:
+			border-color 0.15s,
+			color 0.15s;
+	}
+	.prNav button:hover {
+		border-color: rgba(var(--dl-accent-rgb), 0.6);
+		color: var(--dl-accent);
+	}
+	/* 회사 배지 — 제품·지주(캡션 메타 아래). 작은 칩. */
+	.prBadges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin: 0 0 12px;
+	}
+	.prTag {
+		font-size: 11px;
+		font-weight: 700;
+		padding: 3px 9px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.05);
+		color: #aab8c8;
+		border: 1px solid #1e2433;
+		word-break: keep-all;
+	}
+	.prTagHold {
+		color: var(--dl-accent);
+		border-color: rgba(var(--dl-accent-rgb), 0.4);
+		background: rgba(var(--dl-accent-rgb), 0.08);
 	}
 	.prTitle {
 		margin: 0 0 14px;

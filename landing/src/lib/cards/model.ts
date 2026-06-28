@@ -29,6 +29,8 @@ interface CardHead {
 	note?: string;
 	/** 배경 hero 사진 URL — 전 슬라이드가 회사 사진을 배경으로(인스타 에디토리얼). hero 전부를 슬라이드에 순환 배정. */
 	bg?: string;
+	/** 챕터 라벨(표지/핵심지표/재무/사업·운영) — 캡션 패널 섹션 점프 네비(chapterAnchors)용. 20장+ 익명 닷 보완. */
+	chapter?: string;
 }
 
 // 카드(슬라이드) 판별 유니온. chart 계열(line/bars/share/table)은 ReportBlock 과 1:1.

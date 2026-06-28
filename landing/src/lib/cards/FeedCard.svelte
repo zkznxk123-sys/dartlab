@@ -6,6 +6,7 @@
 	import type { DartLabRuntime } from '@dartlab/ui-contracts';
 	import Deck from './Deck.svelte';
 	import CoverThumb from './CoverThumb.svelte';
+	import { loadCompanyBadges, type CompanyBadges } from './meta';
 	import { cardShareUrl } from './share';
 	import { heroUrls } from './media';
 	import type { MediaIndex, CarouselCard } from './model';
@@ -37,6 +38,20 @@
 		media: MediaIndex | null;
 		onOpen: () => void;
 	} = $props();
+
+	// 섹션 점프 네비 + 캡션 배지(제품·지주) — PostModal 과 동형. Deck 이 onSections 로 앵커를 넘기고
+	// jumpTo 는 bind:this 로 호출. 배지는 rt.company.products 직독(공유 이미지 무변경, 캡션 크롬만).
+	let deckRef = $state<{ jumpTo: (i: number) => void } | null>(null);
+	let anchors = $state<{ label: string; index: number }[]>([]);
+	let badges = $state<CompanyBadges | null>(null);
+	$effect(() => {
+		const c = code;
+		badges = null;
+		anchors = [];
+		loadCompanyBadges(rt, c, corpName).then((b) => {
+			if (c === code) badges = b;
+		});
+	});
 
 	// 캡션 인라인 펼침(인스타 피드식) — 클릭 시 모달이 아니라 그 자리(같은 페이지) 이미지 아래에서 펼침/접힘.
 	let expanded = $state(false);
@@ -75,7 +90,7 @@
 	<!-- 인스타 피드식 — 풀폭 인라인 스와이프 캐러셀 + 아래 캡션 바. -->
 	<article class="fc">
 		<div class="fcDeck">
-			<Deck {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} {leadCards} />
+			<Deck bind:this={deckRef} {rt} sym={code} {slug} {corpName} heroUrls={heroUrls(media, code)} {leadCards} onSections={(a) => (anchors = a)} />
 		</div>
 		<div class="fcBar">
 			<picture>
@@ -92,6 +107,17 @@
 				{/if}
 			</button>
 		</div>
+		{#if anchors.length > 1}
+			<nav class="fcNav" aria-label="섹션 바로가기">
+				{#each anchors as a (a.index)}<button onclick={() => deckRef?.jumpTo(a.index)}>{a.label}</button>{/each}
+			</nav>
+		{/if}
+		{#if badges && (badges.product || badges.isHolding)}
+			<div class="fcBadges">
+				{#if badges.isHolding}<span class="fcTag fcTagHold">지주회사</span>{/if}
+				{#if badges.product}<span class="fcTag">{badges.product}</span>{/if}
+			</div>
+		{/if}
 		{#if title || hasCaption}
 			<div class="fcCap">
 				{#if title}<p class="fcCapTitle" class:clamp={!expanded}>{title}</p>{/if}
@@ -159,6 +185,55 @@
 	}
 	.fcShare:active {
 		background: rgba(var(--dl-accent-rgb), 0.2);
+	}
+	/* 섹션 점프 프리셋(모바일) — 캡션 바 아래 가로 칩 행(넘치면 가로 스크롤). */
+	.fcNav {
+		display: flex;
+		gap: 6px;
+		padding: 2px 4px 8px;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	.fcNav::-webkit-scrollbar {
+		display: none;
+	}
+	.fcNav button {
+		flex: 0 0 auto;
+		padding: 5px 11px;
+		border-radius: 999px;
+		border: 1px solid #243244;
+		background: rgba(255, 255, 255, 0.03);
+		color: #cbd5e1;
+		font-size: 12px;
+		font-weight: 700;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.fcNav button:active {
+		border-color: rgba(var(--dl-accent-rgb), 0.6);
+		color: var(--dl-accent);
+	}
+	/* 회사 배지(모바일) — 제품·지주. */
+	.fcBadges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		padding: 0 4px 8px;
+	}
+	.fcTag {
+		font-size: 11px;
+		font-weight: 700;
+		padding: 3px 9px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.05);
+		color: #aab8c8;
+		border: 1px solid #1e2433;
+		word-break: keep-all;
+	}
+	.fcTagHold {
+		color: var(--dl-accent);
+		border-color: rgba(var(--dl-accent-rgb), 0.4);
+		background: rgba(var(--dl-accent-rgb), 0.08);
 	}
 	/* 인스타 피드 캡션 — 이미지 아래 같은 페이지. 접힘=제목 2줄, '더 보기'로 캡션 본문 인라인 펼침(모달 아님). */
 	.fcCap {

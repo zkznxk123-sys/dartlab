@@ -4,6 +4,7 @@
 	// 색감·규격은 기존 SNS 캐러셀(colors.ts·1080×1350) 재현. 키보드 ←→ 는 포커스된 덱에만.
 	import type { DartLabRuntime } from '@dartlab/ui-contracts';
 	import { buildDeck, DECK_PERSPECTIVES } from './build';
+	import { chapterAnchors } from './project';
 	import type { CarouselDeck, CarouselCard } from './model';
 	import CardSlide from './CardSlide.svelte';
 
@@ -15,7 +16,8 @@
 		heroUrls = [],
 		leadCards = [],
 		perspectiveKey = 'earningsPower',
-		onEnlarge
+		onEnlarge,
+		onSections
 	}: {
 		rt: DartLabRuntime;
 		sym: string;
@@ -26,7 +28,14 @@
 		leadCards?: CarouselCard[];
 		perspectiveKey?: string;
 		onEnlarge?: () => void;
+		/** 빌드 완료 후 챕터 점프 앵커 콜백 — 캡션 패널 섹션 네비(사진 밖 크롬)가 받아 렌더. */
+		onSections?: (anchors: { label: string; index: number }[]) => void;
 	} = $props();
+
+	// 외부(캡션 네비)에서 호출하는 점프 — 기존 검증된 go()(scrollIntoView+idx) 재사용. bind:this 로 노출.
+	export function jumpTo(i: number) {
+		go(i);
+	}
 
 	// 표지 미리보기 — buildReport 없이 즉시 첫장 노출(피드 가벼움).
 	function previewDeck(): CarouselDeck {
@@ -80,6 +89,7 @@
 					deck = d;
 					built = true;
 					idx = 0;
+					onSections?.(chapterAnchors(d.cards));
 				}
 			})
 			.catch(() => {});

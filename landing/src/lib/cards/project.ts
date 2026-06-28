@@ -5,7 +5,14 @@
 import type { ReportBlock, ReportModel, ReportResult, OverviewModel } from '$lib/report/model';
 import { isSkipped } from '$lib/report/model';
 import { clean, splitTitle, isTimeSeries } from '$lib/report/render';
+import type { NoteSeriesBundle, CompositionSeries } from '@dartlab/ui-contracts';
 import type { CarouselCard, CarouselDeck, CarouselSpec } from './model';
+
+// 챕터 라벨 SSOT — 캡션 패널 섹션 점프 네비(chapterAnchors)가 이 순서대로 앵커를 만든다.
+const CH_COVER = '표지';
+const CH_KPIS = '핵심지표';
+const CH_FIN = '재무';
+const CH_BIZ = '사업·운영';
 
 interface HeadCtx {
 	heading?: string;
@@ -24,6 +31,47 @@ function hook(text: string, max = 80): string {
 	let s = dot > 0 && dot < max + 12 ? t.slice(0, t.indexOf('. ', dot - 1) + 1 || dot + 1) : t;
 	if (s.length > max) s = s.slice(0, max).trim() + '…';
 	return s.trim();
+}
+
+// ── 주석 구성 시계열(부문별매출·비용성격별) → share 카드 ──
+// 카테고리명 정제는 터미널 NotesDashboardDialog.niceName 동형(원어 truth 보존·표시만 다듬음). 최근 6기간.
+const SHARE_PERIODS = 6;
+function niceCat(n: string): string {
+	if (n === '기타') return '기타';
+	const t = n.replace(/\s*및\s*/g, '·').replace(/(매입액|사용액|비용|비$)/g, '').trim();
+	if (/^[A-Za-z]{1,4}$/.test(t)) return t.toUpperCase();
+	return t.replace(/([a-z])([A-Z])/g, '$1 $2').slice(0, 16) || n;
+}
+const shortPeriod = (p: string): string => p.replace(/^20/, '');
+
+/** 주석 구성(`rt.report.noteSeries` 의 segment/cost) → 100% 적층 share 카드. 단일부문/미공시(null·빈)면
+ *  null 반환 → 조건부 skip(데이터 있을 때만 카드 = 핵심만 정체성). 신규 숫자 합성 0(shares 그대로). */
+export function compositionToShare(
+	series: CompositionSeries | null | undefined,
+	heading: string,
+	sub: string
+): CarouselCard | null {
+	if (!series?.points?.length || !series.categories.length) return null;
+	const legend = series.categories.map((c) => ({ label: niceCat(c), key: c }));
+	const rows = series.points.slice(-SHARE_PERIODS).map((p) => ({
+		year: shortPeriod(p.period),
+		segs: series.categories.map((c, i) => ({ label: niceCat(c), pct: p.shares[i] ?? 0, key: c }))
+	}));
+	return { kind: 'share', heading, sub, chapter: CH_BIZ, rows, legend };
+}
+
+/** 덱 카드 → 챕터 점프 앵커(각 distinct chapter 의 첫 카드 index). 캡션 패널 섹션 네비용 —
+ *  20장+ 익명 닷을 보완. 챕터는 projectReport 가 순서대로 태깅(표지→지표→재무→사업·운영)하므로 연속 dedup. */
+export function chapterAnchors(cards: CarouselCard[]): { label: string; index: number }[] {
+	const out: { label: string; index: number }[] = [];
+	let last = '';
+	cards.forEach((c, i) => {
+		if (c.chapter && c.chapter !== last) {
+			out.push({ label: c.chapter, index: i });
+			last = c.chapter;
+		}
+	});
+	return out;
 }
 
 /** ReportBlock 1개 → 슬라이드 카드 또는 null(명시 skip). 모든 변종을 다뤄야 컴파일됨(exhaustive). */
@@ -81,7 +129,7 @@ export function projectBlock(block: ReportBlock, head: HeadCtx): CarouselCard | 
  *  `carousel:`)이 있으면 큐레이션 오버레이 — order 로 섹션 필터/재정렬, notes[key] 로 손글 caption. */
 export function projectReport(
 	model: ReportModel,
-	opts: { heroUrls?: string[]; spec?: CarouselSpec; lead?: CarouselCard[] } = {}
+	opts: { heroUrls?: string[]; spec?: CarouselSpec; lead?: CarouselCard[]; noteSeries?: NoteSeriesBundle | null } = {}
 ): CarouselDeck {
 	const spec = opts.spec;
 	const heroUrls = opts.heroUrls ?? [];
@@ -104,9 +152,12 @@ export function projectReport(
 					stockCode: model.stockCode,
 					perspectiveLabel: model.perspectiveLabel,
 					conclusion: hook(model.conclusion, 70), // 표지는 한 줄 후킹(리포트 결론 문단 전체 금지)
-					dataBasis: model.dataBasis
+					dataBasis: model.dataBasis,
+					chapter: CH_COVER
 				}
 			];
+	// 편집 lead 표지도 첫 카드를 표지 챕터로(네비 첫 앵커) — 이미 chapter 있으면 보존.
+	if (cards[0] && !cards[0].chapter) cards[0].chapter = CH_COVER;
 
 	// 미구현 관점 → 정직 빈 카드(broken img 아님). lead 가 있으면 편집 슬라이드는 보존.
 	if (model.pending) {
@@ -115,10 +166,19 @@ export function projectReport(
 		return { ...base, cards };
 	}
 
-	if (model.headlineKpis.length) cards.push({ kind: 'kpis', heading: '핵심 지표', metrics: model.headlineKpis });
+	if (model.headlineKpis.length) cards.push({ kind: 'kpis', heading: '핵심 지표', chapter: CH_KPIS, metrics: model.headlineKpis });
 	// 재무 백본 = 터미널 중간패널 재무 그리드를 **보는 관점 순서** 그대로 한 장씩(각 장 = MiniFinChart 그래프
 	// + 표 한 세트). 손익→현금→효율→체력. cardKey 로 번들 카드 선택. 스파크라인(table) 금지.
-	for (const p of FIN_PERSPECTIVES) cards.push({ kind: 'finChart', heading: p.heading, sub: p.sub, stockCode: model.stockCode, cardKey: p.key });
+	for (const p of FIN_PERSPECTIVES) cards.push({ kind: 'finChart', heading: p.heading, sub: p.sub, chapter: CH_FIN, stockCode: model.stockCode, cardKey: p.key });
+
+	// 사업·운영 깊은 카드 — 주석 구성(부문별매출·비용성격별)을 수익성 관점에만 주입(맥락 적합·5덱 비대화 방지).
+	// rt.report.noteSeries 직독(별도 bake 0). 단일부문/미공시면 compositionToShare 가 null → 조건부 skip(핵심만).
+	if (model.perspectiveKey === 'earningsPower' && opts.noteSeries) {
+		const seg = compositionToShare(opts.noteSeries.segment, '부문별 매출', '어디서 버나');
+		const cost = compositionToShare(opts.noteSeries.cost, '비용 체질', '돈을 뭐에 쓰나');
+		if (seg) cards.push(seg);
+		if (cost) cards.push(cost);
+	}
 
 	// 큐레이션 order: 섹션 key 화이트리스트로 필터/재정렬(없으면 원순서). 미지정 key 는 무시(누락 surface 는 audit).
 	let sections = model.sections;
@@ -134,6 +194,7 @@ export function projectReport(
 		if (card) {
 			const note = spec?.notes?.[sec.key];
 			if (note) card.note = note;
+			card.chapter = CH_BIZ;
 			cards.push(card);
 		}
 	}
@@ -187,7 +248,7 @@ function assignHeroes(cards: CarouselCard[], heroUrls: string[]): void {
 export function projectResult(
 	result: ReportResult,
 	perspectiveLabel: string,
-	opts: { heroUrls?: string[]; spec?: CarouselSpec; lead?: CarouselCard[] } = {}
+	opts: { heroUrls?: string[]; spec?: CarouselSpec; lead?: CarouselCard[]; noteSeries?: NoteSeriesBundle | null } = {}
 ): CarouselDeck {
 	if (isSkipped(result)) {
 		// 데이터 skip 이어도 편집 계약 슬라이드(lead)는 그대로 보여준다(굽지 않은 손글). 없으면 정직 빈 카드.
