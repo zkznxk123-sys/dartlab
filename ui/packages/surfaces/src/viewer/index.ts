@@ -59,7 +59,7 @@ export {
 	type SheetSelection,
 	type ExportMode
 } from './lib/export/selection.svelte';
-export { buildWorkbook, type SheetInput, type GridCell } from './lib/xlsx';
+export { buildWorkbook, type SheetInput } from './lib/xlsx';
 export { loadFinanceStatement, financeAvailability, provideFinanceRows } from './lib/finance/financeQuery';
 export { type RawFinanceRow } from './lib/finance/financePivot';
 export { KIND_LABELS, type FinanceKind, type FinanceScope, type FinanceStatement } from './lib/finance/types';

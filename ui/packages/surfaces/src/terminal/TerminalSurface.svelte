@@ -11,6 +11,7 @@
 	import type { Lang } from './lib/types';
 	import { chgClass, fmtNum, sign, sparkPts } from './ui/helpers';
 	import BrandSwitch from './ui/BrandSwitch.svelte'; // 브랜드 색 테마 — SNS 행 첫 아이콘(카드·랜딩 Header 와 동일 컨트롤)
+	import DataMenu from './ui/DataMenu.svelte'; // 상단 「데이터」 — 이 회사 데이터 공개 다운로드(viewer DataDownloadMenu 동형)
 	import LeftRail from './panels/LeftRail.svelte';
 	import StrategyDock from './charts/StrategyDock.svelte'; // 백테스트 모드 = 좌패널 전체를 조작 패널로 교체(좌중우 중 좌)
 	import CenterStack from './panels/CenterStack.svelte';
@@ -267,6 +268,7 @@
 				<span class="connDot"><span class="dot"></span>HF</span>
 				<div class="hdrLinks">
 					{#if co}
+						<DataMenu {runtime} code={co.code} corpName={co.name.kr} {lang} />
 						<a class="hdrLink hdrReport" href="{base}/report?sym={co.code}" target="_blank" rel="noopener" title={lang === 'en' ? 'Corporate analysis report — printable (PDF)' : '기업분석보고서 — 인쇄 가능 (PDF)'}>{lang === 'en' ? 'Report' : '보고서'}</a>
 						<a class="hdrLink hdrCards" href="{base}/cards" target="_blank" rel="noopener" title={lang === 'en' ? 'Card stories — Instagram-style feed (all companies)' : '카드뉴스 — 인스타그램형 피드(전체 회사)'}>{lang === 'en' ? 'Cards' : '카드뉴스'}</a>
 					{/if}

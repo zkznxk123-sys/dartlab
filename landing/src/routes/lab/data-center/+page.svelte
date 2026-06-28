@@ -4,8 +4,7 @@
 	// 전부 기존 자산 재사용: 카탈로그(runtime), readParquet*(runtime), buildWorkbook·downloadBlob(viewer), toCsv(scan).
 	import { DOWNLOAD_CATALOG, isTier2Eligible } from '@dartlab/ui-runtime/data/catalog/downloadCatalog';
 	import { readParquetMetadata, readParquetRows } from '@dartlab/ui-runtime/data/parquet/hfRange';
-	import { buildWorkbook, downloadBlob, type GridCell } from '@dartlab/ui-surfaces/viewer';
-	import { downloadCsv } from '@dartlab/ui-surfaces/scan';
+	import { buildWorkbook, downloadBlob, downloadCsv, type GridCell } from '@dartlab/ui-surfaces/downloadExport';
 
 	const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 	const CELL_CAP = 45000; // Tier2 라이브 셀 상한 (Sheets IMPORTDATA ~5만 셀, 01-api-contract §4).

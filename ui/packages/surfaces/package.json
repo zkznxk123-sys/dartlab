@@ -44,6 +44,11 @@
 			"types": "./src/scan/vizIndex.ts",
 			"svelte": "./src/scan/vizIndex.ts",
 			"default": "./src/scan/vizIndex.ts"
+		},
+		"./downloadExport": {
+			"types": "./src/downloadExport.ts",
+			"svelte": "./src/downloadExport.ts",
+			"default": "./src/downloadExport.ts"
 		}
 	},
 	"scripts": {
