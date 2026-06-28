@@ -50,6 +50,24 @@ carousel:
     1분기 영업이익은 1조 3,560억원이었습니다. 최근에는 초대형 가스운반선 8척, 1조 4,161억원 규모 계약도 보도됐습니다. 다만 인도는 2030년 6월까지입니다.
 
     결론은 단순합니다. 다음 확인 포인트는 배가 실제 인도되는 시점, 배 가격이 이익 비율로 남는지, 강판 가격과 환율이 흔드는지입니다.
+  explainers:
+  - term: 수주잔고·인도
+    body: 조선은 계약(수주)→건조→인도가 몇 년에 걸쳐 일어납니다. 수주가 많아도 이익은 배가 실제 인도될 때 확정되므로, 수주 뉴스만으론 반쪽입니다.
+  - term: 선가(신조선가)
+    body: 새로 짓는 배의 계약 가격입니다. 선가가 높을 때 받은 수주가 인도되면 이익률이 올라가, 조선사 마진을 좌우합니다.
+  relatedNews:
+  - title: 고선가에 고환율까지…조선 3사, 2분기도 두 자릿수 마진 전망
+    source: sisajournal-e.com
+    date: '2026-06-25'
+    url: https://www.sisajournal-e.com/news/articleView.html?idxno=421981
+    track: naver
+    description: 네이버 보관 뉴스 기준. 선가·환율이 마진을 끌어올리는 흐름 — 카드가 말한 '배 가격이 이익 비율로 남는지, 환율'의 업계 근거입니다.
+  - title: 中과 격차 좁힌 조선 빅3, 영업이익률 두 자릿수 예상
+    source: daily.hankooki.com
+    date: '2026-06-28'
+    url: https://daily.hankooki.com/news/articleView.html?idxno=1380325
+    track: naver
+    description: 네이버 보관 뉴스 기준. 조선 빅3 이익률 — 카드가 본 '이익 비율'이 업계 전반에서 회복되는 맥락입니다.
   pinnedComment: 조선주는 수주보다 인도 시점과 이익 비율을 같이 봐야 합니다.
   slides:
   - layout: editorial
