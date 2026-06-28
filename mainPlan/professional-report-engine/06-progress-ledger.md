@@ -34,7 +34,7 @@
 
 ## P2 · 리포트 엔진
 - ☐ 삭제 ~2,834 LOC (`story/macro`·publisher·sixAct·dashboard·sections)
-- ☐ `reportModel.ts` 계약 + 18블록
+- ✅ **`reportModel.ts` 계약 + 18블록 완성**(`9e7c77862`, tsc 통과): 기존 8 + 신규 10(thesis·exhibit·callout·verdict[noComposite]·scenario·valuationBridge·peerScatter·driverTree·excerpt·transition) + 구조화 객체(Thesis·ScenarioSet·ValuationView). Python emitter·TS build 공통 SSOT. 신규 전부 optional(무회귀). index.ts export(ReportPort 무충돌).
 - ☐ `story/report.py::buildReportModel` emitter
 - ☐ 소비자 마이그레이션 (CLI·테스트·storyTemplate)
 
