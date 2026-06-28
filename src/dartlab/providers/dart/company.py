@@ -2809,6 +2809,58 @@ class Company:
         return result.toDataframe()
 
     @property
+    def reportModel(self):
+        """전문 리포트 계약 모델 — story 블록 + de-gate 밸류에이션을 thesis-led ReportModel(dict).
+
+        story 가 합산한 분석 섹션을 계약 ReportBlock 으로 매핑하고, 밸류에이션 de-gate
+        (내재가치 bridge·시나리오)와 구조화 thesis 를 pro 블록으로 합성한다. 랜딩 /report 가
+        **동일 계약**(contracts/reportModel.ts)을 소비하는 SSOT. self-calc 0 — 숫자는 L2 엔진.
+
+        Guide:
+            - "전문 리포트" → c.reportModel()
+            - "밸류에이션 관점 리포트" → c.reportModel("valuation")
+
+        Returns:
+            CallableAccessor: 호출 시 ``_reportModelImpl`` 이 ReportModel dict
+            (contracts/reportModel.ts conform, schemaVersion=2) 반환. 데이터 부족 시
+            {"skipped": True, ...}. dual-access proxy (story 패턴).
+
+        Raises:
+            없음 — 데이터 부족·빌드 실패는 skipped dict 로 반환.
+
+        Example:
+            >>> Company("005930").reportModel("valuation")["schemaVersion"]
+            2
+
+        SeeAlso:
+            - ``dartlab.story.report.buildReportModel`` — backend SSOT.
+            - ``story`` — 레거시 Story dataclass(CLI/렌더용, 공존).
+
+        Requires:
+            - dartlab
+            - polars
+
+        Capabilities:
+            - thesis-led 전문 리포트 계약 emitter. Python·랜딩 TS 가 둘 다 conform 하는
+              단일 ReportModel 문법(18 블록)으로 직렬화. 관점별(full/valuation/credit/...) 아크.
+
+        AIContext:
+            ``ask`` 가 본 결과(계약 dict)를 받아 답변 합성 가능. story 보다 구조화·결론선행.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_reportModelAccessor" not in self._cache:
+            self._cache["_reportModelAccessor"] = CallableAccessor(self._reportModelImpl, name="reportModel")
+        return self._cache["_reportModelAccessor"]
+
+    def _reportModelImpl(self, perspective: str = "full", *, basePeriod: str | None = None) -> dict:
+        """reportModel 실제 구현 — buildReportModel(L3) 에 위임."""
+        import importlib
+
+        buildReportModel = importlib.import_module("dartlab.story.report").buildReportModel
+        return buildReportModel(self, perspective, basePeriod=basePeriod)
+
+    @property
     def story(self):
         """5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access.
 

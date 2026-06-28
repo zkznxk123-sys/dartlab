@@ -1766,6 +1766,41 @@ class Company:
     # insights는 analysis 내부 — c.analysis("financial", "종합평가")로 접근
 
     @property
+    def reportModel(self):
+        """전문 리포트 계약 모델 — story 블록 + de-gate 밸류에이션을 thesis-led ReportModel(dict).
+
+        랜딩 /report 가 **동일 계약**(contracts/reportModel.ts)을 소비하는 SSOT. self-calc 0.
+        dart Company 와 동형 — buildReportModel 위임.
+
+        Returns:
+            CallableAccessor: 호출 시 ``_reportModelImpl`` 이 ReportModel dict
+            (schemaVersion=2) 반환. 데이터 부족 시 {"skipped": True, ...}.
+
+        Raises:
+            없음 — 데이터 부족·빌드 실패는 skipped dict 로 반환.
+
+        Example:
+            >>> Company("AAPL").reportModel("valuation")["schemaVersion"]
+            2
+
+        SeeAlso:
+            - ``dartlab.story.report.buildReportModel`` — backend SSOT.
+            - ``story`` — 레거시 Story dataclass(공존).
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_reportModelAccessor" not in self._cache:
+            self._cache["_reportModelAccessor"] = CallableAccessor(self._reportModelImpl, name="reportModel")
+        return self._cache["_reportModelAccessor"]
+
+    def _reportModelImpl(self, perspective: str = "full", *, basePeriod: str | None = None) -> dict:
+        """reportModel 실제 구현 — buildReportModel(L3) 에 위임."""
+        import importlib
+
+        buildReportModel = importlib.import_module("dartlab.story.report").buildReportModel
+        return buildReportModel(self, perspective, basePeriod=basePeriod)
+
+    @property
     def story(self):
         """재무 검토 보고서 — dual access.
 
