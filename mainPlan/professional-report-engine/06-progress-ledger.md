@@ -27,9 +27,9 @@
   - ✅ **범위가드 003230 PASS (엔지니어링 판단으로 해결, operator 미위임)**: 삼양식품 FAIL(1,709,625) 근본 = de-gate 성장클램프 25%/yr 과대(Damodaran: 8년 지속 >18% 성장 상위<5%, fad 외삽). **클램프 25→18% 보수화**(`_growthPathFromRoics`) → 삼양 dFV 1.71M→**1,425,947 PASS**[1,245k-1,525k], 삼성 196,337 무영향(8.9%<18). 가드 재baseline(과대값 승인) 대신 de-gate 보수화 = 정공법. + 아티팩트 가드(>100% ROIC 제외·40% cap). **damodaranPhase4 범위가드 2케이스 + country override 전부 검증 PASS.**
   - ✅ **G2 §5 게이트 통과 — 엄밀 point-in-time 판**: 02a §5 = "t→t+12M, 방향>55%"(t=2025-06→2026-06). **basePeriod 스레딩**(calcDFV→_calcTwoStageDcf→buildReinvestmentPath→calcRoicTimeline)으로 **look-ahead 제거**(FY2024 재무만) + `_rimCalc` fix 로 **full dFV 삼각검증**(dcf2stage·relative·ddm). 결과: **방향 적중 10/14(71%) ≫ 55%**, 저평가(12) +181% vs 고평가(2) −18% → **스프레드 +199%p**. 카카오 고평가콜→−45% 정확·삼양 clamp18 로 fairly-valued→−20% 정상. (look-ahead 포함 판은 13사 77%, 일치.) 잔여 미세(base FCF/netDebt latest=mid-cycle robust·단일윈도)는 CI 다종목/baseline 원장 정형화.
   - ✅ **stress-test 발견 → 즉시 해결**: 고-ROIC 사이클 peak 과대평가 — 하이닉스 ROIC latest 31%(HBM boom)/median 7.35%(2023 메모리 불황 -10.4% 포함) → fundG 28%→**6.62%** 정규화. `buildReinvestmentPath` roicAnchor 를 latest → **through-cycle median** 으로(`_growthPathFromRoics`, FCF 정규화 `_tsdMaybeNormalizeFcf` 와 정합). 실 캡처 ROIC 로 offline 검증(테스트 3개): 하이닉스 절반↓·삼성/현대 무변(median≈latest)·구조적적자 None 폴백. 라이브 end-to-end 확인(하이닉스 fundG 6.62·삼성 8.91 무변). *가격 무관·실재무데이터만 필요라 샌드박스서 정공법 처리.*
-- ☐ P1b 전망 driver + `_revenueBacktest.py` — 게이트 MAPE·방향·밴드·skill
-- ☐ P1c 세그먼트 마진 도출 + SOTP — 게이트 MAE≤5%p·커버·ρ
-- ☐ P1d 정량 moat(`_attempts/quantMoat` → `moat.py`) — 게이트 cohort 평균회귀
+- ◐ P1b 전망 de-gate — ✅ **핵심 완료**: `_forecastMetric` 지수 fade(임의 선형감속 폐기, λ 0.35/0.5) + 영업레버리지 마진(고정마진 폐기, β 회귀+범위캡+fallback). offline 4 테스트 통과(`test_forecastUplift.py`). 잔여: driver-growth(segment/backlog) 가중 승격·driver 시나리오·walk-forward 백테스트(`_revenueBacktest.py`, data/CI — P1a G2 방법론 동일).
+- ◐ P1c 세그먼트 경제성 — ✅ **핵심 완료**: `_segmentEconomics.reconcileSegmentMargins`(peer 마진 구조 × 연결 OI reconcile, Σ 보존·적자부문 k 제외·범위/method 라벨). offline 5 테스트(`test_segmentEconomics.py`). 잔여: company peer fetch 배선(industryPeers/themes)·calcSegmentComposition hasOpIncome 게이트 해제·SOTP·공시사 백테스트(MAE≤5%p, data/CI).
+- ◐ P1d 정량 moat — ✅ **개념확립 통과**(`tests/_attempts/quantMoat/concept.py`, graduation gate 준수): C1 ROIC−WACC 지속성·C2 마진 CV·등급 논리곱(wide/narrow/none, noComposite)·정성원천(switching/network/brand) unmeasured 명시. offline 5 체크. 잔여: 코호트 mean-reversion 백테스트(G1, data/CI) 통과 후 `src/analysis/financial/moat.py` 졸업 + axis 등록.
 - ☐ P1e 신용 라이브배선 + 매크로 강화 — 게이트 parity·79사·β-stability (결정1 ✅ 조건부, 5가드 준수)
 
 ## P2 · 리포트 엔진
