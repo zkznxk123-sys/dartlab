@@ -144,4 +144,6 @@ def buildSectionSummary(section) -> str:
             parts.append(block.flags[0])
             break
 
-    return " / ".join(parts[:3]) if parts else ""
+    # str 강제 — thread.title/flag 가 드물게 tuple 인 경우(일부 회사) cosmetic 요약이 리포트
+    # 전체를 죽이지 않게 방어. 정보는 보존(무크래시 우선).
+    return " / ".join(str(p) for p in parts[:3]) if parts else ""
