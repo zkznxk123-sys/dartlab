@@ -43,6 +43,24 @@ carousel:
     1분기 매출은 1.3714조원, 영업이익은 5,616억원이었습니다. 회사 자료 기준 PUBG 관련 매출은 분기 처음으로 1조원을 넘었습니다.
 
     다음에는 PUBG 매출이 계속 이어지는지, 모바일 접속이 결제로 이어지는지, 신작 비용이 이익을 누르는지 보면 됩니다.
+  explainers:
+  - term: PUBG(배틀그라운드)
+    body: 크래프톤의 대표 게임입니다. 출시 8년차에도 인게임 결제로 매출을 내는 '오래돼도 돈 버는 엔진'인지가 이 카드의 핵심입니다.
+  - term: 라이브 서비스(인게임 결제)
+    body: 게임을 계속 운영하며 아이템·시즌패스로 버는 매출입니다. 신작 없이도 PUBG가 반복 매출을 내는 구조의 핵심입니다.
+  relatedNews:
+  - title: 크래프톤 장태석 "PUBG, 게임 넘어선 문화 플랫폼으로 만들겠다"
+    source: yna.co.kr
+    date: '2026-06-26'
+    url: https://www.yna.co.kr/view/AKR20260626159500017?input=1195m
+    track: naver
+    description: 네이버 보관 뉴스 기준. PUBG를 장기 IP·플랫폼으로 키우는 전략 — '낡은 게임이 아니라 돈 버는 엔진'인지의 핵심입니다.
+  - title: 엔씨·크래프톤·카겜, 글로벌 공략 신작 테스트로 기대감
+    source: daily.hankooki.com
+    date: '2026-06-27'
+    url: https://daily.hankooki.com/news/articleView.html?idxno=1380274
+    track: naver
+    description: 네이버 보관 뉴스 기준. 신작 테스트 흐름 — 카드가 말한 '신작 비용이 이익을 누르는지' 관전 포인트입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 PUBG 매출이 계속 이어지는지, 모바일 접속이 결제로 이어지는지, 신작 비용이 이익을 누르는지를 읽는 관점입니다.'
   slides:
   - layout: editorial
