@@ -44,6 +44,24 @@ carousel:
     반전은 재무제표에 있다. Under Armour의 매출총이익률은 FY2024 46.1% — Nike(44.6%)보다 높다. 제품 자체는 건강하다. 그런데 판관비가 매출의 42.1%를 먹어 영업이익률은 4.0%로 주저앉는다. Nike의 판관비는 32.3%다. 9.8%p 차이가 구조적으로 고정돼 있다.
 
     관전 포인트는 두 가지다. 창업자 Kevin Plank이 의결권 66.5%(지분 16.6%)로 복귀해 제품 수(SKU) 25% 축소를 밀고 있다. 다음 재무제표에서 볼 지표는 단 하나 — 판관비 비율이 42%에서 내려오는가.
+  explainers:
+  - term: 판관비(SG&A)
+    body: 영업·마케팅·관리에 쓰는 비용입니다. Under Armour는 제품 마진이 Nike보다 높은데도 이 비용이 매출의 42%를 먹어 영업이익률이 4%로 주저앉습니다 — 회복의 단 하나의 지표입니다.
+  - term: SKU
+    body: 판매하는 개별 상품 종류의 수입니다. Kevin Plank은 SKU를 25% 줄여 군더더기를 걷어내고 판관비를 끌어내리는 데 걸고 있습니다.
+  relatedNews:
+  - title: Under Armour (UA) Q4 2026 Earnings Transcript
+    source: fool.com
+    date: '2026-05-12'
+    url: https://www.fool.com/earnings/call-transcripts/2026/05/12/under-armour-ua-q4-2026-earnings-transcript/
+    track: global
+    description: Motley Fool. 카드가 짚은 SKU 25% 축소와 판관비 절감 전략이 경영진 입으로 확인되는 원자료입니다.
+  - title: 'Under Armour Inc (UAA) Q4 2026 Earnings Call Highlights: Navigating Revenue Declines'
+    source: finance.yahoo.com
+    date: '2026-05-13'
+    url: https://finance.yahoo.com/news/under-armour-inc-uaa-q4-230339909.html
+    track: global
+    description: Yahoo Finance. 매출 감소 속 판관비가 12% 줄어 2.3B로 — '판관비 비율이 42%에서 내려오는가'의 최신 숫자입니다.
   pinnedComment: 투자 판단이 아닙니다. 매출·마진·판관비·Nike 비교·의결권 수치는 dartlab EDGAR 실측(FY2024 기준)입니다. 시가총액 추이·SKU 가이던스·FY2025 추정치는 외부 인용입니다.
   slides:
   - layout: editorial

@@ -41,6 +41,24 @@ carousel:
     재무제표를 열면 빈칸입니다. 매출 3년 연속 0, 순손실은 -$4.3M에서 -$105.7M으로. 자산이 1년 만에 83배가 된 건 원자로가 아니라 주식 발행 때문이었습니다. 계약은 14GW(원전 14기 분량) 쌓였지만 법적 구속력 있는 건 미 공군 75MW, 전체의 0.5%뿐. NRC(미국원자력규제위원회)는 2022년 한 번 거절했습니다.
 
     관전 포인트: 현금 런웨이 약 3.2년. 첫 원자로가 돌기 전에 추가 자금 조달이 필요합니다. 다음에 볼 지표는 매출 행 — 2027년 INL에서 1호기가 임계에 도달하는 날, 0이 아닌 첫 숫자가 적힙니다.
+  explainers:
+  - term: PER(주가수익비율)
+    body: 주가를 주당순이익으로 나눈 밸류 지표입니다. Oklo는 이익(분모)이 없어 아예 계산이 안 됩니다 — 매출 0인 회사에 시총 18조가 매겨진 이유를 묻게 만듭니다.
+  - term: NRC(미국 원자력규제위원회)
+    body: 미국에서 원자로 건설·운영을 허가하는 기관입니다. Oklo는 2022년 한 번 거절당했고, 이 기관의 승인 속도가 첫 매출(2027년 INL 1호기) 시점을 좌우합니다.
+  relatedNews:
+  - title: Oklo's NRC Principal Design Criteria Topical Report Approved for Aurora Powerhouse in Idaho
+    source: finance.yahoo.com
+    date: '2026-05-20'
+    url: https://finance.yahoo.com/sectors/energy/articles/oklo-nrc-principal-design-criteria-120000127.html
+    track: global
+    description: Yahoo Finance. 카드가 본 NRC 관문의 진전 — 아이다호 Aurora 설계 기준이 승인됐지만 운영 허가는 아직입니다.
+  - title: Is Oklo's Prolonged NRC Timeline Reshaping Its AI-Focused Nuclear Power Investment Story?
+    source: finance.yahoo.com
+    date: '2026-04-15'
+    url: https://finance.yahoo.com/news/oklo-oklo-prolonged-nrc-timeline-191005375.html
+    track: global
+    description: Yahoo Finance. 매출 0·시총 18조의 핵심 변수 — 허가 일정이 2027년 첫 매출 시점과 밸류를 흔드는 구조입니다.
   pinnedComment: 투자 판단이 아닙니다. 재무 수치(매출·순손실·자본·현금)는 SEC 10-K 기준 dartlab 실측, 계약 용량·주가·시총·경쟁사 수치는 외부 공시·시세 인용입니다.
   slides:
   - layout: editorial

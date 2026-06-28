@@ -30,6 +30,24 @@ carousel:
     반전은 방향이 갈라졌다는 것. OPM은 16.3%에서 7.9%로 840bp 무너졌고, 당기순이익도 $3.76B에서 $1.86B로, 영업현금흐름은 $6.10B에서 $4.75B(-22%)로 같이 내려왔습니다. 성장 곡선과 수익성 곡선이 한 회사 안에서 정반대로 찢어진 해입니다.
 
     관전 포인트는 회복의 '질'. 2026년 2분기 OPM은 8.7%로 반등했지만(회사 공시 기준), 반기 누적은 8.8%로 아직 2023년 16.3% 체력의 절반 조금 넘습니다. 다음에 볼 지표는 매출이 아니라 영업이익률이 두 자릿수로 돌아오는가입니다.
+  explainers:
+  - term: 영업이익률(OPM)
+    body: 매출에서 본업으로 남긴 이익 비율입니다. 스타벅스는 가장 많이 팔고도 이 숫자가 16.3%→7.9%로 반토막 났습니다 — 매출이 아니라 이게 두 자릿수로 돌아오는가가 회복의 핵심입니다.
+  - term: bp(베이시스포인트)
+    body: 0.01%포인트입니다. OPM이 840bp 무너졌다는 건 8.4%포인트 하락 — 마진을 말할 때 자주 쓰는 단위입니다.
+  relatedNews:
+  - title: 'Starbucks'' Margin Recovery Takes Shape: Can Cost Leverage Build?'
+    source: finance.yahoo.com
+    date: '2026-05-01'
+    url: https://finance.yahoo.com/markets/stocks/articles/starbucks-margin-recovery-takes-shape-152100801.html
+    track: global
+    description: Yahoo Finance. 카드가 본 바로 그 질문 — 무너진 마진이 비용 레버리지로 다시 살아나는지의 최신 점검입니다.
+  - title: 'Starbucks Q2 FY26 slides: turnaround gains momentum with 6.2% comps'
+    source: investing.com
+    date: '2026-04-30'
+    url: https://www.investing.com/news/company-news/starbucks-q2-fy26-slides-turnaround-gains-momentum-with-62-comps-93CH-4667268
+    track: global
+    description: Investing.com. 2026 2분기 반등의 근거 — 동일점포 6.2% 성장과 함께 턴어라운드가 탄력을 받는 국면입니다.
   pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·연간 OPM·현금흐름은 dartlab 연결 실측, 2026 Q2/반기 OPM(8.7%/8.8%)·$1B 구조조정·세그먼트·선불충전 float는 회사 공시 인용(외부)입니다.
   slides:
   - layout: editorial

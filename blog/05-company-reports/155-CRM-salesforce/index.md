@@ -40,6 +40,24 @@ carousel:
     반전은 원가가 아니라 판관비에서 왔다. 판관비율이 2023년 43.1%에서 2025년 34.6%로 내려가자, 영업이익률은 3.3%에서 20.1%로 뛰었다. 2025년 영업현금흐름 15.00B는 순이익 7.46B의 2배다. 매출이 커져서가 아니라, 매출이 큰 뒤 비용을 접어서 난 이익이다.
 
     이제 질문은 한 단계 넘어간다. 회사 발표 기준 non-GAAP 마진은 34%, GAAP은 20%이고, 그 14%포인트 격차의 가장 큰 항목이 SBC(회사 가이던스 조정표 기준)다. 다음에 볼 것은 AI 제품명이 아니라 GAAP 20% 마진과 current RPO가 같이 살아 있는가다.
+  explainers:
+  - term: 판관비(SG&A)
+    body: 영업·마케팅·관리에 쓰는 비용입니다. Salesforce의 마진 도약(3.3%→20.1%)은 원가가 아니라 이 판관비율을 43%→34%로 접어서 났습니다.
+  - term: SBC(주식보상비용)
+    body: 임직원에게 현금 대신 주식으로 주는 보상의 비용입니다. 회사가 내세우는 non-GAAP 34%와 실제 GAAP 20%의 14%포인트 격차를 만드는 가장 큰 항목입니다.
+  relatedNews:
+  - title: Salesforce, Inc. Q4 2026 Earnings Call Summary
+    source: finance.yahoo.com
+    date: '2026-03-04'
+    url: https://finance.yahoo.com/markets/stocks/articles/salesforce-inc-q4-2026-earnings-133000908.html
+    track: global
+    description: Yahoo Finance. GAAP 영업이익률 20.1%와 사상 최대 RPO가 함께 찍힌 분기 — 카드가 '같이 살아 있는가' 물은 두 숫자입니다.
+  - title: 'Is Now the Time to Buy Salesforce? Here''s What the Numbers Reveal'
+    source: fool.com
+    date: '2026-03-28'
+    url: https://www.fool.com/investing/2026/03/28/is-now-the-time-to-buy-salesforce-heres-what-the-n/
+    track: global
+    description: Motley Fool. 매출이 아니라 마진·현금흐름으로 회사를 뜯어보는 시각 — 카드의 '비용을 접어 난 이익' 논지와 같은 결입니다.
   pinnedComment: 투자 판단이 아닙니다. dartlab 실측(라벨연도 분기 합산, USD)은 손익·현금흐름표 기준이고, RPO·SBC·Agentforce·자사주 등 회사 발표 숫자는 (외부) 공시 인용입니다.
   slides:
   - layout: editorial

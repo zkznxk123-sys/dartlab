@@ -30,6 +30,24 @@ carousel:
     그 비대칭의 자국은 마진에 있습니다. 매출총이익률(GPM)은 FY22 47.4% 저점에서 FY25 51.2%로 3.8%p 되돌아왔습니다. 단 이 회복을 가격 단독으로 보면 비약 — 가격전가와 원가완화(외부 매크로)가 겹친 국면입니다. 영업이익률은 24.3%로 5년 최고지만 FY21 23.6% 대비 +0.7%p — '극적 확장'이 아니라 '밴드 상단 갱신'까지입니다.
 
     함정은 FY25입니다. 매출은 +0.24B로 사실상 정체인데 영업이익이 +1.90B 뛰었습니다. 가격으로 단정하면 비약 — 7,000명 감원(외부)이 겹친 국면입니다. 다음에 볼 건 'FY26에 매출이 회복되면서 OPM 24%대를 지키는가'입니다.
+  explainers:
+  - term: 매출총이익률(GPM)
+    body: 매출에서 원가를 뺀 이익 비율입니다. P&G의 마진 회복(47.4%→51.2%)은 가격 전가와 원가 완화가 겹친 결과라, 가격 단독으로 보면 비약입니다.
+  - term: 가격전가
+    body: 오른 원가를 제품 값에 얹어 소비자에게 넘기는 것입니다. 매출이 정체인데 이익이 뛴 5년의 핵심 동력이지만, 7,000명 감원·원가 완화가 함께 겹친 국면이라 가격만으로 단정하면 안 됩니다.
+  relatedNews:
+  - title: Procter & Gamble to cut 7,000 jobs in restructuring
+    source: cnbc.com
+    date: '2025-06-05'
+    url: https://www.cnbc.com/2025/06/05/procter-gamble-job-cuts-restructuring.html
+    track: global
+    description: CNBC. 카드가 짚은 '7,000명 감원'의 원자료 — 매출 정체 속 이익이 뛴 배경의 한 축입니다.
+  - title: What Procter & Gamble's Restructuring, Cost Cuts, and Cash Returns Strategy Means For Shareholders
+    source: finance.yahoo.com
+    date: '2026-02-20'
+    url: https://finance.yahoo.com/markets/stocks/articles/procter-gamble-pg-restructuring-cost-042452424.html
+    track: global
+    description: Yahoo Finance. 비용 절감으로 만든 이익이 'OPM 24%대를 지키는가'로 이어지는지의 점검입니다.
   pinnedComment: 투자 판단이 아닙니다. 매출·영업이익·GPM·순이익·영업현금흐름은 dartlab 미국 연결(USD) 실측이고, 가격/물량 분해·세그먼트·손상·감원은 10-K/IR/언론 외부 인용입니다.
   slides:
   - layout: editorial

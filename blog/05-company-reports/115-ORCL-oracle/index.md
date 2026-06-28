@@ -32,6 +32,24 @@ carousel:
     하지만 AI 데이터센터는 먼저 지어야 합니다. 영업활동 현금흐름은 320억달러였지만, 투자 뒤 남는 현금은 마이너스 237억달러였습니다.
 
     다음에는 세 가지만 보면 됩니다. 남은 계약이 매출로 바뀌는 속도, 투자 뒤 현금이 플러스로 돌아서는 시점, 돈을 더 끌어오지 않고 버틸 수 있는지입니다.
+  explainers:
+  - term: 남은 계약(RPO)
+    body: 앞으로 고객에게 제공해야 할, 아직 매출로 안 잡힌 계약 잔량입니다. 오라클의 6,380억달러는 현금이 아니라 이 약속 — 전년 대비 363% 늘었지만 매출로 바뀌어야 진짜입니다.
+  - term: 잉여현금흐름(FCF)
+    body: 영업으로 번 현금에서 설비투자를 뺀, 회사에 실제로 남는 현금입니다. AI 데이터센터를 먼저 지어야 해 오라클은 이 값이 마이너스 약 237억달러 — 그래서 '언제 플러스로 돌아서나'가 관건입니다.
+  relatedNews:
+  - title: Oracle blows investors away with 22% 'hyper growth'—but cash flow crunches to negative $24.7 billion
+    source: finance.yahoo.com
+    date: '2026-06-11'
+    url: https://finance.yahoo.com/news/oracle-blows-investors-away-22-234802787.html
+    track: global
+    description: Yahoo Finance. 카드의 두 얼굴 그대로 — 폭발하는 성장과 마이너스로 꺼진 현금흐름이 한 분기에 같이 나옵니다.
+  - title: Oracle (ORCL) Q4 earnings report 2026
+    source: cnbc.com
+    date: '2026-06-10'
+    url: https://www.cnbc.com/2026/06/10/oracle-orcl-q4-earnings-report-2026.html
+    track: global
+    description: CNBC. 남은 계약 363% 급증과 대규모 설비투자가 함께 찍힌 분기 실적 원자료입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 남은 계약이 매출과 현금으로 바뀌는지 읽는 관점입니다.'
   slides:
   - layout: editorial
