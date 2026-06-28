@@ -4,6 +4,7 @@
 	// 전종목: scan 프리빌드. 전역(회사 무관, 헤더라 상시): 거시(FRED·ECOS·관세청)·SEC ticker맵·시장지수·증권사
 	// 리서치·전종목 시세. 뉴스는 언론사 저작권(재배포 불가)이라 라이브 표시 전용 — 다운로드 미제공.
 	import type { DartLabRuntime, StmtKind } from '@dartlab/ui-contracts';
+	import { KR_INDEX_PRESETS } from '@dartlab/ui-contracts';
 	import { DOWNLOAD_CATALOG } from '@dartlab/ui-runtime/data/catalog/downloadCatalog';
 	import { hfUrl, readParquetRows } from '@dartlab/ui-runtime/data/parquet/hfRange';
 	import { objectsToWorkbook, downloadBlob, downloadCsv, type ObjectSheet } from '../../downloadExport';
@@ -153,15 +154,55 @@
 		{ path: 'macro/customs/observations.parquet', label: en ? 'Customs trade (KR)' : '관세청 수출입' },
 		{ path: 'edgar/tickers/tickers.parquet', label: en ? 'SEC ticker↔CIK map' : 'SEC ticker↔CIK 맵' }
 	]);
-	const MARKET_FOLDERS = $derived([
-		{ dir: 'gov/indices/index', label: en ? 'Market indices (daily, per index)' : '시장지수 일별 (지수별)' },
-		{ dir: 'research/brokerage', label: en ? 'Brokerage research (monthly)' : '증권사 리서치 (월별)' },
-		{ dir: 'gov/prices/date', label: en ? 'All-stock daily prices (by year)' : '전종목 일별 시세 (연도별·대형)' }
-	]);
 	const dlMarket = (m: { path: string; label: string }, fmt: 'xlsx' | 'csv') =>
 		run(`mkt:${m.path}:${fmt}`, async () => {
 			const { rows } = await readParquetRows(m.path);
 			emit(m.label, rows, fmt, clean(m.label));
+		});
+
+	// 다파일 데이터셋 → 일반인용 Excel/CSV (개발자용 parquet 폴더 대신). HF tree API 는 CORS 차단이라 브라우저
+	// 나열 불가 → 샤드 경로를 런타임 지식(지수 프리셋·월/연 범위)으로 생성, 404 샤드는 skip 후 concat.
+	const RESERVED = /[/\\:*?"<>|]/g;
+	const indexKey = (market: string, name: string) =>
+		`${market}-${name.normalize('NFC').trim().replace(RESERVED, '_').replace(/\s+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '')}`;
+	async function readShards(paths: string[], cap = 6): Promise<Record<string, unknown>[]> {
+		const out: Record<string, unknown>[] = [];
+		for (let i = 0; i < paths.length; i += cap) {
+			const res = await Promise.allSettled(paths.slice(i, i + cap).map((p) => readParquetRows(p)));
+			for (const r of res) if (r.status === 'fulfilled') out.push(...(r.value.rows as Record<string, unknown>[]));
+		}
+		return out;
+	}
+	// 시장지수 — KR 프리셋 5종 per-index(전이력) concat.
+	const dlIndices = (fmt: 'xlsx' | 'csv') =>
+		run(`idx:${fmt}`, async () =>
+			emit(
+				en ? 'Market indices' : '시장지수',
+				await readShards(KR_INDEX_PRESETS.map((p) => `gov/indices/index/${indexKey(p.market, p.name)}.parquet`)),
+				fmt,
+				en ? 'market_indices' : '시장지수'
+			));
+	// 증권사 리서치 — 201901~현재월 probe(월 sparse·인덱스 없음), 존재분 concat.
+	const dlBrokerage = (fmt: 'xlsx' | 'csv') =>
+		run(`brk:${fmt}`, async () => {
+			const now = new Date();
+			const months: string[] = [];
+			for (let y = 2019; y <= now.getFullYear(); y += 1)
+				for (let m = 1; m <= 12; m += 1) {
+					if (y === now.getFullYear() && m > now.getMonth() + 1) break;
+					months.push(`research/brokerage/${y}${String(m).padStart(2, '0')}.parquet`);
+				}
+			emit(en ? 'Brokerage research' : '증권사 리서치', await readShards(months), fmt, en ? 'brokerage_research' : '증권사리서치');
+		});
+	// 전종목 일별시세 — 최근 가용연도 1개(전체는 67만행×N년이라 폴더 ↗). CSV 권장.
+	const dlPricesYear = (fmt: 'xlsx' | 'csv') =>
+		run(`pxy:${fmt}`, async () => {
+			const y = new Date().getFullYear();
+			for (const yr of [y, y - 1, y - 2]) {
+				const rows = await readShards([`gov/prices/date/${yr}.parquet`]);
+				if (rows.length) return emit(en ? 'All-stock daily' : '전종목 일별시세', rows, fmt, (en ? 'all_stock_daily_' : '전종목일별시세_') + yr);
+			}
+			err = en ? 'no data' : '데이터 없음';
 		});
 </script>
 
@@ -220,12 +261,27 @@
 					</span>
 				</div>
 			{/each}
-			{#each MARKET_FOLDERS as m (m.dir)}
-				<div class="dsRow">
-					<span class="dsLabel">{m.label}<span class="dsDir">{m.dir}/</span></span>
-					<span class="dsBtns"><a class="dsBtn" href={`${TREE}/${m.dir}`} target="_blank" rel="noreferrer">parquet ↗</a></span>
-				</div>
-			{/each}
+			<div class="dsRow">
+				<span class="dsLabel">{en ? 'Market indices (KOSPI·KOSDAQ…)' : '시장지수 (KOSPI·KOSDAQ 등)'}<span class="dsDir">gov/indices/index</span></span>
+				<span class="dsBtns">
+					<button class="dsBtn" onclick={() => dlIndices('xlsx')} disabled={!!busy}>{busy === 'idx:xlsx' ? '…' : 'Excel'}</button>
+					<button class="dsBtn" onclick={() => dlIndices('csv')} disabled={!!busy}>{busy === 'idx:csv' ? '…' : 'CSV'}</button>
+				</span>
+			</div>
+			<div class="dsRow">
+				<span class="dsLabel">{en ? 'Brokerage research (monthly)' : '증권사 리서치 (월별)'}<span class="dsDir">research/brokerage</span></span>
+				<span class="dsBtns">
+					<button class="dsBtn" onclick={() => dlBrokerage('xlsx')} disabled={!!busy}>{busy === 'brk:xlsx' ? '…' : 'Excel'}</button>
+					<button class="dsBtn" onclick={() => dlBrokerage('csv')} disabled={!!busy}>{busy === 'brk:csv' ? '…' : 'CSV'}</button>
+				</span>
+			</div>
+			<div class="dsRow">
+				<span class="dsLabel">{en ? 'All-stock daily prices (latest yr)' : '전종목 일별시세 (최근연도)'}<span class="dsDir">gov/prices/date · 67만행</span></span>
+				<span class="dsBtns">
+					<button class="dsBtn" onclick={() => dlPricesYear('csv')} disabled={!!busy}>{busy === 'pxy:csv' ? '…' : 'CSV'}</button>
+					<a class="dsBtn" href={`${TREE}/gov/prices/date`} target="_blank" rel="noreferrer">{en ? 'all ↗' : '전체 ↗'}</a>
+				</span>
+			</div>
 
 			{#if err}<div class="dsErr">⚠ {err}</div>{/if}
 
