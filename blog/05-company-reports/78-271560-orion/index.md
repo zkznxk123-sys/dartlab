@@ -42,6 +42,24 @@ carousel:
     핵심은 제품 이름이 아닙니다. 중국, 베트남, 러시아에서 직접 만들고 파는 구조가 이익을 지키는지입니다. 같은 과자라도 재료값, 환율, 유통 경로, 공장 가동률에 따라 남는 돈이 달라집니다.
 
     결론은 명확합니다. 다음 확인 포인트는 해외 매출이 어느 나라에서 늘어나는지, 지역별 이익 비율이 버티는지, 설비투자 뒤 매출과 현금이 따라오는지입니다.
+  explainers:
+  - term: 영업이익률(OPM)
+    body: 매출에서 영업이익이 남는 비율입니다. 오리온은 17.8%로 식품 회사치고 높은데, 그 비결이 현지 생산·판매 구조에 있는지가 카드의 질문입니다.
+  - term: 현지 생산망
+    body: 수출이 아니라 중국·베트남·러시아 현지 공장에서 직접 만들어 파는 구조입니다. 환율·운송비를 줄여 같은 과자라도 이익률을 지킵니다.
+  relatedNews:
+  - title: 오리온, 베트남서 '안(An)' 신제품 론칭…현지 쌀과자 1위 정조준
+    source: theguru.co.kr
+    date: '2026-06-28'
+    url: https://www.theguru.co.kr/news/article.html?no=103594
+    track: naver
+    description: 네이버 보관 뉴스 기준. 베트남 현지 신제품 — 카드가 말한 '현지에서 직접 만들고 파는 구조'의 실제 사례입니다.
+  - title: 오리온, 베트남서 '초코파이' 패키지 전면 리뉴얼…합리적 가치 더한다
+    source: theguru.co.kr
+    date: '2026-06-27'
+    url: https://www.theguru.co.kr/news/article.html?no=103522
+    track: naver
+    description: 네이버 보관 뉴스 기준. 현지 맞춤 전략 — 카드가 본 '지역별 이익 비율'을 지키는 운영의 한 장면입니다.
   pinnedComment: 오리온은 제품 이름보다 현지 공장이 만든 이익 비율을 봐야 합니다.
   slides:
   - layout: editorial
