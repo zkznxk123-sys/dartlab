@@ -30,6 +30,24 @@ carousel:
     카카오톡은 국내 월간 이용자 4,900만명 규모의 입구입니다. 5월 기준 ChatGPT for Kakao 누적 가입자도 1,100만명을 넘었습니다. 여기까지는 사용될 가능성입니다.
 
     다음에는 채팅방 안 실제 사용 빈도, 유료 서비스 전환, 톡비즈 광고와 메시지 매출을 보면 됩니다.
+  explainers:
+  - term: 톡비즈
+    body: 카카오톡 안에서 버는 광고·커머스·메시지 사업입니다. ChatGPT 가입자 같은 '가능성'이 실제 돈이 되는지는 결국 이 톡비즈 매출로 확인됩니다.
+  - term: MAU(월간 이용자)
+    body: 한 달에 한 번이라도 쓴 이용자 수입니다. 카톡 4,900만이라는 입구의 크기 — 다만 입구가 크다고 매출이 되는 건 아니라, 채팅방 안 실제 사용 빈도가 관건입니다.
+  relatedNews:
+  - title: 카카오 1분기 영업이익 66% 튀었다 "챗GPT 포 카카오 가입자 1100만"
+    source: investing.com
+    date: '2026-05-07'
+    url: https://kr.investing.com/news/economy-news/article-1931865
+    track: naver
+    description: 카드가 본 1,100만 가입자와 톡비즈 — 광고 16% 성장과 영업이익 66% 급증이 함께 나온 분기입니다.
+  - title: '1분기 최대실적 쓴 카카오…"AI 에이전트 커머스 본격화"'
+    source: fnnews.com
+    date: '2026-05-07'
+    url: https://www.fnnews.com/news/202605071040174234
+    track: naver
+    description: 카드의 '유료 전환·커머스'가 실제로 매출이 되는지 — AI 에이전트 커머스 본격화 국면입니다.
   pinnedComment: '이 캐러셀은 투자 판단이 아니라 카톡 안의 AI가 반복 사용, 유료 전환, 톡비즈 매출로 이어지는지 보는 관점입니다.'
   slides:
   - layout: editorial
