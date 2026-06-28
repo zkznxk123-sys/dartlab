@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 from dartlab.analysis.forecast._forecastTypes import (
     _FALLBACKS,
     FORECAST_TARGETS,
@@ -166,11 +168,13 @@ def forecastMetric(
         method = "cagr_decay"
         growth = min(max(cagr, -10), 25)
         terminal = sectorGrowth
+        # 지수 fade (임의 선형감속 폐기) — g(t)=gT+(g0−gT)·exp(−λt). 초과성장 경쟁수렴(Damodaran).
+        # λ: 고성장(g0>15)=0.35(완만 수렴, 성장 지속)·그 외 0.5. fadeLambda·terminal 은 assumptions 노출.
+        fadeLambda = 0.35 if growth > 15 else 0.5
         projected = []
         last = yVals[-1]
         for yr in range(1, horizon + 1):
-            blend = (yr - 1) / max(horizon - 1, 1)
-            g = growth * (1 - blend) + terminal * blend
+            g = terminal + (growth - terminal) * math.exp(-fadeLambda * yr)
             proj = last * (1 + g / 100)
             projected.append(proj)
             last = proj
@@ -187,7 +191,8 @@ def forecastMetric(
     if method == "linear":
         assumptions.append(f"선형 추세 연장 (R²={r2:.2f})")
     elif method == "cagr_decay":
-        assumptions.append(f"CAGR {cagr:.1f}% → 섹터평균 {sectorGrowth:.1f}%로 감속")
+        _lam = 0.35 if min(max(cagr, -10), 25) > 15 else 0.5
+        assumptions.append(f"CAGR {cagr:.1f}% → 섹터 {sectorGrowth:.1f}% 지수 fade (λ={_lam}, 경쟁수렴)")
     elif method == "mean_revert":
         meanVal = sum(yVals) / n
         assumptions.append(f"평균 {meanVal / 1e8:,.0f}억으로 회귀")
@@ -243,14 +248,40 @@ def _marginLinkedForecast(
     if len(margins) < 2:
         return None
 
-    # 최근 3년 마진 가중평균 (최신에 가중)
+    # 최근 3년 마진 가중평균 (base + fallback)
     recent = margins[-3:] if len(margins) >= 3 else margins
     weights = list(range(1, len(recent) + 1))
-    wSum = sum(w * m for w, m in zip(weights, recent))
-    avgMargin = wSum / sum(weights)
+    avgMargin = sum(w * m for w, m in zip(weights, recent)) / sum(weights)
 
-    # 매출 전망 × 마진 → 이익 전망
-    projected = [rev * avgMargin for rev in revResult.projected]
+    # 영업레버리지 마진 (고정 마진 폐기) — OPM(t)=OPM_base+β·(revGrowth−normal). β=ΔOPM%/ΔRevGrowth%
+    # 회귀(고정비 희석). 과거 OPM 범위±20% 상·하한. β 불안정(r²<0.3·<4점·폭주) 시 고정 fallback.
+    revGrowthPairs = []
+    for i in range(1, len(revVals)):
+        r0, r1 = revVals[i - 1], revVals[i]
+        m1 = metricVals[i] if i < len(metricVals) else None
+        if r0 and r1 and m1 and r0 != 0 and r1 != 0:
+            revGrowthPairs.append(((r1 / r0 - 1) * 100, m1 / r1))
+    leverageBeta = None
+    if len(revGrowthPairs) >= 4:
+        bslope, _bint, br2 = _ols([p[0] for p in revGrowthPairs], [p[1] * 100 for p in revGrowthPairs])
+        if br2 >= 0.3 and abs(bslope) < 5.0:
+            leverageBeta = bslope
+    if leverageBeta is not None and revVals and revVals[-1]:
+        revGrowthNormal = sum(p[0] for p in revGrowthPairs) / len(revGrowthPairs)
+        mlo, mhi = min(margins), max(margins)
+        buf = 0.2 * (mhi - mlo) if mhi > mlo else 0.2 * abs(mhi or 0.05)
+        mlo, mhi = mlo - buf, mhi + buf
+        projected = []
+        prevRev = float(revVals[-1])
+        for rev in revResult.projected:
+            rg = (rev / prevRev - 1) * 100 if prevRev else 0.0
+            opm = max(mlo, min(avgMargin + (leverageBeta / 100.0) * (rg - revGrowthNormal), mhi))
+            projected.append(rev * opm)
+            prevRev = rev
+        marginMethod = f"영업레버리지(β={leverageBeta:.2f}%p/%p)"
+    else:
+        projected = [rev * avgMargin for rev in revResult.projected]
+        marginMethod = f"매출전망×고정마진({avgMargin:.1%})"
     validHist = [v for v in metricVals if v is not None]
     lastVal = validHist[-1] if validHist else 0
     growthRate = ((projected[-1] / lastVal) ** (1 / horizon) - 1) * 100 if lastVal and lastVal > 0 else 0
@@ -261,7 +292,7 @@ def _marginLinkedForecast(
         historical=metricVals,
         projected=projected,
         horizon=horizon,
-        method=f"매출전망×마진({avgMargin:.1%})",
+        method=marginMethod,
         confidence=revResult.confidence,
         rSquared=revResult.rSquared,
         growthRate=round(growthRate, 1),
