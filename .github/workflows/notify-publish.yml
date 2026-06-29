@@ -1,0 +1,43 @@
+name: Notify Publish
+
+# 블로그/카드 발행 시 pushHub /send 호출(P1 발행 알림). detect 가 매칭하는 경로만 트리거(1:1 커버).
+# deploy-landing.yml(group=pages, cancel-in-progress:true)에 얹으면 연속 push 시 취소로 알림 유실 → 분리.
+# 상세: mainPlan/watcher-notify-platform/08-p1-publish-ops-test.md
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'blog/**/index.md'
+      - 'blog/_issues/**/cards.plan.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notify-publish
+  cancel-in-progress: false # 취소 0 — push 이벤트당 1회 보장(알림 유실 가드)
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # git diff before..sha (얕은 checkout 금지)
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Detect publish + send
+        working-directory: .github/scripts
+        env:
+          PUSHHUB_URL: ${{ vars.VITE_PUSHHUB_URL }}
+          PUSHHUB_SEND_TOKEN: ${{ secrets.PUSHHUB_SEND_TOKEN }}
+        run: uv run python -X utf8 -m notify.send --before "${{ github.event.before }}" --sha "${{ github.sha }}"

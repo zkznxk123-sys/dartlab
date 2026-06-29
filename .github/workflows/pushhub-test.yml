@@ -1,0 +1,53 @@
+name: PushHub Tests
+
+# 푸시 허브 P1 게이트 — 발행 러너(py)·허브 Worker(vitest-pool-workers). landing sink 러너는 deploy-landing.yml
+# build 전 step(npm test -w landing) 에서 강제. 상세: mainPlan/watcher-notify-platform/08-p1-publish-ops-test.md
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'infra/workers/pushHub/**'
+      - '.github/scripts/notify/**'
+      - '.github/workflows/pushhub-test.yml'
+  pull_request:
+    paths:
+      - 'infra/workers/pushHub/**'
+      - '.github/scripts/notify/**'
+
+permissions:
+  contents: read
+
+jobs:
+  # 러너3 — 발행 러너 detect/payload/nonce (활성)
+  notify-py:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync
+      - name: pytest notify
+        working-directory: .github/scripts
+        run: uv run python -X utf8 -m pytest notify/ -q
+
+  # 러너2 — 허브 Worker (vitest-pool-workers). 하네스 스캐폴드(package-lock.json 커밋) 전까지 skip.
+  # TEST_SCAFFOLD.md 절차로 핀 + lockfile 커밋되면 자동 활성.
+  worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: hashFiles('infra/workers/pushHub/package-lock.json') != ''
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+      - name: Worker tests
+        working-directory: infra/workers/pushHub
+        run: |
+          npm ci
+          npm test

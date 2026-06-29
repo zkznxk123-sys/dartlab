@@ -131,8 +131,13 @@ jobs:
           # Cloudflare Web Analytics 공개 beacon site token 또는 Cloudflare 제공 script snippet.
           # 비우면 analytics beacon 을 로드하지 않음.
           VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
+          # 웹푸시(P1) 공개값 — VAPID 공개키·허브 URL. 둘 다 비면 NotifyOptIn 자동 hidden·SW 재구독 skip(가역).
+          # SW 빌드 산출물에 VITE_VAPID_PUBLIC_KEY 가 정적 치환되어야 함(P1 SHIP 게이트 [07] §7-1).
+          VITE_VAPID_PUBLIC_KEY: ${{ vars.VITE_VAPID_PUBLIC_KEY }}
+          VITE_PUSHHUB_URL: ${{ vars.VITE_PUSHHUB_URL }}
         run: |
           npm ci
+          npm test -w landing            # vitest run — sink(피싱 URL)·직렬화 보안 게이트 (build 전)
           BASE_PATH=/dartlab npm run build -w landing
 
       - name: Upload artifact
