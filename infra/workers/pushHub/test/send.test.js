@@ -1,7 +1,7 @@
 // /send 회귀 — 인증(Bearer/nonce/ts) · 입력검증 · fan-out/purge. SHIP 게이트 9 시나리오.
 // ⚠ 하네스 미스캐폴드면 미실행(TEST_SCAFFOLD.md). fan-out/purge 는 push 엔드포인트 outbound 를 fetchMock 으로
 //    가로채야 한다 — 설치한 vitest-pool-workers 의 fetchMock API 로 맞춘다(버전별 상이).
-import { env, applyD1Migrations, SELF } from 'cloudflare:test';
+import { env, SELF } from 'cloudflare:test';
 import { beforeEach, describe, it, expect } from 'vitest';
 
 const TOKEN = 'test-send-token'; // wrangler.toml/test env 의 PUSHHUB_SEND_TOKEN 와 일치시킬 것
@@ -19,7 +19,6 @@ function send(body, opts) {
 }
 
 beforeEach(async () => {
-	await applyD1Migrations(env.PUSHHUB_DB, env.TEST_MIGRATIONS);
 	await env.PUSHHUB_DB.batch([
 		env.PUSHHUB_DB.prepare('DELETE FROM topicSubs'),
 		env.PUSHHUB_DB.prepare('DELETE FROM subscriptions'),

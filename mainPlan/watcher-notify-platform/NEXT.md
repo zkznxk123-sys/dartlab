@@ -16,7 +16,7 @@
 
 ## A. P1 SHIP 잔여 게이트 (비차단)
 - [ ] **iOS 16.4+ standalone 실기기 실배달** — Chrome 통과 ≠ Apple 수락(별 leg). 실기기에서 홈화면 추가 후 구독→발송.
-- [ ] **Worker 테스트 하네스 스캐폴드** — `infra/workers/pushHub/TEST_SCAFFOLD.md` 절차(`npm create cloudflare` → vitest-pool-workers 버전핀 → 첫 green → `package-lock.json` 커밋). 커밋되면 `pushhub-test.yml` worker 잡 자동 활성.
+- [x] **Worker 테스트 하네스 스캐폴드** (2026-06-30 완료) — vitest-pool-workers 0.16.20 + vitest 4, `cloudflareTest()` 플러그인 config. 15 passed/1 todo. lockfile 커밋 → `pushhub-test.yml` worker 잡 활성. 남은 것: fan-out/purge fetchMock 테스트(`it.todo`).
 - [ ] **운영자 눈검수** — NotifyOptIn/InstallPrompt 하단 바 겹침 스크린샷 확인.
 
 ## B. 공개 배포 — 방향 결정 필요 (포크만 제어 중)

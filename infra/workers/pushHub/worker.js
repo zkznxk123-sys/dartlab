@@ -265,11 +265,12 @@ async function handleSend(req, env) {
 		return new Response('topic or endpoints required', { status: 422 });
 	}
 
-	const privKey = await getVapidPrivKey(env);
 	const jwtByOrigin = {}; // origin별 JWT 1회 메모(push origin 3개뿐)
 	let sent = 0;
 	let failed = 0;
 	const toPurge = [];
+	// 대상 0이면 VAPID 키 import 건너뜀 — 불필요 작업 제거 + 무구독 발송이 정상 no-op(sent:0).
+	const privKey = rows.length ? await getVapidPrivKey(env) : null;
 	for (let i = 0; i < rows.length; i += SEND_CHUNK) {
 		const chunk = rows.slice(i, i + SEND_CHUNK);
 		const settled = await Promise.allSettled(chunk.map((sub) => sendOne(sub, plaintext, jwtByOrigin, env, privKey)));

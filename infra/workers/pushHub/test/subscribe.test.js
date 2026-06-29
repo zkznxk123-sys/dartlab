@@ -1,6 +1,6 @@
 // /subscribe 회귀 — SSRF allowlist · topic 필터 · UPSERT 멱등 · DELETE 부분/전체(CASCADE).
 // ⚠ 하네스 미스캐폴드면 미실행(TEST_SCAFFOLD.md). 'cloudflare:test' import·migration 바인딩은 설치 버전에 맞춤.
-import { env, applyD1Migrations, SELF } from 'cloudflare:test';
+import { env, SELF } from 'cloudflare:test';
 import { beforeEach, describe, it, expect } from 'vitest';
 
 const APPLE = 'https://web.push.apple.com/sub/abc';
@@ -15,7 +15,6 @@ async function post(body) {
 }
 
 beforeEach(async () => {
-	await applyD1Migrations(env.PUSHHUB_DB, env.TEST_MIGRATIONS);
 	await env.PUSHHUB_DB.batch([
 		env.PUSHHUB_DB.prepare('DELETE FROM topicSubs'),
 		env.PUSHHUB_DB.prepare('DELETE FROM subscriptions'),
