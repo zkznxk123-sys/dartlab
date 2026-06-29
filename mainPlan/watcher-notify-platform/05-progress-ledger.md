@@ -12,7 +12,8 @@
 | 2026-06-29 | P1 자동검증 — 발행 러너 pytest 8/8 · landing vitest(sink/직렬화) 59/59 · svelte-check 0 err · ruff pass | ✅ |
 | 2026-06-29 | **pushHub Worker 배포** — `dartlab-push-hub.zkznxk123.workers.dev` (Cloudflare zkznxk123@gmail.com). D1 생성·스키마·VAPID/SEND secret 등록. 인증401·SSRF422·구독/삭제 CASCADE 검증 | ✅ |
 | — | 운영자 결정 잔여 — #2 발송 트리거(수동 vs cron) | ⏳ |
-| — | **P1 SHIP 게이트** — ece 실브라우저 졸업(`tests/_attempts/pushHub/`)·iOS 16.4+ 실배달·Worker 하네스 스캐폴드(TEST_SCAFFOLD.md)·SW 키 치환 확인·운영자 스크린샷 눈검수 | ⏳ 대기 |
+| 2026-06-29 | **P1 end-to-end 실배달 검증(Chrome/localhost)** — 브라우저 구독→D1→/send(Bearer+nonce)→VAPID+aes128gcm→FCM(sent:1,failed:0)→SW push→macOS 알림 표시 성공. ece 인코딩·키쌍 정합·SW 3리스너 실동작 닫힘 | ✅ |
+| — | **P1 SHIP 잔여 게이트** — iOS 16.4+ standalone 실배달(별 leg)·Worker 하네스 스캐폴드(TEST_SCAFFOLD.md)·운영자 스크린샷 눈검수. *공개 배포는 upstream(eddmpython) 권한 필요 — 미보유* | ⏳ |
 | — | P2 공개 토픽(신규수주 첫 레퍼런스) | ⬜ |
 | — | P3 개인 왓처(로컬 소유·브리지) | ⬜ |
 | — | P4 모드B·패키징 | ⬜ 운영자 결정 게이트 |
