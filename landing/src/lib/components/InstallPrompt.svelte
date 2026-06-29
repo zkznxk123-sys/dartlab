@@ -5,6 +5,7 @@
 	// 닫으면 localStorage 로 다시 안 뜸. 라우트 무관(루트 레이아웃 마운트).
 	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
+	import { isStandalone, isIosSafari } from '$lib/pwa/platform';
 
 	const DISMISS_KEY = 'dl-install-dismissed';
 
@@ -17,12 +18,6 @@
 	let mode = $state<'button' | 'ios'>('button');
 	let deferred: BipEvent | null = null;
 
-	function isStandalone(): boolean {
-		return (
-			window.matchMedia('(display-mode: standalone)').matches ||
-			(navigator as unknown as { standalone?: boolean }).standalone === true
-		);
-	}
 	function dismissed(): boolean {
 		try {
 			return localStorage.getItem(DISMISS_KEY) === '1';
@@ -36,10 +31,6 @@
 		} catch {
 			/* 프라이빗 모드 등 — 무시 */
 		}
-	}
-	function isIosSafari(): boolean {
-		const ua = navigator.userAgent;
-		return /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
 	}
 
 	function close() {
