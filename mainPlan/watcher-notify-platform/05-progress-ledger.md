@@ -1,6 +1,6 @@
 # 05 — 진행 원장
 
-## 상태: 기획 완료 · 구현 미착수
+## 상태: P1 구현 완료(코드) · SHIP 게이트(실브라우저·배포) 대기
 
 | 날짜 | 항목 | 상태 |
 |---|---|---|
@@ -8,8 +8,11 @@
 | 2026-06-28 | 로컬 런타임 브리지 일반화 + 로컬 GPU 방향 노트([00b](00b-local-runtime-bridge-and-gpu.md)) | ✅ |
 | 2026-06-28 | 6 분야 전문 패널 토론 + 통합(라이브러리·인프라/WebPush·프로덕트/UX·보안·로컬브리지·클러터비평) | ✅ |
 | 2026-06-28 | PRD 문서 세트 합성(00~04 + README) | ✅ |
-| — | 운영자 결정 6종([04](04-phasing-scope-guardrails.md) §4) | ⏳ 대기 |
-| — | P1 구현(허브+수신단+발행알림) | ⬜ 미착수 |
+| 2026-06-29 | **P1 구현(코드)** — 허브 Worker(`infra/workers/pushHub/` worker.js·schema·wrangler)·수신단(service-worker 3리스너·NotifyOptIn·notify/subscription·url·pwa/platform)·발행 러너(`.github/scripts/notify/` + notify-publish.yml)·CI 배선(deploy-landing env+vitest, pushhub-test.yml) | ✅ |
+| 2026-06-29 | P1 자동검증 — 발행 러너 pytest 8/8 · landing vitest(sink/직렬화) 59/59 · svelte-check 0 err · ruff pass | ✅ |
+| 2026-06-29 | **pushHub Worker 배포** — `dartlab-push-hub.zkznxk123.workers.dev` (Cloudflare zkznxk123@gmail.com). D1 생성·스키마·VAPID/SEND secret 등록. 인증401·SSRF422·구독/삭제 CASCADE 검증 | ✅ |
+| — | 운영자 결정 잔여 — #2 발송 트리거(수동 vs cron) | ⏳ |
+| — | **P1 SHIP 게이트** — ece 실브라우저 졸업(`tests/_attempts/pushHub/`)·iOS 16.4+ 실배달·Worker 하네스 스캐폴드(TEST_SCAFFOLD.md)·SW 키 치환 확인·운영자 스크린샷 눈검수 | ⏳ 대기 |
 | — | P2 공개 토픽(신규수주 첫 레퍼런스) | ⬜ |
 | — | P3 개인 왓처(로컬 소유·브리지) | ⬜ |
 | — | P4 모드B·패키징 | ⬜ 운영자 결정 게이트 |
@@ -29,6 +32,8 @@
 ## 비용 메모
 - 패널 토론: 7 에이전트 · 531k 토큰 · 7분 24초.
 
-## 다음 액션
-1. 운영자 결정 6종 회수.
-2. 결정 후 → P1 deep 플랜(plan-deep) 작성 → 구현. (landing/UI 포함이라 발간은 운영자 눈검수 후.)
+## 다음 액션 (P1 코드 완료 후)
+1. **VAPID 키쌍 생성** + Cloudflare/GitHub secret 등록(결정 #4) — `wrangler secret put VAPID_PRIVATE_KEY·PUSHHUB_SEND_TOKEN`, `[vars] VAPID_PUBLIC_KEY`, GitHub `vars VITE_VAPID_PUBLIC_KEY·VITE_PUSHHUB_URL` + `secret PUSHHUB_SEND_TOKEN`(Worker↔GHA 동일값).
+2. **Worker 하네스 스캐폴드**(`infra/workers/pushHub/TEST_SCAFFOLD.md`) — `npm create cloudflare` 로 vitest-pool-workers config 버전핀 + 첫 green + lockfile 커밋(→ pushhub-test.yml worker 잡 활성).
+3. **ece 실브라우저 졸업**(`tests/_attempts/pushHub/`) — Chrome + iOS 16.4+ standalone aes128gcm 수신. P1 SHIP 선행.
+4. d1 create + schema 적용 + `wrangler deploy` → 운영자 눈검수(NotifyOptIn/InstallPrompt 겹침 스크린샷) 후 발간.
