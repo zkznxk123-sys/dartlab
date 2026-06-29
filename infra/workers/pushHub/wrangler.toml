@@ -1,0 +1,20 @@
+name = "dartlab-push-hub"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# D1 binding 생성 후 database_id 를 채운다.
+# wrangler d1 create dartlab-push-hub
+# wrangler d1 execute dartlab-push-hub --remote --file schema.sql
+[[d1_databases]]
+binding = "PUSHHUB_DB"
+database_name = "dartlab-push-hub"
+database_id = "8893927a-d911-410c-8c99-d88091dd2b7f"
+
+[vars]
+ALLOW_ORIGIN = "https://eddmpython.github.io"
+VAPID_SUBJECT = "mailto:zkznxk123@gmail.com"
+# uncompressed 65B(0x04‖x‖y) 공개키의 base64url. k= 파라미터·VITE_VAPID_PUBLIC_KEY 공용 공개값.
+VAPID_PUBLIC_KEY = "BAVOeCEdsHZUpAwefKtqVGjuA0eAEChLD46qiIFIWgJXqGxfq0b7XL7cTzBQIrrB3EpipSld21AZ6DZOcq9OaDs"
+
+# secrets (wrangler secret put): VAPID_PRIVATE_KEY(pkcs8 base64url) · PUSHHUB_SEND_TOKEN
+#   SIGN_KEY 없음 (HMAC 서명층 제거 — SEND_TOKEN 과 같은 신뢰축이라 독립성 0). 총 secret 2종.

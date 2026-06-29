@@ -154,3 +154,9 @@ tests/audit/_camelcaseIndex.json
 ui/web.backup/
 .venv-ci/
 ui/web/test-results/
+
+# VAPID/푸시 비밀 — genVapid 출력을 파일로 리다이렉트해도 커밋 차단 (DEPLOY_RUNBOOK)
+*.vapid
+.vapid*
+vapid-*.key
+infra/workers/**/.dev.vars
