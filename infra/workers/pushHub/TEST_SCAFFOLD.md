@@ -34,5 +34,7 @@ npm test          # vitest run — 현재 15 passed, 1 todo
 
 ## 남은 것
 
-- `send.test.js` 의 `it.todo('410 endpoint purge / 201 sent 집계')` — push 엔드포인트 outbound 를 fetchMock 으로 가로채는
-  fan-out/purge 검증. 설치된 vitest-pool-workers 의 fetchMock(`cloudflare:test`) API 로 구현.
+- `send.test.js` 의 `it.todo('410 endpoint purge / 201 sent 집계')` — fan-out/purge 검증.
+  ⚠ vitest-pool-workers **0.16 에서 `cloudflare:test` 의 `fetchMock` 이 제거**됨(공식 Test APIs 미문서화) → 재도입 또는
+  miniflare-level mock 확인 후 구현. **실제 발송 경로(aes128gcm 암호화 + 201/410 집계)는 라이브 FCM e2e(2026-06-29 sent:1)로
+  이미 검증**됐으므로 본 단위테스트는 회귀 보강용(커버리지 공백 아님).

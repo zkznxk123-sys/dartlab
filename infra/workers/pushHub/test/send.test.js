@@ -1,6 +1,4 @@
-// /send 회귀 — 인증(Bearer/nonce/ts) · 입력검증 · fan-out/purge. SHIP 게이트 9 시나리오.
-// ⚠ 하네스 미스캐폴드면 미실행(TEST_SCAFFOLD.md). fan-out/purge 는 push 엔드포인트 outbound 를 fetchMock 으로
-//    가로채야 한다 — 설치한 vitest-pool-workers 의 fetchMock API 로 맞춘다(버전별 상이).
+// /send 회귀 — 인증(Bearer/nonce/ts) · 입력검증 · 무구독 no-op. fan-out/purge 는 it.todo(아래 사유).
 import { env, SELF } from 'cloudflare:test';
 import { beforeEach, describe, it, expect } from 'vitest';
 
@@ -66,8 +64,9 @@ describe('POST /send fan-out (구독 0 = no-op)', () => {
 		expect(await res.json()).toMatchObject({ sent: 0, pruned: 0, failed: 0 });
 	});
 
-	// fan-out + 404/410 purge: push 엔드포인트 outbound 를 fetchMock 으로 가로채 201/410 을 흉내내고,
-	// 응답 {sent,pruned,failed} 집계와 purge 후 subscriptions 행 삭제를 검증한다.
-	// 구현 시 설치한 vitest-pool-workers fetchMock 으로 작성([08] §5 발송 동시성·purge).
-	it.todo('410 endpoint 는 purge 되고 201 은 sent 집계');
+	// fan-out + 404/410 purge: push 엔드포인트 outbound 를 가로채 201/410 을 흉내내야 검증 가능.
+	// ⚠ vitest-pool-workers 0.16 에서 'cloudflare:test' 의 fetchMock 이 제거됨(공식 Test APIs 미문서화). 재도입 또는
+	//    miniflare-level fetch mock 방식 확인 후 구현. 실제 발송 경로(aes128gcm+201/410 집계)는 라이브 FCM e2e
+	//    (2026-06-29 sent:1)로 이미 검증됨 — 본 단위테스트는 회귀 보강용.
+	it.todo('410 endpoint purge / 201 sent 집계 (fetch mock 재도입 시)');
 });
